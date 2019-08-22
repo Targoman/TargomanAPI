@@ -16,12 +16,17 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
+PRJDIR = "."
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
+    src/appTargomanAPI.h \
+    src/Configs.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
-    src/main.cpp
+    src/main.cpp \
+    src/appTargomanAPI.cpp \
+    src/Configs.cpp
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
@@ -48,3 +53,5 @@ OTHER_FILES += \
     README.md \
     INSTALL \
     buildDependencies.sh
+
+include($$PRJDIR/qmake/install.pri)
