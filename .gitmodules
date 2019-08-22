@@ -1,0 +1,6 @@
+[submodule "3rdParty/TargomanAAA"]
+	path = 3rdParty/TargomanAAA
+	url = git@github.com:Targoman/TargomanAAA.git
+[submodule "3rdParty/QRestServer"]
+	path = 3rdParty/QRestServer
+	url = git@github.com:Targoman/QRestServer.git
