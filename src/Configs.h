@@ -28,7 +28,7 @@
 #include "libTargomanCommon/Macros.h"
 #include "QHttp/QRESTServer.h"
 
-ENUM_CONFIGURABLE(QHttp::enuJWTHashAlgs);
+ENUM_CONFIGURABLE(QHttp::enuJWTHashAlgs)
 
 namespace Targoman{
 namespace Apps {
@@ -56,10 +56,18 @@ public:
     static Common::Configuration::tmplConfigurable<QString>      CacheConnector;
     static Common::Configuration::tmplConfigurable<FilePath_t>   BaseOpenAPIObjectFile;
 
+    static Common::Configuration::tmplConfigurable<QString>      DBHost;
+    static Common::Configuration::tmplRangedConfigurable<quint16>DBPort;
+    static Common::Configuration::tmplConfigurable<QString>      DBUser;
+    static Common::Configuration::tmplConfigurable<QString>      DBPass;
+    static Common::Configuration::tmplConfigurable<QString>      DBSchema;
+
+#ifdef QHTTP_ENABLE_WEBSOCKET
     static Common::Configuration::tmplConfigurable<QString>      WebSocketServerName;
     static Common::Configuration::tmplRangedConfigurable<quint16>WebSocketServerPort;
     static Common::Configuration::tmplConfigurable<bool>         WebSocketServerJustLocal;
     static Common::Configuration::tmplConfigurable<bool>         WebSocketServerSecure;
+#endif
 
     ~gConfigs();
 };

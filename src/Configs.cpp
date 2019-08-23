@@ -23,11 +23,14 @@
 #include "Configs.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 
+ENUM_CONFIGURABLE_IMPL(QHttp::enuJWTHashAlgs)
+
 namespace Targoman{
 namespace Apps {
 
 using namespace Common;
 using namespace Common::Configuration;
+
 
 //Just to avoid warning on vtable
 gConfigs::~gConfigs()
@@ -180,6 +183,59 @@ tmplConfigurable<FilePath_t>     gConfigs::BaseOpenAPIObjectFile(
         "openapi-file",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
+/****************************************************************************/
+tmplConfigurable<QString> gConfigs::DBHost(
+        gConfigs::appConfig("DBHost"),
+        "Database Host address",
+        "127.0.0.1",
+        ReturnTrueCrossValidator(),
+        "",
+        "HOST",
+        "db-host",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplRangedConfigurable<quint16> gConfigs::DBPort(
+        gConfigs::appConfig("DBPort"),
+        "Database port",
+        10,65000,
+        3306,
+        ReturnTrueCrossValidator(),
+        "",
+        "PORT",
+        "db-port",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplConfigurable<QString> gConfigs::DBUser(
+        gConfigs::appConfig("DBUser"),
+        "Database username for connection",
+        "root",
+        ReturnTrueCrossValidator(),
+        "",
+        "USER",
+        "db-user",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplConfigurable<QString> gConfigs::DBPass(
+        gConfigs::appConfig("DBPass"),
+        "Database password",
+        "",
+        ReturnTrueCrossValidator(),
+        "",
+        "PASS",
+        "db-pass",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplConfigurable<QString> gConfigs::DBSchema(
+        gConfigs::appConfig("DBSchema"),
+        "Database schema",
+        "Targoman",
+        ReturnTrueCrossValidator(),
+        "",
+        "SCHEMA",
+        "db-schema",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+/****************************************************************************/
+#ifdef QHTTP_ENABLE_WEBSOCKET
 tmplConfigurable<QString> gConfigs::WebSocketServerName(
         gConfigs::appConfig("WebSocketServerName"),
         "If set then a socket server with specified name will be started",
@@ -201,7 +257,6 @@ tmplRangedConfigurable<quint16> gConfigs::WebSocketServerPort(
         "ws-listen-port",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-
 tmplConfigurable<bool> gConfigs::WebSocketServerJustLocal(
         gConfigs::appConfig("WebSocketServerJustLocal"),
         "If set to true it will just listen to local connections",
@@ -221,6 +276,6 @@ tmplConfigurable<bool> gConfigs::WebSocketServerSecure(
         "",
         "ws-secure",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
-
+#endif
 }
 }
