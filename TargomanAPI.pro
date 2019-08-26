@@ -20,13 +20,17 @@ PRJDIR = "."
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
     src/appTargomanAPI.h \
-    src/Configs.h
+    src/Configs.h \
+    src/Modules/Translation.h \
+    src/Classes/TranslationDispatcher.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
     src/main.cpp \
     src/appTargomanAPI.cpp \
-    src/Configs.cpp
+    src/Configs.cpp \
+    src/Modules/Translation.cpp \
+    src/Classes/TranslationDispatcher.cpp
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #

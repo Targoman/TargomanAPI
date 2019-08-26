@@ -19,25 +19,32 @@
 /**
  @author S. Mohammad M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_APPTARGOMANAPI_H
-#define TARGOMAN_APPS_APPTARGOMANAPI_H
+#ifndef TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
+#define TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
 
-#include <QObject>
+#include <QJsonObject>
 
-namespace Targoman{
+namespace Targoman {
 namespace Apps {
+namespace Classes {
 
-class appTargomanAPI : public QObject
+class TranslationDispatcher
 {
-    Q_OBJECT
 public:
-    explicit appTargomanAPI(QObject *parent = nullptr);
+    TranslationDispatcher();
 
-public slots:
-    void slotExecute();
-
+    QJsonObject doTranslation(const QString& _remoteIP,
+                  const QJsonObject& _info,
+                  QString _text,
+                  const QString& _dir,
+                  const QString& _clientIP = "127.0.0.10",
+                  const QString& _engine = "NMT",
+                  bool _detailed = false,
+                  bool _dic=false,
+                  bool _dicFull = false);
 };
 
 }
 }
-#endif // TARGOMAN_APPS_APPTARGOMANAPI_H
+}
+#endif // TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H

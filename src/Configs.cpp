@@ -23,7 +23,6 @@
 #include "Configs.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 
-ENUM_CONFIGURABLE_IMPL(QHttp::enuJWTHashAlgs)
 
 namespace Targoman{
 namespace Apps {
@@ -234,6 +233,7 @@ tmplConfigurable<QString> gConfigs::DBSchema(
         "SCHEMA",
         "db-schema",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
 /****************************************************************************/
 #ifdef QHTTP_ENABLE_WEBSOCKET
 tmplConfigurable<QString> gConfigs::WebSocketServerName(
@@ -279,3 +279,5 @@ tmplConfigurable<bool> gConfigs::WebSocketServerSecure(
 #endif
 }
 }
+
+ENUM_CONFIGURABLE_IMPL(QHttp::enuJWTHashAlgs)
