@@ -25,9 +25,6 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 
-namespace Targoman {
-namespace Apps {
-namespace Modules {
 
 class Translation  : public QHttp::intfRESTAPIHolder
 {
@@ -40,26 +37,22 @@ private slots:
                              const QString& _token,
                              QString _text,
                              const QString& _dir,
-                             const QString& _clientIP = "127.0.0.10",
                              const QString& _engine = "NMT",
                              bool _detailed = false,
                              bool _dic=false,
                              bool _dicFull = false
                              );
 
-    QVariantMap test(const QHttp::RemoteIP_t& _REMOTE_IP, const QString &_token, const QString& _arg);
+    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString &_token, const QString& _arg);
 
 private:
     Translation();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Translation);
 
 private:
-    QScopedPointer<DBManager::clsDAC> DAC;
+    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
 
 };
 
-}
-}
-}
 
 #endif // TARGOMAN_APPS_MODULES_TRANSLATION_H

@@ -247,7 +247,7 @@ tmplConfigurable<QString> gConfigs::WebSocketServerName(
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
 tmplRangedConfigurable<quint16> gConfigs::WebSocketServerPort(
-        gConfigs::appConfig("ListenPort"),
+        gConfigs::appConfig("WebSocketServerPort"),
         "Listen port for WebSocket server",
         1000,65000,
         10000,
@@ -268,7 +268,7 @@ tmplConfigurable<bool> gConfigs::WebSocketServerJustLocal(
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
 tmplConfigurable<bool> gConfigs::WebSocketServerSecure(
-        gConfigs::appConfig("WebSocketServerJustLocal"),
+        gConfigs::appConfig("WebSocketServerSecure"),
         "Start web socket server in secure mode",
         false,
         ReturnTrueCrossValidator(),

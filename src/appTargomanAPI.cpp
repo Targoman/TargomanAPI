@@ -24,6 +24,7 @@
 #include "appTargomanAPI.h"
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
+#include "Modules/Translation.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -74,17 +75,20 @@ void Targoman::Apps::appTargomanAPI::slotExecute()
         //Configs.fnIPInBlackList;
 
         clsDAC::addDBEngine(enuDBEngines::MySQL);
-        clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASS;%4;SCHEMA=%5").arg(
+        clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
                                         gConfigs::DBHost.value()).arg(
                                         gConfigs::DBPort.value()).arg(
                                         gConfigs::DBUser.value()).arg(
                                         gConfigs::DBPass.value()).arg(
                                         gConfigs::DBSchema.value()));
 
+        Translation::instance().init();
+
+
         RESTServer::configure (Configs);
         RESTServer::start();
 
-        QCoreApplication::exit(0);
+        //QCoreApplication::exit(0);
     }catch(Common::exTargomanBase& e){
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);

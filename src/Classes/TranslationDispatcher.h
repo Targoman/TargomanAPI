@@ -31,17 +31,20 @@ namespace Classes {
 class TranslationDispatcher
 {
 public:
-    TranslationDispatcher();
+    static TranslationDispatcher& instance(){static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
 
-    QJsonObject doTranslation(const QString& _remoteIP,
-                  const QJsonObject& _info,
-                  QString _text,
-                  const QString& _dir,
-                  const QString& _clientIP = "127.0.0.10",
-                  const QString& _engine = "NMT",
-                  bool _detailed = false,
-                  bool _dic=false,
-                  bool _dicFull = false);
+    QVariantMap doTranslation(const QString& _remoteIP,
+                              const QJsonObject& privInfo,
+                              QString _text,
+                              const QString& _dir,
+                              const QString& _engine = "NMT",
+                              bool _detailed = false,
+                              bool _dic=false,
+                              bool _dicFull = false);
+private:
+    TranslationDispatcher() {;}
+    Q_DISABLE_COPY(TranslationDispatcher)
+
 };
 
 }

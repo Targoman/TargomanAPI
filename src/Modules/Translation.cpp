@@ -22,22 +22,24 @@
 
 #include "Translation.h"
 #include "libTargomanAAA/AAA.h"
+#include "Classes/TranslationDispatcher.h"
 
 using namespace QHttp;
+using namespace Targoman;
 using namespace Targoman::DBManager;
-
-namespace Targoman {
-namespace Apps {
-namespace Modules {
 
 static QString PRIV_PREFIX = "Targoman:can";
 static QString QUOTA_PREFIX = "Targoman:";
+
+void Translation::init()
+{
+
+}
 
 QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                       const QString& _token,
                                       QString _text,
                                       const QString& _dir,
-                                      const QString& _clientIP,
                                       const QString& _engine,
                                       bool _detailed,
                                       bool _dic,
@@ -67,20 +69,31 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
 
     quint64 SourceWordCount = 0;
 
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(TokenInfo["privs"].toObject(), QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    QJsonObject Privs = TokenInfo["privs"].toObject();
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
-    return QVariantMap();
+    QVariantMap Translation = Targoman::Apps::Classes::TranslationDispatcher::instance().doTranslation(_REMOTE_IP,
+                                                                                       TokenInfo,
+                                                                                       _text,
+                                                                                       _dir,
+                                                                                       _engine,
+                                                                                       _detailed,
+                                                                                       _dic,
+                                                                                       _dicFull
+                                                                                       );
+
+    return Translation;
 }
 
-QVariantMap Translation::test(const QHttp::RemoteIP_t &_REMOTE_IP, const QString &_token, const QString &_arg)
+QVariantMap Translation::apiTest(const QHttp::RemoteIP_t &_REMOTE_IP, const QString &_token, const QString &_arg)
 {
     return {
         {"inputArg", _arg},
@@ -94,6 +107,3 @@ Translation::Translation() :
     this->registerMyRESTAPIs();
 }
 
-}
-}
-}
