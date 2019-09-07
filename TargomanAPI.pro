@@ -22,7 +22,8 @@ HEADERS += \
     src/appTargomanAPI.h \
     src/Configs.h \
     src/Modules/Translation.h \
-    src/Classes/TranslationDispatcher.h
+    src/Classes/TranslationDispatcher.h \
+    src/Classes/intfTranslatorEngine.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \

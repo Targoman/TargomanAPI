@@ -23,10 +23,17 @@
 #define TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
+#include "intfTranslatorEngine.hpp"
+#include "libTargomanDBM/clsDAC.h"
 
 namespace Targoman {
 namespace Apps {
 namespace Classes {
+
+static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
+static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
+
+typedef QPair<QString, QString>  TranslationDir_t;
 
 class TranslationDispatcher
 {
@@ -34,18 +41,45 @@ public:
     static TranslationDispatcher& instance(){static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
 
     QVariantMap doTranslation(const QString& _remoteIP,
-                              const QJsonObject& privInfo,
+                              const QJsonObject& _privInfo,
                               QString _text,
-                              const QString& _dir,
+                              const TranslationDir_t& _dir,
                               const QString& _engine = "NMT",
                               bool _detailed = false,
                               bool _dic=false,
                               bool _dicFull = false);
+
+    QString tokenize(const QString& _text, const QString& _lang);
+    QString detokenize(const QString& _text, const QString& _lang);
+    QString detectClass(const QString& _text, const QString& _lang);
+    QVariantMap retrieveDicResponse(const QString& _text, const QString& _lang);
+    void addDicLog(const QString& _lang, quint64 _worcCount, const QString& _text);
+    void addErrorLog(const QString& _lang, quint64 _worcCount, const QString& _text);
+    void addTranslationLog(const QString& _lang, quint64 _worcCount, const QString& _text);
+
+    inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir){
+        return this->RegisteredEngines.contains(intfTranslatorEngine::makeEngineName(_engine, _dir.first, _dir.second));
+    }
+
+    static inline TranslationDir_t dirLangs(const QString& _dir){
+        if(_dir.contains("2"))
+            return qMakePair(_dir.split("2").first(), _dir.split("2").last());
+        else if(_dir.contains("_"))
+            return qMakePair(_dir.split("_").first(), _dir.split("_").last());
+        return  qMakePair("","");
+    }
+
 private:
-    TranslationDispatcher() {;}
+    TranslationDispatcher();
     Q_DISABLE_COPY(TranslationDispatcher)
 
+    QHash<QString, intfTranslatorEngine*> RegisteredEngines;
+    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
 };
+
+/********************************************/
+intfTranslatorEngine::~intfTranslatorEngine()
+{;}
 
 }
 }

@@ -19,40 +19,27 @@
 /**
  @author S. Mohammad M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_MODULES_TRANSLATION_H
-#define TARGOMAN_APPS_MODULES_TRANSLATION_H
+#ifndef TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP
+#define TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
+#include <QString>
+#include <QVariantMap>
 
+namespace Targoman {
+namespace Apps {
+namespace Classes {
 
-class Translation  : public QHttp::intfRESTAPIHolder
-{
-    Q_OBJECT
+class intfTranslatorEngine{
 public:
-    void init();
+    virtual ~intfTranslatorEngine();
+    virtual QVariantMap doTranslation(const QString& _text, bool _detailed) = 0;
 
-private slots:
-    QVariantMap apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
-                             const QString& _token,
-                             QString _text,
-                             QString _dir,
-                             QString _engine = "NMT",
-                             bool _detailed = false, bool _detok,
-                             bool _dic=false,
-                             bool _dicFull = false
-                             );
-
-    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString &_token, const QString& _arg);
-
-private:
-    Translation();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Translation);
-
-private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
-
+    static inline QString makeEngineName(const QString& _engine, const QString& _sourceLang, const QString& _destLang){
+        return QString("%1:%2_%3").arg(_engine).arg(_sourceLang).arg(_destLang);
+    }
 };
 
-
-#endif // TARGOMAN_APPS_MODULES_TRANSLATION_H
+}
+}
+}
+#endif // TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP

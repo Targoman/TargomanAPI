@@ -27,9 +27,7 @@
 using namespace QHttp;
 using namespace Targoman;
 using namespace Targoman::DBManager;
-
-static QString PRIV_PREFIX = "Targoman:can";
-static QString QUOTA_PREFIX = "Targoman:";
+using namespace Targoman::Apps::Classes;
 
 void Translation::init()
 {
@@ -39,56 +37,129 @@ void Translation::init()
 QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                       const QString& _token,
                                       QString _text,
-                                      const QString& _dir,
+                                      QString _dir,
                                       const QString& _engine,
                                       bool _detailed,
+                                      bool _detok,
                                       bool _dic,
                                       bool _dicFull)
 {
+    QTime PreprocessTimer, TranslationTimer, PostProcessTimer;
+    int PreprocessTime = 0, TrTime = 0;
+    PreprocessTimer.start();
+
     _text = _text.trimmed();
     if(_text.isEmpty())
         throw exHTTPBadRequest("Input text must not be empty");
+    _dir = _dir.replace('_', '2');
 
-    //validate Client IP
-    //check engine availability + Dir
+    TranslationDir_t Dir = TranslationDispatcher::dirLangs(_dir);
+    if(Dir.first.isNull())
+        throw exHTTPBadRequest("Invalid translation direction format");
+
+    if(!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
+        throw exHTTPBadRequest("Invalid engine/direction combination");
 
     QJsonObject TokenInfo = AAA::retrieveTokenInfo(_token,
                                                    _REMOTE_IP, {
-                                                       PRIV_PREFIX + _engine,
-                                                       PRIV_PREFIX + _dir,
-                                                       _dic ? (PRIV_PREFIX + "Dic") : QString(),
-                                                       _dicFull ? (PRIV_PREFIX + "DicFull") : QString()
+                                                       TARGOMAN_PRIV_PREFIX + _engine,
+                                                       TARGOMAN_PRIV_PREFIX + _dir,
+                                                       _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
+                                                       _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
                                                    });
-    QJsonObject Stats = this->DAC->execQuery(
-            TokenInfo["usrID"].toString(),
-            "SELECT * FROM tblTokenStats WHERE tks_tokID = ?",
-            {{TokenInfo["tokID"]}}
-            ).toJson(true).object ();
-    if(Stats.size())
-        this->DAC->execQuery(TokenInfo["usrID"].toString(), "INSERT INTO tblTokenStats (tks_tokID) VALUES(?)", {{TokenInfo["tokID"]}});
 
-    quint64 SourceWordCount = 0;
+    QJsonObject Stats = this->DAC->execQuery(
+                TokenInfo["usrID"].toString(),
+                "SELECT * FROM tblTokenStats "
+                "WHERE tks_tokID = ? "
+                "  AND tksEngine=? "
+                "  AND tksDir=? ",
+                {
+                    {TokenInfo["tokID"]},
+                    {_engine},
+                    {_dir},
+                }
+            ).toJson(true).object ();
+
+    if(Stats.isEmpty())
+        this->DAC->execQuery(TokenInfo["usrID"].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?)", {
+            {TokenInfo["tokID"]},
+            {_engine},
+            {_dir},
+        });
+
+    _text = TranslationDispatcher::instance().tokenize(_text, Dir.first);
+    quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
     QJsonObject Privs = TokenInfo["privs"].toObject();
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    AAA::checkCredit(Privs, QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+    AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
-    QVariantMap Translation = Targoman::Apps::Classes::TranslationDispatcher::instance().doTranslation(_REMOTE_IP,
-                                                                                       TokenInfo,
-                                                                                       _text,
-                                                                                       _dir,
-                                                                                       _engine,
-                                                                                       _detailed,
-                                                                                       _dic,
-                                                                                       _dicFull
-                                                                                       );
+    if(_dic){
+        if(AAA::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})){
+            if(_dicFull && AAA::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
+                throw exAuthorization("Not enought priviledges to retrieve dictionary full response.");
+
+            PreprocessTime = PreprocessTimer.elapsed();PreprocessTimer.restart(); TranslationTimer.start();
+            QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
+            if(DicResponse.size()){
+                if(_detailed){
+                    DicResponse["times"]= QVariantMap({
+                         {"pre", PreprocessTime},
+                         {"tr", TranslationTimer.elapsed()},
+                         {"post", 0},
+                         {"overall", PreprocessTime+TranslationTimer.elapsed()}
+                    });
+                }
+                TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
+                return DicResponse;
+            }
+        }else
+            throw exAuthorization("Not enought priviledges to retrieve dictionary response.");
+    }
+    PreprocessTime += PreprocessTimer.elapsed();TranslationTimer.start();
+
+    try{
+    QVariantMap Translation = TranslationDispatcher::instance().doTranslation(_REMOTE_IP,
+                                                                              TokenInfo,
+                                                                              _text,
+                                                                              Dir,
+                                                                              _engine,
+                                                                              _detailed,
+                                                                              _dic,
+                                                                              _dicFull
+                                                                              );
+    }catch(Common::exTargomanBase &e){
+        TranslationDispatcher::instance().addErrorLog(_engine, _dir, SourceWordCount, _text);
+        throw;
+    }
+    TrTime = TranslationTimer.elapsed();PostProcessTimer.start();
+
+    if(_detok){
+        if(_detailed && Translation["tr"].isValid()){
+            QVariantList TranslationBaseDetokenized;
+            /*foreach(auto VariantPair, Translation["tr"].toMap()["base"].toList())
+                Detokenized.push_back(QVariantList({{VariantPair.first()}, {VariantPair.last()}}));*/
+
+        }else{
+            Translation["simple"] = TranslationDispatcher::instance().detokenize(Translation["simple"].toString(), Dir.second);
+        }
+    }
+    if(_detailed){
+        Translation["times"]= QVariantMap({
+             {"pre", PreprocessTime},
+             {"tr", TrTime},
+             {"post", PostProcessTimer.elapsed()},
+             {"all", PreprocessTime + TrTime + PostProcessTimer.elapsed()}
+        });
+    }
 
     return Translation;
 }

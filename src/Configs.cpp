@@ -227,7 +227,7 @@ tmplConfigurable<QString> gConfigs::DBPass(
 tmplConfigurable<QString> gConfigs::DBSchema(
         gConfigs::appConfig("DBSchema"),
         "Database schema",
-        "Targoman",
+        "MT",
         ReturnTrueCrossValidator(),
         "",
         "SCHEMA",
