@@ -23,7 +23,19 @@ HEADERS += \
     src/Configs.h \
     src/Modules/Translation.h \
     src/Classes/TranslationDispatcher.h \
-    src/Classes/intfTranslatorEngine.hpp
+    src/Classes/intfTranslatorEngine.hpp \
+    3rdParty/E4MT/fastText/src/dictionary.h \
+    3rdParty/E4MT/fastText/src/args.h \
+    3rdParty/E4MT/fastText/src/dictionary.h \
+    3rdParty/E4MT/fastText/src/fasttext.h \
+    3rdParty/E4MT/fastText/src/matrix.h \
+    3rdParty/E4MT/fastText/src/model.h \
+    3rdParty/E4MT/fastText/src/productquantizer.h \
+    3rdParty/E4MT/fastText/src/qmatrix.h \
+    3rdParty/E4MT/fastText/src/real.h \
+    3rdParty/E4MT/fastText/src/utils.h \
+    3rdParty/E4MT/fastText/src/vector.h \
+    3rdParty/E4MT/src/clsFormalityChecker.h \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -31,7 +43,21 @@ SOURCES += \
     src/appTargomanAPI.cpp \
     src/Configs.cpp \
     src/Modules/Translation.cpp \
-    src/Classes/TranslationDispatcher.cpp
+    src/Classes/TranslationDispatcher.cpp \
+    3rdParty/fastText/src/args.cc \
+    3rdParty/fastText/src/dictionary.cc \
+    3rdParty/fastText/src/fasttext.cc \
+    3rdParty/fastText/src/matrix.cc \
+    3rdParty/fastText/src/model.cc \
+    3rdParty/fastText/src/productquantizer.cc \
+    3rdParty/fastText/src/qmatrix.cc \
+    3rdParty/fastText/src/utils.cc \
+    3rdParty/fastText/src/vector.cc \
+    3rdParty/E4MT/src/clsFormalityChecker.cpp \
+
+INCLUDEPATH+= \
+  3rdParty/E4MT/src/ \
+  3rdParty/E4MT/fastText/ \
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
