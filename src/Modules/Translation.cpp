@@ -124,44 +124,46 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
         }else
             throw exAuthorization("Not enought priviledges to retrieve dictionary response.");
     }
+
     PreprocessTime += PreprocessTimer.elapsed();TranslationTimer.start();
 
     try{
-    QVariantMap Translation = TranslationDispatcher::instance().doTranslation(_REMOTE_IP,
-                                                                              TokenInfo,
-                                                                              _text,
-                                                                              Dir,
-                                                                              _engine,
-                                                                              _detailed,
-                                                                              _dic,
-                                                                              _dicFull
-                                                                              );
-    }catch(Common::exTargomanBase &e){
-        TranslationDispatcher::instance().addErrorLog(_engine, _dir, SourceWordCount, _text);
+        QVariantMap Translation = TranslationDispatcher::instance().doTranslation(TokenInfo,
+                                                                                  _text,
+                                                                                  Dir,
+                                                                                  _engine,
+                                                                                  true,
+                                                                                  _detailed
+                                                                                  );
+        TrTime = TranslationTimer.elapsed();PostProcessTimer.start();
+        if(_detok){
+            if(_detailed && Translation["tr"].isValid()){
+                QVariantList TranslationBaseDetokenized;
+                /*foreach(auto VariantPair, Translation["tr"].toMap()["base"].toList())
+                    Detokenized.push_back(QVariantList({{VariantPair.first()}, {VariantPair.last()}}));*/
+
+            }else{
+                Translation["simple"] = TranslationDispatcher::instance().detokenize(Translation["simple"].toString(), Dir.second);
+            }
+        }
+        if(_detailed){
+            Translation["times"]= QVariantMap({
+                 {"pre", PreprocessTime},
+                 {"tr", TrTime},
+                 {"post", PostProcessTimer.elapsed()},
+                 {"all", PreprocessTime + TrTime + PostProcessTimer.elapsed()}
+            });
+        }
+
+        TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo["tokID"].toInt()), _engine, _dir, SourceWordCount, _text, PreprocessTime + TrTime + PostProcessTimer.elapsed());
+
+
+        return Translation;
+    }catch(Common::exTargomanBase &ex){
+        //TODO diffeent erro codes needed
+        TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo["tokID"].toInt()), _engine, _dir, SourceWordCount, _text, -1);
         throw;
     }
-    TrTime = TranslationTimer.elapsed();PostProcessTimer.start();
-
-    if(_detok){
-        if(_detailed && Translation["tr"].isValid()){
-            QVariantList TranslationBaseDetokenized;
-            /*foreach(auto VariantPair, Translation["tr"].toMap()["base"].toList())
-                Detokenized.push_back(QVariantList({{VariantPair.first()}, {VariantPair.last()}}));*/
-
-        }else{
-            Translation["simple"] = TranslationDispatcher::instance().detokenize(Translation["simple"].toString(), Dir.second);
-        }
-    }
-    if(_detailed){
-        Translation["times"]= QVariantMap({
-             {"pre", PreprocessTime},
-             {"tr", TrTime},
-             {"post", PostProcessTimer.elapsed()},
-             {"all", PreprocessTime + TrTime + PostProcessTimer.elapsed()}
-        });
-    }
-
-    return Translation;
 }
 
 QVariantMap Translation::apiTest(const QHttp::RemoteIP_t &_REMOTE_IP, const QString &_token, const QString &_arg)

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ExternalDeps=$3
 DEPS_BUILT=$(realpath $(dirname $2))/$(basename $2)
 cd $(realpath $1)
 BASE_PATH=$(pwd)
@@ -29,7 +29,11 @@ if [ -f .gitmodules ]; then
   Deps=$(grep "\[submodule " .gitmodules | cut -d ' ' -f 2 | tr -d '\"\]')
   for Dep in $Deps; do
     echo -e "\n\n=====================> Building $Dep <========================\n"
-    if fgrep "$Dep" "$DEPS_BUILT" >/dev/null 2>&1; then
+    if [ $ExternalDeps -eq 1 ]; then
+      echo "Target building ignored as must be used as external"
+      continue
+    fi
+    if  fgrep "$Dep" "$DEPS_BUILT" >/dev/null 2>&1; then
         echo "Target has already been built."
         continue
     fi

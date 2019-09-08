@@ -55,6 +55,9 @@ public:
     static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
     static Common::Configuration::tmplConfigurable<QString>      CacheConnector;
     static Common::Configuration::tmplConfigurable<FilePath_t>   BaseOpenAPIObjectFile;
+    static Common::Configuration::tmplConfigurable<double>       FastTextThreshold;
+    static Common::Configuration::tmplConfigurable<FilePath_t>   FastTextModelPath;
+    static Common::Configuration::tmplConfigurable<QString>      FastTextModelPattern;
 
     static Common::Configuration::tmplConfigurable<QString>      DBHost;
     static Common::Configuration::tmplRangedConfigurable<quint16>DBPort;

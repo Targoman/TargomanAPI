@@ -34,8 +34,10 @@ public:
     virtual ~intfTranslatorEngine();
     virtual QVariantMap doTranslation(const QString& _text, bool _detailed) = 0;
 
-    static inline QString makeEngineName(const QString& _engine, const QString& _sourceLang, const QString& _destLang){
-        return QString("%1:%2_%3").arg(_engine).arg(_sourceLang).arg(_destLang);
+    static inline QString makeEngineName(const QString& _engine, const QString& _sourceLang, const QString& _destLang, const QString& _class = QString()){
+        return _class.isNull() ?
+                    QString("%1:%2_%3").arg(_engine).arg(_sourceLang).arg(_destLang) :
+                    QString("%1:%2:%3_%4").arg(_engine).arg(_class).arg(_sourceLang).arg(_destLang);
     }
 };
 

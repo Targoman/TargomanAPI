@@ -183,6 +183,45 @@ tmplConfigurable<FilePath_t>     gConfigs::BaseOpenAPIObjectFile(
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
 /****************************************************************************/
+tmplConfigurable<double>     gConfigs::FastTextThreshold(
+        gConfigs::appConfig("FastTextThreshold"),
+        "Threshold to be used by classifier",
+        0.8,
+        ReturnTrueCrossValidator(),
+        "",
+        "",
+        "fasttext-threshold",
+        static_cast<enuConfigSource::Type>(
+            enuConfigSource::Arg  |
+            enuConfigSource::File));
+
+tmplConfigurable<FilePath_t>     gConfigs::FastTextModelPath(
+        gConfigs::appConfig("FastTextModelPath"),
+        "Directory where FastText models are stored.",
+        "",
+        Validators::tmplPathAccessValidator<
+        static_cast<enuPathAccess::Type>(enuPathAccess::Dir | enuPathAccess::Readable),
+        false>,
+        "",
+        "",
+        "fasttext-models-path",
+        static_cast<enuConfigSource::Type>(
+            enuConfigSource::Arg  |
+            enuConfigSource::File));
+
+tmplConfigurable<QString> gConfigs::FastTextModelPattern(
+        gConfigs::appConfig("FastTextModelPattern"),
+        "File pattern for FastText models must have <%LANG%> pattern as language placeholder",
+        "fasttext-%LANG%.bin",
+        ReturnTrueCrossValidator(),
+        "",
+        "",
+        "fasttext-model-pattrn",
+        static_cast<enuConfigSource::Type>(
+            enuConfigSource::Arg  |
+            enuConfigSource::File));
+
+/****************************************************************************/
 tmplConfigurable<QString> gConfigs::DBHost(
         gConfigs::appConfig("DBHost"),
         "Database Host address",

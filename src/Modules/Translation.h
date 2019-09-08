@@ -37,8 +37,9 @@ private slots:
                              const QString& _token,
                              QString _text,
                              QString _dir,
-                             QString _engine = "NMT",
-                             bool _detailed = false, bool _detok,
+                             const QString &_engine = "NMT",
+                             bool _detailed = false,
+                             bool _detok = true,
                              bool _dic=false,
                              bool _dicFull = false
                              );
