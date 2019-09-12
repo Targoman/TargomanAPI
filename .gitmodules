@@ -7,3 +7,6 @@
 [submodule "3rdParty/E4MT"]
 	path = 3rdParty/E4MT
 	url = https://github.com/Targoman/E4MT.git
+[submodule "3rdParty/QtCUrl"]
+	path = 3rdParty/QtCUrl
+	url = https://github.com/Targoman/qtcurl.git
