@@ -22,7 +22,7 @@
 
 #include "Configs.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
-
+#include "ISO639.h"
 
 namespace Targoman{
 namespace Apps {
@@ -35,8 +35,8 @@ using namespace Common::Configuration;
 gConfigs::~gConfigs()
 {;}
 
-tmplConfigurable<QString> gConfigs::BasePath(
-        gConfigs::appConfig("BasePath"),
+tmplConfigurable<QString> gConfigs::Rest::BasePath(
+        gConfigs::Rest::makeConfig("BasePath"),
         "Base path to access the REST API",
         "rest",
         ReturnTrueCrossValidator(),
@@ -45,8 +45,8 @@ tmplConfigurable<QString> gConfigs::BasePath(
         "base-path",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::Version(
-        gConfigs::appConfig("Version"),
+tmplConfigurable<QString> gConfigs::Rest::Version(
+        gConfigs::Rest::makeConfig("Version"),
         "REST API version to be appended to base path",
         "v10",
         ReturnTrueCrossValidator(),
@@ -55,8 +55,8 @@ tmplConfigurable<QString> gConfigs::Version(
         "version",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<bool> gConfigs::JustLocal(
-        gConfigs::appConfig("JustLocal"),
+tmplConfigurable<bool> gConfigs::Rest::JustLocal(
+        gConfigs::Rest::makeConfig("JustLocal"),
         "If set to true it will just listen to local connections",
         false,
         ReturnTrueCrossValidator(),
@@ -65,8 +65,8 @@ tmplConfigurable<bool> gConfigs::JustLocal(
         "just-local",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<quint16> gConfigs::ListenPort(
-        gConfigs::appConfig("ListenPort"),
+tmplRangedConfigurable<quint16> gConfigs::Rest::ListenPort(
+        gConfigs::Rest::makeConfig("ListenPort"),
         "Listen port for main REST server",
         1000,65000,
         10000,
@@ -76,8 +76,8 @@ tmplRangedConfigurable<quint16> gConfigs::ListenPort(
         "listen-port",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<quint8> gConfigs::StatisticsInterval(
-        gConfigs::appConfig("StatisticsInterval"),
+tmplRangedConfigurable<quint8> gConfigs::Rest::StatisticsInterval(
+        gConfigs::Rest::makeConfig("StatisticsInterval"),
         "Listen port for main REST server",
         1,60,
         10,
@@ -87,38 +87,8 @@ tmplRangedConfigurable<quint8> gConfigs::StatisticsInterval(
         "stats-interval",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::JWTSecret(
-        gConfigs::appConfig("JWTSecret"),
-        "Secret to be used for hashing JWT",
-        "~5KHeTc7.C^Ln%<X~YnE4<Kr",
-        ReturnTrueCrossValidator(),
-        "",
-        "SECRET",
-        "jwt-secret",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
-
-tmplConfigurable<QHttp::enuJWTHashAlgs::Type> gConfigs::JWTHashAlgorithm(
-        gConfigs::appConfig("JWTHashAlgorithm"),
-        "Hash algorithm toe be used for JWT",
-        QHttp::enuJWTHashAlgs::HS256,
-        ReturnTrueCrossValidator(),
-        "",
-        "ALGORITHM",
-        "jwt-hash-alg",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
-
-tmplConfigurable<quint64> gConfigs::SimpleCryptKey(
-        gConfigs::appConfig("SimpleCryptKey"),
-        "Secret to be used for encrypting private JWT objects",
-        static_cast<quint64>(43121109170974191),
-        ReturnTrueCrossValidator(),
-        "",
-        "SECRET",
-        "jwt-private-key",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
-
-tmplConfigurable<bool> gConfigs::IndentedJson(
-        gConfigs::appConfig("IndentedJson"),
+tmplConfigurable<bool> gConfigs::Rest::IndentedJson(
+        gConfigs::Rest::makeConfig("IndentedJson"),
         "If set to true Json outputs will be indented",
         false,
         ReturnTrueCrossValidator(),
@@ -127,8 +97,8 @@ tmplConfigurable<bool> gConfigs::IndentedJson(
         "indented-json",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<qint64> gConfigs::MaxUploadSize(
-        gConfigs::appConfig("MaxUploadSize"),
+tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadSize(
+        gConfigs::Rest::makeConfig("MaxUploadSize"),
         "Max Upload size for any type of request",
         10*1024,10*1024*1024,
         10*1024*1024,
@@ -138,8 +108,8 @@ tmplRangedConfigurable<qint64> gConfigs::MaxUploadSize(
         "max-upload-size",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<qint64> gConfigs::MaxUploadedFileSize(
-        gConfigs::appConfig("MaxUploadedFileSize"),
+tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadedFileSize(
+        gConfigs::Rest::makeConfig("MaxUploadedFileSize"),
         "Max Upload size for files",
         1*1024,100*1024*1024,
         100*1024*1024,
@@ -149,8 +119,8 @@ tmplRangedConfigurable<qint64> gConfigs::MaxUploadedFileSize(
         "max-file-upload-size",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<quint32> gConfigs::MaxCachedItems(
-        gConfigs::appConfig("MaxCachedItems"),
+tmplRangedConfigurable<quint32> gConfigs::Rest::MaxCachedItems(
+        gConfigs::Rest::makeConfig("MaxCachedItems"),
         "Maximum API calls to be cached",
         0,65000,
         5000,
@@ -160,8 +130,8 @@ tmplRangedConfigurable<quint32> gConfigs::MaxCachedItems(
         "max-cache-size",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::CacheConnector(
-        gConfigs::appConfig("CacheConnector"),
+tmplConfigurable<QString> gConfigs::Rest::CacheConnector(
+        gConfigs::Rest::makeConfig("CacheConnector"),
         "Connection string to connect to Redis cache server",
         "",
         ReturnTrueCrossValidator(),
@@ -170,8 +140,8 @@ tmplConfigurable<QString> gConfigs::CacheConnector(
         "cache-connector",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<FilePath_t>     gConfigs::BaseOpenAPIObjectFile(
-        gConfigs::appConfig("BaseOpenAPIObjectFile"),
+tmplConfigurable<FilePath_t>     gConfigs::Rest::BaseOpenAPIObjectFile(
+        gConfigs::Rest::makeConfig("BaseOpenAPIObjectFile"),
         "Input file path where default OpenAPI object file resides",
         "",
         Validators::tmplPathAccessValidator<
@@ -183,34 +153,62 @@ tmplConfigurable<FilePath_t>     gConfigs::BaseOpenAPIObjectFile(
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
 /****************************************************************************/
-tmplConfigurable<double>     gConfigs::FastTextThreshold(
-        gConfigs::appConfig("FastTextThreshold"),
+tmplConfigurable<QString> gConfigs::JWT::Secret(
+        gConfigs::JWT::makeConfig("JWTSecret"),
+        "Secret to be used for hashing JWT",
+        "~5KHeTc7.C^Ln%<X~YnE4<Kr",
+        ReturnTrueCrossValidator(),
+        "",
+        "SECRET",
+        "jwt-secret",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplConfigurable<QHttp::enuJWTHashAlgs::Type> gConfigs::JWT::HashAlgorithm(
+        gConfigs::JWT::makeConfig("JWTHashAlgorithm"),
+        "Hash algorithm toe be used for JWT",
+        QHttp::enuJWTHashAlgs::HS256,
+        ReturnTrueCrossValidator(),
+        "",
+        "ALGORITHM",
+        "jwt-hash-alg",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+tmplConfigurable<quint64> gConfigs::JWT::SimpleCryptKey(
+        gConfigs::JWT::makeConfig("SimpleCryptKey"),
+        "Secret to be used for encrypting private JWT objects",
+        static_cast<quint64>(43121109170974191),
+        ReturnTrueCrossValidator(),
+        "",
+        "SECRET",
+        "jwt-private-key",
+        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+
+
+/****************************************************************************/
+tmplConfigurable<double>     gConfigs::Classifier::Threshold(
+        gConfigs::Classifier::makeConfig("Threshold"),
         "Threshold to be used by classifier",
         0.8,
         ReturnTrueCrossValidator(),
-        "",
-        "",
-        "fasttext-threshold",
+        "", "", "fasttext-threshold",
         static_cast<enuConfigSource::Type>(
             enuConfigSource::Arg  |
             enuConfigSource::File));
 
-tmplConfigurable<FilePath_t>     gConfigs::FastTextModelPath(
-        gConfigs::appConfig("FastTextModelPath"),
+tmplConfigurable<FilePath_t>     gConfigs::Classifier::ModelPath(
+        gConfigs::Classifier::makeConfig("ModelPath"),
         "Directory where FastText models are stored.",
         "",
         Validators::tmplPathAccessValidator<
         static_cast<enuPathAccess::Type>(enuPathAccess::Dir | enuPathAccess::Readable),
         false>,
-        "",
-        "",
-        "fasttext-models-path",
+        "", "", "fasttext-models-path",
         static_cast<enuConfigSource::Type>(
             enuConfigSource::Arg  |
             enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::FastTextModelPattern(
-        gConfigs::appConfig("FastTextModelPattern"),
+tmplConfigurable<QString> gConfigs::Classifier::ModelPattern(
+        gConfigs::Classifier::makeConfig("ModelPattern"),
         "File pattern for FastText models must have <%LANG%> pattern as language placeholder",
         "fasttext-%LANG%.bin",
         ReturnTrueCrossValidator(),
@@ -221,9 +219,49 @@ tmplConfigurable<QString> gConfigs::FastTextModelPattern(
             enuConfigSource::Arg  |
             enuConfigSource::File));
 
+tmplConfigurable<bool> gConfigs::Classifier::SupportsIXML(
+        gConfigs::Classifier::makeConfig("SupportsIXML"),
+        "Wheter the classifier was trained with IXML markups or not",
+        true,
+        ReturnTrueCrossValidator(),
+        "", "", "fasttext-supports-ixml",
+        static_cast<enuConfigSource::Type>(
+            enuConfigSource::Arg  |
+            enuConfigSource::File));
+
 /****************************************************************************/
-tmplConfigurable<QString> gConfigs::DBHost(
-        gConfigs::appConfig("DBHost"),
+tmplConfigurable<FilePath_t> gConfigs::TextProcessor::AbbreviationFile(
+        gConfigs::TextProcessor::makeConfig("AbbreviationFile"),
+        "File path to abbreviations table file. Relative to config file path if not specified as absolute.",
+        "",
+        Validators::tmplPathAccessValidator<
+        static_cast<enuPathAccess::Type>(enuPathAccess::File | enuPathAccess::Readable),
+        true>
+        );
+tmplConfigurable<FilePath_t> gConfigs::TextProcessor::NormalizationFile(
+        gConfigs::TextProcessor::makeConfig("NormalizationFile"),
+        "File path to normalization rules file. Relative to config file path if not specified as absolute.",
+        "",
+        Validators::tmplPathAccessValidator<
+        static_cast<enuPathAccess::Type>(enuPathAccess::File | enuPathAccess::Readable),
+        true>
+        );
+tmplConfigurable<FilePath_t> gConfigs::TextProcessor::SpellCorrectorBaseConfigPath(
+        gConfigs::TextProcessor::makeConfig("SpellCorrectorBaseConfigPath"),
+        "Directory path to spell correction specific files. Relative to config file path if not specified as absolute.",
+        "",
+        Validators::tmplPathAccessValidator<
+        static_cast<enuPathAccess::Type>(enuPathAccess::Dir | enuPathAccess::Readable),
+        false>
+        );
+clsFileBasedConfig       gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs(
+        gConfigs::TextProcessor::makeConfig("SpellCorrectorLanguageBasedConfigs"),
+        "Specific configurations for each language. See TargomanTextProcessor documents for more info."
+        );
+
+/****************************************************************************/
+tmplConfigurable<QString> gConfigs::DB::Host(
+        gConfigs::DB::makeConfig("Host"),
         "Database Host address",
         "127.0.0.1",
         ReturnTrueCrossValidator(),
@@ -232,8 +270,8 @@ tmplConfigurable<QString> gConfigs::DBHost(
         "db-host",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<quint16> gConfigs::DBPort(
-        gConfigs::appConfig("DBPort"),
+tmplRangedConfigurable<quint16> gConfigs::DB::Port(
+        gConfigs::DB::makeConfig("Port"),
         "Database port",
         10,65000,
         3306,
@@ -243,8 +281,8 @@ tmplRangedConfigurable<quint16> gConfigs::DBPort(
         "db-port",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::DBUser(
-        gConfigs::appConfig("DBUser"),
+tmplConfigurable<QString> gConfigs::DB::User(
+        gConfigs::DB::makeConfig("User"),
         "Database username for connection",
         "root",
         ReturnTrueCrossValidator(),
@@ -253,8 +291,8 @@ tmplConfigurable<QString> gConfigs::DBUser(
         "db-user",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::DBPass(
-        gConfigs::appConfig("DBPass"),
+tmplConfigurable<QString> gConfigs::DB::Pass(
+        gConfigs::DB::makeConfig("Pass"),
         "Database password",
         "",
         ReturnTrueCrossValidator(),
@@ -263,8 +301,8 @@ tmplConfigurable<QString> gConfigs::DBPass(
         "db-pass",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<QString> gConfigs::DBSchema(
-        gConfigs::appConfig("DBSchema"),
+tmplConfigurable<QString> gConfigs::DB::Schema(
+        gConfigs::DB::makeConfig("Schema"),
         "Database schema",
         "MT",
         ReturnTrueCrossValidator(),
@@ -274,9 +312,87 @@ tmplConfigurable<QString> gConfigs::DBSchema(
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
 /****************************************************************************/
+static auto langValidator = [](const intfConfigurable& _item, QString& _errorMessage) -> bool{
+    if(ISO639isValid(_item.toVariant().toString().toLatin1().constData()))
+        return true;
+    _errorMessage = QString("Invalid language code <%1> on <%2>").arg(
+                _item.toVariant().toString()).arg(
+                _item.configPath()
+                );
+    return false;
+};
+
+gConfigs::Server::Server(const QString &_basePath) :
+    URL(_basePath + "URL",
+         "URL to connect to server",
+         "http://127.0.0.1:5000",
+         ReturnTrueCrossValidator(),
+         "","","",
+         enuConfigSource::File
+         ),
+    Class(_basePath + "Class",
+         "Target class that this server will translate (formal|informal)",
+         "",
+         ReturnTrueCrossValidator(),
+         "","","",
+         enuConfigSource::File
+         ),
+    SourceLang(_basePath + "SourceLang",
+         "Source language to translate",
+         "",
+         langValidator,
+         "","","",
+         enuConfigSource::File
+         ),
+    DestLang(_basePath + "DestLang",
+         "Target language to translate",
+         "",
+         langValidator,
+         "","","",
+         enuConfigSource::File
+         ),
+    SupportsIXML(_basePath + "SupportsIXML",
+         "Wheter this engine supports IXML or not",
+         true,
+         ReturnTrueCrossValidator(),
+         "","","",
+         enuConfigSource::File
+         ),
+    Active(_basePath + "Active",
+         "Host or IP Address of Server",
+         true,
+         ReturnTrueCrossValidator(),
+         "","","",
+         enuConfigSource::File
+         ),
+    Statistics(gConfigs::Server::stuStatistics(_basePath))
+{}
+
+gConfigs::Server::stuStatistics::stuStatistics(const QString &_basePath) :
+    OkResponses(_basePath + "Stats/OkResponses",
+                    "Count of OK Responses",
+                    0,
+                    ReturnTrueCrossValidator(),
+                    "","","",
+                    enuConfigSource::ReadOnly
+                    ),
+    FailedResponses(_basePath + "Stats/Load15Min",
+                     "Count of Failed Responses",
+                     0,
+                     ReturnTrueCrossValidator(),
+                     "","","",
+                     enuConfigSource::ReadOnly
+                     )
+  {}
+
+tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
+        clsConfigPath("TranslationServers"),
+        "List of valid translation servers to connect to them separated by their translation engine");
+
+/****************************************************************************/
 #ifdef QHTTP_ENABLE_WEBSOCKET
-tmplConfigurable<QString> gConfigs::WebSocketServerName(
-        gConfigs::appConfig("WebSocketServerName"),
+tmplConfigurable<QString> gConfigs::WS::Name(
+        gConfigs::WS::makeConfig("Name"),
         "If set then a socket server with specified name will be started",
         "",
         ReturnTrueCrossValidator(),
@@ -285,8 +401,8 @@ tmplConfigurable<QString> gConfigs::WebSocketServerName(
         "ws-name",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplRangedConfigurable<quint16> gConfigs::WebSocketServerPort(
-        gConfigs::appConfig("WebSocketServerPort"),
+tmplRangedConfigurable<quint16> gConfigs::WS::Port(
+        gConfigs::WS::makeConfig("Port"),
         "Listen port for WebSocket server",
         1000,65000,
         10000,
@@ -296,8 +412,8 @@ tmplRangedConfigurable<quint16> gConfigs::WebSocketServerPort(
         "ws-listen-port",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<bool> gConfigs::WebSocketServerJustLocal(
-        gConfigs::appConfig("WebSocketServerJustLocal"),
+tmplConfigurable<bool> gConfigs::WS::JustLocal(
+        gConfigs::WS::makeConfig("JustLocal"),
         "If set to true it will just listen to local connections",
         false,
         ReturnTrueCrossValidator(),
@@ -306,8 +422,8 @@ tmplConfigurable<bool> gConfigs::WebSocketServerJustLocal(
         "ws-just-local",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 
-tmplConfigurable<bool> gConfigs::WebSocketServerSecure(
-        gConfigs::appConfig("WebSocketServerSecure"),
+tmplConfigurable<bool> gConfigs::WS::Secure(
+        gConfigs::WS::makeConfig("Secure"),
         "Start web socket server in secure mode",
         false,
         ReturnTrueCrossValidator(),
@@ -316,7 +432,10 @@ tmplConfigurable<bool> gConfigs::WebSocketServerSecure(
         "ws-secure",
         static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
 #endif
+
 }
 }
+
+
 
 ENUM_CONFIGURABLE_IMPL(QHttp::enuJWTHashAlgs)

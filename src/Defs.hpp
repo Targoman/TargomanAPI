@@ -19,20 +19,34 @@
 /**
  @author S. Mohammad M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_CLASSES_INTFTRANSLATORBRIDGE_HPP
-#define TARGOMAN_APPS_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#ifndef TARGOMAN_APPS_DEFS_HPP
+#define TARGOMAN_APPS_DEFS_HPP
 
-namespace Targoman {
+namespace Targoman{
 namespace Apps {
-namespace Classes {
 
-class intfTranslatorBridge{
-public:
+/***************************************************************/
+constexpr char RESULT_ERRNO[]= "errno";
+constexpr char RESULT_MESSAGE[]= "message";
+constexpr char RESULT_CLASS[]= "class";
+constexpr char RESULT_CACHE[]= "byCache";
 
-};
+constexpr char RESULT_SIMPLE[]= "simple";
+constexpr char RESULT_SERVERID[]= "serverID";
+
+constexpr char RESULT_TRANSLATION[]= "tr";
+constexpr char RESULT_TRANSLATION_PHRASES[]= "phrases";
+constexpr char RESULT_TRANSLATION_ALIGNMENTS[]= "alignments";
+constexpr char RESULT_TRANSLATION_BASE[]= "base";
+
+constexpr char RESULT_TIMES[]= "times";
+constexpr char RESULT_TIMES_PRE[]= "pre";
+constexpr char RESULT_TIMES_TR[]= "tr";
+constexpr char RESULT_TIMES_POST[]= "post";
+constexpr char RESULT_TIMES_ALL[]= "all";
+/***************************************************************/
 
 }
 }
-}
 
-#endif // TARGOMAN_APPS_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#endif // TARGOMAN_APPS_DEFS_HPP

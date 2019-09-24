@@ -30,11 +30,11 @@ if [ -f .gitmodules ]; then
   for Dep in $Deps; do
     echo -e "\n\n=====================> Building $Dep <========================\n"
     if [ $ExternalDeps -eq 1 ]; then
-      echo "Target building ignored as must be used as external"
+      echo -e "Target building ignored as must be used as external\n"
       continue
     fi
     if  fgrep "$Dep" "$DEPS_BUILT" >/dev/null 2>&1; then
-        echo "Target has already been built."
+        echo -e "Target has already been built.\n"
         continue
     fi
     pushd $Dep

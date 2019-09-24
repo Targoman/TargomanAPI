@@ -24,18 +24,25 @@ HEADERS += \
     src/Modules/Translation.h \
     src/Classes/TranslationDispatcher.h \
     src/Classes/intfTranslatorEngine.hpp \
-    3rdParty/E4MT/fastText/src/dictionary.h \
     3rdParty/E4MT/fastText/src/args.h \
+    3rdParty/E4MT/fastText/src/autotune.h \
+    3rdParty/E4MT/fastText/src/densematrix.h \
     3rdParty/E4MT/fastText/src/dictionary.h \
     3rdParty/E4MT/fastText/src/fasttext.h \
+    3rdParty/E4MT/fastText/src/loss.h \
     3rdParty/E4MT/fastText/src/matrix.h \
+    3rdParty/E4MT/fastText/src/meter.h \
     3rdParty/E4MT/fastText/src/model.h \
     3rdParty/E4MT/fastText/src/productquantizer.h \
-    3rdParty/E4MT/fastText/src/qmatrix.h \
+    3rdParty/E4MT/fastText/src/quantmatrix.h \
     3rdParty/E4MT/fastText/src/real.h \
     3rdParty/E4MT/fastText/src/utils.h \
     3rdParty/E4MT/fastText/src/vector.h \
     3rdParty/E4MT/src/clsFormalityChecker.h \
+    3rdParty/QtCUrl/src/QtCUrl.h \
+    src/Classes/intfTranslatorBridge.hpp \
+    src/Engines/clsNMT.h \
+    src/Defs.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -45,15 +52,21 @@ SOURCES += \
     src/Modules/Translation.cpp \
     src/Classes/TranslationDispatcher.cpp \
     3rdParty/E4MT/fastText/src/args.cc \
+    3rdParty/E4MT/fastText/src/autotune.cc \
+    3rdParty/E4MT/fastText/src/densematrix.cc \
     3rdParty/E4MT/fastText/src/dictionary.cc \
     3rdParty/E4MT/fastText/src/fasttext.cc \
+    3rdParty/E4MT/fastText/src/loss.cc \
     3rdParty/E4MT/fastText/src/matrix.cc \
+    3rdParty/E4MT/fastText/src/meter.cc \
     3rdParty/E4MT/fastText/src/model.cc \
     3rdParty/E4MT/fastText/src/productquantizer.cc \
-    3rdParty/E4MT/fastText/src/qmatrix.cc \
+    3rdParty/E4MT/fastText/src/quantmatrix.cc \
     3rdParty/E4MT/fastText/src/utils.cc \
     3rdParty/E4MT/fastText/src/vector.cc \
     3rdParty/E4MT/src/clsFormalityChecker.cpp \
+    3rdParty/QtCUrl/src/QtCUrl.cpp \
+    src/Engines/clsNMT.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \
@@ -85,3 +98,6 @@ OTHER_FILES += \
     buildDependencies.sh
 
 include($$PRJDIR/qmake/install.pri)
+
+DISTFILES += \
+    conf/test.conf

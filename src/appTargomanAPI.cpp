@@ -25,12 +25,15 @@
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Modules/Translation.h"
+#include "Classes/TranslationDispatcher.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
 
 namespace Targoman{
 namespace Apps {
+
+using namespace Classes;
 
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 {;}
@@ -40,51 +43,57 @@ void Targoman::Apps::appTargomanAPI::slotExecute()
     try{
         RESTServer::stuConfig Configs;
 
-        Configs.BasePath = gConfigs::BasePath.value();
-        Configs.Version = gConfigs::Version.value();
-        Configs.StatisticsInterval = gConfigs::StatisticsInterval.value();
-        Configs.ListenPort = gConfigs::ListenPort.value();
-        Configs.ListenAddress = gConfigs::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
-        Configs.JWTSecret = gConfigs::JWTSecret.value();
-        Configs.JWTHashAlgorithm = gConfigs::JWTHashAlgorithm.value();
-        Configs.SimpleCryptKey = gConfigs::SimpleCryptKey.value();
-        Configs.IndentedJson = gConfigs::IndentedJson.value();
-        Configs.MaxUploadSize = gConfigs::MaxUploadSize.value();
-        Configs.MaxUploadedFileSize = gConfigs::MaxUploadedFileSize.value();
-        Configs.MaxCachedItems = gConfigs::MaxCachedItems.value();
-        Configs.CacheConnector = gConfigs::CacheConnector.value();
+        Configs.BasePath = gConfigs::Rest::BasePath.value();
+        Configs.Version = gConfigs::Rest::Version.value();
+        Configs.StatisticsInterval = gConfigs::Rest::StatisticsInterval.value();
+        Configs.ListenPort = gConfigs::Rest::ListenPort.value();
+        Configs.ListenAddress = gConfigs::Rest::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
+        Configs.IndentedJson = gConfigs::Rest::IndentedJson.value();
+        Configs.MaxUploadSize = gConfigs::Rest::MaxUploadSize.value();
+        Configs.MaxUploadedFileSize = gConfigs::Rest::MaxUploadedFileSize.value();
+        Configs.MaxCachedItems = gConfigs::Rest::MaxCachedItems.value();
+        Configs.CacheConnector = gConfigs::Rest::CacheConnector.value();
+
+        Configs.JWTSecret = gConfigs::JWT::Secret.value();
+        Configs.JWTHashAlgorithm = gConfigs::JWT::HashAlgorithm.value();
+        Configs.SimpleCryptKey = gConfigs::JWT::SimpleCryptKey.value();
 
 #ifdef QHTTP_ENABLE_WEBSOCKET
-        Configs.WebSocketServerName = gConfigs::WebSocketServerName.value();
-        Configs.WebSocketServerPort = gConfigs::WebSocketServerPort.value();
-        Configs.WebSocketServerAdderss = gConfigs::WebSocketServerJustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
-        Configs.WebSocketSecure = gConfigs::WebSocketServerSecure.value();;
+        Configs.WebSocketServerName = gConfigs::WS::Name.value();
+        Configs.WebSocketServerPort = gConfigs::WS::Port.value();
+        Configs.WebSocketServerAdderss = gConfigs::WS::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
+        Configs.WebSocketSecure = gConfigs::WS::Secure.value();;
 #endif
 
-        if(gConfigs::BaseOpenAPIObjectFile.value().size()){
-            QFile File(gConfigs::BaseOpenAPIObjectFile.value());
+        if(gConfigs::Rest::BaseOpenAPIObjectFile.value().size()){
+            QFile File(gConfigs::Rest::BaseOpenAPIObjectFile.value());
             File.open(QIODevice::ReadOnly);
             if (File.isReadable() == false)
-                throw exTargomanAPI("Unable to open: <" + gConfigs::BaseOpenAPIObjectFile.value() + "> for reading");
+                throw exTargomanAPI("Unable to open: <" + gConfigs::Rest::BaseOpenAPIObjectFile.value() + "> for reading");
             QJsonDocument JsonDoc = QJsonDocument::fromBinaryData(File.readAll());
             if(JsonDoc.isNull() || JsonDoc.isObject() == false)
-                throw exTargomanAPI("Invalid json reading from: <" + gConfigs::BaseOpenAPIObjectFile.value() + ">");
+                throw exTargomanAPI("Invalid json reading from: <" + gConfigs::Rest::BaseOpenAPIObjectFile.value() + ">");
             Configs.BaseOpenAPIObject = JsonDoc.object();
         }
 
         //Configs.fnIPInBlackList;
 
+
         clsDAC::addDBEngine(enuDBEngines::MySQL);
         clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
-                                        gConfigs::DBHost.value()).arg(
-                                        gConfigs::DBPort.value()).arg(
-                                        gConfigs::DBUser.value()).arg(
-                                        gConfigs::DBPass.value()).arg(
-                                        gConfigs::DBSchema.value()));
+                                        gConfigs::DB::Host.value()).arg(
+                                        gConfigs::DB::Port.value()).arg(
+                                        gConfigs::DB::User.value()).arg(
+                                        gConfigs::DB::Pass.value()).arg(
+                                        gConfigs::DB::Schema.value()));
 
+        // Register translation engines
+        TranslationDispatcher::instance().registerEngines();
+
+        //Initialize API modules
         Translation::instance().init();
 
-
+        // Initialize REST Server
         RESTServer::configure (Configs);
         RESTServer::start();
 

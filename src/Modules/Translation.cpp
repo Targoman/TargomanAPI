@@ -23,10 +23,12 @@
 #include "Translation.h"
 #include "libTargomanAAA/AAA.h"
 #include "Classes/TranslationDispatcher.h"
+#include "libTargomanAAA/Defs.hpp"
 
 using namespace QHttp;
 using namespace Targoman;
 using namespace Targoman::DBManager;
+using namespace Targoman::Apps;
 using namespace Targoman::Apps::Classes;
 
 void Translation::init()
@@ -44,9 +46,9 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                       bool _dic,
                                       bool _dicFull)
 {
-    QTime PreprocessTimer, TranslationTimer, PostProcessTimer;
-    int PreprocessTime = 0, TrTime = 0;
-    PreprocessTimer.start();
+    QTime Timer, OverallTime;
+    int PreprocessTime = 0;
+    Timer.start();OverallTime.start();
 
     _text = _text.trimmed();
     if(_text.isEmpty())
@@ -69,21 +71,21 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                                    });
 
     QJsonObject Stats = this->DAC->execQuery(
-                TokenInfo["usrID"].toString(),
+                TokenInfo[AAA_USERID].toString(),
                 "SELECT * FROM tblTokenStats "
                 "WHERE tks_tokID = ? "
                 "  AND tksEngine=? "
                 "  AND tksDir=? ",
                 {
-                    {TokenInfo["tokID"]},
+                    {TokenInfo[AAA_TOKENID]},
                     {_engine},
                     {_dir},
                 }
             ).toJson(true).object ();
 
     if(Stats.isEmpty())
-        this->DAC->execQuery(TokenInfo["usrID"].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?)", {
-            {TokenInfo["tokID"]},
+        this->DAC->execQuery(TokenInfo[AAA_USERID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+            {TokenInfo[AAA_TOKENID]},
             {_engine},
             {_dir},
         });
@@ -91,7 +93,7 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
     _text = TranslationDispatcher::instance().tokenize(_text, Dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
-    QJsonObject Privs = TokenInfo["privs"].toObject();
+    QJsonObject Privs = AAA::privObjectFromInfo(TokenInfo);
     AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
     AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
     AAA::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
@@ -107,15 +109,15 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
             if(_dicFull && AAA::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
                 throw exAuthorization("Not enought priviledges to retrieve dictionary full response.");
 
-            PreprocessTime = PreprocessTimer.elapsed();PreprocessTimer.restart(); TranslationTimer.start();
+            PreprocessTime = Timer.elapsed();Timer.restart();
             QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
             if(DicResponse.size()){
                 if(_detailed){
-                    DicResponse["times"]= QVariantMap({
-                         {"pre", PreprocessTime},
-                         {"tr", TranslationTimer.elapsed()},
-                         {"post", 0},
-                         {"overall", PreprocessTime+TranslationTimer.elapsed()}
+                    DicResponse[RESULT_TIMES]= QVariantMap({
+                         {RESULT_TIMES_PRE, PreprocessTime},
+                         {RESULT_TIMES_TR, Timer.elapsed()},
+                         {RESULT_TIMES_POST, 0},
+                         {RESULT_TIMES_ALL, PreprocessTime+Timer.elapsed()}
                     });
                 }
                 TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
@@ -125,43 +127,36 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
             throw exAuthorization("Not enought priviledges to retrieve dictionary response.");
     }
 
-    PreprocessTime += PreprocessTimer.elapsed();TranslationTimer.start();
+    PreprocessTime += Timer.elapsed();
 
     try{
+        int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
         QVariantMap Translation = TranslationDispatcher::instance().doTranslation(TokenInfo,
                                                                                   _text,
                                                                                   Dir,
                                                                                   _engine,
                                                                                   true,
-                                                                                  _detailed
+                                                                                  _detailed,
+                                                                                  _detok,
+                                                                                  InternalPreprocessTime,
+                                                                                  InternalTranslationTime
                                                                                   );
-        TrTime = TranslationTimer.elapsed();PostProcessTimer.start();
-        if(_detok){
-            if(_detailed && Translation["tr"].isValid()){
-                QVariantList TranslationBaseDetokenized;
-                /*foreach(auto VariantPair, Translation["tr"].toMap()["base"].toList())
-                    Detokenized.push_back(QVariantList({{VariantPair.first()}, {VariantPair.last()}}));*/
-
-            }else{
-                Translation["simple"] = TranslationDispatcher::instance().detokenize(Translation["simple"].toString(), Dir.second);
-            }
-        }
+        Timer.restart();
         if(_detailed){
-            Translation["times"]= QVariantMap({
-                 {"pre", PreprocessTime},
-                 {"tr", TrTime},
-                 {"post", PostProcessTimer.elapsed()},
-                 {"all", PreprocessTime + TrTime + PostProcessTimer.elapsed()}
+            Translation[RESULT_TIMES]= QVariantMap({
+                 {RESULT_TIMES_PRE, InternalPreprocessTime + PreprocessTime},
+                 {RESULT_TIMES_TR, InternalTranslationTime},
+                 {RESULT_TIMES_POST, InternalPostprocessTime + Timer.elapsed()},
+                 {RESULT_TIMES_ALL, OverallTime.elapsed()}
             });
         }
 
-        TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo["tokID"].toInt()), _engine, _dir, SourceWordCount, _text, PreprocessTime + TrTime + PostProcessTimer.elapsed());
+        TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo[AAA_TOKENID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
 
         return Translation;
     }catch(Common::exTargomanBase &ex){
-        //TODO diffeent erro codes needed
-        TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo["tokID"].toInt()), _engine, _dir, SourceWordCount, _text, -1);
+        TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[AAA_TOKENID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
         throw;
     }
 }

@@ -24,21 +24,71 @@
 
 #include <QString>
 #include <QVariantMap>
+#include <QUrl>
+#include "libTargomanCommon/Macros.h"
+#include "Defs.hpp"
 
 namespace Targoman {
 namespace Apps {
 namespace Classes {
 
+
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuEngine,
+                               NMT,
+                               )
+struct stuEngineSpecs{
+    enuEngine::Type Engine;
+    QString SourceLang;
+    QString DestLang;
+    QString Class;
+    bool    SupportsIXML;
+    QUrl    URL;
+
+    stuEngineSpecs(enuEngine::Type _engine = enuEngine::Unknown,
+                   const QString& _sourceLang = QString(),
+                   const QString& _destLang = QString(),
+                   const QString& _class = QString(),
+                   bool _supportsIXML = true,
+                   const QUrl& _url = QUrl()
+                   ) :
+        Engine(_engine),
+        SourceLang(_sourceLang),
+        DestLang(_destLang),
+        Class(_class),
+        SupportsIXML(_supportsIXML),
+        URL(_url)
+    {;}
+
+    inline QString fullName(){
+        return this->makeFullName(enuEngine::toStr(this->Engine), this->SourceLang, this->DestLang, this->Class);
+    }
+
+    static inline QString makeFullName(const QString& _engine,
+                                const QString& _sourceLang = QString(),
+                                const QString& _destLang = QString(),
+                                const QString& _class = QString()){
+
+        return _class.isNull() ?
+                    QString("%1;%2_%3").arg(_engine).arg(_sourceLang).arg(_destLang) :
+                    QString("%1;%2;%3_%4").arg(_engine).arg(_class).arg(_sourceLang).arg(_destLang);
+    }
+};
+
 class intfTranslatorEngine{
 public:
-    virtual ~intfTranslatorEngine();
-    virtual QVariantMap doTranslation(const QString& _text, bool _detailed) = 0;
+    explicit intfTranslatorEngine(const stuEngineSpecs& _specs) :
+       EngineSpecs(_specs)
+    {}
 
-    static inline QString makeEngineName(const QString& _engine, const QString& _sourceLang, const QString& _destLang, const QString& _class = QString()){
-        return _class.isNull() ?
-                    QString("%1:%2_%3").arg(_engine).arg(_sourceLang).arg(_destLang) :
-                    QString("%1:%2:%3_%4").arg(_engine).arg(_class).arg(_sourceLang).arg(_destLang);
-    }
+    virtual ~intfTranslatorEngine();
+    virtual QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokinize) = 0;
+
+    QString fullName(){return this->EngineSpecs.fullName();}
+
+    inline const stuEngineSpecs& specs(){return this->EngineSpecs;}
+
+protected:
+    stuEngineSpecs EngineSpecs;
 };
 
 }

@@ -35,6 +35,16 @@ namespace Classes {
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
 
+TARGOMAN_DEFINE_ENUM (enuTranslationError,
+                      Ok = 0,
+                      OperationTimedOut = -10,
+                      ConnectionRefused  = -20,
+                      JsonParseError = -30,
+                      InvalidServerResponse = -40,
+                      CURLError = -100
+                      )
+
+
 typedef QPair<QString, QString>  TranslationDir_t;
 
 class TranslationDispatcher
@@ -44,11 +54,14 @@ public:
     ~TranslationDispatcher();
 
     QVariantMap doTranslation(const QJsonObject& _privInfo,
-                              const QString &_text,
+                              QString _text,
                               const TranslationDir_t& _dir,
                               const QString& _engine,
                               bool _useSpecialClass,
-                              bool _detailed);
+                              bool _detailed, bool _detokenize,
+                              int& _preprocessTime,
+                              int& _translationTime
+                              );
 
     QString tokenize(const QString& _text, const QString& _lang);
     QString detokenize(const QString& _text, const QString& _lang);
@@ -56,11 +69,12 @@ public:
     QString preprocessText(const QString& _text, const QString& _lang);
     QVariantMap retrieveDicResponse(const QString& _text, const QString& _lang);
     void addDicLog(const QString& _lang, quint64 _worcCount, const QString& _text);
-    void addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, qint8 _errorCode);
+    void addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, qint32 _errorCode);
     void addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, int _trTime);
+    void registerEngines();
 
     inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir){
-        return this->RegisteredEngines.contains(intfTranslatorEngine::makeEngineName(_engine, _dir.first, _dir.second));
+        return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
     }
 
     static inline TranslationDir_t dirLangs(const QString& _dir){
@@ -72,10 +86,13 @@ public:
     }
 
 private:
+    QVariantMap finalizeTranslation(QVariantMap& _translationResult, bool _detailed, const QString& _destLang);
+
+private:
     TranslationDispatcher();
     Q_DISABLE_COPY(TranslationDispatcher)
 
-    QHash<QString, intfTranslatorEngine*> RegisteredEngines;
+    QHash<QString,  intfTranslatorEngine*> RegisteredEngines;
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
     QScopedPointer<clsFormalityChecker> FormalityChecker;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;

@@ -21,64 +21,105 @@
  */
 #include <QVariantMap>
 #include <QTime>
+#include <QUrl>
 
 #include "TranslationDispatcher.h"
 #include "libTargomanAAA/AAA.h"
 #include "3rdParty/E4MT/src/clsFormalityChecker.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
+#include "Configs.h"
+#include "Engines/clsNMT.h"
+#include "QHttp/QRESTServer.h"
 
-using namespace Targoman::NLPLibs;
-using namespace Targoman::DBManager;
-using namespace Targoman::Common;
-using namespace Targoman::Common::Configuration;
 
 namespace Targoman {
 namespace Apps {
 namespace Classes {
 
+using namespace NLPLibs;
+using namespace DBManager;
+using namespace Common;
+using namespace Common::Configuration;
+using namespace Common::Configuration;
+using namespace QHttp;
+
 TranslationDispatcher::~TranslationDispatcher()
 { ; }
 
 QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
-                                                 const QString& _text,
+                                                 QString _text,
                                                  const TranslationDir_t &_dir,
                                                  const QString &_engine,
                                                  bool _useSpecialClass,
-                                                 bool _detailed)
+                                                 bool _detailed,
+                                                 bool _detokenize,
+                                                 int& _preprocessTime,
+                                                 int& _translationTime)
 {
     if(_detailed && AAA::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought priviledges to get detailed translation response.");
-
-    QString CacheKey = QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text);
+    QTime CacheLookupTime; CacheLookupTime.start();
+    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();
     QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
-    QString Class;
     if(CachedTranslation.isEmpty()){
+        QTime Timer;Timer.start();
+        QString Class;
 
         intfTranslatorEngine* TranslationEngine  = nullptr;
         if(_useSpecialClass){
             Class = this->detectClass(_engine, _text, _dir.first);
-            TranslationEngine = this->RegisteredEngines.value(
-                        intfTranslatorEngine::makeEngineName(_engine, _dir.first, _dir.second, Class)
-                        );
+            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
         }
         if(TranslationEngine == nullptr)
-            TranslationEngine = this->RegisteredEngines.value(intfTranslatorEngine::makeEngineName(_engine, _dir.first, _dir.second));
+            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
 
-        CachedTranslation = TranslationEngine->doTranslation(this->preprocessText(_text, _dir.first), _detailed);
+        if(TranslationEngine == nullptr)
+            throw exHTTPInternalServerError("Unable to find generic translator engine");
+
+        _text = this->preprocessText(_text, _dir.first);
+        _preprocessTime = Timer.elapsed();Timer.restart();
+
+        if(TranslationEngine->specs().SupportsIXML == false)
+            _text = TargomanTextProcessor::instance().ixml2Text(_text, _dir.first, false, false,false);
+
+
+        CachedTranslation = TranslationEngine->doTranslation(_text, _detailed, _detokenize);
+
+        _translationTime = Timer.elapsed();
         if(Class.size())
-            CachedTranslation["class"] = Class;
-    }else{
-        CachedTranslation["cache"] = true;
-    }
+            CachedTranslation[RESULT_CLASS] = Class;
 
+        if(CachedTranslation.value(RESULT_ERRNO, 0).toInt() == 0)
+            this->TranslationCache.insert(CacheKey, CachedTranslation);
+        else{
+            switch(CachedTranslation.value(RESULT_ERRNO, 0).toInt()){
+            case enuTranslationError::Ok:
+                break;
+            case enuTranslationError::OperationTimedOut:
+            case enuTranslationError::ConnectionRefused:
+                throw exHTTPRequestTimeout(CachedTranslation.value(RESULT_MESSAGE).toString());
+            case enuTranslationError::InvalidServerResponse:
+            case enuTranslationError::JsonParseError:
+                throw exHTTPUnprocessableEntity(CachedTranslation.value(RESULT_MESSAGE).toString());
+            case enuTranslationError::CURLError:
+            default:
+                throw exHTTPExpectationFailed(CachedTranslation.value(RESULT_MESSAGE).toString());
+            }
+        }
+    }else{
+        CachedTranslation[RESULT_CACHE] = CacheLookupTime.elapsed();
+    }
     return CachedTranslation;
 }
 
 QString TranslationDispatcher::detectClass(const QString& _engine, const QString &_text, const QString &_lang)
 {
     Q_UNUSED(_engine);
-    return this->FormalityChecker->check(_lang, _text);
+    if(gConfigs::Classifier::SupportsIXML.value()== false)
+        return this->FormalityChecker->check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, _lang, false, false,false));
+    else
+        return this->FormalityChecker->check(_lang, _text);
 }
 
 QString TranslationDispatcher::preprocessText(const QString &_text, const QString &_lang)
@@ -112,8 +153,8 @@ QString TranslationDispatcher::tokenize(const QString &_text, const QString &_la
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
                 stuIXMLReplacement(
-                    QRegExp("(\\s)([\\.\\?\\!])(\\s)"),
-                    "\\1\\2\n\\3"));
+                    QRegularExpression("(\\s)([\\.\\?\\!])(\\s)"),
+                    "\\1\\2\\3")); //"\\1\\2\\n\\3"
 
     return TargomanTextProcessor::instance().text2IXML(
                 _text,
@@ -143,7 +184,7 @@ void TranslationDispatcher::addDicLog(const QString &_lang, quint64 _wordCount, 
     Q_UNUSED(_text); Q_UNUSED (_lang); Q_UNUSED (_wordCount)
 }
 
-void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString &_engine, const QString &_dir, quint64 _wordCount, const QString &_text, qint8 _errorCode)
+void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString &_engine, const QString &_dir, quint64 _wordCount, const QString &_text, qint32 _errorCode)
 {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID); Q_UNUSED (_errorCode);Q_UNUSED (_engine)
 }
@@ -153,11 +194,65 @@ void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString &_en
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
 
+void TranslationDispatcher::registerEngines()
+{
+    foreach (const QString& Key, gConfigs::TranslationServers.keys()){
+        const tmplConfigurableArray<gConfigs::Server>& ServersConfig =
+                gConfigs::TranslationServers.values(Key);
+        for(size_t i=0; i<ServersConfig.size(); ++i){
+            gConfigs::Server Server = ServersConfig.at(i);
+            if(Server.Active.value() == false)
+                continue;
+
+            intfTranslatorEngine* Engine = nullptr;
+            switch(enuEngine::toEnum(Key)){
+            case enuEngine::NMT:
+                Engine = new Engines::clsBaseNMT(stuEngineSpecs(enuEngine::toEnum(Key),
+                                                                   Server.SourceLang.value(),
+                                                                   Server.DestLang.value(),
+                                                                   Server.Class.value(),
+                                                                   Server.SupportsIXML.value(),
+                                                                   Server.URL.value())
+                            );
+                break;
+            case enuEngine::Unknown:
+                throw exTargomanInitialization("Invalid engine type");
+            }
+
+            if(Engine)
+                this->RegisteredEngines.insert(stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value()),
+                                               Engine
+                                               );
+
+        }
+
+    }
+}
+
 TranslationDispatcher::TranslationDispatcher() :
     DAC(new DBManager::clsDAC),
     FormalityChecker(new clsFormalityChecker)
 {
-    TargomanTextProcessor::instance().init(ConfigManager::instance().configSettings());
+    TargomanTextProcessor::stuConfigs TPConfigs;
+    TPConfigs.AbbreviationsFile = gConfigs::TextProcessor::AbbreviationFile.value();
+    TPConfigs.NormalizationFile = gConfigs::TextProcessor::NormalizationFile.value();
+    TPConfigs.SpellCorrectorBaseConfigPath = gConfigs::TextProcessor::SpellCorrectorBaseConfigPath.value();
+
+    QSharedPointer<QSettings>  ConfigSettings = ConfigManager::instance().configSettings();
+
+    if (ConfigSettings.isNull() == false){
+        ConfigSettings->beginGroup(gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs.configPath());
+        foreach(const QString& Lang, ConfigSettings->childGroups()){
+            foreach (const QString& Key, ConfigSettings->allKeys()){
+                ConfigSettings->beginGroup(Lang);
+                TPConfigs.SpellCorrectorLanguageBasedConfigs[Lang].insert(Key, ConfigSettings->value(Key));
+                ConfigSettings->endGroup();
+            }
+        }
+        ConfigSettings->endGroup();
+    }
+
+    TargomanTextProcessor::instance().init(TPConfigs);
 }
 
 /********************************************/
