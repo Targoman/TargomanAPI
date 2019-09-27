@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include "Translation.h"
@@ -155,13 +155,13 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
 
 
         return Translation;
-    }catch(Common::exTargomanBase &ex){
+    }catch(Common::exTargomanBase& ex){
         TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[AAA_TOKENID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
         throw;
     }
 }
 
-QVariantMap Translation::apiTest(const QHttp::RemoteIP_t &_REMOTE_IP, const QString &_token, const QString &_arg)
+QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
 {
     return {
         {"inputArg", _arg},

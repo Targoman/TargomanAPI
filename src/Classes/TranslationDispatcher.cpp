@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 #include <QVariantMap>
 #include <QTime>
@@ -49,8 +49,8 @@ TranslationDispatcher::~TranslationDispatcher()
 
 QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  QString _text,
-                                                 const TranslationDir_t &_dir,
-                                                 const QString &_engine,
+                                                 const TranslationDir_t& _dir,
+                                                 const QString& _engine,
                                                  bool _useSpecialClass,
                                                  bool _detailed,
                                                  bool _detokenize,
@@ -113,7 +113,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
     return CachedTranslation;
 }
 
-QString TranslationDispatcher::detectClass(const QString& _engine, const QString &_text, const QString &_lang)
+QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang)
 {
     Q_UNUSED(_engine);
     if(gConfigs::Classifier::SupportsIXML.value()== false)
@@ -122,7 +122,7 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
         return this->FormalityChecker->check(_lang, _text);
 }
 
-QString TranslationDispatcher::preprocessText(const QString &_text, const QString &_lang)
+QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang)
 {
     Q_UNUSED (_lang)
     if(this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600){
@@ -147,7 +147,7 @@ QString TranslationDispatcher::preprocessText(const QString &_text, const QStrin
     return Text;
 }
 
-QString TranslationDispatcher::tokenize(const QString &_text, const QString &_lang)
+QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang)
 {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
@@ -168,28 +168,28 @@ QString TranslationDispatcher::tokenize(const QString &_text, const QString &_la
                 );
 }
 
-QString TranslationDispatcher::detokenize(const QString &_text, const QString &_lang)
+QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang)
 {
     return TargomanTextProcessor::instance().ixml2Text(_text, _lang, true, _lang=="fa" || _lang=="ar", false);
 }
 
-QVariantMap TranslationDispatcher::retrieveDicResponse(const QString &_text, const QString &_lang)
+QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang)
 {
     Q_UNUSED(_text); Q_UNUSED (_lang);
     return QVariantMap();
 }
 
-void TranslationDispatcher::addDicLog(const QString &_lang, quint64 _wordCount, const QString &_text)
+void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text)
 {
     Q_UNUSED(_text); Q_UNUSED (_lang); Q_UNUSED (_wordCount)
 }
 
-void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString &_engine, const QString &_dir, quint64 _wordCount, const QString &_text, qint32 _errorCode)
+void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode)
 {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID); Q_UNUSED (_errorCode);Q_UNUSED (_engine)
 }
 
-void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString &_engine, const QString &_dir, quint64 _wordCount, const QString &_text, int _trTime)
+void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime)
 {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }

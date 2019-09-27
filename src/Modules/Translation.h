@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 #ifndef TARGOMAN_APPS_MODULES_TRANSLATION_H
 #define TARGOMAN_APPS_MODULES_TRANSLATION_H
@@ -37,14 +37,14 @@ private slots:
                              const QString& _token,
                              QString _text,
                              QString _dir,
-                             const QString &_engine = "NMT",
+                             const QString& _engine = "NMT",
                              bool _detailed = false,
                              bool _detok = true,
                              bool _dic=false,
                              bool _dicFull = false
                              );
 
-    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString &_token, const QString& _arg);
+    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg);
 
 private:
     Translation();

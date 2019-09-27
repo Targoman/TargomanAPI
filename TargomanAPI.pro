@@ -42,7 +42,8 @@ HEADERS += \
     3rdParty/QtCUrl/src/QtCUrl.h \
     src/Classes/intfTranslatorBridge.hpp \
     src/Engines/clsNMT.h \
-    src/Defs.hpp
+    src/Defs.hpp \
+    src/Modules/Accounting.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -66,7 +67,8 @@ SOURCES += \
     3rdParty/E4MT/fastText/src/vector.cc \
     3rdParty/E4MT/src/clsFormalityChecker.cpp \
     3rdParty/QtCUrl/src/QtCUrl.cpp \
-    src/Engines/clsNMT.cpp
+    src/Engines/clsNMT.cpp \
+    src/Modules/Accounting.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \

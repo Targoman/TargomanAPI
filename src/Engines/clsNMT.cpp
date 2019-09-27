@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -40,11 +40,11 @@ constexpr char RESPONSE_RESULT_PHRASES[]= "phrases";
 constexpr char RESPONSE_RESULT_ALIGNMENTS[]= "alignments";
 constexpr char RESPONSE_RESULT_TOKENS[]= "tokens";
 
-clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs &_specs) :
+clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs& _specs) :
     Classes::intfTranslatorEngine(_specs)
 { ; }
 
-QVariantMap clsBaseNMT::doTranslation(const QString &_text, bool _detailed, bool _detokenize)
+QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize)
 {
     int Retries = 0;
     QVariantMap Result;
@@ -85,7 +85,7 @@ QVariantMap clsBaseNMT::doTranslation(const QString &_text, bool _detailed, bool
             return Result;
         }else{
             QJsonParseError JsonError;
-            QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
+            QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
             if(JsonError.error != QJsonParseError::NoError){
                 Result[RESULT_ERRNO] = enuTranslationError::JsonParseError;
                 Result[RESULT_MESSAGE] = "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
@@ -100,7 +100,7 @@ QVariantMap clsBaseNMT::doTranslation(const QString &_text, bool _detailed, bool
     return  Result;
 }
 
-QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument &_doc, bool _detailed, bool _detok)
+QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok)
 {
     Q_UNUSED(_detailed)
 

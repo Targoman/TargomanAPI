@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include <QCoreApplication>
@@ -55,10 +55,10 @@ int main(int _argc, char *_argv[])
         QTimer::singleShot(10, new appTargomanAPI, SLOT(slotExecute()));
 
         return App.exec();
-    }catch(exTargomanBase& e){
-        TargomanError(e.what());
-    }catch (std::exception &e){
-        TargomanError(e.what());
+    }catch(exTargomanBase& ex){
+        TargomanError(ex.what());
+    }catch (std::exception& ex){
+        TargomanError(ex.what());
     }catch(...){
         TargomanError("FATAL Unrecognized exception");
     }

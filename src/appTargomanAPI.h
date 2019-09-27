@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 #ifndef TARGOMAN_APPS_APPTARGOMANAPI_H
 #define TARGOMAN_APPS_APPTARGOMANAPI_H

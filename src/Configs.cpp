@@ -17,7 +17,7 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mohammad M. Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include "Configs.h"
@@ -322,7 +322,7 @@ static auto langValidator = [](const intfConfigurable& _item, QString& _errorMes
     return false;
 };
 
-gConfigs::Server::Server(const QString &_basePath) :
+gConfigs::Server::Server(const QString& _basePath) :
     URL(_basePath + "URL",
          "URL to connect to server",
          "http://127.0.0.1:5000",
@@ -368,7 +368,7 @@ gConfigs::Server::Server(const QString &_basePath) :
     Statistics(gConfigs::Server::stuStatistics(_basePath))
 {}
 
-gConfigs::Server::stuStatistics::stuStatistics(const QString &_basePath) :
+gConfigs::Server::stuStatistics::stuStatistics(const QString& _basePath) :
     OkResponses(_basePath + "Stats/OkResponses",
                     "Count of OK Responses",
                     0,

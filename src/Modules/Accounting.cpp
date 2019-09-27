@@ -19,28 +19,51 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_ENGINES_CLSBASENMT_H
-#define TARGOMAN_APPS_ENGINES_CLSBASENMT_H
 
-#include <QUrl>
-#include "Classes/intfTranslatorEngine.hpp"
+#include "Translation.h"
+#include "Accounting.h"
 
-namespace Targoman {
-namespace Apps {
-namespace Engines {
-
-class clsBaseNMT : public Classes::intfTranslatorEngine
+QHttp::JWT_t Accounting::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QString& _pass, const QString& _salt, const QJsonObject& _sessionInfo)
 {
-public:
-    clsBaseNMT(const Classes::stuEngineSpecs& _specs);
-
-    QVariantMap  doTranslation(const QString& _text, bool _detailed, bool _detokenize);
-
-private:
-    QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
-};
 
 }
+
+QHttp::JWT_t Accounting::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP, enuOAuthType::Type _type, const QString& _AuthToken, const QJsonObject& _sessionInfo)
+{
+
 }
+
+QHttp::JWT_t Accounting::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QJsonObject& _sessionInfo)
+{
+
 }
-#endif // TARGOMAN_APPS_ENGINES_CLSBASENMT_H
+
+bool Accounting::apiLogout(QHttp::JWT_t)
+{
+
+}
+
+bool Accounting::apiChangePass(QHttp::JWT_t, const QString& _oldPass, const QString& _oldPassSalt, const QString& _newPass)
+{
+
+}
+
+bool Accounting::apiChangePassByUUID(const QString& _uuid, const QString& _newPass)
+{
+
+}
+
+QHttp::stuTable Accounting::apiGETLastSessions(QHttp::JWT_t, quint16 _fromID, quint16 _maxItems)
+{
+
+}
+
+QHttp::stuTable Accounting::apiGETLastSessions(QHttp::JWT_t)
+{
+
+}
+
+Accounting::Accounting()
+{
+
+}
