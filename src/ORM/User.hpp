@@ -1,4 +1,4 @@
-################################################################################
+/******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
 #   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
@@ -15,27 +15,24 @@
 #
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
-################################################################################
-ProjectName="TargomanAPI"
-VERSION=1.0.0
+ ******************************************************************************/
+/**
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ */
+#ifndef TARGOMAN_APPS_ORM_USER_HPP
+#define TARGOMAN_APPS_ORM_USER_HPP
 
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
-# Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough
-QMAKE_CXXFLAGS += -std=c++11 -std=c++14
-CONFIGS += c++11 c++14
+#include <QString>
+#include "libTargomanCommon/Macros.h"
 
-QT += core sql network
-QT -= gui
+namespace Targoman {
+namespace Apps {
+namespace ORM {
 
-EXTERNAL_DEPS=1
 
-LIBS += -lTargomanCommon \
-        -lTargomanDBM \
-        -lTargomanAAA \
-        -lTargomanTextProcessor \
-        -lQFieldValidator \
-        -lQRESTServer \
-        -lqhttp \
-        -lcurl
 
-DEFINES += QHTTP_ENABLE_WEBSOCKET
+}
+}
+}
+
+#endif // TARGOMAN_APPS_ORM_USER_HPP

@@ -22,6 +22,8 @@
 #ifndef TARGOMAN_APPS_DEFS_HPP
 #define TARGOMAN_APPS_DEFS_HPP
 
+#include "libTargomanCommon/Macros.h"
+
 namespace Targoman{
 namespace Apps {
 

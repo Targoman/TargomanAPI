@@ -43,7 +43,7 @@ tmplConfigurable<QString> gConfigs::Rest::BasePath(
         "",
         "PATH",
         "base-path",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::Rest::Version(
         gConfigs::Rest::makeConfig("Version"),
@@ -53,7 +53,7 @@ tmplConfigurable<QString> gConfigs::Rest::Version(
         "",
         "VERSION",
         "version",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> gConfigs::Rest::JustLocal(
         gConfigs::Rest::makeConfig("JustLocal"),
@@ -63,7 +63,7 @@ tmplConfigurable<bool> gConfigs::Rest::JustLocal(
         "",
         "",
         "just-local",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<quint16> gConfigs::Rest::ListenPort(
         gConfigs::Rest::makeConfig("ListenPort"),
@@ -74,7 +74,7 @@ tmplRangedConfigurable<quint16> gConfigs::Rest::ListenPort(
         "p",
         "PORT",
         "listen-port",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<quint8> gConfigs::Rest::StatisticsInterval(
         gConfigs::Rest::makeConfig("StatisticsInterval"),
@@ -85,7 +85,7 @@ tmplRangedConfigurable<quint8> gConfigs::Rest::StatisticsInterval(
         "",
         "INTERVAL",
         "stats-interval",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> gConfigs::Rest::IndentedJson(
         gConfigs::Rest::makeConfig("IndentedJson"),
@@ -95,7 +95,7 @@ tmplConfigurable<bool> gConfigs::Rest::IndentedJson(
         "",
         "",
         "indented-json",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadSize(
         gConfigs::Rest::makeConfig("MaxUploadSize"),
@@ -106,7 +106,7 @@ tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadSize(
         "",
         "SIZE",
         "max-upload-size",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadedFileSize(
         gConfigs::Rest::makeConfig("MaxUploadedFileSize"),
@@ -117,7 +117,7 @@ tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadedFileSize(
         "",
         "SIZE",
         "max-file-upload-size",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<quint32> gConfigs::Rest::MaxCachedItems(
         gConfigs::Rest::makeConfig("MaxCachedItems"),
@@ -128,7 +128,7 @@ tmplRangedConfigurable<quint32> gConfigs::Rest::MaxCachedItems(
         "",
         "SIZE",
         "max-cache-size",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::Rest::CacheConnector(
         gConfigs::Rest::makeConfig("CacheConnector"),
@@ -138,19 +138,19 @@ tmplConfigurable<QString> gConfigs::Rest::CacheConnector(
         "",
         "CONNECTION_STRING",
         "cache-connector",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<FilePath_t>     gConfigs::Rest::BaseOpenAPIObjectFile(
         gConfigs::Rest::makeConfig("BaseOpenAPIObjectFile"),
         "Input file path where default OpenAPI object file resides",
         "",
         Validators::tmplPathAccessValidator<
-        static_cast<enuPathAccess::Type>(enuPathAccess::File | enuPathAccess::Readable),
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
         false>,
         "",
         "FILEPATH",
         "openapi-file",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 /****************************************************************************/
 tmplConfigurable<QString> gConfigs::JWT::Secret(
@@ -161,7 +161,7 @@ tmplConfigurable<QString> gConfigs::JWT::Secret(
         "",
         "SECRET",
         "jwt-secret",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QHttp::enuJWTHashAlgs::Type> gConfigs::JWT::HashAlgorithm(
         gConfigs::JWT::makeConfig("JWTHashAlgorithm"),
@@ -171,7 +171,7 @@ tmplConfigurable<QHttp::enuJWTHashAlgs::Type> gConfigs::JWT::HashAlgorithm(
         "",
         "ALGORITHM",
         "jwt-hash-alg",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<quint64> gConfigs::JWT::SimpleCryptKey(
         gConfigs::JWT::makeConfig("SimpleCryptKey"),
@@ -181,7 +181,7 @@ tmplConfigurable<quint64> gConfigs::JWT::SimpleCryptKey(
         "",
         "SECRET",
         "jwt-private-key",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 
 /****************************************************************************/
@@ -191,21 +191,17 @@ tmplConfigurable<double>     gConfigs::Classifier::Threshold(
         0.8,
         ReturnTrueCrossValidator(),
         "", "", "fasttext-threshold",
-        static_cast<enuConfigSource::Type>(
-            enuConfigSource::Arg  |
-            enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<FilePath_t>     gConfigs::Classifier::ModelPath(
         gConfigs::Classifier::makeConfig("ModelPath"),
         "Directory where FastText models are stored.",
         "",
         Validators::tmplPathAccessValidator<
-        static_cast<enuPathAccess::Type>(enuPathAccess::Dir | enuPathAccess::Readable),
+        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
         false>,
         "", "", "fasttext-models-path",
-        static_cast<enuConfigSource::Type>(
-            enuConfigSource::Arg  |
-            enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::Classifier::ModelPattern(
         gConfigs::Classifier::makeConfig("ModelPattern"),
@@ -215,9 +211,7 @@ tmplConfigurable<QString> gConfigs::Classifier::ModelPattern(
         "",
         "",
         "fasttext-model-pattrn",
-        static_cast<enuConfigSource::Type>(
-            enuConfigSource::Arg  |
-            enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> gConfigs::Classifier::SupportsIXML(
         gConfigs::Classifier::makeConfig("SupportsIXML"),
@@ -225,9 +219,7 @@ tmplConfigurable<bool> gConfigs::Classifier::SupportsIXML(
         true,
         ReturnTrueCrossValidator(),
         "", "", "fasttext-supports-ixml",
-        static_cast<enuConfigSource::Type>(
-            enuConfigSource::Arg  |
-            enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 /****************************************************************************/
 tmplConfigurable<FilePath_t> gConfigs::TextProcessor::AbbreviationFile(
@@ -235,7 +227,7 @@ tmplConfigurable<FilePath_t> gConfigs::TextProcessor::AbbreviationFile(
         "File path to abbreviations table file. Relative to config file path if not specified as absolute.",
         "",
         Validators::tmplPathAccessValidator<
-        static_cast<enuPathAccess::Type>(enuPathAccess::File | enuPathAccess::Readable),
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
         true>
         );
 tmplConfigurable<FilePath_t> gConfigs::TextProcessor::NormalizationFile(
@@ -243,7 +235,7 @@ tmplConfigurable<FilePath_t> gConfigs::TextProcessor::NormalizationFile(
         "File path to normalization rules file. Relative to config file path if not specified as absolute.",
         "",
         Validators::tmplPathAccessValidator<
-        static_cast<enuPathAccess::Type>(enuPathAccess::File | enuPathAccess::Readable),
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
         true>
         );
 tmplConfigurable<FilePath_t> gConfigs::TextProcessor::SpellCorrectorBaseConfigPath(
@@ -251,7 +243,7 @@ tmplConfigurable<FilePath_t> gConfigs::TextProcessor::SpellCorrectorBaseConfigPa
         "Directory path to spell correction specific files. Relative to config file path if not specified as absolute.",
         "",
         Validators::tmplPathAccessValidator<
-        static_cast<enuPathAccess::Type>(enuPathAccess::Dir | enuPathAccess::Readable),
+        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
         false>
         );
 clsFileBasedConfig       gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs(
@@ -268,7 +260,7 @@ tmplConfigurable<QString> gConfigs::DB::Host(
         "",
         "HOST",
         "db-host",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<quint16> gConfigs::DB::Port(
         gConfigs::DB::makeConfig("Port"),
@@ -279,7 +271,7 @@ tmplRangedConfigurable<quint16> gConfigs::DB::Port(
         "",
         "PORT",
         "db-port",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::DB::User(
         gConfigs::DB::makeConfig("User"),
@@ -289,7 +281,7 @@ tmplConfigurable<QString> gConfigs::DB::User(
         "",
         "USER",
         "db-user",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::DB::Pass(
         gConfigs::DB::makeConfig("Pass"),
@@ -299,7 +291,7 @@ tmplConfigurable<QString> gConfigs::DB::Pass(
         "",
         "PASS",
         "db-pass",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<QString> gConfigs::DB::Schema(
         gConfigs::DB::makeConfig("Schema"),
@@ -309,7 +301,7 @@ tmplConfigurable<QString> gConfigs::DB::Schema(
         "",
         "SCHEMA",
         "db-schema",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 /****************************************************************************/
 static auto langValidator = [](const intfConfigurable& _item, QString& _errorMessage) -> bool{
@@ -399,7 +391,7 @@ tmplConfigurable<QString> gConfigs::WS::Name(
         "",
         "NAME",
         "ws-name",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplRangedConfigurable<quint16> gConfigs::WS::Port(
         gConfigs::WS::makeConfig("Port"),
@@ -410,7 +402,7 @@ tmplRangedConfigurable<quint16> gConfigs::WS::Port(
         "w",
         "PORT",
         "ws-listen-port",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> gConfigs::WS::JustLocal(
         gConfigs::WS::makeConfig("JustLocal"),
@@ -420,7 +412,7 @@ tmplConfigurable<bool> gConfigs::WS::JustLocal(
         "",
         "",
         "ws-just-local",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> gConfigs::WS::Secure(
         gConfigs::WS::makeConfig("Secure"),
@@ -430,7 +422,7 @@ tmplConfigurable<bool> gConfigs::WS::Secure(
         "",
         "",
         "ws-secure",
-        static_cast<enuConfigSource::Type>(enuConfigSource::Arg | enuConfigSource::File));
+        enuConfigSource::Arg | enuConfigSource::File);
 #endif
 
 }

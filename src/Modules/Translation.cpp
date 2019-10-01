@@ -33,7 +33,8 @@ using namespace Targoman::Apps::Classes;
 
 void Translation::init()
 {
-
+    // Register translation engines
+    TranslationDispatcher::instance().registerEngines();
 }
 
 QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
@@ -170,8 +171,7 @@ QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QStr
 }
 
 Translation::Translation() :
-    DAC(new DBManager::clsDAC)
-{
+    DAC(new DBManager::clsDAC){
     this->registerMyRESTAPIs();
 }
 

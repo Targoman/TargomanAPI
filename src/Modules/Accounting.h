@@ -40,39 +40,39 @@ public:
     void init();
 
 private slots:
-    QHttp::JWT_t apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
+    QHttp::EncodedJWT_t apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
                           const QString& _login,
-                          const QString& _pass,
+                          const QHttp::MD5_t& _pass,
                           const QString& _salt,
-                          const QJsonObject& _sessionInfo = QJsonObject()
+                          bool _rememberMe = false,
+                          const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()
             );
 
-    QHttp::JWT_t apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP,
+    QHttp::EncodedJWT_t apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP,
                                  enuOAuthType::Type _type,
                                  const QString& oAuthToken,
-                                 const QJsonObject& _sessionInfo = QJsonObject());
+                                 const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t());
 
-    QHttp::JWT_t apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                 const QJsonObject& _sessionInfo
+    QHttp::EncodedJWT_t apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                 const QHttp::JSON_t& _sessionInfo
                                  );
 
-    bool apiLogout(QHttp::JWT_t);
+    bool apiLogout(QHttp::JWT_t _JWT);
     bool apiCreateForgotPasswordLink(const QHttp::RemoteIP_t& _REMOTE_IP,
                                      const QString& _login);
-    bool apiChangePass(QHttp::JWT_t,
-                       const QString& _oldPass,
+
+    bool apiChangePass(QHttp::JWT_t _JWT,
+                       const QHttp::MD5_t& _oldPass,
                        const QString& _oldPassSalt,
-                       const QString& _newPass
+                       const QHttp::MD5_t& _newPass
                        );
 
-    bool apiChangePassByUUID(const QString& _uuid,
-                             const QString& _newPass
+    bool apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP,
+                             const QHttp::MD5_t& _uuid,
+                             const QHttp::MD5_t& _newPass
                              );
 
-    QHttp::stuTable apiGETLastSessions(QHttp::JWT_t, quint16 _fromID = 0, quint16 _maxItems = 100);
-
-
-    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg);
+    QHttp::stuTable apiGETLastSessions(QHttp::JWT_t _JWT, quint16 _fromID = 0, quint16 _maxItems = 100);
 
 private:
     Accounting();
@@ -81,5 +81,7 @@ private:
 private:
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
 };
+
+Q_DECLARE_METATYPE(enuOAuthType::Type);
 
 #endif // ACCOUNTING_H

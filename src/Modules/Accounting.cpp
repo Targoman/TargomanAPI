@@ -22,48 +22,117 @@
 
 #include "Translation.h"
 #include "Accounting.h"
+#include "libTargomanAAA/AAA.h"
+#include "QFieldValidator.h"
+#include "QHttp/QRESTServer.h"
+#include "QHttp/intfAPIArgManipulator.h"
 
-QHttp::JWT_t Accounting::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QString& _pass, const QString& _salt, const QJsonObject& _sessionInfo)
-{
+using namespace Targoman;
+using namespace QHttp;
 
+TARGOMAN_DEFINE_ENUM(enuUserStatus,
+                     Active = 'A',
+                     Remove = 'R',
+                     Blocked = 'B',
+                     MustChangePass = 'C',
+                     MustValidate = 'V'
+                    )
+
+TARGOMAN_DEFINE_ENUM(enuUserApproval,
+                     None = 'N',
+                     All = 'A',
+                     JustMobile = 'M',
+                     JustEmail = 'E',
+                    )
+
+namespace JWT{
+    TARGOMAN_CREATE_CONSTEXPR(usrLogin);
+    TARGOMAN_CREATE_CONSTEXPR(usrName);
+    TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+    TARGOMAN_CREATE_CONSTEXPR(rolName);
+    TARGOMAN_CREATE_CONSTEXPR(roleID);
+    TARGOMAN_CREATE_CONSTEXPR(privs);
+    TARGOMAN_CREATE_CONSTEXPR(usrID);
+    TARGOMAN_CREATE_CONSTEXPR(usrApproval);
+    TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+    TARGOMAN_CREATE_CONSTEXPR(jti);
 }
 
-QHttp::JWT_t Accounting::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP, enuOAuthType::Type _type, const QString& _AuthToken, const QJsonObject& _sessionInfo)
-{
+void Accounting::init()
+{}
 
+QHttp::EncodedJWT_t Accounting::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QHttp::MD5_t& _pass, const QString& _salt, bool _rememberMe, const QHttp::JSON_t& _sessionInfo)
+{
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+    QFV.optional(QFV.json()).validate(_sessionInfo, "sessionInfo");
+
+    AAA::validateIPAddress(_REMOTE_IP);
+
+    QJsonObject Result = AAA::login(_login, _pass, _salt, QJsonDocument::fromJson(_sessionInfo.toUtf8()).object());
+    return this->createSignedJWT({
+                                     {JWT::usrLogin, _login},
+                                     {JWT::usrName, Result["usrGivenName"]},
+                                     {JWT::usrFamily, Result["usrFamilyName"]},
+                                     {JWT::rolName, Result["rolName"]},
+                                     {JWT::roleID, Result["rolID"]},
+                                     {JWT::privs, Result["privs"]},
+                                     {JWT::usrID, Result["usrID"]},
+                                     {JWT::usrApproval, enuUserApproval::toStr(Result["usrApprovalState"].toString())},
+                                     {JWT::usrStatus, enuUserStatus::toStr(Result["usrStatus"].toString())},
+                                 },
+                                 QJsonObject(),
+                                 _rememberMe ? 7*24*3600 : 1800,
+                                 Result["ssnKey"].toString()
+            );
 }
 
-QHttp::JWT_t Accounting::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QJsonObject& _sessionInfo)
+QHttp::EncodedJWT_t Accounting::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP, enuOAuthType::Type _type, const QString& _AuthToken, const QHttp::JSON_t& _sessionInfo)
 {
-
+    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_type) Q_UNUSED(_AuthToken)Q_UNUSED(_sessionInfo)
+    throw exHTTPNotImplemented("oh oh!");
 }
 
-bool Accounting::apiLogout(QHttp::JWT_t)
+QHttp::EncodedJWT_t Accounting::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QHttp::JSON_t& _sessionInfo)
 {
-
+    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_sessionInfo)
+    throw exHTTPNotImplemented("oh oh!");
 }
 
-bool Accounting::apiChangePass(QHttp::JWT_t, const QString& _oldPass, const QString& _oldPassSalt, const QString& _newPass)
+bool Accounting::apiLogout(QHttp::JWT_t _JWT)
 {
-
+    return AAA::logout(static_cast<quint64>(_JWT[JWT::usrID].toDouble()), _JWT[JWT::jti].toString());
 }
 
-bool Accounting::apiChangePassByUUID(const QString& _uuid, const QString& _newPass)
+bool Accounting::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, const QString& _login)
 {
-
+    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_login)
+    throw exHTTPNotImplemented("oh oh!");
 }
 
-QHttp::stuTable Accounting::apiGETLastSessions(QHttp::JWT_t, quint16 _fromID, quint16 _maxItems)
+bool Accounting::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, const QString& _oldPassSalt, const QHttp::MD5_t& _newPass)
 {
-
+    Q_UNUSED(_JWT) Q_UNUSED(_oldPass) Q_UNUSED(_oldPassSalt)Q_UNUSED(_newPass)
+    throw exHTTPNotImplemented("oh oh!");
 }
 
-QHttp::stuTable Accounting::apiGETLastSessions(QHttp::JWT_t)
+bool Accounting::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5_t& _uuid, const MD5_t& _newPass)
 {
-
+    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_uuid) Q_UNUSED(_newPass)
+    throw exHTTPNotImplemented("oh oh!");
 }
 
-Accounting::Accounting()
+QHttp::stuTable Accounting::apiGETLastSessions(QHttp::JWT_t _JWT, quint16 _fromID, quint16 _maxItems)
 {
+    Q_UNUSED(_JWT) Q_UNUSED(_fromID) Q_UNUSED(_maxItems)
+    throw exHTTPNotImplemented("oh oh!");
+}
 
+
+Accounting::Accounting() :
+    DAC(new DBManager::clsDAC){
+
+    QHTTP_REGISTER_ENHANCED_ENUM(enuOAuthType);
+
+    this->registerMyRESTAPIs();
 }

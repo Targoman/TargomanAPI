@@ -43,7 +43,8 @@ HEADERS += \
     src/Classes/intfTranslatorBridge.hpp \
     src/Engines/clsNMT.h \
     src/Defs.hpp \
-    src/Modules/Accounting.h
+    src/Modules/Accounting.h \
+    src/ORM/User.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \

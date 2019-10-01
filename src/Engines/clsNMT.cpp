@@ -34,11 +34,16 @@ namespace Engines {
 
 using namespace Classes;
 
-constexpr char RESPONSE_RESULT[]= "rslt";
-constexpr char RESPONSE_SERVERID[]= "serverName";
-constexpr char RESPONSE_RESULT_PHRASES[]= "phrases";
-constexpr char RESPONSE_RESULT_ALIGNMENTS[]= "alignments";
-constexpr char RESPONSE_RESULT_TOKENS[]= "tokens";
+namespace NMTResponse{
+    TARGOMAN_CREATE_CONSTEXPR(rslt);
+    TARGOMAN_CREATE_CONSTEXPR(serverName);
+    namespace Result {
+        TARGOMAN_CREATE_CONSTEXPR(phrases);
+        TARGOMAN_CREATE_CONSTEXPR(alignments);
+        TARGOMAN_CREATE_CONSTEXPR(tokens);
+
+    }
+}
 
 clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs& _specs) :
     Classes::intfTranslatorEngine(_specs)
@@ -119,12 +124,12 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     if(BaseMap.isEmpty()) return invalidResponse();
 
-    if(BaseMap.contains(RESPONSE_SERVERID))
-        Result[RESULT_SERVERID] = BaseMap[RESPONSE_SERVERID].toString();
+    if(BaseMap.contains(NMTResponse::serverName))
+        Result[RESULT_SERVERID] = BaseMap[NMTResponse::serverName].toString();
 
     static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults){
         QStringList TrTokens;
-        foreach(auto Phrase, SentenceResults[RESPONSE_RESULT_PHRASES].toList()){
+        foreach(auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()){
             TrTokens.append(Phrase.toList().at(0).toString());
         }
         if(_detok)
@@ -135,24 +140,24 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     if(!_detailed){
         QStringList TrSentences;
-        foreach(QVariant SentenceResults, BaseMap[RESPONSE_RESULT].toList())
+        foreach(QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
             TrSentences.append (baseTranslation(SentenceResults.toMap()));
         Result[RESULT_SIMPLE] = TrSentences.join('\n');
     }else{
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
 
-        foreach(auto SentenceResults, BaseMap[RESPONSE_RESULT].toList()){
+        foreach(auto SentenceResults, BaseMap[NMTResponse::rslt].toList()){
             QStringList TempStringList;
             QVariantList TempList;
             QVariantMap SentenceResultMap = SentenceResults.toMap();
-            QVariantList TokensList = SentenceResultMap[RESPONSE_RESULT_TOKENS].toList();
+            QVariantList TokensList = SentenceResultMap[NMTResponse::Result::tokens].toList();
 
             foreach(auto Token, TokensList)
                 TempStringList.append(Token.toString());
             ResultBaseList.push_back(QVariantList({{TempStringList.join(" ")},{baseTranslation(SentenceResultMap)}}));
 
             quint16 Index = 0;
-            foreach(auto Phrases, SentenceResultMap[RESPONSE_RESULT_PHRASES].toList())
+            foreach(auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
                                                     {_detok ?
                                                      TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang) :
@@ -179,7 +184,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
                 return Result;
             };
 
-            foreach(auto Alignment, SentenceResultMap[RESPONSE_RESULT_ALIGNMENTS].toList()){
+            foreach(auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()){
                 TempStringList.clear();
 
                 foreach(auto AlignmentItem, Alignment.toList())
@@ -187,7 +192,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
                 TempList.push_back(QVariantList({
                                                     {TempStringList.join(' ')},
                                                     {Alignment.toList().at(0).toInt() + 1},
-                                                    {buildAlignments(SentenceResultMap[RESPONSE_RESULT_PHRASES].toList().at(Index).toList())}
+                                                    {buildAlignments(SentenceResultMap[NMTResponse::Result::phrases].toList().at(Index).toList())}
                                                 }));
                 Index++;
             }

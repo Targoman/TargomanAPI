@@ -25,7 +25,7 @@
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Modules/Translation.h"
-#include "Classes/TranslationDispatcher.h"
+#include "Modules/Accounting.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -87,11 +87,11 @@ void Targoman::Apps::appTargomanAPI::slotExecute()
                                         gConfigs::DB::Pass.value()).arg(
                                         gConfigs::DB::Schema.value()));
 
-        // Register translation engines
-        TranslationDispatcher::instance().registerEngines();
-
         //Initialize API modules
-        Translation::instance().init();
+        //Translation::instance().init();
+        Accounting::instance().init();
+
+        std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
 
         // Initialize REST Server
         RESTServer::configure (Configs);
