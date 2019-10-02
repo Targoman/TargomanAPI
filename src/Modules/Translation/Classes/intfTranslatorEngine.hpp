@@ -19,17 +19,19 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP
-#define TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP
+#ifndef TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP
+#define TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP
 
 #include <QString>
 #include <QVariantMap>
 #include <QUrl>
 #include "libTargomanCommon/Macros.h"
-#include "Defs.hpp"
+#include "Modules/Translation/TranslationDefs.hpp"
 
 namespace Targoman {
-namespace Apps {
+namespace API {
+namespace Modules {
+namespace Translation {
 namespace Classes {
 
 
@@ -94,4 +96,6 @@ protected:
 }
 }
 }
-#endif // TARGOMAN_APPS_CLASSES_INTFTRANSLATORENGINE_HPP
+}
+}
+#endif // TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP

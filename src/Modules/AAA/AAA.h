@@ -20,8 +20,8 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_APPS_MODULES_ACCOUNTING_H
-#define TARGOMAN_APPS_MODULES_ACCOUNTING_H
+#ifndef TARGOMAN_API_MODULES_AAA_AAA_H
+#define TARGOMAN_API_MODULES_AAA_AAA_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
@@ -33,7 +33,13 @@ TARGOMAN_DEFINE_ENHANCED_ENUM (enuOAuthType,
                                Linkedin
                                );
 
-class Accounting : public QHttp::intfRESTAPIHolder
+TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
+                               Web,
+                               Mobile,
+                               App
+                               );
+
+class Account : public QHttp::intfRESTAPIHolder
 {
     Q_OBJECT
 public:
@@ -58,8 +64,9 @@ private slots:
                                  );
 
     bool apiLogout(QHttp::JWT_t _JWT);
-    bool apiCreateForgotPasswordLink(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                     const QString& _login);
+    QHttp::MD5_t apiCreateForgotPasswordLink(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                             const QString& _login,
+                                             enuForgotPassLinkVia::Type _via);
 
     bool apiChangePass(QHttp::JWT_t _JWT,
                        const QHttp::MD5_t& _oldPass,
@@ -75,13 +82,14 @@ private slots:
     QHttp::stuTable apiGETLastSessions(QHttp::JWT_t _JWT, quint16 _fromID = 0, quint16 _maxItems = 100);
 
 private:
-    Accounting();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Accounting);
+    Account();
+    TARGOMAN_DEFINE_SINGLETON_MODULE(Account);
 
 private:
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
 };
 
 Q_DECLARE_METATYPE(enuOAuthType::Type);
+Q_DECLARE_METATYPE(enuForgotPassLinkVia::Type);
 
-#endif // ACCOUNTING_H
+#endif // TARGOMAN_API_MODULES_AAA_AAA_H

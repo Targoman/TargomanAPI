@@ -35,7 +35,6 @@ static const char* LicenseStr =
 "%1 [Arguments]\n"
 "Arguments: \n";
 
-using namespace Targoman;
 using namespace Targoman::Common;
 using namespace Targoman::Apps;
 

@@ -24,8 +24,8 @@
 #include "appTargomanAPI.h"
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Modules/Translation.h"
-#include "Modules/Accounting.h"
+#include "Modules/Translation/Translation.h"
+#include "Modules/AAA/AAA.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -33,12 +33,10 @@ using namespace Targoman::DBManager;
 namespace Targoman{
 namespace Apps {
 
-using namespace Classes;
-
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 {;}
 
-void Targoman::Apps::appTargomanAPI::slotExecute()
+void appTargomanAPI::slotExecute()
 {
     try{
         RESTServer::stuConfig Configs;
@@ -89,7 +87,7 @@ void Targoman::Apps::appTargomanAPI::slotExecute()
 
         //Initialize API modules
         //Translation::instance().init();
-        Accounting::instance().init();
+        Account::instance().init();
 
         std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
 

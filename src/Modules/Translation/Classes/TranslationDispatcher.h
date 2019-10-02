@@ -19,8 +19,8 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
-#define TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
+#ifndef TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
+#define TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
 #include "intfTranslatorEngine.hpp"
@@ -30,6 +30,10 @@
 namespace Targoman {
 namespace Apps {
 class clsFormalityChecker;
+}
+namespace API {
+namespace Modules {
+namespace Translation {
 namespace Classes {
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
@@ -94,7 +98,7 @@ private:
 
     QHash<QString,  intfTranslatorEngine*> RegisteredEngines;
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
-    QScopedPointer<clsFormalityChecker> FormalityChecker;
+    QScopedPointer<Apps::clsFormalityChecker> FormalityChecker;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;
@@ -104,4 +108,6 @@ private:
 }
 }
 }
-#endif // TARGOMAN_APPS_CLASSES_TRANSLATIONDISPATCHER_H
+}
+}
+#endif // TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H

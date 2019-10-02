@@ -28,7 +28,6 @@
 #include "libTargomanCommon/Configuration/clsFileBasedConfig.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "libTargomanCommon/Macros.h"
-#include "Classes/intfTranslatorEngine.hpp"
 #include "QHttp/QRESTServer.h"
 
 ENUM_CONFIGURABLE(QHttp::enuJWTHashAlgs)

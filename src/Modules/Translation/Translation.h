@@ -19,8 +19,8 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_MODULES_TRANSLATION_H
-#define TARGOMAN_APPS_MODULES_TRANSLATION_H
+#ifndef TARGOMAN_API_MODULES_TRANSLATION_H
+#define TARGOMAN_API_MODULES_TRANSLATION_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
@@ -56,4 +56,4 @@ private:
 };
 
 
-#endif // TARGOMAN_APPS_MODULES_TRANSLATION_H
+#endif // TARGOMAN_API_MODULES_TRANSLATION_H

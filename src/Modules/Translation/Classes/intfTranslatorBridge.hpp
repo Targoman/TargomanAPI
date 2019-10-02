@@ -19,28 +19,25 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_APPS_ENGINES_CLSBASENMT_H
-#define TARGOMAN_APPS_ENGINES_CLSBASENMT_H
+#ifndef TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#define TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP
 
-#include <QUrl>
-#include "Classes/intfTranslatorEngine.hpp"
+#include "intfTranslatorEngine.hpp"
 
 namespace Targoman {
-namespace Apps {
-namespace Engines {
+namespace API {
+namespace Modules {
+namespace Translation {
+namespace Classes {
 
-class clsBaseNMT : public Classes::intfTranslatorEngine
-{
+class intfTranslatorBridge : public intfTranslatorEngine{
 public:
-    clsBaseNMT(const Classes::stuEngineSpecs& _specs);
 
-    QVariantMap  doTranslation(const QString& _text, bool _detailed, bool _detokenize);
-
-private:
-    QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
 };
 
 }
 }
 }
-#endif // TARGOMAN_APPS_ENGINES_CLSBASENMT_H
+}
+}
+#endif // TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP

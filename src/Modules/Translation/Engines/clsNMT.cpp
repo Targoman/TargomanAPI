@@ -24,12 +24,14 @@
 #include <QJsonObject>
 #include "clsNMT.h"
 #include "3rdParty/QtCUrl/src/QtCUrl.h"
-#include "Classes/TranslationDispatcher.h"
+#include "../Classes/TranslationDispatcher.h"
 
 #include <QtDebug>
 
 namespace Targoman {
-namespace Apps {
+namespace API {
+namespace Modules {
+namespace Translation {
 namespace Engines {
 
 using namespace Classes;
@@ -77,23 +79,23 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
         QString CUrlResult = CUrl.exec(Opt);
 
         if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT){
-            Result[RESULT_ERRNO]   = enuTranslationError::OperationTimedOut;
-            Result[RESULT_MESSAGE] = "Unable to translate with NMT after 5 retries.";
+            Result[RESULTItems::ERRNO]   = enuTranslationError::OperationTimedOut;
+            Result[RESULTItems::MESSAGE] = "Unable to translate with NMT after 5 retries.";
             ++Retries;
         }else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT){
-            Result[RESULT_ERRNO]   = enuTranslationError::ConnectionRefused;
-            Result[RESULT_MESSAGE] = "Unable to translate with NMT after 5 retries.";
+            Result[RESULTItems::ERRNO]   = enuTranslationError::ConnectionRefused;
+            Result[RESULTItems::MESSAGE] = "Unable to translate with NMT after 5 retries.";
             ++Retries;
         }else if(CUrl.lastError().isOk() == false){
-            Result[RESULT_ERRNO] = enuTranslationError::CURLError + CUrl.lastError().code();
-            Result[RESULT_MESSAGE] = CUrl.lastError().text();
+            Result[RESULTItems::ERRNO] = enuTranslationError::CURLError + CUrl.lastError().code();
+            Result[RESULTItems::MESSAGE] = CUrl.lastError().text();
             return Result;
         }else{
             QJsonParseError JsonError;
             QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
             if(JsonError.error != QJsonParseError::NoError){
-                Result[RESULT_ERRNO] = enuTranslationError::JsonParseError;
-                Result[RESULT_MESSAGE] = "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+                Result[RESULTItems::ERRNO] = enuTranslationError::JsonParseError;
+                Result[RESULTItems::MESSAGE] = "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
                 ++Retries;
                 continue;
             }
@@ -111,8 +113,8 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     auto invalidResponse = [_doc]() -> QVariantMap{
             return  {
-                {RESULT_ERRNO, enuTranslationError::InvalidServerResponse},
-                {RESULT_MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact)}
+                {RESULTItems::ERRNO, enuTranslationError::InvalidServerResponse},
+                {RESULTItems::MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact)}
             };
     };
 
@@ -125,7 +127,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
     if(BaseMap.isEmpty()) return invalidResponse();
 
     if(BaseMap.contains(NMTResponse::serverName))
-        Result[RESULT_SERVERID] = BaseMap[NMTResponse::serverName].toString();
+        Result[RESULTItems::SERVERID] = BaseMap[NMTResponse::serverName].toString();
 
     static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults){
         QStringList TrTokens;
@@ -142,7 +144,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
         QStringList TrSentences;
         foreach(QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
             TrSentences.append (baseTranslation(SentenceResults.toMap()));
-        Result[RESULT_SIMPLE] = TrSentences.join('\n');
+        Result[RESULTItems::SIMPLE] = TrSentences.join('\n');
     }else{
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
 
@@ -200,16 +202,18 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
         }
 
-        Result[RESULT_TRANSLATION] = QVariantMap({
-                                                     {RESULT_TRANSLATION_BASE, ResultBaseList},
-                                                     {RESULT_TRANSLATION_PHRASES, ResultPhrasesList},
-                                                     {RESULT_TRANSLATION_ALIGNMENTS, ResultAlignmentsList},
+        Result[RESULTItems::TRANSLATION] = QVariantMap({
+                                                     {RESULTItems::TRANSLATIONItems::BASE, ResultBaseList},
+                                                     {RESULTItems::TRANSLATIONItems::PHRASES, ResultPhrasesList},
+                                                     {RESULTItems::TRANSLATIONItems::ALIGNMENTS, ResultAlignmentsList},
                                                  });
     }
 
     return Result;
 }
 
+}
+}
 }
 }
 }

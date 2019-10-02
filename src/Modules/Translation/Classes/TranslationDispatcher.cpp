@@ -24,25 +24,28 @@
 #include <QUrl>
 
 #include "TranslationDispatcher.h"
-#include "libTargomanAAA/AAA.h"
 #include "3rdParty/E4MT/src/clsFormalityChecker.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 #include "Configs.h"
-#include "Engines/clsNMT.h"
+#include "../Engines/clsNMT.h"
 #include "QHttp/QRESTServer.h"
-
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
-namespace Apps {
+namespace API {
+namespace Modules {
+namespace Translation {
 namespace Classes {
 
+using namespace Apps;
 using namespace NLPLibs;
 using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
 using namespace Common::Configuration;
 using namespace QHttp;
+using namespace Targoman::API::Helpers::AAA;
 
 TranslationDispatcher::~TranslationDispatcher()
 { ; }
@@ -57,7 +60,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  int& _preprocessTime,
                                                  int& _translationTime)
 {
-    if(_detailed && AAA::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
+    if(_detailed && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought priviledges to get detailed translation response.");
     QTime CacheLookupTime; CacheLookupTime.start();
     QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();
@@ -88,27 +91,27 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
 
         _translationTime = Timer.elapsed();
         if(Class.size())
-            CachedTranslation[RESULT_CLASS] = Class;
+            CachedTranslation[RESULTItems::CLASS] = Class;
 
-        if(CachedTranslation.value(RESULT_ERRNO, 0).toInt() == 0)
+        if(CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
             this->TranslationCache.insert(CacheKey, CachedTranslation);
         else{
-            switch(CachedTranslation.value(RESULT_ERRNO, 0).toInt()){
+            switch(CachedTranslation.value(RESULTItems::ERRNO, 0).toInt()){
             case enuTranslationError::Ok:
                 break;
             case enuTranslationError::OperationTimedOut:
             case enuTranslationError::ConnectionRefused:
-                throw exHTTPRequestTimeout(CachedTranslation.value(RESULT_MESSAGE).toString());
+                throw exHTTPRequestTimeout(CachedTranslation.value(RESULTItems::MESSAGE).toString());
             case enuTranslationError::InvalidServerResponse:
             case enuTranslationError::JsonParseError:
-                throw exHTTPUnprocessableEntity(CachedTranslation.value(RESULT_MESSAGE).toString());
+                throw exHTTPUnprocessableEntity(CachedTranslation.value(RESULTItems::MESSAGE).toString());
             case enuTranslationError::CURLError:
             default:
-                throw exHTTPExpectationFailed(CachedTranslation.value(RESULT_MESSAGE).toString());
+                throw exHTTPExpectationFailed(CachedTranslation.value(RESULTItems::MESSAGE).toString());
             }
         }
     }else{
-        CachedTranslation[RESULT_CACHE] = CacheLookupTime.elapsed();
+        CachedTranslation[RESULTItems::CACHE] = CacheLookupTime.elapsed();
     }
     return CachedTranslation;
 }
@@ -259,6 +262,8 @@ TranslationDispatcher::TranslationDispatcher() :
 intfTranslatorEngine::~intfTranslatorEngine()
 {;}
 
+}
+}
 }
 }
 }
