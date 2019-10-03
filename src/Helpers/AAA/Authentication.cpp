@@ -31,7 +31,7 @@ namespace Authentication{
 
 QJsonObject login(const QString& _login, const QString& _pass, const QString& _salt, const QJsonObject& _info)
 {
-    QJsonObject UserInfo =  DACInstance().callSP ("","AAA.sp_UPDATE_login", {
+    QJsonObject UserInfo =  AAADACInstance().callSP ("","AAA.sp_UPDATE_login", {
                                                       {"iLogin", _login},
                                                       {"iPass", _pass},
                                                       {"iSalt", _salt},

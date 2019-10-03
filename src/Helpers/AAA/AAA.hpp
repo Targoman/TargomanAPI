@@ -26,6 +26,9 @@
 #include "Helpers/AAA/Authentication.h"
 #include "Helpers/AAA/Authorization.h"
 #include "Helpers/AAA/Accounting.h"
+#include "Helpers/AAA/AAADefs.hpp"
 #include "Helpers/AAA/clsJWT.hpp"
+
+using namespace Targoman::API::Helpers::AAA;
 
 #endif // TARGOMAN_API_HELPERS_AAA_AAA_HPP

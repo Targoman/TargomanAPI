@@ -79,14 +79,9 @@ private slots:
                              const QHttp::MD5_t& _newPass
                              );
 
-    QHttp::stuTable apiGETLastSessions(QHttp::JWT_t _JWT, quint16 _fromID = 0, quint16 _maxItems = 100);
-
 private:
     Account();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Account);
-
-private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
 };
 
 Q_DECLARE_METATYPE(enuOAuthType::Type);

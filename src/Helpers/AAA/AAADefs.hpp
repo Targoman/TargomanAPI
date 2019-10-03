@@ -27,6 +27,7 @@
 #include "libTargomanCommon/exTargomanBase.h"
 #include "QHttp/HTTPExceptions.h"
 #include "QHttp/qhttpfwd.hpp"
+#include "libTargomanDBM/clsDAC.h"
 
 using namespace qhttp;
 
@@ -35,8 +36,8 @@ namespace API {
 namespace Helpers {
 namespace AAA {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_BAD_REQUEST, exAAA);
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_UNAUTHORIZED, exAuthentication);
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_FORBIDDEN, exAuthorization);
@@ -44,7 +45,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_METHOD_NOT_ALLOWED, exAccounti
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (499, exNoTokenProvided);
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (498, exInvalidToken);
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_PAYMENT_REQUIRED, exPaymentRequired);
-#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 namespace TOKENItems {
 TARGOMAN_CREATE_CONSTEXPR(tokID);
@@ -60,10 +61,12 @@ namespace AAACommonItems {
 TARGOMAN_CREATE_CONSTEXPR(privs);
 }
 
-/*constexpr char AAA_TOKENID[]= "tokID";
-constexpr char AAA_USERID[]= "usrID";
-constexpr char AAA_PRIVS_CRUD[]= "CRUD";
-*/
+using namespace DBManager;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+static clsDAC& AAADACInstance(){static clsDAC* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new clsDAC("AAA")));}
+#pragma GCC diagnostic pop
 
 }
 }

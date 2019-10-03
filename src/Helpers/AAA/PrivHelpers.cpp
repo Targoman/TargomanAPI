@@ -62,7 +62,9 @@ char PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
             return true;
         }
         bool Found = false;
-        for (auto PrivIter = CurrCheckingPriv.begin(); PrivIter != CurrCheckingPriv.end(); ++PrivIter)
+        for (auto PrivIter = CurrCheckingPriv.begin(); PrivIter != CurrCheckingPriv.end(); ++PrivIter){
+            if(PrivIter.key() == "ALL" && PrivIter.value().toBool())
+                return true;
             if(PrivIter.key().toLower() == Part.toLower()){
                 CurrCheckingPriv = PrivIter.value().toObject();
                 Found = true;
@@ -71,6 +73,7 @@ char PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
 
         if(Found == false)
             return false;
+        }
     }
 
     return true;

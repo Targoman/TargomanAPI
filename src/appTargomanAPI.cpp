@@ -25,7 +25,7 @@
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Modules/Translation/Translation.h"
-#include "Modules/AAA/AAA.h"
+#include "Modules/Account/Account.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;

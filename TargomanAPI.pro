@@ -43,7 +43,6 @@ HEADERS += \
     src/Helpers/AAA/Authorization.h \
     src/Helpers/AAA/clsJWT.hpp \
     src/Helpers/AAA/PrivHelpers.h \
-    src/Modules/AAA/AAA.h \
     src/Modules/Translation/Classes/intfTranslatorBridge.hpp \
     src/Modules/Translation/Classes/intfTranslatorEngine.hpp \
     src/Modules/Translation/Classes/TranslationDispatcher.h \
@@ -51,7 +50,10 @@ HEADERS += \
     src/Modules/Translation/Translation.h \
     src/Modules/Translation/TranslationDefs.hpp \
     src/Helpers/AAA/AAA.hpp \
-    src/Helpers/AAA/UserEnums.hpp
+    src/Helpers/AAA/UserEnums.hpp \
+    src/Modules/Account/ORM/User.h \
+    src/Modules/Account/Account.h \
+    src/Helpers/ORM/intfTable.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -77,10 +79,12 @@ SOURCES += \
     src/Helpers/AAA/Authentication.cpp \
     src/Helpers/AAA/Authorization.cpp \
     src/Helpers/AAA/PrivHelpers.cpp \
-    src/Modules/AAA/AAA.cpp \
     src/Modules/Translation/Classes/TranslationDispatcher.cpp \
     src/Modules/Translation/Engines/clsNMT.cpp \
-    src/Modules/Translation/Translation.cpp
+    src/Modules/Translation/Translation.cpp \
+    src/Modules/Account/ORM/User.cpp \
+    src/Modules/Account/Account.cpp \
+    src/Helpers/ORM/intfTable.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \

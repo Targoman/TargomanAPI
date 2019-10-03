@@ -26,23 +26,12 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QStringList>
-#include "libTargomanDBM/clsDAC.h"
 #include "AAADefs.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Helpers {
 namespace AAA {
-
-using namespace Common;
-using namespace DBManager;
-
-namespace AAAInternal {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static clsDAC& DACInstance(){static clsDAC* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new clsDAC("AAA")));}
-#pragma GCC diagnostic pop
-}
 
 class PrivHelpers{
 public:
@@ -60,6 +49,5 @@ public:
 }
 
 using namespace Targoman::API::Helpers::AAA;
-using namespace Targoman::API::Helpers::AAA::AAAInternal;
 
 #endif // TARGOMAN_API_HELPERS_AAA_PRIVHELPERS_HPP

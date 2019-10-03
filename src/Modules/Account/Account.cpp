@@ -20,15 +20,17 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "AAA.h"
+#include "Account.h"
 #include "QFieldValidator.h"
 #include "QHttp/QRESTServer.h"
 #include "QHttp/intfAPIArgManipulator.h"
 #include "Helpers/AAA/AAA.hpp"
+#include "Helpers/AAA/PrivHelpers.h"
+
+#include "ORM/User.h"
 
 using namespace Targoman;
 using namespace QHttp;
-using namespace Targoman::API::Helpers::AAA;
 
 void Account::init()
 {}
@@ -74,7 +76,7 @@ QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP
 bool Account::apiLogout(QHttp::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
-    this->DAC->callSP("","AAA.sp_UPDATE_logout", {
+    AAADACInstance().callSP("","AAA.sp_UPDATE_logout", {
                           {"iByUserID", clsJWT(_JWT).usrID()},
                           {"iSessionGUID", clsJWT(_JWT).session()},
                       });
@@ -83,8 +85,10 @@ bool Account::apiLogout(QHttp::JWT_t _JWT)
 
 QHttp::MD5_t Account::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, const QString& _login, enuForgotPassLinkVia::Type _via)
 {
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
+
     Authorization::validateIPAddress(_REMOTE_IP);
-    return this->DAC->callSP ("","AAA.sp_CREATE_forgotPassRequest", {
+    return AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
                                   {"iLogin", _login},
                                   {"iVia", _via},
                               }).spDirectOutputs().value("oUUID").toString();;
@@ -94,7 +98,7 @@ bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, con
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    this->DAC->callSP ("","AAA.sp_UPDATE_changePass", {
+    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
                            {"iUserID", clsJWT(_JWT).usrID()},
                            {"iOldPass", _oldPass},
                            {"iOldPassSalt", _oldPassSalt},
@@ -106,25 +110,19 @@ bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, con
 bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5_t& _uuid, const MD5_t& _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    this->DAC->callSP ("","AAA.sp_UPDATE_changePass", {
+    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
                            {"iUUID", _uuid},
                            {"iNewPass", _newPass},
                        });
     return true;
 }
 
-QHttp::stuTable Account::apiGETLastSessions(QHttp::JWT_t _JWT, quint16 _fromID, quint16 _maxItems)
-{
-    Q_UNUSED(_JWT) Q_UNUSED(_fromID) Q_UNUSED(_maxItems)
-            throw exHTTPNotImplemented("oh oh!");
-}
-
-
-Account::Account() :
-    DAC(new DBManager::clsDAC){
+Account::Account(){
 
     QHTTP_REGISTER_ENHANCED_ENUM(enuOAuthType);
     QHTTP_REGISTER_ENHANCED_ENUM(enuForgotPassLinkVia);
+
+    User::instance().init();
 
     this->registerMyRESTAPIs();
 }
