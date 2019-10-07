@@ -42,17 +42,18 @@ class gConfigs
 public:
     struct Rest{
         static inline QString makeConfig(const QString& _name){return "/Rest/" + _name;}
-        static Common::Configuration::tmplConfigurable<QString>      BasePath;
-        static Common::Configuration::tmplConfigurable<QString>      Version;
-        static Common::Configuration::tmplConfigurable<bool>         JustLocal;
-        static Common::Configuration::tmplRangedConfigurable<quint16>ListenPort;
-        static Common::Configuration::tmplConfigurable<bool>         IndentedJson;
-        static Common::Configuration::tmplRangedConfigurable<qint64> MaxUploadSize;
-        static Common::Configuration::tmplRangedConfigurable<qint64> MaxUploadedFileSize;
-        static Common::Configuration::tmplConfigurable<FilePath_t>   BaseOpenAPIObjectFile;
-        static Common::Configuration::tmplRangedConfigurable<quint8> StatisticsInterval;
+        static Common::Configuration::tmplConfigurable<QString>       BasePath;
+        static Common::Configuration::tmplConfigurable<QString>       Version;
+        static Common::Configuration::tmplConfigurable<bool>          JustLocal;
+        static Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
+        static Common::Configuration::tmplConfigurable<bool>          IndentedJson;
+        static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
+        static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;
+        static Common::Configuration::tmplConfigurable<FilePath_t>    BaseOpenAPIObjectFile;
+        static Common::Configuration::tmplRangedConfigurable<quint8>  StatisticsInterval;
         static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
-        static Common::Configuration::tmplConfigurable<QString>      CacheConnector;
+        static Common::Configuration::tmplConfigurable<QString>       CacheConnector;
+        static Common::Configuration::tmplConfigurable<QString>       AccessControl;
     };
 
     struct JWT{

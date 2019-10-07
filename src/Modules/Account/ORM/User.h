@@ -27,6 +27,7 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
 
+
 class User : public QHttp::intfRESTAPIHolder, private intfTable
 {
     Q_OBJECT
@@ -34,7 +35,7 @@ public:
     void init();
 
 private slots:
-    QVariant apiGET(GET_METHOD_ARGS_HEADER);
+    QVariant ORMGET("Get user information")
 
 private:
     User();

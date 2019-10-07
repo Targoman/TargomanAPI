@@ -20,50 +20,44 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "User.h"
+#include "Roles.h"
 #include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/UserEnums.hpp"
-//#include "Roles.h"
 
 class Roles;
-void User::init()
+void Roles::init()
 {
 
 }
 
-QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
-        Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-User::User() :  intfTable("AAA",
-                          "tblUser",
-                          "usr",
+Roles::Roles() :  intfTable("AAA",
+                          "tblRoles",
+                          "rol",
                           {
-                            {"usrID", QFieldValidator().integer().minValue(1), true, true, {}, true},
-                            {"usrGivenName", QFieldValidator().unicodeAlNum().maxLenght(100)},
+                            {"rolID", QFieldValidator().integer().minValue(1), true, true, {}, true},
+                            {"rolName", QFieldValidator().unicodeAlNum().maxLenght(100)},
                             {"usrFamilyName", QFieldValidator().unicodeAlNum().maxLenght(100)},
                             {"usrEmail", QFieldValidator().emailNotFake()},
                             {"usrMobile", QFieldValidator().mobile()},
                             {"usrApprovalState"},
                             //{"usrPass"},
-                            {"usr_rolID", QFieldValidator().integer().minValue(1)},
-                            {"usrSpecialPrivs", QFieldValidator().json(), false, false},
-                            {"usrMaxConcurrentSessions", QFieldValidator().integer().betweenValues(-1, 100)},
-                            {"usrActiveSessions", QFieldValidator().integer().betweenValues(-1, 1000)},
-                            {"usrLastLogin", QFieldValidator().dateTime()},
-                            {"usrCreatedBy_usrID", QFieldValidator().integer().minValue(1)},
-                            {"usrCreationDateTime", QFieldValidator().dateTime()},
-                            {"usrUpdatedBy_usrID", QFieldValidator().integer().minValue(1)},
-                            {"usrStatus"},
+                            {"rolParent_rolID", QFieldValidator().integer().minValue(1)},
+                            {"rolPrivileges", QFieldValidator().json(), false, false},
+                            {"rolCreatedBy_usrID", QFieldValidator().integer().minValue(1)},
+                            {"rolCreationDateTime", QFieldValidator().dateTime()},
+                            {"rolUpdatedBy_usrID", QFieldValidator().integer().minValue(1)},
+                            {"rolStatus"},
                           },
                           {
-                            {"usr_rolID",          "AAA.tblRoles", "rolID"},
-                            {"usrCreatedBy_usrID", "AAA.tblUser",  "usrID", "Creator_", true},
-                            {"usrCreatedBy_usrID", "AAA.tblUser",  "usrID", "Updater_", true}
+                            {"rolParent_rolID",    "AAA.tblRoles", "rolID", "Parent_", true},
+                            {"rolCreatedBy_usrID", "AAA.tblUser",  "usrID", "Creator_", true},
+                            {"rolUpdatedBy_usrID", "AAA.tblUser",  "usrID", "Updater_", true}
                           })
 {
     this->registerMyRESTAPIs();

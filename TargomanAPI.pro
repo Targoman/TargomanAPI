@@ -21,20 +21,6 @@ PRJDIR = "."
 HEADERS += \
     src/appTargomanAPI.h \
     src/Configs.h \
-    3rdParty/E4MT/fastText/src/args.h \
-    3rdParty/E4MT/fastText/src/autotune.h \
-    3rdParty/E4MT/fastText/src/densematrix.h \
-    3rdParty/E4MT/fastText/src/dictionary.h \
-    3rdParty/E4MT/fastText/src/fasttext.h \
-    3rdParty/E4MT/fastText/src/loss.h \
-    3rdParty/E4MT/fastText/src/matrix.h \
-    3rdParty/E4MT/fastText/src/meter.h \
-    3rdParty/E4MT/fastText/src/model.h \
-    3rdParty/E4MT/fastText/src/productquantizer.h \
-    3rdParty/E4MT/fastText/src/quantmatrix.h \
-    3rdParty/E4MT/fastText/src/real.h \
-    3rdParty/E4MT/fastText/src/utils.h \
-    3rdParty/E4MT/fastText/src/vector.h \
     3rdParty/E4MT/src/clsFormalityChecker.h \
     3rdParty/QtCUrl/src/QtCUrl.h \
     src/Helpers/AAA/AAADefs.hpp \
@@ -53,26 +39,14 @@ HEADERS += \
     src/Helpers/AAA/UserEnums.hpp \
     src/Modules/Account/ORM/User.h \
     src/Modules/Account/Account.h \
-    src/Helpers/ORM/intfTable.h
+    src/Helpers/ORM/intfTable.h \
+    src/Modules/Account/ORM/Roles.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
     src/main.cpp \
     src/appTargomanAPI.cpp \
     src/Configs.cpp \
-    3rdParty/E4MT/fastText/src/args.cc \
-    3rdParty/E4MT/fastText/src/autotune.cc \
-    3rdParty/E4MT/fastText/src/densematrix.cc \
-    3rdParty/E4MT/fastText/src/dictionary.cc \
-    3rdParty/E4MT/fastText/src/fasttext.cc \
-    3rdParty/E4MT/fastText/src/loss.cc \
-    3rdParty/E4MT/fastText/src/matrix.cc \
-    3rdParty/E4MT/fastText/src/meter.cc \
-    3rdParty/E4MT/fastText/src/model.cc \
-    3rdParty/E4MT/fastText/src/productquantizer.cc \
-    3rdParty/E4MT/fastText/src/quantmatrix.cc \
-    3rdParty/E4MT/fastText/src/utils.cc \
-    3rdParty/E4MT/fastText/src/vector.cc \
     3rdParty/E4MT/src/clsFormalityChecker.cpp \
     3rdParty/QtCUrl/src/QtCUrl.cpp \
     src/Helpers/AAA/Accounting.cpp \
@@ -84,7 +58,8 @@ SOURCES += \
     src/Modules/Translation/Translation.cpp \
     src/Modules/Account/ORM/User.cpp \
     src/Modules/Account/Account.cpp \
-    src/Helpers/ORM/intfTable.cpp
+    src/Helpers/ORM/intfTable.cpp \
+    src/Modules/Account/ORM/Roles.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \

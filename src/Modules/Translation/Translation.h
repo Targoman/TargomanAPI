@@ -25,6 +25,9 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 
+#ifndef API
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#endif
 
 class Translation  : public QHttp::intfRESTAPIHolder
 {
@@ -33,21 +36,22 @@ public:
     void init();
 
 private slots:
-    QVariantMap apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
-                             const QString& _token,
-                             QString _text,
-                             QString _dir,
-                             const QString& _engine = "NMT",
-                             bool _detailed = false,
-                             bool _detok = true,
-                             bool _dic=false,
-                             bool _dicFull = false
-                             );
+    QVariantMap API(,Translate,
+                    (const QHttp::RemoteIP_t& _REMOTE_IP,
+                     const QString& _token,
+                     QString _text,
+                     QString _dir,
+                     const QString& _engine = "NMT",
+                     bool _detailed = false,
+                     bool _detok = true,
+                     bool _dic=false,
+                     bool _dicFull = false),
+                    "Translates ....")
 
-    QVariantMap apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg);
+    QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
 
-private:
-    Translation();
+    private:
+        Translation();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Translation);
 
 private:

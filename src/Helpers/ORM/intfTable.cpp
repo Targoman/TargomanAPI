@@ -51,19 +51,25 @@ intfTable::intfTable(const QString& _schema,
     if(TypesRegistered)
         return;
 
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(Targoman::API::Cols_t, QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(Targoman::API::Filter_t, QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(Targoman::API::OrderBy_t, QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(Targoman::API::GroupBy_t, QFieldValidator::allwaysValid (), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Cols_t,    QFieldValidator::allwaysValid (), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,  QFieldValidator::allwaysValid (), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::OrderBy_t, QFieldValidator::allwaysValid (), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::GroupBy_t, QFieldValidator::allwaysValid (), _value);
     TypesRegistered = true;
 }
 
-QString intfTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix){
-    return (_col.RenameAs.isEmpty() ? "" : " AS `"+ _prefix + _col.RenameAs + "`");
+QString intfTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix) const {
+    return (_col.RenameAs.isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ _prefix + (_col.RenameAs.isEmpty() ? _col.Name : _col.RenameAs) + "`");
 };
 
-QString intfTable::makeColName(const stuColumn& _col, const QString& _prefix){
-    return  this->Name + "." + _col.Name + this->makeColRenamedAs(_col, _prefix);
+QString intfTable::makeColName(const stuColumn& _col, const stuRelation& _relation) const {
+    return  (_relation.Column.isEmpty() ?
+                 this->Name :
+                 (_relation.RenamingPrefix.isEmpty() ?
+                      _relation.ReferenceTable :
+                      _relation.RenamingPrefix
+                      )
+                 ) + "." + _col.Name + this->makeColRenamedAs(_col, _relation.RenamingPrefix);
 };
 
 QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
@@ -76,7 +82,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                                     const QString& _filters,
                                     const QString& _orderBy,
                                     const QString& _groupBy,
-                                    bool _reportCount)
+                                    bool _reportCount) const
 {
     stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + "," + _extraFilters, _orderBy, _groupBy);
     if(_extraPath.isEmpty()){
@@ -99,7 +105,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                                    + QUERY_SEPARATOR
                                    + (SelectItems.GroupBy.size() ? "ORDER BY " : "")
                                    + SelectItems.OrderBy.join(',')
-                                   + QString("LIMIT %1,%2").arg(_offset, _limit)
+                                   + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
                                    ).toJson(false).toVariant().toList();
         if(_reportCount)
             Table.TotalRows = static_cast<qint64>(_db.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
@@ -116,9 +122,8 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                 }
         }
 
-        return _db.execQuery("",
+        QJsonDocument Result = _db.execQuery("",
                              QString("SELECT ")
-                             + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
                              + QUERY_SEPARATOR
                              + SelectItems.Cols.join(QUERY_SEPARATOR)
                              + QUERY_SEPARATOR
@@ -134,13 +139,18 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                              + QUERY_SEPARATOR
                              + SelectItems.Where.join(QUERY_SEPARATOR)
                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-                             ).toJson(false).toVariant();
+                             ).toJson(false);
+        if(Result.isEmpty())
+            throw exHTTPBadRequest("No item could be found");
+
+        return Result.toVariant();
     }
 }
 
-intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy)
+intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
-    QFieldValidator().asciiAlNum(false, ",").validate(_requiredCols, "cols");
+    if(_requiredCols != "*")
+        QFieldValidator().asciiAlNum(false, ",").validate(_requiredCols, "cols");
 
     intfTable::stuSelectItems SelectItems;
 
@@ -149,7 +159,7 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
     QStringList AllCols;
 
     foreach(auto Col, this->Cols){
-        if(RequiredCols.isEmpty())
+        if(RequiredCols.contains("*"))
             SelectItems.Cols.append(this->makeColName(Col));
         else{
             if(RequiredCols.contains(Col.Name) || RequiredCols.contains(Col.RenameAs))
@@ -166,12 +176,12 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
 
         bool Joined = false;
         foreach(auto Col, ForeignTable->Cols){
-            if(RequiredCols.isEmpty()){
-                SelectItems.Cols.append(this->makeColName(Col, Relation.RenamingPrefix));
+            if(RequiredCols.contains("*")){
+                SelectItems.Cols.append(this->makeColName(Col, Relation));
                 Joined = true;
             }else{
                 if(RequiredCols.contains(Relation.RenamingPrefix + Col.Name) || RequiredCols.contains(Relation.RenamingPrefix + Col.RenameAs)){
-                    SelectItems.Cols.append(this->makeColName(Col, Relation.RenamingPrefix));
+                    SelectItems.Cols.append(this->makeColName(Col, Relation));
                     Joined = true;
                 }
             }
@@ -196,7 +206,7 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
                                 + Join.ReferenceTable
                                 + " "
                                 + Join.RenamingPrefix
-                                + "    ON "
+                                + " ON "
                                 + (Join.RenamingPrefix.size() ? Join.RenamingPrefix : Join.ReferenceTable) + "." + Join.ForeignColumn
                                 + " = "
                                 + this->Name + "." + Join.Column

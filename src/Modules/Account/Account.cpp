@@ -28,6 +28,7 @@
 #include "Helpers/AAA/PrivHelpers.h"
 
 #include "ORM/User.h"
+#include "ORM/Roles.h"
 
 using namespace Targoman;
 using namespace QHttp;
@@ -119,10 +120,11 @@ bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5
 
 Account::Account(){
 
-    QHTTP_REGISTER_ENHANCED_ENUM(enuOAuthType);
-    QHTTP_REGISTER_ENHANCED_ENUM(enuForgotPassLinkVia);
+    QHTTP_REGISTER_TARGOMAN_ENUM(enuOAuthType);
+    QHTTP_REGISTER_TARGOMAN_ENUM(enuForgotPassLinkVia);
 
     User::instance().init();
+    Roles::instance().init();
 
     this->registerMyRESTAPIs();
 }

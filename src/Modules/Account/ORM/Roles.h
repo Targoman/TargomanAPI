@@ -1,4 +1,4 @@
-################################################################################
+/******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
 #   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
@@ -15,28 +15,31 @@
 #
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
-################################################################################
-ProjectName="TargomanAPI"
-VERSION=1.0.0
+ ******************************************************************************/
+/**
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ */
 
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
-# Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough
-QMAKE_CXXFLAGS += -std=c++11 -std=c++14
-CONFIGS += c++11 c++14
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_ROLES_H
+#define TARGOMAN_API_MODULES_AAA_ORM_ROLES_H
 
-QT += core sql network
-QT -= gui
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
-EXTERNAL_DEPS=1
 
-LIBS += -lTargomanCommon \
-        -lTargomanDBM \
-        -lTargomanTextProcessor \
-        -lQFieldValidator \
-        -lQRESTServer \
-        -lqhttp \
-        -lfasttext \
-        -lcurl
+class Roles : public QHttp::intfRESTAPIHolder, private intfTable
+{
+    Q_OBJECT
+public:
+    void init();
 
-DEFINES += QHTTP_ENABLE_WEBSOCKET
-QMAKE_CXXFLAGS += -Wno-unknown-pragmas
+private slots:
+    QVariant ORMGET("Get roles information")
+
+private:
+    Roles();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Roles);
+};
+
+#endif // TARGOMAN_API_MODULES_AAA_ORM_ROLES_H

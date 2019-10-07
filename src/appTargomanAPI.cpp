@@ -51,6 +51,7 @@ void appTargomanAPI::slotExecute()
         Configs.MaxUploadedFileSize = gConfigs::Rest::MaxUploadedFileSize.value();
         Configs.MaxCachedItems = gConfigs::Rest::MaxCachedItems.value();
         Configs.CacheConnector = gConfigs::Rest::CacheConnector.value();
+        Configs.AccessControl = gConfigs::Rest::AccessControl.value();
 
         Configs.JWTSecret = gConfigs::JWT::Secret.value();
         Configs.JWTHashAlgorithm = gConfigs::JWT::HashAlgorithm.value();

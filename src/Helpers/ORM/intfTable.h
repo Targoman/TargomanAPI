@@ -48,10 +48,12 @@ struct stuRelation{
     QString RenamingPrefix;
     bool    LeftJoin;
 
-    stuRelation(QString _col, QString _foreignCol, QString _referenceTable, QString _renamingPrefix = {}, bool _isLeftJoin = false) :
+    stuRelation(QString _col, QString _referenceTable, QString _foreignCol, QString _renamingPrefix = {}, bool _isLeftJoin = false) :
         Column(_col), ReferenceTable(_referenceTable), ForeignColumn(_foreignCol), RenamingPrefix(_renamingPrefix), LeftJoin(_isLeftJoin)
     {;}
 };
+
+static stuRelation InvalidRelation("","","");
 
 struct stuColumn{
     QString Name;
@@ -104,16 +106,16 @@ public:
                              const QString& _filters,
                              const QString& _orderBy,
                              const QString& _groupBy,
-                             bool _reportCount);
+                             bool _reportCount) const;
 
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
                                     const QStringList& _extraJoins = {},
                                     const QString _filters = {},
                                     const QString& _orderBy = {},
-                                    const QString _groupBy = {});
-    QString makeColName(const stuColumn& _col, const QString& _prefix = {});
-    QString makeColRenamedAs(const stuColumn& _col, const QString& _prefix = {});
+                                    const QString _groupBy = {}) const;
+    QString makeColName(const stuColumn& _col, const stuRelation& _relation = InvalidRelation) const;
+    QString makeColRenamedAs(const stuColumn& _col, const QString& _prefix = {})  const ;
 
 protected:
     QString Schema;
@@ -125,9 +127,11 @@ protected:
     static QHash<QString, intfTable*> Registry;
 };
 
-#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QString _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Cols_t _cols={}, Filter_t _filters={}, OrderBy_t _orderBy={}, GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QString _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Cols_t _cols   , Filter_t _filters   , OrderBy_t _orderBy   , GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QString _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={"*"}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QString _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
+
 }
 }
 }

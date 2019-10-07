@@ -38,6 +38,9 @@ TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
                                Mobile,
                                App
                                );
+#ifndef API
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#endif
 
 class Account : public QHttp::intfRESTAPIHolder
 {
@@ -46,41 +49,46 @@ public:
     void init();
 
 private slots:
-    QHttp::EncodedJWT_t apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
-                          const QString& _login,
-                          const QHttp::MD5_t& _pass,
-                          const QString& _salt,
-                          bool _rememberMe = false,
-                          const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()
-            );
+    QHttp::EncodedJWT_t API(,Login,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                    const QString& _login,
+                                    const QHttp::MD5_t& _pass,
+                                    const QString& _salt,
+                                    bool _rememberMe = false,
+                                    const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
+                            "Login user and return an encoded JWT")
 
-    QHttp::EncodedJWT_t apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                 enuOAuthType::Type _type,
-                                 const QString& oAuthToken,
-                                 const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t());
+    QHttp::EncodedJWT_t API(,LoginByOAuth,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                           enuOAuthType::Type _type,
+                                           const QString& oAuthToken,
+                                           const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
+                            "Login by Open Authentication and return an encoded JWT")
 
-    QHttp::EncodedJWT_t apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                 const QHttp::JSON_t& _sessionInfo
-                                 );
+    QHttp::EncodedJWT_t API(,LoginAsGuest,(const QHttp::RemoteIP_t& _REMOTE_IP,const QHttp::JSON_t& _sessionInfo),
+                            "Login user as guest and return an encoded JWT")
 
-    bool apiLogout(QHttp::JWT_t _JWT);
-    QHttp::MD5_t apiCreateForgotPasswordLink(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                             const QString& _login,
-                                             enuForgotPassLinkVia::Type _via);
+    bool API(,Logout,(QHttp::JWT_t _JWT),
+             "Logout logged in user")
 
-    bool apiChangePass(QHttp::JWT_t _JWT,
-                       const QHttp::MD5_t& _oldPass,
-                       const QString& _oldPassSalt,
-                       const QHttp::MD5_t& _newPass
-                       );
+    QHttp::MD5_t API(,CreateForgotPasswordLink,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                                const QString& _login,
+                                                enuForgotPassLinkVia::Type _via),
+                     "Create a forgot password request returning a UUID for the requiest")
 
-    bool apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP,
-                             const QHttp::MD5_t& _uuid,
-                             const QHttp::MD5_t& _newPass
-                             );
+    bool API(,ChangePass,(QHttp::JWT_t _JWT,
+                          const QHttp::MD5_t& _oldPass,
+                          const QString& _oldPassSalt,
+                          const QHttp::MD5_t& _newPass
+                          ),
+             "Changes password of the logged-in user")
 
-private:
-    Account();
+    bool API(,ChangePassByUUID,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                const QHttp::MD5_t& _uuid,
+                                const QHttp::MD5_t& _newPass
+                                ),
+             "Changes password based on a UUID provided by ")
+
+    private:
+        Account();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Account);
 };
 

@@ -140,6 +140,16 @@ tmplConfigurable<QString> gConfigs::Rest::CacheConnector(
         "cache-connector",
         enuConfigSource::Arg | enuConfigSource::File);
 
+tmplConfigurable<QString> gConfigs::Rest::AccessControl(
+        gConfigs::Rest::makeConfig("AccessControl"),
+        "Default access control",
+        "*",
+        ReturnTrueCrossValidator(),
+        "",
+        "ACCESS-CONTROL-STRING",
+        "",
+        enuConfigSource::File);
+
 tmplConfigurable<FilePath_t>     gConfigs::Rest::BaseOpenAPIObjectFile(
         gConfigs::Rest::makeConfig("BaseOpenAPIObjectFile"),
         "Input file path where default OpenAPI object file resides",
