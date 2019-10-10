@@ -1,6 +1,3 @@
-[submodule "3rdParty/TargomanAAA"]
-	path = 3rdParty/TargomanAAA
-	url = https://github.com/Targoman/TargomanAAA.git
 [submodule "3rdParty/QRestServer"]
 	path = 3rdParty/QRestServer
 	url = https://github.com/Targoman/QRestServer.git
@@ -10,3 +7,6 @@
 [submodule "3rdParty/QtCUrl"]
 	path = 3rdParty/QtCUrl
 	url = https://github.com/Targoman/qtcurl.git
+[submodule "3rdParty/QFieldValidator"]
+	path = 3rdParty/QFieldValidator
+	url = https://github.com/Targoman/QFieldValidator.git
