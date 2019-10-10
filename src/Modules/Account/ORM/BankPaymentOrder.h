@@ -19,38 +19,40 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
-#define TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_BANKPAYMENTORDER_H
+#define TARGOMAN_API_MODULES_AAA_ORM_BANKPAYMENTORDER_H
+
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
 namespace Targoman {
 namespace API {
 
-namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
+TARGOMAN_DEFINE_ENUM(enuBankPaymentStatus,
+                     Pending  = 'N',
+                     Success  = 'S',
+                     Error    = 'A',
+                     Removed  = 'R'
+                     )
 
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
+class BankPaymentOrder : public QHttp::intfRESTAPIHolder, private intfTable
+{
+    Q_OBJECT
+public:
+    void init();
 
-    namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
+private slots:
+    QVariant ORMGET("Get BankPaymentOrder information")
 
-    }
-
-    namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
-    }
-}
+private:
+    BankPaymentOrder();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,BankPaymentOrder);
+};
 
 }
 }
-#endif // TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+Q_DECLARE_METATYPE(Targoman::API::enuBankPaymentStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_AAA_ORM_BANKPAYMENTORDER_H

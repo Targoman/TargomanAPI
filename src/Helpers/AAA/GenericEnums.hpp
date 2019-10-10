@@ -29,9 +29,6 @@
 
 namespace Targoman {
 namespace API {
-namespace Helpers {
-namespace AAA {
-
 TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Active = 'A',
                      Remove = 'R',
@@ -47,8 +44,15 @@ TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      JustEmail = 'E',
                      )
 
+TARGOMAN_DEFINE_ENUM(enuGenericStatus,
+                     Active = 'A',
+                     Removed = 'R',
+                      )
 }
 }
-}
-}
+
+Q_DECLARE_METATYPE(Targoman::API::enuUserStatus::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuUserApproval::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuGenericStatus::Type);
+
 #endif // TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP

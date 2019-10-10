@@ -26,40 +26,43 @@
 #include "QHttp/intfAPIArgManipulator.h"
 #include "Helpers/AAA/AAA.hpp"
 #include "Helpers/AAA/PrivHelpers.h"
+#include "Helpers/AAA/GenericEnums.hpp"
+#include "Configs.h"
 
-#include "ORM/User.h"
+#include "ORM/ActionLog.h"
+#include "ORM/APITokenValidIPs.h"
+#include "ORM/ActionLog.h"
+#include "ORM/ActiveSessions.h"
+#include "ORM/BankPaymentOrder.h"
+#include "ORM/BlockingRule.h"
+#include "ORM/ForgotPassRequest.h"
+#include "ORM/IPBin.h"
+#include "ORM/IPStats.h"
+#include "ORM/Invoice.h"
 #include "ORM/Roles.h"
+#include "ORM/User.h"
+#include "ORM/UserWallets.h"
+#include "ORM/WalletTransactions.h"
 
 using namespace Targoman;
+using namespace Targoman::API;
 using namespace QHttp;
 
 void Account::init()
 {}
 
-QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QHttp::MD5_t& _pass, const QString& _salt, bool _rememberMe, const QHttp::JSON_t& _sessionInfo)
+QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QHttp::MD5_t& _pass, const QString& _salt, const QString& _tlps, bool _rememberMe, const QHttp::JSON_t& _sessionInfo)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
     QFV.optional(QFV.json()).validate(_sessionInfo, "sessionInfo");
+    QFV.optional(QFV.asciiAlNum(false, ",")).validate(_tlps, "tlps");
 
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QJsonObject Result = Authentication::login(_login, _pass, _salt, QJsonDocument::fromJson(_sessionInfo.toUtf8()).object());
-    return this->createSignedJWT({
-                                     {JWTItems::usrLogin, _login},
-                                     {JWTItems::usrName, Result["usrGivenName"]},
-                                     {JWTItems::usrFamily, Result["usrFamilyName"]},
-                                     {JWTItems::rolName, Result["rolName"]},
-                                     {JWTItems::rolID, Result["rolID"]},
-                                     {JWTItems::privs, Result["privs"]},
-                                     {JWTItems::usrID, Result["usrID"]},
-                                     {JWTItems::usrApproval, enuUserApproval::toStr(Result["usrApprovalState"].toString())},
-                                     {JWTItems::usrStatus, enuUserStatus::toStr(Result["usrStatus"].toString())},
-                                 },
-                                 QJsonObject(),
-                                 _rememberMe ? 7*24*3600 : 1800,
-                                 Result["ssnKey"].toString()
-            );
+    return this->createJWT (_login,
+                            Authentication::login(_login, _pass, _salt, _rememberMe, _tlps.split(","), QJsonDocument::fromJson(_sessionInfo.toUtf8()).object()),
+                            _tlps);
 }
 
 QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP, enuOAuthType::Type _type, const QString& _AuthToken, const QHttp::JSON_t& _sessionInfo)
@@ -74,13 +77,56 @@ QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP
             throw exHTTPNotImplemented("oh oh!");
 }
 
+QHttp::EncodedJWT_t Account::apiRefreshJWT(QHttp::JWT_t _JWT)
+{
+    clsJWT JWT(_JWT);
+    QString TLPs =  JWT.privatePart().value("tlps").toString();
+
+    return this->createJWT (JWT.login(),
+                            Authentication::updatePrivs(JWT.session(), TLPs),
+                            TLPs);
+}
+
+quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
+                       const QString& _emailOrMobile,
+                       const QHttp::MD5_t& _pass,
+                       const QString& _role,
+                       const QString& _name,
+                       const QString& _family,
+                       QHttp::JSON_t _specialPrivs,
+                       qint8 _maxConcurrentSessions)
+{
+    char Type;
+    if(QFV.email().isValid(_emailOrMobile)){
+        if(QFV.emailNotFake().isValid(_emailOrMobile))
+            Type = 'E';
+        else
+            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+    }else if (QFV.mobile().isValid(_emailOrMobile))
+        Type = 'M';
+    else
+        throw exHTTPBadRequest("signup must be by a valid email or mobile");
+
+    return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_signup", {
+                                                             {"iBy", Type},
+                                                             {"iLogin", _emailOrMobile},
+                                                             {"iPass", _pass},
+                                                             {"iRole", _role},
+                                                             {"iIP", _REMOTE_IP},
+                                                             {"iName", _name.isEmpty()? QVariant() : _name},
+                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
+                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
+                                                             {"iMaxConcurrentSessions", _maxConcurrentSessions},
+                                                         }).spDirectOutputs().value("oUserID").toDouble());
+}
+
 bool Account::apiLogout(QHttp::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
     AAADACInstance().callSP("","AAA.sp_UPDATE_logout", {
-                          {"iByUserID", clsJWT(_JWT).usrID()},
-                          {"iSessionGUID", clsJWT(_JWT).session()},
-                      });
+                                {"iByUserID", clsJWT(_JWT).usrID()},
+                                {"iSessionGUID", clsJWT(_JWT).session()},
+                            });
     return true;
 }
 
@@ -90,9 +136,9 @@ QHttp::MD5_t Account::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, 
 
     Authorization::validateIPAddress(_REMOTE_IP);
     return AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
-                                  {"iLogin", _login},
-                                  {"iVia", _via},
-                              }).spDirectOutputs().value("oUUID").toString();;
+                                        {"iLogin", _login},
+                                        {"iVia", _via},
+                                    }).spDirectOutputs().value("oUUID").toString();;
 }
 
 bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, const QString& _oldPassSalt, const QHttp::MD5_t& _newPass)
@@ -100,11 +146,11 @@ bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, con
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
     AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
-                           {"iUserID", clsJWT(_JWT).usrID()},
-                           {"iOldPass", _oldPass},
-                           {"iOldPassSalt", _oldPassSalt},
-                           {"iNewPass", _newPass},
-                       });
+                                 {"iUserID", clsJWT(_JWT).usrID()},
+                                 {"iOldPass", _oldPass},
+                                 {"iOldPassSalt", _oldPassSalt},
+                                 {"iNewPass", _newPass},
+                             });
     return true;
 }
 
@@ -112,19 +158,54 @@ bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
-                           {"iUUID", _uuid},
-                           {"iNewPass", _newPass},
-                       });
+                                 {"iUUID", _uuid},
+                                 {"iNewPass", _newPass},
+                             });
     return true;
 }
 
 Account::Account(){
 
-    QHTTP_REGISTER_TARGOMAN_ENUM(enuOAuthType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(enuForgotPassLinkVia);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuOAuthType);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuForgotPassLinkVia);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserStatus);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserApproval);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuGenericStatus);
 
-    User::instance().init();
+    ActionLog::instance().init();
+    APITokenValidIPs::instance().init();
+    ActionLog::instance().init();
+    ActiveSessions::instance().init();
+    BankPaymentOrder::instance().init();
+    BlockingRule::instance().init();
+    ForgotPassRequest::instance().init();
+    IPBin::instance().init();
+    IPStats::instance().init();
+    Invoice::instance().init();
     Roles::instance().init();
+    User::instance().init();
+    UserWallets::instance().init();
+    WalletTransactions::instance().init();
 
     this->registerMyRESTAPIs();
 }
+
+EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)
+{
+    return this->createSignedJWT({
+                                     {JWTItems::usrLogin, _login},
+                                     {JWTItems::usrName, _result["usrGivenName"]},
+                                     {JWTItems::usrFamily, _result["usrFamilyName"]},
+                                     {JWTItems::rolName, _result["rolName"]},
+                                     {JWTItems::rolID, _result["rolID"]},
+                                     {JWTItems::privs, _result["privs"]},
+                                     {JWTItems::usrID, _result["usrID"]},
+                                     {JWTItems::usrApproval, enuUserApproval::toStr(_result["usrApprovalState"].toString())},
+                                     {JWTItems::usrStatus, enuUserStatus::toStr(_result["usrStatus"].toString())},
+                                 },
+                                 QJsonObject({{"tlps",_requiredTLPs}}),
+                                 Targoman::Apps::gConfigs::JWT::TTL.value(),
+                                 _result["ssnKey"].toString()
+            );
+}
+

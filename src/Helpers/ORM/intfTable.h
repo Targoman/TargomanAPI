@@ -60,20 +60,23 @@ struct stuColumn{
     QFieldValidator Validator;
     bool Sortable;
     bool Filterable;
+    bool ReadOnly;
     bool PrimaryKey;
     QString RenameAs;
 
     stuColumn(const QString& _name,
-              const QFieldValidator& _validator = QFieldValidator().allwaysValid(),
+              const QFieldValidator& _validator = QFV.allwaysValid(),
               bool  _sortable = true,
               bool  _filterable = true,
               const QString& _renameAs = {},
+              bool _readOnly = false,
               bool _primaryKey = false
               ):
         Name(_name),
         Validator(_validator),
         Sortable(_sortable),
         Filterable(_filterable),
+        ReadOnly(_readOnly),
         PrimaryKey(_primaryKey),
         RenameAs(_renameAs)
     {;}
@@ -116,6 +119,7 @@ private:
                                     const QString _groupBy = {}) const;
     QString makeColName(const stuColumn& _col, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const stuColumn& _col, const QString& _prefix = {})  const ;
+    QString finalColName(const stuColumn& _col, const QString& _prefix = {}) const;
 
 protected:
     QString Schema;

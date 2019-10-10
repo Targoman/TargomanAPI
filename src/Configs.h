@@ -61,6 +61,7 @@ public:
         static Common::Configuration::tmplConfigurable<QString>     Secret;
         static Common::Configuration::tmplConfigurable<QHttp::enuJWTHashAlgs::Type>    HashAlgorithm;
         static Common::Configuration::tmplConfigurable<quint64>      SimpleCryptKey;
+        static Common::Configuration::tmplConfigurable<quint16>      TTL;
     };
 
     struct Classifier{

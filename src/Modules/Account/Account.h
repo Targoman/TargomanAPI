@@ -26,6 +26,9 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 
+namespace Targoman {
+namespace API {
+
 TARGOMAN_DEFINE_ENHANCED_ENUM (enuOAuthType,
                                Google,
                                Yahoo,
@@ -53,12 +56,13 @@ private slots:
                                     const QString& _login,
                                     const QHttp::MD5_t& _pass,
                                     const QString& _salt,
+                                    const QString& _tlps = "",
                                     bool _rememberMe = false,
                                     const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
-                            "Login user and return an encoded JWT")
+                            "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
 
     QHttp::EncodedJWT_t API(,LoginByOAuth,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                           enuOAuthType::Type _type,
+                                           Targoman::API::enuOAuthType::Type _type,
                                            const QString& oAuthToken,
                                            const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
                             "Login by Open Authentication and return an encoded JWT")
@@ -66,12 +70,25 @@ private slots:
     QHttp::EncodedJWT_t API(,LoginAsGuest,(const QHttp::RemoteIP_t& _REMOTE_IP,const QHttp::JSON_t& _sessionInfo),
                             "Login user as guest and return an encoded JWT")
 
+    QHttp::EncodedJWT_t API(,RefreshJWT,(QHttp::JWT_t _JWT),
+                            "Refresh JWT in order to update information or expiry time")
+
+    quint32 API(PUT,Signup,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                         const QString& _emailOrMobile,
+                         const QHttp::MD5_t& _pass,
+                         const QString& _role,
+                         const QString& _name = "",
+                         const QString& _family = "",
+                         QHttp::JSON_t _specialPrivs ={},
+                         qint8 _maxConcurrentSessions = -1),
+                "Base method for signup with email address. this method can be called just by predefined IPs")
+
     bool API(,Logout,(QHttp::JWT_t _JWT),
              "Logout logged in user")
 
     QHttp::MD5_t API(,CreateForgotPasswordLink,(const QHttp::RemoteIP_t& _REMOTE_IP,
                                                 const QString& _login,
-                                                enuForgotPassLinkVia::Type _via),
+                                                Targoman::API::enuForgotPassLinkVia::Type _via),
                      "Create a forgot password request returning a UUID for the requiest")
 
     bool API(,ChangePass,(QHttp::JWT_t _JWT,
@@ -87,12 +104,17 @@ private slots:
                                 ),
              "Changes password based on a UUID provided by ")
 
-    private:
-        Account();
+private:
+    Account();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Account);
+
+    QHttp::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
 };
 
-Q_DECLARE_METATYPE(enuOAuthType::Type);
-Q_DECLARE_METATYPE(enuForgotPassLinkVia::Type);
+}
+}
+
+Q_DECLARE_METATYPE(Targoman::API::enuOAuthType::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuForgotPassLinkVia::Type);
 
 #endif // TARGOMAN_API_MODULES_AAA_AAA_H

@@ -27,6 +27,8 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
 
+namespace Targoman {
+namespace API {
 
 class Roles : public QHttp::intfRESTAPIHolder, private intfTable
 {
@@ -42,4 +44,6 @@ private:
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Roles);
 };
 
+}
+}
 #endif // TARGOMAN_API_MODULES_AAA_ORM_ROLES_H

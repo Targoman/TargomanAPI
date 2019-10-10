@@ -19,38 +19,40 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
-#define TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H
+#define TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H
+
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
 namespace Targoman {
 namespace API {
 
-namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
+TARGOMAN_DEFINE_ENUM(enuSessionStatus,
+                     Active    = 'A',
+                     LoggedOut = 'G',
+                     FiredOut  = 'F',
+                     Expired   = 'E'
+                     )
 
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
+class ActiveSessions : public QHttp::intfRESTAPIHolder, private intfTable
+{
+    Q_OBJECT
+public:
+    void init();
 
-    namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
+private slots:
+    QVariant ORMGET("Get ActiveSessions information. Primary key is ssnKey (stored as jti in JWT)")
 
-    }
-
-    namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
-    }
-}
+private:
+    ActiveSessions();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ActiveSessions);
+};
 
 }
 }
-#endif // TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+Q_DECLARE_METATYPE(Targoman::API::enuSessionStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H

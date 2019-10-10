@@ -51,15 +51,19 @@ intfTable::intfTable(const QString& _schema,
     if(TypesRegistered)
         return;
 
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Cols_t,    QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,  QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::OrderBy_t, QFieldValidator::allwaysValid (), _value);
-    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::GroupBy_t, QFieldValidator::allwaysValid (), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Cols_t,    QFieldValidator::allwaysValid(), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,  QFieldValidator::allwaysValid(), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::OrderBy_t, QFieldValidator::allwaysValid(), _value);
+    QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::GroupBy_t, QFieldValidator::allwaysValid(), _value);
     TypesRegistered = true;
 }
 
+QString intfTable::finalColName(const stuColumn& _col, const QString& _prefix) const{
+    return _prefix + (_col.RenameAs.isEmpty() ? _col.Name : _col.RenameAs);
+}
+
 QString intfTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix) const {
-    return (_col.RenameAs.isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ _prefix + (_col.RenameAs.isEmpty() ? _col.Name : _col.RenameAs) + "`");
+    return (_col.RenameAs.isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
 };
 
 QString intfTable::makeColName(const stuColumn& _col, const stuRelation& _relation) const {
@@ -91,7 +95,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                                    QString("SELECT ")
                                    + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
                                    + QUERY_SEPARATOR
-                                   + SelectItems.Cols.join(QUERY_SEPARATOR)
+                                   + SelectItems.Cols.join("," + QUERY_SEPARATOR)
                                    + QUERY_SEPARATOR
                                    + "FROM "
                                    + QUERY_SEPARATOR
@@ -105,6 +109,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
                                    + QUERY_SEPARATOR
                                    + (SelectItems.GroupBy.size() ? "ORDER BY " : "")
                                    + SelectItems.OrderBy.join(',')
+                                   + QUERY_SEPARATOR
                                    + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
                                    ).toJson(false).toVariant().toList();
         if(_reportCount)
@@ -117,7 +122,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
         foreach(auto Query, PrimaryKeyQueries){
             for(quint8 i=Offset;i<this->Cols.size(); ++i)
                 if(this->Cols.at(i).PrimaryKey){
-                    PrimaryKeyQueries.append(this->makeColRenamedAs(this->Cols.at(i)) + " = \"" + Query + "\"");
+                    PrimaryKeyCriterias.append(this->finalColName(this->Cols.at(i)) + " = \"" + Query + "\"");
                     Offset = i;
                 }
         }
@@ -125,19 +130,18 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
         QJsonDocument Result = _db.execQuery("",
                              QString("SELECT ")
                              + QUERY_SEPARATOR
-                             + SelectItems.Cols.join(QUERY_SEPARATOR)
+                             + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
                              + QUERY_SEPARATOR
                              + "FROM "
                              + QUERY_SEPARATOR
                              + SelectItems.From.join(QUERY_SEPARATOR)
                              + QUERY_SEPARATOR
                              + "WHERE ("
-                             + QUERY_SEPARATOR
-                             + PrimaryKeyCriterias.join("AND ")
-                             + QUERY_SEPARATOR
-                             + ")"
+                             + PrimaryKeyCriterias.join(" AND ")
+                             + ") AND "
                              + QUERY_SEPARATOR
                              + SelectItems.Where.join(QUERY_SEPARATOR)
+                             + QUERY_SEPARATOR
                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
                              ).toJson(false);
         if(Result.isEmpty())
@@ -150,13 +154,16 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
 intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols != "*")
-        QFieldValidator().asciiAlNum(false, ",").validate(_requiredCols, "cols");
+        QFV.asciiAlNum(false, ",").validate(_requiredCols, "cols");
+
+    QFV.optional(QFV.asciiAlNum(false, ",\\+\\-")).validate(_orderBy, "orderBy");
+    QFV.optional(QFV.asciiAlNum(false, ",")).validate(_groupBy, "groupBy");
 
     intfTable::stuSelectItems SelectItems;
 
     /****************************************************************************/
     QStringList RequiredCols = _requiredCols.split(",", QString::SkipEmptyParts);
-    QStringList AllCols;
+    QStringList SortableCols, FilterableCols;
 
     foreach(auto Col, this->Cols){
         if(RequiredCols.contains("*"))
@@ -165,7 +172,8 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
             if(RequiredCols.contains(Col.Name) || RequiredCols.contains(Col.RenameAs))
                 SelectItems.Cols.append(this->makeColName(Col));
         }
-        AllCols.append(this->makeColRenamedAs(Col));
+        if(Col.Sortable) SortableCols.append(this->finalColName(Col));
+        if(Col.Filterable) FilterableCols.append(this->finalColName(Col));
     }
 
     QList<stuRelation> UsedJoins;
@@ -185,7 +193,8 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
                     Joined = true;
                 }
             }
-            AllCols.append(this->makeColRenamedAs(Col, Relation.RenamingPrefix));
+            if(Col.Sortable) SortableCols.append(this->finalColName(Col, Relation.RenamingPrefix));
+            if(Col.Filterable) FilterableCols.append(this->finalColName(Col, Relation.RenamingPrefix));
         }
 
         if(Joined)
@@ -254,7 +263,10 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
         else if(PatternMatches.captured(1) == '|') Rule = " OR ";
         else if(PatternMatches.captured(1) == '*') Rule = " XOR ";
 
-        Rule+=PatternMatches.captured(2);
+        if(FilterableCols.contains(PatternMatches.captured(2).trimmed()))
+            Rule+=PatternMatches.captured(2);
+        else
+            throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(2));
 
         if(PatternMatches.captured(4) == "NULL"){
             if(PatternMatches.captured(3) == "=")
@@ -292,9 +304,11 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
         if(OrderByCriteria.startsWith("-")){
             Direction = "DESC";
             OrderByCriteria = OrderByCriteria.mid(1);
-        }
+        }else if(OrderByCriteria.startsWith("+"))
+            OrderByCriteria = OrderByCriteria.mid(1);
+
         bool Found = false;
-        foreach(auto Col, AllCols)
+        foreach(auto Col, SortableCols)
             if(Col == OrderByCriteria){
                 Found = true;
                 break;
@@ -307,7 +321,7 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
     /****************************************************************************/
     foreach(auto GroupBy, _groupBy.split(",", QString::SkipEmptyParts)) {
         bool Found = false;
-        foreach(auto Col, AllCols)
+        foreach(auto Col, SortableCols)
             if(Col == GroupBy){
                 Found = true;
                 break;

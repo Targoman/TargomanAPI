@@ -193,6 +193,16 @@ tmplConfigurable<quint64> gConfigs::JWT::SimpleCryptKey(
         "jwt-private-key",
         enuConfigSource::Arg | enuConfigSource::File);
 
+tmplConfigurable<quint16> gConfigs::JWT::TTL(
+        gConfigs::JWT::makeConfig("TTL"),
+        "Time to live for the token keep it small enough to be updated by Ux Logic",
+        static_cast<quint16>(600),
+        ReturnTrueCrossValidator(),
+        "",
+        "TTL",
+        "jwt-ttl",
+        enuConfigSource::Arg | enuConfigSource::File);
+
 
 /****************************************************************************/
 tmplConfigurable<double>     gConfigs::Classifier::Threshold(

@@ -20,47 +20,45 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "Roles.h"
+#include "APITokenValidIPs.h"
 #include "Helpers/AAA/AAA.hpp"
 
 using namespace Targoman;
 using namespace Targoman::API;
 using namespace QHttp;
 
-void Roles::init()
+void APITokenValidIPs::init()
 {
 
 }
 
-QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-Roles::Roles() :
+APITokenValidIPs::APITokenValidIPs() :
     intfTable("AAA",
-              "tblRoles",
-              "rol",
-              { ///<ColName            Validation                           Sort  Filter AS  RO   PK
-                {"rolID",               QFV.integer().minValue(1),          true, true, {},  true, true},
-                {"rolName",             QFV.unicodeAlNum().maxLenght(50)},
-                {"rolParent_rolID",     QFV.integer().minValue(1)},
-                {"rolPrivileges",       QFV.json(),                         false, false},
-                {"rolSignupAllowedIPs", QFV.allwaysValid(),                 false, false}, //OJO This must be validated after splitting by comma
-                {"rolCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, "", true},
-                {"rolCreationDateTime", QFV.dateTime(),                     true,  true, "", true},
-                {"rolUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"rolStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
+              "tblAPITokenValidIPs",
+              "tvi",
+              { ///<ColName            Validation                           Sort   Filter AS  RO   PK
+                {"tviID",               QFV.integer().minValue(1),          true,  true, "", true,  true},
+                {"tvi_aptID",           QFV.integer().minValue(1),          true,  true, "", false, true},
+                {"tviIP",               QFV.integer().minValue(1),          true,  true, "", false, true},
+                {"tviIPReadable",       QFV.allwaysInvalid(),               false,false, "", true},
+                {"tviCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, "", true},
+                {"tviCreationDateTime", QFV.dateTime(),                     true,  true, "", true},
+                {"tviUpdatedBy_usrID",  QFV.integer().minValue(1)},
+                {"tviStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
-                {"rolParent_rolID",    "AAA.tblRoles",     "rolID",     "Parent_",  true},
-                {"rolCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"rolUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
+                {"tvi_aptID",          "AAA.tblAPIToken",  "aptID"},
+                {"tviCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
+                {"tviUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
     this->registerMyRESTAPIs();
 }
-
 

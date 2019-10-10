@@ -20,42 +20,49 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_USER_H
-#define TARGOMAN_API_MODULES_AAA_ORM_USER_H
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H
+#define TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
-#include "Helpers/AAA/GenericEnums.hpp"
 
 namespace Targoman {
 namespace API {
 
-class User : public QHttp::intfRESTAPIHolder, private intfTable
+TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
+                     New = 'A',
+                     Processed = 'P',
+                     )
+
+class WalletTransactions : public QHttp::intfRESTAPIHolder, private intfTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get user information")
+    QVariant ORMGET("Get WalletTransactions information. Primary keys are WalletID from UserWallets and TransactionID")
 
 private:
-    User();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,User);
+    WalletTransactions();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,WalletTransactions);
 };
 
-class UserExtraInfo : public QHttp::intfRESTAPIHolder, private intfTable
+class WalletBalances : public QHttp::intfRESTAPIHolder, private intfTable
 {
     Q_OBJECT
 public:
     void init();
 
 private:
-    UserExtraInfo();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,UserExtraInfo);
+    WalletBalances();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account, WalletBalances);
 };
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_USER_H
+
+Q_DECLARE_METATYPE(Targoman::API::enuWalletTransactionStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H

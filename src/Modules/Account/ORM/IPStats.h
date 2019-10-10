@@ -19,38 +19,31 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
-#define TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H
+#define TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H
+
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
 namespace Targoman {
 namespace API {
 
-namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
+class IPStats : public QHttp::intfRESTAPIHolder, private intfTable
+{
+    Q_OBJECT
+public:
+    void init();
 
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
+private slots:
+    QVariant ORMGET("Get IPStats information")
 
-    namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
-
-    }
-
-    namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
-    }
-}
+private:
+    IPStats();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,IPStats);
+};
 
 }
 }
-#endif // TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+#endif // TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H

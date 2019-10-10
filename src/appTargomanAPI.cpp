@@ -88,7 +88,7 @@ void appTargomanAPI::slotExecute()
 
         //Initialize API modules
         //Translation::instance().init();
-        Account::instance().init();
+        Targoman::API::Account::instance().init();
 
         std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
 

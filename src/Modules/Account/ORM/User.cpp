@@ -22,13 +22,14 @@
 
 #include "User.h"
 #include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/UserEnums.hpp"
-//#include "Roles.h"
 
-class Roles;
+using namespace Targoman;
+using namespace Targoman::API;
+using namespace QHttp;
+
 void User::init()
 {
-
+    UserExtraInfo::instance().init();
 }
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
@@ -36,37 +37,61 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
     if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
         Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(
+                AAADACInstance(),
+                {"LEFT JOIN"},
+                {},
+                GET_METHOD_CALL_ARGS);
 }
 
 User::User() :  intfTable("AAA",
                           "tblUser",
                           "usr",
-                          {
-                            {"usrID", QFieldValidator().integer().minValue(1), true, true, {}, true},
-                            {"usrGivenName", QFieldValidator().unicodeAlNum().maxLenght(100)},
-                            {"usrFamilyName", QFieldValidator().unicodeAlNum().maxLenght(100)},
-                            {"usrEmail", QFieldValidator().emailNotFake()},
-                            {"usrMobile", QFieldValidator().mobile()},
+                          { ///<ColName                  Validation                            Sort  Filter AS  RO    PK
+                            {"usrID",                    QFV.integer().minValue(1),            true, true,  "", true, true},
+                            {"usrName",                  QFV.unicodeAlNum().maxLenght(100)},
+                            {"usrFamily",                QFV.unicodeAlNum().maxLenght(100)},
+                            {"usrEmail",                 QFV.emailNotFake()},
+                            {"usrMobile",                QFV.mobile()},
                             {"usrApprovalState"},
                             //{"usrPass"},
-                            {"usr_rolID", QFieldValidator().integer().minValue(1)},
-                            {"usrSpecialPrivs", QFieldValidator().json(), false, false},
-                            {"usrMaxConcurrentSessions", QFieldValidator().integer().betweenValues(-1, 100)},
-                            {"usrActiveSessions", QFieldValidator().integer().betweenValues(-1, 1000)},
-                            {"usrLastLogin", QFieldValidator().dateTime()},
-                            {"usrCreatedBy_usrID", QFieldValidator().integer().minValue(1)},
-                            {"usrCreationDateTime", QFieldValidator().dateTime()},
-                            {"usrUpdatedBy_usrID", QFieldValidator().integer().minValue(1)},
+                            {"usr_rolID",                QFV.integer().minValue(1)},
+                            {"usrSpecialPrivs",          QFV.json(),                            false, false},
+                            {"usrMaxConcurrentSessions", QFV.integer().betweenValues(-1, 100)},
+                            {"usrActiveSessions",        QFV.integer().betweenValues(-1, 1000), true, true, "", true},
+                            {"usrLastLogin",             QFV.dateTime(),                        true, true, "", true},
+                            {"usrCreatedBy_usrID",       QFV.integer().minValue(1),             true, true, "", true},
+                            {"usrCreationDateTime",      QFV.dateTime(),                        true, true, "", true},
+                            {"usrUpdatedBy_usrID",       QFV.integer().minValue(1)},
                             {"usrStatus"},
                           },
-                          {
-                            {"usr_rolID",          "AAA.tblRoles", "rolID"},
-                            {"usrCreatedBy_usrID", "AAA.tblUser",  "usrID", "Creator_", true},
-                            {"usrCreatedBy_usrID", "AAA.tblUser",  "usrID", "Updater_", true}
+                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
+                            {"usr_rolID",          "AAA.tblRoles",          "rolID"},
+                            {"usrID",              "AAA.tblUserExtraInfo",  "uei_usrID",  "",          true},
+                            {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
+                            {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true}
                           })
 {
     this->registerMyRESTAPIs();
 }
 
 
+
+void UserExtraInfo::init()
+{;}
+
+UserExtraInfo::UserExtraInfo() :
+    intfTable ("AAA",
+               "tblUserExtraInfo",
+               "uei",
+               {///<ColName    Validation                     Sort  Filter    AS  RO   PK
+                   {"ueiExtraInfo",       QFV.allwaysValid(), false, false},
+                   {"ueiPhoto",           QFV.allwaysValid(), false, false},
+                   {"ueiUpdatedBy_usrID", QFV.integer().minValue(1)},
+               },
+               { ///< Col                 Reference Table       ForeignCol     Rename     LeftJoin
+                   {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}
+               })
+{
+
+}

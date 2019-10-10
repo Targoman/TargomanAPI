@@ -36,11 +36,23 @@ HEADERS += \
     src/Modules/Translation/Translation.h \
     src/Modules/Translation/TranslationDefs.hpp \
     src/Helpers/AAA/AAA.hpp \
-    src/Helpers/AAA/UserEnums.hpp \
     src/Modules/Account/ORM/User.h \
     src/Modules/Account/Account.h \
     src/Helpers/ORM/intfTable.h \
-    src/Modules/Account/ORM/Roles.h
+    src/Modules/Account/ORM/Roles.h \
+    src/Modules/Account/ORM/ActionLog.h \
+    src/Modules/Account/ORM/ActiveSessions.h \
+    src/Modules/Account/ORM/APIToken.h \
+    src/Modules/Account/ORM/APITokenValidIPs.h \
+    src/Modules/Account/ORM/BankPaymentOrder.h \
+    src/Modules/Account/ORM/ForgotPassRequest.h \
+    src/Modules/Account/ORM/Invoice.h \
+    src/Modules/Account/ORM/IPBin.h \
+    src/Modules/Account/ORM/IPStats.h \
+    src/Modules/Account/ORM/UserWallets.h \
+    src/Modules/Account/ORM/WalletTransactions.h \
+    src/Modules/Account/ORM/BlockingRule.h \
+    src/Helpers/AAA/GenericEnums.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -59,7 +71,19 @@ SOURCES += \
     src/Modules/Account/ORM/User.cpp \
     src/Modules/Account/Account.cpp \
     src/Helpers/ORM/intfTable.cpp \
-    src/Modules/Account/ORM/Roles.cpp
+    src/Modules/Account/ORM/Roles.cpp \
+    src/Modules/Account/ORM/ActionLog.cpp \
+    src/Modules/Account/ORM/ActiveSessions.cpp \
+    src/Modules/Account/ORM/APIToken.cpp \
+    src/Modules/Account/ORM/APITokenValidIPs.cpp \
+    src/Modules/Account/ORM/BankPaymentOrder.cpp \
+    src/Modules/Account/ORM/ForgotPassRequest.cpp \
+    src/Modules/Account/ORM/Invoice.cpp \
+    src/Modules/Account/ORM/IPBin.cpp \
+    src/Modules/Account/ORM/IPStats.cpp \
+    src/Modules/Account/ORM/UserWallets.cpp \
+    src/Modules/Account/ORM/WalletTransactions.cpp \
+    src/Modules/Account/ORM/BlockingRule.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \
@@ -93,4 +117,5 @@ OTHER_FILES += \
 include($$PRJDIR/qmake/install.pri)
 
 DISTFILES += \
-    conf/test.conf
+    conf/test.conf \
+    Dockerfile

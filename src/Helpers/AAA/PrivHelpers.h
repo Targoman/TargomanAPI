@@ -35,12 +35,12 @@ namespace AAA {
 
 class PrivHelpers{
 public:
-    static QJsonObject digestPrivileges(const QJsonArray& _privs);
+    static QJsonObject digestPrivileges(const QJsonArray& _privs, const QStringList& _requiredTLPs);
     static char hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess);
     static QJsonObject confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess);
     static void validateToken(const QString& _token);
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector);
-    static QJsonObject processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess = {});
+    static QJsonObject processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess = {}, const QStringList& _requiredTLPs = {});
 };
 
 }

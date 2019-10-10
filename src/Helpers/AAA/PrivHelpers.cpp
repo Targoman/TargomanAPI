@@ -30,13 +30,18 @@ namespace AAA {
 
 using namespace DBManager;
 
-QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs) {
+QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStringList& _requiredTLPs) {
     QJsonObject Privs;
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
         for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            Privs = Common::mergeJsonObjects(Privs, PrivIter);
+            if(_requiredTLPs.isEmpty() || _requiredTLPs.contains(PrivIter.key()))
+                Privs = Common::mergeJsonObjects(Privs, PrivIter);
     }
+    foreach (auto TLP, _requiredTLPs)
+        if(Privs.contains(TLP) == false)
+            throw exAuthorization("Not enough priviledges to access <"+TLP+">");
+
     return  Privs;
 }
 
@@ -111,11 +116,11 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
     return CurrCheckingPriv.value("");
 }
 
-QJsonObject PrivHelpers::processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess){
+QJsonObject PrivHelpers::processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess, const QStringList& _requiredTLPs){
     _object = _object[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
     if(_object.size())
-        _object[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(PrivHelpers::digestPrivileges(_object[AAACommonItems::privs].toArray()), _requiredAccess);
+        _object[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(PrivHelpers::digestPrivileges(_object[AAACommonItems::privs].toArray(), _requiredTLPs), _requiredAccess);
 
     return _object;
 }

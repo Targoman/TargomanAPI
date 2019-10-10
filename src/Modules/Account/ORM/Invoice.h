@@ -19,38 +19,44 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
-#define TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+
+#ifndef TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
+#define TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
+
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
 namespace Targoman {
 namespace API {
 
-namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
+TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
+                     New      = 'N',
+                     Pending  = 'P',
+                     Canceled = 'C'
+                     )
+TARGOMAN_DEFINE_ENUM(enuInvoiceType,
+                     PostPaid = 'O',
+                     PrePaid  = 'R',
+                     )
 
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
+class Invoice : public QHttp::intfRESTAPIHolder, private intfTable
+{
+    Q_OBJECT
+public:
+    void init();
 
-    namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
+private slots:
+    QVariant ORMGET("Get Invoice information")
 
-    }
-
-    namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
-    }
-}
+private:
+    Invoice();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Invoice);
+};
 
 }
 }
-#endif // TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+Q_DECLARE_METATYPE(Targoman::API::enuInvoiceStatus::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuInvoiceType::Type);
+
+#endif // TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
