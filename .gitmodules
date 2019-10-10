@@ -10,3 +10,9 @@
 [submodule "3rdParty/QFieldValidator"]
 	path = 3rdParty/QFieldValidator
 	url = https://github.com/Targoman/QFieldValidator.git
+[submodule "TargomanCommon"]
+	path = TargomanCommon
+	url = https://github.com/Targoman/TargomanCommon.git
+[submodule "TextProcessor"]
+	path = TextProcessor
+	url = https://github.com/Targoman/TextProcessor.git
