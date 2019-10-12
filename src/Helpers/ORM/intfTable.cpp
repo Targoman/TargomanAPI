@@ -222,7 +222,8 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
                                 );
     }
 
-    SelectItems.From.append(_extraJoins);
+    if(_extraJoins.size())
+        SelectItems.From.append(_extraJoins);
 
     /****************************************************************************/
     quint8 OpenParenthesis = 0;

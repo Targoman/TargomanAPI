@@ -16,3 +16,6 @@
 [submodule "3rdParty/TargomanCommon"]
 	path = 3rdParty/TargomanCommon
 	url = https://github.com/Targoman/TargomanCommon.git
+[submodule "3rdParty/3rdParty/TargomanDBM"]
+	path = 3rdParty/3rdParty/TargomanDBM
+	url = https://github.com/Targoman/TargomanDBM.git

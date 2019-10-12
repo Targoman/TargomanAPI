@@ -39,7 +39,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 
     return this->selectFromTable(
                 AAADACInstance(),
-                {"LEFT JOIN"},
+                {},
                 {},
                 GET_METHOD_CALL_ARGS);
 }

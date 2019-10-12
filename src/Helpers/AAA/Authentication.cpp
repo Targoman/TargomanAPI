@@ -29,14 +29,21 @@ namespace Helpers {
 namespace AAA {
 namespace Authentication{
 
-QJsonObject login(const QString& _login, const QString& _pass, const QString& _salt, bool _rememberMe, const QStringList& _requiredTLPs, const QJsonObject& _info)
+QJsonObject login(const QString      _ip,
+                  const QString&     _login,
+                  const QString&     _pass,
+                  const QString&     _salt,
+                  bool               _rememberMe,
+                  const QStringList& _requiredTLPs,
+                  const QJsonObject& _info)
 {
     QJsonObject UserInfo =  AAADACInstance().callSP ("","AAA.sp_UPDATE_login", {
                                                          {"iLogin", _login},
+                                                         {"iIP", _ip},
                                                          {"iPass", _pass},
                                                          {"iSalt", _salt},
                                                          {"iInfo", _info},
-                                                         {"iRemember", _rememberMe}
+                                                         {"iRemember", _rememberMe ? "1" : "0"}
                                                      }).toJson(true).object();
     return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs);
 }

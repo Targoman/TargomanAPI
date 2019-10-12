@@ -38,10 +38,10 @@ QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStrin
             if(_requiredTLPs.isEmpty() || _requiredTLPs.contains(PrivIter.key()))
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
     }
-    foreach (auto TLP, _requiredTLPs)
+    /*foreach (auto TLP, _requiredTLPs)
         if(Privs.contains(TLP) == false)
             throw exAuthorization("Not enough priviledges to access <"+TLP+">");
-
+*/
     return  Privs;
 }
 
