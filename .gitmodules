@@ -24,7 +24,7 @@
 	url = https://github.com/Targoman/ISO639.git
 [submodule "3rdParty/TargomanDBM"]
 	path = 3rdParty/TargomanDBM
-	url = git@github.com:Targoman/TargomanDBM.git
+	url = https://github.com/Targoman/TargomanDBM.git
 [submodule "3rdParty/fasttext"]
 	path = 3rdParty/fasttext
 	url = https://github.com/facebookresearch/fastText.git
