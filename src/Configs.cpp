@@ -48,7 +48,7 @@ tmplConfigurable<QString> gConfigs::Rest::BasePath(
 tmplConfigurable<QString> gConfigs::Rest::Version(
         gConfigs::Rest::makeConfig("Version"),
         "REST API version to be appended to base path",
-        "v10",
+        "v1",
         ReturnTrueCrossValidator(),
         "",
         "VERSION",

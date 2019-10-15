@@ -33,6 +33,7 @@ echo "Building Dependencies" \
 && cd $DepPath/ISO639/ && cp ISO639.h $PREFIX/include/ \
 && cd $DepPath/fasttext/ && mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=$PREFIX .. && make -j $THREADS install \
 && buildQt TextProcessor \
+&& buildQt TargomanDBM \
 && cd $CWD \
 && qmake-qt5 CONFIG+=$MODE PREFIX=$PREFIX && make -j $THREADS install
 
