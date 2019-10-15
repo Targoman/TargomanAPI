@@ -35,13 +35,14 @@ QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStrin
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
         for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            if(_requiredTLPs.isEmpty() || _requiredTLPs.contains(PrivIter.key()))
+            if(PrivIter.key() == "ALL" || _requiredTLPs.isEmpty() || _requiredTLPs.contains(PrivIter.key()))
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
     }
-    /*foreach (auto TLP, _requiredTLPs)
-        if(Privs.contains(TLP) == false)
-            throw exAuthorization("Not enough priviledges to access <"+TLP+">");
-*/
+    if(Privs.contains("ALL") == false)
+        foreach (auto TLP, _requiredTLPs)
+            if(Privs.contains(TLP) == false)
+                throw exAuthorization("Not enough priviledges to access <"+TLP+">");
+
     return  Privs;
 }
 
