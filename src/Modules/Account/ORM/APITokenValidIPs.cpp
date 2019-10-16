@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void APITokenValidIPs::init()
-{
-
-}
+{;}
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {

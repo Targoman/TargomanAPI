@@ -27,12 +27,33 @@
 
 namespace Targoman {
 namespace API {
+
+TARGOMAN_DEFINE_ENHANCED_ENUM (enuOAuthType,
+                               Google,
+                               Yahoo,
+                               Github,
+                               Linkedin
+                               );
 namespace Helpers {
 namespace AAA {
 namespace Authentication{
 
+struct stuOAuthInfo{
+    QString Type;
+    QString Name;
+    QString Family;
+    QString Email;
+    QString Photo;
+    QString ID;
+};
+
 extern QJsonObject login(const QString _ip, const QString& _login, const QString& _pass, const QString& _salt, bool _rememberMe, const QStringList& _requiredTLPs, const QJsonObject& _info);
 extern QJsonObject updatePrivs(const QString& _ssid, const QString& _requiredTLPs);
+
+extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);
+extern stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken);
+extern stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken);
+extern stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken);
 
 };
 

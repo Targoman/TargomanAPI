@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void ActionLog::init()
-{
-
-}
+{;}
 
 QVariant ActionLog::apiGET(GET_METHOD_ARGS_IMPL)
 {

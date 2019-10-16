@@ -25,16 +25,10 @@
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
+#include "Helpers/AAA/Authentication.h"
 
 namespace Targoman {
 namespace API {
-
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuOAuthType,
-                               Google,
-                               Yahoo,
-                               Github,
-                               Linkedin
-                               );
 
 TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
                                Web,
@@ -63,7 +57,8 @@ private slots:
 
     QHttp::EncodedJWT_t API(,LoginByOAuth,(const QHttp::RemoteIP_t& _REMOTE_IP,
                                            Targoman::API::enuOAuthType::Type _type,
-                                           const QString& oAuthToken,
+                                           const QString& _oAuthToken,
+                                           const QString& _tlps,
                                            const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
                             "Login by Open Authentication and return an encoded JWT")
 

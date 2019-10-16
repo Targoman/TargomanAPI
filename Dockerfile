@@ -12,11 +12,10 @@ RUN apk add --virtual .build-dependencies --no-cache gcc g++ make qt5-qtbase-dev
     && sed -i "s/isystem/I/g" /usr/lib/qt5/mkspecs/common/gcc-base.conf \
     && cd /tmp/TargomanAPI/ \
     && ./build.sh \
-    && mv /tmp/build/conf/* /etc/TargomanAPI/ \
     && rm -rf /tmp/* \
     && apk del .build-dependencies
 
-COPY ./scripts/E4MT.server.conf ./scripts/tsa.ini /etc/E4MT/
+COPY ./conf/api.server.conf ./3rdParty/E4MT/TextProcessor/libsrc/conf/* ./conf/fasttext-*.bin /etc/TargomanAPI/
 
 EXPOSE 10000
-ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/TargomanAPI.server.conf" ]
+ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/api.server.conf" ]

@@ -41,6 +41,8 @@ public:
     static void validateToken(const QString& _token);
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector);
     static QJsonObject processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess = {}, const QStringList& _requiredTLPs = {});
+
+    static QByteArray getURL(const QString& _url);
 };
 
 }

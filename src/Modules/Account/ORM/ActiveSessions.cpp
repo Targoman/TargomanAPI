@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void ActiveSessions::init()
-{
-
-}
+{;}
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {

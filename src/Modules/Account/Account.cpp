@@ -46,6 +46,7 @@
 
 using namespace Targoman;
 using namespace Targoman::API;
+using namespace Targoman::API::Helpers::AAA;
 using namespace QHttp;
 
 void Account::init()
@@ -55,7 +56,6 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-    QFV.optional(QFV.json()).validate(_sessionInfo, "sessionInfo");
     QFV.optional(QFV.asciiAlNum(false, ",")).validate(_tlps, "tlps");
 
     Authorization::validateIPAddress(_REMOTE_IP);
@@ -65,16 +65,41 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const
                             _tlps);
 }
 
-QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP, enuOAuthType::Type _type, const QString& _AuthToken, const QHttp::JSON_t& _sessionInfo)
+QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                             enuOAuthType::Type _type,
+                                             const QString& _oAuthToken,
+                                             const QString& _tlps,
+                                             const QHttp::JSON_t& _sessionInfo)
 {
-    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_type) Q_UNUSED(_AuthToken)Q_UNUSED(_sessionInfo)
-            throw exHTTPNotImplemented("oh oh!");
+    Authorization::validateIPAddress(_REMOTE_IP);
+    QString Login;
+    Authentication::stuOAuthInfo OAuthInfo;
+
+    switch(_type){
+    case enuOAuthType::Google:
+        OAuthInfo = Authentication::retrieveGoogleUserInfo(_oAuthToken);
+        break;
+    case enuOAuthType::Linkedin:
+        OAuthInfo = Authentication::retrieveLinkedinUserInfo(_oAuthToken);
+        break;
+    case enuOAuthType::Yahoo:
+        OAuthInfo = Authentication::retrieveYahooUserInfo(_oAuthToken);
+        break;
+    case enuOAuthType::Github:
+        OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
+        break;
+    default:
+        throw exHTTPNotImplemented("Invalid oAuth type");
+    }
+    return this->createJWT (OAuthInfo.Email,
+                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), QJsonDocument::fromJson(_sessionInfo.toUtf8()).object()),
+                            _tlps);
 }
 
 QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QHttp::JSON_t& _sessionInfo)
 {
     Q_UNUSED(_REMOTE_IP) Q_UNUSED(_sessionInfo)
-            throw exHTTPNotImplemented("oh oh!");
+    throw exHTTPNotImplemented("oh oh!");
 }
 
 QHttp::EncodedJWT_t Account::apiRefreshJWT(QHttp::JWT_t _JWT)

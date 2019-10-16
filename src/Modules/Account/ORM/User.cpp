@@ -88,6 +88,7 @@ UserExtraInfo::UserExtraInfo() :
                    {"ueiExtraInfo",       QFV.allwaysValid(), false, false},
                    {"ueiPhoto",           QFV.allwaysValid(), false, false},
                    {"ueiUpdatedBy_usrID", QFV.integer().minValue(1)},
+                   {"ueiOAuthAccounts",   QFV.allwaysInvalid()}
                },
                { ///< Col                 Reference Table       ForeignCol     Rename     LeftJoin
                    {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}

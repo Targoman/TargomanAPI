@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void Roles::init()
-{
-
-}
+{;}
 
 QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
 {

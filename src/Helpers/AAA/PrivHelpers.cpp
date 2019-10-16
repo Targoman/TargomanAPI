@@ -22,6 +22,7 @@
 
 #include "PrivHelpers.h"
 #include "libTargomanCommon/Helpers.hpp"
+#include "3rdParty/QtCUrl/src/QtCUrl.h"
 
 namespace Targoman {
 namespace API {
@@ -126,6 +127,25 @@ QJsonObject PrivHelpers::processObjectPrivs(QJsonObject& _object, const QStringL
     return _object;
 }
 
+QByteArray PrivHelpers::getURL(const QString& _url){
+    QtCUrl CUrl;
+    CUrl.setTextCodec("UTF-8");
+
+    QtCUrl::Options Opt;
+    Opt[CURLOPT_URL] = _url;
+    Opt[CURLOPT_TIMEOUT] = 30;
+    Opt[CURLOPT_FAILONERROR] = true;
+    QString CUrlResult = CUrl.exec(Opt);
+
+    if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT)
+        throw exAccounting("Connection to <" + _url +"> timed out.");
+    else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
+        throw exAccounting("Connection to <" + _url +"> failed.");
+    else if(CUrl.lastError().isOk() == false)
+        throw exAccounting("Connection to <" + _url + "> error: " + CUrl.lastError().text());
+    else
+        return CUrlResult.toUtf8();
+}
 
 }
 }

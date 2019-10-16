@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void APIToken::init()
-{
-
-}
+{;}
 
 QVariant APIToken::apiGET(GET_METHOD_ARGS_IMPL)
 {

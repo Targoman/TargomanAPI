@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void BlockingRule::init()
-{
-
-}
+{;}
 
 QVariant BlockingRule::apiGET(GET_METHOD_ARGS_IMPL)
 {

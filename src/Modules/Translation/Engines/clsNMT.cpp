@@ -43,7 +43,6 @@ namespace NMTResponse{
         TARGOMAN_CREATE_CONSTEXPR(phrases);
         TARGOMAN_CREATE_CONSTEXPR(alignments);
         TARGOMAN_CREATE_CONSTEXPR(tokens);
-
     }
 }
 

@@ -28,7 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void IPBin::init()
-{}
+{;}
 
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 {

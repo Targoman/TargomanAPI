@@ -43,11 +43,11 @@ WalletTransactions::WalletTransactions() :
     intfTable("AAA",
               "tblWalletsTransactions",
               "wlt",
-              { ///<ColName    Validation                 Sort  Filter AS  RO   PK
-                {"wlt_walID",   QFV.integer().minValue(1), true, true, "", true, true},
-                {"wltID",       QFV.integer().minValue(1), true, true, "", true, true},
-                {"wltDateTime", QFV.dateTime(), true, true, "", true},
-                {"wltAmount",   QFV.allwaysInvalid(), false, false, "", true},
+              { ///<ColName    Validation                   Sort  Filter AS  RO   PK
+                {"wlt_walID",   QFV.integer().minValue(1),  true, true, "", true, true},
+                {"wltID",       QFV.integer().minValue(1),  true, true, "", true, true},
+                {"wltDateTime", QFV.dateTime(),             true, true, "", true},
+                {"wltAmount",   QFV.allwaysInvalid(),      false,false, "", true},
                 {"wltStatus",   QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuWalletTransactionStatus::options().join("|"))))},
               },
               { ///< Col       Reference Table             ForeignCol     Rename   LeftJoin
@@ -59,8 +59,6 @@ WalletTransactions::WalletTransactions() :
 
     this->registerMyRESTAPIs();
 }
-
-
 
 void WalletBalances::init()
 {;}

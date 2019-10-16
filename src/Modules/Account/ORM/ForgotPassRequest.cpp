@@ -28,9 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void ForgotPassRequest::init()
-{
-
-}
+{;}
 
 QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
 {

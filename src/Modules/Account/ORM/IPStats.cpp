@@ -28,7 +28,7 @@ using namespace Targoman::API;
 using namespace QHttp;
 
 void IPStats::init()
-{}
+{;}
 
 QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 {
