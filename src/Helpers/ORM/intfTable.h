@@ -138,8 +138,8 @@ protected:
     static QHash<QString, intfTable*> Registry;
 };
 
-#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QString _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={"*"}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QString _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={"*"}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
 

@@ -64,6 +64,9 @@ private slots:
                       enuUserStatus::Type _status = {}),
              "Update User info by priviledged user")
 
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::EXTRAPATH_t _EXTRAPATH = {}),
+             "Delete user");
+
 private:
     User();
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,User);
