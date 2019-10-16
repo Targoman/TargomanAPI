@@ -34,8 +34,8 @@ TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Remove = 'R',
                      Blocked = 'B',
                      MustChangePass = 'C',
-                     MustValidate = 'V'
-                                    )
+                     MustValidate = 'V',
+                    )
 
 TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      None = 'N',

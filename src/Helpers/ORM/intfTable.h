@@ -60,9 +60,11 @@ struct stuColumn{
     QFieldValidator Validator;
     bool Sortable;
     bool Filterable;
-    bool ReadOnly;
-    bool PrimaryKey;
+    bool IsReadOnly;
+    bool IsPrimaryKey;
     QString RenameAs;
+
+    stuColumn(){;}
 
     stuColumn(const QString& _name,
               const QFieldValidator& _validator = QFV.allwaysValid(),
@@ -76,8 +78,8 @@ struct stuColumn{
         Validator(_validator),
         Sortable(_sortable),
         Filterable(_filterable),
-        ReadOnly(_readOnly),
-        PrimaryKey(_primaryKey),
+        IsReadOnly(_readOnly),
+        IsPrimaryKey(_primaryKey),
         RenameAs(_renameAs)
     {;}
 };
@@ -111,6 +113,10 @@ public:
                              const QString& _groupBy,
                              bool _reportCount) const;
 
+    bool update(Targoman::DBManager::clsDAC& _db,
+                    QVariantMap _primaryKeys,
+                    QVariantMap _updateInfo);
+
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
                                     const QStringList& _extraJoins = {},
@@ -125,8 +131,9 @@ protected:
     QString Schema;
     QString Name;
     QString Prefix;
-    QList<stuColumn> Cols;
+    QMap<QString, stuColumn> Cols;
     QList<stuRelation> ForeignKeys;
+    quint8  CountOfPKs;
 
     static QHash<QString, intfTable*> Registry;
 };

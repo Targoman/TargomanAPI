@@ -30,6 +30,7 @@ namespace Helpers {
 namespace ORM {
 
 using namespace QHttp;
+using namespace Targoman::DBManager;
 
 static QString QUERY_SEPARATOR = "\n";
 
@@ -44,9 +45,14 @@ intfTable::intfTable(const QString& _schema,
     Schema(_schema),
     Name(_name),
     Prefix(_prefix),
-    Cols(_cols),
-    ForeignKeys(_foreignKeys)
+    ForeignKeys(_foreignKeys),
+    CountOfPKs(0)
 {
+    foreach(auto Col, _cols){
+        this->Cols.insert(Col.Name, Col);
+        if(Col.IsPrimaryKey)
+            this->CountOfPKs++;
+    }
     intfTable::Registry.insert(Schema + "." + Name, this);
     if(TypesRegistered)
         return;
@@ -120,35 +126,76 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
         QStringList PrimaryKeyCriterias;
         quint8 Offset = 0;
         foreach(auto Query, PrimaryKeyQueries){
-            for(quint8 i=Offset;i<this->Cols.size(); ++i)
-                if(this->Cols.at(i).PrimaryKey){
-                    PrimaryKeyCriterias.append(this->finalColName(this->Cols.at(i)) + " = \"" + Query + "\"");
+            QList<stuColumn> ColValues = this->Cols.values();
+            for(quint8 i=Offset;i<ColValues.size(); ++i)
+                if(ColValues.at(i).IsPrimaryKey){
+                    PrimaryKeyCriterias.append(this->finalColName(ColValues.at(i)) + " = \"" + Query + "\"");
                     Offset = i;
                 }
         }
 
         QJsonDocument Result = _db.execQuery("",
-                             QString("SELECT ")
-                             + QUERY_SEPARATOR
-                             + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
-                             + QUERY_SEPARATOR
-                             + "FROM "
-                             + QUERY_SEPARATOR
-                             + SelectItems.From.join(QUERY_SEPARATOR)
-                             + QUERY_SEPARATOR
-                             + "WHERE ("
-                             + PrimaryKeyCriterias.join(" AND ")
-                             + ") AND "
-                             + QUERY_SEPARATOR
-                             + SelectItems.Where.join(QUERY_SEPARATOR)
-                             + QUERY_SEPARATOR
-                             + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-                             ).toJson(false);
+                                             QString("SELECT ")
+                                             + QUERY_SEPARATOR
+                                             + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
+                                             + QUERY_SEPARATOR
+                                             + "FROM "
+                                             + QUERY_SEPARATOR
+                                             + SelectItems.From.join(QUERY_SEPARATOR)
+                                             + QUERY_SEPARATOR
+                                             + "WHERE ("
+                                             + PrimaryKeyCriterias.join(" AND ")
+                                             + ") AND "
+                                             + QUERY_SEPARATOR
+                                             + SelectItems.Where.join(QUERY_SEPARATOR)
+                                             + QUERY_SEPARATOR
+                                             + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
+                                             ).toJson(false);
         if(Result.isEmpty())
             throw exHTTPBadRequest("No item could be found");
 
         return Result.toVariant();
     }
+}
+
+bool intfTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariantMap _updateInfo)
+{
+    QStringList  UpdateCommands;
+    QVariantList Values;
+    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
+        if(InfoIter->isValid() == false)
+            continue;
+        const stuColumn& Column = this->Cols[InfoIter.key()];
+        if(Column.IsReadOnly)
+            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
+        this->Cols[InfoIter.key()].Validator.validate(InfoIter.value(), InfoIter.key());
+        UpdateCommands.append(Column.Name + "=?");
+        Values.append(InfoIter.value());
+    }
+
+    QStringList  PKs;
+    for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
+        if(PKIter->isValid() == false)
+            continue;
+        const stuColumn& Column = this->Cols[PKIter.key()];
+        if(Column.IsPrimaryKey == false)
+            throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
+        PKs.append(Column.Name + "=?");
+        Values.append(PKIter.value());
+    }
+
+    clsDACResult Result = _db.execQuery("",
+                                        QString("UPDATE ") + this->Name
+                                        + QUERY_SEPARATOR
+                                        + "SET "
+                                        + UpdateCommands.join("," + QUERY_SEPARATOR)
+                                        + QUERY_SEPARATOR
+                                        + "WHERE "
+                                        + QUERY_SEPARATOR
+                                        + PKs.join(" AND " + QUERY_SEPARATOR)
+                                        ,Values);
+
+    return Result.numRowsAffected() > 0;
 }
 
 intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const

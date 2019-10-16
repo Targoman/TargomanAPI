@@ -31,6 +31,10 @@
 namespace Targoman {
 namespace API {
 
+#ifndef API
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#endif
+
 class User : public QHttp::intfRESTAPIHolder, private intfTable
 {
     Q_OBJECT
@@ -39,6 +43,26 @@ public:
 
 private slots:
     QVariant ORMGET("Get user information")
+
+    bool API(UPDATE,profile,(QHttp::JWT_t _JWT,
+                             QString _name = {},
+                             QString _family = {},
+                             QHttp::Email_t _email = {},
+                             QHttp::Mobile_t _mobile = {}),
+             "Update User profile")
+
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _userID,
+                      QString _name = {},
+                      QString _family = {},
+                      QHttp::Email_t _email = {},
+                      QHttp::Mobile_t _mobile = {},
+                      enuUserApproval::Type _approvalState = {},
+                      quint64 _roleID = {},
+                      QHttp::JSON_t _specialPrivs = {},
+                      qint8 _maxSessions = {},
+                      enuUserStatus::Type _status = {}),
+             "Update User info by priviledged user")
 
 private:
     User();

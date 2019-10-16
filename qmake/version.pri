@@ -39,4 +39,4 @@ LIBS += -lTargomanCommon \
         -lcurl
 
 DEFINES += QHTTP_ENABLE_WEBSOCKET
-QMAKE_CXXFLAGS += -Wno-unknown-pragmas
+QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded

@@ -44,6 +44,52 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
                 GET_METHOD_CALL_ARGS);
 }
 
+bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
+                            QString _name,
+                            QString _family,
+                            QHttp::Email_t _email,
+                            QHttp::Mobile_t _mobile){
+    return this->update(AAADACInstance(),
+                        {{"usrID", clsJWT(_JWT).usrID()}},
+                        {
+                            {"usrName", _name},
+                            {"usrFamily", _family},
+                            {"usrEmail", _email},
+                            {"usrMobile", _mobile},
+                        }
+                        );
+}
+
+bool User::apiUPDATE(QHttp::JWT_t _JWT,
+                     quint64 _userID,
+                     QString _name,
+                     QString _family,
+                     QHttp::Email_t _email,
+                     QHttp::Mobile_t _mobile,
+                     enuUserApproval::Type _approvalState,
+                     quint64 _roleID,
+                     QHttp::JSON_t _specialPrivs,
+                     qint8 _maxSessions,
+                     enuUserStatus::Type _status){
+
+    Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
+    return this->update(AAADACInstance(),
+                        {{"usrID", _userID}},
+                        {
+                            {"usrName", _name},
+                            {"usrFamily", _family},
+                            {"usrEmail", _email},
+                            {"usrMobile", _mobile},
+                            {"usrApprovalState", _approvalState},
+                            {"usr_rolID", _roleID},
+                            {"usrSpecialPrivs", _specialPrivs},
+                            {"usrMaxConcurrentSessions", _maxSessions},
+                            {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
+                            {"usrStatus", _status},
+                        }
+                        );
+}
+
 User::User() :  intfTable("AAA",
                           "tblUser",
                           "usr",
@@ -74,7 +120,6 @@ User::User() :  intfTable("AAA",
 {
     this->registerMyRESTAPIs();
 }
-
 
 
 void UserExtraInfo::init()
