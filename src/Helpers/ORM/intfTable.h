@@ -114,9 +114,10 @@ public:
                              bool _reportCount) const;
 
     bool update(Targoman::DBManager::clsDAC& _db,
-                    QVariantMap _primaryKeys,
+                QVariantMap _primaryKeys,
+                QVariantMap _updateInfo);
+    QVariant create(Targoman::DBManager::clsDAC& _db,
                     QVariantMap _updateInfo);
-
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
                                     const QStringList& _extraJoins = {},

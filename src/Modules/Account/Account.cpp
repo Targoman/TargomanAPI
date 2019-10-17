@@ -119,7 +119,7 @@ quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
                        const QString& _name,
                        const QString& _family,
                        QHttp::JSON_t _specialPrivs,
-                       qint8 _maxConcurrentSessions)
+                       qint8 _maxSessions)
 {
     char Type;
     if(QFV.email().isValid(_emailOrMobile)){
@@ -141,7 +141,7 @@ quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
                                                              {"iName", _name.isEmpty()? QVariant() : _name},
                                                              {"iFamily", _family.isEmpty()? QVariant() : _family},
                                                              {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                                             {"iMaxConcurrentSessions", _maxConcurrentSessions},
+                                                             {"iMaxSessions", _maxSessions},
                                                          }).spDirectOutputs().value("oUserID").toDouble());
 }
 

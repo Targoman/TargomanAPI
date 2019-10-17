@@ -197,6 +197,32 @@ bool intfTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVarian
     return Result.numRowsAffected() > 0;
 }
 
+QVariant intfTable::create(clsDAC& _db, QVariantMap _updateInfo)
+{
+    QStringList  CreateCommands;
+    QVariantList Values;
+    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
+        if(InfoIter->isValid() == false)
+            continue;
+        const stuColumn& Column = this->Cols[InfoIter.key()];
+        if(Column.IsReadOnly)
+            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
+        this->Cols[InfoIter.key()].Validator.validate(InfoIter.value(), InfoIter.key());
+        CreateCommands.append(Column.Name + "=?");
+        Values.append(InfoIter.value());
+    }
+
+    clsDACResult Result = _db.execQuery("",
+                                        QString("INSERT INTO ") + this->Name
+                                        + QUERY_SEPARATOR
+                                        + "SET "
+                                        + CreateCommands.join("," + QUERY_SEPARATOR)
+                                        + QUERY_SEPARATOR
+                                        ,Values);
+
+    return Result.lastInsertId();
+}
+
 intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols != "*")

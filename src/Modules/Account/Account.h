@@ -75,7 +75,7 @@ private slots:
                          const QString& _name = "",
                          const QString& _family = "",
                          QHttp::JSON_t _specialPrivs ={},
-                         qint8 _maxConcurrentSessions = -1),
+                         qint8 _maxSessions = -1),
                 "Base method for signup with email address. this method can be called just by predefined IPs")
 
     bool API(,Logout,(QHttp::JWT_t _JWT),

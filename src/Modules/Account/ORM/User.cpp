@@ -88,6 +88,33 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                         );
 }
 
+quint32 User::apiCREATE(QHttp::JWT_t _JWT,
+                        QString _name,
+                        QString _family,
+                        QHttp::Email_t _email,
+                        QHttp::Mobile_t _mobile,
+                        Targoman::API::enuUserApproval::Type _approvalState,
+                        quint64 _roleID,
+                        qint8 _maxSessions,
+                        QHttp::JSON_t _specialPrivs,
+                        Targoman::API::enuUserStatus::Type _status)
+{
+    Authorization::hasPriv(_JWT,{"Account:CRUD~1000"});
+    return this->create(AAADACInstance(),
+                        {
+                            {"usrName", _name},
+                            {"usrFamily", _family},
+                            {"usrEmail", _email},
+                            {"usrMobile", _mobile},
+                            {"usrApprovalState", _approvalState},
+                            {"usr_rolID", _roleID},
+                            {"usrSpecialPrivs", _specialPrivs},
+                            {"usrMaxSessions", _maxSessions},
+                            {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
+                            {"usrStatus", _status},
+                        }
+                        ).toUInt();
+}
 /*bool User::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH){
     Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
     return this->update(AAADACInstance(),
@@ -102,21 +129,21 @@ User::User() :  intfTable("AAA",
                           "tblUser",
                           "usr",
                           { ///<ColName                  Validation                            Sort  Filter AS  RO    PK
-                            {"usrID",                    QFV.integer().minValue(1),            true, true,  "", true, true},
-                            {"usrName",                  QFV.unicodeAlNum().maxLenght(100)},
-                            {"usrFamily",                QFV.unicodeAlNum().maxLenght(100)},
-                            {"usrEmail",                 QFV.emailNotFake()},
-                            {"usrMobile",                QFV.mobile()},
+                            {"usrID",               QFV.integer().minValue(1),            true, true,  "", true, true},
+                            {"usrName",             QFV.unicodeAlNum().maxLenght(100)},
+                            {"usrFamily",           QFV.unicodeAlNum().maxLenght(100)},
+                            {"usrEmail",            QFV.emailNotFake()},
+                            {"usrMobile",           QFV.mobile()},
                             {"usrApprovalState"},
-                            //{"usrPass"},
-                            {"usr_rolID",                QFV.integer().minValue(1)},
-                            {"usrSpecialPrivs",          QFV.json(),                            false, false},
-                            {"usrMaxConcurrentSessions", QFV.integer().betweenValues(-1, 100)},
-                            {"usrActiveSessions",        QFV.integer().betweenValues(-1, 1000), true, true, "", true},
-                            {"usrLastLogin",             QFV.dateTime(),                        true, true, "", true},
-                            {"usrCreatedBy_usrID",       QFV.integer().minValue(1),             true, true, "", true},
-                            {"usrCreationDateTime",      QFV.dateTime(),                        true, true, "", true},
-                            {"usrUpdatedBy_usrID",       QFV.integer().minValue(1)},
+                          //{"usrPass"},
+                            {"usr_rolID",           QFV.integer().minValue(1)},
+                            {"usrSpecialPrivs",     QFV.json(),                            false, false},
+                            {"usrMaxSessions",      QFV.integer().betweenValues(-1, 100)},
+                            {"usrActiveSessions",   QFV.integer().betweenValues(-1, 1000), true, true, "", true},
+                            {"usrLastLogin",        QFV.dateTime(),                        true, true, "", true},
+                            {"usrCreatedBy_usrID",  QFV.integer().minValue(1),             true, true, "", true},
+                            {"usrCreationDateTime", QFV.dateTime(),                        true, true, "", true},
+                            {"usrUpdatedBy_usrID",  QFV.integer().minValue(1)},
                             {"usrStatus"},
                           },
                           { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin

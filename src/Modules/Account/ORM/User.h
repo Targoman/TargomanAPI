@@ -63,6 +63,17 @@ private slots:
                       Targoman::API::enuUserStatus::Type _status = {}),
              "Update User info by priviledged user")
 
+    quint32 API(CREATE,,(QHttp::JWT_t _JWT,
+                         QString _name,
+                         QString _family,
+                         QHttp::Email_t _email = {},
+                         QHttp::Mobile_t _mobile = {},
+                         Targoman::API::enuUserApproval::Type _approvalState = {},
+                         quint64 _roleID = {},
+                         qint8 _maxSessions = -1,
+                         QHttp::JSON_t _specialPrivs = {},
+                         Targoman::API::enuUserStatus::Type _status = {}),
+             "Create a new user by priviledged user")
     /*bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
              "Delete user")*/
 
