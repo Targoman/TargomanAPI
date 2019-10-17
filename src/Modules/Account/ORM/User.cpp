@@ -69,7 +69,6 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                      enuUserApproval::Type _approvalState,
                      quint64 _roleID,
                      QHttp::JSON_t _specialPrivs,
-                     qint8 _maxSessions,
                      enuUserStatus::Type _status){
 
     Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
@@ -83,12 +82,21 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                             {"usrApprovalState", _approvalState},
                             {"usr_rolID", _roleID},
                             {"usrSpecialPrivs", _specialPrivs},
-                            {"usrMaxConcurrentSessions", _maxSessions},
                             {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
                             {"usrStatus", _status},
                         }
                         );
 }
+
+/*bool User::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH){
+    Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
+    return this->update(AAADACInstance(),
+                        {{"usrID", _EXTRAPATH}},
+                        {
+                            {"usrStatus", enuUserStatus::Removed},
+                        }
+                       );
+}*/
 
 User::User() :  intfTable("AAA",
                           "tblUser",
@@ -125,6 +133,20 @@ User::User() :  intfTable("AAA",
 void UserExtraInfo::init()
 {;}
 
+bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _image){
+    clsDACResult Result = AAADACInstance().execQuery(
+                              "",
+                              "UPDATE " + this->Name
+                              + QUERY_SEPARATOR
+                              + "SET ueiPhoto = ?, ueiUpdatedBy_usrID = ?"
+                              + QUERY_SEPARATOR
+                              + "WHERE uei_usrID = ?",
+                              { _image, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+        );
+
+    return Result.numRowsAffected() > 0;
+}
+
 UserExtraInfo::UserExtraInfo() :
     intfTable ("AAA",
                "tblUserExtraInfo",
@@ -139,5 +161,5 @@ UserExtraInfo::UserExtraInfo() :
                    {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}
                })
 {
-
+    this->registerMyRESTAPIs();
 }

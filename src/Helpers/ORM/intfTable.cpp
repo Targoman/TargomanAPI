@@ -32,7 +32,6 @@ namespace ORM {
 using namespace QHttp;
 using namespace Targoman::DBManager;
 
-static QString QUERY_SEPARATOR = "\n";
 
 QHash<QString, intfTable*> intfTable::Registry;
 static bool TypesRegistered = false;

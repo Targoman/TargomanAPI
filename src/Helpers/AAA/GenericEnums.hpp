@@ -31,7 +31,7 @@ namespace Targoman {
 namespace API {
 TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Active = 'A',
-                     Remove = 'R',
+                     Removed = 'R',
                      Blocked = 'B',
                      MustChangePass = 'C',
                      MustValidate = 'V',

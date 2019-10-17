@@ -57,15 +57,14 @@ private slots:
                       QString _family = {},
                       QHttp::Email_t _email = {},
                       QHttp::Mobile_t _mobile = {},
-                      enuUserApproval::Type _approvalState = {},
+                      Targoman::API::enuUserApproval::Type _approvalState = {},
                       quint64 _roleID = {},
                       QHttp::JSON_t _specialPrivs = {},
-                      qint8 _maxSessions = {},
-                      enuUserStatus::Type _status = {}),
+                      Targoman::API::enuUserStatus::Type _status = {}),
              "Update User info by priviledged user")
 
-    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::EXTRAPATH_t _EXTRAPATH = {}),
-             "Delete user");
+    /*bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete user")*/
 
 private:
     User();
@@ -78,6 +77,9 @@ class UserExtraInfo : public QHttp::intfRESTAPIHolder, private intfTable
 public:
     void init();
 
+private slots:
+    bool API(UPDATE,Photo,(QHttp::JWT_t _JWT, QHttp::Base64Image_t _image),
+             "Updates user image based using a base64 encoded image")
 private:
     UserExtraInfo();
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,UserExtraInfo);

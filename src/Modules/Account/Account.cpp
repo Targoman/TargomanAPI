@@ -61,7 +61,7 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const
     Authorization::validateIPAddress(_REMOTE_IP);
 
     return this->createJWT (_login,
-                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(","), QJsonDocument::fromJson(_sessionInfo.toUtf8()).object()),
+                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(","), _sessionInfo.object()),
                             _tlps);
 }
 
@@ -92,7 +92,7 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
         throw exHTTPNotImplemented("Invalid oAuth type");
     }
     return this->createJWT (OAuthInfo.Email,
-                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), QJsonDocument::fromJson(_sessionInfo.toUtf8()).object()),
+                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), _sessionInfo.object()),
                             _tlps);
 }
 

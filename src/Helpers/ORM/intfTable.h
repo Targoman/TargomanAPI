@@ -38,7 +38,6 @@ QHTTP_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 namespace Helpers {
 namespace ORM {
 
-
 class intfTable;
 
 struct stuRelation{
@@ -54,6 +53,7 @@ struct stuRelation{
 };
 
 static stuRelation InvalidRelation("","","");
+static QString QUERY_SEPARATOR = "\n";
 
 struct stuColumn{
     QString Name;
