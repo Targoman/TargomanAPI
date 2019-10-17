@@ -74,8 +74,6 @@ private slots:
                          QHttp::JSON_t _specialPrivs = {},
                          Targoman::API::enuUserStatus::Type _status = {}),
              "Create a new user by priviledged user")
-    /*bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete user")*/
 
 private:
     User();

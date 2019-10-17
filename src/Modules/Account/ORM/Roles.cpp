@@ -21,7 +21,6 @@
  */
 
 #include "Roles.h"
-#include "Helpers/AAA/AAA.hpp"
 
 using namespace Targoman;
 using namespace Targoman::API;
@@ -32,10 +31,56 @@ void Roles::init()
 
 QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    Authorization::hasPriv(_JWT,{"Account:Roles:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
+
+bool Roles::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+{
+    Authorization::hasPriv(_JWT,{"Account:Roles:CRUD~0001"});
+    return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
+}
+
+bool Roles::apiUPDATE(QHttp::JWT_t _JWT,
+                      quint64 _rolID,
+                      QString _name,
+                      quint64 _parentRolID,
+                      QHttp::JSON_t _privs,
+                      QStringList _signupAllowdIPs,
+                      Targoman::API::enuGenericStatus::Type _status)
+{
+    Authorization::hasPriv(_JWT,{"Account:Roles:CRUD~0010"});
+    return this->update(AAADACInstance(),
+                        {{"rolID", _rolID}},
+                        {
+                            {"rolName", _name},
+                            {"rolParent_rolID", _parentRolID == 0 ? QVariant() : _parentRolID},
+                            {"rolPrivileges", _privs},
+                            {"rolSignupAllowedIPs", _signupAllowdIPs.join(",")},
+                            {"rolUpdatedBy_usrID", clsJWT(_JWT).usrID()},
+                            {"rolStatus", _status},
+                        }
+                        );
+}
+
+quint64 Roles::apiCREATE(QHttp::JWT_t _JWT,
+                         QString _name,
+                         quint64 _parentRolID,
+                         QHttp::JSON_t _privs,
+                         QStringList _signupAllowdIPs)
+{
+    Authorization::hasPriv(_JWT,{"Account:Roles:CRUD~1000"});
+    return this->create(AAADACInstance(),
+                        {
+                            {"rolName", _name},
+                            {"rolParent_rolID", _parentRolID},
+                            {"rolPrivileges", _privs},
+                            {"rolSignupAllowedIPs", _signupAllowdIPs.join(",")},
+                        }
+                        ).toUInt();
+}
+
 
 Roles::Roles() :
     intfTable("AAA",

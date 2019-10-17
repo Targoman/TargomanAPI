@@ -26,6 +26,7 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
@@ -38,6 +39,24 @@ public:
 
 private slots:
     QVariant ORMGET("Get roles information")
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete Role")
+
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _rolID,
+                      QString _name = {},
+                      quint64 _parentRolID = {},
+                      QHttp::JSON_t _privs = {},
+                      QStringList _signupAllowdIPs = {},
+                      Targoman::API::enuGenericStatus::Type _status = {}),
+             "Update Role by priviledged user")
+
+    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
+                         QString _name,
+                         quint64 _parentRolID = {},
+                         QHttp::JSON_t _privs = {},
+                         QStringList _signupAllowdIPs = {}),
+             "Create a new Role by priviledged user")
 
 private:
     Roles();

@@ -26,6 +26,7 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
@@ -38,6 +39,20 @@ public:
 
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")
+
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _tviID,
+                      QHttp::IPv4_t _ip = {},
+                      Targoman::API::enuGenericStatus::Type _status = {}),
+             "Update APITokenValidIPs by priviledged user")
+
+    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
+                         quint64 _tokenID,
+                         QHttp::IPv4_t _ip),
+             "Create a new APITokenValidIPs by priviledged user")
+
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete APITokenValidIPs")
 
 private:
     APITokenValidIPs();

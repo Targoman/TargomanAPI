@@ -26,6 +26,7 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/intfTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
@@ -38,6 +39,25 @@ public:
 
 private slots:
     QVariant ORMGET("Get BlockingRule information")
+
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete BlockingRule")
+
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _blrID,
+                      QHttp::IPv4_t _ip = {},
+                      QHttp::DateTime_t _startTime = {},
+                      QHttp::DateTime_t _endTime = {},
+                      QString _cause = {},
+                      Targoman::API::enuGenericStatus::Type _status = {}),
+             "Update BlockingRule by priviledged user")
+
+    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
+                         QHttp::IPv4_t _ip,
+                         QHttp::DateTime_t _startTime,
+                         QHttp::DateTime_t _endTime,
+                         QString _cause),
+             "Create a new BlockingRule by priviledged user")
 
 private:
     BlockingRule();

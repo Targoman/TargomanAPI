@@ -32,7 +32,7 @@ void ActionLog::init()
 
 QVariant ActionLog::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    Authorization::hasPriv(_JWT,{"Account:ActionLog:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

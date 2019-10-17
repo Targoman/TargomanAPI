@@ -35,7 +35,7 @@ void User::init()
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
-        Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+        Authorization::hasPriv(_JWT,{"Account:User:CRUD~0100"});
 
     return this->selectFromTable(
                 AAADACInstance(),
@@ -52,9 +52,9 @@ bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
     return this->update(AAADACInstance(),
                         {{"usrID", clsJWT(_JWT).usrID()}},
                         {
-                            {"usrName", _name},
+                            {"usrName",   _name},
                             {"usrFamily", _family},
-                            {"usrEmail", _email},
+                            {"usrEmail",  _email},
                             {"usrMobile", _mobile},
                         }
                         );
@@ -69,9 +69,9 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                      enuUserApproval::Type _approvalState,
                      quint64 _roleID,
                      QHttp::JSON_t _specialPrivs,
-                     enuUserStatus::Type _status){
-
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
+                     enuUserStatus::Type _status)
+{
+    Authorization::hasPriv(_JWT,{"Account:User:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"usrID", _userID}},
                         {
@@ -80,7 +80,7 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                             {"usrEmail", _email},
                             {"usrMobile", _mobile},
                             {"usrApprovalState", _approvalState},
-                            {"usr_rolID", _roleID},
+                            {"usr_rolID", _roleID == 0 ? QVariant() : _roleID},
                             {"usrSpecialPrivs", _specialPrivs},
                             {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
                             {"usrStatus", _status},
@@ -99,7 +99,10 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                         QHttp::JSON_t _specialPrivs,
                         Targoman::API::enuUserStatus::Type _status)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~1000"});
+    Authorization::hasPriv(_JWT,{"Account:User:CRUD~1000"});
+    if(_email.isEmpty() && _mobile.isEmpty())
+        throw exHTTPBadRequest("Either email or mobile must be provided to create user");
+
     return this->create(AAADACInstance(),
                         {
                             {"usrName", _name},
@@ -107,7 +110,7 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                             {"usrEmail", _email},
                             {"usrMobile", _mobile},
                             {"usrApprovalState", _approvalState},
-                            {"usr_rolID", _roleID},
+                            {"usr_rolID", _roleID == 0 ? QVariant() : _roleID},
                             {"usrSpecialPrivs", _specialPrivs},
                             {"usrMaxSessions", _maxSessions},
                             {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
@@ -115,15 +118,6 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                         }
                         ).toUInt();
 }
-/*bool User::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH){
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0010"});
-    return this->update(AAADACInstance(),
-                        {{"usrID", _EXTRAPATH}},
-                        {
-                            {"usrStatus", enuUserStatus::Removed},
-                        }
-                       );
-}*/
 
 User::User() :  intfTable("AAA",
                           "tblUser",

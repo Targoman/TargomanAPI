@@ -118,6 +118,9 @@ public:
                 QVariantMap _updateInfo);
     QVariant create(Targoman::DBManager::clsDAC& _db,
                     QVariantMap _updateInfo);
+    bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
+                     QVariantMap _primaryKeys);
+
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
                                     const QStringList& _extraJoins = {},

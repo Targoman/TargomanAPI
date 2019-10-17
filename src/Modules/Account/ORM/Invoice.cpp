@@ -32,7 +32,8 @@ void Invoice::init()
 
 QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    if(_EXTRAPATH.contains(',') == false || clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt())
+        Authorization::hasPriv(_JWT,{"Account:Invoice:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

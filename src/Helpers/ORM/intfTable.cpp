@@ -197,11 +197,11 @@ bool intfTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVarian
     return Result.numRowsAffected() > 0;
 }
 
-QVariant intfTable::create(clsDAC& _db, QVariantMap _updateInfo)
+QVariant intfTable::create(clsDAC& _db, QVariantMap _createInfo)
 {
     QStringList  CreateCommands;
     QVariantList Values;
-    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
+    for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
         const stuColumn& Column = this->Cols[InfoIter.key()];
@@ -221,6 +221,34 @@ QVariant intfTable::create(clsDAC& _db, QVariantMap _updateInfo)
                                         ,Values);
 
     return Result.lastInsertId();
+}
+
+bool intfTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
+{
+    if(this->update(_db, _primaryKeys, {{this->Cols.last().Name, "Removed"}}) == false)
+        return false;
+
+    QVariantList Values;
+    QStringList  PKs;
+    for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
+        if(PKIter->isValid() == false)
+            continue;
+        const stuColumn& Column = this->Cols[PKIter.key()];
+        if(Column.IsPrimaryKey == false)
+            throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
+        PKs.append(Column.Name + "=?");
+        Values.append(PKIter.value());
+    }
+
+    clsDACResult Result = _db.execQuery("",
+                                        QString("DELETE FROM ") + this->Name
+                                        + QUERY_SEPARATOR
+                                        + "WHERE "
+                                        + QUERY_SEPARATOR
+                                        + PKs.join(" AND " + QUERY_SEPARATOR)
+                                        ,Values);
+
+    return Result.numRowsAffected() > 0;
 }
 
 intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const

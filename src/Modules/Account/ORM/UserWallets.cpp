@@ -32,7 +32,8 @@ void UserWallets::init()
 
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    if(_EXTRAPATH.contains(',') == false || clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt())
+         Authorization::hasPriv(_JWT,{"Account:UserWallets:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -43,7 +44,7 @@ UserWallets::UserWallets() :
               "wal",
               { ///<ColName       Validation                 Sort  Filter AS  RO    PK
                 {"walID",         QFV.integer().minValue(1), true, true,  "", true, true},
-                {"wal_usrID",     QFV.integer().minValue(1)},
+                {"wal_usrID",     QFV.integer().minValue(1), true, true,  "", true, true},
                 {"walName",       QFV.unicodeAlNum().maxLenght(100)},
                 {"walMinBalance", QFV.integer(),             false, false},
                 {"walLastBalance",QFV.integer(),             false, false},

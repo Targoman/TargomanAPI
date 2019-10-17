@@ -32,7 +32,8 @@ void ActiveSessions::init()
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    if(_EXTRAPATH.contains(',') == false || clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt())
+        Authorization::hasPriv(_JWT,{"Account:ActiveSessions:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -43,7 +44,7 @@ ActiveSessions::ActiveSessions() :
               "ssn",
               { ///<ColName            Validation                    Sort   Filter AS  RO   PK
                 {"ssnKey",              QFV.md5(),                   true,  true, "", true, true},
-                {"ssn_usrID",           QFV.integer().minValue(1),   true,  true, "", true},
+                {"ssn_usrID",           QFV.integer().minValue(1),   true,  true, "", true, true},
                 {"ssnCreationDateTime", QFV.dateTime(),              true,  true, "", true},
                 {"ssnIP",               QFV.integer().minValue(1),   true,  true, "", true},
                 {"ssnIPReadable",       QFV.allwaysInvalid(),        false,false, "", true},

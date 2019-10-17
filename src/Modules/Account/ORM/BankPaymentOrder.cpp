@@ -32,7 +32,7 @@ void BankPaymentOrder::init()
 
 QVariant BankPaymentOrder::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    Authorization::hasPriv(_JWT,{"Account:BankPaymentOrder:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

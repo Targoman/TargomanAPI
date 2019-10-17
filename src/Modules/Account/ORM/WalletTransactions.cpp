@@ -34,7 +34,8 @@ void WalletTransactions::init()
 
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:CRUD~0100"});
+    //TODO how to get my own transactions?
+    Authorization::hasPriv(_JWT,{"Account:WalletTransactions:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
