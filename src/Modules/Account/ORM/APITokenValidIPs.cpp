@@ -31,13 +31,13 @@ void APITokenValidIPs::init()
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0100"});
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool APITokenValidIPs::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
 {
-    Authorization::hasPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0001"});
+    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0001"});
     return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
 }
 
@@ -46,7 +46,7 @@ bool APITokenValidIPs::apiUPDATE(QHttp::JWT_t _JWT,
                                  QHttp::IPv4_t _ip,
                                  Targoman::API::enuGenericStatus::Type _status)
 {
-    Authorization::hasPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0010"});
+    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"tviID", _tviID}},
                         {
@@ -61,7 +61,7 @@ quint64 APITokenValidIPs::apiCREATE(QHttp::JWT_t _JWT,
                                     quint64 _tokenID,
                                     QHttp::IPv4_t _ip)
 {
-    Authorization::hasPriv(_JWT,{"Account:APITokenValidIPs:CRUD~1000"});
+    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~1000"});
     return this->create(AAADACInstance(),
                         {
                             {"tvi_aptID", _tokenID},

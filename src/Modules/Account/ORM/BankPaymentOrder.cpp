@@ -32,9 +32,13 @@ void BankPaymentOrder::init()
 
 QVariant BankPaymentOrder::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:BankPaymentOrder:CRUD~0100"});
+    bool IsSelf = _EXTRAPATH.split(',').size() == 3 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
+    if(_EXTRAPATH.isEmpty() || IsSelf == false)
+        Authorization::checkPriv(_JWT,{"Account:BankPaymentOrder:CRUD~0100"});
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {},
+                                 IsSelf ? "" : QString("+inv_usrID=%1").arg(clsJWT(_JWT).usrID()),
+                                 GET_METHOD_CALL_ARGS);
 }
 
 BankPaymentOrder::BankPaymentOrder() :

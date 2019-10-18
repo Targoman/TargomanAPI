@@ -35,7 +35,7 @@ void User::init()
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
-        Authorization::hasPriv(_JWT,{"Account:User:CRUD~0100"});
+        Authorization::checkPriv(_JWT,{"Account:User:CRUD~0100"});
 
     return this->selectFromTable(
                 AAADACInstance(),
@@ -71,7 +71,7 @@ bool User::apiUPDATE(QHttp::JWT_t _JWT,
                      QHttp::JSON_t _specialPrivs,
                      enuUserStatus::Type _status)
 {
-    Authorization::hasPriv(_JWT,{"Account:User:CRUD~0010"});
+    Authorization::checkPriv(_JWT,{"Account:User:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"usrID", _userID}},
                         {
@@ -99,7 +99,7 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                         QHttp::JSON_t _specialPrivs,
                         Targoman::API::enuUserStatus::Type _status)
 {
-    Authorization::hasPriv(_JWT,{"Account:User:CRUD~1000"});
+    Authorization::checkPriv(_JWT,{"Account:User:CRUD~1000"});
     if(_email.isEmpty() && _mobile.isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 

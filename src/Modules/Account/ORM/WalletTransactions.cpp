@@ -34,10 +34,12 @@ void WalletTransactions::init()
 
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    //TODO how to get my own transactions?
-    Authorization::hasPriv(_JWT,{"Account:WalletTransactions:CRUD~0100"});
+    if(_EXTRAPATH.isEmpty())
+        Authorization::checkPriv(_JWT,{"Account:WalletTransactions:CRUD~0100"});
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {},
+                                 _EXTRAPATH.isEmpty() ? "" : QString("+wal_usrID=%1").arg(clsJWT(_JWT).usrID()),
+                                 GET_METHOD_CALL_ARGS);
 }
 
 WalletTransactions::WalletTransactions() :

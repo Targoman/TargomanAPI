@@ -29,6 +29,16 @@ namespace Helpers {
 namespace AAA {
 namespace Accounting{
 
+void checkCredit(const QJsonObject& _privs, const QString& _selector, double _value)
+{
+    QVariant Credit = PrivHelpers::getPrivValue(_privs, _selector);
+    if(Credit.isValid() &&
+       Credit.canConvert<double>() &&
+       Credit.toDouble() >= 0 &&
+       Credit.toDouble() < _value)
+        throw exAccounting("You have exceeded your "+_selector+" quota.");
+}
+
 }
 }
 }

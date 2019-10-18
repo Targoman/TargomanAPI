@@ -50,16 +50,6 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
     return PrivHelpers::processObjectPrivs(TokenInfo, _requiredPrivs);
 }
 
-void checkCredit(const QJsonObject& _privs, const QString& _selector, double _value)
-{
-    QVariant Credit = PrivHelpers::getPrivValue(_privs, _selector);
-    if(Credit.isValid() &&
-       Credit.canConvert<double>() &&
-       Credit.toDouble() >= 0 &&
-       Credit.toDouble() < _value)
-        throw new exAccounting("You have exceeded your "+_selector+" quota.");
-}
-
 bool hasPriv(const QJsonObject& _privs, const QStringList& _requiredAccess)
 {
     if (_requiredAccess.isEmpty() || _privs.isEmpty())
@@ -71,10 +61,20 @@ bool hasPriv(const QJsonObject& _privs, const QStringList& _requiredAccess)
     return true;
 }
 
+void checkPriv(const QJsonObject &_privs, const QStringList &_requiredAccess)
+{
+    if(!hasPriv(_privs, _requiredAccess))
+        throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
+}
+
 QJsonObject privObjectFromInfo(const QJsonObject& _info)
 {
     return _info.contains(AAACommonItems::privs) ? _info[AAACommonItems::privs].toObject() : _info;
 }
+
+
+
+
 
 }
 }

@@ -32,7 +32,7 @@ void ForgotPassRequest::init()
 
 QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:ForgotPassRequest:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:ForgotPassRequest:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

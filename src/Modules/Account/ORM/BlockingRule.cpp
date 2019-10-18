@@ -31,14 +31,14 @@ void BlockingRule::init()
 
 QVariant BlockingRule::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:BlockingRule:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool BlockingRule::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
 {
-    Authorization::hasPriv(_JWT,{"Account:BlockingRule:CRUD~0001"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0001"});
     return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
 }
 
@@ -50,7 +50,7 @@ bool BlockingRule::apiUPDATE(QHttp::JWT_t _JWT,
                              QString _cause,
                              Targoman::API::enuGenericStatus::Type _status)
 {
-    Authorization::hasPriv(_JWT,{"Account:BlockingRule:CRUD~0010"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"blrID", _blrID}},
                         {
@@ -70,7 +70,7 @@ quint64 BlockingRule::apiCREATE(QHttp::JWT_t _JWT,
                                 QHttp::DateTime_t _endTime,
                                 QString _cause)
 {
-    Authorization::hasPriv(_JWT,{"Account:BlockingRule:CRUD~1000"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~1000"});
     return this->create(AAADACInstance(),
                         {
                             {"blr_ipbIP", QHostAddress(_ip).toIPv4Address()},

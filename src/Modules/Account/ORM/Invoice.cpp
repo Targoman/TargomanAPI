@@ -32,10 +32,13 @@ void Invoice::init()
 
 QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(_EXTRAPATH.contains(',') == false || clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt())
-        Authorization::hasPriv(_JWT,{"Account:Invoice:CRUD~0100"});
+    bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
+    if(_EXTRAPATH.isEmpty() || IsSelf == false)
+        Authorization::checkPriv(_JWT,{"Account:Invoice:CRUD~0100"});
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {},
+                                 IsSelf ? "" : QString("+inv_usrID=%1").arg(clsJWT(_JWT).usrID()),
+                                 GET_METHOD_CALL_ARGS);
 }
 
 Invoice::Invoice() :

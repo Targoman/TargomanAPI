@@ -32,7 +32,7 @@ void IPBin::init()
 
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:IPBin:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:IPBin:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

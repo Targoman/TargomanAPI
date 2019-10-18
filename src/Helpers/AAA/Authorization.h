@@ -32,8 +32,8 @@ namespace AAA {
 namespace Authorization{
     extern void validateIPAddress(const QString& _ip);
     extern QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs = {});
-    extern void checkCredit(const QJsonObject& _privs, const QString& _selector, double _value);
     extern bool hasPriv(const QJsonObject& _privs, const QStringList& _requiredAccess);
+    extern void checkPriv(const QJsonObject& _privs, const QStringList& _requiredAccess);
     extern QJsonObject privObjectFromInfo(const QJsonObject& _info);
 }
 }

@@ -32,7 +32,7 @@ void IPStats::init()
 
 QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::hasPriv(_JWT,{"Account:IPStats:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }

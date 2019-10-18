@@ -30,6 +30,9 @@ namespace API {
 namespace Helpers {
 namespace AAA {
 namespace Accounting{
+
+extern void checkCredit(const QJsonObject& _privs, const QString& _selector, double _value);
+
 }
 }
 }
