@@ -40,13 +40,12 @@ QVariant ActionLog::apiGET(GET_METHOD_ARGS_IMPL)
 ActionLog::ActionLog() :
     intfTable("AAA",
               "tblActionLog",
-              "atl",
-              { ///<ColName             Validation                      Sort   Filter AS  RO   PK
-                {"atlID",               QFV.integer().minValue(1),      true,  true, "", true, true},
-                {"atlBy_usrID",         QFV.integer().minValue(1),      true,  true, "", true, true},
-                {"atlInsertionDateTime",QFV.dateTime(),                 true,  true, "", true},
-                {"atlType",             QFV.asciiAlNum().maxLenght(50), true,  true, "", true},
-                {"atlType",             QFV.allwaysInvalid(),           false,false, "", true},
+              { ///<ColName             Validation                      Sort   Filter RO   PK
+                {"atlID",               QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlBy_usrID",         QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlInsertionDateTime",QFV.dateTime(),                 true,  true, true},
+                {"atlType",             QFV.asciiAlNum().maxLenght(50), true,  true, true},
+                {"atlType",             QFV.allwaysInvalid(),           false,false, true},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},

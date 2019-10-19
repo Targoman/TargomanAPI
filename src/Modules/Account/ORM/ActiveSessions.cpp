@@ -33,7 +33,7 @@ void ActiveSessions::init()
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
     bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
-    if(_EXTRAPATH.isEmpty() || IsSelf == false)
+    if(IsSelf == false)
         Authorization::checkPriv(_JWT,{"Account:ActiveSessions:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {},
@@ -44,16 +44,15 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 ActiveSessions::ActiveSessions() :
     intfTable("AAA",
               "tblActiveSessions",
-              "ssn",
-              { ///<ColName            Validation                    Sort   Filter AS  RO   PK
-                {"ssnKey",              QFV.md5(),                   true,  true, "", true, true},
-                {"ssn_usrID",           QFV.integer().minValue(1),   true,  true, "", true, true},
-                {"ssnCreationDateTime", QFV.dateTime(),              true,  true, "", true},
-                {"ssnIP",               QFV.integer().minValue(1),   true,  true, "", true},
-                {"ssnIPReadable",       QFV.allwaysInvalid(),        false,false, "", true},
-                {"ssnInfo",             QFV.json(),                  false,false, "", true},
-                {"ssnLastActivity",     QFV.integer().minValue(1),   true,  true, "", true},
-                {"ssnRemember",         QFV.boolean(),               true,  true, "", true},
+              { ///<ColName            Validation                    Sort   Filter RO   PK
+                {"ssnKey",              QFV.md5(),                   true,  true, true, true},
+                {"ssn_usrID",           QFV.integer().minValue(1),   true,  true, true, true},
+                {"ssnCreationDateTime", QFV.dateTime(),              true,  true, true},
+                {"ssnIP",               QFV.integer().minValue(1),   true,  true, true},
+                {"ssnIPReadable",       QFV.allwaysInvalid(),        false,false, true},
+                {"ssnInfo",             QFV.json(),                  false,false, true},
+                {"ssnLastActivity",     QFV.integer().minValue(1),   true,  true, true},
+                {"ssnRemember",         QFV.boolean(),               true,  true, true},
                 {"ssnUpdatedBy_usrID",  QFV.integer().minValue(1)},
                 {"ssnStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuSessionStatus::options().join("|"))))},
               },

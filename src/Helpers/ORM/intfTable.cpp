@@ -38,12 +38,10 @@ static bool TypesRegistered = false;
 
 intfTable::intfTable(const QString& _schema,
                      const QString& _name,
-                     const QString& _prefix,
                      const QList<Targoman::API::Helpers::ORM::stuColumn>& _cols,
                      const QList<stuRelation>& _foreignKeys) :
     Schema(_schema),
     Name(_name),
-    Prefix(_prefix),
     ForeignKeys(_foreignKeys),
     CountOfPKs(0)
 {

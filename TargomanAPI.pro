@@ -52,7 +52,18 @@ HEADERS += \
     src/Modules/Account/ORM/UserWallets.h \
     src/Modules/Account/ORM/WalletTransactions.h \
     src/Modules/Account/ORM/BlockingRule.h \
-    src/Helpers/AAA/GenericEnums.hpp
+    src/Helpers/AAA/GenericEnums.hpp \
+    src/Modules/Advertisement/Advertisement.h \
+    src/Modules/Advertisement/ORM/ActiveAds.h \
+    src/Modules/Advertisement/ORM/AdvBin.h \
+    src/Modules/Advertisement/ORM/AdvClicks.h \
+    src/Modules/Advertisement/ORM/AdvProps.h \
+    src/Modules/Advertisement/ORM/AdvOrders.h \
+    src/Modules/Advertisement/ORM/AdvKeywords.h \
+    src/Modules/Advertisement/ORM/AdvImages.h \
+    src/Modules/Advertisement/ORM/AdvClicks.h \
+    src/Modules/Advertisement/ORM/AdvBin.h \
+    src/Modules/Advertisement/ORM/ActiveAds.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -83,7 +94,16 @@ SOURCES += \
     src/Modules/Account/ORM/IPStats.cpp \
     src/Modules/Account/ORM/UserWallets.cpp \
     src/Modules/Account/ORM/WalletTransactions.cpp \
-    src/Modules/Account/ORM/BlockingRule.cpp
+    src/Modules/Account/ORM/BlockingRule.cpp \
+    src/Modules/Advertisement/Advertisement.cpp \
+    src/Modules/Advertisement/ORM/ActiveAds.cpp \
+    src/Modules/Advertisement/ORM/AdvProps.cpp \
+    src/Modules/Advertisement/ORM/AdvOrders.cpp \
+    src/Modules/Advertisement/ORM/AdvKeywords.cpp \
+    src/Modules/Advertisement/ORM/AdvImages.cpp \
+    src/Modules/Advertisement/ORM/AdvClicks.cpp \
+    src/Modules/Advertisement/ORM/AdvBin.cpp \
+    src/Modules/Advertisement/ORM/ActiveAds.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \

@@ -20,36 +20,29 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "IPStats.h"
+#include "Advertisement.h"
+#include "QFieldValidator.h"
+#include "QHttp/QRESTServer.h"
+#include "QHttp/intfAPIArgManipulator.h"
 #include "Helpers/AAA/AAA.hpp"
+#include "Helpers/AAA/PrivHelpers.h"
+#include "Helpers/AAA/GenericEnums.hpp"
+#include "Configs.h"
+
+#include "ORM/ActiveAds.h"
 
 using namespace Targoman;
 using namespace Targoman::API;
+using namespace Targoman::API::Helpers::AAA;
 using namespace QHttp;
 
-void IPStats::init()
-{;}
+void Advertisement::init()
+{}
 
-QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
+Advertisement::Advertisement(){
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
-}
 
-IPStats::IPStats() :
-    intfTable("AAA",
-              "tblIPStats",
-              { ///<ColName             Validation                          Sort   Filter RO    PK
-                {"ips_ipbIP",           QFV.integer().minValue(1),          true,  true, true, true},
-                {"ipsTimeStamp",        QFV.allwaysValid(),                 false, false, true},
-                {"ipsInsertionDate",    QFV.allwaysValid(),                 false, false, true},
-              },
-              { ///< Col        Reference Table     ForeignCol
-                {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
-              })
-{
+    ActiveAds::instance().init();
+
     this->registerMyRESTAPIs();
 }
-
-

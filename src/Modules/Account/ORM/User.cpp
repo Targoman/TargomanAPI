@@ -119,33 +119,32 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                         ).toUInt();
 }
 
-User::User() :  intfTable("AAA",
-                          "tblUser",
-                          "usr",
-                          { ///<ColName                  Validation                            Sort  Filter AS  RO    PK
-                            {"usrID",               QFV.integer().minValue(1),            true, true,  "", true, true},
-                            {"usrName",             QFV.unicodeAlNum().maxLenght(100)},
-                            {"usrFamily",           QFV.unicodeAlNum().maxLenght(100)},
-                            {"usrEmail",            QFV.emailNotFake()},
-                            {"usrMobile",           QFV.mobile()},
-                            {"usrApprovalState"},
-                          //{"usrPass"},
-                            {"usr_rolID",           QFV.integer().minValue(1)},
-                            {"usrSpecialPrivs",     QFV.json(),                            false, false},
-                            {"usrMaxSessions",      QFV.integer().betweenValues(-1, 100)},
-                            {"usrActiveSessions",   QFV.integer().betweenValues(-1, 1000), true, true, "", true},
-                            {"usrLastLogin",        QFV.dateTime(),                        true, true, "", true},
-                            {"usrCreatedBy_usrID",  QFV.integer().minValue(1),             true, true, "", true},
-                            {"usrCreationDateTime", QFV.dateTime(),                        true, true, "", true},
-                            {"usrUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                            {"usrStatus"},
-                          },
-                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
-                            {"usr_rolID",          "AAA.tblRoles",          "rolID"},
-                            {"usrID",              "AAA.tblUserExtraInfo",  "uei_usrID",  "",          true},
-                            {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
-                            {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true}
-                          })
+User::User() : intfTable("AAA",
+                         "tblUser",
+                         { ///<ColName             Validation                            Sort  Filter RO    PK
+                           {"usrID",               QFV.integer().minValue(1),            true, true, true, true},
+                           {"usrName",             QFV.unicodeAlNum().maxLenght(100)},
+                           {"usrFamily",           QFV.unicodeAlNum().maxLenght(100)},
+                           {"usrEmail",            QFV.emailNotFake()},
+                           {"usrMobile",           QFV.mobile()},
+                           {"usrApprovalState"},
+                         //{"usrPass"},
+                           {"usr_rolID",           QFV.integer().minValue(1)},
+                           {"usrSpecialPrivs",     QFV.json(),                            false, false},
+                           {"usrMaxSessions",      QFV.integer().betweenValues(-1, 100)},
+                           {"usrActiveSessions",   QFV.integer().betweenValues(-1, 1000), true, true, true},
+                           {"usrLastLogin",        QFV.dateTime(),                        true, true, true},
+                           {"usrCreatedBy_usrID",  QFV.integer().minValue(1),             true, true, true},
+                           {"usrCreationDateTime", QFV.dateTime(),                        true, true, true},
+                           {"usrUpdatedBy_usrID",  QFV.integer().minValue(1)},
+                           {"usrStatus"},
+                         },
+                         { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
+                           {"usr_rolID",          "AAA.tblRoles",          "rolID"},
+                           {"usrID",              "AAA.tblUserExtraInfo",  "uei_usrID",  "",          true},
+                           {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
+                           {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true}
+                         })
 {
     this->registerMyRESTAPIs();
 }
@@ -171,8 +170,7 @@ bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _imag
 UserExtraInfo::UserExtraInfo() :
     intfTable ("AAA",
                "tblUserExtraInfo",
-               "uei",
-               {///<ColName    Validation                     Sort  Filter    AS  RO   PK
+               {///<ColName    Validation                     Sort  Filter    RO   PK
                    {"ueiExtraInfo",       QFV.allwaysValid(), false, false},
                    {"ueiPhoto",           QFV.allwaysValid(), false, false},
                    {"ueiUpdatedBy_usrID", QFV.integer().minValue(1)},

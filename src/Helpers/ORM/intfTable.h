@@ -70,9 +70,9 @@ struct stuColumn{
               const QFieldValidator& _validator = QFV.allwaysValid(),
               bool  _sortable = true,
               bool  _filterable = true,
-              const QString& _renameAs = {},
               bool _readOnly = false,
-              bool _primaryKey = false
+              bool _primaryKey = false,
+              const QString& _renameAs = {}
               ):
         Name(_name),
         Validator(_validator),
@@ -97,7 +97,6 @@ protected:
 public:
     intfTable(const QString& _scheam,
               const QString& _name,
-              const QString& _prefix,
               const QList<stuColumn>& _cols,
               const QList<stuRelation>& _foreignKeys);
 
@@ -134,7 +133,6 @@ private:
 protected:
     QString Schema;
     QString Name;
-    QString Prefix;
     QMap<QString, stuColumn> Cols;
     QList<stuRelation> ForeignKeys;
     quint8  CountOfPKs;

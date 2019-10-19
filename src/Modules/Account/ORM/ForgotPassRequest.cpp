@@ -40,13 +40,12 @@ QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
 ForgotPassRequest::ForgotPassRequest() :
     intfTable("AAA",
               "tblForgotPassRequest",
-              "fpr",
-              { ///<ColName             Validation                                  Sort   Filter AS  RO    PK
-                {"fprUUID",             QFV.md5(),                                  true,  true,  "", true, true},
-                {"fpr_usrID",           QFV.integer().minValue(1),                  true,  true,  "", true, true},
-                {"fprRequestedVia",     QFV.asciiAlNum().minLenght(1).maxLenght(10),true,  true,  "", true} ,
-                {"fprRequestDate",      QFV.dateTime(),                             true,  true,  "", true},
-                {"fprApplyDate",        QFV.dateTime(),                             true,  true,  "", true},
+              { ///<ColName             Validation                                  Sort   Filter RO    PK
+                {"fprUUID",             QFV.md5(),                                  true,  true, true, true},
+                {"fpr_usrID",           QFV.integer().minValue(1),                  true,  true, true, true},
+                {"fprRequestedVia",     QFV.asciiAlNum().minLenght(1).maxLenght(10),true,  true, true} ,
+                {"fprRequestDate",      QFV.dateTime(),                             true,  true, true},
+                {"fprApplyDate",        QFV.dateTime(),                             true,  true, true},
                 {"invStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuFPRStatus::options().join("|"))))},
               },
               { ///< Col       Reference Table   ForeignCol

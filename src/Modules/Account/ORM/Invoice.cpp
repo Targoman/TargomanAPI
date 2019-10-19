@@ -44,12 +44,11 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 Invoice::Invoice() :
     intfTable("AAA",
               "tblIPBin",
-              "ipb",
-              { ///<ColName             Validation                                  Sort   Filter AS  RO    PK
-                {"invID",               QFV.integer().minValue(1),                  true,  true,  "", true, true},
-                {"invCreationDateTime", QFV.dateTime(),                             true,  true,  "", true},
+              { ///<ColName             Validation                                  Sort   Filter RO    PK
+                {"invID",               QFV.integer().minValue(1),                  true,  true, true, true},
+                {"invCreationDateTime", QFV.dateTime(),                             true,  true, true},
                 {"invServiceCode",      QFV.asciiAlNum().minLenght(4).maxLenght(4)},
-                {"inv_usrID",           QFV.integer().minValue(1),                  true,  true,  "", true, true},
+                {"inv_usrID",           QFV.integer().minValue(1),                  true,  true, true, true},
                 {"invDesc",             QFV.allwaysInvalid(),                       false, false},
                 {"invPaymentType",      QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuInvoiceType::options().join("|"))))},
                 {"invStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuInvoiceStatus::options().join("|"))))},

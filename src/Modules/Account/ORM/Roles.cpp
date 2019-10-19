@@ -85,15 +85,14 @@ quint64 Roles::apiCREATE(QHttp::JWT_t _JWT,
 Roles::Roles() :
     intfTable("AAA",
               "tblRoles",
-              "rol",
-              { ///<ColName            Validation                           Sort  Filter AS  RO   PK
-                {"rolID",               QFV.integer().minValue(1),          true, true, {},  true, true},
+              { ///<ColName            Validation                           Sort  Filter RO   PK
+                {"rolID",               QFV.integer().minValue(1),          true, true,  true, true},
                 {"rolName",             QFV.unicodeAlNum().maxLenght(50)},
                 {"rolParent_rolID",     QFV.integer().minValue(1)},
                 {"rolPrivileges",       QFV.json(),                         false, false},
                 {"rolSignupAllowedIPs", QFV.allwaysValid(),                 false, false}, //OJO This must be validated after splitting by comma
-                {"rolCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, "", true},
-                {"rolCreationDateTime", QFV.dateTime(),                     true,  true, "", true},
+                {"rolCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, true},
+                {"rolCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"rolUpdatedBy_usrID",  QFV.integer().minValue(1)},
                 {"rolStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
               },

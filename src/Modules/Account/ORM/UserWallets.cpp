@@ -44,10 +44,9 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 UserWallets::UserWallets() :
     intfTable("AAA",
               "tblUserWallets",
-              "wal",
-              { ///<ColName       Validation                 Sort  Filter AS  RO    PK
-                {"walID",         QFV.integer().minValue(1), true, true,  "", true, true},
-                {"wal_usrID",     QFV.integer().minValue(1), true, true,  "", true, true},
+              { ///<ColName       Validation                 Sort  Filter RO    PK
+                {"walID",         QFV.integer().minValue(1), true, true, true, true},
+                {"wal_usrID",     QFV.integer().minValue(1), true, true, true, true},
                 {"walName",       QFV.unicodeAlNum().maxLenght(100)},
                 {"walMinBalance", QFV.integer(),             false, false},
                 {"walLastBalance",QFV.integer(),             false, false},

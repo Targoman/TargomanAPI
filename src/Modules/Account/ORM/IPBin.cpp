@@ -40,14 +40,13 @@ QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 IPBin::IPBin() :
     intfTable("AAA",
               "tblIPBin",
-              "ipb",
-              { ///<ColName             Validation                 Sort   Filter AS  RO    PK
-                {"ipbIP",               QFV.integer().minValue(1), true,  true,  "", true, true},
+              { ///<ColName             Validation                 Sort   Filter RO    PK
+                {"ipbIP",               QFV.integer().minValue(1), true,  true, true, true},
                 {"ipbReadable",         QFV.unicodeAlNum().maxLenght(50)},
-                {"ipbFirstAccess",      QFV.dateTime(),            true,  true,  "", true},
-                {"ipbAccessCount",      QFV.integer().minValue(0), true,  true,  "", true},
-                {"ipbLastAccess",       QFV.dateTime(),            true,  true,  "", true},
-                {"ipbBlockingTime",     QFV.allwaysInvalid(),      false, false, "", true},
+                {"ipbFirstAccess",      QFV.dateTime(),            true,  true, true},
+                {"ipbAccessCount",      QFV.integer().minValue(0), true,  true, true},
+                {"ipbLastAccess",       QFV.dateTime(),            true,  true, true},
+                {"ipbBlockingTime",     QFV.allwaysInvalid(),      false, false, true},
                 {"ipbBlockedBy_usrID",  QFV.integer().minValue(1)},
                 {"ipbStatus", QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuIPBinStatus::options().join("|"))))},
               },

@@ -20,36 +20,30 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "IPStats.h"
-#include "Helpers/AAA/AAA.hpp"
+#ifndef TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_ACTIVEADS_H
+#define TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_ACTIVEADS_H
 
-using namespace Targoman;
-using namespace Targoman::API;
-using namespace QHttp;
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/intfTable.h"
 
-void IPStats::init()
-{;}
+namespace Targoman {
+namespace API {
 
-QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
+class ActiveAds : public QHttp::intfRESTAPIHolder, private intfTable
 {
-    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
+    Q_OBJECT
+public:
+    void init();
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+private slots:
+    QVariant ORMGET("Get ActionLog information")
+
+private:
+    ActiveAds();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advertisement,ActiveAds);
+};
+
 }
-
-IPStats::IPStats() :
-    intfTable("AAA",
-              "tblIPStats",
-              { ///<ColName             Validation                          Sort   Filter RO    PK
-                {"ips_ipbIP",           QFV.integer().minValue(1),          true,  true, true, true},
-                {"ipsTimeStamp",        QFV.allwaysValid(),                 false, false, true},
-                {"ipsInsertionDate",    QFV.allwaysValid(),                 false, false, true},
-              },
-              { ///< Col        Reference Table     ForeignCol
-                {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
-              })
-{
-    this->registerMyRESTAPIs();
 }
-
-
+#endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_ACTIVEADS_H

@@ -20,36 +20,40 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "IPStats.h"
-#include "Helpers/AAA/AAA.hpp"
+#ifndef TARGOMAN_API_MODULES_AAA_ADVERTISEMENT_H
+#define TARGOMAN_API_MODULES_AAA_ADVERTISEMENT_H
 
-using namespace Targoman;
-using namespace Targoman::API;
-using namespace QHttp;
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
 
-void IPStats::init()
-{;}
+namespace Targoman {
+namespace API {
 
-QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
+TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
+                               Web,
+                               Mobile,
+                               App
+                               );
+#ifndef API
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#endif
+
+class Advertisement : public QHttp::intfRESTAPIHolder
 {
-    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
+    Q_OBJECT
+public:
+    void init();
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+private slots:
+
+private:
+    Advertisement();
+    TARGOMAN_DEFINE_SINGLETON_MODULE(Advertisement);
+};
+
+}
 }
 
-IPStats::IPStats() :
-    intfTable("AAA",
-              "tblIPStats",
-              { ///<ColName             Validation                          Sort   Filter RO    PK
-                {"ips_ipbIP",           QFV.integer().minValue(1),          true,  true, true, true},
-                {"ipsTimeStamp",        QFV.allwaysValid(),                 false, false, true},
-                {"ipsInsertionDate",    QFV.allwaysValid(),                 false, false, true},
-              },
-              { ///< Col        Reference Table     ForeignCol
-                {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
-              })
-{
-    this->registerMyRESTAPIs();
-}
+Q_DECLARE_METATYPE(Targoman::API::enuOAuthType::Type);
 
-
+#endif // TARGOMAN_API_MODULES_AAA_ADVERTISEMENT_H

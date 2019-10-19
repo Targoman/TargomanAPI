@@ -48,6 +48,14 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
                      Removed = 'R',
                       )
+
+TARGOMAN_DEFINE_ENUM(enuPendableStatus,
+                     Pending = 'P'
+                     Active = 'A',
+                     Banned = 'B',
+                     Removed = 'R',
+                      )
+
 }
 }
 

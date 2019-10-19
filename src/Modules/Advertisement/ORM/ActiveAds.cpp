@@ -20,36 +20,35 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "IPStats.h"
+#include "ActiveAds.h"
 #include "Helpers/AAA/AAA.hpp"
 
 using namespace Targoman;
 using namespace Targoman::API;
 using namespace QHttp;
 
-void IPStats::init()
+void ActiveAds::init()
 {;}
 
-QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
-
+    Authorization::checkPriv(_JWT,{"Advertisement:ActiveAds:CRUD~0100"});
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-IPStats::IPStats() :
-    intfTable("AAA",
-              "tblIPStats",
-              { ///<ColName             Validation                          Sort   Filter RO    PK
-                {"ips_ipbIP",           QFV.integer().minValue(1),          true,  true, true, true},
-                {"ipsTimeStamp",        QFV.allwaysValid(),                 false, false, true},
-                {"ipsInsertionDate",    QFV.allwaysValid(),                 false, false, true},
+ActiveAds::ActiveAds() :
+    intfTable("Advertisement",
+              "tblActiveAds",
+              { ///<ColName             Validation                      Sort   Filter RO   PK
+                {"adv_adbID",           QFV.integer().minValue(1),      true,  true, true, true},
+                {"advType",             QFV.asciiAlNum().maxValue(2)},
+                {"adv_ordID",           QFV.dateTime()},
+                {"advPage",             QFV.asciiAlNum().maxLenght(20)},
               },
-              { ///< Col        Reference Table     ForeignCol
-                {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
+              { ///< Col             Reference Table                 ForeignCol   Rename     LeftJoin
+                {"adv_adbID",        "Advertisement.tblAdvBin",      "adbID"},
+                {"adv_ordID",        "Advertisement.tblAdvOrders",   "ordID"},
               })
 {
     this->registerMyRESTAPIs();
 }
-
-

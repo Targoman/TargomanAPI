@@ -44,14 +44,13 @@ QVariant BankPaymentOrder::apiGET(GET_METHOD_ARGS_IMPL)
 BankPaymentOrder::BankPaymentOrder() :
     intfTable("AAA",
               "tblBankPaymentOrder",
-              "bpo",
-              { ///<ColName            Validation                           Sort   Filter AS  RO   PK
-                {"bpoID",               QFV.integer().minValue(1),          true,  true, "", true, true},
-                {"bpoMD5",              QFV.md5(),                          true,  true, "", true, true},
-                {"bpo_invID",           QFV.integer().minValue(1),          true,  true, "", true},
-                {"bpoCreationDateTime", QFV.dateTime(),                     true,  true, "", true},
-                {"bpoBankTrnID",        QFV.allwaysValid().maxLenght(50),   true,  true, "", true},
-                {"bpoAmount",           QFV.dateTime(),                     true,  true, "", true},
+              { ///<ColName            Validation                           Sort   Filter RO   PK
+                {"bpoID",               QFV.integer().minValue(1),          true,  true, true, true},
+                {"bpoMD5",              QFV.md5(),                          true,  true, true, true},
+                {"bpo_invID",           QFV.integer().minValue(1),          true,  true, true},
+                {"bpoCreationDateTime", QFV.dateTime(),                     true,  true, true},
+                {"bpoBankTrnID",        QFV.allwaysValid().maxLenght(50),   true,  true, true},
+                {"bpoAmount",           QFV.dateTime(),                     true,  true, true},
                 {"bpoStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuBankPaymentStatus::options().join("|"))))},
                 {"bpoResult",           QFV.allwaysValid(),                 false,false},
               },

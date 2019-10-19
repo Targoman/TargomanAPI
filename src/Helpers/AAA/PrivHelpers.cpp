@@ -47,7 +47,7 @@ QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStrin
     return  Privs;
 }
 
-char PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess){
+bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess){
     QStringList AccessItemParts = _requiredAccess.split(":");
     QJsonObject CurrCheckingPriv = _privs;
     foreach(auto Part, AccessItemParts){
@@ -58,11 +58,14 @@ char PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
 
             QString CheckingPriv = CurrCheckingPriv.value(PRIVItems::CRUD).toString();
             for(quint8 i=0; i<4; ++i)
-                if (RequiredAccess[i] == '1' ||  RequiredAccess[i].toUpper() == 'T'){
+                if (RequiredAccess[i] == '1' ||
+                        RequiredAccess[i].toUpper() == 'T' ||
+                        RequiredAccess[i].toUpper() == 'S'
+                        ){
                     if(CheckingPriv[i] == '0' || CheckingPriv[i].toUpper() == 'F')
                         return false;
-                    else if (CheckingPriv[i].toUpper() == 'S')
-                        return 'S';
+                    else
+                        return true;
                 }
 
 
