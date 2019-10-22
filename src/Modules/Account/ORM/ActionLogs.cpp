@@ -20,36 +20,41 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "AdvProps.h"
+#include "ActionLogs.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
-void AdvProps::init()
+void ActionLogs::init()
 {;}
 
-QVariant AdvProps::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant ActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advertisement:AdvProps:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:ActionLogs:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-AdvProps::AdvProps() :
-    intfTable("Advertisement",
-              "tblAdvProps",
+ActionLogs::ActionLogs() :
+    intfTable("AAA",
+              "tblActionLogs",
               { ///<ColName             Validation                      Sort   Filter RO   PK
-                {"adv_adbID",           QFV.integer().minValue(1),      true,  true, true, true},
-                {"advType",             QFV.asciiAlNum().maxValue(2)},
-                {"adv_ordID",           QFV.dateTime()},
-                {"advPage",             QFV.asciiAlNum().maxLenght(20)},
+                {"atlID",               QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlBy_usrID",         QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlInsertionDateTime",QFV.dateTime(),                 true,  true, true},
+                {"atlType",             QFV.asciiAlNum().maxLenght(50), true,  true, true},
+                {"atlType",             QFV.allwaysInvalid(),           false,false, true},
               },
-              { ///< Col             Reference Table                 ForeignCol   Rename     LeftJoin
-                {"adv_adbID",        "Advertisement.tblAdvBin",      "adbID"},
-                {"adv_ordID",        "Advertisement.tblAdvOrders",   "ordID"},
+              { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
+                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},
               })
 {
     this->registerMyRESTAPIs();
+}
+
+}
+}
 }

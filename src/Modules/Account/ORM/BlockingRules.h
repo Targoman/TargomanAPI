@@ -20,28 +20,29 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_BlockingRule_H
-#define TARGOMAN_API_MODULES_AAA_ORM_BlockingRule_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 #include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-class BlockingRule : public QHttp::intfRESTAPIHolder, private intfTable
+class BlockingRules : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get BlockingRule information")
+    QVariant ORMGET("Get BlockingRules information")
 
     bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete BlockingRule")
+             "Delete BlockingRules")
 
     bool API(UPDATE,,(QHttp::JWT_t _JWT,
                       quint64 _blrID,
@@ -50,20 +51,22 @@ private slots:
                       QHttp::DateTime_t _endTime = {},
                       QString _cause = {},
                       Targoman::API::enuGenericStatus::Type _status = {}),
-             "Update BlockingRule by priviledged user")
+             "Update BlockingRules by priviledged user")
 
     quint64 API(CREATE,,(QHttp::JWT_t _JWT,
                          QHttp::IPv4_t _ip,
                          QHttp::DateTime_t _startTime,
                          QHttp::DateTime_t _endTime,
                          QString _cause),
-             "Create a new BlockingRule by priviledged user")
+             "Create a new BlockingRules by priviledged user")
 
 private:
-    BlockingRule();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,BlockingRule);
+    BlockingRules();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,BlockingRules);
 };
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_BlockingRule_H
+}
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H

@@ -22,8 +22,9 @@
 
 #include "APITokenValidIPs.h"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void APITokenValidIPs::init()
@@ -71,7 +72,7 @@ quint64 APITokenValidIPs::apiCREATE(QHttp::JWT_t _JWT,
 }
 
 APITokenValidIPs::APITokenValidIPs() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblAPITokenValidIPs",
               { ///<ColName            Validation                           Sort   Filter RO   PK
                 {"tviID",               QFV.integer().minValue(1),          true,  true, true,  true},
@@ -81,7 +82,7 @@ APITokenValidIPs::APITokenValidIPs() :
                 {"tviCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, true},
                 {"tviCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"tviUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"tviStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
+                {"tviStatus",           QFV_Enum(enuGenericStatus)},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"tvi_aptID",          "AAA.tblAPIToken",  "aptID"},
@@ -92,3 +93,6 @@ APITokenValidIPs::APITokenValidIPs() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}

@@ -20,23 +20,24 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "APIToken.h"
+#include "APITokens.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
-void APIToken::init()
+void APITokens::init()
 {;}
 
-QVariant APIToken::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Account:APIToken:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0100"});
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool APIToken::apiUPDATE(QHttp::JWT_t _JWT,
+bool APITokens::apiUPDATE(QHttp::JWT_t _JWT,
                          quint64 _tokenID,
                          QString _token,
                          quint32 _userID,
@@ -45,9 +46,9 @@ bool APIToken::apiUPDATE(QHttp::JWT_t _JWT,
                          bool    _validateIP,
                          QHttp::Date_t _expiryDate,
                          QHttp::JSON_t _extraPrivs,
-                         Targoman::API::enuAPITokenStatus::Type _status)
+                         Targoman::API::enuAPITokensStatus::Type _status)
 {
-    Authorization::checkPriv(_JWT,{"Account:APIToken:CRUD~0010"});
+    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"aptID", _tokenID}},
                         {
@@ -64,13 +65,13 @@ bool APIToken::apiUPDATE(QHttp::JWT_t _JWT,
                         );
 }
 
-bool APIToken::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+bool APITokens::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
 {
-    Authorization::checkPriv(_JWT,{"Account:APIToken:CRUD~0001"});
+    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0001"});
     return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
 }
 
-quint32 APIToken::apiCREATE(QHttp::JWT_t _JWT,
+quint32 APITokens::apiCREATE(QHttp::JWT_t _JWT,
                             QString _token,
                             quint32 _userID,
                             quint32 _rolID,
@@ -78,9 +79,9 @@ quint32 APIToken::apiCREATE(QHttp::JWT_t _JWT,
                             bool    _validateIP,
                             QHttp::Date_t _expiryDate,
                             QHttp::JSON_t _extraPrivs,
-                            Targoman::API::enuAPITokenStatus::Type _status)
+                            Targoman::API::enuAPITokensStatus::Type _status)
 {
-    Authorization::checkPriv(_JWT,{"Account:APIToken:CRUD~1000"});
+    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~1000"});
     return this->create(AAADACInstance(),
                         {
                             {"aptToken", _token},
@@ -95,9 +96,9 @@ quint32 APIToken::apiCREATE(QHttp::JWT_t _JWT,
                         ).toUInt();
 }
 
-APIToken::APIToken() :
-    intfTable("AAA",
-              "tblAPIToken",
+APITokens::APITokens() :
+    clsTable("AAA",
+              "tblAPITokens",
               { ///<ColName            Validation                           Sort  Filter RO   PK
                 {"aptID",               QFV.integer().minValue(1),          true, true,  true, true},
                 {"aptToken",            QFV.asciiAlNum().maxLenght(50),     true, true, false, true},
@@ -112,7 +113,7 @@ APIToken::APIToken() :
                 {"aptCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, true},
                 {"aptCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"aptUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"aptStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuAPITokenStatus::options().join("|"))))},
+                {"aptStatus",           QFV_Enum(enuAPITokensStatus)},
               },
               { ///< Col               Reference Table    ForeignCol   Rename     LeftJoin
                 {"apt_rolID",          "AAA.tblRoles",    "rolID",     "",         true},
@@ -121,6 +122,10 @@ APIToken::APIToken() :
                 {"rolUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAPITokenStatus);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAPITokensStatus);
     this->registerMyRESTAPIs();
+}
+
+}
+}
 }

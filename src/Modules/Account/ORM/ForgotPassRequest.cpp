@@ -23,8 +23,9 @@
 #include "ForgotPassRequest.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void ForgotPassRequest::init()
@@ -38,7 +39,7 @@ QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 ForgotPassRequest::ForgotPassRequest() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblForgotPassRequest",
               { ///<ColName             Validation                                  Sort   Filter RO    PK
                 {"fprUUID",             QFV.md5(),                                  true,  true, true, true},
@@ -46,7 +47,7 @@ ForgotPassRequest::ForgotPassRequest() :
                 {"fprRequestedVia",     QFV.asciiAlNum().minLenght(1).maxLenght(10),true,  true, true} ,
                 {"fprRequestDate",      QFV.dateTime(),                             true,  true, true},
                 {"fprApplyDate",        QFV.dateTime(),                             true,  true, true},
-                {"invStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuFPRStatus::options().join("|"))))},
+                {"invStatus",           QFV_Enum(enuFPRStatus)},
               },
               { ///< Col       Reference Table   ForeignCol
                 {"fpr_usrID",  "AAA.tblUser",    "usrID"},
@@ -55,4 +56,8 @@ ForgotPassRequest::ForgotPassRequest() :
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuFPRStatus);
 
     this->registerMyRESTAPIs();
+}
+
+}
+}
 }

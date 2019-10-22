@@ -22,8 +22,9 @@
 
 #include "Roles.h"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void Roles::init()
@@ -83,7 +84,7 @@ quint64 Roles::apiCREATE(QHttp::JWT_t _JWT,
 
 
 Roles::Roles() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblRoles",
               { ///<ColName            Validation                           Sort  Filter RO   PK
                 {"rolID",               QFV.integer().minValue(1),          true, true,  true, true},
@@ -94,7 +95,7 @@ Roles::Roles() :
                 {"rolCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, true},
                 {"rolCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"rolUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"rolStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
+                {"rolStatus",           QFV_Enum(enuGenericStatus)},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"rolParent_rolID",    "AAA.tblRoles",     "rolID",     "Parent_",  true},
@@ -105,4 +106,7 @@ Roles::Roles() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 

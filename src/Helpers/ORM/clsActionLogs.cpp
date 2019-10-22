@@ -20,47 +20,39 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
-#define TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
-
-#include <QJsonObject>
-#include <QVariantMap>
-#include "libTargomanCommon/Macros.h"
+#include "clsActionLogs.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
-TARGOMAN_DEFINE_ENUM(enuUserStatus,
-                     Active = 'A',
-                     Removed = 'R',
-                     Blocked = 'B',
-                     MustChangePass = 'C',
-                     MustValidate = 'V',
-                     )
+namespace Helpers {
+namespace ORM {
 
-TARGOMAN_DEFINE_ENUM(enuUserApproval,
-                     None = 'N',
-                     All = 'A',
-                     JustMobile = 'M',
-                     JustEmail = 'E',
-                     )
+QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
+    return this->selectFromTable(this->DAC, {}, {}, GET_METHOD_CALL_ARGS);
+}
 
-TARGOMAN_DEFINE_ENUM(enuGenericStatus,
-                     Active = 'A',
-                     Removed = 'R',
-                     )
-
-TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
-                     Pending = 'P',
-                     Active = 'A',
-                     Banned = 'B',
-                     Removed = 'R',
-                     )
+clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module) :
+    clsTable(_schema,
+            "tblActionLogs",
+            {
+                {"atlID",               QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlBy_usrID",         QFV.integer().minValue(1),      true,  true, true, true},
+                {"atlInsertionDateTime",QFV.dateTime(),                 true,  true, true},
+                {"atlType",             QFV.asciiAlNum().maxLenght(50), true,  true, true},
+                {"atlType",             QFV.allwaysInvalid(),           false,false, true},
+            },
+            {
+                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"}, \
+            }),
+    DAC(_dac),
+    Module(_module)
+{
+}
 
 }
 }
-
-Q_DECLARE_METATYPE(Targoman::API::enuUserStatus::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuUserApproval::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuGenericStatus::Type);
-
-#endif // TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
+}
+}

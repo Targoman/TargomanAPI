@@ -20,18 +20,19 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_ROLES_H
-#define TARGOMAN_API_MODULES_AAA_ORM_ROLES_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 #include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-class Roles : public QHttp::intfRESTAPIHolder, private intfTable
+class Roles : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -65,4 +66,6 @@ private:
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_ROLES_H
+}
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

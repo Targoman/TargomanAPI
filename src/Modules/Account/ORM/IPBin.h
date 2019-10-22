@@ -20,22 +20,22 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_IPBIN_H
-#define TARGOMAN_API_MODULES_AAA_ORM_IPBIN_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuIPBinStatus,
                      Active  = 'A',
                      Blocked = 'B',
                      )
+namespace AAA {
 
-class IPBin : public QHttp::intfRESTAPIHolder, private intfTable
+class IPBin : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -51,7 +51,8 @@ private:
 
 }
 }
+}
 
 Q_DECLARE_METATYPE(Targoman::API::enuIPBinStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_IPBIN_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H

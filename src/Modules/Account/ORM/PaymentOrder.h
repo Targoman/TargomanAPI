@@ -20,30 +20,41 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_ACTIONLOG_H
-#define TARGOMAN_API_MODULES_AAA_ORM_ACTIONLOG_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
+TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
+                     Pending  = 'N',
+                     Success  = 'S',
+                     Error    = 'A',
+                     Removed  = 'R'
+                     )
+namespace AAA {
 
-class ActionLog : public QHttp::intfRESTAPIHolder, private intfTable
+class PaymentOrders : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get ActionLog information")
+    QVariant ORMGET("Get PaymentOrders information")
 
 private:
-    ActionLog();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ActionLog);
+    PaymentOrders();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,PaymentOrders);
 };
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_ACTIONLOG_H
+}
+
+Q_DECLARE_METATYPE(Targoman::API::enuPaymentStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

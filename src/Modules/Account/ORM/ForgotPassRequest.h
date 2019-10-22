@@ -20,24 +20,24 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_FORGOTPASSREQUEST_H
-#define TARGOMAN_API_MODULES_AAA_ORM_FORGOTPASSREQUEST_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuFPRStatus,
                      New      = 'N',
                      Sent     = 'S',
                      Applied  = 'A',
                      Removed  = 'R'
                      )
+namespace AAA {
 
-class ForgotPassRequest : public QHttp::intfRESTAPIHolder, private intfTable
+class ForgotPassRequest : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -53,6 +53,8 @@ private:
 
 }
 }
+}
+
 Q_DECLARE_METATYPE(Targoman::API::enuFPRStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_FORGOTPASSREQUEST_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H

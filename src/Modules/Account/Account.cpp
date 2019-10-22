@@ -29,12 +29,12 @@
 #include "Helpers/AAA/GenericEnums.hpp"
 #include "Configs.h"
 
-#include "ORM/ActionLog.h"
+//#include "ORM/ActionLogs.h"
+#include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
-#include "ORM/ActionLog.h"
 #include "ORM/ActiveSessions.h"
-#include "ORM/BankPaymentOrder.h"
-#include "ORM/BlockingRule.h"
+#include "ORM/PaymentOrder.h"
+#include "ORM/BlockingRules.h"
 #include "ORM/ForgotPassRequest.h"
 #include "ORM/IPBin.h"
 #include "ORM/IPStats.h"
@@ -44,8 +44,11 @@
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 
+#include "Helpers/ORM/clsActionLogs.h"
+
 using namespace Targoman;
 using namespace Targoman::API;
+using namespace Targoman::API::AAA;
 using namespace Targoman::API::Helpers::AAA;
 using namespace QHttp;
 
@@ -189,24 +192,25 @@ bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5
     return true;
 }
 
-Account::Account(){
-
+Account::Account() :
+    clsRESTAPIWithActionLogs(AAADACInstance(), "AAA", "Account")
+{
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuOAuthType);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuForgotPassLinkVia);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserStatus);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserApproval);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuGenericStatus);
 
-    ActionLog::instance().init();
-    APITokenValidIPs::instance().init();
-    ActionLog::instance().init();
+//    ActionLogs::instance().init();
     ActiveSessions::instance().init();
-    BankPaymentOrder::instance().init();
-    BlockingRule::instance().init();
+    APITokens::instance().init();
+    APITokenValidIPs::instance().init();
+    BlockingRules::instance().init();
     ForgotPassRequest::instance().init();
+    Invoice::instance().init();
     IPBin::instance().init();
     IPStats::instance().init();
-    Invoice::instance().init();
+    PaymentOrders::instance().init();
     Roles::instance().init();
     User::instance().init();
     UserWallets::instance().init();

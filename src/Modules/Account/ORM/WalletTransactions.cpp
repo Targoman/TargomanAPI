@@ -23,8 +23,9 @@
 #include "WalletTransactions.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void WalletTransactions::init()
@@ -43,14 +44,14 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 WalletTransactions::WalletTransactions() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblWalletsTransactions",
               { ///<ColName    Validation                   Sort  Filter RO   PK
                 {"wlt_walID",   QFV.integer().minValue(1),  true, true, true, true},
                 {"wltID",       QFV.integer().minValue(1),  true, true, true, true},
                 {"wltDateTime", QFV.dateTime(),             true, true, true},
                 {"wltAmount",   QFV.allwaysInvalid(),      false,false, true},
-                {"wltStatus",   QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuWalletTransactionStatus::options().join("|"))))},
+                {"wltStatus",   QFV_Enum(enuWalletTransactionStatus)},
               },
               { ///< Col       Reference Table             ForeignCol     Rename   LeftJoin
                 {"wlt_walID", "AAA.tblUserWallets",         "walID"},
@@ -66,9 +67,8 @@ void WalletBalances::init()
 {;}
 
 WalletBalances::WalletBalances() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblWalletBalances",
-              "wbl",
               {
                 {"wblBalance", QFV.allwaysInvalid(), false, false, true},
               },
@@ -76,5 +76,9 @@ WalletBalances::WalletBalances() :
               }
               )
 {
+    this->registerMyRESTAPIs();
+}
 
+}
+}
 }

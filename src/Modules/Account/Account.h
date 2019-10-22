@@ -20,12 +20,13 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_AAA_H
-#define TARGOMAN_API_MODULES_AAA_AAA_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_AAA_H
+#define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/AAA/Authentication.h"
+#include "Helpers/ORM/clsActionLogs.h"
 
 namespace Targoman {
 namespace API {
@@ -39,7 +40,7 @@ TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class Account : public QHttp::intfRESTAPIHolder
+class Account : private Helpers::ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
 public:
@@ -112,4 +113,4 @@ private:
 Q_DECLARE_METATYPE(Targoman::API::enuOAuthType::Type);
 Q_DECLARE_METATYPE(Targoman::API::enuForgotPassLinkVia::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_AAA_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

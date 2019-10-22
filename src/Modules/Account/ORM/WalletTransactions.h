@@ -20,22 +20,22 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H
-#define TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      New = 'A',
                      Processed = 'P',
                      )
+namespace AAA {
 
-class WalletTransactions : public QHttp::intfRESTAPIHolder, private intfTable
+class WalletTransactions : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -49,7 +49,7 @@ private:
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,WalletTransactions);
 };
 
-class WalletBalances : public QHttp::intfRESTAPIHolder, private intfTable
+class WalletBalances : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -62,7 +62,8 @@ private:
 
 }
 }
+}
 
 Q_DECLARE_METATYPE(Targoman::API::enuWalletTransactionStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_WALLETTRANSACTIONS_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

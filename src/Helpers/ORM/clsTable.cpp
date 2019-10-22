@@ -19,7 +19,7 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#include "intfTable.h"
+#include "clsTable.h"
 #include "QHttp/HTTPExceptions.h"
 #include "QHttp/GenericTypes.h"
 #include <QRegularExpression>
@@ -33,10 +33,10 @@ using namespace QHttp;
 using namespace Targoman::DBManager;
 
 
-QHash<QString, intfTable*> intfTable::Registry;
+QHash<QString, clsTable*> clsTable::Registry;
 static bool TypesRegistered = false;
 
-intfTable::intfTable(const QString& _schema,
+clsTable::clsTable(const QString& _schema,
                      const QString& _name,
                      const QList<Targoman::API::Helpers::ORM::stuColumn>& _cols,
                      const QList<stuRelation>& _foreignKeys) :
@@ -50,7 +50,7 @@ intfTable::intfTable(const QString& _schema,
         if(Col.IsPrimaryKey)
             this->CountOfPKs++;
     }
-    intfTable::Registry.insert(Schema + "." + Name, this);
+    clsTable::Registry.insert(Schema + "." + Name, this);
     if(TypesRegistered)
         return;
 
@@ -61,15 +61,15 @@ intfTable::intfTable(const QString& _schema,
     TypesRegistered = true;
 }
 
-QString intfTable::finalColName(const stuColumn& _col, const QString& _prefix) const{
+QString clsTable::finalColName(const stuColumn& _col, const QString& _prefix) const{
     return _prefix + (_col.RenameAs.isEmpty() ? _col.Name : _col.RenameAs);
 }
 
-QString intfTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix) const {
+QString clsTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix) const {
     return (_col.RenameAs.isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
 };
 
-QString intfTable::makeColName(const stuColumn& _col, const stuRelation& _relation) const {
+QString clsTable::makeColName(const stuColumn& _col, const stuRelation& _relation) const {
     return  (_relation.Column.isEmpty() ?
                  this->Name :
                  (_relation.RenamingPrefix.isEmpty() ?
@@ -79,7 +79,7 @@ QString intfTable::makeColName(const stuColumn& _col, const stuRelation& _relati
                  ) + "." + _col.Name + this->makeColRenamedAs(_col, _relation.RenamingPrefix);
 };
 
-QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
+QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                     const QStringList& _extraJoins,
                                     const QString& _extraFilters,
                                     QString _extraPath,
@@ -155,7 +155,7 @@ QVariant intfTable::selectFromTable(DBManager::clsDAC& _db,
     }
 }
 
-bool intfTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariantMap _updateInfo)
+bool clsTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariantMap _updateInfo)
 {
     QStringList  UpdateCommands;
     QVariantList Values;
@@ -195,7 +195,7 @@ bool intfTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVarian
     return Result.numRowsAffected() > 0;
 }
 
-QVariant intfTable::create(clsDAC& _db, QVariantMap _createInfo)
+QVariant clsTable::create(clsDAC& _db, QVariantMap _createInfo)
 {
     QStringList  CreateCommands;
     QVariantList Values;
@@ -221,7 +221,7 @@ QVariant intfTable::create(clsDAC& _db, QVariantMap _createInfo)
     return Result.lastInsertId();
 }
 
-bool intfTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
+bool clsTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
 {
     if(this->update(_db, _primaryKeys, {{this->Cols.last().Name, "Removed"}}) == false)
         return false;
@@ -249,7 +249,7 @@ bool intfTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
     return Result.numRowsAffected() > 0;
 }
 
-intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
+clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols != "*")
         QFV.asciiAlNum(false, ",").validate(_requiredCols, "cols");
@@ -257,7 +257,7 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
     QFV.optional(QFV.asciiAlNum(false, ",\\+\\-")).validate(_orderBy, "orderBy");
     QFV.optional(QFV.asciiAlNum(false, ",")).validate(_groupBy, "groupBy");
 
-    intfTable::stuSelectItems SelectItems;
+    clsTable::stuSelectItems SelectItems;
 
     /****************************************************************************/
     QStringList RequiredCols = _requiredCols.split(",", QString::SkipEmptyParts);
@@ -276,7 +276,7 @@ intfTable::stuSelectItems intfTable::makeListingQuery(const QString& _requiredCo
 
     QList<stuRelation> UsedJoins;
     foreach(auto Relation, this->ForeignKeys){
-        intfTable* ForeignTable = this->Registry[Relation.ReferenceTable];
+        clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
         if(ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 

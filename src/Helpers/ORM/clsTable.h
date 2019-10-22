@@ -20,8 +20,8 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_HELPERS_ORM_INTFTABLE_HPP
-#define TARGOMAN_API_HELPERS_ORM_INTFTABLE_HPP
+#ifndef TARGOMAN_API_HELPERS_ORM_INTFTABLE_H
+#define TARGOMAN_API_HELPERS_ORM_INTFTABLE_H
 
 #include "QFieldValidator.h"
 #include <functional>
@@ -38,7 +38,7 @@ QHTTP_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 namespace Helpers {
 namespace ORM {
 
-class intfTable;
+class clsTable;
 
 struct stuRelation{
     QString Column;
@@ -84,7 +84,7 @@ struct stuColumn{
     {;}
 };
 
-class intfTable{
+class clsTable{
 protected:
     struct stuSelectItems{
         QStringList Cols;
@@ -95,7 +95,7 @@ protected:
     };
 
 public:
-    intfTable(const QString& _scheam,
+    clsTable(const QString& _scheam,
               const QString& _name,
               const QList<stuColumn>& _cols,
               const QList<stuRelation>& _foreignKeys);
@@ -137,14 +137,14 @@ protected:
     QList<stuRelation> ForeignKeys;
     quint8  CountOfPKs;
 
-    static QHash<QString, intfTable*> Registry;
+    static QHash<QString, clsTable*> Registry;
 };
 
 #define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={"*"}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
 #define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
-
+#define QFV_Enum(_enum) QFV.matches(QRegularExpression(QString("^[%1]$").arg(_enum::options().join("|"))))
 #ifndef API
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif

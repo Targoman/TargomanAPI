@@ -26,6 +26,7 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "Modules/Translation/Translation.h"
 #include "Modules/Account/Account.h"
+#include "Modules/Advert/Advert.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -87,8 +88,9 @@ void appTargomanAPI::slotExecute()
                                         gConfigs::DB::Schema.value()));
 
         //Initialize API modules
-        //Translation::instance().init();
-        Targoman::API::Account::instance().init();
+        Translation::instance().init();
+        Account::instance().init();
+        Advert::instance().init();
 
         std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
 

@@ -20,30 +20,31 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "BankPaymentOrder.h"
+#include "PaymentOrder.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
-void BankPaymentOrder::init()
+void PaymentOrders::init()
 {;}
 
-QVariant BankPaymentOrder::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant PaymentOrders::apiGET(GET_METHOD_ARGS_IMPL)
 {
     bool IsSelf = _EXTRAPATH.split(',').size() == 3 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
     if(_EXTRAPATH.isEmpty() || IsSelf == false)
-        Authorization::checkPriv(_JWT,{"Account:BankPaymentOrder:CRUD~0100"});
+        Authorization::checkPriv(_JWT,{"Account:PaymentOrders:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {},
                                  IsSelf ? "" : QString("+inv_usrID=%1").arg(clsJWT(_JWT).usrID()),
                                  GET_METHOD_CALL_ARGS);
 }
 
-BankPaymentOrder::BankPaymentOrder() :
-    intfTable("AAA",
-              "tblBankPaymentOrder",
+PaymentOrders::PaymentOrders() :
+    clsTable("AAA",
+              "tblPaymentOrders",
               { ///<ColName            Validation                           Sort   Filter RO   PK
                 {"bpoID",               QFV.integer().minValue(1),          true,  true, true, true},
                 {"bpoMD5",              QFV.md5(),                          true,  true, true, true},
@@ -51,15 +52,18 @@ BankPaymentOrder::BankPaymentOrder() :
                 {"bpoCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"bpoBankTrnID",        QFV.allwaysValid().maxLenght(50),   true,  true, true},
                 {"bpoAmount",           QFV.dateTime(),                     true,  true, true},
-                {"bpoStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuBankPaymentStatus::options().join("|"))))},
+                {"bpoStatus",           QFV_Enum(enuPaymentStatus)},
                 {"bpoResult",           QFV.allwaysValid(),                 false,false},
               },
               { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
                 {"bpo_invID",  "AAA.tblInvoice",           "invID",     "",        true},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBankPaymentStatus);
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuPaymentStatus);
 
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}

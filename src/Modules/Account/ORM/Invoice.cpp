@@ -23,8 +23,9 @@
 #include "Invoice.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void Invoice::init()
@@ -42,7 +43,7 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 Invoice::Invoice() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblIPBin",
               { ///<ColName             Validation                                  Sort   Filter RO    PK
                 {"invID",               QFV.integer().minValue(1),                  true,  true, true, true},
@@ -50,8 +51,8 @@ Invoice::Invoice() :
                 {"invServiceCode",      QFV.asciiAlNum().minLenght(4).maxLenght(4)},
                 {"inv_usrID",           QFV.integer().minValue(1),                  true,  true, true, true},
                 {"invDesc",             QFV.allwaysInvalid(),                       false, false},
-                {"invPaymentType",      QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuInvoiceType::options().join("|"))))},
-                {"invStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuInvoiceStatus::options().join("|"))))},
+                {"invPaymentType",      QFV_Enum(enuInvoiceType)},
+                {"invStatus",           QFV_Enum(enuInvoiceStatus)},
               },
               { ///< Col       Reference Table   ForeignCol
                 {"inv_usrID",  "AAA.tblUser",    "usrID"},
@@ -63,5 +64,8 @@ Invoice::Invoice() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 
 

@@ -24,6 +24,7 @@
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/clsActionLogs.h"
 
 namespace Targoman {
 namespace API {
@@ -32,7 +33,7 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class Translation  : public QHttp::intfRESTAPIHolder
+class Translation  : private Helpers::ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
 public:
@@ -59,7 +60,6 @@ private slots:
 
 private:
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
-
 };
 
 }

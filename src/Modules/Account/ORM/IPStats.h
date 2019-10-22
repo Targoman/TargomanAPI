@@ -20,17 +20,18 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H
-#define TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-class IPStats : public QHttp::intfRESTAPIHolder, private intfTable
+class IPStats : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -46,4 +47,6 @@ private:
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_IPSTATS_H
+}
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H

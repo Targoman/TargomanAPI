@@ -20,24 +20,25 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H
-#define TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuSessionStatus,
                      Active    = 'A',
                      LoggedOut = 'G',
                      FiredOut  = 'F',
                      Expired   = 'E'
                      )
+namespace AAA {
 
-class ActiveSessions : public QHttp::intfRESTAPIHolder, private intfTable
+
+class ActiveSessions : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -53,6 +54,8 @@ private:
 
 }
 }
+}
+
 Q_DECLARE_METATYPE(Targoman::API::enuSessionStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_ACTIVESESSIONS_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H

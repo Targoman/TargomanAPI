@@ -171,8 +171,9 @@ QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QStr
     };
 }
 
-Translation::Translation() :
-    DAC(new DBManager::clsDAC){
+Translation::Translation() :    Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
+    DAC(new DBManager::clsDAC)
+{
     this->registerMyRESTAPIs();
 }
 

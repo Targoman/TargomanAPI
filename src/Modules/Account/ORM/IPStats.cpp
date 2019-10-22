@@ -23,8 +23,9 @@
 #include "IPStats.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void IPStats::init()
@@ -38,7 +39,7 @@ QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 IPStats::IPStats() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblIPStats",
               { ///<ColName             Validation                          Sort   Filter RO    PK
                 {"ips_ipbIP",           QFV.integer().minValue(1),          true,  true, true, true},
@@ -52,4 +53,7 @@ IPStats::IPStats() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 

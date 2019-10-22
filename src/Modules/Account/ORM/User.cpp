@@ -23,8 +23,9 @@
 #include "User.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void User::init()
@@ -119,7 +120,7 @@ quint32 User::apiCREATE(QHttp::JWT_t _JWT,
                         ).toUInt();
 }
 
-User::User() : intfTable("AAA",
+User::User() : clsTable("AAA",
                          "tblUser",
                          { ///<ColName             Validation                            Sort  Filter RO    PK
                            {"usrID",               QFV.integer().minValue(1),            true, true, true, true},
@@ -168,7 +169,7 @@ bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _imag
 }
 
 UserExtraInfo::UserExtraInfo() :
-    intfTable ("AAA",
+    clsTable ("AAA",
                "tblUserExtraInfo",
                {///<ColName    Validation                     Sort  Filter    RO   PK
                    {"ueiExtraInfo",       QFV.allwaysValid(), false, false},
@@ -181,4 +182,8 @@ UserExtraInfo::UserExtraInfo() :
                })
 {
     this->registerMyRESTAPIs();
+}
+
+}
+}
 }

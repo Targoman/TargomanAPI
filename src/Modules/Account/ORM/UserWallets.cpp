@@ -23,8 +23,9 @@
 #include "UserWallets.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void UserWallets::init()
@@ -42,7 +43,7 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 UserWallets::UserWallets() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblUserWallets",
               { ///<ColName       Validation                 Sort  Filter RO    PK
                 {"walID",         QFV.integer().minValue(1), true, true, true, true},
@@ -50,7 +51,7 @@ UserWallets::UserWallets() :
                 {"walName",       QFV.unicodeAlNum().maxLenght(100)},
                 {"walMinBalance", QFV.integer(),             false, false},
                 {"walLastBalance",QFV.integer(),             false, false},
-                {"walStatus",     QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuUserWalletStatus::options().join("|"))))},
+                {"walStatus",     QFV_Enum(enuUserWalletStatus)},
               },
               { ///< Col       Reference Table             ForeignCol    Rename   LeftJoin
                 {"wal_usrID",  "AAA.tblUser",              "usrID"},
@@ -60,4 +61,7 @@ UserWallets::UserWallets() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 

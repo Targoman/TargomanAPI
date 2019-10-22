@@ -20,47 +20,35 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
-#define TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
+#ifndef TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP
+#define TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP
 
-#include <QJsonObject>
-#include <QVariantMap>
-#include "libTargomanCommon/Macros.h"
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-TARGOMAN_DEFINE_ENUM(enuUserStatus,
-                     Active = 'A',
-                     Removed = 'R',
-                     Blocked = 'B',
-                     MustChangePass = 'C',
-                     MustValidate = 'V',
-                     )
+namespace Helpers {
+namespace ORM {
 
-TARGOMAN_DEFINE_ENUM(enuUserApproval,
-                     None = 'N',
-                     All = 'A',
-                     JustMobile = 'M',
-                     JustEmail = 'E',
-                     )
+class clsRESTAPIWithActionLogs : public QHttp::intfRESTAPIHolder, private clsTable {
+    Q_OBJECT
+public:
+    clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module);
 
-TARGOMAN_DEFINE_ENUM(enuGenericStatus,
-                     Active = 'A',
-                     Removed = 'R',
-                     )
+private slots:
+    QVariant apiGETActionLogs(GET_METHOD_ARGS_HEADER);
+    QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
+    QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
 
-TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
-                     Pending = 'P',
-                     Active = 'A',
-                     Banned = 'B',
-                     Removed = 'R',
-                     )
-
+private:
+    DBManager::clsDAC& DAC;
+    QString Module;
+};
+}
+}
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuUserStatus::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuUserApproval::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuGenericStatus::Type);
-
-#endif // TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP
+#endif // TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP

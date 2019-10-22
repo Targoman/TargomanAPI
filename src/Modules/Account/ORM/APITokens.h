@@ -20,31 +20,31 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_APITOKEN_H
-#define TARGOMAN_API_MODULES_AAA_ORM_APITOKEN_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
-TARGOMAN_DEFINE_ENUM(enuAPITokenStatus,
+TARGOMAN_DEFINE_ENUM(enuAPITokensStatus,
                      Active   = 'A',
                      Pending  = 'P',
                      CreditFinished    = 'C',
                      Removed  = 'R'
                      )
+namespace AAA {
 
-class APIToken : public QHttp::intfRESTAPIHolder, private intfTable
+class APITokens : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get APIToken information")
+    QVariant ORMGET("Get APITokens information")
     bool API(UPDATE,,(QHttp::JWT_t _JWT,
                       quint64 _tokenID,
                       QString _token = {},
@@ -54,8 +54,8 @@ private slots:
                       bool    _validateIP = false,
                       QHttp::Date_t _expiryDate = {},
                       QHttp::JSON_t _extraPrivs = {},
-                      Targoman::API::enuAPITokenStatus::Type _status = {}),
-             "Update APIToken by priviledged user")
+                      Targoman::API::enuAPITokensStatus::Type _status = {}),
+             "Update APITokens by priviledged user")
 
     quint32 API(CREATE,,(QHttp::JWT_t _JWT,
                          QString _token,
@@ -65,19 +65,21 @@ private slots:
                          bool    _validateIP = false,
                          QHttp::Date_t _expiryDate = {},
                          QHttp::JSON_t _extraPrivs = {},
-                         Targoman::API::enuAPITokenStatus::Type _status = {}),
-             "Create a new APIToken by priviledged user")
+                         Targoman::API::enuAPITokensStatus::Type _status = {}),
+             "Create a new APITokens by priviledged user")
 
     bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete APIToken")
+             "Delete APITokens")
 
 private:
-    APIToken();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,APIToken);
+    APITokens();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,APITokens);
 };
 
 }
 }
-Q_DECLARE_METATYPE(Targoman::API::enuAPITokenStatus::Type);
+}
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_APITOKEN_H
+Q_DECLARE_METATYPE(Targoman::API::enuAPITokensStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H

@@ -20,18 +20,19 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_USER_H
-#define TARGOMAN_API_MODULES_AAA_ORM_USER_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 #include "Helpers/AAA/GenericEnums.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-class User : public QHttp::intfRESTAPIHolder, private intfTable
+class User : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -76,7 +77,7 @@ private:
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,User);
 };
 
-class UserExtraInfo : public QHttp::intfRESTAPIHolder, private intfTable
+class UserExtraInfo : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -92,4 +93,6 @@ private:
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_USER_H
+}
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H

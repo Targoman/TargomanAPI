@@ -20,23 +20,23 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_USERWALLETS_H
-#define TARGOMAN_API_MODULES_AAA_ORM_USERWALLETS_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuUserWalletStatus,
                      Active = 'A',
                      Deactive = 'P',
                      Removed = 'R'
                      )
+namespace AAA {
 
-class UserWallets : public QHttp::intfRESTAPIHolder, private intfTable
+class UserWallets : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -52,7 +52,8 @@ private:
 
 }
 }
+}
 
 Q_DECLARE_METATYPE(Targoman::API::enuUserWalletStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_USERWALLETS_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H

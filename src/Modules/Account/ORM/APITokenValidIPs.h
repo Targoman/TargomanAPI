@@ -20,18 +20,19 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_APITOKENVALIDIPS_H
-#define TARGOMAN_API_MODULES_AAA_ORM_APITOKENVALIDIPS_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 #include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-class APITokenValidIPs : public QHttp::intfRESTAPIHolder, private intfTable
+class APITokenValidIPs : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -61,4 +62,6 @@ private:
 
 }
 }
-#endif // TARGOMAN_API_MODULES_AAA_ORM_APITOKENVALIDIPS_H
+}
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H

@@ -23,8 +23,9 @@
 #include "ActiveSessions.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void ActiveSessions::init()
@@ -42,7 +43,7 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 ActiveSessions::ActiveSessions() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblActiveSessions",
               { ///<ColName            Validation                    Sort   Filter RO   PK
                 {"ssnKey",              QFV.md5(),                   true,  true, true, true},
@@ -54,7 +55,7 @@ ActiveSessions::ActiveSessions() :
                 {"ssnLastActivity",     QFV.integer().minValue(1),   true,  true, true},
                 {"ssnRemember",         QFV.boolean(),               true,  true, true},
                 {"ssnUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"ssnStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuSessionStatus::options().join("|"))))},
+                {"ssnStatus",           QFV_Enum(enuSessionStatus)},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"ssn_usrID",          "AAA.tblUser",      "usrID",     "Owner_"},
@@ -65,4 +66,7 @@ ActiveSessions::ActiveSessions() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 

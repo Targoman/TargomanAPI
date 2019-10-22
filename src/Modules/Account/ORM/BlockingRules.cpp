@@ -20,29 +20,30 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "BlockingRule.h"
+#include "BlockingRules.h"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
-void BlockingRule::init()
+void BlockingRules::init()
 {;}
 
-QVariant BlockingRule::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRules:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool BlockingRule::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+bool BlockingRules::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
 {
-    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0001"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRules:CRUD~0001"});
     return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
 }
 
-bool BlockingRule::apiUPDATE(QHttp::JWT_t _JWT,
+bool BlockingRules::apiUPDATE(QHttp::JWT_t _JWT,
                              quint64 _blrID,
                              QHttp::IPv4_t _ip,
                              QHttp::DateTime_t _startTime,
@@ -50,7 +51,7 @@ bool BlockingRule::apiUPDATE(QHttp::JWT_t _JWT,
                              QString _cause,
                              Targoman::API::enuGenericStatus::Type _status)
 {
-    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~0010"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRules:CRUD~0010"});
     return this->update(AAADACInstance(),
                         {{"blrID", _blrID}},
                         {
@@ -64,13 +65,13 @@ bool BlockingRule::apiUPDATE(QHttp::JWT_t _JWT,
                         );
 }
 
-quint64 BlockingRule::apiCREATE(QHttp::JWT_t _JWT,
+quint64 BlockingRules::apiCREATE(QHttp::JWT_t _JWT,
                                 QHttp::IPv4_t _ip,
                                 QHttp::DateTime_t _startTime,
                                 QHttp::DateTime_t _endTime,
                                 QString _cause)
 {
-    Authorization::checkPriv(_JWT,{"Account:BlockingRule:CRUD~1000"});
+    Authorization::checkPriv(_JWT,{"Account:BlockingRules:CRUD~1000"});
     return this->create(AAADACInstance(),
                         {
                             {"blr_ipbIP", QHostAddress(_ip).toIPv4Address()},
@@ -81,9 +82,9 @@ quint64 BlockingRule::apiCREATE(QHttp::JWT_t _JWT,
                         ).toUInt();
 }
 
-BlockingRule::BlockingRule() :
-    intfTable("AAA",
-              "tblBlockingRules",
+BlockingRules::BlockingRules() :
+    clsTable("AAA",
+              "tblBlockingRuless",
               { ///<ColName            Validation                           Sort   Filter RO   PK
                 {"blrID",               QFV.integer().minValue(1),          true,  true, true, true},
                 {"blr_ipbIP",           QFV.integer().minValue(1),          true,  true, false, true},
@@ -94,7 +95,7 @@ BlockingRule::BlockingRule() :
                 {"blrCreatedBy_usrID",  QFV.integer().minValue(1),          true,  true, true},
                 {"blrCreationDateTime", QFV.dateTime(),                     true,  true, true},
                 {"blrUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"blrStatus",           QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuGenericStatus::options().join("|"))))},
+                {"blrStatus",           QFV_Enum(enuGenericStatus)},
               },
               { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
                 {"blrCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
@@ -102,4 +103,8 @@ BlockingRule::BlockingRule() :
               })
 {
     this->registerMyRESTAPIs();
+}
+
+}
+}
 }

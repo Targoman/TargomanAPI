@@ -20,16 +20,15 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
-#define TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/intfTable.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
-
 TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
                      New      = 'N',
                      Pending  = 'P',
@@ -39,8 +38,9 @@ TARGOMAN_DEFINE_ENUM(enuInvoiceType,
                      PostPaid = 'O',
                      PrePaid  = 'R',
                      )
+namespace AAA {
 
-class Invoice : public QHttp::intfRESTAPIHolder, private intfTable
+class Invoice : public QHttp::intfRESTAPIHolder, private clsTable
 {
     Q_OBJECT
 public:
@@ -56,7 +56,9 @@ private:
 
 }
 }
+}
+
 Q_DECLARE_METATYPE(Targoman::API::enuInvoiceStatus::Type);
 Q_DECLARE_METATYPE(Targoman::API::enuInvoiceType::Type);
 
-#endif // TARGOMAN_API_MODULES_AAA_ORM_INVOICE_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H

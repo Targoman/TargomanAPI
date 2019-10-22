@@ -23,8 +23,9 @@
 #include "IPBin.h"
 #include "Helpers/AAA/AAA.hpp"
 
-using namespace Targoman;
-using namespace Targoman::API;
+namespace Targoman {
+namespace API {
+namespace AAA {
 using namespace QHttp;
 
 void IPBin::init()
@@ -38,7 +39,7 @@ QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 IPBin::IPBin() :
-    intfTable("AAA",
+    clsTable("AAA",
               "tblIPBin",
               { ///<ColName             Validation                 Sort   Filter RO    PK
                 {"ipbIP",               QFV.integer().minValue(1), true,  true, true, true},
@@ -48,7 +49,7 @@ IPBin::IPBin() :
                 {"ipbLastAccess",       QFV.dateTime(),            true,  true, true},
                 {"ipbBlockingTime",     QFV.allwaysInvalid(),      false, false, true},
                 {"ipbBlockedBy_usrID",  QFV.integer().minValue(1)},
-                {"ipbStatus", QFV.matches(QRegularExpression(QString("^[%1]$").arg(enuIPBinStatus::options().join("|"))))},
+                {"ipbStatus", QFV_Enum(enuIPBinStatus)},
               },
               { ///< Col               Reference Table     ForeignCol Rename      LeftJoin
                 {"ipbBlockedBy_usrID", "AAA.tblUser",      "usrID",   "Blocker_", true},
@@ -58,4 +59,7 @@ IPBin::IPBin() :
     this->registerMyRESTAPIs();
 }
 
+}
+}
+}
 
