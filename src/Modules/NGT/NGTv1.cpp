@@ -20,51 +20,19 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "Advert.h"
-#include "QFieldValidator.h"
-#include "QHttp/QRESTServer.h"
-#include "QHttp/intfAPIArgManipulator.h"
-#include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/PrivHelpers.h"
-#include "Helpers/AAA/GenericEnums.hpp"
-#include "Configs.h"
-
+#include "NGTv1.h"
 #include "ORM/Defs.hpp"
-//#include "ORM/ActionLogs.h"
-#include "ORM/ActiveAds.h"
-#include "ORM/Bin.h"
-#include "ORM/Clicks.h"
-#include "ORM/Props.h"
 
-using namespace Targoman;
-using namespace Targoman::API;
-using namespace Targoman::API::Advertisement;
-using namespace Targoman::API::Helpers::AAA;
 using namespace QHttp;
+using namespace Targoman::DBManager;
+using namespace Targoman::API;
 
-void Advert::init()
-{}
-
-stuAdvert Advert::apiGETNewBanner(const RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order)
+void Ngtv1::init()
 {
-      /*clsDACResult Result = AdvertDACInstance().execQuery(
-                                "",
-                                "SELECT "
-                                )*/
 }
 
-stuAdvert Advert::apiGETNewText(const RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order, const QString _keywords)
-{
-
-}
-
-QString Advert::apiGETRetrieveURL(const RemoteIP_t& _REMOTE_IP, quint64 _id, IPv4_t _clientIP, QString _agent)
-{
-
-}
-
-Advert::Advert() :
-    Helpers::ORM::clsRESTAPIWithActionLogs (AdvertDACInstance(), "MT", "Targoman"){
+Ngtv1::Ngtv1() :
+    Helpers::ORM::clsRESTAPIWithActionLogs (NGTDACInstance(), "NGT", "Targoman"){/*
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertType);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBannerSizes);
@@ -75,5 +43,7 @@ Advert::Advert() :
     Advertisement::Clicks::instance().init();
     Advertisement::Props::instance().init();
 
-    this->registerMyRESTAPIs();
+    this->registerMyRESTAPIs();*/
 }
+
+

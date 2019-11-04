@@ -64,15 +64,21 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
     if(!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
-    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
+    /*QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
                                                    _REMOTE_IP, {
                                                        TARGOMAN_PRIV_PREFIX + _engine,
                                                        TARGOMAN_PRIV_PREFIX + _dir,
                                                        _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
                                                        _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
-                                                   });
+                                                   });*/
 
-    QJsonObject Stats = this->DAC->execQuery(
+    QJsonObject TokenInfo = {
+        {"usrID", 10},
+        {}
+
+    };
+
+    QJsonObject Stats;/* = this->DAC->execQuery(
                 TokenInfo[TOKENItems::usrID].toString(),
                 "SELECT * FROM tblTokenStats "
                 "WHERE tks_tokID = ? "
@@ -83,9 +89,9 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                     {_engine},
                     {_dir},
                 }
-            ).toJson(true).object ();
+            ).toJson(true).object ();*/
 
-    if(Stats.isEmpty())
+    if(/* DISABLES CODE */ (false) && Stats.isEmpty())
         this->DAC->execQuery(TokenInfo[TOKENItems::usrID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
             {TokenInfo[TOKENItems::tokID]},
             {_engine},
@@ -171,7 +177,7 @@ QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QStr
     };
 }
 
-Translation::Translation() :    Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
+Translation::Translation() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
     DAC(new DBManager::clsDAC)
 {
     this->registerMyRESTAPIs();
