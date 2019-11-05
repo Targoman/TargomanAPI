@@ -58,7 +58,9 @@ HEADERS += \
     src/Modules/Advert/ORM/Clicks.h \
     src/Modules/Advert/ORM/Props.h \
     src/Helpers/ORM/clsActionLogs.h \
-    src/Helpers/ORM/clsTable.h
+    src/Helpers/ORM/clsTable.h \
+    src/Modules/NGT/NGTv1.h \
+    src/Modules/NGT/ORM/Defs.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -96,7 +98,8 @@ SOURCES += \
     src/Modules/Advert/ORM/Props.cpp \
 #    src/Modules/Advert/ORM/ActionLogs.cpp \
     src/Helpers/ORM/clsActionLogs.cpp \
-    src/Helpers/ORM/clsTable.cpp
+    src/Helpers/ORM/clsTable.cpp \
+    src/Modules/NGT/NGTv1.cpp
 
 INCLUDEPATH+= \
   3rdParty/E4MT/ \
@@ -132,4 +135,5 @@ include($$PRJDIR/qmake/install.pri)
 DISTFILES += \
     conf/test.conf \
     Dockerfile \
-    conf/api.server.conf
+    conf/api.server.conf \
+    build.sh

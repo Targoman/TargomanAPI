@@ -20,12 +20,11 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ADVERT_ADVERT_H
-#define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
+#ifndef TARGOMAN_API_MODULES_NGT_NGTV1_H
+#define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
 #include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "./ORM/Defs.hpp"
+#include "QHttp/GenericTypes.h"
 #include "Helpers/ORM/clsActionLogs.h"
 
 namespace Targoman {
@@ -35,34 +34,28 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-struct stuAdvert{
-    quint64 ID;
-    QString Title;
-    QString Description;
-    QString PrettyURL;
+struct stuNGTPriceInfo{
+    quint32 basePPW;
+    QHttp::MD5_t FileMD5;
 };
 
-class Advert : private Helpers::ORM::clsRESTAPIWithActionLogs
+class Ngtv1 : private Helpers::ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
 public:
     void init();
-    stuAdvert API(GET,NewBanner,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order),
-                  "Get new banner based on location and order info")
-    stuAdvert API(GET,NewText,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order, const QString _keywords),
-                  "Get new text advertisement")
-    QString   API(GET,RetrieveURL, (const QHttp::RemoteIP_t& _REMOTE_IP, quint64 _id, QHttp::IPv4_t _clientIP, QString _agent),
-                  "Retrieve URL of the specified Advertisement")
+
 private slots:
+    //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
 
 private:
-    Advert();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Advert);
+    Ngtv1();
+    TARGOMAN_DEFINE_SINGLETON_MODULE(Ngtv1);
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::stuAdvert);
+Q_DECLARE_METATYPE(Targoman::API::stuNGTPriceInfo);
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H
+#endif // TARGOMAN_API_MODULES_NGT_NGTV1_H

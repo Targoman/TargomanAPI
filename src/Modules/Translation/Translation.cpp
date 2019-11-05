@@ -64,15 +64,22 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
     if(!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
-    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
+    /*QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
                                                    _REMOTE_IP, {
                                                        TARGOMAN_PRIV_PREFIX + _engine,
                                                        TARGOMAN_PRIV_PREFIX + _dir,
                                                        _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
                                                        _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
-                                                   });
+                                                   });*/
 
-    QJsonObject Stats = this->DAC->execQuery(
+    QJsonObject TokenInfo = {
+        {"usrID", 10},
+        {"Targoman",QJsonObject({
+             {"canDetailed",1}
+         })}
+    };
+
+    QJsonObject Stats;/* = this->DAC->execQuery(
                 TokenInfo[TOKENItems::usrID].toString(),
                 "SELECT * FROM tblTokenStats "
                 "WHERE tks_tokID = ? "
@@ -83,14 +90,14 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                     {_engine},
                     {_dir},
                 }
-            ).toJson(true).object ();
+            ).toJson(true).object ();*/
 
-    if(Stats.isEmpty())
+    if(/* DISABLES CODE */ (false) && Stats.isEmpty())
         this->DAC->execQuery(TokenInfo[TOKENItems::usrID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
-            {TokenInfo[TOKENItems::tokID]},
-            {_engine},
-            {_dir},
-        });
+        {TokenInfo[TOKENItems::tokID]},
+        {_engine},
+        {_dir},
+    });
 
     _text = TranslationDispatcher::instance().tokenize(_text, Dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
@@ -116,11 +123,11 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
             if(DicResponse.size()){
                 if(_detailed){
                     DicResponse[RESULTItems::TIMES]= QVariantMap({
-                         {RESULTItems::TIMESItems::PRE, PreprocessTime},
-                         {RESULTItems::TIMESItems::TR, Timer.elapsed()},
-                         {RESULTItems::TIMESItems::POST, 0},
-                         {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
-                    });
+                                                                     {RESULTItems::TIMESItems::PRE, PreprocessTime},
+                                                                     {RESULTItems::TIMESItems::TR, Timer.elapsed()},
+                                                                     {RESULTItems::TIMESItems::POST, 0},
+                                                                     {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
+                                                                 });
                 }
                 TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
                 return DicResponse;
@@ -145,12 +152,19 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                                                                   );
         Timer.restart();
         if(_detailed){
-            Translation[RESULTItems::TIMES]= QVariantMap({
+            /*            Translation[RESULTItems::TIMES]= QVariantMap({
                  {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
                  {RESULTItems::TIMESItems::TR, InternalTranslationTime},
                  {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
                  {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
-            });
+            });*/
+            QVariantMap Tr2 = Translation["tr"].toMap();
+            QVariantMap Tr;
+            Tr["base"] = Tr2["base"];
+            Tr["alignments"] = Tr2["alignments"];
+            Tr["phrases"] = Tr2["phrases"];
+            return Tr;
+
         }
 
         TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
@@ -171,7 +185,7 @@ QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QStr
     };
 }
 
-Translation::Translation() :    Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
+Translation::Translation() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
     DAC(new DBManager::clsDAC)
 {
     this->registerMyRESTAPIs();

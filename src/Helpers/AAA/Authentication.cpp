@@ -43,7 +43,8 @@ QJsonObject login(const QString      _ip,
                                                          {"iPass", _pass},
                                                          {"iSalt", _salt},
                                                          {"iInfo", _info},
-                                                         {"iRemember", _rememberMe ? "1" : "0"}
+                                                         {"iRemember", _rememberMe ? "1" : "0"},
+                                                         {"iOAuthInfo", QVariant()}
                                                      }).toJson(true).object();
     return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs);
 }

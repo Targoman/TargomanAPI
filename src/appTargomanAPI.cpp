@@ -27,6 +27,7 @@
 #include "Modules/Translation/Translation.h"
 #include "Modules/Account/Account.h"
 #include "Modules/Advert/Advert.h"
+#include "Modules/NGT/NGTv1.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -89,8 +90,10 @@ void appTargomanAPI::slotExecute()
 
         //Initialize API modules
         Translation::instance().init();
-        Account::instance().init();
+        /*Account::instance().init();
         Advert::instance().init();
+        Ngtv1::instance().init();
+        */
 
         std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
 

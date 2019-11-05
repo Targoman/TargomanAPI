@@ -11,7 +11,7 @@ echo "THREADS=$THREADS"
 CWD=`realpath $(dirname "$0")`
 DepPath=$CWD/3rdParty
 
-git submodule update --init --recursive
+#git submodule update --init --recursive
 
 function buildQt() {
   cd $DepPath/$1 \
