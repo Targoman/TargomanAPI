@@ -86,11 +86,10 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
         if(TranslationEngine->specs().SupportsIXML == false)
             _text = TargomanTextProcessor::instance().ixml2Text(_text, _dir.first, false, false,false);
 
-
         CachedTranslation = TranslationEngine->doTranslation(_text, _detailed, _detokenize);
 
         _translationTime = Timer.elapsed();
-        if(Class.size())
+        if(Class.size() && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "ReportClass"}))
             CachedTranslation[RESULTItems::CLASS] = Class;
 
         if(CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
@@ -129,7 +128,7 @@ QString TranslationDispatcher::preprocessText(const QString& _text, const QStrin
 {
     Q_UNUSED (_lang)
     if(this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600){
-        clsDACResult Result ;//= this->DAC->execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
+        clsDACResult Result = this->DAC->execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
         if(Result.isValid()){
             this->CorrectionRule.clear();
             while(Result.next())

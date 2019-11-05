@@ -35,6 +35,7 @@ echo "Building Dependencies" \
 && buildQt TextProcessor \
 && buildQt TargomanDBM \
 && cd $CWD \
-&& qmake-qt5 CONFIG+=$MODE PREFIX=$PREFIX && make -j $THREADS install
+&& qmake-qt5 CONFIG+=$MODE PREFIX=$PREFIX && make -j $THREADS \
+&& cp out/bin/TargomanAPI $PREFIX/bin/
 
 

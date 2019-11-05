@@ -35,6 +35,7 @@ namespace RESULTItems {
     constexpr char SERVERID[]= "serverID";
     constexpr char TRANSLATION[]= "tr";
     constexpr char TIMES[]= "times";
+    constexpr char TIME[]= "time";
 
     namespace TRANSLATIONItems {
         constexpr char PHRASES[]= "phrases";
