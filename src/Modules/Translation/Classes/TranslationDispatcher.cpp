@@ -129,7 +129,7 @@ QString TranslationDispatcher::preprocessText(const QString& _text, const QStrin
 {
     Q_UNUSED (_lang)
     if(this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600){
-        clsDACResult Result = this->DAC->execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
+        clsDACResult Result ;//= this->DAC->execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
         if(Result.isValid()){
             this->CorrectionRule.clear();
             while(Result.next())

@@ -163,7 +163,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
                                                     {_detok ?
                                                      TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang) :
                                                      Phrases.toList().at(0)},
-                                                    {++Index}
+                                                    {Index++}
                                                 }));
             ResultPhrasesList.push_back(TempList);
 

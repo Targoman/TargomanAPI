@@ -135,4 +135,5 @@ include($$PRJDIR/qmake/install.pri)
 DISTFILES += \
     conf/test.conf \
     Dockerfile \
-    conf/api.server.conf
+    conf/api.server.conf \
+    build.sh
