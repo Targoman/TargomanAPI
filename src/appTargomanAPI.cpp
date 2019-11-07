@@ -89,13 +89,18 @@ void appTargomanAPI::slotExecute()
                                         gConfigs::DB::Schema.value()));
 
         //Initialize API modules
+#ifdef ENABLE_MODULE_TRANSLATION
         Translation::instance().init();
-        /*Account::instance().init();
+#endif
+#ifdef ENABLE_MODULE_ACCOUNT
+        Account::instance().init();
+#endif
+#ifdef ENABLE_MODULE_ADVERT
         Advert::instance().init();
+#endif
+#ifdef ENABLE_MODULE_NGT
         Ngtv1::instance().init();
-        */
-
-        std::cerr<<qPrintable(RESTServer::registeredAPIs(true, true).join("\n"))<<std::endl;
+#endif
 
         // Initialize REST Server
         RESTServer::configure (Configs);

@@ -16,7 +16,21 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
-include(version.pri)
+ProjectName="TargomanAPI"
+VERSION=1.0.0
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
+# Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough
+QMAKE_CXXFLAGS += -std=c++11 -std=c++14
+CONFIGS += c++11 c++14
+QT += core sql network
+QT -= gui
+
+DEFINES += QHTTP_ENABLE_WEBSOCKET
+QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
+INCLUDEPATH+= \
+  $$PRJDIR/3rdParty/E4MT/ \
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 CONFIG(debug, debug|release): DEFINES += TARGOMAN_SHOW_DEBUG=1
@@ -98,17 +112,4 @@ defineTest(addSubdirs) {
     }
     export (SUBDIRS)
 }
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
-DEPS_BUILT = $$PRJDIR/out/.depsBuilt
-Dependencies.target  = $$DEPS_BUILT
-Dependencies.depends = FORCE
-unix: Dependencies.commands = $$PRJDIR/buildDependencies.sh $$PRJDIR $$DEPS_BUILT $$EXTERNAL_DEPS;
-win32: error(submodule auto-compile has not yet been implemented for windows)
-
-PRE_TARGETDEPS += $$DEPS_BUILT
-QMAKE_EXTRA_TARGETS += Dependencies
-QMAKE_DISTCLEAN += $$DEPS_BUILT
-
-HEADERS+= $$VERSIONINGHEADER
-
 

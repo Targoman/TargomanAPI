@@ -16,25 +16,43 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
+PRJDIR = "../../"
+TARGET = Module_Translation
+
+HEADERS += \
+    Classes/intfTranslatorBridge.hpp \
+    Classes/intfTranslatorEngine.hpp \
+    Classes/TranslationDispatcher.h \
+    Engines/clsNMT.h \
+    Translation.h \
+    TranslationDefs.hpp \
+
+SOURCES += \
+    Classes/TranslationDispatcher.cpp \
+    Engines/clsNMT.cpp \
+    Translation.cpp \
+
+OTHER_FILES += \
+
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################
-ConfigFile = ./qmake/configs.pri
+ConfigFile = $$PRJDIR/qmake/configs.pri
 !exists($$ConfigFile){
-error("**** $$ProjectName: Unable to find Configuration file $$ConfigFile ****")
+error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 }
 include ($$ConfigFile)
 
-TEMPLATE = subdirs
-CONFIG += ordered
+TEMPLATE = lib
+CONFIG+= staticlib
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-addSubdirs(Modules, Dependencies)
-addSubdirs(src, Modules)
+DESTDIR =      $$BaseLibraryFolder
+MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
+OBJECTS_DIR  = $$BuildFolderPattern/$$TARGET/obj
+RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
+UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-OTHER_FILES += \
-    README.md \
-    INSTALL \
-    buildDependencies.sh
+QMAKE_CXXFLAGS_RELEASE += -fPIC
+QMAKE_CXXFLAGS_DEBUG += -fPIC
 
+DEFINES+=MODULE_$${upper($$TARGET)}_ENABLED
