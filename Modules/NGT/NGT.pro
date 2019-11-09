@@ -21,10 +21,12 @@ TARGET = Module_NGT
 
 HEADERS += \
     NGTv1.h \
-    ORM/Defs.hpp
+    ORM/Defs.hpp \
+    ORM/ActionLogs.h
 
 SOURCES += \
-    NGTv1.cpp
+    NGTv1.cpp \
+    ORM/ActionLogs.cpp
 
 OTHER_FILES += \
 

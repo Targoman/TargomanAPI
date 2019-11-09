@@ -29,7 +29,7 @@
 #include "Helpers/AAA/GenericEnums.hpp"
 #include "Configs.h"
 
-//#include "ORM/ActionLogs.h"
+#include "ORM/ActionLogs.h"
 #include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
 #include "ORM/ActiveSessions.h"
@@ -201,7 +201,7 @@ Account::Account() :
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserApproval);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuGenericStatus);
 
-//    ActionLogs::instance().init();
+    ActionLogs::instance().init();
     ActiveSessions::instance().init();
     APITokens::instance().init();
     APITokenValidIPs::instance().init();

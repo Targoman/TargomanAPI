@@ -24,13 +24,15 @@ HEADERS += \
     Classes/intfTranslatorEngine.hpp \
     Classes/TranslationDispatcher.h \
     Engines/clsNMT.h \
-    Translation.h \
     TranslationDefs.hpp \
+    ORM/ActionLogs.h \
+    MT.h
 
 SOURCES += \
     Classes/TranslationDispatcher.cpp \
     Engines/clsNMT.cpp \
-    Translation.cpp \
+    ORM/ActionLogs.cpp \
+    MT.cpp
 
 OTHER_FILES += \
 

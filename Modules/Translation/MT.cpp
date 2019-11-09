@@ -20,10 +20,11 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "Translation.h"
+#include "MT.h"
 #include "Classes/TranslationDispatcher.h"
 #include "Helpers/AAA/AAA.hpp"
 #include "TranslationDefs.hpp"
+#include "ORM/ActionLogs.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;

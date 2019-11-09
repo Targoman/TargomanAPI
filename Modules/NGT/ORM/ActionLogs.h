@@ -20,8 +20,8 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIONLOGS_H
-#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIONLOGS_H
+#ifndef TARGOMAN_API_MODULES_NGT_ORM_ACTIONLOGS_H
+#define TARGOMAN_API_MODULES_NGT_ORM_ACTIONLOGS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
@@ -29,7 +29,7 @@
 
 namespace Targoman {
 namespace API {
-namespace AAA {
+namespace NGT {
 
 class ActionLogs : public QHttp::intfRESTAPIHolder, private clsTable
 {
@@ -42,11 +42,11 @@ private slots:
 
 private:
     ActionLogs();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ActionLogs);
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(NGT,ActionLogs);
 };
 
 }
 }
 }
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIONLOGS_H
+#endif // TARGOMAN_API_MODULES_NGT_ORM_ACTIONLOGS_H

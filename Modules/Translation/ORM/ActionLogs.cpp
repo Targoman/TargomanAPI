@@ -25,7 +25,7 @@
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace Translation {
 using namespace QHttp;
 
 void ActionLogs::init()
@@ -39,7 +39,7 @@ QVariant ActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
 }
 
 ActionLogs::ActionLogs() :
-    clsTable("AAA",
+    clsTable("MT",
               "tblActionLogs",
               { ///<ColName             Validation                      Sort   Filter RO   PK
                 {"atlID",               QFV.integer().minValue(1),      true,  true, true, true},
