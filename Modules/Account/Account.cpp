@@ -185,7 +185,7 @@ bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, con
 bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5_t& _uuid, const MD5_t& _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
+    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePassByUUID", {
                                  {"iUUID", _uuid},
                                  {"iNewPass", _newPass},
                              });
