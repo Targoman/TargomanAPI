@@ -21,6 +21,7 @@ TARGET = Module_Advert
 
 HEADERS += \
     Advert.h \
+    ORM/ActionLogs.h \
     ORM/ActiveAds.h \
     ORM/Defs.hpp \
     ORM/Bin.h \
@@ -47,7 +48,7 @@ error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 include ($$ConfigFile)
 
 TEMPLATE = lib
-CONFIG+= staticlib
+CONFIG(release): CONFIG+= staticlib
 
 DESTDIR =      $$BaseLibraryFolder
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc

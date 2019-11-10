@@ -96,16 +96,17 @@ ACTIVE_MODULES= \
   Account \
   Advert \
   NGT \
-  Translation \
+
+#  MT \
 
 contains(ACTIVE_MODULES, Account) {
   DEFINES+=ENABLE_MODULE_ACCOUNT
   LIBS+=-lModule_Account
 }
 
-contains(ACTIVE_MODULES, Translation) {
-  DEFINES+=ENABLE_MODULE_TRANSLATION
-  LIBS+=-lModule_Translation
+contains(ACTIVE_MODULES, MT) {
+  DEFINES+=ENABLE_MODULE_MT
+  LIBS+=-lModule_MT
 }
 
 contains(ACTIVE_MODULES, Advert) {

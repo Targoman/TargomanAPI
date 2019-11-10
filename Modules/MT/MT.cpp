@@ -33,13 +33,13 @@ using namespace Targoman::API;
 using namespace Targoman::API::Modules::Translation::Classes;
 using namespace Targoman::API::Helpers::AAA;
 
-void Translation::init()
+void MT::init()
 {
     // Register translation engines
     TranslationDispatcher::instance().registerEngines();
 }
 
-QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
+QVariantMap MT::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
                                       const QString& _token,
                                       QString _text,
                                       QString _dir,
@@ -167,7 +167,7 @@ QVariantMap Translation::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
     }
 }
 
-QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
+QVariantMap MT::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
 {
     return {
         {"inputArg", _arg},
@@ -175,7 +175,7 @@ QVariantMap Translation::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QStr
     };
 }
 
-Translation::Translation() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
+MT::MT() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
     DAC(new DBManager::clsDAC)
 {
     this->registerMyRESTAPIs();

@@ -34,13 +34,13 @@ OTHER_FILES += \
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################
 ConfigFile = $$PRJDIR/qmake/configs.pri
-!exists($$ConfigFile){
-error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
+!exists($$ConfigFile) {
+  error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 }
 include ($$ConfigFile)
 
 TEMPLATE = lib
-CONFIG+= staticlib
+CONFIG(release): CONFIG+= staticlib
 
 DESTDIR =      $$BaseLibraryFolder
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
@@ -49,6 +49,6 @@ RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
 UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
 
 QMAKE_CXXFLAGS_RELEASE += -fPIC
-QMAKE_CXXFLAGS_DEBUG += -fPIC
+QMAKE_CXXFLAGS_DEBUG   += -fPIC
 
 DEFINES+=MODULE_$${upper($$TARGET)}_ENABLED

@@ -102,7 +102,7 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
 QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QHttp::JSON_t& _sessionInfo)
 {
     Q_UNUSED(_REMOTE_IP) Q_UNUSED(_sessionInfo)
-    throw exHTTPNotImplemented("oh oh!");
+            throw exHTTPNotImplemented("oh oh!");
 }
 
 QHttp::EncodedJWT_t Account::apiRefreshJWT(QHttp::JWT_t _JWT)
@@ -116,15 +116,15 @@ QHttp::EncodedJWT_t Account::apiRefreshJWT(QHttp::JWT_t _JWT)
 }
 
 quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
-                       const QString& _emailOrMobile,
-                       const QHttp::MD5_t& _pass,
-                       const QString& _role,
-                       const QString& _name,
-                       const QString& _family,
-                       QHttp::JSON_t _specialPrivs,
-                       qint8 _maxSessions)
+                              const QString& _emailOrMobile,
+                              const QHttp::MD5_t& _pass,
+                              const QString& _role,
+                              const QString& _name,
+                              const QString& _family,
+                              QHttp::JSON_t _specialPrivs,
+                              qint8 _maxSessions)
 {
-    char Type;
+    QString Type;
     if(QFV.email().isValid(_emailOrMobile)){
         if(QFV.emailNotFake().isValid(_emailOrMobile))
             Type = 'E';
@@ -158,15 +158,16 @@ bool Account::apiLogout(QHttp::JWT_t _JWT)
     return true;
 }
 
-QHttp::MD5_t Account::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, const QString& _login, enuForgotPassLinkVia::Type _via)
+bool Account::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, const QString& _login, enuForgotPassLinkVia::Type _via)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
-    return AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
-                                        {"iLogin", _login},
-                                        {"iVia", _via},
-                                    }).spDirectOutputs().value("oUUID").toString();;
+    AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
+                                 {"iLogin", _login},
+                                 {"iVia", _via},
+                             });
+    return true;
 }
 
 bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, const QString& _oldPassSalt, const QHttp::MD5_t& _newPass)

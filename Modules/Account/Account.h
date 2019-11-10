@@ -70,22 +70,22 @@ private slots:
                             "Refresh JWT in order to update information or expiry time")
 
     quint32 API(PUT,Signup,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                         const QString& _emailOrMobile,
-                         const QHttp::MD5_t& _pass,
-                         const QString& _role,
-                         const QString& _name = "",
-                         const QString& _family = "",
-                         QHttp::JSON_t _specialPrivs ={},
-                         qint8 _maxSessions = -1),
+                            const QString& _emailOrMobile,
+                            const QHttp::MD5_t& _pass,
+                            const QString& _role,
+                            const QString& _name = "",
+                            const QString& _family = "",
+                            QHttp::JSON_t _specialPrivs = {},
+                            qint8 _maxSessions = -1),
                 "Base method for signup with email address. this method can be called just by predefined IPs")
 
     bool API(,Logout,(QHttp::JWT_t _JWT),
              "Logout logged in user")
 
-    QHttp::MD5_t API(,CreateForgotPasswordLink,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                                const QString& _login,
-                                                Targoman::API::enuForgotPassLinkVia::Type _via),
-                     "Create a forgot password request returning a UUID for the requiest")
+    bool API(,CreateForgotPasswordLink,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                        const QString& _login,
+                                        Targoman::API::enuForgotPassLinkVia::Type _via),
+             "Create a forgot password request returning a UUID for the requiest")
 
     bool API(,ChangePass,(QHttp::JWT_t _JWT,
                           const QHttp::MD5_t& _oldPass,

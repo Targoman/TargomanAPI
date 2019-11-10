@@ -24,7 +24,7 @@
 #include "appTargomanAPI.h"
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Modules/Translation/MT.h"
+#include "Modules/MT/MT.h"
 #include "Modules/Account/Account.h"
 #include "Modules/Advert/Advert.h"
 #include "Modules/NGT/NGTv1.h"
@@ -90,7 +90,7 @@ void appTargomanAPI::slotExecute()
 
         //Initialize API modules
 #ifdef ENABLE_MODULE_TRANSLATION
-        Translation::instance().init();
+        MT::instance().init();
 #endif
 #ifdef ENABLE_MODULE_ACCOUNT
         Account::instance().init();

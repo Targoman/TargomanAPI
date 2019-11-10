@@ -33,13 +33,28 @@ void ActiveSessions::init()
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
+    bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() == _EXTRAPATH.split(',').last().toUInt();
     if(IsSelf == false)
         Authorization::checkPriv(_JWT,{"Account:ActiveSessions:CRUD~0100"});
 
     return this->selectFromTable(AAADACInstance(), {},
                                  IsSelf ? "" : QString("+ssn_usrID=%1").arg(clsJWT(_JWT).usrID()),
                                  GET_METHOD_CALL_ARGS);
+}
+
+bool ActiveSessions::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+{
+    QString Key = _EXTRAPATH.split(',').first();
+    quint64 UserID = _EXTRAPATH.split(',').size() == 2 ? _EXTRAPATH.split(',').last().toUInt() : 0;
+    bool IsSelf = clsJWT(_JWT).usrID() == UserID;
+    if(IsSelf == false)
+        Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0001"});
+
+    QVariantMap PKs = {{this->Cols.first().Name, Key}};
+    if(UserID > 0)
+        PKs.insert("ssn_usrID", UserID);
+
+    return this->deleteByPKs(AAADACInstance(), PKs);
 }
 
 ActiveSessions::ActiveSessions() :

@@ -33,7 +33,7 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class Translation  : private Helpers::ORM::clsRESTAPIWithActionLogs
+class MT  : private Helpers::ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
 public:
@@ -55,8 +55,8 @@ private slots:
     QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
 
     private:
-        Translation();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Translation);
+        MT();
+    TARGOMAN_DEFINE_SINGLETON_MODULE(MT);
 
 private:
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
