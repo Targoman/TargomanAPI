@@ -45,6 +45,7 @@ namespace JWTItems{
     TARGOMAN_CREATE_CONSTEXPR(usrStatus);
     TARGOMAN_CREATE_CONSTEXPR(jti);
     TARGOMAN_CREATE_CONSTEXPR(priv);
+    TARGOMAN_CREATE_CONSTEXPR(canChangePass);
 }
 
 class clsJWT{

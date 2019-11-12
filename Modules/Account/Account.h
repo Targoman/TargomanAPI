@@ -66,7 +66,7 @@ private slots:
     QHttp::EncodedJWT_t API(,LoginAsGuest,(const QHttp::RemoteIP_t& _REMOTE_IP,const QHttp::JSON_t& _sessionInfo),
                             "Login user as guest and return an encoded JWT")
 
-    QHttp::EncodedJWT_t API(,RefreshJWT,(QHttp::JWT_t _JWT),
+    QHttp::EncodedJWT_t API(,RefreshJWT,(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT),
                             "Refresh JWT in order to update information or expiry time")
 
     quint32 API(PUT,Signup,(const QHttp::RemoteIP_t& _REMOTE_IP,
@@ -99,7 +99,14 @@ private slots:
                                 const QHttp::MD5_t& _newPass
                                 ),
              "Changes password based on a UUID provided by ")
+    bool API(POST,ApproveEmail,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                const QHttp::MD5_t& _uuid),
+             "Approves Email by provided UUID")
 
+    bool API(POST,ApproveMobile,(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                 const QHttp::Mobile_t _mobile,
+                                 const quint16& _code),
+             "Approves Mobile by provided mobile no and code")
 private:
     Account();
     TARGOMAN_DEFINE_SINGLETON_MODULE(Account);

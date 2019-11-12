@@ -64,7 +64,7 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const
     Authorization::validateIPAddress(_REMOTE_IP);
 
     return this->createJWT (_login,
-                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(","), _sessionInfo.object()),
+                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(",", QString::SkipEmptyParts), _sessionInfo.object()),
                             _tlps);
 }
 
@@ -105,13 +105,14 @@ QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP
             throw exHTTPNotImplemented("oh oh!");
 }
 
-QHttp::EncodedJWT_t Account::apiRefreshJWT(QHttp::JWT_t _JWT)
+QHttp::EncodedJWT_t Account::apiRefreshJWT(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT)
 {
+    Authorization::validateIPAddress(_REMOTE_IP);
     clsJWT JWT(_JWT);
     QString TLPs =  JWT.privatePart().value("tlps").toString();
 
     return this->createJWT (JWT.login(),
-                            Authentication::updatePrivs(JWT.session(), TLPs),
+                            Authentication::updatePrivs(_REMOTE_IP, JWT.session(), TLPs),
                             TLPs);
 }
 
@@ -193,6 +194,29 @@ bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5
     return true;
 }
 
+bool Account::apiPOSTApproveEmail(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                  const QHttp::MD5_t& _uuid)
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+    AAADACInstance().callSP("", "AAA.sp_UPDATE_acceptApproval", {
+                                {"iUUID", _uuid},
+                                {"iMobile", {}},
+                            });
+    return true;
+}
+
+bool Account::apiPOSTApproveMobile(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                  const QHttp::Mobile_t _mobile,
+                                  const quint16& _code)
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+    AAADACInstance().callSP("", "AAA.sp_UPDATE_acceptApproval", {
+                                {"iUUID", _code},
+                                {"iMobile", _mobile},
+                            });
+    return true;
+}
+
 Account::Account() :
     clsRESTAPIWithActionLogs(AAADACInstance(), "AAA", "Account")
 {
@@ -230,6 +254,7 @@ EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result
                                      {JWTItems::rolID, _result["rolID"]},
                                      {JWTItems::privs, _result["privs"]},
                                      {JWTItems::usrID, _result["usrID"]},
+                                     {JWTItems::canChangePass, _result["hasPass"]},
                                      {JWTItems::usrApproval, enuUserApproval::toStr(_result["usrApprovalState"].toString())},
                                      {JWTItems::usrStatus, enuUserStatus::toStr(_result["usrStatus"].toString())},
                                  },

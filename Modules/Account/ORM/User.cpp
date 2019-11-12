@@ -48,17 +48,44 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
                             QString _name,
                             QString _family,
+                            QHttp::ISO639_2_t _lang,
                             QHttp::Email_t _email,
-                            QHttp::Mobile_t _mobile){
-    return this->update(AAADACInstance(),
-                        {{"usrID", clsJWT(_JWT).usrID()}},
-                        {
-                            {"usrName",   _name},
-                            {"usrFamily", _family},
-                            {"usrEmail",  _email},
-                            {"usrMobile", _mobile},
-                        }
-                        );
+                            QHttp::Mobile_t _mobile,
+                            QHttp::MD5_t _pass,
+                            QString _salt){
+    if(_email.size() || _mobile.size ()){
+        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+        if(_pass.isEmpty())
+            throw exHTTPBadRequest("Password and salt are required to change email");
+    }
+
+    if(_email.size())
+        AAADACInstance().callSP("","AAA.sp_CREATE_approvalRequest",{
+                                    {"iWhat2Approve", "E"},
+                                    {"iUserID", clsJWT(_JWT).usrID()},
+                                    {"iValue", _email},
+                                    {"iPass", _pass},
+                                    {"iSalt", _salt},
+                                });
+    if(_mobile.size())
+        AAADACInstance().callSP("","AAA.sp_CREATE_approvalRequest",{
+                                    {"iWhat2Approve", "E"},
+                                    {"iUserID", clsJWT(_JWT).usrID()},
+                                    {"iValue", _email},
+                                    {"iPass", _pass},
+                                    {"iSalt", _salt},
+                                });
+
+    if(_name.size() || _family.size())
+        return this->update(AAADACInstance(),
+                            {{"usrID", clsJWT(_JWT).usrID()}},
+                            {
+                                {"usrName",   _name},
+                                {"usrFamily", _family},
+                                {"usrLanguage", _lang}
+                            }
+                            );
+    return true;
 }
 
 bool User::apiUPDATE(QHttp::JWT_t _JWT,
@@ -132,6 +159,7 @@ User::User() : clsTable("AAA",
                          //{"usrPass"},
                            {"usr_rolID",           QFV.integer().minValue(1)},
                            {"usrSpecialPrivs",     QFV.json(),                            false, false},
+                           {"usrLanguage",         QFV.languageCode(),                        true, true},
                            {"usrMaxSessions",      QFV.integer().betweenValues(-1, 100)},
                            {"usrActiveSessions",   QFV.integer().betweenValues(-1, 1000), true, true, true},
                            {"usrLastLogin",        QFV.dateTime(),                        true, true, true},

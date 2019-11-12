@@ -44,9 +44,13 @@ private slots:
     bool API(UPDATE,profile,(QHttp::JWT_t _JWT,
                              QString _name = {},
                              QString _family = {},
+                             QHttp::ISO639_2_t _lang = {},
                              QHttp::Email_t _email = {},
-                             QHttp::Mobile_t _mobile = {}),
-             "Update User profile")
+                             QHttp::Mobile_t _mobile = {},
+                             QHttp::MD5_t _pass = {},
+                             QString _salt = {}),
+             "Update User profile. Take note that this method does not change password "
+             "Password and Salt are required to change email or mobile")
 
     bool API(UPDATE,,(QHttp::JWT_t _JWT,
                       quint64 _userID,

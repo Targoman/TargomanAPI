@@ -35,6 +35,7 @@ HEADERS += \
     ORM/PaymentOrder.h \
     ORM/APITokens.h \
     ORM/ActionLogs.h \
+    ORM/ApprovalRequest.h
 
 SOURCES += \
     Account.cpp \
@@ -52,6 +53,7 @@ SOURCES += \
     ORM/PaymentOrders.cpp \
     ORM/APITokens.cpp \
     ORM/ActionLogs.cpp \
+    ORM/ApprovalRequest.cpp
 
 OTHER_FILES += \
 
@@ -65,7 +67,7 @@ error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 include ($$ConfigFile)
 
 TEMPLATE = lib
-CONFIG(release): CONFIG+= staticlib
+#CONFIG(release): CONFIG+= staticlib
 
 DESTDIR =      $$BaseLibraryFolder/
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc

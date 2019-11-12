@@ -48,7 +48,7 @@ error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 include ($$ConfigFile)
 
 TEMPLATE = lib
-CONFIG(release): CONFIG+= staticlib
+#CONFIG(release): CONFIG+= staticlib
 
 DESTDIR =      $$BaseLibraryFolder
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc

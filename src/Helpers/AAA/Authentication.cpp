@@ -29,7 +29,7 @@ namespace Helpers {
 namespace AAA {
 namespace Authentication{
 
-QJsonObject login(const QString      _ip,
+QJsonObject login(const QString&     _ip,
                   const QString&     _login,
                   const QString&     _pass,
                   const QString&     _salt,
@@ -49,12 +49,13 @@ QJsonObject login(const QString      _ip,
     return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs);
 }
 
-QJsonObject updatePrivs(const QString& _ssid, const QString& _requiredTLPs)
+QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs)
 {
     QJsonObject UserInfo =  AAADACInstance().callSP ("","AAA.sp_UPDATE_sessionActivity", {
+                                                         {"iIP", _ip},
                                                          {"iSSID", _ssid},
                                                      }).toJson(true).object();
-    return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs.split(','));
+    return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs.split(',', QString::SkipEmptyParts));
 }
 
 QString retrievePhoto(const QString _url){

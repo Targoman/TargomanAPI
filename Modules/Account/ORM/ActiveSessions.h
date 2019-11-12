@@ -47,7 +47,8 @@ public:
 private slots:
     QVariant ORMGET("Get ActiveSessions information. Primary key is ssnKey (stored as jti in JWT)")
     bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete an active session")
+             "Delete an active session. PKs are sessionKey and userID "
+             "both must be provided in oreder to remove self session")
 
 private:
     ActiveSessions();
