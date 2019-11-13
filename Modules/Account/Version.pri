@@ -16,10 +16,5 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
-
-
-
-
-
-
-
+ProjectName=Account
+Version=1.0.0

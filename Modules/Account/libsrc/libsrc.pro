@@ -1,40 +1,58 @@
 ################################################################################
-#   TargomanAPI: REST API for Targoman
+#   TargomanDBM: An extension to QSqlDatabase
 #
 #   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
 #
-#   TargomanAPI is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
+#   TargomanDBM is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU Lesser General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
-#   TargomanAPI is distributed in the hope that it will be useful,
+#   TargomanDBM is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+#   GNU Lesser General Public License for more details.
 #
-#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
+#   You should have received a copy of the GNU Lesser General Public License
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
-PRJDIR = "../../"
-TARGET = Module_Advert
+PRJDIR = "../../../"
 
 HEADERS += \
-    Advert.h \
+    Account.h \
+    ORM/Roles.h \
+    ORM/User.h \
+    ORM/ActiveSessions.h \
+    ORM/APITokenValidIPs.h \
+    ORM/ForgotPassRequest.h \
+    ORM/Invoice.h \
+    ORM/IPBin.h \
+    ORM/IPStats.h \
+    ORM/UserWallets.h \
+    ORM/WalletTransactions.h \
+    ORM/BlockingRules.h \
+    ORM/PaymentOrder.h \
+    ORM/APITokens.h \
     ORM/ActionLogs.h \
-    ORM/ActiveAds.h \
-    ORM/Defs.hpp \
-    ORM/Bin.h \
-    ORM/Clicks.h \
-    ORM/Props.h \
+    ORM/ApprovalRequest.h
 
 SOURCES += \
-    Advert.cpp \
-    ORM/ActiveAds.cpp \
-    ORM/Bin.cpp \
-    ORM/Clicks.cpp \
-    ORM/Props.cpp \
+    Account.cpp \
+    ORM/Roles.cpp \
+    ORM/User.cpp \
+    ORM/ActiveSessions.cpp \
+    ORM/APITokenValidIPs.cpp \
+    ORM/ForgotPassRequest.cpp \
+    ORM/Invoice.cpp \
+    ORM/IPBin.cpp \
+    ORM/IPStats.cpp \
+    ORM/UserWallets.cpp \
+    ORM/WalletTransactions.cpp \
+    ORM/BlockingRules.cpp \
+    ORM/PaymentOrders.cpp \
+    ORM/APITokens.cpp \
     ORM/ActionLogs.cpp \
+    ORM/ApprovalRequest.cpp
 
 OTHER_FILES += \
 
@@ -46,11 +64,15 @@ ConfigFile = $$PRJDIR/qmake/configs.pri
 error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 }
 include ($$ConfigFile)
+include ("../Version.pri")
 
 TEMPLATE = lib
-#CONFIG(release): CONFIG+= staticlib
+TARGET = Module_$$ProjectName
+CONFIG(release){
+  CONFIG+= staticlib
+}
 
-DESTDIR =      $$BaseLibraryFolder
+DESTDIR =      $$BaseLibraryFolder/
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
 OBJECTS_DIR  = $$BuildFolderPattern/$$TARGET/obj
 RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
@@ -59,4 +81,4 @@ UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 QMAKE_CXXFLAGS_DEBUG += -fPIC
 
-DEFINES+=MODULE_$${upper($$TARGET)}_ENABLED
+DEFINES+=MODULE_$${upper($$ProjectName)}_ENABLED
