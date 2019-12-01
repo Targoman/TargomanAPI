@@ -91,14 +91,6 @@ LIBS += -lTargomanCommon \
         -lTargomanTextProcessor \
         -lcurl
 
-
-ACTIVE_MODULES= \
-  Account \
-  Advert \
-  NGT \
-
-#  MT \
-
 contains(ACTIVE_MODULES, Account) {
   DEFINES+=ENABLE_MODULE_ACCOUNT
   LIBS+=-lModule_Account

@@ -1,16 +1,14 @@
 /******************************************************************************
- * Targoman: A robust Machine Translation framework               *
+ * TargomanAAA: Authentication, Authorization, Accounting framework           *
  *                                                                            *
- * Copyright 2014-2018 by ITRC <http://itrc.ac.ir>                            *
+ * Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>  *
  *                                                                            *
- * This file is part of Targoman.                                             *
- *                                                                            *
- * Targoman is free software: you can redistribute it and/or modify           *
+ * TargomanAAA is free software: you can redistribute it and/or modify        *
  * it under the terms of the GNU Lesser General Public License as published   *
  * by the Free Software Foundation, either version 3 of the License, or       *
  * (at your option) any later version.                                        *
  *                                                                            *
- * Targoman is distributed in the hope that it will be useful,                *
+ * TargomanAAA is distributed in the hope that it will be useful,             *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
  * GNU Lesser General Public License for more details.                        *
@@ -19,42 +17,29 @@
  *                                                                            *
  ******************************************************************************/
 /**
- * @author S. Mohammad M. Ziabary <ziabary@targoman.com>
- * @author Behrooz Vedadian <vedadian@targoman.com>
- * @author Saeed Torabzadeh <saeed.torabzadeh@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
+#ifndef TESTBASE_HPP
+#define TESTBASE_HPP
 
-#ifndef UNITTEST_H
-#define UNITTEST_H
+#include "testCommon.hpp"
 
-#include <QtTest/QtTest>
-
-#include "Modules/Account/libsrc/Account.h"
-
-class testBase: public QObject
+class testBase: public clsBaseTest
 {
     Q_OBJECT
-public:
-    testBase() :
-        Instance(Account::instance())
-    {
-        Instance().init();
-    }
 private slots:
-    void signup(){
+    void initTestCase(){
 
     }
 
-    void login(){
-        QVERIFY()
-        /*QVERIFY(VERIFY_NORMALIZE("fa",
-        "خانه ی",
-        "خانه"
-        ));*/
-    };
+    void cleanupTestCase(){
 
-private:
-    Account& Instance;
+    }
+
+    void openAPI(){
+
+    }
 };
 
-#endif // UNITTEST_H
+#endif // TESTBASE_HPP
+

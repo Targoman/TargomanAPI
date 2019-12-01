@@ -17,11 +17,10 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 PRJDIR = "../../"
-TARGET = Module_Advert
+ModuleName=Advert
 
 HEADERS += \
     Advert.h \
-    ORM/ActionLogs.h \
     ORM/ActiveAds.h \
     ORM/Defs.hpp \
     ORM/Bin.h \
@@ -34,7 +33,6 @@ SOURCES += \
     ORM/Bin.cpp \
     ORM/Clicks.cpp \
     ORM/Props.cpp \
-    ORM/ActionLogs.cpp \
 
 OTHER_FILES += \
 
@@ -48,9 +46,10 @@ error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 include ($$ConfigFile)
 
 TEMPLATE = lib
-#CONFIG(release): CONFIG+= staticlib
+TARGET = Module_$$ModuleName
+!CONFIG(debug): CONFIG+= staticlib
 
-DESTDIR =      $$BaseLibraryFolder
+DESTDIR =      $$BaseLibraryFolder/
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
 OBJECTS_DIR  = $$BuildFolderPattern/$$TARGET/obj
 RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
@@ -59,4 +58,4 @@ UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 QMAKE_CXXFLAGS_DEBUG += -fPIC
 
-DEFINES+=MODULE_$${upper($$TARGET)}_ENABLED
+DEFINES+=MODULE_$${upper($$ModuleName)}_ENABLED

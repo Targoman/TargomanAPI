@@ -41,3 +41,6 @@ OTHER_FILES += \
     conf/test.conf \
     conf/api.server.conf
 
+SUBDIRS += \
+    unitTest
+

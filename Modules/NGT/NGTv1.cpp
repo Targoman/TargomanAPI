@@ -22,7 +22,6 @@
 
 #include "NGTv1.h"
 #include "ORM/Defs.hpp"
-#include "ORM/ActionLogs.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -35,7 +34,6 @@ void Ngtv1::init()
 Ngtv1::Ngtv1() :
     Helpers::ORM::clsRESTAPIWithActionLogs (NGTDACInstance(), "NGT", "Targoman"){
 
-    NGT::ActionLogs::instance().init();
     /*
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertType);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);

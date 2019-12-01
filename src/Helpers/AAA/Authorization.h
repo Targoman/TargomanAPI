@@ -24,6 +24,7 @@
 #define TARGOMAN_API_HELPERS_AAA_AUTHORIZATION_H
 
 #include "AAADefs.hpp"
+#include "QHttp/GenericTypes.h"
 
 namespace Targoman {
 namespace API {
@@ -32,8 +33,8 @@ namespace AAA {
 namespace Authorization{
     extern void validateIPAddress(const QString& _ip);
     extern QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs = {});
-    extern bool hasPriv(const QJsonObject& _privs, const QStringList& _requiredAccess);
-    extern void checkPriv(const QJsonObject& _privs, const QStringList& _requiredAccess);
+    extern bool hasPriv(const QHttp::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
+    extern void checkPriv(const QHttp::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
     extern QJsonObject privObjectFromInfo(const QJsonObject& _info);
 }
 }

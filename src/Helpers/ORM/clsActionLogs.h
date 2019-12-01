@@ -32,7 +32,7 @@ namespace API {
 namespace Helpers {
 namespace ORM {
 
-class clsRESTAPIWithActionLogs : public QHttp::intfRESTAPIHolder, private clsTable {
+class clsRESTAPIWithActionLogs : protected clsTable {
     Q_OBJECT
 public:
     clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module);

@@ -31,13 +31,14 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class ActiveAds : public QHttp::intfRESTAPIHolder, private clsTable
+class ActiveAds : public clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
+    /// @TODO default GET descriptiopn
     QVariant ORMGET("Get ActiveAds information")
 
 private:

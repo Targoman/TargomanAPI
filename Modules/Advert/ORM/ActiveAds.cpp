@@ -41,11 +41,11 @@ QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
 ActiveAds::ActiveAds() :
     clsTable("Advert",
               "tblActiveAds",
-              { ///<ColName             Validation                      Sort   Filter RO   PK
-                {"act_binID",           QFV.integer().minValue(1),      true,  true, true, true},
-                {"act_locID",           QFV.integer().minValue(1),      true,  true, true, true},
-                {"actOrder",            QFV_Enum(enuAdvertOrder)},
-                {"actOnKeyword",        QFV.unicodeAlNum().maxLenght(50)},
+              { ///<ColName      Type           Validation                      RO   Sort  Filter  PK
+                {"act_binID",    T(quint32),    QFV.integer().minValue(1),      true,  true, true, true},
+                {"act_locID",    T(quint32),    QFV.integer().minValue(1),      true,  true, true, true},
+                {"actOrder",     T(Targoman::API::enuAdvertOrder::Type)},
+                {"actOnKeyword", T(QString),    QFV.unicodeAlNum().maxLenght(50)},
               },
               { ///< Col             Reference Table            ForeignCol   Rename     LeftJoin
                 {"act_binID",        "Advert.tblBin",           "binID"},

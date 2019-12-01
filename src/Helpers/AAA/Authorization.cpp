@@ -50,20 +50,20 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
     return PrivHelpers::processObjectPrivs(TokenInfo, _requiredPrivs);
 }
 
-bool hasPriv(const QJsonObject& _privs, const QStringList& _requiredAccess)
+bool hasPriv(const QHttp::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf)
 {
-    if (_requiredAccess.isEmpty() || _privs.isEmpty())
+    if (_requiredAccess.isEmpty() || privObjectFromInfo(_jwt).isEmpty())
         return false;
 
     foreach(auto AccessItem, _requiredAccess)
-        if(PrivHelpers::hasPrivBase(privObjectFromInfo(_privs), AccessItem) == false)
+        if(PrivHelpers::hasPrivBase(privObjectFromInfo(_jwt), AccessItem, _isSelf) == false)
             return false;
     return true;
 }
 
-void checkPriv(const QJsonObject &_privs, const QStringList &_requiredAccess)
+void checkPriv(const QHttp::JWT_t &_jwt, const QStringList &_requiredAccess, bool _isSelf)
 {
-    if(!hasPriv(_privs, _requiredAccess))
+    if(!hasPriv(_jwt, _requiredAccess, _isSelf))
         throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
 }
 

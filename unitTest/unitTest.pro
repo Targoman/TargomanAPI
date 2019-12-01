@@ -1,58 +1,59 @@
 ################################################################################
-#   TargomanDBM: An extension to QSqlDatabase
+#   TargomanAPI: REST API for Targoman
 #
 #   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
 #
-#   TargomanDBM is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU Lesser General Public License as published by
+#   TargomanAPI is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
 #   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
-#   TargomanDBM is distributed in the hope that it will be useful,
+#   TargomanAPI is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU Lesser General Public License for more details.
+#   GNU AFFERO GENERAL PUBLIC LICENSE for more details.
 #
-#   You should have received a copy of the GNU Lesser General Public License
+#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
-PRJDIR = "../../../"
-
+PRJDIR = ".."
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
-    testBase.hpp
+    testCommon.hpp \
+    testBase.hpp \
+    testAccount.hpp \
+    testAccountORM.hpp \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
-    UnitTest.cpp
-#    testNormalizer.cpp \
+    main.cpp \
+    ../3rdParty/QtCUrl/src/QtCUrl.cpp \
 
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################
-ConfigFile = $$PRJDIR/qmake/configs.pri
+ConfigFile = ../qmake/configs.pri
 !exists($$ConfigFile){
-error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
+error("**** $$ProjectName: Unable to find Configuration file $$ConfigFile ****")
 }
 include ($$ConfigFile)
-include ("../Version.pri")
+QT += testlib
+QT -= gui
 
 TEMPLATE = app
-QT+=testlib
-TARGET = unitTestModule$$ProjectName
+CONFIG += qt console warn_on depend_includepath testcase
+CONFIG -= app_bundle
+
 DESTDIR = $$BaseUnitTestBinFolder
-OBJECTS_DIR = $$BaseBuildFolder/obj
-MOC_DIR = $$BaseBuildFolder/moc
-INCLUDEPATH += $$BasePath/libsrc
-QMAKE_LIBDIR += $$BaseLibraryFolder
-LIBS += -lModule_$$ProjectName
+OBJECTS_DIR = $$BaseBuildFolder/unitTest/obj
+MOC_DIR = $$BaseBuildFolder/unitTest/moc
 
 LIBS += -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
         -lQRESTServer \
         -lqhttp \
-        -lfasttext \
-        -lTargomanTextProcessor \
         -lcurl
+
+

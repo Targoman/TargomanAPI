@@ -17,16 +17,14 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 PRJDIR = "../../"
-TARGET = Module_NGT
+ModuleName=NGT
 
 HEADERS += \
     NGTv1.h \
-    ORM/Defs.hpp \
-    ORM/ActionLogs.h
+    ORM/Defs.hpp
 
 SOURCES += \
-    NGTv1.cpp \
-    ORM/ActionLogs.cpp
+    NGTv1.cpp
 
 OTHER_FILES += \
 
@@ -34,21 +32,22 @@ OTHER_FILES += \
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################
 ConfigFile = $$PRJDIR/qmake/configs.pri
-!exists($$ConfigFile) {
-  error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
+!exists($$ConfigFile){
+error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 }
 include ($$ConfigFile)
 
 TEMPLATE = lib
-#CONFIG(release): CONFIG+= staticlib
+TARGET = Module_$$ModuleName
+!CONFIG(debug): CONFIG+= staticlib
 
-DESTDIR =      $$BaseLibraryFolder
+DESTDIR =      $$BaseLibraryFolder/
 MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
 OBJECTS_DIR  = $$BuildFolderPattern/$$TARGET/obj
 RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
 UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
 
 QMAKE_CXXFLAGS_RELEASE += -fPIC
-QMAKE_CXXFLAGS_DEBUG   += -fPIC
+QMAKE_CXXFLAGS_DEBUG += -fPIC
 
-DEFINES+=MODULE_$${upper($$TARGET)}_ENABLED
+DEFINES+=MODULE_$${upper($$ModuleName)}_ENABLED

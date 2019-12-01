@@ -31,7 +31,7 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class Props : public QHttp::intfRESTAPIHolder, private clsTable
+class Props : public clsTable
 {
     Q_OBJECT
 public:

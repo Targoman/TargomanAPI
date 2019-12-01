@@ -42,19 +42,19 @@ QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL)
 Bin::Bin() :
     clsTable("Advert",
               "tblBin",
-              { ///<ColName             Validation                      Sort   Filter RO   PK
-                {"binID",               QFV.integer().minValue(1),      true,  true,  true, true},
-                {"binType",             QFV_Enum(enuAdvertType)},
-                {"binTitle",            QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binDesc",             QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binPrettyURL",        QFV.url()},
-                {"binURL",              QFV.url()},
-                {"binShown",            QFV.integer(),                  true,  true,  true},
-                {"binClicks",           QFV.integer(),                  true,  true,  true},
-                {"binCreatedBy_usrID",  QFV.integer().minValue(1),      true,  true,  true},
-                {"binCreationDateTime", QFV.dateTime(),                 true,  true,  true},
-                {"binUpdatedBy_usrID",  QFV.integer().minValue(1)},
-                {"binStatus",           QFV_Enum(enuAuditableStatus)},
+              { ///<ColName             Type            Validation                      RO   Sort  Filter  PK
+                {"binID",               T(quint32),             QFV.integer().minValue(1),      true,  true,  true, true},
+                {"binType",             T(Targoman::API::enuAdvertType::Type)},
+                {"binTitle",            T(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
+                {"binDesc",             T(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
+                {"binPrettyURL",        T(QString),             QFV.url()},
+                {"binURL",              T(QString),             QFV.url()},
+                {"binShown",            T(quint64),             QFV.integer(),                  true},
+                {"binClicks",           T(quint64),             QFV.integer(),                  true},
+                {"binCreatedBy_usrID",  T(quint32),             QFV.integer().minValue(1),      true},
+                {"binCreationDateTime", T(QHttp::DateTime_t),   QFV,                            true},
+                {"binUpdatedBy_usrID",  T(quint32),             QFV.integer().minValue(1)},
+                {"binStatus",           T(Targoman::API::enuAuditableStatus::Type)},
               },
               { ///< Col                Reference Table        ForeignCol   Rename      LeftJoin
                 {"adbCreatedBy_usrID",  "AAA.tblUser",         "usrID",     "Creator_", true},
@@ -68,10 +68,10 @@ Bin::Bin() :
 Banners::Banners() :
     clsTable("Advert",
               "tblBanners",
-              { ///<ColName             Validation                      Sort   Filter RO   PK
-                {"bnrImage",            QFV.base64Image(),              false, false},
-                {"bnrSize",             QFV_Enum(enuBannerSizes)},
-                {"bnrUpdatedBy_usrID",  QFV.integer().minValue(1)},
+              { ///<ColName             Type                Validation        RO   Sort  Filter  PK
+                {"bnrImage",            T(QHttp::Base64_t), QFV,             false,false,false},
+                {"bnrSize",             T(Targoman::API::enuBannerSizes::Type)},
+                {"bnrUpdatedBy_usrID",  T(quint32),         QFV.integer().minValue(1)},
               },
               {
                 {"bnrUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},

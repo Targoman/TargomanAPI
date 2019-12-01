@@ -42,16 +42,16 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
 Props::Props() :
     clsTable("Advert",
               "tblProps",
-              { ///<ColName             Validation                        Sort   Filter RO   PK
-                {"prp_binID",           QFV.integer().minValue(1),        true,  true, true, true},
-                {"prp_locID",           QFV.integer().minValue(1)},
-                {"prpOrder",            QFV_Enum(enuAdvertOrder)},
-                {"prpKeyword",          QFV.unicodeAlNum().maxLenght(50)},
-                {"prpStartDate",        QFV.dateTime()},
-                {"prpEndDate",          QFV.dateTime()},
-                {"prpCreatedBy_usrID",  QFV.integer().minValue(1),        true,  true,  true},
-                {"prpCreationDateTime", QFV.dateTime(),                   true,  true,  true},
-                {"prpUpdatedBy_usrID",  QFV.integer().minValue(1)},
+              { ///<ColName             Type                    Validation                      RO   Sort  Filter  PK
+                {"prp_binID",           T(quint32),             QFV.integer().minValue(1),        true,  true, true, true},
+                {"prp_locID",           T(quint32),             QFV.integer().minValue(1)},
+                {"prpOrder",            T(Targoman::API::enuAdvertOrder::Type)},
+                {"prpKeyword",          T(QString),             QFV.unicodeAlNum().maxLenght(50)},
+                {"prpStartDate",        T(QHttp::DateTime_t),   QFV},
+                {"prpEndDate",          T(QHttp::DateTime_t),   QFV},
+                {"prpCreatedBy_usrID",  T(quint32),             QFV.integer().minValue(1),        true},
+                {"prpCreationDateTime", T(QHttp::DateTime_t),   QFV,                              true},
+                {"prpUpdatedBy_usrID",  T(quint32),             QFV.integer().minValue(1)},
               },
               { ///< Col                Reference Table        ForeignCol   Rename     LeftJoin
                 {"prp_binID",           "Advert.tblBin",       "binID"},

@@ -63,6 +63,7 @@ public:
     inline QString session(){return this->Token.value(JWTItems::jti).toString();}
     inline QVariantMap privatePart(){return this->Token.value(JWTItems::priv).toObject().toVariantMap();}
     inline QJsonValue value(const QLatin1String& _key){return this->Token.value(_key);}
+    inline bool canChangePass(){return this->Token.value(JWTItems::canChangePass).toBool();}
 
 private:
     const QJsonObject& Token;

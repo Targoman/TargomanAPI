@@ -47,7 +47,7 @@ QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStrin
     return  Privs;
 }
 
-bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess){
+bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf){
     QStringList AccessItemParts = _requiredAccess.split(":");
     QJsonObject CurrCheckingPriv = _privs;
     foreach(auto Part, AccessItemParts){
@@ -59,13 +59,12 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
             QString CheckingPriv = CurrCheckingPriv.value(PRIVItems::CRUD).toString();
             for(quint8 i=0; i<4; ++i)
                 if (RequiredAccess[i] == '1' ||
-                        RequiredAccess[i].toUpper() == 'T' ||
-                        RequiredAccess[i].toUpper() == 'S'
+                        RequiredAccess[i].toUpper() == 'T'
                         ){
                     if(CheckingPriv[i] == '0' || CheckingPriv[i].toUpper() == 'F')
                         return false;
                     else
-                        return true;
+                        return (CheckingPriv[i].toUpper() == 'T' || _isSelf);
                 }
 
 
@@ -73,7 +72,7 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
         }
         bool Found = false;
         for (auto PrivIter = CurrCheckingPriv.begin(); PrivIter != CurrCheckingPriv.end(); ++PrivIter){
-            if(PrivIter.key() == "ALL" && PrivIter.value().toBool())
+            if(PrivIter.key() == "ALL" && PrivIter.value().toInt() != 0)
                 return true;
             if(PrivIter.key().toLower() == Part.toLower()){
                 CurrCheckingPriv = PrivIter.value().toObject();
@@ -97,7 +96,7 @@ QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const 
         throw exAAA("Seems that Privs has not been set");
 
     foreach(auto AccessItem, _requiredAccess)
-        if(AccessItem.size() && hasPrivBase(_privs, AccessItem) == false)
+        if(AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
             throw exAuthorization("Not enough priviledges on <"+AccessItem+">");
     return _privs;
 }

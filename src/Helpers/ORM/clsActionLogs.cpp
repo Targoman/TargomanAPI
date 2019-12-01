@@ -37,15 +37,15 @@ QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
 clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module) :
     clsTable(_schema,
             "tblActionLogs",
-            {
-                {"atlID",               QFV.integer().minValue(1),      true,  true, true, true},
-                {"atlBy_usrID",         QFV.integer().minValue(1),      true,  true, true, true},
-                {"atlInsertionDateTime",QFV.dateTime(),                 true,  true, true},
-                {"atlType",             QFV.asciiAlNum().maxLenght(50), true,  true, true},
-                {"atlType",             QFV.allwaysInvalid(),           false,false, true},
+            { ///<ColName             Type            Validation                      RO   Sort  Filter  PK
+              {"atlID",               T(quint64),     QFV.integer().minValue(1),      true, true, true, true},
+              {"atlBy_usrID",         T(quint32),     QFV.integer().minValue(1),      true},
+              {"atlInsertionDateTime",T(QHttp::DateTime_t),   QFV,                            true},
+              {"atlType",             T(QString),     QFV.asciiAlNum().maxLenght(50), true},
+              {"atlDescription",      T(QString),     QFV.allwaysInvalid(),           true, false,false},
             },
             {
-                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"}, \
+                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},
             }),
     DAC(_dac),
     Module(_module)

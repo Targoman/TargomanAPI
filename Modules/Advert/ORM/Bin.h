@@ -31,7 +31,7 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class Bin : public QHttp::intfRESTAPIHolder, private clsTable
+class Bin : public clsTable
 {
     Q_OBJECT
 public:
@@ -45,7 +45,7 @@ private:
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advert,Bin);
 };
 
-class Banners : public QHttp::intfRESTAPIHolder, private clsTable
+class Banners : public clsTable
 {
     Q_OBJECT
 public:

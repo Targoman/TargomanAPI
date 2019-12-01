@@ -44,6 +44,12 @@ TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      JustEmail = 'E',
                      )
 
+TARGOMAN_DEFINE_ENUM(enuUserSex,
+                     Male = 'M',
+                     Female = 'F',
+                     NotExpressed = 'N',
+                     )
+
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
                      Removed = 'R',
@@ -61,6 +67,8 @@ TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
 
 Q_DECLARE_METATYPE(Targoman::API::enuUserStatus::Type);
 Q_DECLARE_METATYPE(Targoman::API::enuUserApproval::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuUserSex::Type);
 Q_DECLARE_METATYPE(Targoman::API::enuGenericStatus::Type);
+Q_DECLARE_METATYPE(Targoman::API::enuAuditableStatus::Type);
 
 #endif // TARGOMAN_API_HELPERS_AAA_USERENUMS_HPP

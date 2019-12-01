@@ -18,6 +18,12 @@
 ################################################################################
 ProjectName="TargomanAPI"
 VERSION=1.0.0
+ACTIVE_MODULES= \
+  Account \
+  Advert \
+  NGT \
+#  MT \
+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 # Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough
 QMAKE_CXXFLAGS += -std=c++11 -std=c++14

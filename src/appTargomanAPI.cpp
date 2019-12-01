@@ -25,7 +25,7 @@
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Modules/MT/MT.h"
-#include "Modules/Account/libsrc/Account.h"
+#include "Modules/Account/Account.h"
 #include "Modules/Advert/Advert.h"
 #include "Modules/NGT/NGTv1.h"
 

@@ -23,6 +23,7 @@
 #include "QHttp/HTTPExceptions.h"
 #include "QHttp/GenericTypes.h"
 #include <QRegularExpression>
+#include "Helpers/AAA/clsJWT.hpp"
 
 namespace Targoman {
 namespace API {
@@ -31,25 +32,31 @@ namespace ORM {
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
-
+using namespace AAA;
 
 QHash<QString, clsTable*> clsTable::Registry;
 static bool TypesRegistered = false;
 
 clsTable::clsTable(const QString& _schema,
-                     const QString& _name,
-                     const QList<Targoman::API::Helpers::ORM::stuColumn>& _cols,
-                     const QList<stuRelation>& _foreignKeys) :
+                   const QString& _name,
+                   const QList<QHttp::stuORMField>& _cols,
+                   const QList<stuRelation>& _foreignKeys) :
     Schema(_schema),
     Name(_name),
     ForeignKeys(_foreignKeys),
     CountOfPKs(0)
 {
+    qint8 ColIndex = 0;
+
     foreach(auto Col, _cols){
-        this->Cols.insert(Col.Name, Col);
-        if(Col.IsPrimaryKey)
+        if(Col.PKIndex == 0){
             this->CountOfPKs++;
+            Col.PKIndex = ++ColIndex;
+        }
+        this->Cols.insert(Col.Name, Col);
+        this->Filters.append(Col);
     }
+    this->Filters.append(QHttp::stuORMField(COLS_KEY, T(Targoman::API::Cols_t), QFV, true));
     clsTable::Registry.insert(Schema + "." + Name, this);
     if(TypesRegistered)
         return;
@@ -61,15 +68,25 @@ clsTable::clsTable(const QString& _schema,
     TypesRegistered = true;
 }
 
-QString clsTable::finalColName(const stuColumn& _col, const QString& _prefix) const{
+void clsTable::updateFilterParamType(const QString& _fieldTypeName, int _typeID)
+{
+    for(auto ColIter = this->Cols.begin(); ColIter != this->Cols.end(); ++ColIter)
+        if(ColIter.value().ParamTypeName == _fieldTypeName)
+            ColIter.value().ParameterType = _typeID;
+    for(auto ColIter = this->Filters.begin(); ColIter != this->Filters.end(); ++ColIter)
+        if(ColIter->ParamTypeName == _fieldTypeName)
+            ColIter->ParameterType = _typeID;
+}
+
+QString clsTable::finalColName(const QHttp::stuORMField& _col, const QString& _prefix) const{
     return _prefix + (_col.RenameAs.isEmpty() ? _col.Name : _col.RenameAs);
 }
 
-QString clsTable::makeColRenamedAs(const stuColumn& _col, const QString& _prefix) const {
+QString clsTable::makeColRenamedAs(const QHttp::stuORMField& _col, const QString& _prefix) const {
     return (_col.RenameAs.isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
 };
 
-QString clsTable::makeColName(const stuColumn& _col, const stuRelation& _relation) const {
+QString clsTable::makeColName(const QHttp::stuORMField& _col, const stuRelation& _relation) const {
     return  (_relation.Column.isEmpty() ?
                  this->Name :
                  (_relation.RenamingPrefix.isEmpty() ?
@@ -80,18 +97,22 @@ QString clsTable::makeColName(const stuColumn& _col, const stuRelation& _relatio
 };
 
 QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
-                                    const QStringList& _extraJoins,
-                                    const QString& _extraFilters,
-                                    QString _extraPath,
-                                    quint64 _offset,
-                                    quint16 _limit,
-                                    const QString& _cols,
-                                    const QString& _filters,
-                                    const QString& _orderBy,
-                                    const QString& _groupBy,
-                                    bool _reportCount) const
+                                   const QStringList& _extraJoins,
+                                   const QString& _extraFilters,
+                                   const QHttp::ExtraPath_t& _extraPath,
+                                   const QHttp::DirectFilters_t& _directFilters,
+                                   quint64 _offset,
+                                   quint16 _limit,
+                                   QString _cols,
+                                   const QString& _filters,
+                                   const QString& _orderBy,
+                                   const QString& _groupBy,
+                                   bool _reportCount) const
 {
-    stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + "," + _extraFilters, _orderBy, _groupBy);
+    if(_directFilters.contains(COLS_KEY))
+        _cols = _directFilters.value(COLS_KEY).toString();
+
+    stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
     if(_extraPath.isEmpty()){
         QHttp::stuTable Table;
         Table.Rows = _db.execQuery("",
@@ -110,7 +131,7 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                    + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
                                    + SelectItems.GroupBy.join(',')
                                    + QUERY_SEPARATOR
-                                   + (SelectItems.GroupBy.size() ? "ORDER BY " : "")
+                                   + (SelectItems.OrderBy.size() ? "ORDER BY " : "")
                                    + SelectItems.OrderBy.join(',')
                                    + QUERY_SEPARATOR
                                    + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
@@ -120,15 +141,23 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
         return Table.toVariant();
     }else{
         QStringList PrimaryKeyQueries = _extraPath.split(",");
-        QStringList PrimaryKeyCriterias;
-        quint8 Offset = 0;
+        QStringList Filters;
+        quint8 PKIndex = 1;
         foreach(auto Query, PrimaryKeyQueries){
-            QList<stuColumn> ColValues = this->Cols.values();
-            for(quint8 i=Offset;i<ColValues.size(); ++i)
-                if(ColValues.at(i).IsPrimaryKey){
-                    PrimaryKeyCriterias.append(this->finalColName(ColValues.at(i)) + " = \"" + Query + "\"");
-                    Offset = i;
+            QList<QHttp::stuORMField> ColValues = this->Cols.values();
+            foreach(auto Col, this->Cols)
+                if(Col.PKIndex == PKIndex){
+                    if(Query.size())
+                        Filters.append(this->finalColName(Col) + " = \"" + Query + "\"");
+                    break;
                 }
+            PKIndex++;
+        }
+        for(auto FilterIter = _directFilters.begin(); FilterIter != _directFilters.end(); ++FilterIter){
+            if(FilterIter.key() == COLS_KEY) continue;
+            const QHttp::stuORMField& Col = this->Cols.value(FilterIter.key());
+            if(Col.Filterable)
+                Filters.append(FilterIter.key() + " = \"" + FilterIter.value().toString() + "\"");
         }
 
         QJsonDocument Result = _db.execQuery("",
@@ -140,14 +169,11 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                              + QUERY_SEPARATOR
                                              + SelectItems.From.join(QUERY_SEPARATOR)
                                              + QUERY_SEPARATOR
-                                             + "WHERE ("
-                                             + PrimaryKeyCriterias.join(" AND ")
-                                             + ") AND "
-                                             + QUERY_SEPARATOR
-                                             + SelectItems.Where.join(QUERY_SEPARATOR)
+                                             + "WHERE "
+                                             + Filters.join(" AND ")
                                              + QUERY_SEPARATOR
                                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-                                             ).toJson(false);
+                                             ).toJson(true);
         if(Result.isEmpty())
             throw exHTTPBadRequest("No item could be found");
 
@@ -162,10 +188,11 @@ bool clsTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariant
     for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
-        const stuColumn& Column = this->Cols[InfoIter.key()];
+        const QHttp::stuORMField& Column = this->Cols.value(InfoIter.key());
         if(Column.IsReadOnly)
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
-        this->Cols[InfoIter.key()].Validator.validate(InfoIter.value(), InfoIter.key());
+
+        this->Cols.value(InfoIter.key()).validate(InfoIter.value());
         UpdateCommands.append(Column.Name + "=?");
         Values.append(InfoIter.value());
     }
@@ -174,8 +201,8 @@ bool clsTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariant
     for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
         if(PKIter->isValid() == false)
             continue;
-        const stuColumn& Column = this->Cols[PKIter.key()];
-        if(Column.IsPrimaryKey == false)
+        const QHttp::stuORMField& Column = this->Cols[PKIter.key()];
+        if(Column.PKIndex <= 0)
             throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
         PKs.append(Column.Name + "=?");
         Values.append(PKIter.value());
@@ -202,10 +229,10 @@ QVariant clsTable::create(clsDAC& _db, QVariantMap _createInfo)
     for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
-        const stuColumn& Column = this->Cols[InfoIter.key()];
+        const QHttp::stuORMField& Column = this->Cols[InfoIter.key()];
         if(Column.IsReadOnly)
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
-        this->Cols[InfoIter.key()].Validator.validate(InfoIter.value(), InfoIter.key());
+        this->Cols[InfoIter.key()].validate(InfoIter.value());
         CreateCommands.append(Column.Name + "=?");
         Values.append(InfoIter.value());
     }
@@ -231,8 +258,8 @@ bool clsTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
     for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
         if(PKIter->isValid() == false)
             continue;
-        const stuColumn& Column = this->Cols[PKIter.key()];
-        if(Column.IsPrimaryKey == false)
+        const QHttp::stuORMField& Column = this->Cols[PKIter.key()];
+        if(Column.PKIndex < 0)
             throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
         PKs.append(Column.Name + "=?");
         Values.append(PKIter.value());
@@ -249,9 +276,19 @@ bool clsTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
     return Result.numRowsAffected() > 0;
 }
 
-clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, const QString _filters, const QString& _orderBy, const QString _groupBy) const
+bool clsTable::isSelfGet(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, DirectFilters_t _DIRECTFILTERS, Targoman::API::Filter_t _filters)
 {
-    if(_requiredCols != "*")
+    for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
+        if((_EXTRAPATH.size() && _DIRECTFILTERS.value(FilterIter.key(), 0) != FilterIter.value())
+           || (_EXTRAPATH.isEmpty() && _filters.contains(QString("%1=%2").arg(FilterIter.key()).arg(FilterIter.value().toString())) == false)
+           )
+            return false;
+    return true;
+}
+
+clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, QString _filters, const QString& _orderBy, const QString _groupBy) const
+{
+    if(_requiredCols.size())
         QFV.asciiAlNum(false, ",").validate(_requiredCols, "cols");
 
     QFV.optional(QFV.asciiAlNum(false, ",\\+\\-")).validate(_orderBy, "orderBy");
@@ -260,7 +297,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     clsTable::stuSelectItems SelectItems;
 
     /****************************************************************************/
-    QStringList RequiredCols = _requiredCols.split(",", QString::SkipEmptyParts);
+    QStringList RequiredCols = _requiredCols.size() ? _requiredCols.split(",", QString::SkipEmptyParts) : QStringList("*");
     QStringList SortableCols, FilterableCols;
 
     foreach(auto Col, this->Cols){
@@ -311,10 +348,10 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     foreach(auto Join, UsedJoins){
         SelectItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
                                 + Join.ReferenceTable
-                                + " "
+                                + " `"
                                 + Join.RenamingPrefix
-                                + " ON "
-                                + (Join.RenamingPrefix.size() ? Join.RenamingPrefix : Join.ReferenceTable) + "." + Join.ForeignColumn
+                                + "` ON `"
+                                + (Join.RenamingPrefix.size() ? Join.RenamingPrefix : Join.ReferenceTable) + "`." + Join.ForeignColumn
                                 + " = "
                                 + this->Name + "." + Join.Column
                                 );
@@ -326,68 +363,66 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     /****************************************************************************/
     quint8 OpenParenthesis = 0;
     bool CanStartWithLogical = false;
-    foreach(auto Filter, _filters.split(",", QString::SkipEmptyParts)){
+    QString LastLogical = "";
+    _filters = _filters.replace("\\ ", "$SPACE$");
+    foreach(auto Filter, _filters.split(" ", QString::SkipEmptyParts)){
         QString Rule;
         Filter = Filter.trimmed ();
         if(Filter == ")"){
-            if(OpenParenthesis == 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
+            if(OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
             Rule = " )";
             OpenParenthesis--;
             CanStartWithLogical = true;
+        }else if(Filter == "("){
+            Rule = LastLogical + "(";
+            CanStartWithLogical = false;
+            LastLogical.clear();
+            OpenParenthesis++;
+        }else if(Filter == '+' || Filter == '|' || Filter == '*'){
+            if(CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
+            if(Filter == '+') LastLogical = "AND ";
+            else if(Filter == '|') LastLogical = "OR ";
+            else if(Filter == '*') LastLogical = "XOR ";
+
+            CanStartWithLogical = false;
             continue;
-        }else if(Filter.endsWith("(")){
-            if(Filter != '('){
-                if(CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
-                if(Filter.startsWith('+')) Rule = "AND ";
-                else if(Filter.startsWith('|')) Rule = "OR ";
-                else if(Filter.startsWith('*')) Rule = "XOR ";
-                else throw exHTTPBadRequest("Invalid expression before parenthesis");
+        }else{
+            static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
+            Filter = Filter.replace("$SPACE$", " ");
+            QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
+            if(PatternMatches.lastCapturedIndex() != 3)
+                throw exHTTPBadRequest("Invalid filter set: " + Filter);
 
-                Rule +="(";
-                CanStartWithLogical = false;
-                OpenParenthesis++;
-            }
-        }
+            Rule = LastLogical;
 
-        static QRegularExpression rxFilterPattern("([\\+\\|\\*]?)([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
-        Filter = Filter.replace("$COMMA$", ",");
-        QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
-        if(PatternMatches.lastCapturedIndex() != 4)
-            throw exHTTPBadRequest("Invalid filter set: " + Filter);
-
-        if(PatternMatches.captured(1).length() && CanStartWithLogical == false)
-            throw exHTTPBadRequest("Invalid AND/OR/XOR: " + Filter);
-
-        if(PatternMatches.captured(1) == '+') Rule = " AND ";
-        else if(PatternMatches.captured(1) == '|') Rule = " OR ";
-        else if(PatternMatches.captured(1) == '*') Rule = " XOR ";
-
-        if(FilterableCols.contains(PatternMatches.captured(2).trimmed()))
-            Rule+=PatternMatches.captured(2);
-        else
-            throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(2));
-
-        if(PatternMatches.captured(4) == "NULL"){
-            if(PatternMatches.captured(3) == "=")
-                Rule = " IS NULL";
-            else if(PatternMatches.captured(3) == "!=")
-                Rule = " IS NOT NULL";
+            if(FilterableCols.contains(PatternMatches.captured(1).trimmed()))
+                Rule+=PatternMatches.captured(1);
             else
-                throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
-            continue;
+                throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
+
+            if(PatternMatches.captured(3) == "NULL"){
+                if(PatternMatches.captured(2) == "=")
+                    Rule = " IS NULL";
+                else if(PatternMatches.captured(2) == "!=")
+                    Rule = " IS NOT NULL";
+                else
+                    throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
+                continue;
+            }
+
+            if(PatternMatches.captured(2) == "<") Rule += " < ";
+            else if(PatternMatches.captured(2) == "<=") Rule += " <= ";
+            else if(PatternMatches.captured(2) == ">") Rule += " > ";
+            else if(PatternMatches.captured(2) == ">=") Rule += " >= ";
+            else if(PatternMatches.captured(2) == "!=") Rule += " != ";
+            else if(PatternMatches.captured(2) == "~=") Rule += " LIKE ";
+            else if(PatternMatches.captured(2) == "=") Rule += " = ";
+            else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
+
+            Rule += PatternMatches.captured(3);
+            CanStartWithLogical = true;
+            LastLogical.clear();
         }
-
-        if(PatternMatches.captured(3) == "<") Rule += " < ";
-        else if(PatternMatches.captured(3) == "<=") Rule += " <= ";
-        else if(PatternMatches.captured(3) == ">") Rule += " > ";
-        else if(PatternMatches.captured(3) == ">=") Rule += " >= ";
-        else if(PatternMatches.captured(3) == "!=") Rule += " != ";
-        else if(PatternMatches.captured(3) == "~=") Rule += " LIKE ";
-        else if(PatternMatches.captured(3) == "=") Rule += " = ";
-        else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
-
-        Rule += PatternMatches.captured(4);
-        CanStartWithLogical = true;
         SelectItems.Where.append(Rule);
     }
 

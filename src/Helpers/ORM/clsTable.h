@@ -27,6 +27,8 @@
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
 #include "QHttp/QRESTServer.h"
+//#include "QHttp/stuORMField.hpp"
+#include "QHttp/intfRESTAPIHolder.h"
 
 namespace Targoman {
 namespace API {
@@ -34,6 +36,15 @@ QHTTP_ADD_SIMPLE_TYPE(QString, Cols_t);
 QHTTP_ADD_SIMPLE_TYPE(QString, Filter_t);
 QHTTP_ADD_SIMPLE_TYPE(QString, OrderBy_t);
 QHTTP_ADD_SIMPLE_TYPE(QString, GroupBy_t);
+
+#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::DirectFilters_t _DIRECTFILTERS= {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::DirectFilters_t _DIRECTFILTERS, quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_CALL_ARGS   _EXTRAPATH, _DIRECTFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
+#define QFV_Enum(_enum) QFV.matches(QRegularExpression(QString("^[%1]$").arg(_enum::options().join("|"))))
+#ifndef API
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#endif
 
 namespace Helpers {
 namespace ORM {
@@ -54,37 +65,9 @@ struct stuRelation{
 
 static stuRelation InvalidRelation("","","");
 static QString QUERY_SEPARATOR = "\n";
+static QString COLS_KEY = "cols";
 
-struct stuColumn{
-    QString Name;
-    QFieldValidator Validator;
-    bool Sortable;
-    bool Filterable;
-    bool IsReadOnly;
-    bool IsPrimaryKey;
-    QString RenameAs;
-
-    stuColumn(){;}
-
-    stuColumn(const QString& _name,
-              const QFieldValidator& _validator = QFV.allwaysValid(),
-              bool  _sortable = true,
-              bool  _filterable = true,
-              bool _readOnly = false,
-              bool _primaryKey = false,
-              const QString& _renameAs = {}
-              ):
-        Name(_name),
-        Validator(_validator),
-        Sortable(_sortable),
-        Filterable(_filterable),
-        IsReadOnly(_readOnly),
-        IsPrimaryKey(_primaryKey),
-        RenameAs(_renameAs)
-    {;}
-};
-
-class clsTable{
+class clsTable: public QHttp::intfRESTAPIHolder {
 protected:
     struct stuSelectItems{
         QStringList Cols;
@@ -97,16 +80,20 @@ protected:
 public:
     clsTable(const QString& _scheam,
               const QString& _name,
-              const QList<stuColumn>& _cols,
+              const QList<QHttp::stuORMField>& _cols,
               const QList<stuRelation>& _foreignKeys);
+
+    inline QList<QHttp::stuORMField> filterItems() {return this->Filters;}
+    void updateFilterParamType(const QString& _fieldTypeName, int _typeID);
 
     QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
                              const QStringList& _extraJoins,
                              const QString& _extraFilters,
-                             QString _extraPath,
+                             const QHttp::ExtraPath_t& _extraPath,
+                             const QHttp::DirectFilters_t& _directFilters,
                              quint64 _offset,
                              quint16 _limit,
-                             const QString& _cols,
+                             QString _cols,
                              const QString& _filters,
                              const QString& _orderBy,
                              const QString& _groupBy,
@@ -120,34 +107,28 @@ public:
     bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
                      QVariantMap _primaryKeys);
 
+    bool isSelfGet(const QVariantMap& _requiredFilters, QHttp::ExtraPath_t _EXTRAPATH, QHttp::DirectFilters_t _DIRECTFILTERS, Targoman::API::Filter_t _filters);
+
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
                                     const QStringList& _extraJoins = {},
-                                    const QString _filters = {},
+                                    QString _filters = {},
                                     const QString& _orderBy = {},
                                     const QString _groupBy = {}) const;
-    QString makeColName(const stuColumn& _col, const stuRelation& _relation = InvalidRelation) const;
-    QString makeColRenamedAs(const stuColumn& _col, const QString& _prefix = {})  const ;
-    QString finalColName(const stuColumn& _col, const QString& _prefix = {}) const;
+    QString makeColName(const QHttp::stuORMField& _col, const stuRelation& _relation = InvalidRelation) const;
+    QString makeColRenamedAs(const QHttp::stuORMField& _col, const QString& _prefix = {})  const ;
+    QString finalColName(const QHttp::stuORMField& _col, const QString& _prefix = {}) const;
 
 protected:
     QString Schema;
     QString Name;
-    QMap<QString, stuColumn> Cols;
+    QMap<QString, QHttp::stuORMField> Cols;
     QList<stuRelation> ForeignKeys;
+    QList<QHttp::stuORMField> Filters;
     quint8  CountOfPKs;
 
     static QHash<QString, clsTable*> Registry;
 };
-
-#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={"*"}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
-#define GET_METHOD_CALL_ARGS   _EXTRAPATH, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
-#define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
-#define QFV_Enum(_enum) QFV.matches(QRegularExpression(QString("^[%1]$").arg(_enum::options().join("|"))))
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
 
 }
 }

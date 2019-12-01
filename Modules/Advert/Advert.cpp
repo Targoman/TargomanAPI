@@ -30,7 +30,6 @@
 #include "Configs.h"
 
 #include "ORM/Defs.hpp"
-#include "ORM/ActionLogs.h"
 #include "ORM/ActiveAds.h"
 #include "ORM/Bin.h"
 #include "ORM/Clicks.h"
@@ -69,7 +68,6 @@ Advert::Advert() :
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBannerSizes);
 
-    Advertisement::ActionLogs::instance().init();
     Advertisement::ActiveAds::instance().init();
     Advertisement::Bin::instance().init();
     Advertisement::Clicks::instance().init();
