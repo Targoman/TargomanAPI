@@ -26,7 +26,7 @@
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "./ORM/Defs.hpp"
-#include "Helpers/ORM/clsActionLogs.h"
+#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
 
 namespace Targoman {
 namespace API {

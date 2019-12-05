@@ -20,36 +20,34 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "ActiveAds.h"
+#include "IPStats.h"
 #include "Helpers/AAA/AAA.hpp"
-#include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace AAA {
 using namespace QHttp;
 
-void ActiveAds::init()
+void IPStats::init()
 {;}
 
-QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advert:ActiveAds:CRUD~0100"});
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+//    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
+
+//    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-ActiveAds::ActiveAds() :
-    clsTable("Advert",
-              "tblActiveAds",
-              { ///<ColName      Type           Validation                      RO   Sort  Filter Self  Virt   PK
-                {"act_binID",    S(quint32),    QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"act_locID",    S(quint32),    QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"actOrder",     S(Targoman::API::enuAdvertOrder::Type)},
-                {"actOnKeyword", S(QString),    QFV.unicodeAlNum().maxLenght(50)},
+IPStats::IPStats() :
+    clsTable("AAA",
+              "tblIPStats",
+              { ///<ColName             Type                 Validation                     RO   Sort  Filter Self  Virt   PK
+                {"ips_ipbIP",           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
+                {"ipsTimeStamp",        S(double),           QFV.allwaysValid(),            true},
+                {"ipsInsertionDate",    S(QHttp::DateTime_t),QFV.allwaysValid(),            true},
               },
-              { ///< Col             Reference Table            ForeignCol   Rename     LeftJoin
-                {"act_binID",        "Advert.tblBin",           "binID"},
-                //{"act_locID",        "Advert.tblLocations",     "locID"},
+              { ///< Col        Reference Table     ForeignCol
+                {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
               })
 {
     this->registerMyRESTAPIs();
@@ -58,3 +56,4 @@ ActiveAds::ActiveAds() :
 }
 }
 }
+

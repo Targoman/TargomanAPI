@@ -32,8 +32,8 @@ HEADERS += \
     Helpers/AAA/PrivHelpers.h \
     Helpers/AAA/AAA.hpp \
     Helpers/AAA/GenericEnums.hpp \
-    Helpers/ORM/clsActionLogs.h \
     Helpers/ORM/clsTable.h \
+    Helpers/ORM/clsRESTAPIWithActionLogs.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -46,8 +46,8 @@ SOURCES += \
     Helpers/AAA/Authentication.cpp \
     Helpers/AAA/Authorization.cpp \
     Helpers/AAA/PrivHelpers.cpp \
-    Helpers/ORM/clsActionLogs.cpp \
     Helpers/ORM/clsTable.cpp \
+    Helpers/ORM/clsRESTAPIWithActionLogs.cpp
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #

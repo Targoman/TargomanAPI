@@ -20,35 +20,39 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP
-#define TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP
-
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "clsRESTAPIWithActionLogs.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Helpers {
 namespace ORM {
 
-class clsRESTAPIWithActionLogs : protected clsTable {
-    Q_OBJECT
-public:
-    clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module);
-
-private slots:
-    QVariant apiGETActionLogs(GET_METHOD_ARGS_HEADER);
-    QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
-    QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
-
-private:
-    DBManager::clsDAC& DAC;
-    QString Module;
-};
-}
-}
-}
+QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
+    return this->selectFromTable(this->DAC, {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-#endif // TARGOMAN_API_HELPERS_ORM_ACTIONLOGS_HPP
+clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module) :
+    clsTable(_schema,
+            "tblActionLogs",
+            { ///<ColName             Type                  Validation                      RO   Sort  Filter Self  Virt   PK
+              {"atlID",               S(quint64),           QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+              {"atlBy_usrID",         S(quint32),           QFV.integer().minValue(1),      true},
+              {"atlInsertionDateTime",S(QHttp::DateTime_t), QFV,                            true},
+              {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), true},
+              {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           true, false,false},
+            },
+            {
+                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},
+            }),
+    DAC(_dac),
+    Module(_module)
+{
+}
+
+}
+}
+}
+}

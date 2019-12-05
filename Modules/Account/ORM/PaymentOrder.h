@@ -19,50 +19,42 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATION_H
-#define TARGOMAN_API_MODULES_TRANSLATION_H
+
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
+TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
+                     Pending  = 'N',
+                     Success  = 'S',
+                     Error    = 'A',
+                     Removed  = 'R'
+                     )
+namespace AAA {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-class MT  : private Helpers::ORM::clsRESTAPIWithActionLogs
+class PaymentOrders : public clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariantMap API(,Translate,
-                    (const QHttp::RemoteIP_t& _REMOTE_IP,
-                     const QString& _token,
-                     QString _text,
-                     QString _dir,
-                     const QString& _engine = "NMT",
-                     bool _detailed = false,
-                     bool _detok = true,
-                     bool _dic=false,
-                     bool _dicFull = false),
-                    "Translates ....")
-
-    QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
-
-    private:
-        MT();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(MT);
+    QVariant ORMGET("Get PaymentOrders information. PKs are pyoID, pyoMD5")
 
 private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
+    PaymentOrders();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,PaymentOrders);
 };
 
 }
 }
+}
 
-#endif // TARGOMAN_API_MODULES_TRANSLATION_H
+Q_DECLARE_METATYPE(Targoman::API::enuPaymentStatus::Type);
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

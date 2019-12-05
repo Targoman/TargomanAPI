@@ -20,39 +20,35 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "clsActionLogs.h"
-#include "Helpers/AAA/AAA.hpp"
+#ifndef TARGOMAN_API_HELPERS_ORM_CLSRESTAPIWithActionLogs_HPP
+#define TARGOMAN_API_HELPERS_ORM_CLSRESTAPIWithActionLogs_HPP
+
+#include "QHttp/intfRESTAPIHolder.h"
+#include "libTargomanDBM/clsDAC.h"
+#include "Helpers/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
 namespace Helpers {
 namespace ORM {
 
-QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
-    return this->selectFromTable(this->DAC, {}, {}, GET_METHOD_CALL_ARGS);
+class clsRESTAPIWithActionLogs : protected clsTable {
+    Q_OBJECT
+public:
+    clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module);
+
+private slots:
+    QVariant apiGETActionLogs(GET_METHOD_ARGS_HEADER);
+    QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
+    QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
+
+private:
+    DBManager::clsDAC& DAC;
+    QString Module;
+};
+}
+}
+}
 }
 
-clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module) :
-    clsTable(_schema,
-            "tblActionLogs",
-            { ///<ColName             Type            Validation                      RO   Sort  Filter  PK
-              {"atlID",               T(quint64),     QFV.integer().minValue(1),      true, true, true, true},
-              {"atlBy_usrID",         T(quint32),     QFV.integer().minValue(1),      true},
-              {"atlInsertionDateTime",T(QHttp::DateTime_t),   QFV,                            true},
-              {"atlType",             T(QString),     QFV.asciiAlNum().maxLenght(50), true},
-              {"atlDescription",      T(QString),     QFV.allwaysInvalid(),           true, false,false},
-            },
-            {
-                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},
-            }),
-    DAC(_dac),
-    Module(_module)
-{
-}
-
-}
-}
-}
-}
+#endif // TARGOMAN_API_HELPERS_ORM_CLSRESTAPIWithActionLogs_HPP

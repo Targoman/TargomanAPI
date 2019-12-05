@@ -27,7 +27,6 @@
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
 #include "QHttp/QRESTServer.h"
-//#include "QHttp/stuORMField.hpp"
 #include "QHttp/intfRESTAPIHolder.h"
 
 namespace Targoman {
@@ -41,7 +40,12 @@ QHTTP_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 #define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::DirectFilters_t _DIRECTFILTERS, quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _DIRECTFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
-#define QFV_Enum(_enum) QFV.matches(QRegularExpression(QString("^[%1]$").arg(_enum::options().join("|"))))
+
+#define DELETE_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::DirectFilters_t _DIRECTFILTERS= {}
+#define DELETE_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::DirectFilters_t _DIRECTFILTERS
+#define DELETE_METHOD_CALL_ARGS   _EXTRAPATH, _DIRECTFILTERS
+#define ORMDELETE(_doc) apiDELETE (DELETE_METHOD_ARGS_HEADER); QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER)); } QString docOfDELETE(){ return _doc; }
+
 #ifndef API
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
@@ -80,11 +84,12 @@ protected:
 public:
     clsTable(const QString& _scheam,
               const QString& _name,
-              const QList<QHttp::stuORMField>& _cols,
+              const QList<QHttp::clsORMField>& _cols,
               const QList<stuRelation>& _foreignKeys);
 
-    inline QList<QHttp::stuORMField> filterItems() {return this->Filters;}
-    void updateFilterParamType(const QString& _fieldTypeName, int _typeID);
+    QList<QHttp::clsORMField> filterItems(qhttp::THttpMethod _method);
+    void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
+    void prepareFiltersList();
 
     QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
                              const QStringList& _extraJoins,
@@ -97,7 +102,7 @@ public:
                              const QString& _filters,
                              const QString& _orderBy,
                              const QString& _groupBy,
-                             bool _reportCount) const;
+                             bool _reportCount);
 
     bool update(Targoman::DBManager::clsDAC& _db,
                 QVariantMap _primaryKeys,
@@ -107,7 +112,12 @@ public:
     bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
                      QVariantMap _primaryKeys);
 
-    bool isSelfGet(const QVariantMap& _requiredFilters, QHttp::ExtraPath_t _EXTRAPATH, QHttp::DirectFilters_t _DIRECTFILTERS, Targoman::API::Filter_t _filters);
+    bool isSelf(const QVariantMap& _requiredFilters,
+                QHttp::ExtraPath_t _EXTRAPATH,
+                QHttp::DirectFilters_t _DIRECTFILTERS = {},
+                Targoman::API::Filter_t _filters = {});
+
+    QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
 
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
@@ -115,16 +125,19 @@ private:
                                     QString _filters = {},
                                     const QString& _orderBy = {},
                                     const QString _groupBy = {}) const;
-    QString makeColName(const QHttp::stuORMField& _col, const stuRelation& _relation = InvalidRelation) const;
-    QString makeColRenamedAs(const QHttp::stuORMField& _col, const QString& _prefix = {})  const ;
-    QString finalColName(const QHttp::stuORMField& _col, const QString& _prefix = {}) const;
+    QString makeColName(const QHttp::clsORMField& _col, const stuRelation& _relation = InvalidRelation) const;
+    QString makeColRenamedAs(const QHttp::clsORMField& _col, const QString& _prefix = {})  const ;
+    static QString finalColName(const QHttp::clsORMField& _col, const QString& _prefix = {});
 
 protected:
     QString Schema;
     QString Name;
-    QMap<QString, QHttp::stuORMField> Cols;
+    QMap<QString, QHttp::clsORMField> SelectableColsMap;
+    QMap<QString, QHttp::clsORMField> FilterableColsMap;
+    QMap<QString, QHttp::clsORMField> SortableColsMap;
+    QList<QHttp::clsORMField> AllCols;
+    QList<QHttp::clsORMField> BaseCols;
     QList<stuRelation> ForeignKeys;
-    QList<QHttp::stuORMField> Filters;
     quint8  CountOfPKs;
 
     static QHash<QString, clsTable*> Registry;
@@ -142,5 +155,7 @@ Q_DECLARE_METATYPE(Targoman::API::GroupBy_t);
 
 using namespace Targoman::API;
 using namespace Targoman::API::Helpers::ORM;
+using namespace QHttp;
+using namespace qhttp;
 
 #endif // TARGOMAN_API_HELPERS_AAA_DEFS_HPP

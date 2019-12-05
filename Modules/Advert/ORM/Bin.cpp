@@ -30,7 +30,9 @@ namespace Advertisement {
 using namespace QHttp;
 
 void Bin::init()
-{;}
+{
+    Banners::instance().init();
+}
 
 QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -42,36 +44,39 @@ QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL)
 Bin::Bin() :
     clsTable("Advert",
               "tblBin",
-              { ///<ColName             Type            Validation                      RO   Sort  Filter  PK
-                {"binID",               T(quint32),             QFV.integer().minValue(1),      true,  true,  true, true},
-                {"binType",             T(Targoman::API::enuAdvertType::Type)},
-                {"binTitle",            T(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binDesc",             T(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binPrettyURL",        T(QString),             QFV.url()},
-                {"binURL",              T(QString),             QFV.url()},
-                {"binShown",            T(quint64),             QFV.integer(),                  true},
-                {"binClicks",           T(quint64),             QFV.integer(),                  true},
-                {"binCreatedBy_usrID",  T(quint32),             QFV.integer().minValue(1),      true},
-                {"binCreationDateTime", T(QHttp::DateTime_t),   QFV,                            true},
-                {"binUpdatedBy_usrID",  T(quint32),             QFV.integer().minValue(1)},
-                {"binStatus",           T(Targoman::API::enuAuditableStatus::Type)},
+              { ///<ColName             Type            Validation                      RO   Sort  Filter Self  Virt   PK
+                {"binID",               S(quint32),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {"binType",             S(Targoman::API::enuAdvertType::Type)},
+                {"binTitle",            S(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
+                {"binDesc",             S(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
+                {"binPrettyURL",        S(QString),             QFV.url()},
+                {"binURL",              S(QString),             QFV.url()},
+                {"binShown",            S(quint64),             QFV.integer(),                  true},
+                {"binClicks",           S(quint64),             QFV.integer(),                  true},
+                {"binCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      true},
+                {"binCreationDateTime", S(QHttp::DateTime_t),   QFV,                            true},
+                {"binUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
+                {"binStatus",           S(Targoman::API::enuAuditableStatus::Type)},
               },
               { ///< Col                Reference Table        ForeignCol   Rename      LeftJoin
                 {"adbCreatedBy_usrID",  "AAA.tblUser",         "usrID",     "Creator_", true},
                 {"adbUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
-                {"adbUpdatedBy_usrID",  "Advert.tblBanners",   "bnr_binID", "",         true},
+                //{"adbUpdatedBy_usrID",  "Advert.tblBanners",   "bnr_binID", "",         true},
               })
 {
     this->registerMyRESTAPIs();
 }
 
+void Banners::init()
+{;}
+
 Banners::Banners() :
     clsTable("Advert",
               "tblBanners",
-              { ///<ColName             Type                Validation        RO   Sort  Filter  PK
-                {"bnrImage",            T(QHttp::Base64_t), QFV,             false,false,false},
-                {"bnrSize",             T(Targoman::API::enuBannerSizes::Type)},
-                {"bnrUpdatedBy_usrID",  T(quint32),         QFV.integer().minValue(1)},
+              { ///<ColName             Type                Validation        RO   Sort  Filter Self  Virt   PK
+                {"bnrImage",            S(QHttp::Base64_t), QFV,             false,false,false},
+                {"bnrSize",             S(Targoman::API::enuBannerSizes::Type)},
+                {"bnrUpdatedBy_usrID",  S(quint32),         QFV.integer().minValue(1)},
               },
               {
                 {"bnrUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},

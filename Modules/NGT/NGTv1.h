@@ -25,7 +25,7 @@
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "QHttp/GenericTypes.h"
-#include "Helpers/ORM/clsActionLogs.h"
+#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
 
 namespace Targoman {
 namespace API {

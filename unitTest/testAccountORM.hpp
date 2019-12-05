@@ -55,7 +55,6 @@ private slots:
                         }
                         ).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
     }
-
 };
 
 

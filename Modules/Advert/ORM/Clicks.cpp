@@ -41,20 +41,20 @@ QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL)
 Clicks::Clicks() :
     clsTable("Advert",
               "tblClicks",
-              { ///<ColName             Type                    Validation                      RO   Sort  Filter  PK
-                {"clkID",               T(quint64),             QFV.integer().minValue(1),      true, true, true, true},
-                {"clk_binID",           T(quint32),             QFV.integer().minValue(1),      true, true, true},
-                {"clk_locID",           T(quint32),             QFV.integer().minValue(1),      true, true, true},
-                {"clkDateTime",         T(QHttp::DateTime_t),   QFV,                            true},
-                {"clkIP",               T(quint32),             QFV.ipv4(),                     true},
-                {"clkDevice",           T(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkScreenSize",       T(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkOS",               T(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkBrowser",          T(quint32),             QFV.asciiAlNum().maxLenght(50), true},
+              { ///<ColName             Type                    Validation                      RO   Sort  Filter Self  Virt   PK
+                {"clkID",               S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {"clk_binID",           S(quint32),             QFV.integer().minValue(1),      true, true, true},
+                {"clk_locID",           S(quint32),             QFV.integer().minValue(1),      true, true, true},
+                {"clkDateTime",         S(QHttp::DateTime_t),   QFV,                            true},
+                {"clkIP",               S(quint32),             QFV.ipv4(),                     true},
+                {"clkDevice",           S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
+                {"clkScreenSize",       S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
+                {"clkOS",               S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
+                {"clkBrowser",          S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
               },
               { ///< Col             Reference Table                 ForeignCol   Rename     LeftJoin
                 {"clk_binID",        "Advert.tblBin",                "binID"},
-                {"clk_locID",        "Advert.tblLocations",          "locID"},
+                //{"clk_locID",        "Advert.tblLocations",          "locID"},
               })
 {
     this->registerMyRESTAPIs();

@@ -42,20 +42,20 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
 Props::Props() :
     clsTable("Advert",
               "tblProps",
-              { ///<ColName             Type                    Validation                      RO   Sort  Filter  PK
-                {"prp_binID",           T(quint32),             QFV.integer().minValue(1),        true,  true, true, true},
-                {"prp_locID",           T(quint32),             QFV.integer().minValue(1)},
-                {"prpOrder",            T(Targoman::API::enuAdvertOrder::Type)},
-                {"prpKeyword",          T(QString),             QFV.unicodeAlNum().maxLenght(50)},
-                {"prpStartDate",        T(QHttp::DateTime_t),   QFV},
-                {"prpEndDate",          T(QHttp::DateTime_t),   QFV},
-                {"prpCreatedBy_usrID",  T(quint32),             QFV.integer().minValue(1),        true},
-                {"prpCreationDateTime", T(QHttp::DateTime_t),   QFV,                              true},
-                {"prpUpdatedBy_usrID",  T(quint32),             QFV.integer().minValue(1)},
+              { ///<ColName             Type                    Validation                      RO   Sort  Filter Self  Virt   PK
+                {"prp_binID",           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {"prp_locID",           S(quint32),             QFV.integer().minValue(1)},
+                {"prpOrder",            S(Targoman::API::enuAdvertOrder::Type)},
+                {"prpKeyword",          S(QString),             QFV.unicodeAlNum().maxLenght(50)},
+                {"prpStartDate",        S(QHttp::DateTime_t),   QFV},
+                {"prpEndDate",          S(QHttp::DateTime_t),   QFV},
+                {"prpCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),        true},
+                {"prpCreationDateTime", S(QHttp::DateTime_t),   QFV,                              true},
+                {"prpUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
               },
               { ///< Col                Reference Table        ForeignCol   Rename     LeftJoin
                 {"prp_binID",           "Advert.tblBin",       "binID"},
-                {"prp_locID",           "Advert.tblLocations", "locID"},
+                //{"prp_locID",           "Advert.tblLocations", "locID"},
                 {"prpCreatedBy_usrID",  "AAA.tblUser",         "usrID",     "Creator_", true},
                 {"prpUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
               })

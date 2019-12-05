@@ -19,50 +19,53 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATION_H
-#define TARGOMAN_API_MODULES_TRANSLATION_H
+
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Helpers/ORM/clsTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-class MT  : private Helpers::ORM::clsRESTAPIWithActionLogs
+class Roles : public clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariantMap API(,Translate,
-                    (const QHttp::RemoteIP_t& _REMOTE_IP,
-                     const QString& _token,
-                     QString _text,
-                     QString _dir,
-                     const QString& _engine = "NMT",
-                     bool _detailed = false,
-                     bool _detok = true,
-                     bool _dic=false,
-                     bool _dicFull = false),
-                    "Translates ....")
+    QVariant ORMGET("Get roles information")
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete Role")
 
-    QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _rolID,
+                      QString _name = {},
+                      quint64 _parentRolID = {},
+                      QHttp::JSON_t _privs = {},
+                      QStringList _signupAllowdIPs = {},
+                      Targoman::API::enuGenericStatus::Type _status = {}),
+             "Update Role by priviledged user")
 
-    private:
-        MT();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(MT);
+    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
+                         QString _name,
+                         quint64 _parentRolID = {},
+                         QHttp::JSON_t _privs = {},
+                         QStringList _signupAllowdIPs = {}),
+             "Create a new Role by priviledged user")
 
 private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
+    Roles();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Roles);
 };
 
 }
 }
+}
 
-#endif // TARGOMAN_API_MODULES_TRANSLATION_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

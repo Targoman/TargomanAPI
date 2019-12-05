@@ -19,50 +19,49 @@
 /**
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATION_H
-#define TARGOMAN_API_MODULES_TRANSLATION_H
+
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Helpers/ORM/clsTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace AAA {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-class MT  : private Helpers::ORM::clsRESTAPIWithActionLogs
+class APITokenValidIPs : public clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariantMap API(,Translate,
-                    (const QHttp::RemoteIP_t& _REMOTE_IP,
-                     const QString& _token,
-                     QString _text,
-                     QString _dir,
-                     const QString& _engine = "NMT",
-                     bool _detailed = false,
-                     bool _detok = true,
-                     bool _dic=false,
-                     bool _dicFull = false),
-                    "Translates ....")
+    QVariant ORMGET("Get APITokenValidIPs information")
 
-    QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
+    bool API(UPDATE,,(QHttp::JWT_t _JWT,
+                      quint64 _tviID,
+                      QHttp::IPv4_t _ip = {},
+                      Targoman::API::enuGenericStatus::Type _status = {}),
+             "Update APITokenValidIPs by priviledged user")
 
-    private:
-        MT();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(MT);
+    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
+                         quint64 _tokenID,
+                         QHttp::IPv4_t _ip),
+             "Create a new APITokenValidIPs by priviledged user")
+
+    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
+             "Delete APITokenValidIPs")
 
 private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
+    APITokenValidIPs();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,APITokenValidIPs);
 };
 
 }
 }
+}
 
-#endif // TARGOMAN_API_MODULES_TRANSLATION_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
