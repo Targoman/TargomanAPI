@@ -32,10 +32,9 @@ void ActiveSessions::init()
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(!this->isSelf({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _DIRECTFILTERS, _filters))
-        Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    QString A = this->moduleName ();
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
@@ -44,32 +43,26 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     if(_EXTRAPATH.trimmed() == clsJWT(_JWT).session())
         throw exHTTPForbidden("Deleting current session is not allowed");
 
-    if(!this->isSelf({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _DIRECTFILTERS))
-        Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false)
+        this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
-
- /*   QVariantMap PKs = {{this->Cols.first().Name, Key}};
-    if(UserID > 0)
-        PKs.insert("ssn_usrID", UserID);
-
-    return this->deleteByPKs(AAADACInstance(), PKs);*/
-    return false;
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 
 ActiveSessions::ActiveSessions() :
     clsTable("AAA",
               "tblActiveSessions",
-              { ///<ColName             Type            Validation                           RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
                 {"ssnKey",              S(QHttp::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
-                {"ssn_usrID",           S(quint32),             QFV.integer().minValue(1),   ORM_SELF_REAL},
-                {"ssnCreationDateTime", S(QHttp::DateTime_t),   QFV,                         true},
-                {"ssnIP",               S(quint32),             QFV.integer().minValue(1),   true},
-                {"ssnIPReadable",       S(QString),             QFV.allwaysInvalid(),        true,false,false},
-                {"ssnInfo",             S(QHttp::JSON_t),       QFV,                         true,false,false},
-                {"ssnLastActivity",     S(QHttp::DateTime_t),   QFV,                         true},
-                {"ssnRemember",         S(bool),                QFV,                         true},
-                {"ssnUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
-                {"ssnStatus",           S(Targoman::API::enuSessionStatus::Type)},
+                {"ssn_usrID",           S(quint32),             QFV.integer().minValue(1),   QInvalid,  true},
+                {"ssnIP",               S(quint32),             QFV.integer().minValue(1),   QInvalid,  true},
+                {"ssnIPReadable",       S(QString),             QFV.allwaysInvalid(),        QInvalid,  true,false,false},
+                {"ssnCreationDateTime", S(QHttp::DateTime_t),   QFV,                         QNull,     true},
+                {"ssnInfo",             S(QHttp::JSON_t),       QFV,                         QNull,     true,false,false},
+                {"ssnLastActivity",     S(QHttp::DateTime_t),   QFV,                         QNull,     true},
+                {"ssnRemember",         S(bool),                QFV,                         false,     true},
+                {"ssnUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   true},
+                {"ssnStatus",           S(Targoman::API::enuSessionStatus::Type), QFV,       Targoman::API::enuSessionStatus::Active},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"ssn_usrID",          "AAA.tblUser",      "usrID",     "Owner_"},

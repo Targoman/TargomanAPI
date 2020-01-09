@@ -33,18 +33,17 @@ void IPStats::init()
 
 QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:IPStats:CRUD~0100"});
-
-//    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 IPStats::IPStats() :
     clsTable("AAA",
               "tblIPStats",
-              { ///<ColName             Type                 Validation                     RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                     Default    RO   Sort  Filter Self  Virt   PK
                 {"ips_ipbIP",           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
-                {"ipsTimeStamp",        S(double),           QFV.allwaysValid(),            true},
-                {"ipsInsertionDate",    S(QHttp::DateTime_t),QFV.allwaysValid(),            true},
+                {"ipsTimeStamp",        S(double),           QFV.allwaysValid(),            QInvalid, true},
+                {"ipsInsertionDate",    S(QHttp::DateTime_t),QFV.allwaysValid(),            QNull,    true},
               },
               { ///< Col        Reference Table     ForeignCol
                 {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },

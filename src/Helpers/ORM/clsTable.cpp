@@ -22,6 +22,7 @@
 #include "clsTable.h"
 #include "QHttp/HTTPExceptions.h"
 #include "QHttp/GenericTypes.h"
+#include "Helpers/AAA/AAADefs.hpp"
 #include <QRegularExpression>
 
 namespace Targoman {
@@ -54,25 +55,33 @@ clsTable::clsTable(const QString& _schema,
                                         [](const QList<clsORMField>& _fields){
                                                QStringList Cols;
                                                foreach(auto Col, _fields)
-                                                   Cols.append(clsTable::finalColName(Col));
+                                                   if(Col.isVirtual() == false)
+                                                        Cols.append(clsTable::finalColName(Col));
                                                return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")\n* " + Cols.join("\n* ");
+//                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")";
                                         });
     QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,
                                         QFieldValidator::allwaysValid(), _value,
                                         [](const QList<QHttp::clsORMField>& _fields){
                                                return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
+                                                      "Equality/Inequality operators are\n"
+                                                      "* =: equal\n"
+                                                      "* !=: not equal\n"
+                                                      "* <, <=, >, >=: inequal\n"
+                                                      "* ~=: LIKE on strings\n"
                                                       "Take note that just columns listed in GroupBy field can be filtered\n"
                                                       "example: \n"
-                                                      "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"='2' )";
+                                                      "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
                                         });
     QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::OrderBy_t,
                                         QFieldValidator::allwaysValid(), _value,
                                         [](const QList<clsORMField>& _fields){
                                             QStringList Cols;
                                             foreach(auto Col, _fields)
-                                                if(Col.isSortable())
+                                                if(Col.isSortable() && Col.isVirtual() == false)
                                                     Cols.append(clsTable::finalColName(Col));
                                             return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
+//                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
                                         });
     QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::GroupBy_t,
                                         QFieldValidator::allwaysValid(), _value,
@@ -82,6 +91,7 @@ clsTable::clsTable(const QString& _schema,
                                                     if(Col.isFilterable())
                                                         Cols.append(clsTable::finalColName(Col));
                                                return "Comma separated columns: \n* " + Cols.join(",\n* ");
+//                                               return "Comma separated columns" ;
                                         });
     TypesRegistered = true;
 }
@@ -91,16 +101,22 @@ QList<clsORMField> clsTable::filterItems(THttpMethod _method)
     QList<QHttp::clsORMField> Filters;
     switch(_method){
     case qhttp::EHTTP_GET:
-        this->prepareFiltersList();
-        foreach(auto Filter, this->AllCols)
-            if(Filter.isSelfIdentifier())
-                Filters.append(Filter);
-        Filters.append(QHttp::clsORMField(COLS_KEY, S(Targoman::API::Cols_t), QFV, ORM_SELF_VIRTUAL));
-        break;
     case qhttp::EHTTP_DELETE:
         this->prepareFiltersList();
-        foreach(auto Filter, this->AllCols)
-            if(Filter.isSelfIdentifier())
+        foreach(auto Filter, this->BaseCols)
+            if(Filter.isPrimaryKey())
+                Filters.append(Filter);
+        if(_method == qhttp::EHTTP_GET)
+            Filters.append(QHttp::clsORMField(COLS_KEY, S(Targoman::API::Cols_t), QFV, ORM_SELF_VIRTUAL));
+        break;
+    case qhttp::EHTTP_PATCH:
+        foreach(auto Filter, this->BaseCols)
+            if(Filter.isPrimaryKey() || Filter.isReadOnly() == false)
+                Filters.append(Filter);
+        break;
+    case qhttp::EHTTP_PUT:
+        foreach(auto Filter, this->BaseCols)
+            if(Filter.isReadOnly() == false)
                 Filters.append(Filter);
         break;
     default:
@@ -132,9 +148,9 @@ void clsTable::prepareFiltersList()
         this->AllCols.append(NewCol);
         this->SelectableColsMap.insert(FinalColName, NewCol);
         if(Col.isFilterable())
-            this->FilterableColsMap.insert(FinalColName, NewCol);
+            this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol));
         if(Col.isSortable())
-            this->FilterableColsMap.insert(FinalColName, NewCol);
+            this->SortableColsMap.insert(FinalColName, NewCol);
     }
 
     foreach(auto Relation, this->ForeignKeys){
@@ -148,9 +164,9 @@ void clsTable::prepareFiltersList()
             this->AllCols.append(NewCol);
             this->SelectableColsMap.insert(FinalColName, NewCol);
             if(Col.isFilterable())
-                this->FilterableColsMap.insert(FinalColName, NewCol);
+                this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol, Relation));
             if(Col.isSortable())
-                this->FilterableColsMap.insert(FinalColName, NewCol);
+                this->SortableColsMap.insert(FinalColName, NewCol);
         }
     }
 
@@ -164,21 +180,22 @@ QString clsTable::makeColRenamedAs(const QHttp::clsORMField& _col, const QString
     return (_col.renameAs().isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
 };
 
-QString clsTable::makeColName(const QHttp::clsORMField& _col, const stuRelation& _relation) const {
+QString clsTable::makeColName(const QHttp::clsORMField& _col, bool _appendAs, const stuRelation& _relation) const {
     return  (_relation.Column.isEmpty() ?
                  this->Name :
                  (_relation.RenamingPrefix.isEmpty() ?
                       _relation.ReferenceTable :
                       _relation.RenamingPrefix
                       )
-                 ) + "." + _col.name() + this->makeColRenamedAs(_col, _relation.RenamingPrefix);
+                 ) + "." + _col.name() +
+            (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
 QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                    const QStringList& _extraJoins,
                                    const QString& _extraFilters,
                                    const QHttp::ExtraPath_t& _extraPath,
-                                   const QHttp::DirectFilters_t& _directFilters,
+                                   const QHttp::ORMFilters_t& _ORMFILTERS,
                                    quint64 _offset,
                                    quint16 _limit,
                                    QString _cols,
@@ -188,8 +205,8 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                    bool _reportCount)
 {
     this->prepareFiltersList();
-    if(_directFilters.contains(COLS_KEY))
-        _cols = _directFilters.value(COLS_KEY).toString();
+    if(_ORMFILTERS.contains(COLS_KEY))
+        _cols = _ORMFILTERS.value(COLS_KEY).toString();
 
     stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
     if(_extraPath.isEmpty()){
@@ -225,15 +242,15 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
             foreach(auto Col, this->BaseCols)
                 if(Col.isPrimaryKey()){
                     if(Query.size())
-                        Filters.append(this->finalColName(Col) + " = \"" + Query + "\"");
+                        Filters.append(this->makeColName(Col) + " = \"" + Query + "\"");
                     break;
                 }
 
-        for(auto FilterIter = _directFilters.begin(); FilterIter != _directFilters.end(); ++FilterIter){
+        for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); ++FilterIter){
             if(FilterIter.key() == COLS_KEY) continue;
             const QHttp::clsORMField& Col = this->SelectableColsMap.value(FilterIter.key());
             if(Col.isSelfIdentifier())
-                Filters.append(FilterIter.key() + " = \"" + FilterIter.value().toString() + "\"");
+                Filters.append(this->makeColName(Col) + " = \"" + FilterIter.value().toString() + "\"");
         }
 
         QJsonDocument Result = _db.execQuery("",
@@ -250,69 +267,134 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                              + QUERY_SEPARATOR
                                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
                                              ).toJson(true);
-        if(Result.isEmpty())
-            throw exHTTPBadRequest("No item could be found");
+        if(Result.object().isEmpty())
+            throw exHTTPNotFound("No item could be found");
 
         return Result.toVariant();
     }
 }
 
-bool clsTable::update(DBManager::clsDAC& _db, QVariantMap _primaryKeys, QVariantMap _updateInfo)
+bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
 {
     this->prepareFiltersList();
-/*    QStringList  UpdateCommands;
+    if(_ORMFILTERS.isEmpty())
+        throw exHTTPBadRequest("No filter has been set for update");
+
+    QStringList  UpdateCommands;
     QVariantList Values;
     for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
-        const QHttp::clsORMField& Column = this->Cols.value(InfoIter.key());
-        if(Column.IsReadOnly)
+        QHttp::clsORMField& Column = this->SelectableColsMap[InfoIter.key()];
+        if(Column.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        this->Cols.value(InfoIter.key()).validate(InfoIter.value());
-        UpdateCommands.append(Column.name() + "=?");
-        Values.append(InfoIter.value());
+        Column.validate(InfoIter.value());
+        UpdateCommands.append(this->makeColName(Column) + "=?");
+        Values.append(Column.fromString(InfoIter.value().toString()));
     }
 
-    QStringList  PKs;
-    for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
-        if(PKIter->isValid() == false)
+    QStringList  Filters;
+    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
+        if(FilterIter->isValid() == false)
             continue;
-        const QHttp::clsORMField& Column = this->Cols[PKIter.key()];
-        if(Column.PKIndex <= 0)
-            throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
-        PKs.append(Column.name() + "=?");
-        Values.append(PKIter.value());
+        QHttp::clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
+        if(Column.isReadOnly())
+            continue;
+        Column.validate(FilterIter.value());
+        UpdateCommands.append(this->makeColName(Column) + "=?");
+        Values.append(Column.fromString(FilterIter.value().toString()));
+    }
+
+    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
+        if(FilterIter->isValid() == false)
+            continue;
+        QHttp::clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
+        if(Column.isFilterable() == false)
+            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+        Filters.append(this->makeColName(Column) + "=?");
+        Values.append(FilterIter.value());
     }
 
     clsDACResult Result = _db.execQuery("",
-                                        QString("UPDATE ") + this->Name
+                                        QString("UPDATE ") + this->Schema + "." + this->Name
                                         + QUERY_SEPARATOR
                                         + "SET "
                                         + UpdateCommands.join("," + QUERY_SEPARATOR)
                                         + QUERY_SEPARATOR
                                         + "WHERE "
                                         + QUERY_SEPARATOR
-                                        + PKs.join(" AND " + QUERY_SEPARATOR)
+                                        + Filters.join(" AND " + QUERY_SEPARATOR)
                                         ,Values);
 
-    return Result.numRowsAffected() > 0;*/
+    return Result.numRowsAffected() > 0;
 }
 
-QVariant clsTable::create(clsDAC& _db, QVariantMap _createInfo)
+bool clsTable::deleteByPKs(clsDAC& _db, ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
 {
     this->prepareFiltersList();
-/*    QStringList  CreateCommands;
+
+    QStringList PrimaryKeyQueries = _EXTRAPATH.split(",");
+    QStringList Filters;
+    QVariantList Values;
+    foreach(auto Query, PrimaryKeyQueries)
+        foreach(auto Col, this->BaseCols)
+            if(Col.isPrimaryKey()){
+                if(Query.size())
+                    _ORMFILTERS.insert(this->finalColName(Col), Query);
+                break;
+            }
+
+    if(this->update(_db, _ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
+        return false;
+
+    if(_realDelete == false)
+        return true;
+
+    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); ++FilterIter){
+        if(FilterIter->isValid() == false)
+            continue;
+        const QHttp::clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
+        Filters.append(this->makeColName(Column) + "=?");
+        Values.append(FilterIter.value());
+    }
+
+    clsDACResult Result = _db.execQuery("",
+                                        QString("DELETE FROM ") + this->Schema + "." +this->Name
+                                        + QUERY_SEPARATOR
+                                        + "WHERE "
+                                        + QUERY_SEPARATOR
+                                        + Filters.join(" AND " + QUERY_SEPARATOR)
+                                        ,Values);
+
+    return Result.numRowsAffected() > 0;
+}
+
+QVariant clsTable::create(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
+{
+    this->prepareFiltersList();
+    QStringList  CreateCommands;
     QVariantList Values;
     for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
-        const QHttp::clsORMField& Column = this->Cols[InfoIter.key()];
-        if(Column.IsReadOnly)
+        QHttp::clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
+        if(Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
-        this->Cols[InfoIter.key()].validate(InfoIter.value());
-        CreateCommands.append(Column.name() + "=?");
+        Col.validate(InfoIter.value());
+        CreateCommands.append(this->makeColName(Col) + "=?");
         Values.append(InfoIter.value());
+    }
+
+    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
+        if(FilterIter->isValid() == false)
+            continue;
+        QHttp::clsORMField& Col = this->SelectableColsMap[FilterIter.key()];
+        if(Col.isReadOnly())
+            continue;
+        Col.validate(FilterIter.value());
+        CreateCommands.append(this->makeColName(Col) + "=?");
+        Values.append(Col.fromString(FilterIter.value().toString()));
     }
 
     clsDACResult Result = _db.execQuery("",
@@ -323,56 +405,36 @@ QVariant clsTable::create(clsDAC& _db, QVariantMap _createInfo)
                                         + QUERY_SEPARATOR
                                         ,Values);
 
-    return Result.lastInsertId();*/
+    return Result.lastInsertId();
 }
 
-bool clsTable::deleteByPKs(clsDAC& _db, QVariantMap _primaryKeys)
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, ORMFilters_t& _ORMFILTERS, Targoman::API::Filter_t& _filters)
 {
-    this->prepareFiltersList();
-/*    if(this->update(_db, _primaryKeys, {{this->Cols.last().name(), "Removed"}}) == false)
-        return false;
-
-    QVariantList Values;
-    QStringList  PKs;
-    for(auto PKIter = _primaryKeys.begin(); PKIter != _primaryKeys.end(); ++PKIter){
-        if(PKIter->isValid() == false)
-            continue;
-        const QHttp::clsORMField& Column = this->Cols[PKIter.key()];
-        if(Column.isPrimaryKey())
-            throw exHTTPInternalServerError("Column <"+ PKIter.key() +"> is not primary key");
-        PKs.append(Column.name() + "=?");
-        Values.append(PKIter.value());
-    }
-
-    clsDACResult Result = _db.execQuery("",
-                                        QString("DELETE FROM ") + this->Name
-                                        + QUERY_SEPARATOR
-                                        + "WHERE "
-                                        + QUERY_SEPARATOR
-                                        + PKs.join(" AND " + QUERY_SEPARATOR)
-                                        ,Values);
-
-    return Result.numRowsAffected() > 0;*/
-}
-
-bool clsTable::isSelf(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, DirectFilters_t _DIRECTFILTERS, Targoman::API::Filter_t _filters)
-{
+    if(_ORMFILTERS.size())
+        return this->setSelfFilters(_requiredFilters, _EXTRAPATH, _ORMFILTERS);
+    QStringList Filters;
     for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
-        if((_EXTRAPATH.size() && _DIRECTFILTERS.value(FilterIter.key(), 0) != FilterIter.value())
-           || (_EXTRAPATH.isEmpty() && _filters.contains(QString("%1=%2").arg(FilterIter.key()).arg(FilterIter.value().toString())) == false)
-           )
-            return false;
-    return true;
+        Filters.append(QString("%1=%2").arg(FilterIter.key()).arg(FilterIter.value().toString()));
+    _filters.insert(0, QString("( %1 )").arg(Filters.join(" + ")));
 }
+
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, ORMFilters_t& _ORMFILTERS)
+{
+    Q_UNUSED(_EXTRAPATH);
+    for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
+        _ORMFILTERS.insert(FilterIter.key(), FilterIter.value());
+}
+
+
 
 QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 {
     QString CRUD;
     switch(_method){
-    case qhttp::EHTTP_GET:      CRUD = "0T00";break;
     case qhttp::EHTTP_PUT:      CRUD = "T000";break;
+    case qhttp::EHTTP_GET:      CRUD = "0T00";break;
     case qhttp::EHTTP_PATCH:    CRUD = "00T0";break;
-    case qhttp::EHTTP_DELETE:   CRUD = "0T00";break;
+    case qhttp::EHTTP_DELETE:   CRUD = "000T";break;
     default:
         Q_ASSERT_X(false, "privOn", "Invalid method on ORM");
     }
@@ -382,7 +444,7 @@ QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols.size())
-        QFV.asciiAlNum(false, ",").validate(_requiredCols, "cols");
+        QFV.asciiAlNum(false, ",()").validate(_requiredCols, "cols");
 
     QFV.optional(QFV.asciiAlNum(false, ",\\+\\-")).validate(_orderBy, "orderBy");
     QFV.optional(QFV.asciiAlNum(false, ",")).validate(_groupBy, "groupBy");
@@ -392,12 +454,16 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     /****************************************************************************/
     QStringList RequiredCols = _requiredCols.size() ? _requiredCols.split(",", QString::SkipEmptyParts) : QStringList("*");
 
-    foreach(auto Col, this->SelectableColsMap){
+    foreach(auto Col, this->BaseCols){
         if(RequiredCols.isEmpty() || RequiredCols.contains("*"))
-            SelectItems.Cols.append(this->makeColName(Col));
+            SelectItems.Cols.append(this->makeColName(Col, true));
         else{
+            //TODO check if GROUP_BY is specified check
+            //https://dev.mysql.com/doc/refman/8.0/en/group-by-functions.html
+            //https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_any-value
+
             if(RequiredCols.contains(Col.name()) || RequiredCols.contains(Col.renameAs()))
-                SelectItems.Cols.append(this->makeColName(Col));
+                SelectItems.Cols.append(this->makeColName(Col, true));
         }
     }
 
@@ -410,11 +476,11 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         bool Joined = false;
         foreach(auto Col, ForeignTable->BaseCols){
             if(RequiredCols.isEmpty() || RequiredCols.contains("*")){
-                SelectItems.Cols.append(this->makeColName(Col, Relation));
+                SelectItems.Cols.append(this->makeColName(Col, true, Relation));
                 Joined = true;
             }else{
                 if(RequiredCols.contains(Relation.RenamingPrefix + Col.name()) || RequiredCols.contains(Relation.RenamingPrefix + Col.renameAs())){
-                    SelectItems.Cols.append(this->makeColName(Col, Relation));
+                    SelectItems.Cols.append(this->makeColName(Col, true, Relation));
                     Joined = true;
                 }
             }
@@ -436,10 +502,9 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     foreach(auto Join, UsedJoins){
         SelectItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
                                 + Join.ReferenceTable
-                                + " `"
-                                + Join.RenamingPrefix
-                                + "` ON `"
-                                + (Join.RenamingPrefix.size() ? Join.RenamingPrefix : Join.ReferenceTable) + "`." + Join.ForeignColumn
+                                + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
+                                + " ON "
+                                + (Join.RenamingPrefix.size() ? "`" + Join.RenamingPrefix + "`" : Join.ReferenceTable) + "." + Join.ForeignColumn
                                 + " = "
                                 + this->Name + "." + Join.Column
                                 );
@@ -483,8 +548,9 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             Rule = LastLogical;
 
-            if(this->FilterableColsMap.contains(PatternMatches.captured(1).trimmed()))
-                Rule+=PatternMatches.captured(1);
+            stuFilteredCol FilteredCol = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
+            if(FilteredCol.isValid())
+                Rule+=this->makeColName(FilteredCol.Col, false, FilteredCol.Relation);
             else
                 throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
 
@@ -537,10 +603,11 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     /****************************************************************************/
     foreach(auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
-        if(this->FilterableColsMap.contains(GroupByCriteria) == false)
+        stuFilteredCol Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
+        if(Filter.isValid())
+            SelectItems.GroupBy.append(this->makeColName(Filter.Col, false, Filter.Relation));
+        else
             throw exHTTPBadRequest("Invalid group by <"+GroupByCriteria+"> not found in columns");
-
-        SelectItems.GroupBy.append(GroupByCriteria);
     }
 
     return SelectItems;

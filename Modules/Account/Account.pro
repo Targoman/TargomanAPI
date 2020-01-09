@@ -32,9 +32,11 @@ HEADERS += \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
     ORM/BlockingRules.h \
-    ORM/PaymentOrder.h \
     ORM/APITokens.h \
-    ORM/ApprovalRequest.h
+    ORM/ApprovalRequest.h \
+    ORM/PaymentOrders.h \
+    ORM/Services.h
+
 
 SOURCES += \
     Account.cpp \
@@ -49,9 +51,11 @@ SOURCES += \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \
     ORM/BlockingRules.cpp \
-    ORM/PaymentOrders.cpp \
     ORM/APITokens.cpp \
-    ORM/ApprovalRequest.cpp
+    ORM/ApprovalRequest.cpp \
+    ORM/PaymentOrders.cpp \
+    ORM/Services.cpp \
+    ../../3rdParty/UA-Parser/UaParser.cpp \
 
 OTHER_FILES += \
 

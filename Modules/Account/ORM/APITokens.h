@@ -45,31 +45,9 @@ public:
 
 private slots:
     QVariant ORMGET("Get APITokens information")
-    bool API(UPDATE,,(QHttp::JWT_t _JWT,
-                      quint64 _tokenID,
-                      QString _token = {},
-                      quint32 _userID = {},
-                      quint32 _rolID = {},
-                      QHttp::ISO639_2_t _lang = {},
-                      bool    _validateIP = false,
-                      QHttp::Date_t _expiryDate = {},
-                      QHttp::JSON_t _extraPrivs = {},
-                      Targoman::API::enuAPITokensStatus::Type _status = {}),
-             "Update APITokens by priviledged user")
-
-    quint32 API(CREATE,,(QHttp::JWT_t _JWT,
-                         QString _token,
-                         quint32 _userID,
-                         quint32 _rolID,
-                         QHttp::ISO639_2_t _lang = {},
-                         bool    _validateIP = false,
-                         QHttp::Date_t _expiryDate = {},
-                         QHttp::JSON_t _extraPrivs = {},
-                         Targoman::API::enuAPITokensStatus::Type _status = {}),
-             "Create a new APITokens by priviledged user")
-
-    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete APITokens")
+    bool ORMDELETE("Delete an APIToken")
+    bool ORMUPDATE("Update token info by priviledged user")
+    quint32 ORMCREATE("Create a new APITokens by priviledged user")
 
 private:
     APITokens();

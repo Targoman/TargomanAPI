@@ -27,15 +27,11 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/AAA/Authentication.h"
 #include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Helpers/AAA/GenericEnums.hpp"
 
 namespace Targoman {
 namespace API {
 
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuForgotPassLinkVia,
-                               Web,
-                               Mobile,
-                               App
-                               );
 #ifndef API
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif

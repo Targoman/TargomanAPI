@@ -33,25 +33,52 @@ void UserWallets::init()
 
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
-//    if(_EXTRAPATH.isEmpty() || IsSelf == false)
-//        Authorization::checkPriv(_JWT,{"Account:UserWallets:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-//    return this->selectFromTable(AAADACInstance(), {},
-//                                 IsSelf ? "" : QString("+wal_usrID=%1").arg(clsJWT(_JWT).usrID()),
-//                                 GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+}
+
+bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+        _ORMFILTERS.insert("walDefault", 0);
+        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+    }
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+}
+
+bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
+}
+
+quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+        _ORMFILTERS.insert("walDefault", 0);
+        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+    }
+
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
+}
+
+bool UserWallets::apiUPDATEdefaultWallet(QHttp::JWT_t _JWT, quint64 _walID){
+
 }
 
 UserWallets::UserWallets() :
     clsTable("AAA",
               "tblUserWallets",
-              { ///<ColName         Type                        Validation                          RO   Sort  Filter Self  Virt   PK
+              { ///<ColName         Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"walID",           S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"wal_usrID",       S(quint32),                 QFV.integer().minValue(1),          true},
-                {"walName",         S(quint32),                 QFV.unicodeAlNum().maxLenght(100)},
-                {"walMinBalance",   S(qint64),                  QFV,                               false,false,false},
-                {"walLastBalance",  S(qint64),                  QFV,                                true,false,false},
-                {"walStatus",       S(Targoman::API::enuUserWalletStatus::Type)},
+                {"wal_usrID",       S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
+                {"walName",         S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  QInvalid},
+                {"walDefault",      S(bool),                    QFV,                                false},
+                {"walMinBalance",   S(qint64),                  QFV,                                0,         false,false,false},
+                {"walLastBalance",  S(qint64),                  QFV,                                0,          true,false,false},
+                {"walStatus",       S(Targoman::API::enuUserWalletStatus::Type), QFV,               Targoman::API::enuUserWalletStatus::Active},
               },
               { ///< Col       Reference Table             ForeignCol    Rename   LeftJoin
                 {"wal_usrID",  "AAA.tblUser",              "usrID"},

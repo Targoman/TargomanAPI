@@ -40,20 +40,9 @@ public:
 
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")
-
-    bool API(UPDATE,,(QHttp::JWT_t _JWT,
-                      quint64 _tviID,
-                      QHttp::IPv4_t _ip = {},
-                      Targoman::API::enuGenericStatus::Type _status = {}),
-             "Update APITokenValidIPs by priviledged user")
-
-    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
-                         quint64 _tokenID,
-                         QHttp::IPv4_t _ip),
-             "Create a new APITokenValidIPs by priviledged user")
-
-    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete APITokenValidIPs")
+    bool ORMDELETE("Delete an APITokenValidIP")
+    bool ORMUPDATE("Update token valid IP info")
+    quint64 ORMCREATE("Create a new APITokenValidIP")
 
 private:
     APITokenValidIPs();

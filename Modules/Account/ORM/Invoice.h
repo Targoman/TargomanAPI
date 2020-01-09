@@ -31,12 +31,14 @@ namespace Targoman {
 namespace API {
 TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
                      New      = 'N',
-                     Pending  = 'P',
-                     Canceled = 'C'
+                     Canceled = 'C',
+                     Finished = 'F',
+                     Removed  = 'R'
                      )
+
 TARGOMAN_DEFINE_ENUM(enuInvoiceType,
-                     PostPaid = 'O',
-                     PrePaid  = 'R',
+                     Payment    = 'P',
+                     Withdrawal = 'W'
                      )
 namespace AAA {
 
@@ -48,6 +50,11 @@ public:
 
 private slots:
     QVariant ORMGET("Get Invoice information")
+    bool ORMDELETE("Delete an Invoice. Take note that User can just delete invoices with Payoff type")
+    quint64 API(CREATE,withdrawal,(QHttp::JWT_t _JWT,
+                                quint64 _amount,
+                                quint64 _walletID),
+             "Create a new payback request by user.")
 
 private:
     Invoice();

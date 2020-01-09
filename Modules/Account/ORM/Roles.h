@@ -30,6 +30,11 @@
 
 namespace Targoman {
 namespace API {
+TARGOMAN_DEFINE_ENUM(enuRoleStatus,
+                     Active   = 'A',
+                     Blocked  = 'B',
+                     Removed  = 'R'
+                     )
 namespace AAA {
 
 class Roles : public clsTable
@@ -40,24 +45,9 @@ public:
 
 private slots:
     QVariant ORMGET("Get roles information")
-    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete Role")
-
-    bool API(UPDATE,,(QHttp::JWT_t _JWT,
-                      quint64 _rolID,
-                      QString _name = {},
-                      quint64 _parentRolID = {},
-                      QHttp::JSON_t _privs = {},
-                      QStringList _signupAllowdIPs = {},
-                      Targoman::API::enuGenericStatus::Type _status = {}),
-             "Update Role by priviledged user")
-
-    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
-                         QString _name,
-                         quint64 _parentRolID = {},
-                         QHttp::JSON_t _privs = {},
-                         QStringList _signupAllowdIPs = {}),
-             "Create a new Role by priviledged user")
+    bool ORMDELETE("Delete a Role")
+    bool ORMUPDATE("Update role info by priviledged user")
+    quint32 ORMCREATE("Create a new Role by priviledged user")
 
 private:
     Roles();
@@ -67,5 +57,7 @@ private:
 }
 }
 }
+
+Q_DECLARE_METATYPE(Targoman::API::enuRoleStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

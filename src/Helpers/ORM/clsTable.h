@@ -36,15 +36,25 @@ QHTTP_ADD_SIMPLE_TYPE(QString, Filter_t);
 QHTTP_ADD_SIMPLE_TYPE(QString, OrderBy_t);
 QHTTP_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 
-#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::DirectFilters_t _DIRECTFILTERS= {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::DirectFilters_t _DIRECTFILTERS, quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
-#define GET_METHOD_CALL_ARGS   _EXTRAPATH, _DIRECTFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define GET_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::ORMFilters_t _ORMFILTERS, quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
 
-#define DELETE_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::DirectFilters_t _DIRECTFILTERS= {}
-#define DELETE_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::DirectFilters_t _DIRECTFILTERS
-#define DELETE_METHOD_CALL_ARGS   _EXTRAPATH, _DIRECTFILTERS
+#define DELETE_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH = {}, QHttp::ORMFilters_t _ORMFILTERS= {}
+#define DELETE_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH     , QHttp::ORMFilters_t _ORMFILTERS
+#define DELETE_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS
 #define ORMDELETE(_doc) apiDELETE (DELETE_METHOD_ARGS_HEADER); QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER)); } QString docOfDELETE(){ return _doc; }
+
+#define UPDATE_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ORMFilters_t _ORMFILTERS= {}
+#define UPDATE_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ORMFilters_t _ORMFILTERS
+#define UPDATE_METHOD_CALL_ARGS   _ORMFILTERS
+#define ORMUPDATE(_doc) apiUPDATE (UPDATE_METHOD_ARGS_HEADER); QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER)); } QString docOfUPDATE(){ return _doc; }
+
+#define CREATE_METHOD_ARGS_HEADER QHttp::JWT_t _JWT, QHttp::ORMFilters_t _ORMFILTERS= {}
+#define CREATE_METHOD_ARGS_IMPL   QHttp::JWT_t _JWT, QHttp::ORMFilters_t _ORMFILTERS
+#define CREATE_METHOD_CALL_ARGS   _ORMFILTERS
+#define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
 #ifndef API
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
@@ -81,6 +91,19 @@ protected:
         QStringList GroupBy;
     };
 
+    struct stuFilteredCol{
+        QHttp::clsORMField Col;
+        stuRelation Relation;
+
+        stuFilteredCol(QHttp::clsORMField _col, const stuRelation& _relation = InvalidRelation) :
+            Col(_col), Relation(_relation)
+        {}
+
+        stuFilteredCol() : Relation(InvalidRelation)
+        {}
+        inline bool isValid(){ return this->Col.name().size();}
+    };
+
 public:
     clsTable(const QString& _scheam,
               const QString& _name,
@@ -95,7 +118,7 @@ public:
                              const QStringList& _extraJoins,
                              const QString& _extraFilters,
                              const QHttp::ExtraPath_t& _extraPath,
-                             const QHttp::DirectFilters_t& _directFilters,
+                             const QHttp::ORMFilters_t& _ORMFILTERS,
                              quint64 _offset,
                              quint16 _limit,
                              QString _cols,
@@ -105,17 +128,24 @@ public:
                              bool _reportCount);
 
     bool update(Targoman::DBManager::clsDAC& _db,
-                QVariantMap _primaryKeys,
-                QVariantMap _updateInfo);
+                const QVariantMap& _ORMFILTERS,
+                QVariantMap _updateInfo = {});
     QVariant create(Targoman::DBManager::clsDAC& _db,
-                    QVariantMap _updateInfo);
+                    const QVariantMap& _ORMFILTERS,
+                    QVariantMap _createInfo = {});
     bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
-                     QVariantMap _primaryKeys);
+                     QHttp::ExtraPath_t _EXTRAPATH,
+                     QHttp::ORMFilters_t _ORMFILTERS,
+                     bool _realDelete = false);
 
-    bool isSelf(const QVariantMap& _requiredFilters,
-                QHttp::ExtraPath_t _EXTRAPATH,
-                QHttp::DirectFilters_t _DIRECTFILTERS = {},
-                Targoman::API::Filter_t _filters = {});
+    void setSelfFilters(const QVariantMap& _requiredFilters,
+                    QHttp::ExtraPath_t _EXTRAPATH,
+                    QHttp::ORMFilters_t& _ORMFILTERS,
+                    Targoman::API::Filter_t& _filters);
+
+    void setSelfFilters(const QVariantMap& _requiredFilters,
+                    QHttp::ExtraPath_t _EXTRAPATH,
+                    QHttp::ORMFilters_t& _ORMFILTERS);
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
 
@@ -125,7 +155,7 @@ private:
                                     QString _filters = {},
                                     const QString& _orderBy = {},
                                     const QString _groupBy = {}) const;
-    QString makeColName(const QHttp::clsORMField& _col, const stuRelation& _relation = InvalidRelation) const;
+    QString makeColName(const QHttp::clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const QHttp::clsORMField& _col, const QString& _prefix = {})  const ;
     static QString finalColName(const QHttp::clsORMField& _col, const QString& _prefix = {});
 
@@ -133,7 +163,7 @@ protected:
     QString Schema;
     QString Name;
     QMap<QString, QHttp::clsORMField> SelectableColsMap;
-    QMap<QString, QHttp::clsORMField> FilterableColsMap;
+    QMap<QString, stuFilteredCol> FilterableColsMap;
     QMap<QString, QHttp::clsORMField> SortableColsMap;
     QList<QHttp::clsORMField> AllCols;
     QList<QHttp::clsORMField> BaseCols;

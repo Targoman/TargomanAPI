@@ -44,6 +44,12 @@ public:
 
 private slots:
     QVariant ORMGET("Get UserWallets information")
+    bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
+    bool ORMUPDATE("Update Wallet info by priviledged user")
+    quint64 ORMCREATE("Create a new Wallet")
+
+    bool API(UPDATE,defaultWallet,(QHttp::JWT_t _JWT, quint64 _walID),
+             "change default wallet")
 
 private:
     UserWallets();

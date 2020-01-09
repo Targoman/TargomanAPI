@@ -33,23 +33,22 @@ void IPBin::init()
 
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:IPBin:CRUD~0100"});
-
-//    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 IPBin::IPBin() :
     clsTable("AAA",
               "tblIPBin",
-              { ///<ColName             Type                 Validation                          RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"ipbIP",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"ipbReadable",         S(QHttp::IPv4_t)},
-                {"ipbFirstAccess",      S(QHttp::DateTime_t),QFV,                                true},
-                {"ipbAccessCount",      S(quint64),          QFV.integer().minValue(0),          true},
-                {"ipbLastAccess",       S(QHttp::DateTime_t),QFV,                                true},
-                {"ipbBlockingTime",     S(QHttp::DateTime_t),QFV,                                true},
-                {"ipbBlockedBy_usrID",  S(quint32),          QFV.integer().minValue(1)},
-                {"ipbStatus",           S(Targoman::API::enuIPBinStatus::Type)},
+                {"ipbReadable",         S(QHttp::IPv4_t),    QFV,                                QInvalid,  true},
+                {"ipbFirstAccess",      S(QHttp::DateTime_t),QFV,                                QNull,     true},
+                {"ipbAccessCount",      S(quint64),          QFV.integer().minValue(0),          0,         true},
+                {"ipbLastAccess",       S(QHttp::DateTime_t),QFV,                                QNull,     true},
+                {"ipbBlockedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull,     true},
+                {"ipbBlockingTime",     S(QHttp::DateTime_t),QFV,                                QNull,     true},
+                {"ipbStatus",           S(Targoman::API::enuIPBinStatus::Type), QFV,             Targoman::API::enuIPBinStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol Rename      LeftJoin
                 {"ipbBlockedBy_usrID", "AAA.tblUser",      "usrID",   "Blocker_", true},

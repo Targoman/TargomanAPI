@@ -40,9 +40,12 @@ public:
 
 private slots:
     QVariant ORMGET("Get user information")
+    bool ORMDELETE("Delete a User by priviledged user")
+    bool ORMUPDATE("Update User info by priviledged user")
+    quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
 
     bool API(UPDATE,profile,(QHttp::JWT_t _JWT,
-                             Targoman::API::enuUserSex::Type = {},
+                             Targoman::API::enuUserSex::Type _sex = {},
                              QString _name = {},
                              QString _family = {},
                              QHttp::ISO639_2_t _lang = {},
@@ -52,30 +55,6 @@ private slots:
                              QString _salt = {}),
              "Update User profile. Take note that this method does not change password "
              "Password and Salt are required to change email or mobile")
-
-    bool API(UPDATE,,(QHttp::JWT_t _JWT,
-                      quint64 _userID,
-                      QString _name = {},
-                      QString _family = {},
-                      QHttp::Email_t _email = {},
-                      QHttp::Mobile_t _mobile = {},
-                      Targoman::API::enuUserApproval::Type _approvalState = {},
-                      quint64 _roleID = {},
-                      QHttp::JSON_t _specialPrivs = {},
-                      Targoman::API::enuUserStatus::Type _status = {}),
-             "Update User info by priviledged user")
-
-    quint32 API(CREATE,,(QHttp::JWT_t _JWT,
-                         QString _name,
-                         QString _family,
-                         QHttp::Email_t _email = {},
-                         QHttp::Mobile_t _mobile = {},
-                         Targoman::API::enuUserApproval::Type _approvalState = {},
-                         quint64 _roleID = {},
-                         qint8 _maxSessions = -1,
-                         QHttp::JSON_t _specialPrivs = {},
-                         Targoman::API::enuUserStatus::Type _status = {}),
-             "Create a new user by priviledged user")
 
 private:
     User();

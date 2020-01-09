@@ -33,21 +33,26 @@ void ForgotPassRequest::init()
 
 QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:ForgotPassRequest:CRUD~0100"});
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+}
 
-//    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 
 ForgotPassRequest::ForgotPassRequest() :
     clsTable("AAA",
               "tblForgotPassRequest",
-              { ///<ColName             Type                 Validation                                  RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
                 {"fprUUID",             S(QHttp::MD5_t),     QFV,                                        ORM_PRIMARY_KEY},
-                {"fpr_usrID",           S(quint32),          QFV.integer().minValue(1),                  true},
-                {"fprRequestedVia",     S(QString),          QFV.asciiAlNum().minLenght(1).maxLenght(10),true},
-                {"fprRequestDate",      S(QHttp::DateTime_t),QFV,                                        true},
-                {"fprApplyDate",        S(QHttp::DateTime_t),QFV,                                        true},
-                {"fprStatus",           S(Targoman::API::enuFPRStatus::Type)},
+                {"fpr_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
+                {"fprRequestedVia",     S(Targoman::API::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
+                {"fprRequestDate",      S(QHttp::DateTime_t),QFV,                                        QNull,     true},
+                {"fprApplyDate",        S(QHttp::DateTime_t),QFV,                                        QNull,     true},
+                {"fprStatus",           S(Targoman::API::enuFPRStatus::Type), QFV,                       Targoman::API::enuFPRStatus::New},
               },
               { ///< Col       Reference Table   ForeignCol
                 {"fpr_usrID",  "AAA.tblUser",    "usrID"},

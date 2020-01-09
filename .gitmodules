@@ -28,3 +28,6 @@
 [submodule "3rdParty/fasttext"]
 	path = 3rdParty/fasttext
 	url = https://github.com/facebookresearch/fastText.git
+[submodule "3rdParty/UA-Parser"]
+	path = 3rdParty/UA-Parser
+	url = https://github.com/ua-parser/uap-cpp.git

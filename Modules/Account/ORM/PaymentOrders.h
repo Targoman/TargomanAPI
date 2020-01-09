@@ -44,7 +44,7 @@ public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get PaymentOrders information. PKs are pyoID, pyoMD5")
+    QVariant ORMGET("Get PaymentOrders information.")
 
 private:
     PaymentOrders();

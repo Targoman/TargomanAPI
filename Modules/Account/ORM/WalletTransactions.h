@@ -32,6 +32,7 @@ namespace API {
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      New = 'A',
                      Processed = 'P',
+                     Removed = 'R'
                      )
 namespace AAA {
 
@@ -42,7 +43,7 @@ public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get WalletTransactions information. Primary keys are wlt_walID, wltID")
+    QVariant ORMGET("Get WalletTransactions information.")
 
 private:
     WalletTransactions();

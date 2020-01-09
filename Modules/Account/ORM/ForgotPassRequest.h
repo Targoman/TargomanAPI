@@ -45,6 +45,7 @@ public:
 
 private slots:
     QVariant ORMGET("Get ForgotPassRequest information")
+    bool ORMDELETE("Delete a ForgotPassRequest")
 
 private:
     ForgotPassRequest();

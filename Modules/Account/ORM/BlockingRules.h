@@ -40,25 +40,9 @@ public:
 
 private slots:
     QVariant ORMGET("Get BlockingRules information")
-
-    bool API(DELETE,,(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH),
-             "Delete BlockingRules")
-
-    bool API(UPDATE,,(QHttp::JWT_t _JWT,
-                      quint64 _blrID,
-                      QHttp::IPv4_t _ip = {},
-                      QHttp::DateTime_t _startTime = {},
-                      QHttp::DateTime_t _endTime = {},
-                      QString _cause = {},
-                      Targoman::API::enuGenericStatus::Type _status = {}),
-             "Update BlockingRules by priviledged user")
-
-    quint64 API(CREATE,,(QHttp::JWT_t _JWT,
-                         QHttp::IPv4_t _ip,
-                         QHttp::DateTime_t _startTime,
-                         QHttp::DateTime_t _endTime,
-                         QString _cause),
-             "Create a new BlockingRules by priviledged user")
+    bool ORMDELETE("Delete a BlockingRules")
+    bool ORMUPDATE("Update blocking rule info by priviledged user")
+    quint64 ORMCREATE("Create a new BlockingRule by priviledged user")
 
 private:
     BlockingRules();

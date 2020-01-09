@@ -32,6 +32,7 @@ namespace API {
 TARGOMAN_DEFINE_ENUM(enuIPBinStatus,
                      Active  = 'A',
                      Blocked = 'B',
+                     Removed = 'R'
                      )
 namespace AAA {
 

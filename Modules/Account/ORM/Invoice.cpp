@@ -33,29 +33,56 @@ void Invoice::init()
 
 QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    bool IsSelf = _EXTRAPATH.split(',').size() == 2 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
-//    if(_EXTRAPATH.isEmpty() || IsSelf == false)
-//        Authorization::checkPriv(_JWT,{"Account:Invoice:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-//    return this->selectFromTable(AAADACInstance(), {},
-//                                 IsSelf ? "" : QString("+inv_usrID=%1").arg(clsJWT(_JWT).usrID()),
-//                                 GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+}
+
+bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+        _ORMFILTERS.insert("invPaymentType", enuInvoiceType::toStr(enuInvoiceType::Withdrawal));
+        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+    }
+
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+}
+
+quint64 Invoice::apiCREATEwithdrawal(QHttp::JWT_t _JWT,
+                                     quint64 _amount,
+                                     quint64 _walletID)
+{
+    ORMFilters_t _ORMFILTERS;
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+    }
+    _ORMFILTERS.insert("invPaymentType", QString(enuInvoiceType::Withdrawal));
+    _ORMFILTERS.insert("invTotalAmount", _amount);
+    _ORMFILTERS.insert("invServiceCode", "WALT");
+    _ORMFILTERS.insert("invDesc", QJsonDocument(QJsonObject{
+                                                    {"walletID", static_cast<double>(_walletID)}
+                                                }).toJson());
+
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 Invoice::Invoice() :
     clsTable("AAA",
               "tblInvoice",
-              { ///<ColName             Type                 Validation                                  RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
                 {"invID",               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
-                {"invCreationDateTime", S(QHttp::DateTime_t),QFV,                                        true},
-                {"invServiceCode",      S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4)},
-                {"inv_usrID",           S(quint32),          QFV.integer().minValue(1),                  true},
-                {"invDesc",             S(QHttp::JSON_t),    QFV.allwaysInvalid(),                       false,false,false},
-                {"invPaymentType",      S(Targoman::API::enuInvoiceType::Type)},
-                {"invStatus",           S(Targoman::API::enuInvoiceType::Type)},
+                {"invCreationDateTime", S(QHttp::DateTime_t),QFV,                                        QNull,     true},
+                {"inv_svcID",           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid},
+                {"inv_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
+                {"invDesc",             S(QHttp::JSON_t),    QFV.allwaysInvalid(),                       QNull,    false,false,false},
+                {"invPaymentType",      S(Targoman::API::enuInvoiceType::Type), QFV,                     Targoman::API::enuInvoiceType::Payment},
+                {"invTotalAmount",      S(quint64),          QFV,                                        0},
+                {"invStatus",           S(Targoman::API::enuInvoiceStatus::Type), QFV,                   Targoman::API::enuInvoiceStatus::New},
               },
               { ///< Col       Reference Table   ForeignCol
-                {"inv_usrID",  "AAA.tblUser",    "usrID"},
+                {"inv_usrID",  "AAA.tblUser",     "usrID"},
+                {"inv_svcID",  "AAA.tblServices", "svcID"},
               })
 {
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuInvoiceStatus);

@@ -32,18 +32,21 @@
 #include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
 #include "ORM/ActiveSessions.h"
-#include "ORM/PaymentOrder.h"
+#include "ORM/ApprovalRequest.h"
 #include "ORM/BlockingRules.h"
 #include "ORM/ForgotPassRequest.h"
+#include "ORM/Invoice.h"
 #include "ORM/IPBin.h"
 #include "ORM/IPStats.h"
-#include "ORM/Invoice.h"
+#include "ORM/PaymentOrders.h"
 #include "ORM/Roles.h"
+#include "ORM/Services.h"
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 
 #include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "3rdParty/UA-Parser/UaParser.h"
 
 using namespace Targoman;
 using namespace Targoman::API;
@@ -230,6 +233,7 @@ Account::Account() :
     ActiveSessions::instance().init();
     APITokens::instance().init();
     APITokenValidIPs::instance().init();
+    ApprovalRequest::instance().init();
     BlockingRules::instance().init();
     ForgotPassRequest::instance().init();
     Invoice::instance().init();
@@ -237,6 +241,7 @@ Account::Account() :
     IPStats::instance().init();
     PaymentOrders::instance().init();
     Roles::instance().init();
+    Services::instance().init();
     User::instance().init();
     UserWallets::instance().init();
     WalletTransactions::instance().init();

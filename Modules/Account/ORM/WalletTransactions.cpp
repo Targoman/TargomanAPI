@@ -35,32 +35,34 @@ void WalletTransactions::init()
 
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    if(_EXTRAPATH.isEmpty())
-//        Authorization::checkPriv(_JWT,{"Account:WalletTransactions:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-//    return this->selectFromTable(AAADACInstance(), {},
-//                                 _EXTRAPATH.isEmpty() ? "" : QString("+wal_usrID=%1").arg(clsJWT(_JWT).usrID()),
-//                                 GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 WalletTransactions::WalletTransactions() :
     clsTable("AAA",
               "tblWalletsTransactions",
-              { ///<ColName         Type                        Validation                          RO   Sort  Filter Self  Virt   PK
-                {"wltID",           S(quint32),             QFV.integer().minValue(1),  ORM_PRIMARY_KEY},
-                {"wlt_walID",       S(quint64),             QFV.integer().minValue(1),  true, true, true},
-                {"wltDateTime",     S(QHttp::DateTime_t),   QFV,                        true},
-                {"wltAmount",       S(qint64),              QFV,                        true,false,false},
-                {"wltStatus",       S(Targoman::API::enuWalletTransactionStatus::Type)},
+              { ///<ColName         Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {"wltID",           S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {"wlt_walID",       S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
+                {"wlt_invID",       S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
+                {"wltDateTime",     S(QHttp::DateTime_t),       QFV,                                QNull,      true},
+                {"wltAmount",       S(qint64),                  QFV,                                QInvalid,   true,false,false},
+                {"wltStatus",       S(Targoman::API::enuWalletTransactionStatus::Type), QFV,        Targoman::API::enuWalletTransactionStatus::New},
               },
               { ///< Col       Reference Table             ForeignCol     Rename   LeftJoin
                 {"wlt_walID", "AAA.tblUserWallets",         "walID"},
-                {"wltID",     "AAA.tblWalletsTransactions", "wbl_wltID"},
+                {"wlt_invID", "AAA.tblInvoice",             "invID"},
+                {"wltID",     "AAA.tblWalletBalances",      "wbl_wltID"},
               })
 {
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuWalletTransactionStatus);
 
     this->registerMyRESTAPIs();
+
+    //show balance
 }
 
 void WalletBalances::init()
@@ -69,8 +71,9 @@ void WalletBalances::init()
 WalletBalances::WalletBalances() :
     clsTable("AAA",
               "tblWalletBalances",
-              { ///<ColName         Type         Validation            RO   Sort  Filter Self  Virt   PK
-                {"wblBalance",      S(qint64),   QFV.allwaysInvalid(), true,false,false},
+              { ///<ColName         Type         Validation                       Default    RO   Sort  Filter Self  Virt   PK
+//              {"wbl_wltID",       S(quint64),  QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {"wblBalance",      S(qint64),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
               },
               {
               }

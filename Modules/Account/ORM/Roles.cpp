@@ -32,70 +32,41 @@ void Roles::init()
 
 QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT, false, {"Account:Roles:CRUD~0100"});
-
-//    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool Roles::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+bool Roles::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT, false, {"Account:Roles:CRUD~0001"});
-//    return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
-bool Roles::apiUPDATE(QHttp::JWT_t _JWT,
-                      quint64 _rolID,
-                      QString _name,
-                      quint64 _parentRolID,
-                      QHttp::JSON_t _privs,
-                      QStringList _signupAllowdIPs,
-                      Targoman::API::enuGenericStatus::Type _status)
+bool Roles::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT, false, {"Account:Roles:CRUD~0010"});
-//    return this->update(AAADACInstance(),
-//                        {{"rolID", _rolID}},
-//                        {
-//                            {"rolName", _name},
-//                            {"rolParent_rolID", _parentRolID == 0 ? QVariant() : _parentRolID},
-//                            {"rolPrivileges", _privs},
-//                            {"rolSignupAllowedIPs", _signupAllowdIPs.join(",")},
-//                            {"rolUpdatedBy_usrID", clsJWT(_JWT).usrID()},
-//                            {"rolStatus", _status},
-//                        }
-//                        );
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
-quint64 Roles::apiCREATE(QHttp::JWT_t _JWT,
-                         QString _name,
-                         quint64 _parentRolID,
-                         QHttp::JSON_t _privs,
-                         QStringList _signupAllowdIPs)
+quint32 Roles::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT, false, {"Account:Roles:CRUD~1000"});
-//    return this->create(AAADACInstance(),
-//                        {
-//                            {"rolName", _name},
-//                            {"rolParent_rolID", _parentRolID},
-//                            {"rolPrivileges", _privs},
-//                            {"rolSignupAllowedIPs", _signupAllowdIPs.join(",")},
-//                        }
-//                        ).toUInt();
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
 }
-
 
 Roles::Roles() :
     clsTable("AAA",
               "tblRoles",
-              { ///<ColName             Type                 Validation                          RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"rolID",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"rolName",             S(QString),          QFV.unicodeAlNum().maxLenght(50)},
-                {"rolParent_rolID",     S(quint32),          QFV.integer().minValue(1)},
-                {"rolPrivileges",       S(QHttp::JSON_t),    QFV,                               false,false,false},
-                {"rolSignupAllowedIPs", S(QString),          QFV,                               false,false,false}, //OJO This must be validated after splitting by comma
-                {"rolCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          true},
-                {"rolCreationDateTime", S(QHttp::DateTime_t),QFV,                                true},
-                {"rolUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1)},
-                {"rolStatus",           S(Targoman::API::enuGenericStatus::Type)},
+                {"rolName",             S(QString),          QFV.unicodeAlNum().maxLenght(50),   QInvalid},
+                {"rolParent_rolID",     S(quint32),          QFV.integer().minValue(1),          QNull},
+                {"rolPrivileges",       S(QHttp::JSON_t),    QFV,                                QInvalid, false,false,false},
+                {"rolSignupAllowedIPs", S(QString),          QFV,                                QNull,    false,false,false}, //OJO This must be validated after splitting by comma
+                {"rolCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QInvalid, true},
+                {"rolCreationDateTime", S(QHttp::DateTime_t),QFV,                                QNull,    true},
+                {"rolUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull},
+                {"rolStatus",           S(Targoman::API::enuRoleStatus::Type), QFV,              Targoman::API::enuRoleStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"rolParent_rolID",    "AAA.tblRoles",     "rolID",     "Parent_",  true},
@@ -103,6 +74,8 @@ Roles::Roles() :
                 {"rolUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
+    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuRoleStatus);
+
     this->registerMyRESTAPIs();
 }
 

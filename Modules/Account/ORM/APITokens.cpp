@@ -33,97 +33,56 @@ void APITokens::init()
 
 QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(!this->isSelf({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _DIRECTFILTERS, _filters))
-        Authorization::checkPriv(_JWT, {"Account:APITokens:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool APITokens::apiUPDATE(QHttp::JWT_t _JWT,
-                         quint64 _tokenID,
-                         QString _token,
-                         quint32 _userID,
-                         quint32 _rolID,
-                         QHttp::ISO639_2_t _lang,
-                         bool    _validateIP,
-                         QHttp::Date_t _expiryDate,
-                         QHttp::JSON_t _extraPrivs,
-                         Targoman::API::enuAPITokensStatus::Type _status)
+bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-/*    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0010"});
-    return this->update(AAADACInstance(),
-                        {{"aptID", _tokenID}},
-                        {
-                            {"aptToken", _token},
-                            {"apt_usrID", _userID == 0 ? QVariant() : _userID},
-                            {"apt_rolID", _rolID  == 0 ? QVariant() : _rolID},
-                            {"aptLang", _lang},
-                            {"aptValidateIP", _validateIP},
-                            {"aptExtraPriviledges", _extraPrivs},
-                            {"aptExpiryDate", _expiryDate},
-                            {"aptUpdatedBy_usrID", clsJWT(_JWT).usrID()},
-                            {"aptStatus", _status}
-                        }
-                        );
-                        */
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false)
+        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
-bool APITokens::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-/*    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~0001"});
-    return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});*/
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 APITokens::apiCREATE(QHttp::JWT_t _JWT,
-                            QString _token,
-                            quint32 _userID,
-                            quint32 _rolID,
-                            QHttp::ISO639_2_t _lang,
-                            bool    _validateIP,
-                            QHttp::Date_t _expiryDate,
-                            QHttp::JSON_t _extraPrivs,
-                            Targoman::API::enuAPITokensStatus::Type _status)
+quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-/*    Authorization::checkPriv(_JWT,{"Account:APITokens:CRUD~1000"});
-    return this->create(AAADACInstance(),
-                        {
-                            {"aptToken", _token},
-                            {"apt_usrID", _userID},
-                            {"apt_rolID", _rolID},
-                            {"aptLang", _lang},
-                            {"aptValidateIP", _validateIP},
-                            {"aptExtraPriviledges", _extraPrivs},
-                            {"aptExpiryDate", _expiryDate},
-                            {"aptStatus", _status}
-                        }
-                        ).toUInt();
-                        */
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 APITokens::APITokens() :
     clsTable("AAA",
               "tblAPITokens",
-              { ///<ColName             Type                    Validation                       RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                    Validation                      Default    RO   Sort  Filter Self  Virt   PK
                 {"aptID",               S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"aptToken",            S(QString),             QFV.asciiAlNum().maxLenght(50), true, true, false},
-                {"apt_usrID",           S(quint32),             QFV.integer().minValue(1)},
-                {"apt_rolID",           S(quint32),             QFV.integer().minValue(1)},
-                {"aptLang",             S(QHttp::ISO639_2_t),   QFV},
-                {"aptValidateIP",       S(bool),                QFV},
-                {"aptExtraPriviledges", S(QHttp::JSON_t),       QFV,                           false,false, false},
-                {"aptExpiryDate",       S(QHttp::DateTime_t),   QFV},
-                {"aptLastActivity",     S(QHttp::DateTime_t),   QFV,                            true},
-                {"aptAccessCount",      S(quint32),             QFV.integer().minValue(1),      true},
-                {"aptCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      true},
-                {"aptCreationDateTime", S(QHttp::DateTime_t),   QFV,                            true},
-                {"aptUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
-                {"aptStatus",           S(Targoman::API::enuAPITokensStatus::Type)},
+                {"aptToken",            S(QString),             QFV.asciiAlNum().maxLenght(50), QInvalid,  true, true, false},
+                {"apt_usrID",           S(quint32),             QFV.integer().minValue(1),      0},
+                {"apt_svcID",           S(quint32),             QFV.integer().minValue(1),      0},
+                {"aptLang",             S(QHttp::ISO639_2_t),   QFV,                            "en"},
+                {"aptValidateIP",       S(bool),                QFV,                            false},
+                {"aptExtraPriviledges", S(QHttp::JSON_t),       QFV,                            QNull,    false,false, false},
+                {"aptExpiryDate",       S(QHttp::DateTime_t),   QFV,                            QNull},
+                {"aptLastActivity",     S(QHttp::DateTime_t),   QFV,                            QNull ,    true},
+                {"aptAccessCount",      S(quint32),             QFV.integer().minValue(1),      0,         true},
+                {"aptCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      QInvalid,  true},
+                {"aptCreationDateTime", S(QHttp::DateTime_t),   QFV,                            QNull,     true},
+                {"aptUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      QNull,     true},
+                {"aptStatus",           S(Targoman::API::enuAPITokensStatus::Type),QFV,         Targoman::API::enuAPITokensStatus::Active},
               },
               { ///< Col               Reference Table    ForeignCol   Rename     LeftJoin
-                {"apt_rolID",          "AAA.tblRoles",    "rolID",     "",         true},
-                {"apt_usrID",          "AAA.tblUser",     "rolID",     "Owner_",   true},
-                {"rolCreatedBy_usrID", "AAA.tblUser",     "usrID",     "Creator_", true},
-                {"rolUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
+                {"apt_svcID",          "AAA.tblServices", "svcID",     "",         true},
+                {"apt_usrID",          "AAA.tblUser",     "usrID",     "Owner_",   true},
+                {"aptCreatedBy_usrID", "AAA.tblUser",     "usrID",     "Creator_", true},
+                {"aptUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
               })
 {
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAPITokensStatus);

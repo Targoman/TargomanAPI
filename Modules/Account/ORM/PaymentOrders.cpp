@@ -20,7 +20,7 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "PaymentOrder.h"
+#include "PaymentOrders.h"
 #include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
@@ -33,27 +33,24 @@ void PaymentOrders::init()
 
 QVariant PaymentOrders::apiGET(GET_METHOD_ARGS_IMPL)
 {
-//    bool IsSelf = _EXTRAPATH.split(',').size() == 3 && clsJWT(_JWT).usrID() != _EXTRAPATH.split(',').last().toUInt();
-//    if(_EXTRAPATH.isEmpty() || IsSelf == false)
-//        Authorization::checkPriv(_JWT,{"Account:PaymentOrders:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-//    return this->selectFromTable(AAADACInstance(), {},
-//                                 IsSelf ? "" : QString("+inv_usrID=%1").arg(clsJWT(_JWT).usrID()),
-//                                 GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 PaymentOrders::PaymentOrders() :
     clsTable("AAA",
               "tblPaymentOrders",
-              { ///<ColName             Type                    Validation                          RO   Sort  Filter Self  Virt   PK
-                {"pyoID",               S(quint64),             QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+              { ///<ColName             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {"pyoID",               S(quint64),             QFV.integer().minValue(1),          true},
                 {"pyoMD5",              S(QHttp::MD5_t),        QFV,                                ORM_PRIMARY_KEY},
-                {"pyoCreationDateTime", S(QHttp::DateTime_t),   QFV,                        true},
-                {"pyo_invID",           S(quint64),             QFV.integer().minValue(1),          true},
-                {"pyoBankTrnID",        S(QString),             QFV.allwaysValid().maxLenght(50),   true},
-                {"pyoAmount",           S(QHttp::DateTime_t),   QFV,                        true},
-                {"pyoStatus",           S(Targoman::API::enuPaymentStatus::Type)},
-                {"pyoResult",           S(QString),             QFV,                                true,false,false},
+                {"pyoCreationDateTime", S(QHttp::DateTime_t),   QFV,                                QNull,      true},
+                {"pyo_invID",           S(quint64),             QFV.integer().minValue(1),          QNull,      true},
+                {"pyoBankTrnID",        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   true},
+                {"pyoAmount",           S(QHttp::DateTime_t),   QFV,                                QInvalid,   true},
+                {"pyoStatus",           S(Targoman::API::enuPaymentStatus::Type),QFV,               Targoman::API::enuPaymentStatus::Pending},
+                {"pyoResult",           S(QString),             QFV,                                QNull,      true,false,false},
               },
               { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
                 {"bpo_invID",  "AAA.tblInvoice",           "invID",     "",        true},

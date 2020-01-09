@@ -29,6 +29,12 @@
 
 namespace Targoman {
 namespace API {
+TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
+                               Web = 'W',
+                               Mobile = 'M',
+                               App = 'A'
+                               );
+
 TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Active = 'A',
                      Removed = 'R',

@@ -32,59 +32,45 @@ void APITokenValidIPs::init()
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(!this->isSelf({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _DIRECTFILTERS, _filters))
-        Authorization::checkPriv(_JWT, {"Account:APITokenValidIPs:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool APITokenValidIPs::apiDELETE(QHttp::JWT_t _JWT, QHttp::ExtraPath_t _EXTRAPATH)
+bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0001"});
-//    return this->deleteByPKs(AAADACInstance(), {{this->Cols.first().Name, _EXTRAPATH}});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false)
+        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 
-bool APITokenValidIPs::apiUPDATE(QHttp::JWT_t _JWT,
-                                 quint64 _tviID,
-                                 QHttp::IPv4_t _ip,
-                                 Targoman::API::enuGenericStatus::Type _status)
+bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~0010"});
-//    return this->update(AAADACInstance(),
-//                        {{"tviID", _tviID}},
-//                        {
-//                            {"tviIP", _ip.isEmpty() ? QVariant() : QHostAddress(_ip).toIPv4Address()},
-//                            {"tviUpdatedBy_usrID", clsJWT(_JWT).usrID()},
-//                            {"tviStatus", _status},
-//                        }
-//                        );
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName())) == false)
+        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
-quint64 APITokenValidIPs::apiCREATE(QHttp::JWT_t _JWT,
-                                    quint64 _tokenID,
-                                    QHttp::IPv4_t _ip)
+quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:APITokenValidIPs:CRUD~1000"});
-//    return this->create(AAADACInstance(),
-//                        {
-//                            {"tvi_aptID", _tokenID},
-//                            {"tviIP", QHostAddress(_ip).toIPv4Address()},
-//                        }
-//                        ).toUInt();
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 APITokenValidIPs::APITokenValidIPs() :
     clsTable("AAA",
               "tblAPITokenValidIPs",
-              { ///<ColName             Type                 Validation                       RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                      Default    RO   Sort  Filter Self  Virt   PK
                 {"tviID",               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"tvi_aptID",           S(quint64),          QFV.integer().minValue(1),      true},
-                {"tviIP",               S(quint64),          QFV.integer().minValue(1),      true},
-                {"tviIPReadable",       S(QString),          QFV.allwaysInvalid(),           true,false, false},
-                {"tviCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      true},
-                {"tviCreationDateTime", S(QHttp::DateTime_t),QFV,                            true},
-                {"tviUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1)},
-                {"tviStatus",           S(Targoman::API::enuGenericStatus::Type)},
+                {"tvi_aptID",           S(quint64),          QFV.integer().minValue(1),      QInvalid,  true},
+                {"tviIP",               S(quint64),          QFV.integer().minValue(1),      QInvalid},
+                {"tviIPReadable",       S(QString),          QFV.allwaysInvalid(),           QInvalid,  true,false, false},
+                {"tviCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QInvalid,  true},
+                {"tviCreationDateTime", S(QHttp::DateTime_t),QFV,                            QNull,     true},
+                {"tviUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QNull,     true},
+                {"tviStatus",           S(Targoman::API::enuGenericStatus::Type), QFV,       Targoman::API::enuGenericStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"tvi_aptID",          "AAA.tblAPITokens",  "aptID"},

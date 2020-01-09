@@ -33,7 +33,8 @@ TARGOMAN_DEFINE_ENUM(enuSessionStatus,
                      Active    = 'A',
                      LoggedOut = 'G',
                      FiredOut  = 'F',
-                     Expired   = 'E'
+                     Expired   = 'E',
+                     Removed   = 'R'
                      )
 namespace AAA {
 
@@ -46,7 +47,7 @@ public:
 
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")
-    bool ORMDELETE("Delete an active session. provide userID in order to delete self session. Destroying current session is not allowed.")
+    bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")
 
 private:
     ActiveSessions();

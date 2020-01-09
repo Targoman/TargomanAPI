@@ -45,8 +45,20 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
                 GET_METHOD_CALL_ARGS);
 }
 
+bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+}
+
+bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
+}
+
 bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
-                            Targoman::API::enuUserSex::Type,
+                            Targoman::API::enuUserSex::Type _sex,
                             QString _name,
                             QString _family,
                             QHttp::ISO639_2_t _lang,
@@ -77,7 +89,7 @@ bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
                                     {"iSalt", _salt},
                                 });
 
-    if(_name.size() || _family.size())
+    if(_name.size() || _family.size() || _sex != enuUserSex::NotExpressed)
         return this->update(AAADACInstance(),
                             {{"usrID", clsJWT(_JWT).usrID()}},
                             {
@@ -89,97 +101,46 @@ bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
     return true;
 }
 
-bool User::apiUPDATE(QHttp::JWT_t _JWT,
-                     quint64 _userID,
-                     QString _name,
-                     QString _family,
-                     QHttp::Email_t _email,
-                     QHttp::Mobile_t _mobile,
-                     enuUserApproval::Type _approvalState,
-                     quint64 _roleID,
-                     QHttp::JSON_t _specialPrivs,
-                     enuUserStatus::Type _status)
+quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-//    Authorization::checkPriv(_JWT,{"Account:User:CRUD~0010"});
-//    return this->update(AAADACInstance(),
-//                        {{"usrID", _userID}},
-//                        {
-//                            {"usrName", _name},
-//                            {"usrFamily", _family},
-//                            {"usrEmail", _email},
-//                            {"usrMobile", _mobile},
-//                            {"usrApprovalState", _approvalState},
-//                            {"usr_rolID", _roleID == 0 ? QVariant() : _roleID},
-//                            {"usrSpecialPrivs", _specialPrivs},
-//                            {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
-//                            {"usrStatus", _status},
-//                        }
-//                        );
-}
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    if(_ORMFILTERS.value("usrEmail").toString().isEmpty() && _ORMFILTERS.value("usrMobile").toString().isEmpty())
+        throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-quint32 User::apiCREATE(QHttp::JWT_t _JWT,
-                        QString _name,
-                        QString _family,
-                        QHttp::Email_t _email,
-                        QHttp::Mobile_t _mobile,
-                        Targoman::API::enuUserApproval::Type _approvalState,
-                        quint64 _roleID,
-                        qint8 _maxSessions,
-                        QHttp::JSON_t _specialPrivs,
-                        Targoman::API::enuUserStatus::Type _status)
-{
-//    Authorization::checkPriv(_JWT,{"Account:User:CRUD~1000"});
-//    if(_email.isEmpty() && _mobile.isEmpty())
-//        throw exHTTPBadRequest("Either email or mobile must be provided to create user");
-
-//    return this->create(AAADACInstance(),
-//                        {
-//                            {"usrName", _name},
-//                            {"usrFamily", _family},
-//                            {"usrEmail", _email},
-//                            {"usrMobile", _mobile},
-//                            {"usrApprovalState", _approvalState},
-//                            {"usr_rolID", _roleID == 0 ? QVariant() : _roleID},
-//                            {"usrSpecialPrivs", _specialPrivs},
-//                            {"usrMaxSessions", _maxSessions},
-//                            {"usrUpdatedBy_usrID", clsJWT(_JWT).usrID()},
-//                            {"usrStatus", _status},
-//                        }
-//                        ).toUInt();
+    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 User::User() : clsTable("AAA",
                          "tblUser",
-                         { ///<ColName             Type                      Validation                       RO   Sort  Filter Self  Virt   PK
-                           {"usrID",               S(quint32),          QFV.integer().minValue(1),            ORM_PRIMARY_KEY},
-                           {"usrSex",              S(Targoman::API::enuUserSex::Type)},
-                           {"usrName",             S(QString),          QFV.unicodeAlNum().maxLenght(100)},
-                           {"usrFamily",           S(QString),          QFV.unicodeAlNum().maxLenght(100)},
-                           {"usrEmail",            S(QHttp::Email_t),   QFV.emailNotFake()},
-                           {"usrMobile",           S(QHttp::Mobile_t),  QFV},
-                           {"usrApprovalState",    S(Targoman::API::enuUserApproval::Type)},
+                         { ///<ColName             Type                      Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                           {"usrID",               S(quint32),          QFV.integer().minValue(1),            QInvalid, true, true, true, true, false, true},
+                           {"usrSex",              S(Targoman::API::enuUserSex::Type), QFV,                   Targoman::API::enuUserSex::NotExpressed},
+                           {"usrName",             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
+                           {"usrFamily",           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
+                           {"usrEmail",            S(QHttp::Email_t),   QFV.emailNotFake(),                   QNull},
+                           {"usrMobile",           S(QHttp::Mobile_t),  QFV,                                  QNull},
+                           {"usrApprovalState",    S(Targoman::API::enuUserApproval::Type),QFV,               Targoman::API::enuUserApproval::None},
                          //{"usrPass"},
-                           {"usr_rolID",           S(quint32),          QFV.integer().minValue(1)},
-                           {"usrSpecialPrivs",     S(QHttp::JSON_t),    QFV,                                  false,false,false},
-                           {"usrLanguage",         S(QString),          QFV.languageCode()},
-                           {"usrMaxSessions",      S(quint32),          QFV.integer().betweenValues(-1, 100)},
-                           {"usrActiveSessions",   S(quint32),          QFV.integer().betweenValues(-1, 1000), true},
-                           {"usrLastLogin",        S(QHttp::DateTime_t),QFV,                                   true},
-                           {"usrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),             true},
-                           {"usrCreationDateTime", S(QHttp::DateTime_t),QFV,                                   true},
-                           {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1)},
-                           {"usrStatus",           S(Targoman::API::enuUserStatus::Type)},
+                           {"usr_rolID",           S(quint32),          QFV.integer().minValue(1),            QInvalid},
+                           {"usrSpecialPrivs",     S(QHttp::JSON_t),    QFV,                                  QNull,   false,false,false},
+                           {"usrLanguage",         S(QString),          QFV.languageCode(),                   "fa"},
+                           {"usrMaxSessions",      S(quint32),          QFV.integer().betweenValues(-1, 100), -1},
+                           {"usrActiveSessions",   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, true},
+                           {"usrLastLogin",        S(QHttp::DateTime_t),QFV,                                  QInvalid, true},
+                           {"usrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QInvalid, true},
+                           {"usrCreationDateTime", S(QHttp::DateTime_t),QFV,                                  QNull,    true},
+                           {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QNull,    true},
+                           {"usrStatus",           S(Targoman::API::enuUserStatus::Type), QFV,                Targoman::API::enuUserStatus::MustValidate},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
                            {"usr_rolID",          "AAA.tblRoles",          "rolID"},
                            {"usrID",              "AAA.tblUserExtraInfo",  "uei_usrID",  "",          true},
                            {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
-                           {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true}
+                           {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true},
                          })
 {
     this->registerMyRESTAPIs();
 }
-
 
 void UserExtraInfo::init()
 {;}
@@ -201,12 +162,12 @@ bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _imag
 UserExtraInfo::UserExtraInfo() :
     clsTable ("AAA",
                "tblUserExtraInfo",
-               {  ///<ColName             Type                      Validation                        RO   Sort  Filter Self  Virt   PK
-                   {"uei_usrID",          S(quint32),               QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                   {"ueiExtraInfo",       S(QString),               QFV,                            false,false,false},
-                   {"ueiPhoto",           S(QHttp::Base64Image_t),  QFV,                            false,false,false},
-                   {"ueiUpdatedBy_usrID", S(quint32),               QFV.integer().minValue(1)},
-                   {"ueiOAuthAccounts",   S(QHttp::JSON_t)}
+               {  ///<ColName             Type                      Validation                      Default    RO   Sort  Filter Self  Virt   PK
+//                   {"uei_usrID",          S(quint32),               QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                   {"ueiExtraInfo",       S(QString),               QFV,                            QNull,  false,false,false},
+                   {"ueiPhoto",           S(QHttp::Base64Image_t),  QFV,                            QNull,  false,false,false},
+                   {"ueiUpdatedBy_usrID", S(quint32),               QFV.integer().minValue(1),      QNull},
+                   {"ueiOAuthAccounts",   S(QHttp::JSON_t),         QFV,                            QNull}
                },
                { ///< Col                 Reference Table       ForeignCol     Rename     LeftJoin
                    {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}

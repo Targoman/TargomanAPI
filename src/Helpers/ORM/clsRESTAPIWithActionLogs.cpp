@@ -37,15 +37,15 @@ QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
 clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module) :
     clsTable(_schema,
             "tblActionLogs",
-            { ///<ColName             Type                  Validation                      RO   Sort  Filter Self  Virt   PK
+            { ///<ColName             Type                  Validation                      Default  RO   Sort  Filter Self  Virt   PK
               {"atlID",               S(quint64),           QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-              {"atlBy_usrID",         S(quint32),           QFV.integer().minValue(1),      true},
-              {"atlInsertionDateTime",S(QHttp::DateTime_t), QFV,                            true},
-              {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), true},
-              {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           true, false,false},
+              {"atlBy_usrID",         S(quint32),           QFV.integer().minValue(1),      {},     true},
+              {"atlInsertionDateTime",S(QHttp::DateTime_t), QFV,                            {},     true},
+              {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},     true},
+              {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},     true, false,false},
             },
             {
-                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By"},
+                {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By_"},
             }),
     DAC(_dac),
     Module(_module)

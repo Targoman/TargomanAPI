@@ -33,26 +33,28 @@ void ApprovalRequest::init()
 
 QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,
-                            {"Account:ApprovalRequest:CRUD~0100"},
-                             this->isSelf({{"apr_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _DIRECTFILTERS, _filters));
-
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
+bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
+}
 
 ApprovalRequest::ApprovalRequest() :
     clsTable("AAA",
               "tblApprovalRequest",
-              { ///<ColName             Type                    Validation                       RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                    Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"aprID",               S(quint64),             QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"apr_usrID",           S(quint32),             QFV.integer().minValue(1),       true},
-                {"aprRequestedFor",     S(Targoman::API::enuApprovalType::Type),    QFV,         true},
-                {"aprApprovalCode",     S(QString),             QFV.asciiAlNum().maxLenght(32),  true},
-                {"aprApprovalValue",    S(QString),             QFV.allwaysInvalid(),            true,false,false},
-                {"aprRequestDate",      S(QHttp::DateTime_t),   QFV,                             true},
-                {"aprApplyDate",        S(QHttp::DateTime_t),   QFV,                             true},
-                {"aprStatus",           S(Targoman::API::enuAPRStatus::Type)},
+                {"apr_usrID",           S(quint32),             QFV.integer().minValue(1),       QInvalid,  true},
+                {"aprRequestedFor",     S(Targoman::API::enuApprovalType::Type),    QFV,         "",        true},
+                {"aprApprovalCode",     S(QString),             QFV.asciiAlNum().maxLenght(32),  "",        true},
+                {"aprApprovalValue",    S(QString),             QFV.allwaysInvalid(),            "",        true,false,false},
+                {"aprRequestDate",      S(QHttp::DateTime_t),   QFV,                             QNull,     true},
+                {"aprApplyDate",        S(QHttp::DateTime_t),   QFV,                             QNull,     true},
+                {"aprStatus",           S(Targoman::API::enuAPRStatus::Type), QFV,               Targoman::API::enuAPRStatus::New},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"apr_usrID",          "AAA.tblUser",      "usrID"},

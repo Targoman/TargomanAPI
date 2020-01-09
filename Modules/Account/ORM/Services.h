@@ -20,52 +20,37 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
-#define TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
 
 #include "QHttp/intfRESTAPIHolder.h"
 #include "libTargomanDBM/clsDAC.h"
 #include "Helpers/ORM/clsTable.h"
+#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
-TARGOMAN_DEFINE_ENUM(enuAPRStatus,
-                     New      = 'N',
-                     Sent     = 'S',
-                     Applied  = 'A',
-                     FirstTry = '1',
-                     SecondTry= '2',
-                     Expired  = 'E',
-                     Removed  = 'R',
-                     )
-
-TARGOMAN_DEFINE_ENUM(enuApprovalType,
-                     Email      = 'E',
-                     Mobile     = 'M',
-                     )
 namespace AAA {
 
-
-class ApprovalRequest : public clsTable
+class Services : public clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private slots:
-    QVariant ORMGET("Get ApprovalRequest information.")
-    bool ORMDELETE("Delete an ApprovalRequest")
+    QVariant ORMGET("Get Service information")
+    bool ORMDELETE("Delete a Service")
+    bool ORMUPDATE("Update Service info by priviledged user")
+    quint64 ORMCREATE("Create a new Service by priviledged user")
 
 private:
-    ApprovalRequest();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ApprovalRequest);
+    Services();
+    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Services);
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuAPRStatus::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuApprovalType::Type);
-
-#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
