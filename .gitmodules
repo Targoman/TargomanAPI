@@ -28,3 +28,6 @@
 [submodule "3rdParty/UA-Parser"]
 	path = 3rdParty/UA-Parser
 	url = https://github.com/ua-parser/uap-cpp.git
+[submodule "3rdParty/TargomanDBM"]
+	path = 3rdParty/TargomanDBM
+	url = https://github.com/Targoman/TargomanDBM.git
