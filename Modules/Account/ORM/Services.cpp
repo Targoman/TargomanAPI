@@ -57,7 +57,7 @@ quint64 Services::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 
 Services::Services() :
     clsTable("AAA",
-              "tblServicess",
+              "tblServices",
               { ///<ColName             Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"svcID",               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                 {"svcName",             S(QString),          QFV,                             QInvalid, false},

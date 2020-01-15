@@ -129,7 +129,7 @@ User::User() : clsTable("AAA",
                            {"usrLastLogin",        S(QHttp::DateTime_t),QFV,                                  QInvalid, true},
                            {"usrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QInvalid, true},
                            {"usrCreationDateTime", S(QHttp::DateTime_t),QFV,                                  QNull,    true},
-                           {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QNull,    true},
+                           {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QNull},
                            {"usrStatus",           S(Targoman::API::enuUserStatus::Type), QFV,                Targoman::API::enuUserStatus::MustValidate},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin

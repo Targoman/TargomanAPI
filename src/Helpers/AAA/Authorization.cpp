@@ -52,7 +52,10 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
 
 bool hasPriv(const QHttp::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf)
 {
-    if (_requiredAccess.isEmpty() || privObjectFromInfo(_jwt).isEmpty())
+    if(_requiredAccess.isEmpty())
+        return true;
+
+    if ( privObjectFromInfo(_jwt).isEmpty())
         return false;
 
     foreach(auto AccessItem, _requiredAccess)

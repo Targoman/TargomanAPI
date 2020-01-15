@@ -46,7 +46,6 @@
 #include "ORM/WalletTransactions.h"
 
 #include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
-#include "3rdParty/UA-Parser/UaParser.h"
 
 using namespace Targoman;
 using namespace Targoman::API;
@@ -57,7 +56,14 @@ using namespace QHttp;
 void Account::init()
 {}
 
-QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _login, const QHttp::MD5_t& _pass, const QString& _salt, const QString& _tlps, bool _rememberMe, const QHttp::JSON_t& _sessionInfo)
+QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
+                                      const QString& _login,
+                                      const QHttp::MD5_t& _pass,
+                                      const QString& _salt,
+                                      const QString& _tlps,
+                                      bool _rememberMe,
+                                      const QHttp::JSON_t& _sessionInfo,
+                                      const QHttp::MD5_t& _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -66,7 +72,7 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP, const
     Authorization::validateIPAddress(_REMOTE_IP);
 
     return this->createJWT (_login,
-                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(",", QString::SkipEmptyParts), _sessionInfo.object()),
+                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(",", QString::SkipEmptyParts), _sessionInfo.object(), _fingerprint),
                             _tlps);
 }
 
@@ -74,7 +80,8 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
                                              enuOAuthType::Type _type,
                                              const QString& _oAuthToken,
                                              const QString& _tlps,
-                                             const QHttp::JSON_t& _sessionInfo)
+                                             const QHttp::JSON_t& _sessionInfo,
+                                             const QHttp::MD5_t& _fingerprint)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
@@ -97,14 +104,8 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
         throw exHTTPNotImplemented("Invalid oAuth type");
     }
     return this->createJWT (OAuthInfo.Email,
-                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), _sessionInfo.object()),
+                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), _sessionInfo.object(), _fingerprint),
                             _tlps);
-}
-
-QHttp::EncodedJWT_t Account::apiLoginAsGuest(const QHttp::RemoteIP_t& _REMOTE_IP, const QHttp::JSON_t& _sessionInfo)
-{
-    Q_UNUSED(_REMOTE_IP) Q_UNUSED(_sessionInfo)
-    throw exHTTPNotImplemented("oh oh!");
 }
 
 QHttp::EncodedJWT_t Account::apiRefreshJWT(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT)

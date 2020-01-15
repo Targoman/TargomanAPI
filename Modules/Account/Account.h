@@ -49,18 +49,17 @@ private slots:
                                     const QString& _salt,
                                     const QString& _tlps = "",
                                     bool _rememberMe = false,
-                                    const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
+                                    const QHttp::JSON_t& _sessionInfo = {},
+                                    const QHttp::MD5_t& _fingerprint = {}),
                             "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
 
     QHttp::EncodedJWT_t API(,LoginByOAuth,(const QHttp::RemoteIP_t& _REMOTE_IP,
                                            Targoman::API::enuOAuthType::Type _type,
                                            const QString& _oAuthToken,
                                            const QString& _tlps,
-                                           const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t()),
+                                           const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t(),
+                                           const QHttp::MD5_t& _fingerprint = {}),
                             "Login by Open Authentication and return an encoded JWT")
-
-    QHttp::EncodedJWT_t API(,LoginAsGuest,(const QHttp::RemoteIP_t& _REMOTE_IP,const QHttp::JSON_t& _sessionInfo),
-                            "Login user as guest and return an encoded JWT")
 
     QHttp::EncodedJWT_t API(,RefreshJWT,(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT),
                             "Refresh JWT in order to update information or expiry time")

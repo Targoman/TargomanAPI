@@ -78,6 +78,8 @@ UserWallets::UserWallets() :
                 {"walDefault",      S(bool),                    QFV,                                false},
                 {"walMinBalance",   S(qint64),                  QFV,                                0,         false,false,false},
                 {"walLastBalance",  S(qint64),                  QFV,                                0,          true,false,false},
+                {"walSumIncome",    S(qint64),                  QFV,                                0,          true,false,false},
+                {"walSumExpenses",  S(qint64),                  QFV,                                0,          true,false,false},
                 {"walStatus",       S(Targoman::API::enuUserWalletStatus::Type), QFV,               Targoman::API::enuUserWalletStatus::Active},
               },
               { ///< Col       Reference Table             ForeignCol    Rename   LeftJoin

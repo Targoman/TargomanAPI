@@ -33,20 +33,6 @@ void Ngtv1::init()
 
 Ngtv1::Ngtv1() :
     Helpers::ORM::clsRESTAPIWithActionLogs (NGTDACInstance(), "NGT", "Targoman"){
-
-    /*
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBannerSizes);
-
-
-//    Advertisement::ActionLogs::instance().init();
-    Advertisement::ActiveAds::instance().init();
-    Advertisement::Bin::instance().init();
-    Advertisement::Clicks::instance().init();
-    Advertisement::Props::instance().init();
-
-    this->registerMyRESTAPIs();*/
 }
 
 

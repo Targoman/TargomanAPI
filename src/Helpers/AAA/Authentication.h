@@ -47,7 +47,14 @@ struct stuOAuthInfo{
     QString ID;
 };
 
-extern QJsonObject login(const QString& _ip, const QString& _login, const QString& _pass, const QString& _salt, bool _rememberMe, const QStringList& _requiredTLPs, const QJsonObject& _info);
+extern QJsonObject login(const QString& _ip,
+                         const QString& _login,
+                         const QString& _pass,
+                         const QString& _salt,
+                         bool _rememberMe,
+                         const QStringList& _requiredTLPs,
+                         const QJsonObject& _info,
+                         const QString& _fingerPrint);
 extern QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs);
 
 extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);

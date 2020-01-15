@@ -174,7 +174,7 @@ QVariantMap MT::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _tok
     };
 }
 
-MT::MT() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "Targoman"),
+MT::MT() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "MT"),
     DAC(new DBManager::clsDAC)
 {
     this->registerMyRESTAPIs();

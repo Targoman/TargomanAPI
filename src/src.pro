@@ -89,7 +89,7 @@ LIBS += -lTargomanCommon \
         -lqhttp \
         -lfasttext \
         -lTargomanTextProcessor \
-        -lcurl
+        -lcurl \
 
 contains(ACTIVE_MODULES, Account) {
   DEFINES+=ENABLE_MODULE_ACCOUNT
@@ -111,3 +111,7 @@ contains(ACTIVE_MODULES, NGT) {
   LIBS+=-lModule_NGT
 }
 
+contains(ACTIVE_MODULES, Ticketing) {
+  DEFINES+=ENABLE_MODULE_Ticketing
+  LIBS+=-lModule_Ticketing
+}

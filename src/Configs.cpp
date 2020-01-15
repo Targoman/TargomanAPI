@@ -203,7 +203,6 @@ tmplConfigurable<quint16> gConfigs::JWT::TTL(
         "jwt-ttl",
         enuConfigSource::Arg | enuConfigSource::File);
 
-
 /****************************************************************************/
 tmplConfigurable<double>     gConfigs::Classifier::Threshold(
         gConfigs::Classifier::makeConfig("Threshold"),

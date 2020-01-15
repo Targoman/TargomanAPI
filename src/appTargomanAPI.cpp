@@ -27,6 +27,7 @@
 #include "Modules/MT/MT.h"
 #include "Modules/Account/Account.h"
 #include "Modules/Advert/Advert.h"
+#include "Modules/Ticketing/Ticketing.h"
 #include "Modules/NGT/NGTv1.h"
 
 using namespace QHttp;
@@ -94,6 +95,9 @@ void appTargomanAPI::slotExecute()
 #endif
 #ifdef ENABLE_MODULE_ACCOUNT
         Account::instance().init();
+#endif
+#ifdef ENABLE_MODULE_Ticketing
+        Ticketing::instance().init();
 #endif
 #ifdef ENABLE_MODULE_ADVERT
         Advert::instance().init();

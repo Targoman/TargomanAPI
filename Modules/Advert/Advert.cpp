@@ -63,7 +63,7 @@ QString Advert::apiGETRetrieveURL(const RemoteIP_t& _REMOTE_IP, quint64 _id, IPv
 }
 
 Advert::Advert() :
-    Helpers::ORM::clsRESTAPIWithActionLogs (AdvertDACInstance(), "MT", "Targoman"){
+    Helpers::ORM::clsRESTAPIWithActionLogs (AdvertDACInstance(), "Advert", "Advert"){
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertType);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBannerSizes);

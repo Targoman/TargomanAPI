@@ -35,7 +35,7 @@ QJsonObject login(const QString&     _ip,
                   const QString&     _salt,
                   bool               _rememberMe,
                   const QStringList& _requiredTLPs,
-                  const QJsonObject& _info)
+                  const QJsonObject& _info, const QString& _fingerPrint)
 {
     QJsonObject UserInfo =  AAADACInstance().callSP ("","AAA.sp_UPDATE_login", {
                                                          {"iLogin", _login},
@@ -43,6 +43,7 @@ QJsonObject login(const QString&     _ip,
                                                          {"iPass", _pass},
                                                          {"iSalt", _salt},
                                                          {"iInfo", _info},
+                                                         {"iFingerPrint", _fingerPrint.isEmpty() ? QVariant() : _fingerPrint},
                                                          {"iRemember", _rememberMe ? "1" : "0"},
                                                          {"iOAuthInfo", QVariant()}
                                                      }).toJson(true).object();

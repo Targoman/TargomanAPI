@@ -59,9 +59,10 @@ ActiveSessions::ActiveSessions() :
                 {"ssnIPReadable",       S(QString),             QFV.allwaysInvalid(),        QInvalid,  true,false,false},
                 {"ssnCreationDateTime", S(QHttp::DateTime_t),   QFV,                         QNull,     true},
                 {"ssnInfo",             S(QHttp::JSON_t),       QFV,                         QNull,     true,false,false},
+                {"ssnFingerPrint",      S(QHttp::MD5_t),        QFV.allwaysInvalid(),        QNull,     true,false,false},
                 {"ssnLastActivity",     S(QHttp::DateTime_t),   QFV,                         QNull,     true},
                 {"ssnRemember",         S(bool),                QFV,                         false,     true},
-                {"ssnUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   true},
+                {"ssnUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
                 {"ssnStatus",           S(Targoman::API::enuSessionStatus::Type), QFV,       Targoman::API::enuSessionStatus::Active},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin

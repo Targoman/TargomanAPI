@@ -556,11 +556,15 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             if(PatternMatches.captured(3) == "NULL"){
                 if(PatternMatches.captured(2) == "=")
-                    Rule = " IS NULL";
+                    Rule += " IS NULL";
                 else if(PatternMatches.captured(2) == "!=")
-                    Rule = " IS NOT NULL";
+                    Rule += " IS NOT NULL";
                 else
                     throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
+
+                SelectItems.Where.append(Rule);
+                CanStartWithLogical = true;
+                LastLogical.clear();
                 continue;
             }
 

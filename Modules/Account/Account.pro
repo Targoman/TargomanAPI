@@ -54,8 +54,7 @@ SOURCES += \
     ORM/APITokens.cpp \
     ORM/ApprovalRequest.cpp \
     ORM/PaymentOrders.cpp \
-    ORM/Services.cpp \
-    ../../3rdParty/UA-Parser/UaParser.cpp \
+    ORM/Services.cpp
 
 OTHER_FILES += \
 
