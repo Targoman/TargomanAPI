@@ -169,6 +169,7 @@ protected:
     QList<QHttp::clsORMField> BaseCols;
     QList<stuRelation> ForeignKeys;
     quint8  CountOfPKs;
+    QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
 
     static QHash<QString, clsTable*> Registry;
 };

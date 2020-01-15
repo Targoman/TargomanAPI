@@ -170,6 +170,9 @@ void clsTable::prepareFiltersList()
         }
     }
 
+    foreach(auto Col, this->AllCols)
+        if(Col.argSpecs().fromORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
+            this->Converters.insert(this->finalColName(Col), Col.argSpecs().fromORMValueConverter());
 }
 
 QString clsTable::finalColName(const QHttp::clsORMField& _col, const QString& _prefix){
@@ -231,7 +234,7 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                    + SelectItems.OrderBy.join(',')
                                    + QUERY_SEPARATOR
                                    + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
-                                   ).toJson(false).toVariant().toList();
+                                   ).toJson(false, this->Converters).toVariant().toList();
         if(_reportCount)
             Table.TotalRows = static_cast<qint64>(_db.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
         return Table.toVariant();
@@ -266,7 +269,7 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                              + Filters.join(" AND ")
                                              + QUERY_SEPARATOR
                                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-                                             ).toJson(true);
+                                             ).toJson(true, this->Converters);
         if(Result.object().isEmpty())
             throw exHTTPNotFound("No item could be found");
 
@@ -291,7 +294,7 @@ bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QV
 
         Column.validate(InfoIter.value());
         UpdateCommands.append(this->makeColName(Column) + "=?");
-        Values.append(Column.fromString(InfoIter.value().toString()));
+        Values.append(Column.toDB(InfoIter.value().toString()));
     }
 
     QStringList  Filters;
@@ -303,7 +306,7 @@ bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QV
             continue;
         Column.validate(FilterIter.value());
         UpdateCommands.append(this->makeColName(Column) + "=?");
-        Values.append(Column.fromString(FilterIter.value().toString()));
+        Values.append(Column.toDB(FilterIter.value().toString()));
     }
 
     for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
@@ -394,7 +397,7 @@ QVariant clsTable::create(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS
             continue;
         Col.validate(FilterIter.value());
         CreateCommands.append(this->makeColName(Col) + "=?");
-        Values.append(Col.fromString(FilterIter.value().toString()));
+        Values.append(Col.toDB(FilterIter.value().toString()));
     }
 
     clsDACResult Result = _db.execQuery("",
@@ -577,7 +580,11 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             else if(PatternMatches.captured(2) == "=") Rule += " = ";
             else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
 
-            Rule += PatternMatches.captured(3);
+            FilteredCol.Col.argSpecs().validate(PatternMatches.captured(3), PatternMatches.captured(1).trimmed().toLatin1());
+
+            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
+            Rule += FilteredCol.Col.toDB(PatternMatches.captured(3)).toString();
+            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
             CanStartWithLogical = true;
             LastLogical.clear();
         }
