@@ -120,3 +120,8 @@ contains(ACTIVE_MODULES, TextProcessor) {
   DEFINES+=ENABLE_MODULE_TextProcessor
   LIBS+=-lModule_TextProcessor
 }
+
+contains(ACTIVE_MODULES, FormalityChecker) {
+  DEFINES+=ENABLE_MODULE_FormalityChecker
+  LIBS+=-lModule_FormalityChecker
+}

@@ -30,6 +30,7 @@
 #include "Modules/Ticketing/Ticketing.h"
 #include "Modules/NGT/NGTv1.h"
 #include "Modules/TextProcessor/TextProcessor.h"
+#include "Modules/FormalityChecker/FormalityChecker.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -109,6 +110,10 @@ void appTargomanAPI::slotExecute()
 
 #ifdef ENABLE_MODULE_TextProcessor
         TextProcessor::instance().init();
+#endif
+
+#ifdef ENABLE_MODULE_FormalityChecker
+        FormalityChecker::instance().init();
 #endif
 
         // Initialize REST Server

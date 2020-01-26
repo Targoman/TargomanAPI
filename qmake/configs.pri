@@ -20,6 +20,7 @@ ProjectName="TargomanAPI"
 VERSION=1.0.0
 ACTIVE_MODULES= \
 TextProcessor \
+FormalityChecker \
 #  Account \
 #  Ticketing \
 #  Advert \
