@@ -43,7 +43,6 @@ using namespace NLPLibs;
 using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
-using namespace Common::Configuration;
 using namespace QHttp;
 using namespace Targoman::API::Helpers::AAA;
 

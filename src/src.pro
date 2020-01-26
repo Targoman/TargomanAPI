@@ -115,3 +115,8 @@ contains(ACTIVE_MODULES, Ticketing) {
   DEFINES+=ENABLE_MODULE_Ticketing
   LIBS+=-lModule_Ticketing
 }
+
+contains(ACTIVE_MODULES, TextProcessor) {
+  DEFINES+=ENABLE_MODULE_TextProcessor
+  LIBS+=-lModule_TextProcessor
+}

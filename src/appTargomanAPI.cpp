@@ -29,6 +29,7 @@
 #include "Modules/Advert/Advert.h"
 #include "Modules/Ticketing/Ticketing.h"
 #include "Modules/NGT/NGTv1.h"
+#include "Modules/TextProcessor/TextProcessor.h"
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
@@ -104,6 +105,10 @@ void appTargomanAPI::slotExecute()
 #endif
 #ifdef ENABLE_MODULE_NGT
         Ngtv1::instance().init();
+#endif
+
+#ifdef ENABLE_MODULE_TextProcessor
+        TextProcessor::instance().init();
 #endif
 
         // Initialize REST Server
