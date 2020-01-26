@@ -100,7 +100,7 @@ tmplConfigurable<bool> gConfigs::Rest::IndentedJson(
 tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadSize(
         gConfigs::Rest::makeConfig("MaxUploadSize"),
         "Max Upload size for any type of request",
-        10*1024,10*1024*1024,
+        10*1024, 10*1024*1024,
         10*1024*1024,
         ReturnTrueCrossValidator(),
         "",
@@ -111,7 +111,7 @@ tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadSize(
 tmplRangedConfigurable<qint64> gConfigs::Rest::MaxUploadedFileSize(
         gConfigs::Rest::makeConfig("MaxUploadedFileSize"),
         "Max Upload size for files",
-        1*1024,100*1024*1024,
+        1*1024, 100*1024*1024,
         100*1024*1024,
         ReturnTrueCrossValidator(),
         "",

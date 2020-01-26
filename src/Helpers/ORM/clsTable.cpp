@@ -57,7 +57,10 @@ clsTable::clsTable(const QString& _schema,
                                                foreach(auto Col, _fields)
                                                    if(Col.isVirtual() == false)
                                                         Cols.append(clsTable::finalColName(Col));
-                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")\n* " + Cols.join("\n* ");
+                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+") "
+                                                      "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
+                                                      "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
+                                                      "Availabale Cols are: \n* " + Cols.join("\n* ");
 //                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")";
                                         });
     QHTTP_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,
@@ -214,6 +217,18 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
     stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
     if(_extraPath.isEmpty()){
         QHttp::stuTable Table;
+
+        if(this->BaseCols.last().name().endsWith("Status")){
+            bool StatusFilterFound = false;
+            foreach(auto Filter, SelectItems.Where)
+                if(Filter.split(' ').contains(this->BaseCols.last().name())){
+                    StatusFilterFound = true;
+                    break;
+                }
+            if(StatusFilterFound == false)
+                SelectItems.Where.append((SelectItems.Where.size() ? "AND " : " ") + this->BaseCols.last().name() + "!='R'");
+        }
+
         Table.Rows = _db.execQuery("",
                                    QString("SELECT ")
                                    + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
@@ -457,17 +472,48 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     /****************************************************************************/
     QStringList RequiredCols = _requiredCols.size() ? _requiredCols.split(",", QString::SkipEmptyParts) : QStringList("*");
 
+    auto addCol = [this, _groupBy, RequiredCols](clsTable::stuSelectItems& _selectItems, auto _col, const stuRelation& _relation = InvalidRelation){
+        foreach(auto RequiredCol, RequiredCols){
+            QString ColName;
+            QString Function;
+            if(RequiredCol.contains('(')){
+                if(RequiredCol.endsWith(')') == false)
+                    throw exHTTPBadRequest("Aggroupation rule found without closing parenthesis: " + RequiredCol);
+                Function = RequiredCol.split('(').first();
+                ColName  = RequiredCol.split('(').last().replace(')', "");
+                if(Function != "COUNT"
+                   && Function != "COUNT_DISTINCT"
+                   && Function != "SUM"
+                   && Function != "AVG"
+                   && Function != "MAX"
+                   && Function != "MIN"
+                   )
+                    throw exHTTPBadRequest("Invalid agroupation rule: " + RequiredCol);
+            }else{
+                if(_groupBy.size())
+                    Function = "ANY_VALUE";
+                ColName = RequiredCol;
+            }
+
+            if(ColName == _relation.RenamingPrefix + _col.name () || ColName == _relation.RenamingPrefix + _col.renameAs()){
+                if(Function.size()){
+                    QString ColFinalName = this->makeColName(_col, true, _relation);
+                    if(Function == "COUNT_DISTINCT")
+                        _selectItems.Cols.append("COUNT(DISTINCT " + ColFinalName.split(' ').first()+ ") AS COUNT_" + ColFinalName.split(' ').last());
+                    else
+                        _selectItems.Cols.append(Function + "(" + ColFinalName.split(' ').first()+ ") AS " + Function + "_" + ColFinalName.split(' ').first().split('.').last());
+                }else
+                    _selectItems.Cols.append(this->makeColName(_col, true, _relation));
+                return true;
+            }
+        }
+        return false;
+    };
     foreach(auto Col, this->BaseCols){
         if(RequiredCols.isEmpty() || RequiredCols.contains("*"))
             SelectItems.Cols.append(this->makeColName(Col, true));
-        else{
-            //TODO check if GROUP_BY is specified check
-            //https://dev.mysql.com/doc/refman/8.0/en/group-by-functions.html
-            //https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_any-value
-
-            if(RequiredCols.contains(Col.name()) || RequiredCols.contains(Col.renameAs()))
-                SelectItems.Cols.append(this->makeColName(Col, true));
-        }
+        else
+            addCol(SelectItems, Col);
     }
 
     QList<stuRelation> UsedJoins;
@@ -482,10 +528,8 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                 SelectItems.Cols.append(this->makeColName(Col, true, Relation));
                 Joined = true;
             }else{
-                if(RequiredCols.contains(Relation.RenamingPrefix + Col.name()) || RequiredCols.contains(Relation.RenamingPrefix + Col.renameAs())){
-                    SelectItems.Cols.append(this->makeColName(Col, true, Relation));
+                if(addCol(SelectItems, Col, Relation))
                     Joined = true;
-                }
             }
         }
 
@@ -498,23 +542,6 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     if(RequiredCols.size() && RequiredCols.size() > SelectItems.Cols.size())
         throw exHTTPBadRequest("Seems that some columns could not be resolved: Actives are: [" +SelectItems.Cols.join(", ")+ "]");
-
-    /****************************************************************************/
-
-    SelectItems.From.append(this->Schema + "." + this->Name);
-    foreach(auto Join, UsedJoins){
-        SelectItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
-                                + Join.ReferenceTable
-                                + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
-                                + " ON "
-                                + (Join.RenamingPrefix.size() ? "`" + Join.RenamingPrefix + "`" : Join.ReferenceTable) + "." + Join.ForeignColumn
-                                + " = "
-                                + this->Name + "." + Join.Column
-                                );
-    }
-
-    if(_extraJoins.size())
-        SelectItems.From.append(_extraJoins);
 
     /****************************************************************************/
     quint8 OpenParenthesis = 0;
@@ -557,6 +584,9 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             else
                 throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
 
+            if(FilteredCol.Relation.Column.size() && UsedJoins.contains(FilteredCol.Relation) == false)
+                UsedJoins.append(FilteredCol.Relation);
+
             if(PatternMatches.captured(3) == "NULL"){
                 if(PatternMatches.captured(2) == "=")
                     Rule += " IS NULL";
@@ -596,6 +626,23 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     if(SelectItems.Where.isEmpty())
         SelectItems.Where.append("TRUE");
+
+    /****************************************************************************/
+
+    SelectItems.From.append(this->Schema + "." + this->Name);
+    foreach(auto Join, UsedJoins){
+        SelectItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
+                                + Join.ReferenceTable
+                                + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
+                                + " ON "
+                                + (Join.RenamingPrefix.size() ? "`" + Join.RenamingPrefix + "`" : Join.ReferenceTable) + "." + Join.ForeignColumn
+                                + " = "
+                                + this->Name + "." + Join.Column
+                                );
+    }
+
+    if(_extraJoins.size())
+        SelectItems.From.append(_extraJoins);
 
     /****************************************************************************/
     foreach(auto OrderByCriteria, _orderBy.split(",", QString::SkipEmptyParts)) {

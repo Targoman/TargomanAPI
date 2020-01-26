@@ -100,8 +100,8 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
     case enuOAuthType::Github:
         OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
         break;
-    default:
-        throw exHTTPNotImplemented("Invalid oAuth type");
+/*    default:
+        throw exHTTPNotImplemented("Invalid oAuth type");*/
     }
     return this->createJWT (OAuthInfo.Email,
                             Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), _sessionInfo.object(), _fingerprint),

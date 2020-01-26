@@ -49,7 +49,7 @@ bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
-quint64 Invoice::apiCREATEwithdrawal(QHttp::JWT_t _JWT,
+quint64 Invoice::apiCREATEwithdraw(QHttp::JWT_t _JWT,
                                      quint64 _amount,
                                      quint64 _walletID)
 {
@@ -57,7 +57,7 @@ quint64 Invoice::apiCREATEwithdrawal(QHttp::JWT_t _JWT,
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
-    _ORMFILTERS.insert("invPaymentType", QString(enuInvoiceType::Withdrawal));
+    _ORMFILTERS.insert("invPaymentType", enuInvoiceType::toStr(enuInvoiceType::Withdrawal));
     _ORMFILTERS.insert("invTotalAmount", _amount);
     _ORMFILTERS.insert("invServiceCode", "WALT");
     _ORMFILTERS.insert("invDesc", QJsonDocument(QJsonObject{

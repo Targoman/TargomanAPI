@@ -40,32 +40,32 @@ TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Removed = 'R',
                      Blocked = 'B',
                      MustChangePass = 'C',
-                     MustValidate = 'V',
+                     MustValidate = 'V'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      None = 'N',
                      All = 'A',
                      JustMobile = 'M',
-                     JustEmail = 'E',
+                     JustEmail = 'E'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuUserSex,
                      Male = 'M',
                      Female = 'F',
-                     NotExpressed = 'N',
+                     NotExpressed = 'N'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
-                     Removed = 'R',
+                     Removed = 'R'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
                      Pending = 'P',
                      Active = 'A',
                      Banned = 'B',
-                     Removed = 'R',
+                     Removed = 'R'
                      )
 
 }

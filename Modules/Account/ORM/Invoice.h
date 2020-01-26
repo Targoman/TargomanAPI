@@ -51,7 +51,7 @@ public:
 private slots:
     QVariant ORMGET("Get Invoice information")
     bool ORMDELETE("Delete an Invoice. Take note that User can just delete invoices with Payoff type")
-    quint64 API(CREATE,withdrawal,(QHttp::JWT_t _JWT,
+    quint64 API(CREATE,withdraw,(QHttp::JWT_t _JWT,
                                 quint64 _amount,
                                 quint64 _walletID),
              "Create a new payback request by user.")

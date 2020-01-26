@@ -31,39 +31,39 @@
 namespace Targoman {
 namespace API {
 
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuAdvertOrder,
-                               First  = '1',
-                               Second = '2',
-                               Third  = '3',
-                               HugeRequest = 'H',
-                               Normal = 'R'
+TARGOMAN_DEFINE_ENUM (enuAdvertOrder,
+                      First  = '1',
+                      Second = '2',
+                      Third  = '3',
+                      HugeRequest = 'H',
+                      Normal = 'R'
                                );
 
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuAdvertType,
-                               Text,
-                               Image
-                               );
+TARGOMAN_DEFINE_ENUM (enuAdvertType,
+                      Text,
+                      Image
+                      );
 
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuBannerSizes,
-                               MedimRectangle_300x250   = 'A',
-                               LargeRectangle_336x280   = 'B',
-                               LeaderBoard_728x90       = 'C',
-                               HalfPage_300x600         = 'D',
-                               WideSkyscrapper_160x600  = 'E',
-                               Skyscrapper_120x600      = 'F',
-                               Square_250x250           = 'G',
-                               SmallSquare_200x200      = 'H',
-                               MainBanner_468x60        = 'I',
-                               Portrait_300x1050        = 'J',
-                               Billboard_970x250        = 'K',
-                               LargeLeaderBoard_970x90  = 'L',
-                               HalfBanner_234x60        = 'M',
-                               VerticalBanner_120x240   = 'N',
-                               SmallRectangle_180x150   = 'O',
+TARGOMAN_DEFINE_ENUM (enuBannerSizes,
+                      MedimRectangle_300x250   = 'A',
+                      LargeRectangle_336x280   = 'B',
+                      LeaderBoard_728x90       = 'C',
+                      HalfPage_300x600         = 'D',
+                      WideSkyscrapper_160x600  = 'E',
+                      Skyscrapper_120x600      = 'F',
+                      Square_250x250           = 'G',
+                      SmallSquare_200x200      = 'H',
+                      MainBanner_468x60        = 'I',
+                      Portrait_300x1050        = 'J',
+                      Billboard_970x250        = 'K',
+                      LargeLeaderBoard_970x90  = 'L',
+                      HalfBanner_234x60        = 'M',
+                      VerticalBanner_120x240   = 'N',
+                      SmallRectangle_180x150   = 'O',
 
-                               Mobile_320x50            = 'P',
-                               LargeMobile_320x100      = 'Q',
-                               );
+                      Mobile_320x50            = 'P',
+                      LargeMobile_320x100      = 'Q',
+                      );
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"

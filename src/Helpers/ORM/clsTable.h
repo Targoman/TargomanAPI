@@ -75,6 +75,8 @@ struct stuRelation{
     stuRelation(QString _col, QString _referenceTable, QString _foreignCol, QString _renamingPrefix = {}, bool _isLeftJoin = false) :
         Column(_col), ReferenceTable(_referenceTable), ForeignColumn(_foreignCol), RenamingPrefix(_renamingPrefix), LeftJoin(_isLeftJoin)
     {;}
+
+    bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
 };
 
 static stuRelation InvalidRelation("","","");
@@ -101,6 +103,7 @@ protected:
 
         stuFilteredCol() : Relation(InvalidRelation)
         {}
+
         inline bool isValid(){ return this->Col.name().size();}
     };
 

@@ -70,6 +70,8 @@ public:
 private slots:
     bool API(UPDATE,Photo,(QHttp::JWT_t _JWT, QHttp::Base64Image_t _image),
              "Updates user image based using a base64 encoded image")
+    bool API(UPDATE,Sheba,(QHttp::JWT_t _JWT, QHttp::Sheba_t _sheba),
+             "Updates user image based using a base64 encoded image")
 private:
     UserExtraInfo();
     TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,UserExtraInfo);

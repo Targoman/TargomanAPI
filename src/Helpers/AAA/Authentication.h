@@ -28,12 +28,12 @@
 namespace Targoman {
 namespace API {
 
-TARGOMAN_DEFINE_ENHANCED_ENUM (enuOAuthType,
-                               Google,
-                               Yahoo,
-                               Github,
-                               Linkedin
-                               );
+TARGOMAN_DEFINE_ENUM (enuOAuthType,
+                       Google   = 'G',
+                       Yahoo    = 'Y',
+                       Github   = 'H',
+                       Linkedin = 'L'
+                       );
 namespace Helpers {
 namespace AAA {
 namespace Authentication{

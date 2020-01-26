@@ -159,6 +159,21 @@ bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _imag
     return Result.numRowsAffected() > 0;
 }
 
+bool UserExtraInfo::apiUPDATESheba(QHttp::JWT_t _JWT, QHttp::Sheba_t _sheba){
+    clsDACResult Result = AAADACInstance().execQuery(
+                              "",
+                              "UPDATE " + this->Name
+                              + QUERY_SEPARATOR
+                              + "SET ueiSheba = ?, ueiUpdatedBy_usrID = ?"
+                              + QUERY_SEPARATOR
+                              + "WHERE uei_usrID = ?",
+                              { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+        );
+
+    return Result.numRowsAffected() > 0;
+}
+
+
 UserExtraInfo::UserExtraInfo() :
     clsTable ("AAA",
                "tblUserExtraInfo",

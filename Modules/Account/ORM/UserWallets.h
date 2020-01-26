@@ -50,6 +50,16 @@ private slots:
 
     bool API(UPDATE,defaultWallet,(QHttp::JWT_t _JWT, quint64 _walID),
              "change default wallet")
+    bool API(CREATE,transfer,(QHttp::JWT_t _JWT,
+                              const QString& _destLogin,
+                              quint32 _amount,
+                              const QHttp::MD5_t& _pass,
+                              const QString& _salt,
+                              quint64 _walID = 0),
+             "Transfer money to other user wallet. Default will be used if not defined")
+
+    bool API(CREATE,deposit,(QHttp::JWT_t _JWT, quint32 _amount, quint64 _walID = 0),
+             "Deposit money in the specified or default wallet")
 
 private:
     UserWallets();

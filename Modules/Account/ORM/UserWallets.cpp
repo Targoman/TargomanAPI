@@ -65,25 +65,79 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(QHttp::JWT_t _JWT, quint64 _walID){
+    bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    clsDACResult Result = AAADACInstance().execQuery(
+                              "",
+                              "UPDATE " + this->Name
+                              + QUERY_SEPARATOR
+                              + "SET walDefault = 1, ueiUpdatedBy_usrID = :usrID"
+                              + QUERY_SEPARATOR
+                              + "WHERE "
+                              + (IsPrivileged ? "TRUE" : "wal_usrID = ")
+                              + " AND walID = ?",
+                              (IsPrivileged ?
+                                   QVariantList({ clsJWT(_JWT).usrID(), _walID }) :
+                                   QVariantList({ clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID(), _walID })
+                              )
+        );
 
+    return Result.numRowsAffected() > 0;
+}
+
+bool UserWallets::apiCREATEtransfer(QHttp::JWT_t _JWT,
+                                    const QString& _destLogin,
+                                    quint32 _amount,
+                                    const QHttp::MD5_t& _pass,
+                                    const QString& _salt,
+                                    quint64 _walID){
+    return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_transfer", {
+                                                             /*{"iBy", Type},
+                                                             {"iLogin", _emailOrMobile},
+                                                             {"iPass", _pass},
+                                                             {"iRole", _role},
+                                                             {"iIP", _REMOTE_IP},
+                                                             {"iName", _name.isEmpty()? QVariant() : _name},
+                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
+                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
+                                                             {"iMaxSessions", _maxSessions},*/
+                                                         }).spDirectOutputs().value("oUserID").toDouble());
+}
+
+bool UserWallets::apiCREATEdeposit(QHttp::JWT_t _JWT, quint32 _amount, quint64 _walID){
+    return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_transfer", {
+                                                             /*{"iBy", Type},
+                                                             {"iLogin", _emailOrMobile},
+                                                             {"iPass", _pass},
+                                                             {"iRole", _role},
+                                                             {"iIP", _REMOTE_IP},
+                                                             {"iName", _name.isEmpty()? QVariant() : _name},
+                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
+                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
+                                                             {"iMaxSessions", _maxSessions},*/
+                                                         }).spDirectOutputs().value("oUserID").toDouble());
 }
 
 UserWallets::UserWallets() :
     clsTable("AAA",
               "tblUserWallets",
-              { ///<ColName         Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {"walID",           S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"wal_usrID",       S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
-                {"walName",         S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  QInvalid},
-                {"walDefault",      S(bool),                    QFV,                                false},
-                {"walMinBalance",   S(qint64),                  QFV,                                0,         false,false,false},
-                {"walLastBalance",  S(qint64),                  QFV,                                0,          true,false,false},
-                {"walSumIncome",    S(qint64),                  QFV,                                0,          true,false,false},
-                {"walSumExpenses",  S(qint64),                  QFV,                                0,          true,false,false},
-                {"walStatus",       S(Targoman::API::enuUserWalletStatus::Type), QFV,               Targoman::API::enuUserWalletStatus::Active},
+              { ///<ColName             Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {"walID",               S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {"wal_usrID",           S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
+                {"walName",             S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  QInvalid},
+                {"walDefault",          S(bool),                    QFV,                                false},
+                {"walMinBalance",       S(qint64),                  QFV,                                0,         false,false,false},
+                {"walLastBalance",      S(qint64),                  QFV,                                0,          true,false,false},
+                {"walSumIncome",        S(qint64),                  QFV,                                0,          true,false,false},
+                {"walSumExpenses",      S(qint64),                  QFV,                                0,          true,false,false},
+                {"walCreatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
+                {"walCreationDateTime", S(QHttp::DateTime_t),       QFV,                                QNull,      true},
+                {"walUpdatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QNull,      true},
+                {"walStatus",           S(Targoman::API::enuUserWalletStatus::Type), QFV,               Targoman::API::enuUserWalletStatus::Active},
               },
-              { ///< Col       Reference Table             ForeignCol    Rename   LeftJoin
-                {"wal_usrID",  "AAA.tblUser",              "usrID"},
+              { ///< Col                Reference Table     ForeignCol    Rename   LeftJoin
+                {"wal_usrID",           "AAA.tblUser",      "usrID"},
+                {"walCreatedBy_usrID",  "AAA.tblUser",      "usrID",     "Creator_", true},
+                {"walUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
     QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserWalletStatus);
