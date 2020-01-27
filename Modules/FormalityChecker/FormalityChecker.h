@@ -24,8 +24,6 @@
 #define TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
 
 #include "QHttp/intfRESTAPIHolder.h"
-#include "QHttp/GenericTypes.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
 
 namespace Targoman {
 namespace API {

@@ -28,9 +28,6 @@
 #include "libTargomanCommon/tmplBoundedCache.hpp"
 
 namespace Targoman {
-namespace Apps {
-class clsFormalityChecker;
-}
 namespace API {
 namespace Modules {
 namespace Translation {
@@ -98,7 +95,6 @@ private:
 
     QHash<QString,  intfTranslatorEngine*> RegisteredEngines;
     QScopedPointer<Targoman::DBManager::clsDAC> DAC;
-    QScopedPointer<Apps::clsFormalityChecker> FormalityChecker;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;

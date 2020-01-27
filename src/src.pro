@@ -33,7 +33,8 @@ HEADERS += \
     Helpers/AAA/AAA.hpp \
     Helpers/AAA/GenericEnums.hpp \
     Helpers/ORM/clsTable.h \
-    Helpers/ORM/clsRESTAPIWithActionLogs.h
+    Helpers/ORM/clsRESTAPIWithActionLogs.h \
+    Helpers/NLP/FormalityChecker.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \

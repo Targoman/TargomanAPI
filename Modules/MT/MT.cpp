@@ -27,7 +27,6 @@
 
 using namespace QHttp;
 using namespace Targoman::DBManager;
-using namespace Targoman::Apps;
 using namespace Targoman::API;
 using namespace Targoman::API::Modules::Translation::Classes;
 using namespace Targoman::API::Helpers::AAA;

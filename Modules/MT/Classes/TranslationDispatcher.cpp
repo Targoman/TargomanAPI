@@ -24,13 +24,13 @@
 #include <QUrl>
 
 #include "TranslationDispatcher.h"
-#include "3rdParty/E4MT/src/clsFormalityChecker.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 #include "Configs.h"
 #include "../Engines/clsNMT.h"
 #include "QHttp/QRESTServer.h"
 #include "Helpers/AAA/AAA.hpp"
+#include "Helpers/NLP/FormalityChecker.h"
 
 namespace Targoman {
 namespace API {
@@ -45,6 +45,7 @@ using namespace Common;
 using namespace Common::Configuration;
 using namespace QHttp;
 using namespace Targoman::API::Helpers::AAA;
+using namespace Helpers::NLP;
 
 TranslationDispatcher::~TranslationDispatcher()
 { ; }
@@ -118,9 +119,9 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
 {
     Q_UNUSED(_engine);
     if(gConfigs::Classifier::SupportsIXML.value()== false)
-        return this->FormalityChecker->check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, _lang, false, false,false));
+        return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, _lang, false, false,false));
     else
-        return this->FormalityChecker->check(_lang, _text);
+        return FormalityChecker::instance().check(_lang, _text);
 }
 
 QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang)
@@ -231,9 +232,9 @@ void TranslationDispatcher::registerEngines()
 }
 
 TranslationDispatcher::TranslationDispatcher() :
-    DAC(new DBManager::clsDAC),
-    FormalityChecker(new clsFormalityChecker)
+    DAC(new DBManager::clsDAC)
 {
+    FormalityChecker::instance();
     TargomanTextProcessor::stuConfigs TPConfigs;
     TPConfigs.AbbreviationsFile = gConfigs::TextProcessor::AbbreviationFile.value();
     TPConfigs.NormalizationFile = gConfigs::TextProcessor::NormalizationFile.value();

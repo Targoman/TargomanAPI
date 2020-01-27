@@ -21,28 +21,20 @@
  */
 
 #include "FormalityChecker.h"
-#include "3rdParty/E4MT/src/clsFormalityChecker.h"
-#include "libTargomanTextProcessor/TextProcessor.h"
-#include "libTargomanCommon/Configuration/ConfigManager.h"
-#include "Configs.h"
+#include "Helpers/NLP/FormalityChecker.h"
 
-using namespace Targoman::Apps;
-using namespace Targoman::NLPLibs;
-using namespace Targoman::Common;
-using namespace Targoman::Common::Configuration;
-using namespace QHttp;
 
-static clsFormalityChecker* Checker = nullptr;
+namespace Targoman {
+namespace API {
 
 void FormalityChecker::init()
 {
-    Checker = new clsFormalityChecker;
+    Helpers::NLP::FormalityChecker::instance();
 }
 
 QString FormalityChecker::apiCheck(const QString _text, const QHttp::ISO639_2_t& _lang)
 {
-    Q_ASSERT(Checker);
-    return Checker->check(_lang, _text);
+    return Helpers::NLP::FormalityChecker::instance().check(_lang, _text);
 }
 
 FormalityChecker::FormalityChecker()
@@ -50,5 +42,6 @@ FormalityChecker::FormalityChecker()
     this->registerMyRESTAPIs();
 }
 
-
+}
+}
 

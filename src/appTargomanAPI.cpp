@@ -24,6 +24,8 @@
 #include "appTargomanAPI.h"
 #include "Configs.h"
 #include "libTargomanDBM/clsDAC.h"
+#include "Helpers/NLP/FormalityChecker.h"
+
 #include "Modules/MT/MT.h"
 #include "Modules/Account/Account.h"
 #include "Modules/Advert/Advert.h"
