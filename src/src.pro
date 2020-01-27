@@ -125,3 +125,8 @@ contains(ACTIVE_MODULES, FormalityChecker) {
   DEFINES+=ENABLE_MODULE_FormalityChecker
   LIBS+=-lModule_FormalityChecker
 }
+
+contains(ACTIVE_MODULES, URLProcessor) {
+  DEFINES+=ENABLE_MODULE_URLProcessor
+  LIBS+=-lModule_URLProcessor
+}

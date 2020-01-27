@@ -21,6 +21,7 @@ VERSION=1.0.0
 ACTIVE_MODULES= \
 TextProcessor \
 FormalityChecker \
+URLProcessor \
 #  Account \
 #  Ticketing \
 #  Advert \
