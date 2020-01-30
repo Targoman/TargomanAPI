@@ -158,38 +158,23 @@ tmplConfigurable<FilePath_t>     ServerConfigs::BaseOpenAPIObjectFile(
         "openapi-file",
         enuConfigSource::Arg | enuConfigSource::File);
 
-QString ServerConfigs::BasePathWithVersion;
-QJsonObject ServerConfigs::BaseOpenAPIObject;
-
-/****************************************************************************/
-/*tmplConfigurable<FilePath_t> gConfigs::TextProcessor::AbbreviationFile(
-        gConfigs::TextProcessor::makeConfig("AbbreviationFile"),
-        "File path to abbreviations table file. Relative to config file path if not specified as absolute.",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
-        true>
-        );
-tmplConfigurable<FilePath_t> gConfigs::TextProcessor::NormalizationFile(
-        gConfigs::TextProcessor::makeConfig("NormalizationFile"),
-        "File path to normalization rules file. Relative to config file path if not specified as absolute.",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
-        true>
-        );
-tmplConfigurable<FilePath_t> gConfigs::TextProcessor::SpellCorrectorBaseConfigPath(
-        gConfigs::TextProcessor::makeConfig("SpellCorrectorBaseConfigPath"),
-        "Directory path to spell correction specific files. Relative to config file path if not specified as absolute.",
+tmplConfigurable<FilePath_t>     ServerConfigs::ModulesPath(
+        ServerConfigs::makeConfig("ModulesPath"),
+        "Directory where API modules are stored",
         "",
         Validators::tmplPathAccessValidator<
         TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
-        false>
-        );
-clsFileBasedConfig       gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs(
-        gConfigs::TextProcessor::makeConfig("SpellCorrectorLanguageBasedConfigs"),
-        "Specific configurations for each language. See TargomanTextProcessor documents for more info."
-        );
+        false>,
+        "m",
+        "DIRECTORY",
+        "modules-path",
+        enuConfigSource::Arg | enuConfigSource::File);
+
+QString ServerConfigs::BasePathWithVersion;
+QJsonObject ServerConfigs::BaseOpenAPIObject;
+QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+TAPI::stuStatistics gServerStats;
 
 /****************************************************************************/
 /*tmplConfigurable<QString> gConfigs::DB::Host(

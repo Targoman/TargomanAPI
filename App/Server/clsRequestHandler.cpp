@@ -28,7 +28,7 @@
 #include "QFieldValidator.h"
 #include "clsRequestHandler.h"
 #include "libTargomanCommon/CmdIO.h"
-#include "Interfaces/Common/intfRESTAPIHolder.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 #include "ServerConfigs.h"
 #include "QJWT.h"
 #include "APICache.hpp"

@@ -24,27 +24,26 @@
 #include "libTargomanCommon/Configuration/Validators.hpp"
 
 namespace Targoman {
-namespace API {
-namespace NLP {
+namespace Apps {
 
 using namespace Common;
 using namespace Common::Configuration;
 
-QString Targoman::API::NLP::FormalityChecker::makeConfig(const QString& _name)
+QString gConfigs::Classifier::makeConfig(const QString& _name)
 {
     return "/Classifier/" + _name;
 }
 
-tmplConfigurable<double>     FormalityChecker::Threshold(
-        FormalityChecker::makeConfig("Threshold"),
+tmplConfigurable<double>     gConfigs::Classifier::Threshold(
+        gConfigs::Classifier::makeConfig("Threshold"),
         "Threshold to be used by classifier",
         0.8,
         ReturnTrueCrossValidator(),
         "", "", "fasttext-threshold",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<FilePath_t>     FormalityChecker::ModelPath(
-        FormalityChecker::makeConfig("ModelPath"),
+tmplConfigurable<FilePath_t>     gConfigs::Classifier::ModelPath(
+        gConfigs::Classifier::makeConfig("ModelPath"),
         "Directory where FastText models are stored.",
         "",
         Validators::tmplPathAccessValidator<
@@ -53,8 +52,8 @@ tmplConfigurable<FilePath_t>     FormalityChecker::ModelPath(
         "", "", "fasttext-models-path",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> FormalityChecker::ModelPattern(
-        FormalityChecker::makeConfig("ModelPattern"),
+tmplConfigurable<QString> gConfigs::Classifier::ModelPattern(
+        gConfigs::Classifier::makeConfig("ModelPattern"),
         "File pattern for FastText models must have <%LANG%> pattern as language placeholder",
         "fasttext-%LANG%.bin",
         ReturnTrueCrossValidator(),
@@ -63,14 +62,13 @@ tmplConfigurable<QString> FormalityChecker::ModelPattern(
         "fasttext-model-pattrn",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<bool> FormalityChecker::SupportsIXML(
-        FormalityChecker::makeConfig("SupportsIXML"),
+tmplConfigurable<bool> gConfigs::Classifier::SupportsIXML(
+        gConfigs::Classifier::makeConfig("SupportsIXML"),
         "Wheter the classifier was trained with IXML markups or not",
         true,
         ReturnTrueCrossValidator(),
         "", "", "fasttext-supports-ixml",
         enuConfigSource::Arg | enuConfigSource::File);
 
-}
 }
 }

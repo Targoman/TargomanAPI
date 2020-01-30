@@ -21,48 +21,23 @@
  */
 
 #include "TextProcessor.h"
-#include "3rdParty/E4MT/src/clsFormalityChecker.h"
-#include "libTargomanTextProcessor/TextProcessor.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
-#include "Configs.h"
+#include "Interfaces/NLP/TextProcessor.hpp"
 
-using namespace Targoman::Apps;
+namespace Targoman {
+namespace API {
+
 using namespace Targoman::NLPLibs;
 using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
-using namespace QHttp;
 
-void TextProcessor::init()
+QString TextProcessor::apiNormalize(const QString _text, const TAPI::ISO639_2_t& _lang)
 {
-    TargomanTextProcessor::stuConfigs TPConfigs;
-    TPConfigs.AbbreviationsFile = gConfigs::TextProcessor::AbbreviationFile.value();
-    TPConfigs.NormalizationFile = gConfigs::TextProcessor::NormalizationFile.value();
-    TPConfigs.SpellCorrectorBaseConfigPath = gConfigs::TextProcessor::SpellCorrectorBaseConfigPath.value();
-
-    QSharedPointer<QSettings>  ConfigSettings = ConfigManager::instance().configSettings();
-
-    if (ConfigSettings.isNull() == false){
-        ConfigSettings->beginGroup(gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs.configPath());
-        foreach(const QString& Lang, ConfigSettings->childGroups()){
-            foreach (const QString& Key, ConfigSettings->allKeys()){
-                ConfigSettings->beginGroup(Lang);
-                TPConfigs.SpellCorrectorLanguageBasedConfigs[Lang].insert(Key, ConfigSettings->value(Key));
-                ConfigSettings->endGroup();
-            }
-        }
-        ConfigSettings->endGroup();
-    }
-
-    TargomanTextProcessor::instance().init(TPConfigs);
-}
-
-QString TextProcessor::apiNormalize(const QString _text, const QHttp::ISO639_2_t& _lang)
-{
-    return TargomanTextProcessor::instance().normalizeText(_text, false, _lang);
+    return NLP::TextProcessor::instance().normalizeText(_text, _lang);
 }
 
 QString TextProcessor::apiText2IXML (const QString& _text,
-                                         const QHttp::ISO639_2_t& _lang,
+                                         const TAPI::ISO639_2_t& _lang,
                                          bool _useSpellCorrector)
 {
     bool SpellCorrected;
@@ -72,12 +47,10 @@ QString TextProcessor::apiText2IXML (const QString& _text,
                     QRegularExpression("(\\s)([\\.\\?\\!])(\\s)"),
                     "\\1\\2\\3")); //"\\1\\2\\n\\3"
 
-    return TargomanTextProcessor::instance().text2IXML(
+    return NLP::TextProcessor::instance().text2IXML(
                 _text,
                 SpellCorrected,
                 _lang,
-                0,
-                false,
                 _useSpellCorrector && _lang == "fa",
                 QList<enuTextTags::Type>(),
                 SentenceBreakReplacements
@@ -85,16 +58,16 @@ QString TextProcessor::apiText2IXML (const QString& _text,
 }
 
 QString TextProcessor::apiIxml2Text(const QString& _ixml,
-                                        const QHttp::ISO639_2_t& _lang,
+                                        const TAPI::ISO639_2_t& _lang,
                                         bool _detokenize,
                                         bool _hinidiDigits,
                                         bool _breakSentences)
 {
-    return TargomanTextProcessor::instance().ixml2Text(_ixml, _lang, _detokenize, _hinidiDigits, _breakSentences);
+    return NLP::TextProcessor::instance().ixml2Text(_ixml, _lang, _detokenize, _hinidiDigits, _breakSentences);
 }
 
 QString TextProcessor::apiTokenize (const QString& _text,
-                                        const QHttp::ISO639_2_t& _lang,
+                                        const TAPI::ISO639_2_t& _lang,
                                         bool _useSpellCorrector)
 {
     bool SpellCorrected;
@@ -104,24 +77,21 @@ QString TextProcessor::apiTokenize (const QString& _text,
                     QRegularExpression("(\\s)([\\.\\?\\!])(\\s)"),
                     "\\1\\2\\3")); //"\\1\\2\\n\\3"
 
-    QString Tokenized = TargomanTextProcessor::instance().text2IXML(
+    QString Tokenized = NLP::TextProcessor::instance().text2IXML(
                 _text,
                 SpellCorrected,
                 _lang,
-                0,
-                false,
                 _useSpellCorrector && (_lang == "fa"),
                 QList<enuTextTags::Type>(),
                 SentenceBreakReplacements
                 );
 
-    return TargomanTextProcessor::instance().ixml2Text(_text, _lang, false, false, false);
+    return NLP::TextProcessor::instance().ixml2Text(_text, _lang, false, false, false);
 }
 
-TextProcessor::TextProcessor()
-{
-    this->registerMyRESTAPIs();
+void TextProcessor::init()
+{ ; }
+
 }
-
-
+}
 

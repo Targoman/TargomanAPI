@@ -30,7 +30,7 @@ CONFIG += ordered
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 addSubdirs(App, Dependencies)
-#addSubdirs(Modules, App)
+addSubdirs(Modules, App)
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 OTHER_FILES += \

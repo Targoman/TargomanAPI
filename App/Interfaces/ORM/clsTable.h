@@ -26,7 +26,7 @@
 #include "QFieldValidator.h"
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
-#include "Interfaces/Common/intfRESTAPIHolder.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 #include "Interfaces/ORM/clsORMField.h"
 
 namespace TAPI{
@@ -84,7 +84,7 @@ static stuRelation InvalidRelation("","","");
 static QString QUERY_SEPARATOR = "\n";
 static QString COLS_KEY = "cols";
 
-class clsTable: public intfRESTAPIHolder {
+class clsTable: public intfAPIModule {
 protected:
     struct stuSelectItems{
         QStringList Cols;

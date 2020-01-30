@@ -91,7 +91,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 QJsonObject RESTAPIRegistry::CachedOpenAPI;
 
 /***********************************************************************************************/
-void RESTAPIRegistry::registerRESTAPI(intfRESTAPIHolder* _module, const QMetaMethod& _method){
+void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
     if ((_method.name().startsWith("api") == false &&
          _method.name().startsWith("asyncApi") == false)||
         _method.typeName() == nullptr)
@@ -606,8 +606,6 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
             static QJsonObject DefaultResponses = QJsonObject({
                                                                   {"200", QJsonObject({{"description", "Success."}})},
                                                                   {"400", QJsonObject({{"description", "Bad request."}})},
-                                                                  {"401", QJsonObject({{"description", "Authorization information is missing or invalid"}})},
-                                                                  {"403", QJsonObject({{"description", "Access forbidden"}})},
                                                                   {"404", QJsonObject({{"description", "Not found"}})},
                                                                   {"5XX", QJsonObject({{"description", "Unexpected error"}})},
                                                               });
@@ -631,19 +629,23 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
 
                     Properties.insert(Item.name(), ParamSpecs);
                 }
+                if(Properties.size())
+                    ResponseModel["200"] =
+                            QJsonObject({
+                                            {"description", "Success"},
+                                            {"schema", QJsonObject({
+                                                 {"type", "object"},
+                                                 {"properties", Properties}
+                                             })}
+                                        });
+            }
 
-                ResponseModel["200"] =
-                        QJsonObject({
-                                        {"description", "Success"},
-                                        {"schema", QJsonObject({
-                                             {"type", "object"},
-                                             {"properties", Properties}
-                                         })}
-                                    });
+            if(APIObject->requiresJWT()){
+                ResponseModel["401"] = QJsonObject({{"description", "Authorization information is missing or invalid"}});
+                ResponseModel["403"] = QJsonObject({{"description", "Access forbidden"}});
             }
 
             PathInfo["responses"] = ResponseModel;
-
 
             if(APIObject->requiresJWT()){
                 PathInfo["security"] =  QJsonArray({
@@ -794,7 +796,7 @@ constexpr char CACHE_INTERNAL[] = "CACHEABLE_";
 constexpr char CACHE_CENTRAL[]  = "CENTRALCACHE_";
 
 void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry,
-                                       intfRESTAPIHolder* _module,
+                                       intfAPIModule* _module,
                                        const QMetaMethodExtended& _method,
                                        const QString& _httpMethod,
                                        const QString& _methodName){

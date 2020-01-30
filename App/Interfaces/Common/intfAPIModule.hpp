@@ -17,26 +17,25 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TAPI_INTFRESTAPIHOLDER_H
-#define TAPI_INTFRESTAPIHOLDER_H
+#ifndef TARGOMAN_API_INTFAPIMODULE_HPP
+#define TARGOMAN_API_INTFAPIMODULE_HPP
 
-#include "libTargomanCommon/exTargomanBase.h"
-#include "libTargomanCommon/clsCountAndSpeed.h"
+#include <QObject>
+#include <QtPlugin>
+
 #include "libTargomanCommon/Configuration/intfConfigurableModule.hpp"
 
 #include "QHttp/qhttpfwd.hpp"
 
 #include "Interfaces/Common/HTTPExceptions.h"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/ORM/clsORMField.h"
 
 namespace Targoman {
 namespace API {
-namespace ORM {
-class clsORMField;
-}
 
 /**********************************************************************/
 /** @TODO document QT_NO_CAST_FROM_ASCII */
@@ -85,41 +84,49 @@ class clsORMField;
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 #define ASYNC_API(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 
-/**********************************************************************/
-/**
- * @brief The intfRESTAPIHolder class is an interface to defines modules which export REST APIs. Such modules must have followint characteristics:
- *   1- Must inherit from @see intfRESTAPIHolder
- *   2- Must include One of the following macros at the end of their class definition:
- *      + TARGOMAN_DEFINE_SINGLETON_MODULE
- *      + TARGOMAN_DEFINE_SINGLETON_SUBMODULE
- */
-class intfRESTAPIHolder : public Targoman::Common::Configuration::intfModule{
-    Q_OBJECT
+#define INTFAPIMODULE_IID "TARGOMAN.API.INTFAPIMODULE/1.0.0"
+
+class intfAPIModule : public Targoman::Common::Configuration::intfModule
+{
+public:
+    struct stuDBInfo{
+        QString Host;
+        quint16 Port;
+        QString User;
+        QString Pass;
+        QString Schema;
+
+        stuDBInfo(QString _host = "", quint16 _port = 0, QString _user = "", QString _pass = "", QString _schema = "") :
+            Host(_host),
+            Port(_port),
+            User(_user),
+            Pass(_pass),
+            Schema(_schema)
+        {;}
+
+        QString toConnStr(bool _noSchema = false){
+            return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
+                                                  this->Host).arg(
+                                                  this->Port).arg(
+                                                  this->User).arg(
+                                                  this->Pass).arg(
+                                                  _noSchema ? "" : this->Schema);
+        }
+    };
 
 public:
-    intfRESTAPIHolder(Targoman::Common::Configuration::intfModule *_parent = nullptr);
-    virtual ~intfRESTAPIHolder(){}
-    virtual QList<ORM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL);
+    intfAPIModule(Targoman::Common::Configuration::intfModule *_parent = nullptr) :
+        Targoman::Common::Configuration::intfModule(_parent)
+    {;}
+    virtual ~intfAPIModule() {}
+    virtual QList<ORM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {Q_UNUSED(_method) return {};}
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID)}
+    virtual QList<QMetaMethod> listOfMethods() const = 0;
+    virtual stuDBInfo requiredDB() const {return {};}
+    virtual bool requiresTextProcessor() const {return false;}
+    virtual bool requiresFormalityChecker() const {return false;}
 
-protected:
-    /**
-     * @brief exportAPIs will detect and export acceptable functions to API registry.
-     * Acceptable functions must have following conditions:
-     *  1- Must be defined as slot
-     *  2- Must use API Macro to be defined
-     *  3- Must use one of the following naming conventions
-     *      - Functions working on data: these functions must start with HTTP method that can be used:
-     *        + GET: to get info about a single entry or list of some entries also is usefull for downloading files. These functions
-     *               can be accessed by both GET/POST method
-     *        + PUT: to create new entry
-     *        + DEL: to delete entry
-     *        + PATCH: to update entry
-     *      - complex functions which does not work on single data (e.g. translate, detectLangugae, etc.)  These functions can be accessed by GET/POST method
-     *  4- On any error they must throw one of HTTP execptions ()
-     * This method must be called in subclasses constructor
-     */
-    void registerMyRESTAPIs();
+    virtual void init() = 0;
 
     /**
      * @brief createSignedJWT creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard.
@@ -133,13 +140,29 @@ protected:
      * @param _sessionID optinally a session key for each user to be stored in `jti`
      * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
      */
-    TAPI::EncodedJWT_t createSignedJWT(QJsonObject _payload, QJsonObject _privatePayload = QJsonObject(), const qint32 _expiry = -1, const QString& _sessionID = QString());
-
+    //TAPI::EncodedJWT_t createSignedJWT(QJsonObject _payload, QJsonObject _privatePayload = QJsonObject(), const qint32 _expiry = -1, const QString& _sessionID = QString());
 };
 
-void registerMetaType();
-
 }
 }
+Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
-#endif // TAPI_INTFRESTAPIHOLDER_H
+#define TARGOMAN_DEFINE_API_MODULE(_name) \
+public: \
+    _name(){;} \
+    static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
+    QString moduleFullName(){return _name::moduleFullNameStatic();}\
+    static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
+    static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
+    static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
+    QString moduleBaseName(){return _name::moduleName();} \
+    QList<QMetaMethod> listOfMethods() const { \
+        QList<QMetaMethod> Methods; \
+        for (int i=0; i<this->metaObject()->methodCount(); ++i) \
+            Methods.append(this->metaObject()->method(i)); \
+        return Methods; \
+    } \
+private: \
+    Q_DISABLE_COPY(_name) \
+
+#endif // TARGOMAN_API_INTFAPIMODULE_HPP

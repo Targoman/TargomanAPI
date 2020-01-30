@@ -45,6 +45,7 @@ QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 #this is included here due to a bug in E4MT
 INCLUDEPATH+= $$PRJDIR/3rdParty/E4MT/
+INCLUDEPATH+= $$PRJDIR/App
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 CONFIG(debug, debug|release): DEFINES += TARGOMAN_SHOW_DEBUG=1
@@ -67,14 +68,17 @@ contains(QT_ARCH, x86_64){
 } else {
     LibFolderPattern     = $$PREFIX/lib
 }
-LibIncludeFolderPattern = ./include
+ModulesFolderPattern    = $$PREFIX/modules
+LibIncludeFolderPattern = $$PREFIX/include
 BinFolderPattern        = ./bin
 BuildFolderPattern      = ./build
 TestBinFolder           = ./test
 UnitTestBinFolder       = ./unitTest
 ConfigFolderPattern     = ./conf
 
+
 BaseLibraryFolder        = $$PRJDIR/out/$$LibFolderPattern
+BaseModulesFolder        = $$PRJDIR/out/$$ModulesFolderPattern
 BaseLibraryIncludeFolder = $$PRJDIR/out/$$LibIncludeFolderPattern
 BaseBinFolder            = $$PRJDIR/out/$$BinFolderPattern
 BaseTestBinFolder        = $$PRJDIR/out/$$TestBinFolder

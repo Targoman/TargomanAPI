@@ -23,9 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 #define TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "QHttp/GenericTypes.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 
 namespace Targoman {
 namespace API {
@@ -34,22 +32,23 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class URLProcessor : private QHttp::intfRESTAPIHolder
+class URLProcessor : public intfAPIModule
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+
 public:
     void init();
 
 private slots:
     QString API(GET, canonicalize, (const QString _url, bool _removeWWW = true),
-                    "normalizes url in a common format to be canonical")
+                "normalizes url in a common format to be canonical")
 
     QString API(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
                 "helper method which converts URL encoded strings to normal strings")
 
-    private:
-        URLProcessor();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(URLProcessor);
+    TARGOMAN_DEFINE_API_MODULE(URLProcessor)
 };
 
 }

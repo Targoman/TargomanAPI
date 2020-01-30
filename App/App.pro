@@ -30,7 +30,6 @@ HEADERS += \
     Interfaces/AAA/PrivHelpers.h \
     Interfaces/Common/GenericTypes.h \
     Interfaces/Common/HTTPExceptions.h \
-    Interfaces/Common/intfRESTAPIHolder.h \
     Interfaces/Common/tmplAPIArg.h \
     Interfaces/ORM/clsORMField.h \
     Interfaces/ORM/clsRESTAPIWithActionLogs.h \
@@ -50,7 +49,9 @@ HEADERS += \
     Server/RESTServer.h \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
-    Server/clsAPIObject.h
+    Server/clsAPIObject.h \
+    Interfaces/Common/intfAPIModule.hpp \
+    Interfaces/NLP/TextProcessor.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -75,7 +76,8 @@ SOURCES += \
     Server/RESTServer.cpp \
     Server/appTargomanAPI.cpp \
     Server/main.cpp \
-    $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp
+    $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
+    $$PRJDIR/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
@@ -115,7 +117,9 @@ LIBS += -lTargomanCommon \
         -lQFieldValidator \
         -lQRESTServer \
         -lqhttp \
-        -lcurl
+        -lcurl \
+        -lTargomanTextProcessor \
+        -lfasttext
 
 #defined (TARGOMAN_API_REDIS_PROTOCOL) {
   LIBS+= -lhiredis

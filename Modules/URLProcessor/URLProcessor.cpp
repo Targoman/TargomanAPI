@@ -24,7 +24,9 @@
 #include "3rdParty/URLCanonicalizer/libsrc/libURLCanonicalizer/URLCanonicalizer.h"
 
 using namespace Targoman::Common;
-using namespace QHttp;
+
+namespace Targoman {
+namespace API {
 
 void URLProcessor::init()
 {
@@ -44,10 +46,6 @@ QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAl
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);
 }
 
-URLProcessor::URLProcessor()
-{
-    this->registerMyRESTAPIs();
 }
-
-
+}
 

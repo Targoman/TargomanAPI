@@ -27,7 +27,7 @@
 
 namespace Targoman {
 namespace API {
-class intfRESTAPIHolder;
+class intfAPIModule;
 class intfAPIArgManipulator;
 
 namespace ORM {
@@ -82,7 +82,7 @@ public:
                 bool _isPrimaryKey = false,
                 const QString& _renameAs = {});
     ~clsORMField();
-    void registerTypeIfNotRegisterd(intfRESTAPIHolder* _module);
+    void registerTypeIfNotRegisterd(intfAPIModule* _module);
     void updateTypeID(QMetaType::Type _type);
     void validate(const QVariant _value);
     inline QString         name() const {return this->Data->Name;}

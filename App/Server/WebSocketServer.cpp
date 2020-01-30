@@ -82,8 +82,10 @@ void WebSocketServer::start()
                                             QWebSocketServer::NonSecureMode));
 
 
-    if (this->WS->listen(QHostAddress::Any, this->Port.value())) {
-        TargomanLogInfo(1, "WebSocketServer is listening on "<<this->Port.value()<< " Name: "<<this->Name.value());
+    if (this->WS->listen(this->JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any, this->Port.value())) {
+        TargomanLogInfo(1, "WebSocketServer is listening on "<<
+                        (this->JustLocal.value() ? "localhost:" : "::")<<
+                        this->Port.value()<< " Name: "<<this->Name.value());
         connect(this->WS.data(), &QWebSocketServer::newConnection, this, &WebSocketServer::onNewConnection);
         connect(this->WS.data(), &QWebSocketServer::closed, this, &WebSocketServer::closed);
     }

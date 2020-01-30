@@ -21,13 +21,30 @@
  */
 
 #include <QCoreApplication>
+#include <QPluginLoader>
+
+#include "libTargomanDBM/clsDAC.h"
+
+#include "Interfaces/Common/intfAPIModule.hpp"
+#include "Interfaces/NLP/FormalityChecker.h"
+#include "Interfaces/NLP/TextProcessor.hpp"
 
 #include "appTargomanAPI.h"
 #include "RESTServer.h"
+#include "RESTAPIRegistry.h"
+#include "ServerConfigs.h"
 
 namespace Targoman {
 namespace API {
 namespace Server {
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+TARGOMAN_ADD_EXCEPTION_HANDLER(exModuleLoader, Targoman::Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exModuleUnable2LoadFile, exModuleLoader);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exInvalidAPIModule, exModuleLoader);
+#pragma clang diagnostic pop
+
 
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 {;}
@@ -35,32 +52,9 @@ appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 void appTargomanAPI::slotExecute()
 {
     try{
-        /*RESTServer::stuConfig Configs;
+        TAPI::registerGenericTypes();
 
-        Configs.BasePath = gConfigs::Rest::BasePath.value();
-        Configs.Version = gConfigs::Rest::Version.value();
-        Configs.StatisticsInterval = gConfigs::Rest::StatisticsInterval.value();
-        Configs.ListenPort = gConfigs::Rest::ListenPort.value();
-        Configs.ListenAddress = gConfigs::Rest::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
-        Configs.IndentedJson = gConfigs::Rest::IndentedJson.value();
-        Configs.MaxUploadSize = gConfigs::Rest::MaxUploadSize.value();
-        Configs.MaxUploadedFileSize = gConfigs::Rest::MaxUploadedFileSize.value();
-        Configs.MaxCachedItems = gConfigs::Rest::MaxCachedItems.value();
-        Configs.CacheConnector = gConfigs::Rest::CacheConnector.value();
-        Configs.AccessControl = gConfigs::Rest::AccessControl.value();
-
-        Configs.JWTSecret = gConfigs::JWT::Secret.value();
-        Configs.JWTHashAlgorithm = gConfigs::JWT::HashAlgorithm.value();
-        Configs.SimpleCryptKey = gConfigs::JWT::SimpleCryptKey.value();
-
-#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-        Configs.WebSocketServerName = gConfigs::WS::Name.value();
-        Configs.WebSocketServerPort = gConfigs::WS::Port.value();
-        Configs.WebSocketServerAdderss = gConfigs::WS::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
-        Configs.WebSocketSecure = gConfigs::WS::Secure.value();;
-#endif
-*/
-/*        if(gConfigs::Rest::BaseOpenAPIObjectFile.value().size()){
+        /*        if(gConfigs::Rest::BaseOpenAPIObjectFile.value().size()){
             QFile File(gConfigs::Rest::BaseOpenAPIObjectFile.value());
             File.open(QIODevice::ReadOnly);
             if (File.isReadable() == false)
@@ -71,20 +65,58 @@ void appTargomanAPI::slotExecute()
             Configs.BaseOpenAPIObject = JsonDoc.object();
         }
 */
-        //Configs.fnIPInBlackList;
+        // Load modules
+        QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
+        QDir PluginsDir = QDir(ServerConfigs::ModulesPath.value());
+        foreach (QString FileName, PluginsDir.entryList(QDir::Files))
+        {
+            TargomanDebug(5,"Loading Module: "<<PluginsDir.absoluteFilePath(FileName));
+            QPluginLoader* Loader = new QPluginLoader(PluginsDir.absoluteFilePath(FileName));
+            if (!Loader)
+                throw exModuleUnable2LoadFile(QString("Unable to load %1 ").arg(FileName));
+            QObject* ModuleObject = Loader->instance();
+            if (ModuleObject) {
+                intfAPIModule* Module = qobject_cast<intfAPIModule*>(ModuleObject);
+                if(!Module)
+                    throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(FileName));
+                foreach(auto Method, Module->listOfMethods())
+                    RESTAPIRegistry::registerRESTAPI(Module, Method);
 
+                if(Module->requiredDB().Host.size())
+                    RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
 
-/*        clsDAC::addDBEngine(enuDBEngines::MySQL);
-        clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
-                                        gConfigs::DB::Host.value()).arg(
-                                        gConfigs::DB::Port.value()).arg(
-                                        gConfigs::DB::User.value()).arg(
-                                        gConfigs::DB::Pass.value()).arg(
-                                        gConfigs::DB::Schema.value()));
-                                        */
-        // Initialize REST Server
+                if(Module->requiresTextProcessor())
+                    NLP::TextProcessor::instance().init(
+                                Targoman::Common::Configuration::ConfigManager::instance().configSettings());
+
+                if(Module->requiresFormalityChecker())
+                    NLP::FormalityChecker::instance();
+            }else{
+                TargomanWarn(5,"Unable to load Module :"<<Loader->errorString());
+                if (Loader->isLoaded())
+                    Loader->unload(); //Unload plugin if it canot be used by the application
+                delete Loader;
+            }
+        }
+
+        //Prepare database connections
+        if(RequiredDBs.size()) {
+            DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
+            QSet<QString> ConnectionStrings;
+            for(auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
+                if(ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false) {
+                    ConnectionStrings.insert(DBInfoIter->toConnStr(true));
+                    if(ConnectionStrings.isEmpty())
+                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
+                    else
+                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr(), DBInfoIter.key());
+                }
+            }
+        }
+
+        TargomanInfo(5, RESTAPIRegistry::registeredAPIs("",true,true).join("\n"));
+
         RESTServer::instance().start();
-
     }catch(Common::exTargomanBase& e){
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);

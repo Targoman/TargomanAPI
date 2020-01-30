@@ -23,7 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
 #define TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
 
-#include "QHttp/intfRESTAPIHolder.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 
 namespace Targoman {
 namespace API {
@@ -32,19 +32,21 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class FormalityChecker : private QHttp::intfRESTAPIHolder
+class FormalityChecker : public intfAPIModule
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+
 public:
     void init();
+    bool requiresFormalityChecker() const {return true;}
 
 private slots:
-    QString API(, Check, (const QString _text, const QHttp::ISO639_2_t& _lang),
-                    "Normalizes input text")
+    QString API(, Check, (const QString _text, const TAPI::ISO639_2_t& _lang),
+                "Normalizes input text")
 
-    private:
-        FormalityChecker();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(FormalityChecker);
+    TARGOMAN_DEFINE_API_MODULE(FormalityChecker)
 };
 
 }

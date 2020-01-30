@@ -26,7 +26,7 @@
 
 #include <QGenericArgument>
 #include <QMetaMethod>
-#include "Interfaces/Common/intfRESTAPIHolder.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 #include "clsAPIObject.h"
 #include "NumericTypes.hpp"
 
@@ -59,14 +59,14 @@ public:
     }
 #endif
 
-    static void registerRESTAPI(intfRESTAPIHolder* _module, const QMetaMethod& _method);
+    static void registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
     static QJsonObject retriveOpenAPIJson();
 
 private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
-    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfRESTAPIHolder* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
+    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfAPIModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
     static int  getCacheSeconds(const QMetaMethod& _method, const char* _type);
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 

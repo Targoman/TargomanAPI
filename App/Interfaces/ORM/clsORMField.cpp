@@ -116,7 +116,7 @@ clsORMField::clsORMField(const QString& _name,
 clsORMField::~clsORMField()
 { }
 
-void clsORMField::registerTypeIfNotRegisterd(intfRESTAPIHolder* _module)
+void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
 {
     if(Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)){
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));

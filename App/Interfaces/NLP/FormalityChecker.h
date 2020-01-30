@@ -27,18 +27,24 @@
 #include "3rdParty/E4MT/src/clsFormalityChecker.h"
 
 namespace Targoman {
+namespace Apps {
+struct gConfigs{
+    struct Classifier{
+        static inline QString makeConfig(const QString& _name);
+        static Common::Configuration::tmplConfigurable<double>       Threshold;
+        static Common::Configuration::tmplConfigurable<FilePath_t>   ModelPath;
+        static Common::Configuration::tmplConfigurable<QString>      ModelPattern;
+        static Common::Configuration::tmplConfigurable<bool>         SupportsIXML;
+    };
+};
+}
 namespace API {
 namespace NLP {
 
 class FormalityChecker {
-    static inline QString makeConfig(const QString& _name);
-    static Common::Configuration::tmplConfigurable<double>       Threshold;
-    static Common::Configuration::tmplConfigurable<FilePath_t>   ModelPath;
-    static Common::Configuration::tmplConfigurable<QString>      ModelPattern;
-    static Common::Configuration::tmplConfigurable<bool>         SupportsIXML;
 
 public:
-    static FormalityChecker& instance(){static FormalityChecker* Instance = nullptr; return *(Instance ? Instance : (Instance = new FormalityChecker));}
+    instanceGetter (FormalityChecker)
     inline QString check(const QString _lang, QString _text){return this->FCInstance->check(_lang, _text);}
 
 private:

@@ -20,7 +20,7 @@
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  */
 
-#include "intfRESTAPIHolder.h"
+#include "intfAPIArgManipulator.h"
 
 #include "Server/QJWT.h"
 #include "Server/RESTAPIRegistry.h"
@@ -33,26 +33,15 @@ namespace API {
 
 using namespace Server;
 
-intfRESTAPIHolder::intfRESTAPIHolder(Targoman::Common::Configuration::intfModule *_parent) :
-    Targoman::Common::Configuration::intfModule(_parent) {
-    TAPI::registerGenericTypes();
-}
-
-QList<ORM::clsORMField> intfRESTAPIHolder::filterItems(qhttp::THttpMethod _method)
-{
-    Q_UNUSED(_method) return {};
-}
-
-void intfRESTAPIHolder::registerMyRESTAPIs(){
+/*void intfAPIModule::registerMyRESTAPIs(){
     for (int i=0; i<this->metaObject()->methodCount(); ++i)
         RESTAPIRegistry::registerRESTAPI(this, this->metaObject()->method(i));
 }
 
-
-TAPI::EncodedJWT_t intfRESTAPIHolder::createSignedJWT(QJsonObject _payload, QJsonObject _privatePayload, const qint32 _expiry, const QString& _sessionID) {
+TAPI::EncodedJWT_t intfAPIModule::createSignedJWT(QJsonObject _payload, QJsonObject _privatePayload, const qint32 _expiry, const QString& _sessionID) {
     return QJWT::createSigned(_payload, _privatePayload, _expiry, _sessionID);
 }
-
+*/
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName) {
     this->PrettyTypeName = (_realTypeName.startsWith('Q') ? _realTypeName.mid(1) : _realTypeName).toLower();
     QByteArray RealTypeByteArray = _realTypeName.toLatin1();

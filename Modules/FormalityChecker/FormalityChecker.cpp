@@ -21,7 +21,7 @@
  */
 
 #include "FormalityChecker.h"
-#include "Helpers/NLP/FormalityChecker.h"
+#include "Interfaces/NLP/FormalityChecker.h"
 
 
 namespace Targoman {
@@ -29,17 +29,12 @@ namespace API {
 
 void FormalityChecker::init()
 {
-    Helpers::NLP::FormalityChecker::instance();
+    NLP::FormalityChecker::instance();
 }
 
-QString FormalityChecker::apiCheck(const QString _text, const QHttp::ISO639_2_t& _lang)
+QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang)
 {
-    return Helpers::NLP::FormalityChecker::instance().check(_lang, _text);
-}
-
-FormalityChecker::FormalityChecker()
-{
-    this->registerMyRESTAPIs();
+    return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 
 }

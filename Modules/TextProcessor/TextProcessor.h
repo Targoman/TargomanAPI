@@ -23,9 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
 #define TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "QHttp/GenericTypes.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/Common/intfAPIModule.hpp"
 
 namespace Targoman {
 namespace API {
@@ -34,36 +32,38 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class TextProcessor : private QHttp::intfRESTAPIHolder
+class TextProcessor : public intfAPIModule
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+
 public:
     void init();
+    bool requiresTextProcessor() const {return true;}
 
 private slots:
-    QString API(, Normalize, (const QString _text, const QHttp::ISO639_2_t& _lang),
-                    "Normalizes input text")
+    QString API(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang),
+                "Normalizes input text")
     QString API(, Text2IXML, (
                     const QString& _text,
-                    const QHttp::ISO639_2_t& _lang,
+                    const TAPI::ISO639_2_t& _lang,
                     bool _useSpellCorrector = true),
-                    "Normalizes and tokenizes text and tags special fields in an inline-XML format")
+                "Normalizes and tokenizes text and tags special fields in an inline-XML format")
     QString API(, Ixml2Text, (const QString& _ixml,
-                              const QHttp::ISO639_2_t& _lang,
+                              const TAPI::ISO639_2_t& _lang,
                               bool _detokenize = true,
                               bool _hinidiDigits = true,
                               bool _breakSentences = true),
-                    "Removes IXML tags injected by text2IXML API")
+                "Removes IXML tags injected by text2IXML API")
 
     QString API(, Tokenize, (
                     const QString& _text,
-                    const QHttp::ISO639_2_t& _lang,
+                    const TAPI::ISO639_2_t& _lang,
                     bool _useSpellCorrector = true),
                 "Tokenizes string without tagging special fields")
 
-    private:
-        TextProcessor();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(TextProcessor);
+    TARGOMAN_DEFINE_API_MODULE(TextProcessor)
 };
 
 }
