@@ -34,3 +34,6 @@
 [submodule "3rdParty/URLCanonicalizer"]
 	path = 3rdParty/URLCanonicalizer
 	url = https://github.com/Targoman/URLCanonicalizer.git
+[submodule "3rdParty/multipart-parser"]
+	path = 3rdParty/multipart-parser
+	url = https://github.com/Targoman/multipart-parser.git

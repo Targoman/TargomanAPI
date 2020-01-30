@@ -18,10 +18,10 @@
 ################################################################################
 ProjectName="TargomanAPI"
 VERSION=1.0.0
-ACTIVE_MODULES= \
-TextProcessor \
-FormalityChecker \
-URLProcessor \
+#ACTIVE_MODULES= \
+#TextProcessor \
+#FormalityChecker \
+#URLProcessor \
 #  Account \
 #  Ticketing \
 #  Advert \
@@ -35,12 +35,16 @@ CONFIGS += c++11 c++14
 QT += core sql network
 QT -= gui
 
-DEFINES += QHTTP_ENABLE_WEBSOCKET
+DEFINES += \
+  TARGOMAN_API_ENABLE_WEBSOCKET \
+  TARGOMAN_API_REDIS_PROTOCOL
+
 QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded
 
+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
-INCLUDEPATH+= \
-  $$PRJDIR/3rdParty/E4MT/ \
+#this is included here due to a bug in E4MT
+INCLUDEPATH+= $$PRJDIR/3rdParty/E4MT/
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 CONFIG(debug, debug|release): DEFINES += TARGOMAN_SHOW_DEBUG=1
@@ -48,6 +52,7 @@ CONFIG(release){
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
+
 DEFINES += TARGOMAN_DEBUG_PROCESS_LINE=1
 DEFINES += TARGOMAN_SHOW_WARNING=1
 DEFINES += TARGOMAN_SHOW_INFO=1
