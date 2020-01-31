@@ -96,7 +96,7 @@ public:
         QString Pass;
         QString Schema;
 
-        stuDBInfo(QString _host = "", quint16 _port = 0, QString _user = "", QString _pass = "", QString _schema = "") :
+        stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "") :
             Host(_host),
             Port(_port),
             User(_user),
@@ -149,7 +149,6 @@ Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
-    _name(){;} \
     static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
     QString moduleFullName(){return _name::moduleFullNameStatic();}\
     static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
@@ -164,5 +163,50 @@ public: \
     } \
 private: \
     Q_DISABLE_COPY(_name) \
+
+#define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
+public: \
+    static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
+    virtual QString moduleFullName(){return _name::moduleFullNameStatic();}\
+    static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
+    static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
+    static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_SLASH(_module,_name)));}  \
+    QString moduleBaseName(){return _name::moduleName();} \
+    QList<QMetaMethod> listOfMethods() const { \
+        QList<QMetaMethod> Methods; \
+        for (int i=0; i<this->metaObject()->methodCount(); ++i) \
+            Methods.append(this->metaObject()->method(i)); \
+        return Methods; \
+    } \
+private: \
+    Q_DISABLE_COPY(_name) \
+
+#define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
+    struct DB{ \
+        static inline QString makeConfig(const QString& _name){return TARGOMAN_M2STR(_module) + _name;} \
+        static Common::Configuration::tmplConfigurable<QString>      Host;   \
+        static Common::Configuration::tmplRangedConfigurable<quint16>Port;   \
+        static Common::Configuration::tmplConfigurable<QString>      User;   \
+        static Common::Configuration::tmplConfigurable<QString>      Pass;   \
+        static Common::Configuration::tmplConfigurable<QString>      Schema; \
+    };
+
+#define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module)     \
+    using namespace Targoman::Common::Configuration;    \
+    tmplConfigurable<QString> _module::DB::Host(        \
+            _module::DB::makeConfig("Host"),            \
+            "Database Host address", "127.0.0.1");      \
+    tmplRangedConfigurable<quint16> _module::DB::Port(  \
+            _module::DB::makeConfig("Port"),            \
+            "Database port", 10, 65000, 3306);          \
+    tmplConfigurable<QString> _module::DB::User(        \
+            _module::DB::makeConfig("User"), "Database username for connection", \
+            "root");                                   \
+    tmplConfigurable<QString> _module::DB::Pass(        \
+            _module::DB::makeConfig("Pass"),            \
+            "Database password", "");                   \
+    tmplConfigurable<QString> _module::DB::Schema(      \
+            _module::DB::makeConfig("Schema"),          \
+            "Database schema");
 
 #endif // TARGOMAN_API_INTFAPIMODULE_HPP

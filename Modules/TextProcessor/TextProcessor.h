@@ -39,6 +39,7 @@ class TextProcessor : public intfAPIModule
     Q_INTERFACES(Targoman::API::intfAPIModule)
 
 public:
+    TextProcessor(){;}
     void init();
     bool requiresTextProcessor() const {return true;}
 

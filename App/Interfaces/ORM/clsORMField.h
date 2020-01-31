@@ -47,30 +47,51 @@ public:
                     bool _isSelfIdentifier,
                     bool _isVirtual,
                     bool _isPrimaryKey,
-                    const QString& _renameAs);
+                    const QString& _renameAs):
+        ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
+        Name(_name),
+        ParamTypeName(_type),
+        DefaultValue(_defaultValue),
+        ExtraValidator(_extraValidator),
+        RenameAs(_renameAs),
+        IsSortable(_isSortable),
+        IsFilterable(_isFilterable),
+        IsReadOnly(_isReadOnly),
+        IsSelfIdentifier(_isSelfIdentifier),
+        IsVirtual(_isVirtual),
+        IsPrimaryKey(_isPrimaryKey)
+    {}
     clsORMFieldData(const clsORMFieldData& _o);
     ~clsORMFieldData() { }
 
 public:
-    QString         Name;
     QMetaType::Type ParameterType;
+    QString         Name;
     QString         ParamTypeName;
     QVariant        DefaultValue;
     QFieldValidator ExtraValidator;
+    QString         RenameAs;
     bool            IsSortable;
     bool            IsFilterable;
     bool            IsReadOnly;
     bool            IsSelfIdentifier;
     bool            IsVirtual;
     bool            IsPrimaryKey;
-    QString         RenameAs;
 };
 
 class clsORMField{
 public:
-    clsORMField();
-    clsORMField(const clsORMField& _other, const QString& _newName = QString());
-    clsORMField(const QString& _name,
+    inline clsORMField():
+        Data(new clsORMFieldData)
+    {}
+    inline clsORMField(const clsORMField& _other, const QString& _newName = QString()):
+        Data(_other.Data) {
+        if(_newName.size()){
+            this->Data.detach();
+            this->Data->Name = _newName;
+        }
+    }
+    inline clsORMField(const QString& _name,
                 const QString& _type,
                 const QFieldValidator& _extraValidator = QFV.allwaysValid(),
                 QVariant _defaultValue = {},
@@ -80,8 +101,22 @@ public:
                 bool _isSelfIdentifier = false,
                 bool _isVirtual = false,
                 bool _isPrimaryKey = false,
-                const QString& _renameAs = {});
-    ~clsORMField();
+                const QString& _renameAs = {}) :
+        Data(new clsORMFieldData(
+                 _name,
+                 _type,
+                 _defaultValue,
+                 _extraValidator,
+                 _isReadOnly,
+                 _isSortable,
+                 _isFilterable,
+                 _isSelfIdentifier,
+                 _isVirtual,
+                 _isPrimaryKey,
+                 _renameAs
+                 ))
+    {;}
+
     void registerTypeIfNotRegisterd(intfAPIModule* _module);
     void updateTypeID(QMetaType::Type _type);
     void validate(const QVariant _value);

@@ -32,89 +32,23 @@ namespace ORM {
 using namespace Targoman::API::Server;
 
 clsORMFieldData::clsORMFieldData() : ParameterType(QMetaType::UnknownType) { }
-clsORMFieldData::clsORMFieldData(const QString& _name,
-                                        const QString& _type,
-                                        QVariant _defaultValue,
-                                        const QFieldValidator& _extraValidator,
-                                        bool _isReadOnly,
-                                        bool _isSortable,
-                                        bool _isFilterable,
-                                        bool _isSelfIdentifier,
-                                        bool _isVirtual,
-                                        bool _isPrimaryKey,
-                                        const QString& _renameAs) :
-    Name(_name),
-    ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
-    ParamTypeName(_type),
-    DefaultValue(_defaultValue),
-    ExtraValidator(_extraValidator),
-    IsSortable(_isSortable),
-    IsFilterable(_isFilterable),
-    IsReadOnly(_isReadOnly),
-    IsSelfIdentifier(_isSelfIdentifier),
-    IsVirtual(_isVirtual),
-    IsPrimaryKey(_isPrimaryKey),
-    RenameAs(_renameAs)
-{}
 
 clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
     : QSharedData(_o),
-      Name(_o.Name),
       ParameterType(_o.ParameterType),
+      Name(_o.Name),
       ParamTypeName(_o.ParamTypeName),
       DefaultValue(_o.DefaultValue),
       ExtraValidator(_o.ExtraValidator),
+      RenameAs(_o.RenameAs),
       IsSortable(_o.IsSortable),
       IsFilterable(_o.IsFilterable),
       IsReadOnly(_o.IsReadOnly),
       IsSelfIdentifier(_o.IsSelfIdentifier),
       IsVirtual(_o.IsVirtual),
-      IsPrimaryKey(_o.IsPrimaryKey),
-      RenameAs(_o.RenameAs)
+      IsPrimaryKey(_o.IsPrimaryKey)
 {}
 
-
-clsORMField::clsORMField() :
-    Data(new clsORMFieldData)
-{}
-
-clsORMField::clsORMField(const clsORMField& _other, const QString& _newName) :
-    Data(_other.Data)
-{
-    if(_newName.size()){
-        this->Data.detach();
-        this->Data->Name = _newName;
-    }
-}
-
-clsORMField::clsORMField(const QString& _name,
-                         const QString& _type,
-                         const QFieldValidator& _extraValidator,
-                         QVariant _defaultValue,
-                         bool  _isReadOnly,
-                         bool  _isSortable,
-                         bool  _isFilterable,
-                         bool  _isSelfIdentifier,
-                         bool  _isVirtual,
-                         bool  _isPrimaryKey,
-                         const QString& _renameAs):
-    Data(new clsORMFieldData(
-             _name,
-             _type,
-             _defaultValue,
-             _extraValidator,
-             _isReadOnly,
-             _isSortable,
-             _isFilterable,
-             _isSelfIdentifier,
-             _isVirtual,
-             _isPrimaryKey,
-             _renameAs
-             ))
-{}
-
-clsORMField::~clsORMField()
-{ }
 
 void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
 {

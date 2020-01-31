@@ -46,16 +46,16 @@ error("**** libsrc: Unable to find Configuration file $$ConfigFile ****")
 include ($$ConfigFile)
 
 TEMPLATE = lib
+CONFIG += plugin
 TARGET = Module_$$ModuleName
 !CONFIG(debug): CONFIG+= staticlib
 
-DESTDIR =      $$BaseLibraryFolder/
-MOC_DIR      = $$BuildFolderPattern/$$TARGET/moc
-OBJECTS_DIR  = $$BuildFolderPattern/$$TARGET/obj
-RCC_DIR      = $$BuildFolderPattern/$$TARGET/rcc
-UI_DIR       = $$BuildFolderPattern/$$TARGET/ui
+DESTDIR =      $$BaseModulesFolder/
+MOC_DIR      = $$BaseBuildFolder/$$ModuleName/moc
+OBJECTS_DIR  = $$BaseBuildFolder/$$ModuleName/obj
+RCC_DIR      = $$BaseBuildFolder/$$ModuleName/rcc
+UI_DIR       = $$BaseBuildFolder/$$ModuleName/ui
 
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 QMAKE_CXXFLAGS_DEBUG += -fPIC
 
-DEFINES+=MODULE_$${upper($$ModuleName)}_ENABLED

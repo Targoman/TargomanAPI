@@ -177,8 +177,8 @@ QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
 TAPI::stuStatistics gServerStats;
 
 /****************************************************************************/
-/*tmplConfigurable<QString> gConfigs::DB::Host(
-        gConfigs::DB::makeConfig("Host"),
+tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
+        ServerConfigs::MasterDB::makeConfig("Host"),
         "Database Host address",
         "127.0.0.1",
         ReturnTrueCrossValidator(),
@@ -187,8 +187,8 @@ TAPI::stuStatistics gServerStats;
         "db-host",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<quint16> gConfigs::DB::Port(
-        gConfigs::DB::makeConfig("Port"),
+tmplRangedConfigurable<quint16> ServerConfigs::MasterDB::Port(
+        ServerConfigs::MasterDB::makeConfig("Port"),
         "Database port",
         10,65000,
         3306,
@@ -198,8 +198,8 @@ tmplRangedConfigurable<quint16> gConfigs::DB::Port(
         "db-port",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> gConfigs::DB::User(
-        gConfigs::DB::makeConfig("User"),
+tmplConfigurable<QString> ServerConfigs::MasterDB::User(
+        ServerConfigs::MasterDB::makeConfig("User"),
         "Database username for connection",
         "root",
         ReturnTrueCrossValidator(),
@@ -208,8 +208,8 @@ tmplConfigurable<QString> gConfigs::DB::User(
         "db-user",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> gConfigs::DB::Pass(
-        gConfigs::DB::makeConfig("Pass"),
+tmplConfigurable<QString> ServerConfigs::MasterDB::Pass(
+        ServerConfigs::MasterDB::makeConfig("Pass"),
         "Database password",
         "",
         ReturnTrueCrossValidator(),
@@ -218,8 +218,8 @@ tmplConfigurable<QString> gConfigs::DB::Pass(
         "db-pass",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> gConfigs::DB::Schema(
-        gConfigs::DB::makeConfig("Schema"),
+tmplConfigurable<QString> ServerConfigs::MasterDB::Schema(
+        ServerConfigs::MasterDB::makeConfig("Schema"),
         "Database schema",
         "MT",
         ReturnTrueCrossValidator(),

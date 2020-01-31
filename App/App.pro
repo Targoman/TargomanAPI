@@ -64,7 +64,6 @@ SOURCES += \
     Interfaces/ORM/clsRESTAPIWithActionLogs.cpp \
     Interfaces/ORM/clsTable.cpp \
     Interfaces/NLP/FormalityChecker.cpp \
-    Interfaces/Common/intf_impl.cpp \
     Server/ServerConfigs.cpp \
     Server/clsAPIObject.cpp \
     Server/clsRedisConnector.cpp \

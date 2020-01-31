@@ -43,17 +43,28 @@ enum enuVarComplexity {
 
 class intfCacheConnector;
 /**********************************************************************/
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+
 class intfAPIObject{
 public:
-    virtual ~intfAPIObject();
+    virtual ~intfAPIObject() {};
     virtual void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const = 0;
 };
 
 /**********************************************************************/
 class intfAPIArgManipulator{
 public:
-    intfAPIArgManipulator(const QString& _realTypeName);
-    virtual ~intfAPIArgManipulator();
+    intfAPIArgManipulator(const QString& _realTypeName){
+        this->PrettyTypeName = (_realTypeName.startsWith('Q') ? _realTypeName.mid(1) : _realTypeName).toLower();
+        QByteArray RealTypeByteArray = _realTypeName.toLatin1();
+        this->RealTypeName = new char[static_cast<uint>(RealTypeByteArray.size()+1)];
+        strncpy(this->RealTypeName,
+                _realTypeName.toLatin1().constData(),
+                static_cast<uint>(RealTypeByteArray.size()));
+        this->RealTypeName[RealTypeByteArray.size()] = 0;
+    }
+    virtual ~intfAPIArgManipulator(){;}
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) = 0;
     virtual QVariant invokeMethod(const intfAPIObject* _apiObject, const QVariantList& _arguments) = 0;
@@ -138,5 +149,6 @@ extern void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator
     )
 }
 }
+#pragma clang diagnostic pop
 
 #endif // TAPI_INTFAPIARGMANIPULATOR_H

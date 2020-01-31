@@ -23,9 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H
 #define TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
@@ -34,7 +32,7 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      New       = 'N',
                      Removed   = 'R'
                      )
-class Tickets : public clsTable
+class Tickets : public ORM::clsTable
 {
     Q_OBJECT
 public:
@@ -46,10 +44,10 @@ private slots:
 
 private:
     Tickets();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Ticketing, Tickets);
+    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 };
 
-class TicketRead : public clsTable
+class TicketRead : public ORM::clsTable
 {
     Q_OBJECT
 public:
@@ -57,7 +55,7 @@ public:
 
 private:
     TicketRead();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Ticketing, TicketRead);
+    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
 };
 }
 }

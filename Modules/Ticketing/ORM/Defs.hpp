@@ -23,9 +23,6 @@
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
 #define TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
 #include "libTargomanDBM/clsDAC.h"
 
 namespace Targoman {

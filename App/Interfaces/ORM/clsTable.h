@@ -80,12 +80,56 @@ struct stuRelation{
     bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
 };
 
-static stuRelation InvalidRelation("","","");
-static QString QUERY_SEPARATOR = "\n";
-static QString COLS_KEY = "cols";
+extern stuRelation InvalidRelation;
+extern QString QUERY_SEPARATOR;
+extern QString COLS_KEY;
+
+extern void extInitTableTypes(clsTable* _table, const QString& _schema, const QString& _name);
+extern QList<clsORMField> extFilterItems(clsTable* _table, qhttp::THttpMethod _method);
+extern void extUpdateFilterParamType(clsTable* _table, const QString& _fieldTypeName, QMetaType::Type _typeID);
+extern void extPrepareFiltersList(clsTable* _table);
+extern QVariant extSelectFromTable(clsTable* _table,
+                                   Targoman::DBManager::clsDAC& _db,
+                                   const QStringList& _extraJoins,
+                                   const QString& _extraFilters,
+                                   const TAPI::ExtraPath_t& _extraPath,
+                                   const TAPI::ORMFilters_t& _ORMFILTERS,
+                                   quint64 _offset,
+                                   quint16 _limit,
+                                   QString _cols,
+                                   const QString& _filters,
+                                   const QString& _orderBy,
+                                   const QString& _groupBy,
+                                   bool _reportCount);
+extern bool extUpdate(clsTable* _table,
+                      Targoman::DBManager::clsDAC& _db,
+                      const QVariantMap& _ORMFILTERS,
+                      QVariantMap _updateInfo = {});
+extern QVariant extCreate(clsTable* _table,
+                          Targoman::DBManager::clsDAC& _db,
+                          const QVariantMap& _ORMFILTERS,
+                          QVariantMap _createInfo = {});
+extern bool extDeleteByPKs(clsTable* _table,
+                           Targoman::DBManager::clsDAC& _db,
+                           TAPI::ExtraPath_t _EXTRAPATH,
+                           TAPI::ORMFilters_t _ORMFILTERS,
+                           bool _realDelete = false);
+
+extern void extSetSelfFilters(clsTable* _table,
+                              const QVariantMap& _requiredFilters,
+                              TAPI::ExtraPath_t _EXTRAPATH,
+                              TAPI::ORMFilters_t& _ORMFILTERS,
+                              TAPI::Filter_t& _filters);
+
+extern void extSetSelfFilters(clsTable* _table,
+                              const QVariantMap& _requiredFilters,
+                              TAPI::ExtraPath_t _EXTRAPATH,
+                              TAPI::ORMFilters_t& _ORMFILTERS);
+
+extern QStringList extPrivOn(qhttp::THttpMethod _method, QString _moduleName);
 
 class clsTable: public intfAPIModule {
-protected:
+public:
     struct stuSelectItems{
         QStringList Cols;
         QStringList From;
@@ -109,61 +153,92 @@ protected:
     };
 
 public:
-    clsTable(const QString& _scheam,
-              const QString& _name,
-              const QList<clsORMField>& _cols,
-              const QList<stuRelation>& _foreignKeys);
+    clsTable(const QString& _schema,
+             const QString& _name,
+             const QList<clsORMField>& _cols,
+             const QList<stuRelation>& _foreignKeys) :
+        Schema(_schema),
+        Name(_name),
+        BaseCols(_cols),
+        ForeignKeys(_foreignKeys),
+        CountOfPKs(0){
+        extInitTableTypes(this, _schema, _name);
+    }
 
-    QList<clsORMField> filterItems(qhttp::THttpMethod _method);
-    void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
-    void prepareFiltersList();
 
-    QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
-                             const QStringList& _extraJoins,
-                             const QString& _extraFilters,
-                             const TAPI::ExtraPath_t& _extraPath,
-                             const TAPI::ORMFilters_t& _ORMFILTERS,
-                             quint64 _offset,
-                             quint16 _limit,
-                             QString _cols,
-                             const QString& _filters,
-                             const QString& _orderBy,
-                             const QString& _groupBy,
-                             bool _reportCount);
+    inline QList<clsORMField> filterItems(qhttp::THttpMethod _method){
+        return extFilterItems(this, _method);
+    }
+    inline void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID){
+        extUpdateFilterParamType (this, _fieldTypeName, _typeID);
+    }
 
-    bool update(Targoman::DBManager::clsDAC& _db,
-                const QVariantMap& _ORMFILTERS,
-                QVariantMap _updateInfo = {});
-    QVariant create(Targoman::DBManager::clsDAC& _db,
-                    const QVariantMap& _ORMFILTERS,
-                    QVariantMap _createInfo = {});
-    bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
-                     TAPI::ExtraPath_t _EXTRAPATH,
-                     TAPI::ORMFilters_t _ORMFILTERS,
-                     bool _realDelete = false);
+    inline void prepareFiltersList(){
+        extPrepareFiltersList(this);
+    }
 
-    void setSelfFilters(const QVariantMap& _requiredFilters,
-                    TAPI::ExtraPath_t _EXTRAPATH,
-                    TAPI::ORMFilters_t& _ORMFILTERS,
-                    TAPI::Filter_t& _filters);
+    inline QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
+                                    const QStringList& _extraJoins,
+                                    const QString& _extraFilters,
+                                    const TAPI::ExtraPath_t& _extraPath,
+                                    const TAPI::ORMFilters_t& _ORMFILTERS,
+                                    quint64 _offset,
+                                    quint16 _limit,
+                                    QString _cols,
+                                    const QString& _filters,
+                                    const QString& _orderBy,
+                                    const QString& _groupBy,
+                                    bool _reportCount){
+        return extSelectFromTable(this,
+                                  _db,
+                                  _extraJoins,
+                                  _extraFilters,
+                                  _extraPath,
+                                  _ORMFILTERS,
+                                  _offset,
+                                  _limit,
+                                  _cols,
+                                  _filters,
+                                  _orderBy,
+                                  _groupBy,
+                                  _reportCount);
+    }
 
-    void setSelfFilters(const QVariantMap& _requiredFilters,
-                    TAPI::ExtraPath_t _EXTRAPATH,
-                    TAPI::ORMFilters_t& _ORMFILTERS);
+    inline bool update(Targoman::DBManager::clsDAC& _db,
+                       const QVariantMap& _ORMFILTERS,
+                       QVariantMap _updateInfo = {}){
+        return extUpdate(this, _db, _ORMFILTERS, _updateInfo);
+    }
+    inline QVariant create(Targoman::DBManager::clsDAC& _db,
+                           const QVariantMap& _ORMFILTERS,
+                           QVariantMap _createInfo = {}){
+        return extCreate (this, _db, _ORMFILTERS, _createInfo);
+    }
+    inline bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
+                            TAPI::ExtraPath_t _EXTRAPATH,
+                            TAPI::ORMFilters_t _ORMFILTERS,
+                            bool _realDelete = false){
+        return extDeleteByPKs (this, _db, _EXTRAPATH, _ORMFILTERS, _realDelete);
+    }
 
-    QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
+    inline void setSelfFilters(const QVariantMap& _requiredFilters,
+                               TAPI::ExtraPath_t _EXTRAPATH,
+                               TAPI::ORMFilters_t& _ORMFILTERS,
+                               TAPI::Filter_t& _filters){
+        return extSetSelfFilters (this, _requiredFilters, _EXTRAPATH, _ORMFILTERS, _filters);
+    }
 
-private:
-    stuSelectItems makeListingQuery(const QString& _requiredCols = {},
-                                    const QStringList& _extraJoins = {},
-                                    QString _filters = {},
-                                    const QString& _orderBy = {},
-                                    const QString _groupBy = {}) const;
-    QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
-    QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
-    static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
+    inline void setSelfFilters(const QVariantMap& _requiredFilters,
+                               TAPI::ExtraPath_t _EXTRAPATH,
+                               TAPI::ORMFilters_t& _ORMFILTERS){
+        return extSetSelfFilters (this, _requiredFilters, _EXTRAPATH, _ORMFILTERS);
+    }
 
-protected:
+    inline QStringList privOn(qhttp::THttpMethod _method, QString _moduleName){
+        return extPrivOn(_method, _moduleName);
+    }
+
+public:
     QString Schema;
     QString Name;
     QMap<QString, clsORMField> SelectableColsMap;

@@ -39,6 +39,7 @@ class URLProcessor : public intfAPIModule
     Q_INTERFACES(Targoman::API::intfAPIModule)
 
 public:
+    URLProcessor(){;}
     void init();
 
 private slots:

@@ -23,27 +23,36 @@
 #ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
 #define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
 
-#include "libTargomanDBM/clsDAC.h"
-
 #include "Interfaces/ORM/clsTable.h"
 
 namespace Targoman {
 namespace API {
 namespace ORM {
 
-class clsRESTAPIWithActionLogs : protected clsTable {
+class clsRESTAPIWithActionLogs : public clsTable {
     Q_OBJECT
 public:
-    clsRESTAPIWithActionLogs(DBManager::clsDAC& _dac, const QString& _schema, const QString& _module);
-    virtual ~clsRESTAPIWithActionLogs();
-
+    inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module)  :
+        clsTable(_schema,
+                "tblActionLogs",
+                { ///<ColName             Type                  Validation                      Default  RO   Sort  Filter Self  Virt   PK
+                  {"atlID",               S(quint64),           QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                  {"atlBy_usrID",         S(quint32),           QFV.integer().minValue(1),      {},     true},
+                  {"atlInsertionDateTime",S(TAPI::DateTime_t), QFV,                             {},     true},
+                  {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},     true},
+                  {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},     true, false,false},
+                },
+                {
+                    {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By_"},
+                }),
+        Module(_module)
+    {;}
 private slots:
     QVariant apiGETActionLogs(GET_METHOD_ARGS_HEADER);
     QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
     QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
 
 private:
-    DBManager::clsDAC& DAC;
     QString Module;
 };
 

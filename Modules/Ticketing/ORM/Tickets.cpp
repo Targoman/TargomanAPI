@@ -21,12 +21,12 @@
  */
 
 #include "Tickets.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
-using namespace QHttp;
+using namespace ORM;
 
 void Tickets::init()
 {
@@ -68,9 +68,7 @@ Tickets::Tickets() :
                 {"tktUpdatedBy_usrID",  "AAA.tblUser",     "usrID",     "Updater_",  true},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketStatus);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketStatus);
 }
 
 void TicketRead::init()
@@ -88,7 +86,6 @@ TicketRead::TicketRead() :
               }
               )
 {
-    this->registerMyRESTAPIs();
 }
 
 }

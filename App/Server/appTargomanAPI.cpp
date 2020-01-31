@@ -82,7 +82,7 @@ void appTargomanAPI::slotExecute()
                 foreach(auto Method, Module->listOfMethods())
                     RESTAPIRegistry::registerRESTAPI(Module, Method);
 
-                if(Module->requiredDB().Host.size())
+                if(Module->requiredDB().Schema.size())
                     RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
 
                 if(Module->requiresTextProcessor())
@@ -103,8 +103,23 @@ void appTargomanAPI::slotExecute()
         if(RequiredDBs.size()) {
             DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
             QSet<QString> ConnectionStrings;
+            if(ServerConfigs::MasterDB::Host.value().size()
+               && ServerConfigs::MasterDB::Schema.value().size()){
+                intfAPIModule::stuDBInfo MasterDBInfo = intfAPIModule::stuDBInfo(
+                                                            ServerConfigs::MasterDB::Schema.value(),
+                                                            ServerConfigs::MasterDB::Port.value(),
+                                                            ServerConfigs::MasterDB::User.value(),
+                                                            ServerConfigs::MasterDB::Pass.value(),
+                                                            ServerConfigs::MasterDB::Host.value()
+                                                            );
+                ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
+                DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
+            }
+
+
             for(auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
-                if(ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false) {
+                if(DBInfoIter->Host.size()
+                   && ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false) {
                     ConnectionStrings.insert(DBInfoIter->toConnStr(true));
                     if(ConnectionStrings.isEmpty())
                         DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());

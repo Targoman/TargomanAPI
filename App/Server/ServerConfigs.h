@@ -54,27 +54,19 @@ struct ServerConfigs
     static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
     static Common::Configuration::tmplConfigurable<QString>       CacheConnector;
     static Common::Configuration::tmplConfigurable<QString>       AccessControl;
+
     static QString BasePathWithVersion;
     static QJsonObject BaseOpenAPIObject;
-/*
 
-    struct TextProcessor{
-        static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> AbbreviationFile;
-        static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> NormalizationFile;
-        static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> SpellCorrectorBaseConfigPath;
-        static Targoman::Common::Configuration::clsFileBasedConfig SpellCorrectorLanguageBasedConfigs;
-        static inline QString makeConfig(const QString& _name){ return "/TextProcessor/" + _name;}
-    };
-
-    struct DB{
-        static inline QString makeConfig(const QString& _name){return "/DB/" + _name;}
+    struct MasterDB{
+        static inline QString makeConfig(const QString& _name){return "/MasterDB/" + _name;}
         static Common::Configuration::tmplConfigurable<QString>      Host;
         static Common::Configuration::tmplRangedConfigurable<quint16>Port;
         static Common::Configuration::tmplConfigurable<QString>      User;
         static Common::Configuration::tmplConfigurable<QString>      Pass;
         static Common::Configuration::tmplConfigurable<QString>      Schema;
     };
-
+/*
     struct Server{
         Server(const QString& _basePath);
         Common::Configuration::tmplConfigurable<QUrl> URL;

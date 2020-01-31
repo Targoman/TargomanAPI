@@ -50,4 +50,3 @@ UI_DIR       = $$BaseBuildFolder/$$ModuleName/ui
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 QMAKE_CXXFLAGS_DEBUG += -fPIC
 
-DEFINES+=MODULE_$${upper($$ModuleName)}_ENABLED

@@ -39,6 +39,7 @@ class FormalityChecker : public intfAPIModule
     Q_INTERFACES(Targoman::API::intfAPIModule)
 
 public:
+    FormalityChecker(){;}
     void init();
     bool requiresFormalityChecker() const {return true;}
 

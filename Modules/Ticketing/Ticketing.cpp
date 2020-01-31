@@ -22,20 +22,17 @@
 
 #include "Ticketing.h"
 #include "QFieldValidator.h"
-#include "QHttp/QRESTServer.h"
-#include "QHttp/intfAPIArgManipulator.h"
-#include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/PrivHelpers.h"
-#include "Helpers/AAA/GenericEnums.hpp"
-#include "Configs.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/AAA/PrivHelpers.h"
+#include "Interfaces/AAA/GenericEnums.hpp"
 
 #include "ORM/Defs.hpp"
-#include "ORM/Tickets.h"
+//#include "ORM/Tickets.h"
 
-using namespace Targoman;
-using namespace Targoman::API;
-using namespace Targoman::API::Helpers::AAA;
-using namespace QHttp;
+namespace Targoman {
+namespace API {
+
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
 
 void Ticketing::init()
 {}
@@ -71,13 +68,19 @@ quint64 insertTicket(quint32 _targetUser,
                                      ).lastInsertId().toULongLong();
 }
 
-bool Ticketing::apiPUTNewMessage(QHttp::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser){
+bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser){
     Authorization::checkPriv(_JWT, {this->moduleName() + ":canPUTNewMessage"});
 
     return insertTicket(_targetUser, _serviceID, 0, _targetUser ? enuTicketType::Message : enuTicketType::Broadcast, _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
-bool Ticketing::apiPUTNewFeedback(QHttp::JWT_t _JWT, const QString& _title, const QString& _text, enuTicketType::Type _ticketType, quint32 _serviceID, quint64 _inReplyTo, QHttp::stuFileInfo _file){
+bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
+                                  const QString& _title,
+                                  const QString& _text,
+                                  enuTicketType::Type _ticketType,
+                                  quint32 _serviceID,
+                                  quint64 _inReplyTo,
+                                  TAPI::stuFileInfo _file){
     Authorization::checkPriv(_JWT, {});
 
     if(_inReplyTo && (_ticketType != enuTicketType::Reply))
@@ -98,11 +101,11 @@ bool Ticketing::apiPUTNewFeedback(QHttp::JWT_t _JWT, const QString& _title, cons
 }
 
 Ticketing::Ticketing() :
-    Helpers::ORM::clsRESTAPIWithActionLogs (TicketingDACInstance(), "Ticketing", "Ticketing"){
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketStatus);
+    ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
+    TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketType);
 
-    Tickets::instance().init();
+//    Tickets::instance().init();
+}
 
-    this->registerMyRESTAPIs();
+}
 }

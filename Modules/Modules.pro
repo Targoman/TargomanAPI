@@ -33,8 +33,8 @@ CONFIG += ordered
 #addSubdirs(MT, Dependencies)
 #addSubdirs(Advert, Dependencies)
 #addSubdirs(NGT, Dependencies)
-#addSubdirs(Ticketing, Dependencies)
-addSubdirs(TextProcessor, Dependencies)
-addSubdirs(FormalityChecker, Dependencies)
+addSubdirs(Ticketing, Dependencies)
+#addSubdirs(TextProcessor, Dependencies)
+#addSubdirs(FormalityChecker, Dependencies)
 addSubdirs(URLProcessor, Dependencies)
 
