@@ -30,7 +30,7 @@
 
 #include "QHttp/qhttpfwd.hpp"
 
-#include "Interfaces/Common/HTTPExceptions.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/ORM/clsORMField.h"
 
@@ -96,29 +96,13 @@ public:
         QString Pass;
         QString Schema;
 
-        stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "") :
-            Host(_host),
-            Port(_port),
-            User(_user),
-            Pass(_pass),
-            Schema(_schema)
-        {;}
-
-        QString toConnStr(bool _noSchema = false){
-            return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
-                                                  this->Host).arg(
-                                                  this->Port).arg(
-                                                  this->User).arg(
-                                                  this->Pass).arg(
-                                                  _noSchema ? "" : this->Schema);
-        }
+        stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "");
+        QString toConnStr(bool _noSchema = false);
     };
 
 public:
-    intfAPIModule(Targoman::Common::Configuration::intfModule *_parent = nullptr) :
-        Targoman::Common::Configuration::intfModule(_parent)
-    {;}
-    virtual ~intfAPIModule() {}
+    intfAPIModule(Targoman::Common::Configuration::intfModule *_parent = nullptr);
+    virtual ~intfAPIModule();
     virtual QList<ORM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {Q_UNUSED(_method) return {};}
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID)}
     virtual QList<QMetaMethod> listOfMethods() const = 0;

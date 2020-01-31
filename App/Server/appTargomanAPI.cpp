@@ -25,7 +25,7 @@
 
 #include "libTargomanDBM/clsDAC.h"
 
-#include "Interfaces/Common/intfAPIModule.hpp"
+#include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/NLP/FormalityChecker.h"
 #include "Interfaces/NLP/TextProcessor.hpp"
 

@@ -83,7 +83,8 @@ DISTFILES += \
     conf/api.server.conf \
     build.sh
 
-LIBS += -lTargomanCommon \
+LIBS += -lTargomanAPIInterface \
+        -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
         -lQRESTServer \

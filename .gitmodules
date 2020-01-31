@@ -1,6 +1,3 @@
-[submodule "3rdParty/QRestServer"]
-	path = 3rdParty/QRestServer
-	url = https://github.com/Targoman/QRestServer.git
 [submodule "3rdParty/E4MT"]
 	path = 3rdParty/E4MT
 	url = https://github.com/Targoman/E4MT.git

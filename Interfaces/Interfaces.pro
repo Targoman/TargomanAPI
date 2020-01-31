@@ -21,10 +21,8 @@ LibName=TargomanAPIInterface
 
 HEADERS += \
     Common/GenericTypes.h \
-    Common/HTTPExceptions.h \
     Common/tmplAPIArg.h \
     Common/intfAPIArgManipulator.h \
-    Common/intfAPIModule.hpp \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Accounting.h \
@@ -38,6 +36,8 @@ HEADERS += \
     ORM/clsTable.h \
     NLP/FormalityChecker.h \
     NLP/TextProcessor.hpp \
+    Common/HTTPExceptions.hpp \
+    Common/intfAPIModule.h
 
 SOURCES += \
     AAA/Accounting.cpp \
@@ -50,6 +50,7 @@ SOURCES += \
     ORM/clsTable.cpp \
     NLP/FormalityChecker.cpp \
     $$PRJDIR/3rdParty/E4MT/src/clsFormalityChecker.cpp \
+    Common/intf_impl.cpp
 
 OTHER_FILES += \
 

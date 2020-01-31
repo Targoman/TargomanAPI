@@ -1,23 +1,23 @@
 /******************************************************************************
-#   TargomanAPI: REST API for Targoman
-#
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
-#
-#   TargomanAPI is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   TargomanAPI is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU AFFERO GENERAL PUBLIC LICENSE for more details.
-#
-#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
+ * TargomanAAA: Authentication, Authorization, Accounting framework           *
+ *                                                                            *
+ * Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>  *
+ *                                                                            *
+ * TargomanAAA is free software: you can redistribute it and/or modify        *
+ * it under the terms of the GNU Lesser General Public License as published   *
+ * by the Free Software Foundation, either version 3 of the License, or       *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * TargomanAAA is distributed in the hope that it will be useful,             *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU Lesser General Public License for more details.                        *
+ * You should have received a copy of the GNU Lesser General Public License   *
+ * along with Targoman. If not, see <http://www.gnu.org/licenses/>.           *
+ *                                                                            *
  ******************************************************************************/
 /**
- * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #ifndef TARGOMAN_API_ORM_CLSTABLE_H
@@ -26,22 +26,19 @@
 #include "QFieldValidator.h"
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
-#include "Interfaces/Common/intfAPIModule.hpp"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
+#include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/ORM/clsORMField.h"
 
-namespace TAPI{
+namespace Targoman {
+namespace API {
 TAPI_ADD_SIMPLE_TYPE(QString, Cols_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Filter_t);
 TAPI_ADD_SIMPLE_TYPE(QString, OrderBy_t);
 TAPI_ADD_SIMPLE_TYPE(QString, GroupBy_t);
-}
 
-namespace Targoman {
-namespace API {
-namespace ORM {
-
-#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, TAPI::Cols_t _cols={}, TAPI::Filter_t _filters={}, TAPI::OrderBy_t _orderBy={}, TAPI::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS, quint64 _offset  , quint16 _limit   , TAPI::Cols_t _cols   , TAPI::Filter_t _filters   , TAPI::OrderBy_t _orderBy   , TAPI::GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS,     quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
 
@@ -64,6 +61,8 @@ namespace ORM {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
+namespace ORM {
+
 class clsTable;
 
 struct stuRelation{
@@ -80,12 +79,12 @@ struct stuRelation{
     bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
 };
 
-extern stuRelation InvalidRelation;
-extern QString QUERY_SEPARATOR;
-extern QString COLS_KEY;
+static stuRelation InvalidRelation("","","");
+static QString QUERY_SEPARATOR = "\n";
+static QString COLS_KEY = "cols";
 
 class clsTable: public intfAPIModule {
-public:
+protected:
     struct stuSelectItems{
         QStringList Cols;
         QStringList From;
@@ -109,56 +108,61 @@ public:
     };
 
 public:
-    clsTable(const QString& _schema,
-             const QString& _name,
-             const QList<clsORMField>& _cols,
-             const QList<stuRelation>& _foreignKeys);
-
+    clsTable(const QString& _scheam,
+              const QString& _name,
+              const QList<clsORMField>& _cols,
+              const QList<stuRelation>& _foreignKeys);
 
     QList<clsORMField> filterItems(qhttp::THttpMethod _method);
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
-
     void prepareFiltersList();
+
     QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
-                                    const QStringList& _extraJoins,
-                                    const QString& _extraFilters,
-                                    const TAPI::ExtraPath_t& _extraPath,
-                                    const TAPI::ORMFilters_t& _ORMFILTERS,
-                                    quint64 _offset,
-                                    quint16 _limit,
-                                    QString _cols,
-                                    const QString& _filters,
-                                    const QString& _orderBy,
-                                    const QString& _groupBy,
-                                    bool _reportCount);
+                             const QStringList& _extraJoins,
+                             const QString& _extraFilters,
+                             const TAPI::ExtraPath_t& _extraPath,
+                             const TAPI::ORMFilters_t& _ORMFILTERS,
+                             quint64 _offset,
+                             quint16 _limit,
+                             QString _cols,
+                             const QString& _filters,
+                             const QString& _orderBy,
+                             const QString& _groupBy,
+                             bool _reportCount);
 
     bool update(Targoman::DBManager::clsDAC& _db,
-                       const QVariantMap& _ORMFILTERS,
-                       QVariantMap _updateInfo = {});
+                const QVariantMap& _ORMFILTERS,
+                QVariantMap _updateInfo = {});
     QVariant create(Targoman::DBManager::clsDAC& _db,
-                           const QVariantMap& _ORMFILTERS,
-                           QVariantMap _createInfo = {});
+                    const QVariantMap& _ORMFILTERS,
+                    QVariantMap _createInfo = {});
     bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
-                            TAPI::ExtraPath_t _EXTRAPATH,
-                            TAPI::ORMFilters_t _ORMFILTERS,
-                            bool _realDelete = false);
+                     TAPI::ExtraPath_t _EXTRAPATH,
+                     TAPI::ORMFilters_t _ORMFILTERS,
+                     bool _realDelete = false);
 
-    inline void setSelfFilters(const QVariantMap& _requiredFilters,
-                               TAPI::ExtraPath_t _EXTRAPATH,
-                               TAPI::ORMFilters_t& _ORMFILTERS,
-                               TAPI::Filter_t& _filters);
+    void setSelfFilters(const QVariantMap& _requiredFilters,
+                    TAPI::ExtraPath_t _EXTRAPATH,
+                    TAPI::ORMFilters_t& _ORMFILTERS,
+                    Targoman::API::Filter_t& _filters);
 
-    inline void setSelfFilters(const QVariantMap& _requiredFilters,
-                               TAPI::ExtraPath_t _EXTRAPATH,
-                               TAPI::ORMFilters_t& _ORMFILTERS){
-        return extSetSelfFilters (this, _requiredFilters, _EXTRAPATH, _ORMFILTERS);
-    }
+    void setSelfFilters(const QVariantMap& _requiredFilters,
+                    TAPI::ExtraPath_t _EXTRAPATH,
+                    TAPI::ORMFilters_t& _ORMFILTERS);
 
-    inline QStringList privOn(qhttp::THttpMethod _method, QString _moduleName){
-        return extPrivOn(_method, _moduleName);
-    }
+    QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
 
-public:
+private:
+    stuSelectItems makeListingQuery(const QString& _requiredCols = {},
+                                    const QStringList& _extraJoins = {},
+                                    QString _filters = {},
+                                    const QString& _orderBy = {},
+                                    const QString _groupBy = {}) const;
+    QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
+    QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
+    static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
+
+protected:
     QString Schema;
     QString Name;
     QMap<QString, clsORMField> SelectableColsMap;
@@ -177,10 +181,9 @@ public:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::Cols_t);
-Q_DECLARE_METATYPE(TAPI::Filter_t);
-Q_DECLARE_METATYPE(TAPI::OrderBy_t);
-Q_DECLARE_METATYPE(TAPI::GroupBy_t);
-
+Q_DECLARE_METATYPE(Targoman::API::Cols_t);
+Q_DECLARE_METATYPE(Targoman::API::Filter_t);
+Q_DECLARE_METATYPE(Targoman::API::OrderBy_t);
+Q_DECLARE_METATYPE(Targoman::API::GroupBy_t);
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H

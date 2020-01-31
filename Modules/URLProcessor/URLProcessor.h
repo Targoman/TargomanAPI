@@ -23,7 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 #define TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 
-#include "Interfaces/Common/intfAPIModule.hpp"
+#include "Interfaces/Common/intfAPIModule.h"
 
 namespace Targoman {
 namespace API {

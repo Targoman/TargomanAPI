@@ -29,7 +29,7 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "QHttp/qhttpfwd.hpp"
 
-#include "Interfaces/Common/HTTPExceptions.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 
 using namespace qhttp;
 

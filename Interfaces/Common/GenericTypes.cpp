@@ -27,7 +27,7 @@
 
 #include "intfAPIArgManipulator.h"
 #include "GenericTypes.h"
-#include "HTTPExceptions.h"
+#include "HTTPExceptions.hpp"
 
 namespace TAPI {
 

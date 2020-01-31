@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_SERVER_NUMERICTYPES_HPP
 #define TARGOMAN_API_SERVER_NUMERICTYPES_HPP
 
-#include "Interfaces/Common/HTTPExceptions.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/tmplAPIArg.h"
 
 namespace Targoman {

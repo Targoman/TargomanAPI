@@ -23,7 +23,7 @@
 #ifndef TAPI_INTFAPIARGMANIPULATOR_H
 #define TAPI_INTFAPIARGMANIPULATOR_H
 
-#include "Interfaces/Common/HTTPExceptions.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 
 namespace Targoman {
 namespace API {
@@ -48,23 +48,15 @@ class intfCacheConnector;
 
 class intfAPIObject{
 public:
-    virtual ~intfAPIObject() {};
+    virtual ~intfAPIObject();
     virtual void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const = 0;
 };
 
 /**********************************************************************/
 class intfAPIArgManipulator{
 public:
-    intfAPIArgManipulator(const QString& _realTypeName){
-        this->PrettyTypeName = (_realTypeName.startsWith('Q') ? _realTypeName.mid(1) : _realTypeName).toLower();
-        QByteArray RealTypeByteArray = _realTypeName.toLatin1();
-        this->RealTypeName = new char[static_cast<uint>(RealTypeByteArray.size()+1)];
-        strncpy(this->RealTypeName,
-                _realTypeName.toLatin1().constData(),
-                static_cast<uint>(RealTypeByteArray.size()));
-        this->RealTypeName[RealTypeByteArray.size()] = 0;
-    }
-    virtual ~intfAPIArgManipulator(){;}
+    intfAPIArgManipulator(const QString& _realTypeName);
+    virtual ~intfAPIArgManipulator();
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) = 0;
     virtual QVariant invokeMethod(const intfAPIObject* _apiObject, const QVariantList& _arguments) = 0;

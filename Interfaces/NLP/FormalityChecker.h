@@ -44,7 +44,7 @@ namespace NLP {
 class FormalityChecker {
 
 public:
-    instanceGetter (FormalityChecker)
+    instanceGetter(FormalityChecker)
     inline QString check(const QString _lang, QString _text){return this->FCInstance->check(_lang, _text);}
 
 private:

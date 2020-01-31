@@ -23,7 +23,7 @@
 #ifndef TAPI_TMPLAPIARG_HPP
 #define TAPI_TMPLAPIARG_HPP
 
-#include "Interfaces/Common/HTTPExceptions.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
 namespace Targoman {
