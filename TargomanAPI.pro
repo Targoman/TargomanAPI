@@ -29,7 +29,8 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-addSubdirs(App, Dependencies)
+addSubdirs(Interfaces, Dependencies)
+addSubdirs(App, Interfaces)
 addSubdirs(Modules, App)
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#

@@ -20,22 +20,6 @@
 PRJDIR = ".."
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
-    Interfaces/AAA/AAA.hpp \
-    Interfaces/AAA/AAADefs.hpp \
-    Interfaces/AAA/Accounting.h \
-    Interfaces/AAA/Authentication.h \
-    Interfaces/AAA/Authorization.h \
-    Interfaces/AAA/clsJWT.hpp \
-    Interfaces/AAA/GenericEnums.hpp \
-    Interfaces/AAA/PrivHelpers.h \
-    Interfaces/Common/GenericTypes.h \
-    Interfaces/Common/HTTPExceptions.h \
-    Interfaces/Common/tmplAPIArg.h \
-    Interfaces/ORM/clsORMField.h \
-    Interfaces/ORM/clsRESTAPIWithActionLogs.h \
-    Interfaces/ORM/clsTable.h \
-    Interfaces/Common/intfAPIArgManipulator.h \
-    Interfaces/NLP/FormalityChecker.h \
     Server/RESTServer.h \
     Server/APICache.hpp \
     Server/appTargomanAPI.h \
@@ -50,20 +34,9 @@ HEADERS += \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
-    Interfaces/Common/intfAPIModule.hpp \
-    Interfaces/NLP/TextProcessor.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
-    Interfaces/AAA/Accounting.cpp \
-    Interfaces/AAA/Authentication.cpp \
-    Interfaces/AAA/Authorization.cpp \
-    Interfaces/AAA/PrivHelpers.cpp \
-    Interfaces/Common/GenericTypes.cpp \
-    Interfaces/ORM/clsORMField.cpp \
-    Interfaces/ORM/clsRESTAPIWithActionLogs.cpp \
-    Interfaces/ORM/clsTable.cpp \
-    Interfaces/NLP/FormalityChecker.cpp \
     Server/ServerConfigs.cpp \
     Server/clsAPIObject.cpp \
     Server/clsRedisConnector.cpp \
@@ -76,7 +49,6 @@ SOURCES += \
     Server/appTargomanAPI.cpp \
     Server/main.cpp \
     $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
-    $$PRJDIR/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
