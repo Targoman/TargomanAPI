@@ -21,16 +21,12 @@
  */
 
 #include "Props.h"
-#include "Helpers/AAA/AAA.hpp"
 #include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
-using namespace QHttp;
-
-void Props::init()
-{;}
+using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -60,7 +56,6 @@ Props::Props() :
                 {"prpUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

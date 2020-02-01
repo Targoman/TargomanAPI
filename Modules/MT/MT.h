@@ -22,26 +22,27 @@
 #ifndef TARGOMAN_API_MODULES_TRANSLATION_H
 #define TARGOMAN_API_MODULES_TRANSLATION_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
+
+#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
+namespace Modules {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-class MT  : private Helpers::ORM::clsRESTAPIWithActionLogs
+class MT  : public ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Account)
 public:
     void init();
 
 private slots:
-    QVariantMap API(,Translate,
-                    (const QHttp::RemoteIP_t& _REMOTE_IP,
+    QVariantMap REST(,Translate,
+                    (const TAPI::RemoteIP_t& _REMOTE_IP,
                      const QString& _token,
                      QString _text,
                      QString _dir,
@@ -50,18 +51,15 @@ private slots:
                      bool _detok = true,
                      bool _dic=false,
                      bool _dicFull = false),
-                    "Translates ....")
+                    "Translates input text if specified engine and language are found.")
 
-    QVariantMap API(,Test,(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
+    QVariantMap REST(,Test,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
 
     private:
-        MT();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(MT);
-
-private:
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
+    TARGOMAN_DEFINE_API_MODULE(MT)
 };
 
+}
 }
 }
 

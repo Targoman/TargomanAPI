@@ -23,26 +23,21 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_CLICKS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_CLICKS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class Clicks : public clsTable
+class Clicks : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Clicks information")
 
 private:
-    Clicks();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advert,Clicks);
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Clicks)
 };
 
 }

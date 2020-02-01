@@ -21,15 +21,12 @@
  */
 
 #include "Clicks.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
-using namespace QHttp;
-
-void Clicks::init()
-{;}
+using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -57,7 +54,6 @@ Clicks::Clicks() :
                 //{"clk_locID",        "Advert.tblLocations",          "locID"},
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

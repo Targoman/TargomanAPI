@@ -23,9 +23,9 @@
 #define TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
-#include "intfTranslatorEngine.hpp"
-#include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/tmplBoundedCache.hpp"
+#include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
+#include "intfTranslatorEngine.hpp"
 
 namespace Targoman {
 namespace API {
@@ -50,6 +50,23 @@ typedef QPair<QString, QString>  TranslationDir_t;
 
 class TranslationDispatcher
 {
+private:
+    struct stuTrServerConfig{
+        stuTrServerConfig(const QString& _basePath);
+        Common::Configuration::tmplConfigurable<QUrl> URL;
+        Common::Configuration::tmplConfigurable<QString>  Class;
+        Common::Configuration::tmplConfigurable<QString>  SourceLang;
+        Common::Configuration::tmplConfigurable<QString>  DestLang;
+        Common::Configuration::tmplConfigurable<bool>     SupportsIXML;
+        Common::Configuration::tmplConfigurable<bool>     Active;
+        struct stuStatistics{
+            stuStatistics(const QString& _basePath);
+            Common::Configuration::tmplConfigurable<quint64> OkResponses;
+            Common::Configuration::tmplConfigurable<quint64> FailedResponses;
+        }Statistics;
+    };
+    static Common::Configuration::tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
+
 public:
     static TranslationDispatcher& instance(){static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
     ~TranslationDispatcher();
@@ -94,7 +111,6 @@ private:
     Q_DISABLE_COPY(TranslationDispatcher)
 
     QHash<QString,  intfTranslatorEngine*> RegisteredEngines;
-    QScopedPointer<Targoman::DBManager::clsDAC> DAC;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;

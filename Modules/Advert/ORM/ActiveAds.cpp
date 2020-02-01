@@ -21,16 +21,13 @@
  */
 
 #include "ActiveAds.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
-using namespace QHttp;
-
-void ActiveAds::init()
-{;}
+using namespace ORM;
 
 QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -52,7 +49,6 @@ ActiveAds::ActiveAds() :
                 //{"act_locID",        "Advert.tblLocations",     "locID"},
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

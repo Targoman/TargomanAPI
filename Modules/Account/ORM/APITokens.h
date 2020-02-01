@@ -39,12 +39,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class APITokens : public ORM::clsTable, public intfAPIModule
+class APITokens : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get APITokens information")
     bool ORMDELETE("Delete an APIToken")

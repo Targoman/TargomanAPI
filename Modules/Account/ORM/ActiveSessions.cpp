@@ -21,7 +21,6 @@
  */
 
 #include "ActiveSessions.h"
-#include "Account.h"
 
 namespace Targoman {
 namespace API {
@@ -29,12 +28,9 @@ namespace AAA {
 
 using namespace ORM;
 
-void ActiveSessions::init()
-{;}
-
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
@@ -45,14 +41,13 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     if(_EXTRAPATH.trimmed() == clsJWT(_JWT).session())
         throw exHTTPForbidden("Deleting current session is not allowed");
 
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false)
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
         this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 
-ActiveSessions::ActiveSessions(intfAPIModule* _parent) :
-    intfAPIModule(_parent),
+ActiveSessions::ActiveSessions() :
     clsTable("AAA",
               "tblActiveSessions",
               { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
@@ -74,7 +69,6 @@ ActiveSessions::ActiveSessions(intfAPIModule* _parent) :
               })
 {
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuSessionStatus);
-    this->parent()->addSubmoduleMethods()
 }
 
 }

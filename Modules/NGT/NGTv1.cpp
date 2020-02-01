@@ -23,16 +23,15 @@
 #include "NGTv1.h"
 #include "ORM/Defs.hpp"
 
-using namespace QHttp;
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
 
-void Ngtv1::init()
+void NGTv1::init()
 {
 }
 
-Ngtv1::Ngtv1() :
-    Helpers::ORM::clsRESTAPIWithActionLogs (NGTDACInstance(), "NGT", "Targoman"){
+NGTv1::NGTv1() :
+    ORM::clsRESTAPIWithActionLogs("NGT", "Targoman"){
 }
 
 

@@ -34,9 +34,6 @@ namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
 
-void Ticketing::init()
-{}
-
 quint64 insertTicket(quint32 _targetUser,
                   quint32 _serviceID,
                   quint64 _inReplyTo,
@@ -69,7 +66,7 @@ quint64 insertTicket(quint32 _targetUser,
 }
 
 bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser){
-    Authorization::checkPriv(_JWT, {this->moduleName() + ":canPUTNewMessage"});
+    Authorization::checkPriv(_JWT, {this->moduleBaseName() + ":canPUTNewMessage"});
 
     return insertTicket(_targetUser, _serviceID, 0, _targetUser ? enuTicketType::Message : enuTicketType::Broadcast, _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }

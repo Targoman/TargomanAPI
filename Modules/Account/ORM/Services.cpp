@@ -28,31 +28,28 @@ namespace AAA {
 
 using namespace ORM;
 
-void Services::init()
-{;}
-
 QVariant Services::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Services::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
 
 bool Services::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 Services::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 

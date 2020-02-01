@@ -23,13 +23,9 @@
 #ifndef TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 #define TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
-#include "libTargomanDBM/clsDAC.h"
+#include "libTargomanCommon/Macros.h"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 
 TARGOMAN_DEFINE_ENUM (enuAdvertOrder,
                       First  = '1',
@@ -64,19 +60,11 @@ TARGOMAN_DEFINE_ENUM (enuBannerSizes,
                       Mobile_320x50            = 'P',
                       LargeMobile_320x100      = 'Q',
                       );
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-using namespace DBManager;
-static clsDAC& AdvertDACInstance(){static clsDAC* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new clsDAC("Advert")));}
-#pragma GCC diagnostic pop
-
-}
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuAdvertOrder::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuAdvertType::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuBannerSizes::Type);
+Q_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
+Q_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
+Q_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 

@@ -30,12 +30,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class APITokenValidIPs : public ORM::clsTable, public intfAPIModule
+class APITokenValidIPs : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")
     bool ORMDELETE("Delete an APITokenValidIP")

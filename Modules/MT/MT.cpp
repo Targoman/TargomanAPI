@@ -22,14 +22,14 @@
 
 #include "MT.h"
 #include "Classes/TranslationDispatcher.h"
-#include "Helpers/AAA/AAA.hpp"
 #include "TranslationDefs.hpp"
 
-using namespace QHttp;
-using namespace Targoman::DBManager;
-using namespace Targoman::API;
-using namespace Targoman::API::Modules::Translation::Classes;
-using namespace Targoman::API::Helpers::AAA;
+namespace Targoman {
+namespace API {
+namespace Modules {
+
+using namespace  Translation::Classes;
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT);
 
 void MT::init()
 {
@@ -37,17 +37,18 @@ void MT::init()
     TranslationDispatcher::instance().registerEngines();
 }
 
-QVariantMap MT::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                      const QString& _token,
-                                      QString _text,
-                                      QString _dir,
-                                      const QString& _engine,
-                                      bool _detailed,
-                                      bool _detok,
-                                      bool _dic,
-                                      bool _dicFull)
+QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
+                             const QString& _token,
+                             QString _text,
+                             QString _dir,
+                             const QString& _engine,
+                             bool _detailed,
+                             bool _detok,
+                             bool _dic,
+                             bool _dicFull)
 {
     QTime Timer, OverallTime;
+    clsDAC DAC(this->Module);
     int PreprocessTime = 0;
     Timer.start();OverallTime.start();
 
@@ -64,28 +65,28 @@ QVariantMap MT::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
     QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
-                                                   _REMOTE_IP, {
-                                                       TARGOMAN_PRIV_PREFIX + _engine,
-                                                       TARGOMAN_PRIV_PREFIX + _dir,
-                                                       _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
-                                                       _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
-                                                   });
+                                                             _REMOTE_IP, {
+                                                                 TARGOMAN_PRIV_PREFIX + _engine,
+                                                                 TARGOMAN_PRIV_PREFIX + _dir,
+                                                                 _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
+                                                                 _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
+                                                             });
 
-    QJsonObject Stats = this->DAC->execQuery(
+    QJsonObject Stats = DAC.execQuery(
                 TokenInfo[TOKENItems::usrID].toString(),
-                "SELECT * FROM tblTokenStats "
-                "WHERE tks_tokID = ? "
-                "  AND tksEngine=? "
-                "  AND tksDir=? ",
-                {
-                    {TokenInfo[TOKENItems::tokID]},
-                    {_engine},
-                    {_dir},
-                }
-            ).toJson(true).object ();
+            "SELECT * FROM tblTokenStats "
+            "WHERE tks_tokID = ? "
+            "  AND tksEngine=? "
+            "  AND tksDir=? ",
+    {
+        {TokenInfo[TOKENItems::tokID]},
+        {_engine},
+        {_dir},
+    }
+    ).toJson(true).object ();
 
     if(Stats.isEmpty())
-        this->DAC->execQuery(TokenInfo[TOKENItems::usrID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+        DAC.execQuery(TokenInfo[TOKENItems::usrID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
         {TokenInfo[TOKENItems::tokID]},
         {_engine},
         {_dir},
@@ -145,11 +146,11 @@ QVariantMap MT::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
         Timer.restart();
         if(_detailed){
             Translation[RESULTItems::TIMES]= QVariantMap({
-                 {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
-                 {RESULTItems::TIMESItems::TR, InternalTranslationTime},
-                 {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
-                 {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
-            });
+                                                             {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
+                                                             {RESULTItems::TIMESItems::TR, InternalTranslationTime},
+                                                             {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
+                                                             {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
+                                                         });
         }else
             Translation[RESULTItems::TIME]= OverallTime.elapsed();
 
@@ -165,7 +166,7 @@ QVariantMap MT::apiTranslate(const QHttp::RemoteIP_t& _REMOTE_IP,
     }
 }
 
-QVariantMap MT::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
+QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
 {
     return {
         {"inputArg", _arg},
@@ -173,10 +174,11 @@ QVariantMap MT::apiTest(const QHttp::RemoteIP_t& _REMOTE_IP, const QString& _tok
     };
 }
 
-MT::MT() : Helpers::ORM::clsRESTAPIWithActionLogs (*(new DBManager::clsDAC), "MT", "MT"),
-    DAC(new DBManager::clsDAC)
-{
-    this->registerMyRESTAPIs();
+MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT")
+{;}
+
+
+
 }
-
-
+}
+}

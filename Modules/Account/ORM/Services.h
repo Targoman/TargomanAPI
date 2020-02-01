@@ -30,12 +30,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class Services : public ORM::clsTable, public intfAPIModule
+class Services : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Service information")
     bool ORMDELETE("Delete a Service")

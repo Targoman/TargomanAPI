@@ -21,18 +21,12 @@
  */
 
 #include "Bin.h"
-#include "Helpers/AAA/AAA.hpp"
 #include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
-using namespace QHttp;
-
-void Bin::init()
-{
-    Banners::instance().init();
-}
+using namespace ORM;
 
 QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -64,11 +58,7 @@ Bin::Bin() :
                 //{"adbUpdatedBy_usrID",  "Advert.tblBanners",   "bnr_binID", "",         true},
               })
 {
-    this->registerMyRESTAPIs();
 }
-
-void Banners::init()
-{;}
 
 Banners::Banners() :
     clsTable("Advert",
@@ -83,7 +73,6 @@ Banners::Banners() :
               }
               )
 {
-    this->registerMyRESTAPIs();
 }
 }
 }

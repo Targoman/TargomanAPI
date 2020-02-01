@@ -28,12 +28,9 @@ namespace AAA {
 
 using namespace ORM;
 
-void IPBin::init()
-{;}
-
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 

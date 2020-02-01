@@ -223,21 +223,23 @@ Account::Account() :
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuGenericStatus);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAuditableStatus);
 
-    ActiveSessions::instance().init();
-    APITokens::instance().init();
-    APITokenValidIPs::instance().init();
-    ApprovalRequest::instance().init();
-    BlockingRules::instance().init();
-    ForgotPassRequest::instance().init();
-    Invoice::instance().init();
-    IPBin::instance().init();
-    IPStats::instance().init();
-    PaymentOrders::instance().init();
-    Roles::instance().init();
-    Services::instance().init();
-    User::instance().init();
-    UserWallets::instance().init();
-    WalletTransactions::instance().init();
+    this->addSubModule(new ActiveSessions);
+    this->addSubModule(new APITokens);
+    this->addSubModule(new APITokenValidIPs);
+    this->addSubModule(new ApprovalRequest);
+    this->addSubModule(new BlockingRules);
+    this->addSubModule(new ForgotPassRequest);
+    this->addSubModule(new Invoice);
+    this->addSubModule(new IPBin);
+    this->addSubModule(new IPStats);
+    this->addSubModule(new PaymentOrders);
+    this->addSubModule(new Roles);
+    this->addSubModule(new Services);
+    this->addSubModule(new User);
+    this->addSubModule(new UserExtraInfo);
+    this->addSubModule(new UserWallets);
+    this->addSubModule(new WalletTransactions);
+    this->addSubModule(new WalletBalances);
 }
 
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)

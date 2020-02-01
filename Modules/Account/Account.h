@@ -39,7 +39,6 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_API_MODULE_DB_CONFIGS(Account)
 
 public:
-    Account();
     void init();
 
 private:

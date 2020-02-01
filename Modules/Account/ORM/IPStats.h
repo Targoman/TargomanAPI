@@ -30,12 +30,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class IPStats : public ORM::clsTable, public intfAPIModule
+class IPStats : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get IPStats information")
 

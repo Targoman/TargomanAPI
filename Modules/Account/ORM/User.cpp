@@ -28,11 +28,6 @@ namespace AAA {
 
 using namespace ORM;
 
-void User::init()
-{
-    UserExtraInfo::instance().init();
-}
-
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
@@ -47,13 +42,13 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
@@ -103,7 +98,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
 
 quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     if(_ORMFILTERS.value("usrEmail").toString().isEmpty() && _ORMFILTERS.value("usrMobile").toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -138,10 +133,6 @@ User::User() : clsTable("AAA",
                            {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
                            {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true},
                          })
-{
-}
-
-void UserExtraInfo::init()
 {;}
 
 bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){

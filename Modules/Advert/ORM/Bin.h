@@ -23,37 +23,31 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class Bin : public clsTable
+class Bin : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Bin information")
 
 private:
-    Bin();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advert,Bin);
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Bin)
 };
 
-class Banners : public clsTable
+class Banners : public ORM::clsTable
 {
     Q_OBJECT
 public:
     void init();
 
 private:
-    Banners();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advert,Banners);
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Banners)
 };
 }
 }

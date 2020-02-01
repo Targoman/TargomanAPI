@@ -30,12 +30,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class BlockingRules : public ORM::clsTable, public intfAPIModule
+class BlockingRules : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get BlockingRules information")
     bool ORMDELETE("Delete a BlockingRules")

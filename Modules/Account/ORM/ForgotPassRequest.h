@@ -39,12 +39,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class ForgotPassRequest : public ORM::clsTable, public intfAPIModule
+class ForgotPassRequest : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get ForgotPassRequest information")
     bool ORMDELETE("Delete a ForgotPassRequest")

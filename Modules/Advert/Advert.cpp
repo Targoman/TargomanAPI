@@ -22,12 +22,8 @@
 
 #include "Advert.h"
 #include "QFieldValidator.h"
-#include "QHttp/QRESTServer.h"
-#include "QHttp/intfAPIArgManipulator.h"
-#include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/PrivHelpers.h"
-#include "Helpers/AAA/GenericEnums.hpp"
-#include "Configs.h"
+#include "Interfaces/AAA/PrivHelpers.h"
+#include "Interfaces/AAA/GenericEnums.hpp"
 
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
@@ -38,13 +34,12 @@
 using namespace Targoman;
 using namespace Targoman::API;
 using namespace Targoman::API::Advertisement;
-using namespace Targoman::API::Helpers::AAA;
-using namespace QHttp;
+using namespace AAA;
 
 void Advert::init()
 {}
 
-stuAdvert Advert::apiGETNewBanner(const RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order)
+stuAdvert Advert::apiGETNewBanner(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order)
 {
       /*clsDACResult Result = AdvertDACInstance().execQuery(
                                 "",
@@ -52,26 +47,25 @@ stuAdvert Advert::apiGETNewBanner(const RemoteIP_t& _REMOTE_IP, const QString& _
                                 )*/
 }
 
-stuAdvert Advert::apiGETNewText(const RemoteIP_t& _REMOTE_IP, const QString& _location, enuAdvertOrder::Type _order, const QString _keywords)
+stuAdvert Advert::apiGETNewText(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
 {
 
 }
 
-QString Advert::apiGETRetrieveURL(const RemoteIP_t& _REMOTE_IP, quint64 _id, IPv4_t _clientIP, QString _agent)
+QString Advert::apiGETRetrieveURL(const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent)
 {
 
 }
 
 Advert::Advert() :
-    Helpers::ORM::clsRESTAPIWithActionLogs (AdvertDACInstance(), "Advert", "Advert"){
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAdvertOrder);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuBannerSizes);
+    ORM::clsRESTAPIWithActionLogs("Advert", "Advert"){
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertType);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertOrder);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuBannerSizes);
 
-    Advertisement::ActiveAds::instance().init();
-    Advertisement::Bin::instance().init();
-    Advertisement::Clicks::instance().init();
-    Advertisement::Props::instance().init();
-
-    this->registerMyRESTAPIs();
+    this->addSubModule(new Advertisement::ActiveAds);
+    this->addSubModule(new Advertisement::Bin);
+    this->addSubModule(new Advertisement::Banners);
+    this->addSubModule(new Advertisement::Clicks);
+    this->addSubModule(new Advertisement::Props);
 }

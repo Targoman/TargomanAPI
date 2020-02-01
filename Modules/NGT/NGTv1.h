@@ -23,25 +23,26 @@
 #ifndef TARGOMAN_API_MODULES_NGT_NGTV1_H
 #define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "QHttp/GenericTypes.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
+#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/AAA/AAA.hpp"
+
+namespace TAPI {
+struct stuNGTPriceInfo{
+    quint32 basePPW;
+    TAPI::MD5_t FileMD5;
+};
+}
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-struct stuNGTPriceInfo{
-    quint32 basePPW;
-    QHttp::MD5_t FileMD5;
-};
-
-class Ngtv1 : private Helpers::ORM::clsRESTAPIWithActionLogs
+class NGTv1 : public ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Account)
 public:
     void init();
 
@@ -49,13 +50,12 @@ private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
 
 private:
-    Ngtv1();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Ngtv1);
+    TARGOMAN_DEFINE_API_MODULE(NGTv1)
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::stuNGTPriceInfo);
+Q_DECLARE_METATYPE(TAPI::stuNGTPriceInfo);
 
 #endif // TARGOMAN_API_MODULES_NGT_NGTV1_H

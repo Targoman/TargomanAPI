@@ -38,7 +38,7 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class WalletTransactions : public ORM::clsTable, public intfAPIModule
+class WalletTransactions : public ORM::clsTable
 {
     Q_OBJECT
 public:
@@ -51,7 +51,7 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account,WalletTransactions)
 };
 
-class WalletBalances : public ORM::clsTable, public intfAPIModule
+class WalletBalances : public ORM::clsTable
 {
     Q_OBJECT
 public:

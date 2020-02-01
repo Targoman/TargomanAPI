@@ -28,18 +28,15 @@ namespace AAA {
 
 using namespace ORM;
 
-void ApprovalRequest::init()
-{;}
-
 QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 

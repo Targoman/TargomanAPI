@@ -30,12 +30,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class User : public ORM::clsTable, public intfAPIModule
+class User : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get user information")
     bool ORMDELETE("Delete a User by priviledged user")
@@ -58,13 +55,9 @@ private slots:
         TARGOMAN_DEFINE_API_SUBMODULE(Account,User)
 };
 
-    class UserExtraInfo : public ORM::clsTable, public intfAPIModule
+    class UserExtraInfo : public ORM::clsTable
     {
         Q_OBJECT
-    public:
-        UserExtraInfo();
-        void init();
-
     private slots:
         bool REST(UPDATE,Photo,(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image),
                  "Updates user image based using a base64 encoded image")

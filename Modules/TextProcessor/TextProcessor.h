@@ -28,10 +28,6 @@
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
 class TextProcessor : public intfAPIModule
 {
     Q_OBJECT
@@ -39,26 +35,24 @@ class TextProcessor : public intfAPIModule
     Q_INTERFACES(Targoman::API::intfAPIModule)
 
 public:
-    TextProcessor(){;}
-    void init();
     bool requiresTextProcessor() const {return true;}
 
 private slots:
-    QString API(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang),
+    QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang),
                 "Normalizes input text")
-    QString API(, Text2IXML, (
+    QString REST(, Text2IXML, (
                     const QString& _text,
                     const TAPI::ISO639_2_t& _lang,
                     bool _useSpellCorrector = true),
                 "Normalizes and tokenizes text and tags special fields in an inline-XML format")
-    QString API(, Ixml2Text, (const QString& _ixml,
+    QString REST(, Ixml2Text, (const QString& _ixml,
                               const TAPI::ISO639_2_t& _lang,
                               bool _detokenize = true,
                               bool _hinidiDigits = true,
                               bool _breakSentences = true),
                 "Removes IXML tags injected by text2IXML API")
 
-    QString API(, Tokenize, (
+    QString REST(, Tokenize, (
                     const QString& _text,
                     const TAPI::ISO639_2_t& _lang,
                     bool _useSpellCorrector = true),

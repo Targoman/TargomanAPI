@@ -28,12 +28,9 @@ namespace AAA {
 
 using namespace ORM;
 
-void Invoice::init()
-{;}
-
 QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
@@ -41,7 +38,7 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 
 bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
         _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
@@ -54,7 +51,7 @@ quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
                                      quint64 _walletID)
 {
     TAPI::ORMFilters_t _ORMFILTERS;
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
     _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));

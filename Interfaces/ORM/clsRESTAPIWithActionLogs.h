@@ -29,7 +29,7 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-class clsRESTAPIWithActionLogs : public intfAPIModule, public ORM::clsTable {
+class clsRESTAPIWithActionLogs : public ORM::clsTable {
     Q_OBJECT
 public:
     inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module)  :
@@ -52,7 +52,7 @@ private slots:
     QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
     QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
 
-private:
+protected:
     QString Module;
 };
 

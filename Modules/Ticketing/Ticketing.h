@@ -42,10 +42,6 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing)
 
-public:
-    Ticketing();
-    void init();
-
 private slots:
     bool API(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser = 0),
              "create new message targeting a user or all users (if target user is 0)")

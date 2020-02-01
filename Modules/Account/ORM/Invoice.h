@@ -44,12 +44,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class Invoice : public ORM::clsTable, public intfAPIModule
+class Invoice : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Invoice information")
     bool ORMDELETE("Delete an Invoice. Take note that User can just delete invoices with Payoff type")

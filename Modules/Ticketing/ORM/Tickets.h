@@ -35,26 +35,18 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
 class Tickets : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Tickets")
 
 
 private:
-    Tickets();
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 };
 
 class TicketRead : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private:
-    TicketRead();
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
 };
 }

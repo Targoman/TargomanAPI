@@ -23,26 +23,21 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_PROPS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_PROPS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
 
-class Props : public clsTable
+class Props : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get Props information")
 
 private:
-    Props();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Advert,Props);
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Props)
 };
 
 }

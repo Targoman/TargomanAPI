@@ -104,7 +104,7 @@ public:
 
     struct stuModuleMethod{
         intfAPIModule* Module;
-        const QMetaMethod& Method;
+        QMetaMethod Method;
         stuModuleMethod(intfAPIModule* _module, const QMetaMethod& _method) :
             Module(_module),
             Method(_method)
@@ -122,10 +122,9 @@ public:
     virtual stuDBInfo requiredDB() const {return {};}
     virtual bool requiresTextProcessor() const {return false;}
     virtual bool requiresFormalityChecker() const {return false;}
+    virtual QString parentModuleName() const = 0;
 
-    virtual void init() = 0;
-    void addSubmoduleMethods(intfAPIModule* _submodule);
-private:
+protected:
     ModuleMethods_t Methods;
 };
 
@@ -135,33 +134,35 @@ private:
 Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
-    public: \
-    static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
-    QString moduleFullName(){return _name::moduleFullNameStatic();}\
-    static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
-    static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
-    static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
-    QString moduleBaseName(){return _name::moduleName();} \
-    ModuleMethods_t listOfMethods() { \
+public: \
+    _name(); \
+    QString moduleFullName(){return Targoman::Common::demangle(typeid(_name).name());}\
+    QString moduleBaseName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
+    QString parentModuleName() const final{throw Common::exTargomanNotImplemented("Module can not be added as subModule");} \
+    ModuleMethods_t listOfMethods() final { \
         if(this->Methods.size()) return  this->Methods; \
         for (int i=0; i<this->metaObject()->methodCount(); ++i) \
             this->Methods.append({this, this->metaObject()->method(i)}); \
         return this->Methods; \
+    } \
+    void addSubModule(intfAPIModule* _submodule) { \
+        if (_submodule->parentModuleName() != this->moduleBaseName()) \
+            throw Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
+        for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
+            this->Methods.append({_submodule, _submodule->metaObject()->method(i)}); \
     } \
 private: \
     Q_DISABLE_COPY(_name) \
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \
-    static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
-    virtual QString moduleFullName(){return _name::moduleFullNameStatic();}\
-    static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
-    static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
-    static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_SLASH(_module,_name)));}  \
-    QString moduleBaseName(){return _name::moduleName();} \
-    ModuleMethods_t listOfMethods() { \
+    _name(); \
+    QString moduleFullName(){return Targoman::Common::demangle(typeid(_name).name());}\
+    QString moduleBaseName(){return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module,_name)));}  \
+    ModuleMethods_t listOfMethods() final { \
         throw Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
+    QString parentModuleName() const final{return TARGOMAN_M2STR(_module);} \
 private: \
     Q_DISABLE_COPY(_name) \
 

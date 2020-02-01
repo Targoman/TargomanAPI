@@ -25,6 +25,7 @@
 
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Account.h"
 
 namespace TAPI{
 TARGOMAN_DEFINE_ENUM(enuSessionStatus,
@@ -41,13 +42,9 @@ namespace API {
 namespace AAA {
 
 
-class ActiveSessions : public intfAPIModule, public ORM::clsTable
+class ActiveSessions : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    ActiveSessions(intfAPIModule* _parent);
-    void init();
-
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")
     bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")

@@ -66,23 +66,6 @@ struct ServerConfigs
         static Common::Configuration::tmplConfigurable<QString>      Pass;
         static Common::Configuration::tmplConfigurable<QString>      Schema;
     };
-/*
-    struct Server{
-        Server(const QString& _basePath);
-        Common::Configuration::tmplConfigurable<QUrl> URL;
-        Common::Configuration::tmplConfigurable<QString>  Class;
-        Common::Configuration::tmplConfigurable<QString>  SourceLang;
-        Common::Configuration::tmplConfigurable<QString>  DestLang;
-        Common::Configuration::tmplConfigurable<bool>     SupportsIXML;
-        Common::Configuration::tmplConfigurable<bool>     Active;
-        struct stuStatistics{
-            stuStatistics(const QString& _basePath);
-            Common::Configuration::tmplConfigurable<quint64> OkResponses;
-            Common::Configuration::tmplConfigurable<quint64> FailedResponses;
-        }Statistics;
-    };
-    static Common::Configuration::tmplConfigurableMultiMap<Server> TranslationServers;
-*/
 };
 
 constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = 1026;

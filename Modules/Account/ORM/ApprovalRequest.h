@@ -48,12 +48,9 @@ namespace API {
 namespace AAA {
 
 
-class ApprovalRequest : public ORM::clsTable, public intfAPIModule
+class ApprovalRequest : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get ApprovalRequest information.")
     bool ORMDELETE("Delete an ApprovalRequest")

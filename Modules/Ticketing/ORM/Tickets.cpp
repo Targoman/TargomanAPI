@@ -28,15 +28,10 @@ namespace Targoman {
 namespace API {
 using namespace ORM;
 
-void Tickets::init()
-{
-    TicketRead::instance().init();
-}
-
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     QString ExtraFilters;
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
 
     ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
@@ -71,9 +66,8 @@ Tickets::Tickets() :
     TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketStatus);
 }
 
-void TicketRead::init()
-{;}
 
+/******************************************************************************/
 TicketRead::TicketRead() :
     clsTable("Ticketing",
               "tblTicketRead",

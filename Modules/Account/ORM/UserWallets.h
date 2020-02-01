@@ -38,12 +38,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class UserWallets : public ORM::clsTable, public intfAPIModule
+class UserWallets : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get UserWallets information")
     bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")

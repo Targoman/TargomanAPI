@@ -38,12 +38,9 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
-class IPBin : public ORM::clsTable, public intfAPIModule
+class IPBin : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get IPBin information")
 

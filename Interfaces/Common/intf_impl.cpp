@@ -64,11 +64,5 @@ intfAPIModule::intfAPIModule(Common::Configuration::intfModule *_parent) :
 
 intfAPIModule::~intfAPIModule(){;}
 
-void intfAPIModule::addSubmoduleMethods(intfAPIModule* _submodule) {
-    if(_submodule->parent() != this) throw Common::exTargomanInvalidParameter("seems that submodule is not from this parent");
-    for (int i=0; i<_submodule->metaObject()->methodCount(); ++i)
-        this->Methods.append({_submodule, _submodule->metaObject()->method(i)});
-}
-
 }
 }

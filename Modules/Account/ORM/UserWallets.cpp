@@ -28,12 +28,9 @@ namespace AAA {
 
 using namespace ORM;
 
-void UserWallets::init()
-{;}
-
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleName())) == false)
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
@@ -41,7 +38,7 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 
 bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
         _ORMFILTERS.insert("walDefault", 0);
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
@@ -50,13 +47,13 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 
 bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
         _ORMFILTERS.insert("walDefault", 0);
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
@@ -65,7 +62,7 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
-    bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
+    bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     clsDACResult Result = AAADACInstance().execQuery(
                               "",
                               "UPDATE " + this->Name

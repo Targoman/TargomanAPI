@@ -79,7 +79,7 @@ static stuRelation InvalidRelation("","","");
 static QString QUERY_SEPARATOR = "\n";
 static QString COLS_KEY = "cols";
 
-class clsTable {
+class clsTable : public intfAPIModule {
 protected:
     struct stuSelectItems{
         QStringList Cols;

@@ -25,12 +25,9 @@
 
 #include "TranslationDispatcher.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
-#include "libTargomanCommon/Configuration/ConfigManager.h"
-#include "Configs.h"
-#include "../Engines/clsNMT.h"
-#include "QHttp/QRESTServer.h"
-#include "Helpers/AAA/AAA.hpp"
-#include "Helpers/NLP/FormalityChecker.h"
+#include "Engines/clsNMT.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/NLP/FormalityChecker.h"
 
 namespace Targoman {
 namespace API {
@@ -43,9 +40,8 @@ using namespace NLPLibs;
 using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
-using namespace QHttp;
-using namespace Targoman::API::Helpers::AAA;
-using namespace Helpers::NLP;
+using namespace AAA;
+using namespace NLP;
 
 TranslationDispatcher::~TranslationDispatcher()
 { ; }
@@ -127,8 +123,9 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
 QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang)
 {
     Q_UNUSED (_lang)
+    clsDAC DAC;//TODO find moduleName
     if(this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600){
-        clsDACResult Result = this->DAC->execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
+        clsDACResult Result = DAC.execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
         if(Result.isValid()){
             this->CorrectionRule.clear();
             while(Result.next())
@@ -198,11 +195,11 @@ void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _en
 
 void TranslationDispatcher::registerEngines()
 {
-    foreach (const QString& Key, gConfigs::TranslationServers.keys()){
-        const tmplConfigurableArray<gConfigs::Server>& ServersConfig =
-                gConfigs::TranslationServers.values(Key);
+    foreach (const QString& Key, this->TranslationServers.keys()){
+        const tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
+                this->TranslationServers.values(Key);
         for(size_t i=0; i<ServersConfig.size(); ++i){
-            gConfigs::Server Server = ServersConfig.at(i);
+            stuTrServerConfig Server = ServersConfig.at(i);
             if(Server.Active.value() == false)
                 continue;
 
@@ -231,30 +228,9 @@ void TranslationDispatcher::registerEngines()
     }
 }
 
-TranslationDispatcher::TranslationDispatcher() :
-    DAC(new DBManager::clsDAC)
+TranslationDispatcher::TranslationDispatcher()
 {
     FormalityChecker::instance();
-    TargomanTextProcessor::stuConfigs TPConfigs;
-    TPConfigs.AbbreviationsFile = gConfigs::TextProcessor::AbbreviationFile.value();
-    TPConfigs.NormalizationFile = gConfigs::TextProcessor::NormalizationFile.value();
-    TPConfigs.SpellCorrectorBaseConfigPath = gConfigs::TextProcessor::SpellCorrectorBaseConfigPath.value();
-
-    QSharedPointer<QSettings>  ConfigSettings = ConfigManager::instance().configSettings();
-
-    if (ConfigSettings.isNull() == false){
-        ConfigSettings->beginGroup(gConfigs::TextProcessor::SpellCorrectorLanguageBasedConfigs.configPath());
-        foreach(const QString& Lang, ConfigSettings->childGroups()){
-            foreach (const QString& Key, ConfigSettings->allKeys()){
-                ConfigSettings->beginGroup(Lang);
-                TPConfigs.SpellCorrectorLanguageBasedConfigs[Lang].insert(Key, ConfigSettings->value(Key));
-                ConfigSettings->endGroup();
-            }
-        }
-        ConfigSettings->endGroup();
-    }
-
-    TargomanTextProcessor::instance().init(TPConfigs);
 }
 
 /********************************************/
