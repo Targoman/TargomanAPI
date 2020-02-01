@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -29,7 +29,7 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-class clsRESTAPIWithActionLogs : public clsTable {
+class clsRESTAPIWithActionLogs : public intfAPIModule, public ORM::clsTable {
     Q_OBJECT
 public:
     inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module)  :

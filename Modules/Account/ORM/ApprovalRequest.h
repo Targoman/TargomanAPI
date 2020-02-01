@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,12 +23,10 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuAPRStatus,
                      New      = 'N',
                      Sent     = 'S',
@@ -43,10 +41,14 @@ TARGOMAN_DEFINE_ENUM(enuApprovalType,
                      Email      = 'E',
                      Mobile     = 'M',
                      )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
 
-class ApprovalRequest : public clsTable
+class ApprovalRequest : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -56,16 +58,15 @@ private slots:
     QVariant ORMGET("Get ApprovalRequest information.")
     bool ORMDELETE("Delete an ApprovalRequest")
 
-private:
-    ApprovalRequest();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ApprovalRequest);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,ApprovalRequest)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuAPRStatus::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuApprovalType::Type);
+Q_DECLARE_METATYPE(TAPI::enuAPRStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuApprovalType::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H

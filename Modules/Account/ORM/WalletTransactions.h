@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,20 +23,22 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      New = 'A',
                      Processed = 'P',
                      Removed = 'R'
-                     )
+                               )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class WalletTransactions : public clsTable
+class WalletTransactions : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -46,25 +48,23 @@ private slots:
     QVariant ORMGET("Get WalletTransactions information.")
 
 private:
-    WalletTransactions();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,WalletTransactions);
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,WalletTransactions)
 };
 
-class WalletBalances : public clsTable
+class WalletBalances : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
     void init();
 
 private:
-    WalletBalances();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account, WalletBalances);
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuWalletTransactionStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuWalletTransactionStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

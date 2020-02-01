@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "PaymentOrders.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void PaymentOrders::init()
 {;}
@@ -44,21 +44,19 @@ PaymentOrders::PaymentOrders() :
               "tblPaymentOrders",
               { ///<ColName             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"pyoID",               S(quint64),             QFV.integer().minValue(1),          true},
-                {"pyoMD5",              S(QHttp::MD5_t),        QFV,                                ORM_PRIMARY_KEY},
-                {"pyoCreationDateTime", S(QHttp::DateTime_t),   QFV,                                QNull,      true},
+                {"pyoMD5",              S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
+                {"pyoCreationDateTime", S(TAPI::DateTime_t),    QFV,                                QNull,      true},
                 {"pyo_invID",           S(quint64),             QFV.integer().minValue(1),          QNull,      true},
                 {"pyoBankTrnID",        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   true},
-                {"pyoAmount",           S(QHttp::DateTime_t),   QFV,                                QInvalid,   true},
-                {"pyoStatus",           S(Targoman::API::enuPaymentStatus::Type),QFV,               Targoman::API::enuPaymentStatus::Pending},
+                {"pyoAmount",           S(TAPI::DateTime_t),    QFV,                                QInvalid,   true},
+                {"pyoStatus",           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending},
                 {"pyoResult",           S(QString),             QFV,                                QNull,      true,false,false},
               },
               { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
                 {"bpo_invID",  "AAA.tblInvoice",           "invID",     "",        true},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuPaymentStatus);
-
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuPaymentStatus);
 }
 
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,16 +23,14 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 
-class BlockingRules : public clsTable
+class BlockingRules : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -44,9 +42,8 @@ private slots:
     bool ORMUPDATE("Update blocking rule info by priviledged user")
     quint64 ORMCREATE("Create a new BlockingRule by priviledged user")
 
-private:
-    BlockingRules();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,BlockingRules);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,BlockingRules)
 };
 
 }

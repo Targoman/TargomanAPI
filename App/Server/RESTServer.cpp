@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -20,6 +20,7 @@
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  */
 
+#include <QCoreApplication>
 #include <QThread>
 #include <QTcpSocket>
 #include <QUrl>
@@ -127,7 +128,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
         TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value()<<ServerConfigs::BasePathWithVersion);
     }else{
         TargomanLogError("Unable to start server to listen on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value());
-        exit (1);
+        QCoreApplication::exit(-1);
     }
 
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET

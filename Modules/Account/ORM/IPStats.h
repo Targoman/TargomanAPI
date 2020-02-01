@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,15 +23,14 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 
-class IPStats : public clsTable
+class IPStats : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -40,9 +39,8 @@ public:
 private slots:
     QVariant ORMGET("Get IPStats information")
 
-private:
-    IPStats();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,IPStats);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,IPStats)
 };
 
 }

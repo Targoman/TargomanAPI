@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -25,7 +25,8 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void APITokenValidIPs::init()
 {;}
@@ -68,9 +69,9 @@ APITokenValidIPs::APITokenValidIPs() :
                 {"tviIP",               S(quint64),          QFV.integer().minValue(1),      QInvalid},
                 {"tviIPReadable",       S(QString),          QFV.allwaysInvalid(),           QInvalid,  true,false, false},
                 {"tviCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QInvalid,  true},
-                {"tviCreationDateTime", S(QHttp::DateTime_t),QFV,                            QNull,     true},
+                {"tviCreationDateTime", S(TAPI::DateTime_t), QFV,                            QNull,     true},
                 {"tviUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QNull,     true},
-                {"tviStatus",           S(Targoman::API::enuGenericStatus::Type), QFV,       Targoman::API::enuGenericStatus::Active},
+                {"tviStatus",           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"tvi_aptID",          "AAA.tblAPITokens",  "aptID"},
@@ -78,7 +79,6 @@ APITokenValidIPs::APITokenValidIPs() :
                 {"tviUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

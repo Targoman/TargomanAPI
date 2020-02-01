@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,21 +23,23 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuFPRStatus,
                      New      = 'N',
                      Sent     = 'S',
                      Applied  = 'A',
                      Removed  = 'R'
-                     )
+                                )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class ForgotPassRequest : public clsTable
+class ForgotPassRequest : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -47,15 +49,14 @@ private slots:
     QVariant ORMGET("Get ForgotPassRequest information")
     bool ORMDELETE("Delete a ForgotPassRequest")
 
-private:
-    ForgotPassRequest();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ForgotPassRequest);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,ForgotPassRequest)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuFPRStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuFPRStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H

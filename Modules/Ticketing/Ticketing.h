@@ -26,7 +26,6 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
-#include "libTargomanDBM/clsDAC.h"
 #include "./ORM/Defs.hpp"
 
 namespace Targoman {
@@ -42,6 +41,7 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing)
+
 public:
     Ticketing();
     void init();

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "ApprovalRequest.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void ApprovalRequest::init()
 {;}
@@ -49,20 +49,19 @@ ApprovalRequest::ApprovalRequest() :
               { ///<ColName             Type                    Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"aprID",               S(quint64),             QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                 {"apr_usrID",           S(quint32),             QFV.integer().minValue(1),       QInvalid,  true},
-                {"aprRequestedFor",     S(Targoman::API::enuApprovalType::Type),    QFV,         "",        true},
+                {"aprRequestedFor",     S(TAPI::enuApprovalType::Type),    QFV,         "",        true},
                 {"aprApprovalCode",     S(QString),             QFV.asciiAlNum().maxLenght(32),  "",        true},
                 {"aprApprovalValue",    S(QString),             QFV.allwaysInvalid(),            "",        true,false,false},
-                {"aprRequestDate",      S(QHttp::DateTime_t),   QFV,                             QNull,     true},
-                {"aprApplyDate",        S(QHttp::DateTime_t),   QFV,                             QNull,     true},
-                {"aprStatus",           S(Targoman::API::enuAPRStatus::Type), QFV,               Targoman::API::enuAPRStatus::New},
+                {"aprRequestDate",      S(TAPI::DateTime_t),    QFV,                             QNull,     true},
+                {"aprApplyDate",        S(TAPI::DateTime_t),    QFV,                             QNull,     true},
+                {"aprStatus",           S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"apr_usrID",          "AAA.tblUser",      "usrID"},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAPRStatus);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuApprovalType);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAPRStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuApprovalType);
 }
 
 }

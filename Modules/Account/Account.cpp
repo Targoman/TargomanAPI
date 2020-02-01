@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -22,13 +22,8 @@
 
 #include "Account.h"
 #include "QFieldValidator.h"
-#include "QHttp/QRESTServer.h"
-#include "QHttp/intfAPIArgManipulator.h"
-#include "Helpers/AAA/AAA.hpp"
-#include "Helpers/AAA/PrivHelpers.h"
-#include "Helpers/AAA/GenericEnums.hpp"
-#include "Configs.h"
 
+#include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
 #include "ORM/ActiveSessions.h"
@@ -45,25 +40,22 @@
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
+namespace Targoman {
+namespace API {
 
-using namespace Targoman;
-using namespace Targoman::API;
-using namespace Targoman::API::AAA;
-using namespace Targoman::API::Helpers::AAA;
-using namespace QHttp;
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
 void Account::init()
 {}
 
-QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
+TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
                                       const QString& _login,
-                                      const QHttp::MD5_t& _pass,
+                                      const TAPI::MD5_t& _pass,
                                       const QString& _salt,
                                       const QString& _tlps,
                                       bool _rememberMe,
-                                      const QHttp::JSON_t& _sessionInfo,
-                                      const QHttp::MD5_t& _fingerprint)
+                                      const TAPI::JSON_t& _sessionInfo,
+                                      const TAPI::MD5_t& _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -76,28 +68,28 @@ QHttp::EncodedJWT_t Account::apiLogin(const QHttp::RemoteIP_t& _REMOTE_IP,
                             _tlps);
 }
 
-QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                             enuOAuthType::Type _type,
+TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                             TAPI::enuOAuthType::Type _type,
                                              const QString& _oAuthToken,
                                              const QString& _tlps,
-                                             const QHttp::JSON_t& _sessionInfo,
-                                             const QHttp::MD5_t& _fingerprint)
+                                             const TAPI::JSON_t& _sessionInfo,
+                                             const TAPI::MD5_t& _fingerprint)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
     Authentication::stuOAuthInfo OAuthInfo;
 
     switch(_type){
-    case enuOAuthType::Google:
+    case TAPI::enuOAuthType::Google:
         OAuthInfo = Authentication::retrieveGoogleUserInfo(_oAuthToken);
         break;
-    case enuOAuthType::Linkedin:
+    case TAPI::enuOAuthType::Linkedin:
         OAuthInfo = Authentication::retrieveLinkedinUserInfo(_oAuthToken);
         break;
-    case enuOAuthType::Yahoo:
+    case TAPI::enuOAuthType::Yahoo:
         OAuthInfo = Authentication::retrieveYahooUserInfo(_oAuthToken);
         break;
-    case enuOAuthType::Github:
+    case TAPI::enuOAuthType::Github:
         OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
         break;
 /*    default:
@@ -108,7 +100,7 @@ QHttp::EncodedJWT_t Account::apiLoginByOAuth(const QHttp::RemoteIP_t& _REMOTE_IP
                             _tlps);
 }
 
-QHttp::EncodedJWT_t Account::apiRefreshJWT(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT)
+TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     clsJWT JWT(_JWT);
@@ -119,13 +111,13 @@ QHttp::EncodedJWT_t Account::apiRefreshJWT(const QHttp::RemoteIP_t& _REMOTE_IP, 
                             TLPs);
 }
 
-quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
+quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
                               const QString& _emailOrMobile,
-                              const QHttp::MD5_t& _pass,
+                              const TAPI::MD5_t& _pass,
                               const QString& _role,
                               const QString& _name,
                               const QString& _family,
-                              QHttp::JSON_t _specialPrivs,
+                              TAPI::JSON_t _specialPrivs,
                               qint8 _maxSessions)
 {
     QString Type;
@@ -152,7 +144,7 @@ quint32 Account::apiPUTSignup(const QHttp::RemoteIP_t& _REMOTE_IP,
                                                          }).spDirectOutputs().value("oUserID").toDouble());
 }
 
-bool Account::apiLogout(QHttp::JWT_t _JWT)
+bool Account::apiLogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
     AAADACInstance().callSP("","AAA.sp_UPDATE_logout", {
@@ -162,19 +154,19 @@ bool Account::apiLogout(QHttp::JWT_t _JWT)
     return true;
 }
 
-bool Account::apiCreateForgotPasswordLink(const RemoteIP_t& _REMOTE_IP, const QString& _login, enuForgotPassLinkVia::Type _via)
+bool Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _login, TAPI::enuForgotPassLinkVia::Type _via)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
     AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
                                  {"iLogin", _login},
-                                 {"iVia", enuForgotPassLinkVia::toStr(_via)},
+                                 {"iVia", TAPI::enuForgotPassLinkVia::toStr(_via)},
                              });
     return true;
 }
 
-bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, const QString& _oldPassSalt, const QHttp::MD5_t& _newPass)
+bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const QString& _oldPassSalt, const TAPI::MD5_t& _newPass)
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
@@ -187,7 +179,7 @@ bool Account::apiChangePass(QHttp::JWT_t _JWT, const QHttp::MD5_t& _oldPass, con
     return true;
 }
 
-bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5_t& _uuid, const MD5_t& _newPass)
+bool Account::apiChangePassByUUID(const TAPI::RemoteIP_t& _REMOTE_IP, const TAPI::MD5_t& _uuid, const TAPI::MD5_t& _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     AAADACInstance().callSP ("","AAA.sp_UPDATE_changePassByUUID", {
@@ -197,8 +189,8 @@ bool Account::apiChangePassByUUID(const QHttp::RemoteIP_t& _REMOTE_IP, const MD5
     return true;
 }
 
-bool Account::apiPOSTApproveEmail(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                  const QHttp::MD5_t& _uuid)
+bool Account::apiPOSTApproveEmail(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                  const TAPI::MD5_t& _uuid)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     AAADACInstance().callSP("", "AAA.sp_UPDATE_acceptApproval", {
@@ -208,8 +200,8 @@ bool Account::apiPOSTApproveEmail(const QHttp::RemoteIP_t& _REMOTE_IP,
     return true;
 }
 
-bool Account::apiPOSTApproveMobile(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                  const QHttp::Mobile_t _mobile,
+bool Account::apiPOSTApproveMobile(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                  const TAPI::Mobile_t _mobile,
                                   const quint16& _code)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
@@ -221,15 +213,15 @@ bool Account::apiPOSTApproveMobile(const QHttp::RemoteIP_t& _REMOTE_IP,
 }
 
 Account::Account() :
-    clsRESTAPIWithActionLogs(AAADACInstance(), "AAA", "Account")
+    clsRESTAPIWithActionLogs("AAA", "Account")
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuOAuthType);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuForgotPassLinkVia);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserStatus);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserSex);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserApproval);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuGenericStatus);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAuditableStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuOAuthType);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuForgotPassLinkVia);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserSex);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserApproval);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuGenericStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAuditableStatus);
 
     ActiveSessions::instance().init();
     APITokens::instance().init();
@@ -246,13 +238,11 @@ Account::Account() :
     User::instance().init();
     UserWallets::instance().init();
     WalletTransactions::instance().init();
-
-    this->registerMyRESTAPIs();
 }
 
-EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)
+TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)
 {
-    return this->createSignedJWT({
+    return clsJWT::createSigned({
                                      {JWTItems::usrLogin, _login},
                                      {JWTItems::usrName, _result["usrGivenName"]},
                                      {JWTItems::usrFamily, _result["usrFamilyName"]},
@@ -261,12 +251,13 @@ EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result
                                      {JWTItems::privs, _result["privs"]},
                                      {JWTItems::usrID, _result["usrID"]},
                                      {JWTItems::canChangePass, _result["hasPass"]},
-                                     {JWTItems::usrApproval, enuUserApproval::toStr(_result["usrApprovalState"].toString())},
-                                     {JWTItems::usrStatus, enuUserStatus::toStr(_result["usrStatus"].toString())},
+                                     {JWTItems::usrApproval, TAPI::enuUserApproval::toStr(_result["usrApprovalState"].toString())},
+                                     {JWTItems::usrStatus, TAPI::enuUserStatus::toStr(_result["usrStatus"].toString())},
                                  },
                                  QJsonObject({{"tlps",_requiredTLPs}}),
-                                 Targoman::Apps::gConfigs::JWT::TTL.value(),
                                  _result["ssnKey"].toString()
             );
 }
 
+}
+}

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,16 +23,14 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
-#include "Helpers/AAA/GenericEnums.hpp"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 
-class User : public clsTable
+class User : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -44,40 +42,39 @@ private slots:
     bool ORMUPDATE("Update User info by priviledged user")
     quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
 
-    bool API(UPDATE,profile,(QHttp::JWT_t _JWT,
-                             Targoman::API::enuUserSex::Type _sex = {},
+    bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
+                             TAPI::enuUserSex::Type _sex = {},
                              QString _name = {},
                              QString _family = {},
-                             QHttp::ISO639_2_t _lang = {},
-                             QHttp::Email_t _email = {},
-                             QHttp::Mobile_t _mobile = {},
-                             QHttp::MD5_t _pass = {},
+                             TAPI::ISO639_2_t _lang = {},
+                             TAPI::Email_t _email = {},
+                             TAPI::Mobile_t _mobile = {},
+                             TAPI::MD5_t _pass = {},
                              QString _salt = {}),
              "Update User profile. Take note that this method does not change password "
              "Password and Salt are required to change email or mobile")
 
-private:
-    User();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,User);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,User)
 };
 
-class UserExtraInfo : public clsTable
-{
-    Q_OBJECT
-public:
-    void init();
+    class UserExtraInfo : public ORM::clsTable, public intfAPIModule
+    {
+        Q_OBJECT
+    public:
+        UserExtraInfo();
+        void init();
 
-private slots:
-    bool API(UPDATE,Photo,(QHttp::JWT_t _JWT, QHttp::Base64Image_t _image),
-             "Updates user image based using a base64 encoded image")
-    bool API(UPDATE,Sheba,(QHttp::JWT_t _JWT, QHttp::Sheba_t _sheba),
-             "Updates user image based using a base64 encoded image")
-private:
-    UserExtraInfo();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,UserExtraInfo);
-};
+    private slots:
+        bool REST(UPDATE,Photo,(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image),
+                 "Updates user image based using a base64 encoded image")
+        bool REST(UPDATE,Sheba,(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba),
+                 "Updates user image based using a base64 encoded image")
+        private:
+            TARGOMAN_DEFINE_API_SUBMODULE(Account,UserExtraInfo)
+    };
 
-}
+    }
 }
 }
 

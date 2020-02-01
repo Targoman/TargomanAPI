@@ -1,7 +1,7 @@
 /******************************************************************************
  * TargomanAAA: Authentication, Authorization, Accounting framework           *
  *                                                                            *
- * Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>  *
+ * Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>  *
  *                                                                            *
  * TargomanAAA is free software: you can redistribute it and/or modify        *
  * it under the terms of the GNU Lesser General Public License as published   *
@@ -57,10 +57,6 @@ TAPI_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 #define CREATE_METHOD_CALL_ARGS   _ORMFILTERS
 #define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
 namespace ORM {
 
 class clsTable;
@@ -83,7 +79,7 @@ static stuRelation InvalidRelation("","","");
 static QString QUERY_SEPARATOR = "\n";
 static QString COLS_KEY = "cols";
 
-class clsTable: public intfAPIModule {
+class clsTable {
 protected:
     struct stuSelectItems{
         QStringList Cols;
@@ -108,7 +104,7 @@ protected:
     };
 
 public:
-    clsTable(const QString& _scheam,
+    clsTable( const QString& _schema,
               const QString& _name,
               const QList<clsORMField>& _cols,
               const QList<stuRelation>& _foreignKeys);

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,21 +23,22 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI{
 TARGOMAN_DEFINE_ENUM(enuRoleStatus,
                      Active   = 'A',
                      Blocked  = 'B',
                      Removed  = 'R'
-                     )
+                                )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class Roles : public clsTable
+class Roles : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -49,15 +50,14 @@ private slots:
     bool ORMUPDATE("Update role info by priviledged user")
     quint32 ORMCREATE("Create a new Role by priviledged user")
 
-private:
-    Roles();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Roles);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,Roles)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuRoleStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuRoleStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

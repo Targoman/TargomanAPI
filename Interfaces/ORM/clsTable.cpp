@@ -1,7 +1,7 @@
 /******************************************************************************
  * TargomanAAA: Authentication, Authorization, Accounting framework           *
  *                                                                            *
- * Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>  *
+ * Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>  *
  *                                                                            *
  * TargomanAAA is free software: you can redistribute it and/or modify        *
  * it under the terms of the GNU Lesser General Public License as published   *

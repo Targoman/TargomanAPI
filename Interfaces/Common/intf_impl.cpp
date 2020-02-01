@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -40,6 +40,7 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
 
 intfAPIArgManipulator::~intfAPIArgManipulator() {;}
 
+/******************************************************************************/
 intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
     Host(_host),
     Port(_port),
@@ -57,10 +58,17 @@ QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema){
                 _noSchema ? "" : this->Schema);
 }
 
-intfAPIModule::intfAPIModule(Targoman::Common::Configuration::intfModule *_parent) :
+intfAPIModule::intfAPIModule(Common::Configuration::intfModule *_parent) :
     Targoman::Common::Configuration::intfModule(_parent)
 {;}
 
 intfAPIModule::~intfAPIModule(){;}
+
+void intfAPIModule::addSubmoduleMethods(intfAPIModule* _submodule) {
+    if(_submodule->parent() != this) throw Common::exTargomanInvalidParameter("seems that submodule is not from this parent");
+    for (int i=0; i<_submodule->metaObject()->methodCount(); ++i)
+        this->Methods.append({_submodule, _submodule->metaObject()->method(i)});
+}
+
 }
 }

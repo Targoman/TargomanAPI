@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,20 +23,22 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuUserWalletStatus,
                      Active = 'A',
                      Deactive = 'P',
                      Removed = 'R'
-                     )
+                               )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class UserWallets : public clsTable
+class UserWallets : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -48,28 +50,27 @@ private slots:
     bool ORMUPDATE("Update Wallet info by priviledged user")
     quint64 ORMCREATE("Create a new Wallet")
 
-    bool API(UPDATE,defaultWallet,(QHttp::JWT_t _JWT, quint64 _walID),
+    bool REST(UPDATE,defaultWallet,(TAPI::JWT_t _JWT, quint64 _walID),
              "change default wallet")
-    bool API(CREATE,transfer,(QHttp::JWT_t _JWT,
+    bool REST(CREATE,transfer,(TAPI::JWT_t _JWT,
                               const QString& _destLogin,
                               quint32 _amount,
-                              const QHttp::MD5_t& _pass,
+                              const TAPI::MD5_t& _pass,
                               const QString& _salt,
                               quint64 _walID = 0),
              "Transfer money to other user wallet. Default will be used if not defined")
 
-    bool API(CREATE,deposit,(QHttp::JWT_t _JWT, quint32 _amount, quint64 _walID = 0),
+    bool REST(CREATE,deposit,(TAPI::JWT_t _JWT, quint32 _amount, quint64 _walID = 0),
              "Deposit money in the specified or default wallet")
 
-private:
-    UserWallets();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,UserWallets);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,UserWallets)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuUserWalletStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuUserWalletStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H

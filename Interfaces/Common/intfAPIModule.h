@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -25,8 +25,10 @@
 
 #include <QObject>
 #include <QtPlugin>
+#include <QMap>
 
 #include "libTargomanCommon/Configuration/intfConfigurableModule.hpp"
+#include "libTargomanCommon/exTargomanBase.h"
 
 #include "QHttp/qhttpfwd.hpp"
 
@@ -81,12 +83,12 @@ namespace API {
 #  define CENTRALCACHE_24H
 #endif
 
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
-#define ASYNC_API(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+#define REST(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+#define ASYNC_REST(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 
 #define INTFAPIMODULE_IID "TARGOMAN.API.INTFAPIMODULE/1.0.0"
 
-class intfAPIModule : public Targoman::Common::Configuration::intfModule
+class intfAPIModule : public Common::Configuration::intfModule
 {
 public:
     struct stuDBInfo{
@@ -100,50 +102,51 @@ public:
         QString toConnStr(bool _noSchema = false);
     };
 
+    struct stuModuleMethod{
+        intfAPIModule* Module;
+        const QMetaMethod& Method;
+        stuModuleMethod(intfAPIModule* _module, const QMetaMethod& _method) :
+            Module(_module),
+            Method(_method)
+        {}
+    };
+
+    typedef QList<stuModuleMethod> ModuleMethods_t;
+
 public:
     intfAPIModule(Targoman::Common::Configuration::intfModule *_parent = nullptr);
     virtual ~intfAPIModule();
     virtual QList<ORM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {Q_UNUSED(_method) return {};}
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID)}
-    virtual QList<QMetaMethod> listOfMethods() const = 0;
+    virtual ModuleMethods_t listOfMethods() = 0;
     virtual stuDBInfo requiredDB() const {return {};}
     virtual bool requiresTextProcessor() const {return false;}
     virtual bool requiresFormalityChecker() const {return false;}
 
     virtual void init() = 0;
-
-    /**
-     * @brief createSignedJWT creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard.
-     * @param _payload The payload to include in JWT. The payload object must not include enteries with following keys:
-     *        - iat: reserved for initial time
-     *        - exp: reserved for expiration time
-     *        - jti: reserved for JWT session
-     *        - prv: reserved for private payload
-     * @param _privatePayload Optinally private object that will be included in JWT encrypted. There will be no restriction on key values
-     * @param _expiry optinally a time in seconds for max life time
-     * @param _sessionID optinally a session key for each user to be stored in `jti`
-     * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
-     */
-    //TAPI::EncodedJWT_t createSignedJWT(QJsonObject _payload, QJsonObject _privatePayload = QJsonObject(), const qint32 _expiry = -1, const QString& _sessionID = QString());
+    void addSubmoduleMethods(intfAPIModule* _submodule);
+private:
+    ModuleMethods_t Methods;
 };
+
 
 }
 }
 Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
-public: \
+    public: \
     static QString moduleFullNameStatic(){return Targoman::Common::demangle(typeid(_name).name());}\
     QString moduleFullName(){return _name::moduleFullNameStatic();}\
     static _name& instance() {return *(reinterpret_cast<_name*>(_name::moduleInstance()));} \
     static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
     static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
     QString moduleBaseName(){return _name::moduleName();} \
-    QList<QMetaMethod> listOfMethods() const { \
-        QList<QMetaMethod> Methods; \
+    ModuleMethods_t listOfMethods() { \
+        if(this->Methods.size()) return  this->Methods; \
         for (int i=0; i<this->metaObject()->methodCount(); ++i) \
-            Methods.append(this->metaObject()->method(i)); \
-        return Methods; \
+            this->Methods.append({this, this->metaObject()->method(i)}); \
+        return this->Methods; \
     } \
 private: \
     Q_DISABLE_COPY(_name) \
@@ -156,11 +159,8 @@ public: \
     static Targoman::Common::Configuration::intfModule* moduleInstance(){static _name* Instance = NULL; return Q_LIKELY(Instance) ? Instance : (Instance = new _name);} \
     static QString moduleName(){return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_SLASH(_module,_name)));}  \
     QString moduleBaseName(){return _name::moduleName();} \
-    QList<QMetaMethod> listOfMethods() const { \
-        QList<QMetaMethod> Methods; \
-        for (int i=0; i<this->metaObject()->methodCount(); ++i) \
-            Methods.append(this->metaObject()->method(i)); \
-        return Methods; \
+    ModuleMethods_t listOfMethods() { \
+        throw Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
 private: \
     Q_DISABLE_COPY(_name) \

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -25,7 +25,8 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void Roles::init()
 {;}
@@ -61,12 +62,12 @@ Roles::Roles() :
                 {"rolID",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
                 {"rolName",             S(QString),          QFV.unicodeAlNum().maxLenght(50),   QInvalid},
                 {"rolParent_rolID",     S(quint32),          QFV.integer().minValue(1),          QNull},
-                {"rolPrivileges",       S(QHttp::JSON_t),    QFV,                                QInvalid, false,false,false},
+                {"rolPrivileges",       S(TAPI::JSON_t),     QFV,                                QInvalid, false,false,false},
                 {"rolSignupAllowedIPs", S(QString),          QFV,                                QNull,    false,false,false}, //OJO This must be validated after splitting by comma
                 {"rolCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QInvalid, true},
-                {"rolCreationDateTime", S(QHttp::DateTime_t),QFV,                                QNull,    true},
+                {"rolCreationDateTime", S(TAPI::DateTime_t), QFV,                                QNull,    true},
                 {"rolUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull},
-                {"rolStatus",           S(Targoman::API::enuRoleStatus::Type), QFV,              Targoman::API::enuRoleStatus::Active},
+                {"rolStatus",           S(TAPI::enuRoleStatus::Type), QFV,                       TAPI::enuRoleStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
                 {"rolParent_rolID",    "AAA.tblRoles",     "rolID",     "Parent_",  true},
@@ -74,9 +75,7 @@ Roles::Roles() :
                 {"rolUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuRoleStatus);
-
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuRoleStatus);
 }
 
 }

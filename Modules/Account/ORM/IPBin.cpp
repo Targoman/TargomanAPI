@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "IPBin.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void IPBin::init()
 {;}
@@ -42,20 +42,19 @@ IPBin::IPBin() :
               "tblIPBin",
               { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"ipbIP",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"ipbReadable",         S(QHttp::IPv4_t),    QFV,                                QInvalid,  true},
-                {"ipbFirstAccess",      S(QHttp::DateTime_t),QFV,                                QNull,     true},
+                {"ipbReadable",         S(TAPI::IPv4_t),     QFV,                                QInvalid,  true},
+                {"ipbFirstAccess",      S(TAPI::DateTime_t), QFV,                                QNull,     true},
                 {"ipbAccessCount",      S(quint64),          QFV.integer().minValue(0),          0,         true},
-                {"ipbLastAccess",       S(QHttp::DateTime_t),QFV,                                QNull,     true},
+                {"ipbLastAccess",       S(TAPI::DateTime_t), QFV,                                QNull,     true},
                 {"ipbBlockedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull,     true},
-                {"ipbBlockingTime",     S(QHttp::DateTime_t),QFV,                                QNull,     true},
-                {"ipbStatus",           S(Targoman::API::enuIPBinStatus::Type), QFV,             Targoman::API::enuIPBinStatus::Active},
+                {"ipbBlockingTime",     S(TAPI::DateTime_t), QFV,                                QNull,     true},
+                {"ipbStatus",           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active},
               },
               { ///< Col               Reference Table     ForeignCol Rename      LeftJoin
                 {"ipbBlockedBy_usrID", "AAA.tblUser",      "usrID",   "Blocker_", true},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuIPBinStatus);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuIPBinStatus);
 }
 
 }

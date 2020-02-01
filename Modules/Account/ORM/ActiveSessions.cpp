@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,11 +21,13 @@
  */
 
 #include "ActiveSessions.h"
-#include "Helpers/AAA/AAA.hpp"
+#include "Account.h"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
+
+using namespace ORM;
 
 void ActiveSessions::init()
 {;}
@@ -49,29 +51,30 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
 }
 
-ActiveSessions::ActiveSessions() :
+ActiveSessions::ActiveSessions(intfAPIModule* _parent) :
+    intfAPIModule(_parent),
     clsTable("AAA",
               "tblActiveSessions",
               { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
-                {"ssnKey",              S(QHttp::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
-                {"ssn_usrID",           S(quint32),             QFV.integer().minValue(1),   QInvalid,  true},
-                {"ssnIP",               S(quint32),             QFV.integer().minValue(1),   QInvalid,  true},
-                {"ssnIPReadable",       S(QString),             QFV.allwaysInvalid(),        QInvalid,  true,false,false},
-                {"ssnCreationDateTime", S(QHttp::DateTime_t),   QFV,                         QNull,     true},
-                {"ssnInfo",             S(QHttp::JSON_t),       QFV,                         QNull,     true,false,false},
-                {"ssnFingerPrint",      S(QHttp::MD5_t),        QFV.allwaysInvalid(),        QNull,     true,false,false},
-                {"ssnLastActivity",     S(QHttp::DateTime_t),   QFV,                         QNull,     true},
-                {"ssnRemember",         S(bool),                QFV,                         false,     true},
-                {"ssnUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
-                {"ssnStatus",           S(Targoman::API::enuSessionStatus::Type), QFV,       Targoman::API::enuSessionStatus::Active},
+                {"ssnKey",              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
+                {"ssn_usrID",           S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
+                {"ssnIP",               S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
+                {"ssnIPReadable",       S(QString),            QFV.allwaysInvalid(),        QInvalid,  true,false,false},
+                {"ssnCreationDateTime", S(TAPI::DateTime_t),   QFV,                         QNull,     true},
+                {"ssnInfo",             S(TAPI::JSON_t),       QFV,                         QNull,     true,false,false},
+                {"ssnFingerPrint",      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,     true,false,false},
+                {"ssnLastActivity",     S(TAPI::DateTime_t),   QFV,                         QNull,     true},
+                {"ssnRemember",         S(bool),               QFV,                         false,     true},
+                {"ssnUpdatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),   QNull,     true},
+                {"ssnStatus",           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"ssn_usrID",          "AAA.tblUser",      "usrID",     "Owner_"},
                 {"ssnUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuSessionStatus);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuSessionStatus);
+    this->parent()->addSubmoduleMethods()
 }
 
 }

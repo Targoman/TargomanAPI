@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "Invoice.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void Invoice::init()
 {;}
@@ -42,22 +42,22 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
-        _ORMFILTERS.insert("invPaymentType", enuInvoiceType::toStr(enuInvoiceType::Withdrawal));
+        _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
 
     return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
 }
 
-quint64 Invoice::apiCREATEwithdraw(QHttp::JWT_t _JWT,
+quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
                                      quint64 _amount,
                                      quint64 _walletID)
 {
-    ORMFilters_t _ORMFILTERS;
+    TAPI::ORMFilters_t _ORMFILTERS;
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleName())) == false){
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
-    _ORMFILTERS.insert("invPaymentType", enuInvoiceType::toStr(enuInvoiceType::Withdrawal));
+    _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
     _ORMFILTERS.insert("invTotalAmount", _amount);
     _ORMFILTERS.insert("invServiceCode", "WALT");
     _ORMFILTERS.insert("invDesc", QJsonDocument(QJsonObject{
@@ -72,23 +72,21 @@ Invoice::Invoice() :
               "tblInvoice",
               { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
                 {"invID",               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
-                {"invCreationDateTime", S(QHttp::DateTime_t),QFV,                                        QNull,     true},
+                {"invCreationDateTime", S(TAPI::DateTime_t), QFV,                                        QNull,     true},
                 {"inv_svcID",           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid},
                 {"inv_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
-                {"invDesc",             S(QHttp::JSON_t),    QFV.allwaysInvalid(),                       QNull,    false,false,false},
-                {"invPaymentType",      S(Targoman::API::enuInvoiceType::Type), QFV,                     Targoman::API::enuInvoiceType::Payment},
+                {"invDesc",             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,    false,false,false},
+                {"invPaymentType",      S(TAPI::enuInvoiceType::Type), QFV,                              TAPI::enuInvoiceType::Payment},
                 {"invTotalAmount",      S(quint64),          QFV,                                        0},
-                {"invStatus",           S(Targoman::API::enuInvoiceStatus::Type), QFV,                   Targoman::API::enuInvoiceStatus::New},
+                {"invStatus",           S(TAPI::enuInvoiceStatus::Type), QFV,                            TAPI::enuInvoiceStatus::New},
               },
               { ///< Col       Reference Table   ForeignCol
                 {"inv_usrID",  "AAA.tblUser",     "usrID"},
                 {"inv_svcID",  "AAA.tblServices", "svcID"},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuInvoiceStatus);
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuInvoiceType);
-
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceType);
 }
 
 }

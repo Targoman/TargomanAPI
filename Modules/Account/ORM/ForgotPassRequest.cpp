@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "ForgotPassRequest.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void ForgotPassRequest::init()
 {;}
@@ -46,21 +46,19 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 ForgotPassRequest::ForgotPassRequest() :
     clsTable("AAA",
               "tblForgotPassRequest",
-              { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
-                {"fprUUID",             S(QHttp::MD5_t),     QFV,                                        ORM_PRIMARY_KEY},
-                {"fpr_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
-                {"fprRequestedVia",     S(Targoman::API::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
-                {"fprRequestDate",      S(QHttp::DateTime_t),QFV,                                        QNull,     true},
-                {"fprApplyDate",        S(QHttp::DateTime_t),QFV,                                        QNull,     true},
-                {"fprStatus",           S(Targoman::API::enuFPRStatus::Type), QFV,                       Targoman::API::enuFPRStatus::New},
+              { ///<ColName             Type                 Validation                         Default    RO   Sort  Filter Self  Virt   PK
+                {"fprUUID",             S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
+                {"fpr_usrID",           S(quint32),          QFV.integer().minValue(1),         QInvalid,  true},
+                {"fprRequestedVia",     S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
+                {"fprRequestDate",      S(TAPI::DateTime_t), QFV,                               QNull,     true},
+                {"fprApplyDate",        S(TAPI::DateTime_t), QFV,                               QNull,     true},
+                {"fprStatus",           S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New},
               },
               { ///< Col       Reference Table   ForeignCol
                 {"fpr_usrID",  "AAA.tblUser",    "usrID"},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuFPRStatus);
-
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuFPRStatus);
 }
 
 }

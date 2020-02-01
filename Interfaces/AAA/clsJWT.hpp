@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -27,24 +27,25 @@
 #include <QVariantMap>
 #include "libTargomanCommon/Macros.h"
 #include "GenericEnums.hpp"
+#include "Interfaces/Common/GenericTypes.h"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 
 namespace JWTItems{
-    TARGOMAN_CREATE_CONSTEXPR(usrLogin);
-    TARGOMAN_CREATE_CONSTEXPR(usrName);
-    TARGOMAN_CREATE_CONSTEXPR(usrFamily);
-    TARGOMAN_CREATE_CONSTEXPR(rolName);
-    TARGOMAN_CREATE_CONSTEXPR(rolID);
-    TARGOMAN_CREATE_CONSTEXPR(privs);
-    TARGOMAN_CREATE_CONSTEXPR(usrID);
-    TARGOMAN_CREATE_CONSTEXPR(usrApproval);
-    TARGOMAN_CREATE_CONSTEXPR(usrStatus);
-    TARGOMAN_CREATE_CONSTEXPR(jti);
-    TARGOMAN_CREATE_CONSTEXPR(priv);
-    TARGOMAN_CREATE_CONSTEXPR(canChangePass);
+TARGOMAN_CREATE_CONSTEXPR(usrLogin);
+TARGOMAN_CREATE_CONSTEXPR(usrName);
+TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+TARGOMAN_CREATE_CONSTEXPR(rolName);
+TARGOMAN_CREATE_CONSTEXPR(rolID);
+TARGOMAN_CREATE_CONSTEXPR(privs);
+TARGOMAN_CREATE_CONSTEXPR(usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrApproval);
+TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+TARGOMAN_CREATE_CONSTEXPR(jti);
+TARGOMAN_CREATE_CONSTEXPR(priv);
+TARGOMAN_CREATE_CONSTEXPR(canChangePass);
 }
 
 class clsJWT{
@@ -64,6 +65,21 @@ public:
     inline QJsonValue value(const QLatin1String& _key){return this->Token.value(_key);}
     inline bool canChangePass(){return this->Token.value(JWTItems::canChangePass).toBool();}
 
+    /**
+     * @brief createSignedJWT creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard.
+     * @param _payload The payload to include in JWT. The payload object must not include enteries with following keys:
+     *        - iat: reserved for initial time
+     *        - exp: reserved for expiration time
+     *        - jti: reserved for JWT session
+     *        - prv: reserved for private payload
+     * @param _privatePayload Optinally private object that will be included in JWT encrypted. There will be no restriction on key values
+     * @param _expiry optinally a time in seconds for max life time
+     * @param _sessionID optinally a session key for each user to be stored in `jti`
+     * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
+     */
+    static TAPI::EncodedJWT_t createSigned(QJsonObject _payload,
+                                           QJsonObject _privatePayload = QJsonObject(),
+                                           const QString& _sessionID = QString());
 private:
     const QJsonObject& Token;
 };

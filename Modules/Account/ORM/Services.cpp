@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -25,7 +25,8 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void Services::init()
 {;}
@@ -64,9 +65,9 @@ Services::Services() :
                 {"svc_rolID",           S(quint32),          QFV,                             QInvalid},
                 {"svcInvoiceTemplate",  S(QString),          QFV,                             QInvalid, false, false, false},
                 {"svcCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QInvalid, true},
-                {"svcCreationDateTime", S(QHttp::DateTime_t),QFV,                             QNull,    true},
+                {"svcCreationDateTime", S(TAPI::DateTime_t), QFV,                             QNull,    true},
                 {"svcUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QNull,    true},
-                {"svcStatus",           S(Targoman::API::enuGenericStatus::Type), QFV,        Targoman::API::enuGenericStatus::Active},
+                {"svcStatus",           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active},
               },
               { ///< Col                Reference Table     ForeignCol   Rename     LeftJoin
                 {"usr_rolID",           "AAA.tblRoles",     "rolID"},
@@ -74,7 +75,6 @@ Services::Services() :
                 {"svcUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

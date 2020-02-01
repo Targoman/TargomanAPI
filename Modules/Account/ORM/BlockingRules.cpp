@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -25,7 +25,8 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void BlockingRules::init()
 {;}
@@ -58,24 +59,23 @@ quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 BlockingRules::BlockingRules() :
     clsTable("AAA",
               "tblBlockingRuless",
-              { ///<ColName             Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
-                {"blrID",               S(quint64),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"blr_ipbIP",           S(quint32),          QFV.integer().minValue(1),       QNull},
-                {"blr_ipIPReadable",    S(QHttp::IPv4_t),    QFV,                             QInvalid, true,false,false},
-                {"blrStartingTime",     S(QHttp::DateTime_t),QFV,                             QNull,    true, true},
-                {"blrEndingTime",       S(QHttp::DateTime_t),QFV,                             QNull},
-                {"blrCause",            S(QString),          QFV,                             QNull,   false,false,false},
-                {"blrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QInvalid, true},
-                {"blrCreationDateTime", S(QHttp::DateTime_t),QFV,                             QNull,    true},
-                {"blrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QNull,    true},
-                {"blrStatus",           S(Targoman::API::enuGenericStatus::Type), QFV,        Targoman::API::enuGenericStatus::Active},
+              { ///<ColName             Type                Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                {"blrID",               S(quint64),         QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {"blr_ipbIP",           S(quint32),         QFV.integer().minValue(1),       QNull},
+                {"blr_ipIPReadable",    S(TAPI::IPv4_t),    QFV,                             QInvalid, true,false,false},
+                {"blrStartingTime",     S(TAPI::DateTime_t),QFV,                             QNull,    true, true},
+                {"blrEndingTime",       S(TAPI::DateTime_t),QFV,                             QNull},
+                {"blrCause",            S(QString),         QFV,                             QNull,   false,false,false},
+                {"blrCreatedBy_usrID",  S(quint32),         QFV.integer().minValue(1),       QInvalid, true},
+                {"blrCreationDateTime", S(TAPI::DateTime_t),QFV,                             QNull,    true},
+                {"blrUpdatedBy_usrID",  S(quint32),         QFV.integer().minValue(1),       QNull,    true},
+                {"blrStatus",           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
               { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
                 {"blrCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
                 {"blrUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

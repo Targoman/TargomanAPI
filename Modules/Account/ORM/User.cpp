@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "User.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void User::init()
 {
@@ -57,14 +57,14 @@ bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
     return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
 }
 
-bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
-                            Targoman::API::enuUserSex::Type _sex,
+bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
+                            TAPI::enuUserSex::Type _sex,
                             QString _name,
                             QString _family,
-                            QHttp::ISO639_2_t _lang,
-                            QHttp::Email_t _email,
-                            QHttp::Mobile_t _mobile,
-                            QHttp::MD5_t _pass,
+                            TAPI::ISO639_2_t _lang,
+                            TAPI::Email_t _email,
+                            TAPI::Mobile_t _mobile,
+                            TAPI::MD5_t _pass,
                             QString _salt){
     if(_email.size() || _mobile.size ()){
         QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -89,7 +89,7 @@ bool User::apiUPDATEprofile(QHttp::JWT_t _JWT,
                                     {"iSalt", _salt},
                                 });
 
-    if(_name.size() || _family.size() || _sex != enuUserSex::NotExpressed)
+    if(_name.size() || _family.size() || _sex != TAPI::enuUserSex::NotExpressed)
         return this->update(AAADACInstance(),
                             {{"usrID", clsJWT(_JWT).usrID()}},
                             {
@@ -114,23 +114,23 @@ User::User() : clsTable("AAA",
                          "tblUser",
                          { ///<ColName             Type                      Validation                       Default    RO   Sort  Filter Self  Virt   PK
                            {"usrID",               S(quint32),          QFV.integer().minValue(1),            QInvalid, true, true, true, true, false, true},
-                           {"usrSex",              S(Targoman::API::enuUserSex::Type), QFV,                   Targoman::API::enuUserSex::NotExpressed},
+                           {"usrSex",              S(TAPI::enuUserSex::Type), QFV,                            TAPI::enuUserSex::NotExpressed},
                            {"usrName",             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
                            {"usrFamily",           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
-                           {"usrEmail",            S(QHttp::Email_t),   QFV.emailNotFake(),                   QNull},
-                           {"usrMobile",           S(QHttp::Mobile_t),  QFV,                                  QNull},
-                           {"usrApprovalState",    S(Targoman::API::enuUserApproval::Type),QFV,               Targoman::API::enuUserApproval::None},
+                           {"usrEmail",            S(TAPI::Email_t),    QFV.emailNotFake(),                   QNull},
+                           {"usrMobile",           S(TAPI::Mobile_t),   QFV,                                  QNull},
+                           {"usrApprovalState",    S(TAPI::enuUserApproval::Type),QFV,                        TAPI::enuUserApproval::None},
                          //{"usrPass"},
                            {"usr_rolID",           S(quint32),          QFV.integer().minValue(1),            QInvalid},
-                           {"usrSpecialPrivs",     S(QHttp::JSON_t),    QFV,                                  QNull,   false,false,false},
+                           {"usrSpecialPrivs",     S(TAPI::JSON_t),     QFV,                                  QNull,   false,false,false},
                            {"usrLanguage",         S(QString),          QFV.languageCode(),                   "fa"},
                            {"usrMaxSessions",      S(quint32),          QFV.integer().betweenValues(-1, 100), -1},
                            {"usrActiveSessions",   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, true},
-                           {"usrLastLogin",        S(QHttp::DateTime_t),QFV,                                  QInvalid, true},
+                           {"usrLastLogin",        S(TAPI::DateTime_t), QFV,                                  QInvalid, true},
                            {"usrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QInvalid, true},
-                           {"usrCreationDateTime", S(QHttp::DateTime_t),QFV,                                  QNull,    true},
+                           {"usrCreationDateTime", S(TAPI::DateTime_t), QFV,                                  QNull,    true},
                            {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QNull},
-                           {"usrStatus",           S(Targoman::API::enuUserStatus::Type), QFV,                Targoman::API::enuUserStatus::MustValidate},
+                           {"usrStatus",           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
                            {"usr_rolID",          "AAA.tblRoles",          "rolID"},
@@ -139,13 +139,12 @@ User::User() : clsTable("AAA",
                            {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true},
                          })
 {
-    this->registerMyRESTAPIs();
 }
 
 void UserExtraInfo::init()
 {;}
 
-bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _image){
+bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
     clsDACResult Result = AAADACInstance().execQuery(
                               "",
                               "UPDATE " + this->Name
@@ -159,7 +158,7 @@ bool UserExtraInfo::apiUPDATEPhoto(QHttp::JWT_t _JWT, QHttp::Base64Image_t _imag
     return Result.numRowsAffected() > 0;
 }
 
-bool UserExtraInfo::apiUPDATESheba(QHttp::JWT_t _JWT, QHttp::Sheba_t _sheba){
+bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
     clsDACResult Result = AAADACInstance().execQuery(
                               "",
                               "UPDATE " + this->Name
@@ -180,15 +179,14 @@ UserExtraInfo::UserExtraInfo() :
                {  ///<ColName             Type                      Validation                      Default    RO   Sort  Filter Self  Virt   PK
 //                   {"uei_usrID",          S(quint32),               QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                    {"ueiExtraInfo",       S(QString),               QFV,                            QNull,  false,false,false},
-                   {"ueiPhoto",           S(QHttp::Base64Image_t),  QFV,                            QNull,  false,false,false},
+                   {"ueiPhoto",           S(TAPI::Base64Image_t),   QFV,                            QNull,  false,false,false},
                    {"ueiUpdatedBy_usrID", S(quint32),               QFV.integer().minValue(1),      QNull},
-                   {"ueiOAuthAccounts",   S(QHttp::JSON_t),         QFV,                            QNull}
+                   {"ueiOAuthAccounts",   S(TAPI::JSON_t),          QFV,                            QNull}
                },
                { ///< Col                 Reference Table       ForeignCol     Rename     LeftJoin
                    {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}
                })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "WalletTransactions.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void WalletTransactions::init()
 {
@@ -48,9 +48,9 @@ WalletTransactions::WalletTransactions() :
                 {"wltID",           S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
                 {"wlt_walID",       S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
                 {"wlt_invID",       S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
-                {"wltDateTime",     S(QHttp::DateTime_t),       QFV,                                QNull,      true},
+                {"wltDateTime",     S(TAPI::DateTime_t),        QFV,                                QNull,      true},
                 {"wltAmount",       S(qint64),                  QFV,                                QInvalid,   true,false,false},
-                {"wltStatus",       S(Targoman::API::enuWalletTransactionStatus::Type), QFV,        Targoman::API::enuWalletTransactionStatus::New},
+                {"wltStatus",       S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New},
               },
               { ///< Col       Reference Table             ForeignCol     Rename   LeftJoin
                 {"wlt_walID", "AAA.tblUserWallets",         "walID"},
@@ -58,11 +58,7 @@ WalletTransactions::WalletTransactions() :
                 {"wltID",     "AAA.tblWalletBalances",      "wbl_wltID"},
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuWalletTransactionStatus);
-
-    this->registerMyRESTAPIs();
-
-    //show balance
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuWalletTransactionStatus);
 }
 
 void WalletBalances::init()
@@ -79,7 +75,6 @@ WalletBalances::WalletBalances() :
               }
               )
 {
-    this->registerMyRESTAPIs();
 }
 
 }

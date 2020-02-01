@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,26 +23,28 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
                      New      = 'N',
                      Canceled = 'C',
                      Finished = 'F',
                      Removed  = 'R'
-                     )
+                                )
 
 TARGOMAN_DEFINE_ENUM(enuInvoiceType,
                      Payment    = 'P',
                      Withdrawal = 'W'
-                     )
+                                  )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class Invoice : public clsTable
+class Invoice : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -51,21 +53,20 @@ public:
 private slots:
     QVariant ORMGET("Get Invoice information")
     bool ORMDELETE("Delete an Invoice. Take note that User can just delete invoices with Payoff type")
-    quint64 API(CREATE,withdraw,(QHttp::JWT_t _JWT,
-                                quint64 _amount,
-                                quint64 _walletID),
-             "Create a new payback request by user.")
+    quint64 REST(CREATE,withdraw,(TAPI::JWT_t _JWT,
+                                 quint64 _amount,
+                                 quint64 _walletID),
+                "Create a new payback request by user.")
 
-private:
-    Invoice();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,Invoice);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,Invoice)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuInvoiceStatus::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuInvoiceType::Type);
+Q_DECLARE_METATYPE(TAPI::enuInvoiceStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuInvoiceType::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H

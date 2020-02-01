@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,11 @@
  */
 
 #include "APITokens.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+using namespace ORM;
 
 void APITokens::init()
 {;}
@@ -62,21 +61,21 @@ quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 APITokens::APITokens() :
     clsTable("AAA",
               "tblAPITokens",
-              { ///<ColName             Type                    Validation                      Default    RO   Sort  Filter Self  Virt   PK
-                {"aptID",               S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"aptToken",            S(QString),             QFV.asciiAlNum().maxLenght(50), QInvalid,  true, true, false},
-                {"apt_usrID",           S(quint32),             QFV.integer().minValue(1),      0},
-                {"apt_svcID",           S(quint32),             QFV.integer().minValue(1),      0},
-                {"aptLang",             S(QHttp::ISO639_2_t),   QFV,                            "en"},
-                {"aptValidateIP",       S(bool),                QFV,                            false},
-                {"aptExtraPriviledges", S(QHttp::JSON_t),       QFV,                            QNull,    false,false, false},
-                {"aptExpiryDate",       S(QHttp::DateTime_t),   QFV,                            QNull},
-                {"aptLastActivity",     S(QHttp::DateTime_t),   QFV,                            QNull ,    true},
-                {"aptAccessCount",      S(quint32),             QFV.integer().minValue(1),      0,         true},
-                {"aptCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      QInvalid,  true},
-                {"aptCreationDateTime", S(QHttp::DateTime_t),   QFV,                            QNull,     true},
-                {"aptUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      QNull,     true},
-                {"aptStatus",           S(Targoman::API::enuAPITokensStatus::Type),QFV,         Targoman::API::enuAPITokensStatus::Active},
+              { ///<ColName             Type                   Validation                      Default    RO   Sort  Filter Self  Virt   PK
+                {"aptID",               S(quint64),            QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {"aptToken",            S(QString),            QFV.asciiAlNum().maxLenght(50), QInvalid,  true, true, false},
+                {"apt_usrID",           S(quint32),            QFV.integer().minValue(1),      0},
+                {"apt_svcID",           S(quint32),            QFV.integer().minValue(1),      0},
+                {"aptLang",             S(TAPI::ISO639_2_t),   QFV,                            "en"},
+                {"aptValidateIP",       S(bool),               QFV,                            false},
+                {"aptExtraPriviledges", S(TAPI::JSON_t),       QFV,                            QNull,    false,false, false},
+                {"aptExpiryDate",       S(TAPI::DateTime_t),   QFV,                            QNull},
+                {"aptLastActivity",     S(TAPI::DateTime_t),   QFV,                            QNull ,    true},
+                {"aptAccessCount",      S(quint32),            QFV.integer().minValue(1),      0,         true},
+                {"aptCreatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),      QInvalid,  true},
+                {"aptCreationDateTime", S(TAPI::DateTime_t),   QFV,                            QNull,     true},
+                {"aptUpdatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),      QNull,     true},
+                {"aptStatus",           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active},
               },
               { ///< Col               Reference Table    ForeignCol   Rename     LeftJoin
                 {"apt_svcID",          "AAA.tblServices", "svcID",     "",         true},
@@ -85,8 +84,7 @@ APITokens::APITokens() :
                 {"aptUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuAPITokensStatus);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAPITokensStatus);
 }
 
 }

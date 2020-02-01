@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -79,8 +79,9 @@ void appTargomanAPI::slotExecute()
                 intfAPIModule* Module = qobject_cast<intfAPIModule*>(ModuleObject);
                 if(!Module)
                     throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(FileName));
-                foreach(auto Method, Module->listOfMethods())
-                    RESTAPIRegistry::registerRESTAPI(Module, Method);
+
+                foreach(auto ModuleMethod, Module->listOfMethods())
+                    RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
                 if(Module->requiredDB().Schema.size())
                     RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
@@ -98,20 +99,19 @@ void appTargomanAPI::slotExecute()
                 delete Loader;
             }
         }
-
         //Prepare database connections
         if(RequiredDBs.size()) {
             DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
             QSet<QString> ConnectionStrings;
             if(ServerConfigs::MasterDB::Host.value().size()
                && ServerConfigs::MasterDB::Schema.value().size()){
-                intfAPIModule::stuDBInfo MasterDBInfo = intfAPIModule::stuDBInfo(
+                intfAPIModule::stuDBInfo MasterDBInfo = {
                                                             ServerConfigs::MasterDB::Schema.value(),
                                                             ServerConfigs::MasterDB::Port.value(),
+                                                            ServerConfigs::MasterDB::Host.value(),
                                                             ServerConfigs::MasterDB::User.value(),
-                                                            ServerConfigs::MasterDB::Pass.value(),
-                                                            ServerConfigs::MasterDB::Host.value()
-                                                            );
+                                                            ServerConfigs::MasterDB::Pass.value()
+                                                        };
                 ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
             }
@@ -129,9 +129,10 @@ void appTargomanAPI::slotExecute()
             }
         }
 
-        TargomanInfo(5, RESTAPIRegistry::registeredAPIs("",true,true).join("\n"));
-
         RESTServer::instance().start();
+
+        TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("",true,true).join("\n"));
+
     }catch(Common::exTargomanBase& e){
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);

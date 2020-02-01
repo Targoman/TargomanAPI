@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,21 +23,23 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI{
 TARGOMAN_DEFINE_ENUM(enuAPITokensStatus,
                      Active   = 'A',
                      Pending  = 'P',
                      CreditFinished    = 'C',
                      Removed  = 'R'
-                     )
+                                )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class APITokens : public clsTable
+class APITokens : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -49,15 +51,14 @@ private slots:
     bool ORMUPDATE("Update token info by priviledged user")
     quint32 ORMCREATE("Create a new APITokens by priviledged user")
 
-private:
-    APITokens();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,APITokens);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,APITokens)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuAPITokensStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuAPITokensStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H

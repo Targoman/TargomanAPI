@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -86,7 +86,7 @@ stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
        || Obj.value("email_verified").toBool() == false )
         throw exAuthentication("Invalid Google Token: " + Doc.toJson());
 
-    Info.Type   = enuOAuthType::Google;
+    Info.Type   = TAPI::enuOAuthType::Google;
     Info.ID     = Obj.value("kid").toString();
     Info.Email  = Obj.value("email").toString();
     Info.Photo  = (Obj.contains("") ? retrievePhoto(Obj.value("picture").toString()) : QString());
@@ -109,7 +109,7 @@ stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
     if(Obj.contains("id") == false)
         throw exAuthentication("Invalid Linkedin Token: " + Doc.toJson());
 
-    Info.Type   = enuOAuthType::Linkedin;
+    Info.Type   = TAPI::enuOAuthType::Linkedin;
     Info.ID     = Obj.value("id").toString();
     Info.Email  = QString();
     Info.Photo  = (Obj.contains("") ? retrievePhoto(Obj.value("picture").toString()) : QString());

@@ -1,7 +1,7 @@
 ################################################################################
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -29,12 +29,12 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-#addSubdirs(Account, Dependencies)
+addSubdirs(Account, Dependencies)
 #addSubdirs(MT, Dependencies)
 #addSubdirs(Advert, Dependencies)
 #addSubdirs(NGT, Dependencies)
-addSubdirs(Ticketing, Dependencies)
+#addSubdirs(Ticketing, Dependencies)
 #addSubdirs(TextProcessor, Dependencies)
 #addSubdirs(FormalityChecker, Dependencies)
-addSubdirs(URLProcessor, Dependencies)
+#addSubdirs(URLProcessor, Dependencies)
 

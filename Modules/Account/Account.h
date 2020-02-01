@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,96 +23,96 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 #define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/AAA/Authentication.h"
-#include "Helpers/ORM/clsRESTAPIWithActionLogs.h"
-#include "Helpers/AAA/GenericEnums.hpp"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
+
+#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
-class Account : private Helpers::ORM::clsRESTAPIWithActionLogs
+class Account : public ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Account)
+
 public:
+    Account();
     void init();
 
+private:
+    TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
+
 private slots:
-    QHttp::EncodedJWT_t API(,Login,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                    const QString& _login,
-                                    const QHttp::MD5_t& _pass,
-                                    const QString& _salt,
-                                    const QString& _tlps = "",
-                                    bool _rememberMe = false,
-                                    const QHttp::JSON_t& _sessionInfo = {},
-                                    const QHttp::MD5_t& _fingerprint = {}),
-                            "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
+    TAPI::EncodedJWT_t REST(,Login,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                   const QString& _login,
+                                   const TAPI::MD5_t& _pass,
+                                   const QString& _salt,
+                                   const QString& _tlps = "",
+                                   bool _rememberMe = false,
+                                   const TAPI::JSON_t& _sessionInfo = {},
+                                   const TAPI::MD5_t& _fingerprint = {}),
+                           "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
 
-    QHttp::EncodedJWT_t API(,LoginByOAuth,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                           Targoman::API::enuOAuthType::Type _type,
-                                           const QString& _oAuthToken,
-                                           const QString& _tlps,
-                                           const QHttp::JSON_t& _sessionInfo = QHttp::JSON_t(),
-                                           const QHttp::MD5_t& _fingerprint = {}),
-                            "Login by Open Authentication and return an encoded JWT")
+    TAPI::EncodedJWT_t REST(,LoginByOAuth,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                          TAPI::enuOAuthType::Type _type,
+                                          const QString& _oAuthToken,
+                                          const QString& _tlps,
+                                          const TAPI::JSON_t& _sessionInfo = TAPI::JSON_t(),
+                                          const TAPI::MD5_t& _fingerprint = {}),
+                           "Login by Open Authentication and return an encoded JWT")
 
-    QHttp::EncodedJWT_t API(,RefreshJWT,(const QHttp::RemoteIP_t& _REMOTE_IP, QHttp::JWT_t _JWT),
-                            "Refresh JWT in order to update information or expiry time")
+    TAPI::EncodedJWT_t REST(,RefreshJWT,(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT),
+                           "Refresh JWT in order to update information or expiry time")
 
-    quint32 API(PUT,Signup,(const QHttp::RemoteIP_t& _REMOTE_IP,
+    quint32 REST(PUT,Signup,(const TAPI::RemoteIP_t& _REMOTE_IP,
                             const QString& _emailOrMobile,
-                            const QHttp::MD5_t& _pass,
+                            const TAPI::MD5_t& _pass,
                             const QString& _role,
                             const QString& _name = "",
                             const QString& _family = "",
-                            QHttp::JSON_t _specialPrivs = {},
+                            TAPI::JSON_t _specialPrivs = {},
                             qint8 _maxSessions = -1),
                 "Base method for signup with email address. this method can be called just by predefined IPs")
 
-    bool API(,Logout,(QHttp::JWT_t _JWT),
+    bool REST(,Logout,(TAPI::JWT_t _JWT),
              "Logout logged in user")
 
-    bool API(,CreateForgotPasswordLink,(const QHttp::RemoteIP_t& _REMOTE_IP,
+    bool REST(,CreateForgotPasswordLink,(const TAPI::RemoteIP_t& _REMOTE_IP,
                                         const QString& _login,
-                                        Targoman::API::enuForgotPassLinkVia::Type _via),
+                                        TAPI::enuForgotPassLinkVia::Type _via),
              "Create a forgot password request returning a UUID for the requiest")
 
-    bool API(,ChangePass,(QHttp::JWT_t _JWT,
-                          const QHttp::MD5_t& _oldPass,
+    bool REST(,ChangePass,(TAPI::JWT_t _JWT,
+                          const TAPI::MD5_t& _oldPass,
                           const QString& _oldPassSalt,
-                          const QHttp::MD5_t& _newPass
+                          const TAPI::MD5_t& _newPass
                           ),
              "Changes password of the logged-in user")
 
-    bool API(,ChangePassByUUID,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                const QHttp::MD5_t& _uuid,
-                                const QHttp::MD5_t& _newPass
+    bool REST(,ChangePassByUUID,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                const TAPI::MD5_t& _uuid,
+                                const TAPI::MD5_t& _newPass
                                 ),
              "Changes password based on a UUID provided by ")
-    bool API(POST,ApproveEmail,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                const QHttp::MD5_t& _uuid),
+    bool REST(POST,ApproveEmail,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                const TAPI::MD5_t& _uuid),
              "Approves Email by provided UUID")
 
-    bool API(POST,ApproveMobile,(const QHttp::RemoteIP_t& _REMOTE_IP,
-                                 const QHttp::Mobile_t _mobile,
+    bool REST(POST,ApproveMobile,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                 const TAPI::Mobile_t _mobile,
                                  const quint16& _code),
              "Approves Mobile by provided mobile no and code")
-private:
-    Account();
-    TARGOMAN_DEFINE_SINGLETON_MODULE(Account);
-
-    QHttp::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
+    private:
+    TARGOMAN_DEFINE_API_MODULE(Account)
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuOAuthType::Type);
-Q_DECLARE_METATYPE(Targoman::API::enuForgotPassLinkVia::Type);
+Q_DECLARE_METATYPE(TAPI::enuOAuthType::Type);
+Q_DECLARE_METATYPE(TAPI::enuForgotPassLinkVia::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

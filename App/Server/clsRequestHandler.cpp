@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -242,9 +242,11 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
     if(_api == "/openAPI.yaml")
         throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 
+    QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
+
     if(_api == "/stats.json"){
         gServerStats.Success.inc();
-        return this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson());
+        return this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
     }
 
     QString ExtraAPIPath;
@@ -264,7 +266,6 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
                                "API not found("+this->Request->methodString()+": "+_api+")",
                                true);
 
-    QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
     for(auto QueryIter = Queries.begin(); QueryIter != Queries.end(); ++QueryIter)
         *QueryIter = QueryIter->replace('+', ' ');
 

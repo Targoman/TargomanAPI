@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,41 +23,42 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI{
 TARGOMAN_DEFINE_ENUM(enuSessionStatus,
                      Active    = 'A',
                      LoggedOut = 'G',
                      FiredOut  = 'F',
                      Expired   = 'E',
                      Removed   = 'R'
-                     )
+                                 )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
 
-class ActiveSessions : public clsTable
+class ActiveSessions : public intfAPIModule, public ORM::clsTable
 {
     Q_OBJECT
 public:
+    ActiveSessions(intfAPIModule* _parent);
     void init();
 
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")
     bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")
 
-private:
-    ActiveSessions();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,ActiveSessions);
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,ActiveSessions)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuSessionStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuSessionStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H

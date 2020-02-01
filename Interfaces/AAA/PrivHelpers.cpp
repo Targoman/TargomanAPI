@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,8 +21,10 @@
  */
 
 #include "PrivHelpers.h"
+#include "App/Server/QJWT.h"
 #include "libTargomanCommon/Helpers.hpp"
 #include "3rdParty/QtCUrl/src/QtCUrl.h"
+#include "clsJWT.hpp"
 
 namespace Targoman {
 namespace API {
@@ -146,6 +148,12 @@ QByteArray PrivHelpers::getURL(const QString& _url){
         throw exAccounting("Connection to <" + _url + "> error: " + CUrl.lastError().text());
     else
         return CUrlResult.toUtf8();
+}
+
+/******************************************************************************/
+TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
+{
+    return Server::QJWT::createSigned(_payload, _privatePayload, Server::QJWT::TTL.value(), _sessionID);
 }
 
 }

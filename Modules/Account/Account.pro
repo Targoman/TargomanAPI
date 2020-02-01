@@ -1,7 +1,7 @@
 ################################################################################
 #   TargomanDBM: An extension to QSqlDatabase
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanDBM is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Lesser General Public License as published by
@@ -21,40 +21,40 @@ ModuleName=Account
 
 HEADERS += \
     Account.h \
-    ORM/Roles.h \
-    ORM/User.h \
     ORM/ActiveSessions.h \
+    ORM/APITokens.h \
     ORM/APITokenValidIPs.h \
+    ORM/ApprovalRequest.h \
+    ORM/BlockingRules.h \
     ORM/ForgotPassRequest.h \
     ORM/Invoice.h \
     ORM/IPBin.h \
     ORM/IPStats.h \
+    ORM/PaymentOrders.h \
+    ORM/Roles.h \
+    ORM/Services.h \
+    ORM/User.h \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
-    ORM/BlockingRules.h \
-    ORM/APITokens.h \
-    ORM/ApprovalRequest.h \
-    ORM/PaymentOrders.h \
-    ORM/Services.h
 
 
 SOURCES += \
     Account.cpp \
-    ORM/Roles.cpp \
-    ORM/User.cpp \
     ORM/ActiveSessions.cpp \
+    ORM/APITokens.cpp \
     ORM/APITokenValidIPs.cpp \
+    ORM/ApprovalRequest.cpp \
+    ORM/BlockingRules.cpp \
     ORM/ForgotPassRequest.cpp \
     ORM/Invoice.cpp \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
+    ORM/PaymentOrders.cpp \
+    ORM/Roles.cpp \
+    ORM/Services.cpp \
+    ORM/User.cpp \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \
-    ORM/BlockingRules.cpp \
-    ORM/APITokens.cpp \
-    ORM/ApprovalRequest.cpp \
-    ORM/PaymentOrders.cpp \
-    ORM/Services.cpp
 
 OTHER_FILES += \
 

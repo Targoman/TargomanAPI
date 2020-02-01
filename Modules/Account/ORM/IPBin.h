@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,20 +23,22 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
 
-#include "QHttp/intfRESTAPIHolder.h"
-#include "libTargomanDBM/clsDAC.h"
-#include "Helpers/ORM/clsTable.h"
+#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuIPBinStatus,
                      Active  = 'A',
                      Blocked = 'B',
                      Removed = 'R'
-                     )
+                               )
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 
-class IPBin : public clsTable
+class IPBin : public ORM::clsTable, public intfAPIModule
 {
     Q_OBJECT
 public:
@@ -45,15 +47,14 @@ public:
 private slots:
     QVariant ORMGET("Get IPBin information")
 
-private:
-    IPBin();
-    TARGOMAN_DEFINE_SINGLETON_SUBMODULE(Account,IPBin);
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,IPBin)
 };
 
 }
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuIPBinStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuIPBinStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H

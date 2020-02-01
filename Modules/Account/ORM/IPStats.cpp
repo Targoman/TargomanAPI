@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "IPStats.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void IPStats::init()
 {;}
@@ -43,13 +43,12 @@ IPStats::IPStats() :
               { ///<ColName             Type                 Validation                     Default    RO   Sort  Filter Self  Virt   PK
                 {"ips_ipbIP",           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
                 {"ipsTimeStamp",        S(double),           QFV.allwaysValid(),            QInvalid, true},
-                {"ipsInsertionDate",    S(QHttp::DateTime_t),QFV.allwaysValid(),            QNull,    true},
+                {"ipsInsertionDate",    S(TAPI::DateTime_t), QFV.allwaysValid(),            QNull,    true},
               },
               { ///< Col        Reference Table     ForeignCol
                 {"ips_ipbIP",   "AAA.tblIPBin",     "tblIPBin" },
               })
 {
-    this->registerMyRESTAPIs();
 }
 
 }

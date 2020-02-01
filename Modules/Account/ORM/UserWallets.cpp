@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,12 +21,12 @@
  */
 
 #include "UserWallets.h"
-#include "Helpers/AAA/AAA.hpp"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-using namespace QHttp;
+
+using namespace ORM;
 
 void UserWallets::init()
 {;}
@@ -64,7 +64,7 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
     return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-bool UserWallets::apiUPDATEdefaultWallet(QHttp::JWT_t _JWT, quint64 _walID){
+bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
     bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleName()));
     clsDACResult Result = AAADACInstance().execQuery(
                               "",
@@ -84,10 +84,10 @@ bool UserWallets::apiUPDATEdefaultWallet(QHttp::JWT_t _JWT, quint64 _walID){
     return Result.numRowsAffected() > 0;
 }
 
-bool UserWallets::apiCREATEtransfer(QHttp::JWT_t _JWT,
+bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
                                     const QString& _destLogin,
                                     quint32 _amount,
-                                    const QHttp::MD5_t& _pass,
+                                    const TAPI::MD5_t& _pass,
                                     const QString& _salt,
                                     quint64 _walID){
     return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_transfer", {
@@ -103,7 +103,7 @@ bool UserWallets::apiCREATEtransfer(QHttp::JWT_t _JWT,
                                                          }).spDirectOutputs().value("oUserID").toDouble());
 }
 
-bool UserWallets::apiCREATEdeposit(QHttp::JWT_t _JWT, quint32 _amount, quint64 _walID){
+bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, quint64 _walID){
     return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_transfer", {
                                                              /*{"iBy", Type},
                                                              {"iLogin", _emailOrMobile},
@@ -130,9 +130,9 @@ UserWallets::UserWallets() :
                 {"walSumIncome",        S(qint64),                  QFV,                                0,          true,false,false},
                 {"walSumExpenses",      S(qint64),                  QFV,                                0,          true,false,false},
                 {"walCreatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
-                {"walCreationDateTime", S(QHttp::DateTime_t),       QFV,                                QNull,      true},
+                {"walCreationDateTime", S(TAPI::DateTime_t),        QFV,                                QNull,      true},
                 {"walUpdatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QNull,      true},
-                {"walStatus",           S(Targoman::API::enuUserWalletStatus::Type), QFV,               Targoman::API::enuUserWalletStatus::Active},
+                {"walStatus",           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active},
               },
               { ///< Col                Reference Table     ForeignCol    Rename   LeftJoin
                 {"wal_usrID",           "AAA.tblUser",      "usrID"},
@@ -140,8 +140,7 @@ UserWallets::UserWallets() :
                 {"walUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    QHTTP_REGISTER_TARGOMAN_ENUM(Targoman::API::enuUserWalletStatus);
-    this->registerMyRESTAPIs();
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserWalletStatus);
 }
 
 }

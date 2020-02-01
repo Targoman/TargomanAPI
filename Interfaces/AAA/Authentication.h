@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -26,15 +26,17 @@
 
 #include "AAADefs.hpp"
 
-namespace Targoman {
-namespace API {
-
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM (enuOAuthType,
                        Google   = 'G',
                        Yahoo    = 'Y',
                        Github   = 'H',
                        Linkedin = 'L'
                        );
+}
+
+namespace Targoman {
+namespace API {
 namespace AAA {
 namespace Authentication{
 
