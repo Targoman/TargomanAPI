@@ -30,15 +30,18 @@
 #include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/ORM/clsORMField.h"
 
-namespace Targoman {
-namespace API {
+namespace TAPI{
 TAPI_ADD_SIMPLE_TYPE(QString, Cols_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Filter_t);
 TAPI_ADD_SIMPLE_TYPE(QString, OrderBy_t);
 TAPI_ADD_SIMPLE_TYPE(QString, GroupBy_t);
+}
 
-#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, Targoman::API::Cols_t _cols={}, Targoman::API::Filter_t _filters={}, Targoman::API::OrderBy_t _orderBy={}, Targoman::API::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS,     quint64 _offset  , quint16 _limit   , Targoman::API::Cols_t _cols   , Targoman::API::Filter_t _filters   , Targoman::API::OrderBy_t _orderBy   , Targoman::API::GroupBy_t _groupBy   , bool _reportCount
+namespace Targoman {
+namespace API {
+
+#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, TAPI::Cols_t _cols={}, TAPI::Filter_t _filters={}, TAPI::OrderBy_t _orderBy={}, TAPI::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS,     quint64 _offset  , quint16 _limit   , TAPI::Cols_t _cols   , TAPI::Filter_t _filters   , TAPI::OrderBy_t _orderBy   , TAPI::GroupBy_t _groupBy   , bool _reportCount
 #define GET_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
 
@@ -138,13 +141,13 @@ public:
                      bool _realDelete = false);
 
     void setSelfFilters(const QVariantMap& _requiredFilters,
-                    TAPI::ExtraPath_t _EXTRAPATH,
-                    TAPI::ORMFilters_t& _ORMFILTERS,
-                    Targoman::API::Filter_t& _filters);
+                        TAPI::ExtraPath_t _EXTRAPATH,
+                        TAPI::ORMFilters_t& _ORMFILTERS,
+                        TAPI::Filter_t& _filters);
 
     void setSelfFilters(const QVariantMap& _requiredFilters,
-                    TAPI::ExtraPath_t _EXTRAPATH,
-                    TAPI::ORMFilters_t& _ORMFILTERS);
+                        TAPI::ExtraPath_t _EXTRAPATH,
+                        TAPI::ORMFilters_t& _ORMFILTERS);
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
 
@@ -177,9 +180,9 @@ protected:
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::Cols_t);
-Q_DECLARE_METATYPE(Targoman::API::Filter_t);
-Q_DECLARE_METATYPE(Targoman::API::OrderBy_t);
-Q_DECLARE_METATYPE(Targoman::API::GroupBy_t);
+Q_DECLARE_METATYPE(TAPI::Cols_t);
+Q_DECLARE_METATYPE(TAPI::Filter_t);
+Q_DECLARE_METATYPE(TAPI::OrderBy_t);
+Q_DECLARE_METATYPE(TAPI::GroupBy_t);
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H

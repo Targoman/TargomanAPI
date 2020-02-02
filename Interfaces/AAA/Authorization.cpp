@@ -32,7 +32,7 @@ namespace Authorization{
 
 void validateIPAddress(const QString& _ip)
 {
-    AAADACInstance().callSP("","AAA.sp_SYSTEM_validateIPAccess", {
+    AAADAC.callSP("","AAA.sp_SYSTEM_validateIPAccess", {
                              {"iIP", inet_addr(_ip.toLatin1().constData())},
                          });
 }
@@ -41,7 +41,7 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
 {
     PrivHelpers::validateToken(_token);
 
-    QJsonObject TokenInfo =  AAADACInstance().callSPCacheable(3600,
+    QJsonObject TokenInfo =  AAADAC.callSPCacheable(3600,
                                                            "","AAA.sp_UPDATE_retrieveTokenInfo", {
                                                                {"iToken", _token},
                                                                {"iIP", _ip},

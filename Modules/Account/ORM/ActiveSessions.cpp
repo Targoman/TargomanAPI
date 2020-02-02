@@ -33,7 +33,7 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -44,7 +44,7 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
         this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
-    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS, true);
+    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS, true);
 }
 
 ActiveSessions::ActiveSessions() :

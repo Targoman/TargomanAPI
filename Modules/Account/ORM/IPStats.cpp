@@ -31,7 +31,7 @@ using namespace ORM;
 QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 IPStats::IPStats() :

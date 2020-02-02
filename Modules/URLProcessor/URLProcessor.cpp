@@ -42,6 +42,9 @@ QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAl
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);
 }
 
+URLProcessor::URLProcessor()
+{;}
+
 }
 }
 

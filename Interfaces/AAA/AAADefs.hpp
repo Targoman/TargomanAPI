@@ -68,11 +68,7 @@ TARGOMAN_CREATE_CONSTEXPR(privs);
 
 using namespace DBManager;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static clsDAC& AAADACInstance(){static clsDAC* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new clsDAC("AAA")));}
-#pragma GCC diagnostic pop
-
+#define AAADAC clsDAC("AAA")
 }
 }
 }

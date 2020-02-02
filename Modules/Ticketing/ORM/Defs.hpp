@@ -25,8 +25,7 @@
 
 #include "libTargomanDBM/clsDAC.h"
 
-namespace Targoman {
-namespace API {
+namespace TAPI {
 
 TARGOMAN_DEFINE_ENUM (enuTicketType,
                        Bug        = 'B',
@@ -37,16 +36,9 @@ TARGOMAN_DEFINE_ENUM (enuTicketType,
                        Broadcast  = 'G'
                        );
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-using namespace DBManager;
-static clsDAC& TicketingDACInstance(){static clsDAC* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new clsDAC("Ticketing")));}
-#pragma GCC diagnostic pop
-
-}
 }
 
-Q_DECLARE_METATYPE(Targoman::API::enuTicketType::Type);
+Q_DECLARE_METATYPE(TAPI::enuTicketType::Type);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
 

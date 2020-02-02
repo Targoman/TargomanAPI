@@ -33,7 +33,7 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -43,7 +43,7 @@ bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
 
-    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
 }
 
 quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
@@ -61,7 +61,7 @@ quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
                                                     {"walletID", static_cast<double>(_walletID)}
                                                 }).toJson());
 
-    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toULongLong();
+    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 Invoice::Invoice() :

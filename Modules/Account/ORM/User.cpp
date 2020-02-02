@@ -34,7 +34,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
     return this->selectFromTable(
-                AAADACInstance(),
+                AAADAC,
                 {},
                 {},
                 GET_METHOD_CALL_ARGS);
@@ -43,13 +43,13 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
 }
 
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
+    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
@@ -68,7 +68,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     }
 
     if(_email.size())
-        AAADACInstance().callSP("","AAA.sp_CREATE_approvalRequest",{
+        AAADAC.callSP("","AAA.sp_CREATE_approvalRequest",{
                                     {"iWhat2Approve", "E"},
                                     {"iUserID", clsJWT(_JWT).usrID()},
                                     {"iValue", _email},
@@ -76,7 +76,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                                     {"iSalt", _salt},
                                 });
     if(_mobile.size())
-        AAADACInstance().callSP("","AAA.sp_CREATE_approvalRequest",{
+        AAADAC.callSP("","AAA.sp_CREATE_approvalRequest",{
                                     {"iWhat2Approve", "E"},
                                     {"iUserID", clsJWT(_JWT).usrID()},
                                     {"iValue", _email},
@@ -85,7 +85,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                                 });
 
     if(_name.size() || _family.size() || _sex != TAPI::enuUserSex::NotExpressed)
-        return this->update(AAADACInstance(),
+        return this->update(AAADAC,
                             {{"usrID", clsJWT(_JWT).usrID()}},
                             {
                                 {"usrName",   _name},
@@ -102,7 +102,7 @@ quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
     if(_ORMFILTERS.value("usrEmail").toString().isEmpty() && _ORMFILTERS.value("usrMobile").toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 User::User() : clsTable("AAA",
@@ -136,7 +136,7 @@ User::User() : clsTable("AAA",
 {;}
 
 bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
-    clsDACResult Result = AAADACInstance().execQuery(
+    clsDACResult Result = AAADAC.execQuery(
                               "",
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
@@ -150,7 +150,7 @@ bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
 }
 
 bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
-    clsDACResult Result = AAADACInstance().execQuery(
+    clsDACResult Result = AAADAC.execQuery(
                               "",
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR

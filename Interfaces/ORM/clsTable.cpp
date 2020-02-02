@@ -53,7 +53,7 @@ clsTable::clsTable(const QString& _schema,
     if(TypesRegistered)
         return;
 
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Cols_t,
+    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Cols_t,
                                        QFieldValidator::allwaysValid(), _value,
                                        [](const QList<clsORMField>& _fields){
         QStringList Cols;
@@ -66,7 +66,7 @@ clsTable::clsTable(const QString& _schema,
                                                                                                                                                                    "Availabale Cols are: \n* " + Cols.join("\n* ");
         //                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")";
     });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::Filter_t,
+    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Filter_t,
                                        QFieldValidator::allwaysValid(), _value,
                                        [](const QList<clsORMField>& _fields){
         return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
@@ -79,7 +79,7 @@ clsTable::clsTable(const QString& _schema,
                "example: \n"
                "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
     });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::OrderBy_t,
+    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::OrderBy_t,
                                        QFieldValidator::allwaysValid(), _value,
                                        [](const QList<clsORMField>& _fields){
         QStringList Cols;
@@ -89,7 +89,7 @@ clsTable::clsTable(const QString& _schema,
         return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
         //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
     });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, Targoman::API::GroupBy_t,
+    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::GroupBy_t,
                                        QFieldValidator::allwaysValid(), _value,
                                        [](const QList<clsORMField>& _fields){
         QStringList Cols;
@@ -429,7 +429,7 @@ QVariant clsTable::create(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS
     return Result.lastInsertId();
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, ORMFilters_t& _ORMFILTERS, Filter_t& _filters)
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t& _ORMFILTERS, TAPI::Filter_t& _filters)
 {
     if(_ORMFILTERS.size())
         return this->setSelfFilters(_requiredFilters, _EXTRAPATH, _ORMFILTERS);
@@ -439,7 +439,7 @@ void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, ExtraPath_t _
     _filters.insert(0, QString("( %1 )").arg(Filters.join(" + ")));
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, ExtraPath_t _EXTRAPATH, ORMFilters_t& _ORMFILTERS)
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t& _ORMFILTERS)
 {
     Q_UNUSED(_EXTRAPATH);
     for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)

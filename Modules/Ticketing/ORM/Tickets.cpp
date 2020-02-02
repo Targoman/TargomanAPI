@@ -27,6 +27,7 @@
 namespace Targoman {
 namespace API {
 using namespace ORM;
+using namespace TAPI;
 
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -35,7 +36,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
         ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
 
     ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
-    return this->selectFromTable(AAADACInstance(), {}, ExtraFilters, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable(AAADAC, {}, ExtraFilters, GET_METHOD_CALL_ARGS);
 }
 
 Tickets::Tickets() :

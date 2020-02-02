@@ -37,7 +37,7 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
 quint64 insertTicket(quint32 _targetUser,
                   quint32 _serviceID,
                   quint64 _inReplyTo,
-                  enuTicketType::Type _ticketType,
+                  TAPI::enuTicketType::Type _ticketType,
                   const QString& _title,
                   const QString& _body,
                   bool _hasAttachemnt,

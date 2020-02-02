@@ -31,10 +31,6 @@
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
 class Ticketing : public ORM::clsRESTAPIWithActionLogs
 {
     Q_OBJECT
@@ -43,12 +39,12 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing)
 
 private slots:
-    bool API(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser = 0),
+    bool REST(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser = 0),
              "create new message targeting a user or all users (if target user is 0)")
-    bool API(PUT, NewFeedback, (TAPI::JWT_t _JWT,
+    bool REST(PUT, NewFeedback, (TAPI::JWT_t _JWT,
                                 const QString& _title,
                                 const QString& _text,
-                                Targoman::API::enuTicketType::Type _ticketType,
+                                TAPI::enuTicketType::Type _ticketType,
                                 quint32 _serviceID,
                                 quint64 _inReplyTo = 0,
                                 TAPI::stuFileInfo _file = {}),

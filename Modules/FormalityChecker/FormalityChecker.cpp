@@ -37,6 +37,9 @@ QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& 
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 
+FormalityChecker::FormalityChecker()
+{;}
+
 }
 }
 

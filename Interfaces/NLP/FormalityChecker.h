@@ -41,7 +41,8 @@ struct gConfigs{
 namespace API {
 namespace NLP {
 
-class FormalityChecker {
+class Q_DECL_EXPORT FormalityChecker
+{
 
 public:
     instanceGetter(FormalityChecker)

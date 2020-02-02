@@ -128,7 +128,7 @@ quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
     else
         throw exHTTPBadRequest("signup must be by a valid email or mobile");
 
-    return static_cast<quint32>(AAADACInstance().callSP ("","AAA.sp_CREATE_signup", {
+    return static_cast<quint32>(AAADAC.callSP ("","AAA.sp_CREATE_signup", {
                                                              {"iBy", Type},
                                                              {"iLogin", _emailOrMobile},
                                                              {"iPass", _pass},
@@ -144,7 +144,7 @@ quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
 bool Account::apiLogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
-    AAADACInstance().callSP("","AAA.sp_UPDATE_logout", {
+    AAADAC.callSP("","AAA.sp_UPDATE_logout", {
                                 {"iByUserID", clsJWT(_JWT).usrID()},
                                 {"iSessionGUID", clsJWT(_JWT).session()},
                             });
@@ -156,7 +156,7 @@ bool Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, co
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADACInstance().callSP ("","AAA.sp_CREATE_forgotPassRequest", {
+    AAADAC.callSP ("","AAA.sp_CREATE_forgotPassRequest", {
                                  {"iLogin", _login},
                                  {"iVia", TAPI::enuForgotPassLinkVia::toStr(_via)},
                              });
@@ -167,7 +167,7 @@ bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePass", {
+    AAADAC.callSP ("","AAA.sp_UPDATE_changePass", {
                                  {"iUserID", clsJWT(_JWT).usrID()},
                                  {"iOldPass", _oldPass},
                                  {"iOldPassSalt", _oldPassSalt},
@@ -179,7 +179,7 @@ bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const
 bool Account::apiChangePassByUUID(const TAPI::RemoteIP_t& _REMOTE_IP, const TAPI::MD5_t& _uuid, const TAPI::MD5_t& _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADACInstance().callSP ("","AAA.sp_UPDATE_changePassByUUID", {
+    AAADAC.callSP ("","AAA.sp_UPDATE_changePassByUUID", {
                                  {"iUUID", _uuid},
                                  {"iNewPass", _newPass},
                              });
@@ -190,7 +190,7 @@ bool Account::apiPOSTApproveEmail(const TAPI::RemoteIP_t& _REMOTE_IP,
                                   const TAPI::MD5_t& _uuid)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADACInstance().callSP("", "AAA.sp_UPDATE_acceptApproval", {
+    AAADAC.callSP("", "AAA.sp_UPDATE_acceptApproval", {
                                 {"iUUID", _uuid},
                                 {"iMobile", {}},
                             });
@@ -202,7 +202,7 @@ bool Account::apiPOSTApproveMobile(const TAPI::RemoteIP_t& _REMOTE_IP,
                                   const quint16& _code)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADACInstance().callSP("", "AAA.sp_UPDATE_acceptApproval", {
+    AAADAC.callSP("", "AAA.sp_UPDATE_acceptApproval", {
                                 {"iUUID", _code},
                                 {"iMobile", _mobile},
                             });

@@ -31,8 +31,8 @@ QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
-
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    clsDAC DAC("AAA");
+    return this->selectFromTable(DAC, {}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -40,19 +40,19 @@ bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
         this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
-    return this->deleteByPKs(AAADACInstance(), DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
 }
 
 bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADACInstance(), UPDATE_METHOD_CALL_ARGS);
+    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
 }
 
 quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(AAADACInstance(), CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 APITokens::APITokens() :

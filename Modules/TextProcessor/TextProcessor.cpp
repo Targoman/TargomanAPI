@@ -89,6 +89,9 @@ QString TextProcessor::apiTokenize (const QString& _text,
     return NLP::TextProcessor::instance().ixml2Text(_text, _lang, false, false, false);
 }
 
+TextProcessor::TextProcessor()
+{;}
+
 }
 }
 
