@@ -42,9 +42,7 @@ class NGTv1 : public ORM::clsRESTAPIWithActionLogs
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Account)
-public:
-    void init();
+    TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1)
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())

@@ -43,9 +43,6 @@ private:
 class Banners : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,Banners)
 };

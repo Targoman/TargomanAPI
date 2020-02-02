@@ -31,12 +31,6 @@ namespace Modules {
 using namespace  Translation::Classes;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT);
 
-void MT::init()
-{
-    // Register translation engines
-    TranslationDispatcher::instance().registerEngines();
-}
-
 QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                              const QString& _token,
                              QString _text,
@@ -175,7 +169,10 @@ QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _toke
 }
 
 MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT")
-{;}
+{
+    // Register translation engines
+    TranslationDispatcher::instance().registerEngines();
+}
 
 
 

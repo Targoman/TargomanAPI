@@ -100,8 +100,6 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
 Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
     TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketType);
-
-//    Tickets::instance().init();
 }
 
 }

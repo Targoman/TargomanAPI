@@ -38,10 +38,6 @@ class URLProcessor : public intfAPIModule
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
 
-public:
-    URLProcessor(){;}
-    void init();
-
 private slots:
     QString API(GET, canonicalize, (const QString _url, bool _removeWWW = true),
                 "normalizes url in a common format to be canonical")

@@ -38,9 +38,6 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Account)
 
-public:
-    void init();
-
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
 

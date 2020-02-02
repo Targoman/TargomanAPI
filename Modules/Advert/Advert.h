@@ -45,18 +45,16 @@ class Advert : public ORM::clsRESTAPIWithActionLogs
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert)
-public:
-    void init();
-    stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
-                  "Get new banner based on location and order info")
-    stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
-                  "Get new text advertisement")
-    QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
-                  "Retrieve URL of the specified Advertisement")
 private slots:
+        stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
+                      "Get new banner based on location and order info")
+        stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
+                      "Get new text advertisement")
+        QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
+                      "Retrieve URL of the specified Advertisement")
 
 private:
-    TARGOMAN_DEFINE_API_MODULE(Advert);
+    TARGOMAN_DEFINE_API_MODULE(Advert)
 };
 
 }

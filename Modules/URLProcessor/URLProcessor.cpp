@@ -28,10 +28,6 @@ using namespace Targoman::Common;
 namespace Targoman {
 namespace API {
 
-void URLProcessor::init()
-{
-}
-
 QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW)
 {
     char Normalized[MAX_URL_SIZE+1];

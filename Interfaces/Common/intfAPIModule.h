@@ -123,6 +123,7 @@ public:
     virtual bool requiresTextProcessor() const {return false;}
     virtual bool requiresFormalityChecker() const {return false;}
     virtual QString parentModuleName() const = 0;
+    virtual void init() {}
 
 protected:
     ModuleMethods_t Methods;
@@ -150,6 +151,7 @@ public: \
             throw Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
         for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
             this->Methods.append({_submodule, _submodule->metaObject()->method(i)}); \
+        _submodule->init(); \
     } \
 private: \
     Q_DISABLE_COPY(_name) \

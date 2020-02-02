@@ -41,9 +41,6 @@ namespace AAA {
 class WalletTransactions : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private slots:
     QVariant ORMGET("Get WalletTransactions information.")
 
@@ -54,9 +51,6 @@ private:
 class WalletBalances : public ORM::clsTable
 {
     Q_OBJECT
-public:
-    void init();
-
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
 };

@@ -36,8 +36,7 @@ using namespace Targoman::API;
 using namespace Targoman::API::Advertisement;
 using namespace AAA;
 
-void Advert::init()
-{}
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
 stuAdvert Advert::apiGETNewBanner(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order)
 {

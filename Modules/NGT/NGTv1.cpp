@@ -26,9 +26,7 @@
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
 
-void NGTv1::init()
-{
-}
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1);
 
 NGTv1::NGTv1() :
     ORM::clsRESTAPIWithActionLogs("NGT", "Targoman"){

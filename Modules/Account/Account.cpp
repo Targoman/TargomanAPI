@@ -45,9 +45,6 @@ namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
-void Account::init()
-{}
-
 TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
                                       const QString& _login,
                                       const TAPI::MD5_t& _pass,
