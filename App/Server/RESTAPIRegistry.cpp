@@ -794,6 +794,7 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method){
 
 constexpr char CACHE_INTERNAL[] = "CACHEABLE_";
 constexpr char CACHE_CENTRAL[]  = "CENTRALCACHE_";
+constexpr char API_TIMEOUT[]  = "CENTRALCACHE_";
 
 void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry,
                                        intfAPIModule* _module,
@@ -807,21 +808,24 @@ void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry
             throw exRESTRegistry(QString("Polymorphism is not supported: %1").arg(_method.methodSignature().constData()));
         _registry.value(MethodKey)->updateDefaultValues(_method);
     } else {
-        if(RESTAPIRegistry::getCacheSeconds(_method, CACHE_INTERNAL) > 0 && RESTAPIRegistry::getCacheSeconds(_method, CACHE_CENTRAL) >0)
+        if(RESTAPIRegistry::getTagSeconds(_method, CACHE_INTERNAL) > 0
+                && RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL) >0)
             throw exRESTRegistry("Both internal and central cache can not be defined on an API");
 
         _registry.insert(MethodKey,
                          new clsAPIObject(_module,
                                           _method,
                                           QString(_method.name()).startsWith("async"),
-                                          RESTAPIRegistry::getCacheSeconds(_method, CACHE_INTERNAL),
-                                          RESTAPIRegistry::getCacheSeconds(_method, CACHE_CENTRAL),
+                                          RESTAPIRegistry::getTagSeconds(_method, CACHE_INTERNAL),
+                                          RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL),
+                                          RESTAPIRegistry::getTagSeconds(_method, API_TIMEOUT),
                                           !_methodName.isEmpty()
                                           ));
     }
 }
 
-int RESTAPIRegistry::getCacheSeconds(const QMetaMethod& _method, const char* _type){
+
+int RESTAPIRegistry::getTagSeconds(const QMetaMethod& _method, const char* _type){
     if(_method.tag() == nullptr || _method.tag()[0] == '\0')
         return 0;
     QString Tag = _method.tag();
@@ -836,7 +840,7 @@ int RESTAPIRegistry::getCacheSeconds(const QMetaMethod& _method, const char* _ty
         case 'M': return Number * 60;
         case 'H': return Number * 3600;
         default:
-            throw exRESTRegistry("Invalid CACHE numer or type defined for api: " + _method.methodSignature());
+            throw exRESTRegistry("Invalid tag numer or type defined for api: " + _method.methodSignature());
         }
     }
     return 0;

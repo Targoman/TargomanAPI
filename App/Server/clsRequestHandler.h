@@ -85,6 +85,7 @@ private:
 
 class clsRequestHandler :QObject
 {
+    Q_OBJECT
 public:
     clsRequestHandler(qhttp::server::QHttpRequest* _req,
                       qhttp::server::QHttpResponse* _res,
@@ -98,6 +99,7 @@ public:
     void sendCORSOptions();
 private:
     void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
+    void run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath);
     QString toIPv4(const QString _ip);
 
 private:
@@ -105,7 +107,8 @@ private:
     qhttp::server::QHttpRequest*                        Request;
     qhttp::server::QHttpResponse*                       Response;
     QScopedPointer<clsMultipartFormDataRequestHandler>  MultipartFormDataHandler;
-
+    QFutureWatcher<void>                                FutureWatcher;
+    QTimer                                              FutureTimer;
     friend class clsMultipartFormDataRequestHandler;
 };
 

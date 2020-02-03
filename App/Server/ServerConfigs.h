@@ -54,6 +54,8 @@ struct ServerConfigs
     static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
     static Common::Configuration::tmplConfigurable<QString>       CacheConnector;
     static Common::Configuration::tmplConfigurable<QString>       AccessControl;
+    static Common::Configuration::tmplConfigurable<bool>          MultiThreaded;
+    static Common::Configuration::tmplRangedConfigurable<qint32>  APICallTimeout;
 
     static QString BasePathWithVersion;
     static QJsonObject BaseOpenAPIObject;

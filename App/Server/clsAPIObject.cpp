@@ -37,12 +37,19 @@ namespace Server {
     gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
     gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
 
-clsAPIObject::clsAPIObject(intfAPIModule* _module, QMetaMethodExtended _method, bool _async, qint32 _cache4Internal, qint32 _cache4Central, bool _hasExtraMethodName) :
+clsAPIObject::clsAPIObject(intfAPIModule* _module,
+                           QMetaMethodExtended _method,
+                           bool _async,
+                           qint32 _cache4Internal,
+                           qint32 _cache4Central,
+                           qint32 _ttl,
+                           bool _hasExtraMethodName) :
     QObject(_module),
     BaseMethod(_method),
     IsAsync(_async),
     Cache4Secs(_cache4Internal),
     Cache4SecsCentral(_cache4Central),
+    TTL(_ttl ? _ttl : ServerConfigs::APICallTimeout.value()),
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
     Parent(_module)
@@ -65,7 +72,13 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
         return  gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(_paramIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
-QVariant clsAPIObject::invoke(const QStringList& _args, QList<QPair<QString, QString> > _bodyArgs, qhttp::THeaderHash _headers, qhttp::THeaderHash _cookies, QJsonObject _jwt, QString _remoteIP, QString _extraAPIPath) const
+QVariant clsAPIObject::invoke(const QStringList& _args,
+                              QList<QPair<QString, QString>> _bodyArgs,
+                              qhttp::THeaderHash _headers,
+                              qhttp::THeaderHash _cookies,
+                              QJsonObject _jwt,
+                              QString _remoteIP,
+                              QString _extraAPIPath) const
 {
     Q_ASSERT_X(this->parent(), "parent module", "Parent module not found to invoke method");
 

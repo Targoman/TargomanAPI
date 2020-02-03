@@ -83,6 +83,18 @@ namespace API {
 #  define CENTRALCACHE_24H
 #endif
 
+/**
+  * @brief APITIMEOUT macros are predefined macros in order to mark each API TTL. You can add more cache time as you wish while
+  *        following definition pattern "\d+(S|M|H)" where last character means S: Seconds and digits must be between 0 to 16384
+  */
+#ifndef Q_MOC_RUN
+#  define APITIMEOUT_1S
+#  define APITIMEOUT_3S
+#  define APITIMEOUT_5S
+#  define APITIMEOUT_10S
+#  define APITIMEOUT_30S
+#endif
+
 #define REST(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 #define ASYNC_REST(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 

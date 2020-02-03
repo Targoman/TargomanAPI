@@ -67,7 +67,7 @@ private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
     static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfAPIModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
-    static int  getCacheSeconds(const QMetaMethod& _method, const char* _type);
+    static int  getTagSeconds(const QMetaMethod& _method, const char* _type);
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 
 private:

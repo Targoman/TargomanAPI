@@ -25,6 +25,7 @@
 #include <map>
 #include <utility>
 #include <QTcpSocket>
+#include <QtConcurrent/QtConcurrent>
 #include "QFieldValidator.h"
 #include "clsRequestHandler.h"
 #include "libTargomanCommon/CmdIO.h"
@@ -175,8 +176,9 @@ void clsRequestHandler::process(const QString& _api) {
         try{
             if(this->Request->method() == qhttp::EHTTP_OPTIONS)
                 this->sendCORSOptions();
-            else
+            else{
                 this->findAndCallAPI (_api);
+            }
         }catch(exTargomanBase& ex){
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }catch(QFieldValidator::exRequiredParam &ex){
@@ -232,6 +234,47 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
+void clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath)
+{
+    for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
+        *QueryIter = QueryIter->replace('+', ' ');
+
+    qhttp::THeaderHash Headers = this->Request->headers();
+    qhttp::THeaderHash Cookies;
+    QJsonObject JWT;
+
+    if(_apiObject->requiresJWT()){
+        QString Auth = Headers.value("authorization");
+        if(Auth.startsWith("Bearer ")){
+            JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
+            Headers.remove("authorization");
+        } else
+            throw exHTTPForbidden("No valid authentication header is present");
+    }
+
+    if(_apiObject->requiresCookies() && Headers.value("cookie").size()){
+        foreach (auto Cookie, Headers.value("cookie").split(';')) {
+            auto CookieParts = Cookie.split('=');
+            Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
+        }
+    }
+
+    Headers.remove("cookie");
+
+
+    this->sendResponse(
+                StatusCodeOnMethod[this->Request->method()],
+            _apiObject->invoke(_queries,
+                               this->Request->userDefinedValues(),
+                               Headers,
+                               Cookies,
+                               JWT,
+                               this->toIPv4(this->Request->remoteAddress()),
+                               _extraPath
+                               )
+            );
+}
+
 void clsRequestHandler::findAndCallAPI(const QString& _api)
 {
     if(_api == "/openAPI.json"){
@@ -266,43 +309,18 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
                                "API not found("+this->Request->methodString()+": "+_api+")",
                                true);
 
-    for(auto QueryIter = Queries.begin(); QueryIter != Queries.end(); ++QueryIter)
-        *QueryIter = QueryIter->replace('+', ' ');
-
-    qhttp::THeaderHash Headers = this->Request->headers();
-    qhttp::THeaderHash Cookies;
-    QJsonObject JWT;
-
-    if(APIObject->requiresJWT()){
-        QString Auth = Headers.value("authorization");
-        if(Auth.startsWith("Bearer ")){
-            JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
-            Headers.remove("authorization");
-        } else
-            throw exHTTPForbidden("No valid authentication header is present");
-    }
-
-    if(APIObject->requiresCookies() && Headers.value("cookie").size()){
-        foreach (auto Cookie, Headers.value("cookie").split(';')) {
-            auto CookieParts = Cookie.split('=');
-            Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
-        }
-    }
-
-    Headers.remove("cookie");
-
-
-    this->sendResponse(
-                StatusCodeOnMethod[this->Request->method()],
-            APIObject->invoke(Queries,
-                              this->Request->userDefinedValues(),
-                              Headers,
-                              Cookies,
-                              JWT,
-                              this->toIPv4(this->Request->remoteAddress()),
-                              ExtraAPIPath
-                              )
-            );
+    if(ServerConfigs::MultiThreaded.value()){
+        this->connect(&this->FutureTimer, SIGNAL(timeout()), &this->FutureWatcher, SLOT(cancel()));
+        this->connect(&this->FutureWatcher, &QFutureWatcher<void>::canceled, [this](){
+            this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "");
+        });
+        this->FutureWatcher.setFuture(
+                    QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath)
+                    );
+        if(ServerConfigs::APICallTimeout.value() > -1)
+            this->FutureTimer.start(APIObject->ttl());
+    }else
+        run(APIObject, Queries, ExtraAPIPath);
 }
 
 void clsRequestHandler::sendError(qhttp::TStatusCode _code, const QString& _message, bool _closeConnection)

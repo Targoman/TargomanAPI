@@ -56,7 +56,13 @@ public:
 class clsAPIObject : public intfAPIObject, public QObject
 {
 public:
-    clsAPIObject(intfAPIModule* _module, QMetaMethodExtended _method, bool _async, qint32 _cache4Internal, qint32 _cache4Central, bool _hasExtraMethodName);
+    clsAPIObject(intfAPIModule* _module,
+                 QMetaMethodExtended _method,
+                 bool _async,
+                 qint32 _cache4Internal,
+                 qint32 _cache4Central,
+                 qint32 _ttl,
+                 bool _hasExtraMethodName);
     ~clsAPIObject();
 
     inline QString makeCacheKey(const QVariantList& _args) const{
@@ -87,6 +93,8 @@ public:
         return this->ParamTypes.contains(PARAM_ORMFILTER);
     }
 
+    inline bool ttl() const {return this->TTL;}
+
     inline QString paramType(quint8 _paramIndex) const {
         Q_ASSERT(_paramIndex < this->BaseMethod.parameterTypes().size());
         return this->BaseMethod.parameterTypes().at(_paramIndex).constData();
@@ -113,7 +121,6 @@ public:
 
 
     void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const;
-
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
 private:
@@ -125,6 +132,7 @@ private:
     bool                        IsAsync;
     qint32                      Cache4Secs;
     qint32                      Cache4SecsCentral;
+    qint32                      TTL;
     QList<QByteArray>           ParamNames;
     QList<QString>              ParamTypes;
     quint8                      RequiredParamsCount;

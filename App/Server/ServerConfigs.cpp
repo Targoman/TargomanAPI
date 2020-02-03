@@ -93,6 +93,27 @@ tmplConfigurable<bool> ServerConfigs::IndentedJson(
         "indented-json",
         enuConfigSource::Arg | enuConfigSource::File);
 
+tmplConfigurable<bool> ServerConfigs::MultiThreaded(
+        ServerConfigs::makeConfig("MultiThreaded"),
+        "If set to false then application will run in single-threaded mode and will be blocked on time-consuming API calls",
+        true,
+        ReturnTrueCrossValidator(),
+        "",
+        "",
+        "",
+        enuConfigSource::File);
+
+tmplRangedConfigurable<qint32> ServerConfigs::APICallTimeout(
+        ServerConfigs::makeConfig("APICallTimeout"),
+        "default timeout for API Calls. It can be reconfigured on each API Call. set to -1 for infinite",
+        -1, 60 * 1000,
+        -1,
+        ReturnTrueCrossValidator(),
+        "",
+        "MILISECONDS",
+        "default-api-timeout",
+        enuConfigSource::Arg | enuConfigSource::File);
+
 tmplRangedConfigurable<qint64> ServerConfigs::MaxUploadSize(
         ServerConfigs::makeConfig("MaxUploadSize"),
         "Max Upload size for any type of request",
