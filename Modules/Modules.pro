@@ -36,5 +36,5 @@ addSubdirs(Account, Dependencies)
 addSubdirs(Ticketing, Dependencies)
 #addSubdirs(TextProcessor, Dependencies)
 #addSubdirs(FormalityChecker, Dependencies)
-#addSubdirs(URLProcessor, Dependencies)
+addSubdirs(URLProcessor, Dependencies)
 

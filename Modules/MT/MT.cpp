@@ -42,7 +42,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                              bool _dicFull)
 {
     QTime Timer, OverallTime;
-    clsDAC DAC(this->Module);
+
     int PreprocessTime = 0;
     Timer.start();OverallTime.start();
 
@@ -66,8 +66,8 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                                                                  _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
                                                              });
 
-    QJsonObject Stats = DAC.execQuery(
-                TokenInfo[TOKENItems::usrID].toString(),
+
+    QJsonObject Stats = this->execQuery(
             "SELECT * FROM tblTokenStats "
             "WHERE tks_tokID = ? "
             "  AND tksEngine=? "
@@ -80,7 +80,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     ).toJson(true).object ();
 
     if(Stats.isEmpty())
-        DAC.execQuery(TokenInfo[TOKENItems::usrID].toString(), "INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
         {TokenInfo[TOKENItems::tokID]},
         {_engine},
         {_dir},

@@ -27,13 +27,14 @@ namespace API {
 namespace AAA {
 
 using namespace ORM;
+using namespace DBManager;
 
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -42,13 +43,13 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
         _ORMFILTERS.insert("walDefault", 0);
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
@@ -58,13 +59,12 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
 
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
     bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    clsDACResult Result = AAADAC.execQuery(
-                              "",
+    clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
                               + "SET walDefault = 1, ueiUpdatedBy_usrID = :usrID"
@@ -87,7 +87,7 @@ bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
                                     const TAPI::MD5_t& _pass,
                                     const QString& _salt,
                                     quint64 _walID){
-    return static_cast<quint32>(AAADAC.callSP ("","AAA.sp_CREATE_transfer", {
+    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_transfer", {
                                                              /*{"iBy", Type},
                                                              {"iLogin", _emailOrMobile},
                                                              {"iPass", _pass},
@@ -101,7 +101,7 @@ bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
 }
 
 bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, quint64 _walID){
-    return static_cast<quint32>(AAADAC.callSP ("","AAA.sp_CREATE_transfer", {
+    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_transfer", {
                                                              /*{"iBy", Type},
                                                              {"iLogin", _emailOrMobile},
                                                              {"iPass", _pass},
@@ -115,7 +115,7 @@ bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, quint64 _w
 }
 
 UserWallets::UserWallets() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblUserWallets",
               { ///<ColName             Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"walID",               S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},

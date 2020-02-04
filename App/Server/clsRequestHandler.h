@@ -86,6 +86,15 @@ private:
 class clsRequestHandler :QObject
 {
     Q_OBJECT
+    struct stuResult {
+        qhttp::TStatusCode StatusCode;
+        QVariant Result;
+        stuResult(const QVariant& _result = {}, qhttp::TStatusCode _code = qhttp::ESTATUS_OK) :
+            StatusCode(_code),
+            Result(_result)
+        {;}
+    };
+
 public:
     clsRequestHandler(qhttp::server::QHttpRequest* _req,
                       qhttp::server::QHttpResponse* _res,
@@ -99,7 +108,7 @@ public:
     void sendCORSOptions();
 private:
     void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
-    void run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath);
+    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath);
     QString toIPv4(const QString _ip);
 
 private:
@@ -107,7 +116,7 @@ private:
     qhttp::server::QHttpRequest*                        Request;
     qhttp::server::QHttpResponse*                       Response;
     QScopedPointer<clsMultipartFormDataRequestHandler>  MultipartFormDataHandler;
-    QFutureWatcher<void>                                FutureWatcher;
+    QFutureWatcher<stuResult>                            FutureWatcher;
     QTimer                                              FutureTimer;
     friend class clsMultipartFormDataRequestHandler;
 };

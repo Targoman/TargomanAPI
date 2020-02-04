@@ -27,29 +27,26 @@ namespace API {
 namespace AAA {
 
 using namespace ORM;
+using namespace DBManager;
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return this->selectFromTable(
-                AAADAC,
-                {},
-                {},
-                GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
@@ -66,33 +63,32 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
         if(_pass.isEmpty())
             throw exHTTPBadRequest("Password and salt are required to change email");
     }
-
     if(_email.size())
-        AAADAC.callSP("","AAA.sp_CREATE_approvalRequest",{
-                                    {"iWhat2Approve", "E"},
-                                    {"iUserID", clsJWT(_JWT).usrID()},
-                                    {"iValue", _email},
-                                    {"iPass", _pass},
-                                    {"iSalt", _salt},
-                                });
+        this->callSP("AAA.sp_CREATE_approvalRequest",{
+                         {"iWhat2Approve", "E"},
+                         {"iUserID", clsJWT(_JWT).usrID()},
+                         {"iValue", _email},
+                         {"iPass", _pass},
+                         {"iSalt", _salt},
+                     });
     if(_mobile.size())
-        AAADAC.callSP("","AAA.sp_CREATE_approvalRequest",{
-                                    {"iWhat2Approve", "E"},
-                                    {"iUserID", clsJWT(_JWT).usrID()},
-                                    {"iValue", _email},
-                                    {"iPass", _pass},
-                                    {"iSalt", _salt},
-                                });
+        this->callSP("AAA.sp_CREATE_approvalRequest",{
+                         {"iWhat2Approve", "E"},
+                         {"iUserID", clsJWT(_JWT).usrID()},
+                         {"iValue", _email},
+                         {"iPass", _pass},
+                         {"iSalt", _salt},
+                     });
 
     if(_name.size() || _family.size() || _sex != TAPI::enuUserSex::NotExpressed)
-        return this->update(AAADAC,
-                            {{"usrID", clsJWT(_JWT).usrID()}},
-                            {
-                                {"usrName",   _name},
-                                {"usrFamily", _family},
-                                {"usrLanguage", _lang}
-                            }
-                            );
+        return this->update(
+        {{"usrID", clsJWT(_JWT).usrID()}},
+        {
+                        {"usrName",   _name},
+                        {"usrFamily", _family},
+                        {"usrLanguage", _lang}
+                    }
+                    );
     return true;
 }
 
@@ -102,10 +98,10 @@ quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
     if(_ORMFILTERS.value("usrEmail").toString().isEmpty() && _ORMFILTERS.value("usrMobile").toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-User::User() : clsTable("AAA",
+User::User() : clsTable(AAASchema,
                          "tblUser",
                          { ///<ColName             Type                      Validation                       Default    RO   Sort  Filter Self  Virt   PK
                            {"usrID",               S(quint32),          QFV.integer().minValue(1),            QInvalid, true, true, true, true, false, true},
@@ -136,8 +132,7 @@ User::User() : clsTable("AAA",
 {;}
 
 bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
-    clsDACResult Result = AAADAC.execQuery(
-                              "",
+    clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
                               + "SET ueiPhoto = ?, ueiUpdatedBy_usrID = ?"
@@ -150,8 +145,7 @@ bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
 }
 
 bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
-    clsDACResult Result = AAADAC.execQuery(
-                              "",
+    clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
                               + "SET ueiSheba = ?, ueiUpdatedBy_usrID = ?"

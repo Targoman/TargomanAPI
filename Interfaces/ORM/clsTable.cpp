@@ -50,6 +50,7 @@ clsTable::clsTable(const QString& _schema,
     CountOfPKs(0)
 {
     clsTable::Registry.insert(Schema + "." + Name, this);
+
     if(TypesRegistered)
         return;
 
@@ -185,6 +186,12 @@ QString clsTable::finalColName(const clsORMField& _col, const QString& _prefix){
     return _prefix + (_col.renameAs().isEmpty() ? _col.name() : _col.renameAs());
 }
 
+QString clsTable::domain()
+{
+    return Q_LIKELY(this->Domain.size()) ? this->Domain :
+        this->Domain = this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName();
+}
+
 QString clsTable::makeColRenamedAs(const clsORMField& _col, const QString& _prefix) const {
     return (_col.renameAs().isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
 };
@@ -200,8 +207,7 @@ QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stu
             (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
-QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
-                                   const QStringList& _extraJoins,
+QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _extraFilters,
                                    const TAPI::ExtraPath_t& _extraPath,
                                    const TAPI::ORMFilters_t& _ORMFILTERS,
@@ -232,7 +238,8 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                 SelectItems.Where.append((SelectItems.Where.size() ? "AND " : " ") + this->BaseCols.last().name() + "!='R'");
         }
 
-        Table.Rows = _db.execQuery("",
+        clsDAC DAC(this->domain(), this->Schema);
+        Table.Rows = DAC.execQuery("",
                                    QString("SELECT ")
                                    + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
                                    + QUERY_SEPARATOR
@@ -254,7 +261,7 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                                    + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
                                    ).toJson(false, this->Converters).toVariant().toList();
         if(_reportCount)
-            Table.TotalRows = static_cast<qint64>(_db.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
+            Table.TotalRows = static_cast<qint64>(DAC.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
         return Table.toVariant();
     }else{
         QStringList PrimaryKeyQueries = _extraPath.split(",");
@@ -274,7 +281,8 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
                 Filters.append(this->makeColName(Col) + " = \"" + FilterIter.value().toString() + "\"");
         }
 
-        QJsonDocument Result = _db.execQuery("",
+        clsDAC DAC(this->domain(), this->Schema);
+        QJsonDocument Result = DAC.execQuery("",
                                              QString("SELECT ")
                                              + QUERY_SEPARATOR
                                              + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
@@ -295,7 +303,7 @@ QVariant clsTable::selectFromTable(DBManager::clsDAC& _db,
     }
 }
 
-bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
+bool clsTable::update(const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
 {
     this->prepareFiltersList();
     if(_ORMFILTERS.isEmpty())
@@ -337,7 +345,8 @@ bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QV
         Values.append(FilterIter.value());
     }
 
-    clsDACResult Result = _db.execQuery("",
+    clsDAC DAC(this->domain(), this->Schema);
+    clsDACResult Result = DAC.execQuery("",
                                         QString("UPDATE ") + this->Schema + "." + this->Name
                                         + QUERY_SEPARATOR
                                         + "SET "
@@ -351,7 +360,7 @@ bool clsTable::update(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QV
     return Result.numRowsAffected() > 0;
 }
 
-bool clsTable::deleteByPKs(clsDAC& _db, ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
+bool clsTable::deleteByPKs(ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
 {
     this->prepareFiltersList();
 
@@ -366,7 +375,7 @@ bool clsTable::deleteByPKs(clsDAC& _db, ExtraPath_t _EXTRAPATH, ORMFilters_t _OR
                 break;
             }
 
-    if(this->update(_db, _ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
+    if(this->update(_ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
         return false;
 
     if(_realDelete == false)
@@ -380,7 +389,8 @@ bool clsTable::deleteByPKs(clsDAC& _db, ExtraPath_t _EXTRAPATH, ORMFilters_t _OR
         Values.append(FilterIter.value());
     }
 
-    clsDACResult Result = _db.execQuery("",
+    clsDAC DAC(this->domain(), this->Schema);
+    clsDACResult Result = DAC.execQuery("",
                                         QString("DELETE FROM ") + this->Schema + "." +this->Name
                                         + QUERY_SEPARATOR
                                         + "WHERE "
@@ -391,7 +401,43 @@ bool clsTable::deleteByPKs(clsDAC& _db, ExtraPath_t _EXTRAPATH, ORMFilters_t _OR
     return Result.numRowsAffected() > 0;
 }
 
-QVariant clsTable::create(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
+clsDACResult clsTable::callSP(const QString& _spName, const QVariantMap& _spArgs, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.callSP({}, _spName, _spArgs, _purpose, _executionTime);
+}
+
+clsDACResult clsTable::callSPCacheable(quint32 _maxCacheTime, const QString& _spName, const QVariantMap& _spArgs, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.callSPCacheable(_maxCacheTime, {}, _spName, _spArgs, _purpose, _executionTime);
+}
+
+clsDACResult clsTable::execQuery(const QString& _queryStr, const QVariantList& _params, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
+}
+
+clsDACResult clsTable::execQuery(const QString& _queryStr, const QVariantMap& _params, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
+}
+
+clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& _queryStr, const QVariantList& _params, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
+}
+
+clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& _queryStr, const QVariantMap& _params, const QString& _purpose, quint64* _executionTime)
+{
+    clsDAC DAC(this->domain(), this->Schema);
+    return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
+}
+
+QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
 {
     this->prepareFiltersList();
     QStringList  CreateCommands;
@@ -418,7 +464,8 @@ QVariant clsTable::create(DBManager::clsDAC& _db, const QVariantMap& _ORMFILTERS
         Values.append(Col.toDB(FilterIter.value().toString()));
     }
 
-    clsDACResult Result = _db.execQuery("",
+    clsDAC DAC(this->domain(), this->Schema);
+    clsDACResult Result = DAC.execQuery("",
                                         QString("INSERT INTO ") + this->Name
                                         + QUERY_SEPARATOR
                                         + "SET "

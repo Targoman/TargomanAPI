@@ -36,72 +36,76 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Account)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Account);
+
+public:
+    stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
 
 private slots:
     TAPI::EncodedJWT_t REST(,Login,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                   const QString& _login,
-                                   const TAPI::MD5_t& _pass,
-                                   const QString& _salt,
-                                   const QString& _tlps = "",
-                                   bool _rememberMe = false,
-                                   const TAPI::JSON_t& _sessionInfo = {},
-                                   const TAPI::MD5_t& _fingerprint = {}),
-                           "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
+                                    const QString& _login,
+                                    const TAPI::MD5_t& _pass,
+                                    const QString& _salt,
+                                    const QString& _tlps = "",
+                                    bool _rememberMe = false,
+                                    const TAPI::JSON_t& _sessionInfo = {},
+                                    const TAPI::MD5_t& _fingerprint = {}),
+                            "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
 
     TAPI::EncodedJWT_t REST(,LoginByOAuth,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                          TAPI::enuOAuthType::Type _type,
-                                          const QString& _oAuthToken,
-                                          const QString& _tlps,
-                                          const TAPI::JSON_t& _sessionInfo = TAPI::JSON_t(),
-                                          const TAPI::MD5_t& _fingerprint = {}),
-                           "Login by Open Authentication and return an encoded JWT")
+                                           TAPI::enuOAuthType::Type _type,
+                                           const QString& _oAuthToken,
+                                           const QString& _tlps,
+                                           const TAPI::JSON_t& _sessionInfo = TAPI::JSON_t(),
+                                           const TAPI::MD5_t& _fingerprint = {}),
+                            "Login by Open Authentication and return an encoded JWT")
 
     TAPI::EncodedJWT_t REST(,RefreshJWT,(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT),
-                           "Refresh JWT in order to update information or expiry time")
+                            "Refresh JWT in order to update information or expiry time")
 
     quint32 REST(PUT,Signup,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                            const QString& _emailOrMobile,
-                            const TAPI::MD5_t& _pass,
-                            const QString& _role,
-                            const QString& _name = "",
-                            const QString& _family = "",
-                            TAPI::JSON_t _specialPrivs = {},
-                            qint8 _maxSessions = -1),
-                "Base method for signup with email address. this method can be called just by predefined IPs")
+                             const QString& _emailOrMobile,
+                             const TAPI::MD5_t& _pass,
+                             const QString& _role,
+                             const QString& _name = "",
+                             const QString& _family = "",
+                             TAPI::JSON_t _specialPrivs = {},
+                             qint8 _maxSessions = -1),
+                 "Base method for signup with email address. this method can be called just by predefined IPs")
 
     bool REST(,Logout,(TAPI::JWT_t _JWT),
-             "Logout logged in user")
+              "Logout logged in user")
 
     bool REST(,CreateForgotPasswordLink,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                        const QString& _login,
-                                        TAPI::enuForgotPassLinkVia::Type _via),
-             "Create a forgot password request returning a UUID for the requiest")
+                                         const QString& _login,
+                                         TAPI::enuForgotPassLinkVia::Type _via),
+              "Create a forgot password request returning a UUID for the requiest")
 
     bool REST(,ChangePass,(TAPI::JWT_t _JWT,
-                          const TAPI::MD5_t& _oldPass,
-                          const QString& _oldPassSalt,
-                          const TAPI::MD5_t& _newPass
-                          ),
-             "Changes password of the logged-in user")
+                           const TAPI::MD5_t& _oldPass,
+                           const QString& _oldPassSalt,
+                           const TAPI::MD5_t& _newPass
+                           ),
+              "Changes password of the logged-in user")
 
     bool REST(,ChangePassByUUID,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                const TAPI::MD5_t& _uuid,
-                                const TAPI::MD5_t& _newPass
-                                ),
-             "Changes password based on a UUID provided by ")
+                                 const TAPI::MD5_t& _uuid,
+                                 const TAPI::MD5_t& _newPass
+                                 ),
+              "Changes password based on a UUID provided by ")
     bool REST(POST,ApproveEmail,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                const TAPI::MD5_t& _uuid),
-             "Approves Email by provided UUID")
+                                 const TAPI::MD5_t& _uuid),
+              "Approves Email by provided UUID")
 
     bool REST(POST,ApproveMobile,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                 const TAPI::Mobile_t _mobile,
-                                 const quint16& _code),
-             "Approves Mobile by provided mobile no and code")
-    private:
+                                  const TAPI::Mobile_t _mobile,
+                                  const quint16& _code),
+              "Approves Mobile by provided mobile no and code")
+
+private:
     TARGOMAN_DEFINE_API_MODULE(Account)
 };
 

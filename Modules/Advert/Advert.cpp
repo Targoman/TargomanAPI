@@ -57,7 +57,7 @@ QString Advert::apiGETRetrieveURL(const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _i
 }
 
 Advert::Advert() :
-    ORM::clsRESTAPIWithActionLogs("Advert", "Advert"){
+    ORM::clsRESTAPIWithActionLogs(AdvertSchema, AdvertDomain){
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertType);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertOrder);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuBannerSizes);

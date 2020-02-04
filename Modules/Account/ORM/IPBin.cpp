@@ -31,11 +31,11 @@ using namespace ORM;
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 IPBin::IPBin() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblIPBin",
               { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"ipbIP",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},

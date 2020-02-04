@@ -33,7 +33,7 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -43,7 +43,7 @@ bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
 
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
@@ -61,11 +61,11 @@ quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
                                                     {"walletID", static_cast<double>(_walletID)}
                                                 }).toJson());
 
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toULongLong();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 Invoice::Invoice() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblInvoice",
               { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
                 {"invID",               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},

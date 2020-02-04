@@ -62,6 +62,9 @@ TARGOMAN_DEFINE_ENUM (enuBannerSizes,
                       );
 }
 
+constexpr char AdvertSchema[] = "Advert";
+constexpr char AdvertDomain[] = "Advert";
+
 Q_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
 Q_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
 Q_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);

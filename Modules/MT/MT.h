@@ -36,25 +36,25 @@ class MT  : public ORM::clsRESTAPIWithActionLogs
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(MT)
+    TARGOMAN_API_MODULE_DB_CONFIGS(MT);
 
 private slots:
     QVariantMap REST(,Translate,
-                    (const TAPI::RemoteIP_t& _REMOTE_IP,
-                     const QString& _token,
-                     QString _text,
-                     QString _dir,
-                     const QString& _engine = "NMT",
-                     bool _detailed = false,
-                     bool _detok = true,
-                     bool _dic=false,
-                     bool _dicFull = false),
-                    "Translates input text if specified engine and language are found.")
+                     (const TAPI::RemoteIP_t& _REMOTE_IP,
+                      const QString& _token,
+                      QString _text,
+                      QString _dir,
+                      const QString& _engine = "NMT",
+                      bool _detailed = false,
+                      bool _detok = true,
+                      bool _dic=false,
+                      bool _dicFull = false),
+                     "Translates input text if specified engine and language are found.")
 
     QVariantMap REST(,Test,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg),"Test ")
 
     private:
-    TARGOMAN_DEFINE_API_MODULE(MT)
+        TARGOMAN_DEFINE_API_MODULE(MT)
 };
 
 }

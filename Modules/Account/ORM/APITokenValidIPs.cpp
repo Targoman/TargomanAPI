@@ -33,7 +33,7 @@ QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -41,24 +41,24 @@ bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
         this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS, true);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, true);
 }
 
 bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
         this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
-    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toULongLong();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 APITokenValidIPs::APITokenValidIPs() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblAPITokenValidIPs",
               { ///<ColName             Type                 Validation                      Default    RO   Sort  Filter Self  Virt   PK
                 {"tviID",               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},

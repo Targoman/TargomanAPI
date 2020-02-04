@@ -57,8 +57,8 @@ extern QJsonObject login(const QString& _ip,
                          const QStringList& _requiredTLPs,
                          const QJsonObject& _info,
                          const QString& _fingerPrint);
-extern QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs);
 
+extern QJsonObject  updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs);
 extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken);

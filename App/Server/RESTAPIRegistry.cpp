@@ -347,6 +347,7 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
                                                                })}
                                                           })},
                                                          {"basePath", ServerConfigs::BasePathWithVersion},
+                                                         {"definitions", QJsonObject()},
                                                          {"schemes", QJsonArray({"http", "https"})},
                                                      });
 
@@ -581,6 +582,13 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
                         Parameters.append(PropVal);
                     }
                 }else{
+                    QJsonArray RequiredFields;
+                    for(auto PropertyIter = Properties.begin();
+                        PropertyIter != Properties.end();
+                        PropertyIter++
+                        )
+                        if(PropertyIter->toObject().value("required").toBool())
+                            RequiredFields.append(PropertyIter.key());
                     PathInfo["consumes"] = QJsonArray({"application/json"});
                     Parameters.append(QJsonObject({
                                                       {"in", "body"},
@@ -588,6 +596,7 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
                                                       {"description", "Pramaeter Object"},
                                                       {"required", true},
                                                       {"schema", QJsonObject({
+                                                           {"required", RequiredFields},
                                                            {"type", "object"},
                                                            {"properties", Properties}
                                                        })}
@@ -607,7 +616,7 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
                                                                   {"200", QJsonObject({{"description", "Success."}})},
                                                                   {"400", QJsonObject({{"description", "Bad request."}})},
                                                                   {"404", QJsonObject({{"description", "Not found"}})},
-                                                                  {"5XX", QJsonObject({{"description", "Unexpected error"}})},
+                                                                  //{"5XX", QJsonObject({{"description", "Unexpected error"}})},
                                                               });
             QJsonObject ResponseModel = DefaultResponses;
             if(HTTPMethod == "get"){
@@ -801,7 +810,7 @@ void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry
                                        const QMetaMethodExtended& _method,
                                        const QString& _httpMethod,
                                        const QString& _methodName){
-    QString MethodKey = RESTAPIRegistry::makeRESTAPIKey(_httpMethod, "/" + _module->moduleBaseName().replace("::", "/")+ '/' + _methodName);
+    QString MethodKey = RESTAPIRegistry::makeRESTAPIKey(_httpMethod, "/" + _module->moduleBaseName().replace(":", "/")+ '/' + _methodName);
 
     if(_registry.contains(MethodKey)) {
         if(RESTAPIRegistry::Registry.value(MethodKey)->isPolymorphic(_method))

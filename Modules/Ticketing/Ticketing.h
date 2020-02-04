@@ -36,19 +36,29 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
+
+private:
+    quint64 insertTicket(quint32 _targetUser,
+                         quint32 _serviceID,
+                         quint64 _inReplyTo,
+                         TAPI::enuTicketType::Type _ticketType,
+                         const QString& _title,
+                         const QString& _body,
+                         bool _hasAttachemnt,
+                         quint64 _createdBy);
 
 private slots:
     bool REST(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser = 0),
-             "create new message targeting a user or all users (if target user is 0)")
+              "create new message targeting a user or all users (if target user is 0)")
     bool REST(PUT, NewFeedback, (TAPI::JWT_t _JWT,
-                                const QString& _title,
-                                const QString& _text,
-                                TAPI::enuTicketType::Type _ticketType,
-                                quint32 _serviceID,
-                                quint64 _inReplyTo = 0,
-                                TAPI::stuFileInfo _file = {}),
-             "create a new/reply feedback with")
+                                 const QString& _title,
+                                 const QString& _text,
+                                 TAPI::enuTicketType::Type _ticketType,
+                                 quint32 _serviceID,
+                                 quint64 _inReplyTo = 0,
+                                 TAPI::stuFileInfo _file = {}),
+              "create a new/reply feedback with")
     stuDBInfo requiredDB() const {return stuDBInfo("Ticketing");}
 
     TARGOMAN_DEFINE_API_MODULE(Ticketing)

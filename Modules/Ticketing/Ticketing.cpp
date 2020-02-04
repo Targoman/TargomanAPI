@@ -27,14 +27,15 @@
 #include "Interfaces/AAA/GenericEnums.hpp"
 
 #include "ORM/Defs.hpp"
-//#include "ORM/Tickets.h"
+#include "ORM/Tickets.h"
 
 namespace Targoman {
 namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
+using namespace TAPI;
 
-quint64 insertTicket(quint32 _targetUser,
+quint64 Ticketing::insertTicket(quint32 _targetUser,
                   quint32 _serviceID,
                   quint64 _inReplyTo,
                   TAPI::enuTicketType::Type _ticketType,
@@ -42,7 +43,7 @@ quint64 insertTicket(quint32 _targetUser,
                   const QString& _body,
                   bool _hasAttachemnt,
                   quint64 _createdBy){
-    return TicketingDACInstance().execQuery("",
+    return this->execQuery(
                                      "INSERT INTO tblTickets "
                                      "   SET tblTickets.tktTarget_usrID =?,"
                                      "       tblTickets.tkt_svcID =?,"
@@ -68,7 +69,7 @@ quint64 insertTicket(quint32 _targetUser,
 bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser){
     Authorization::checkPriv(_JWT, {this->moduleBaseName() + ":canPUTNewMessage"});
 
-    return insertTicket(_targetUser, _serviceID, 0, _targetUser ? enuTicketType::Message : enuTicketType::Broadcast, _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
+    return this->insertTicket(_targetUser, _serviceID, 0, _targetUser ? enuTicketType::Message : enuTicketType::Broadcast, _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
 bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
@@ -86,7 +87,7 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
     if(_ticketType == enuTicketType::Message || _ticketType == enuTicketType::Broadcast)
         throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
 
-    quint64 TicketID = insertTicket(_inReplyTo, _serviceID, 0, _ticketType, _title, _text, _file.Size > 0, clsJWT(_JWT).usrID());
+    quint64 TicketID = this->insertTicket(_inReplyTo, _serviceID, 0, _ticketType, _title, _text, _file.Size > 0, clsJWT(_JWT).usrID());
 
     if(_file.Size > 0){
         //TODO move to tiockt attachemnts with ID
@@ -99,7 +100,10 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
 
 Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
-    TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketType);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketType);
+
+    this->addSubModule(new ORM::Tickets);
+    this->addSubModule(new ORM::TicketRead);
 }
 
 }

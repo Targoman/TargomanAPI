@@ -31,8 +31,7 @@ namespace ORM {
 QVariant clsRESTAPIWithActionLogs::apiGETActionLogs(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
-    QScopedPointer<clsDAC> DAC(new DBManager::clsDAC(this->Module));
-    return this->selectFromTable(*DAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 }

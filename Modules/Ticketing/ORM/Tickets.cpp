@@ -36,7 +36,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
         ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
 
     ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
-    return this->selectFromTable(AAADAC, {}, ExtraFilters, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
 }
 
 Tickets::Tickets() :
@@ -44,17 +44,17 @@ Tickets::Tickets() :
               "tblTickets",
               { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
                 {"tktID",               S(quint64),             QFV.integer().minValue(1),   ORM_PRIMARY_KEY},
-                {"tktCreationDateTime", S(QHttp::DateTime_t),   QFV,                         QNull,     true},
+                {"tktCreationDateTime", S(TAPI::DateTime_t),    QFV,                         QNull,     true},
                 {"tktTarget_usrID",     S(quint32),             QFV.integer().minValue(1),   QNull},
                 {"tkt_svcID",           S(quint32),             QFV.integer().minValue(1),   QNull},
                 {"tktInReply_tktID",    S(quint64),             QFV.integer().minValue(1),   QNull},
-                {"tktType",             S(Targoman::API::enuTicketType::Type),   QFV,        Targoman::API::enuTicketType::Message},
-                {"tktTitle",            S(QHttp::JSON_t),       QFV,                         QInvalid, false,false,false},
-                {"tktBodyMarkdown",     S(QHttp::MD5_t),        QFV.allwaysInvalid(),        QInvalid, false,false,false},
-                {"tktHasAttachment",    S(QHttp::DateTime_t),   QFV,                         false,    false},
+                {"tktType",             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message},
+                {"tktTitle",            S(TAPI::JSON_t),        QFV,                         QInvalid, false,false,false},
+                {"tktBodyMarkdown",     S(TAPI::MD5_t),         QFV.allwaysInvalid(),        QInvalid, false,false,false},
+                {"tktHasAttachment",    S(TAPI::DateTime_t),    QFV,                         false,    false},
                 {"tktCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
                 {"tktUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull},
-                {"tktStatus",           S(Targoman::API::enuTicketStatus::Type), QFV,        Targoman::API::enuTicketStatus::New},
+                {"tktStatus",           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New},
               },
               { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
                 {"tktInReply_tktID",    "Ticketing.tblTickets", "tktID","InReply_" , true},
@@ -64,7 +64,7 @@ Tickets::Tickets() :
                 {"tktUpdatedBy_usrID",  "AAA.tblUser",     "usrID",     "Updater_",  true},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::enuTicketStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketStatus);
 }
 
 
@@ -75,7 +75,7 @@ TicketRead::TicketRead() :
               { ///<ColName      Type                   Validation                       Default    RO   Sort  Filter Self  Virt   PK
 //              {"tkr_tktID",    S(quint64),            QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                 {"tkrBy_usrID",  S(quint32),            QFV.integer().minValue(1),       QInvalid, true,false,false},
-                {"tkrDateTime",  S(QHttp::DateTime_t),  QFV.allwaysInvalid(),            QInvalid, true,false,false},
+                {"tkrDateTime",  S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
               },
               {
               }

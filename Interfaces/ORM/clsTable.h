@@ -116,8 +116,7 @@ public:
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
     void prepareFiltersList();
 
-    QVariant selectFromTable(Targoman::DBManager::clsDAC& _db,
-                             const QStringList& _extraJoins,
+    QVariant selectFromTable(const QStringList& _extraJoins,
                              const QString& _extraFilters,
                              const TAPI::ExtraPath_t& _extraPath,
                              const TAPI::ORMFilters_t& _ORMFILTERS,
@@ -129,16 +128,44 @@ public:
                              const QString& _groupBy,
                              bool _reportCount);
 
-    bool update(Targoman::DBManager::clsDAC& _db,
-                const QVariantMap& _ORMFILTERS,
+    bool update(const QVariantMap& _ORMFILTERS,
                 QVariantMap _updateInfo = {});
-    QVariant create(Targoman::DBManager::clsDAC& _db,
-                    const QVariantMap& _ORMFILTERS,
+    QVariant create(const QVariantMap& _ORMFILTERS,
                     QVariantMap _createInfo = {});
-    bool deleteByPKs(Targoman::DBManager::clsDAC& _db,
-                     TAPI::ExtraPath_t _EXTRAPATH,
+    bool deleteByPKs(TAPI::ExtraPath_t _EXTRAPATH,
                      TAPI::ORMFilters_t _ORMFILTERS,
                      bool _realDelete = false);
+
+    DBManager::clsDACResult callSP(const QString& _spName,
+                                   const QVariantMap& _spArgs = QVariantMap(),
+                                   const QString& _purpose = {},
+                                   quint64* _executionTime = nullptr);
+
+    DBManager::clsDACResult callSPCacheable(quint32 _maxCacheTime,
+                                            const QString& _spName,
+                                            const QVariantMap& _spArgs = QVariantMap(),
+                                            const QString& _purpose = {},
+                                            quint64* _executionTime = nullptr);
+
+    DBManager::clsDACResult execQuery(const QString &_queryStr,
+                                      const QVariantList &_params = QVariantList(),
+                                      const QString& _purpose = "",
+                                      quint64* _executionTime = nullptr);
+    DBManager::clsDACResult execQuery(const QString &_queryStr,
+                                      const QVariantMap &_params,
+                                      const QString& _purpose = "",
+                                      quint64* _executionTime = nullptr);
+    DBManager::clsDACResult execQueryCacheable(quint32 _maxCacheTime,
+                                               const QString &_queryStr,
+                                               const QVariantList &_params = QVariantList(),
+                                               const QString& _purpose = "",
+                                               quint64* _executionTime = nullptr);
+    DBManager::clsDACResult execQueryCacheable(quint32 _maxCacheTime,
+                                               const QString &_queryStr,
+                                               const QVariantMap &_params,
+                                               const QString& _purpose = "",
+                                               quint64* _executionTime = nullptr);
+
 
     void setSelfFilters(const QVariantMap& _requiredFilters,
                         TAPI::ExtraPath_t _EXTRAPATH,
@@ -160,10 +187,12 @@ private:
     QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
+    inline QString domain();
 
 protected:
     QString Schema;
     QString Name;
+    QString Domain;
     QMap<QString, clsORMField> SelectableColsMap;
     QMap<QString, stuFilteredCol> FilterableColsMap;
     QMap<QString, clsORMField> SortableColsMap;

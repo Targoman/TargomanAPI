@@ -25,13 +25,17 @@
 
 #include "Interfaces/ORM/clsTable.h"
 
-namespace Targoman {
-namespace API {
-
+namespace TAPI{
 TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      New       = 'N',
                      Removed   = 'R'
                      )
+}
+
+namespace Targoman {
+namespace API {
+namespace ORM {
+
 class Tickets : public ORM::clsTable
 {
     Q_OBJECT
@@ -51,7 +55,8 @@ private:
 };
 }
 }
+}
 
-Q_DECLARE_METATYPE(Targoman::API::enuTicketStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuTicketStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H

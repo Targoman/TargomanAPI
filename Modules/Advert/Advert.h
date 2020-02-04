@@ -44,7 +44,10 @@ class Advert : public ORM::clsRESTAPIWithActionLogs
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Advert)
+    TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
+public:
+    stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
+
 private slots:
         stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
                       "Get new banner based on location and order info")

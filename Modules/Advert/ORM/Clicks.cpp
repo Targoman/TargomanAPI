@@ -32,11 +32,11 @@ QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT,{"Advert:Clicks:CRUD~0100"});
 
-    return this->selectFromTable(AAADACInstance(), {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 Clicks::Clicks() :
-    clsTable("Advert",
+    clsTable(AdvertSchema,
               "tblClicks",
               { ///<ColName             Type                    Validation                      RO   Sort  Filter Self  Virt   PK
                 {"clkID",               S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},

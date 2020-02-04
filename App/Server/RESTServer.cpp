@@ -64,6 +64,8 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     if(BasePath.startsWith('/') == false)
         BasePath='/'+BasePath;
 
+    //TODO server swagger UI
+
     if(ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
         throw exRESTRegistry("Invalid connector url specified for central cache");
 

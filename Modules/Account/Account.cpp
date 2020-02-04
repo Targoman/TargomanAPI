@@ -46,13 +46,13 @@ namespace API {
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
 TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                      const QString& _login,
-                                      const TAPI::MD5_t& _pass,
-                                      const QString& _salt,
-                                      const QString& _tlps,
-                                      bool _rememberMe,
-                                      const TAPI::JSON_t& _sessionInfo,
-                                      const TAPI::MD5_t& _fingerprint)
+                                     const QString& _login,
+                                     const TAPI::MD5_t& _pass,
+                                     const QString& _salt,
+                                     const QString& _tlps,
+                                     bool _rememberMe,
+                                     const TAPI::JSON_t& _sessionInfo,
+                                     const TAPI::MD5_t& _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -66,11 +66,11 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
 }
 
 TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                             TAPI::enuOAuthType::Type _type,
-                                             const QString& _oAuthToken,
-                                             const QString& _tlps,
-                                             const TAPI::JSON_t& _sessionInfo,
-                                             const TAPI::MD5_t& _fingerprint)
+                                            TAPI::enuOAuthType::Type _type,
+                                            const QString& _oAuthToken,
+                                            const QString& _tlps,
+                                            const TAPI::JSON_t& _sessionInfo,
+                                            const TAPI::MD5_t& _fingerprint)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
@@ -89,7 +89,7 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
     case TAPI::enuOAuthType::Github:
         OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
         break;
-/*    default:
+        /*    default:
         throw exHTTPNotImplemented("Invalid oAuth type");*/
     }
     return this->createJWT (OAuthInfo.Email,
@@ -128,26 +128,26 @@ quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
     else
         throw exHTTPBadRequest("signup must be by a valid email or mobile");
 
-    return static_cast<quint32>(AAADAC.callSP ("","AAA.sp_CREATE_signup", {
-                                                             {"iBy", Type},
-                                                             {"iLogin", _emailOrMobile},
-                                                             {"iPass", _pass},
-                                                             {"iRole", _role},
-                                                             {"iIP", _REMOTE_IP},
-                                                             {"iName", _name.isEmpty()? QVariant() : _name},
-                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
-                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                                             {"iMaxSessions", _maxSessions},
-                                                         }).spDirectOutputs().value("oUserID").toDouble());
+    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_signup", {
+                                                 {"iBy", Type},
+                                                 {"iLogin", _emailOrMobile},
+                                                 {"iPass", _pass},
+                                                 {"iRole", _role},
+                                                 {"iIP", _REMOTE_IP},
+                                                 {"iName", _name.isEmpty()? QVariant() : _name},
+                                                 {"iFamily", _family.isEmpty()? QVariant() : _family},
+                                                 {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
+                                                 {"iMaxSessions", _maxSessions},
+                                             }).spDirectOutputs().value("oUserID").toDouble());
 }
 
 bool Account::apiLogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
-    AAADAC.callSP("","AAA.sp_UPDATE_logout", {
-                                {"iByUserID", clsJWT(_JWT).usrID()},
-                                {"iSessionGUID", clsJWT(_JWT).session()},
-                            });
+    this->callSP("AAA.sp_UPDATE_logout", {
+                     {"iByUserID", clsJWT(_JWT).usrID()},
+                     {"iSessionGUID", clsJWT(_JWT).session()},
+                 });
     return true;
 }
 
@@ -156,10 +156,10 @@ bool Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, co
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADAC.callSP ("","AAA.sp_CREATE_forgotPassRequest", {
-                                 {"iLogin", _login},
-                                 {"iVia", TAPI::enuForgotPassLinkVia::toStr(_via)},
-                             });
+    this->callSP("AAA.sp_CREATE_forgotPassRequest", {
+                     {"iLogin", _login},
+                     {"iVia", TAPI::enuForgotPassLinkVia::toStr(_via)},
+                 });
     return true;
 }
 
@@ -167,22 +167,22 @@ bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    AAADAC.callSP ("","AAA.sp_UPDATE_changePass", {
-                                 {"iUserID", clsJWT(_JWT).usrID()},
-                                 {"iOldPass", _oldPass},
-                                 {"iOldPassSalt", _oldPassSalt},
-                                 {"iNewPass", _newPass},
-                             });
+    this->callSP("AAA.sp_UPDATE_changePass", {
+                     {"iUserID", clsJWT(_JWT).usrID()},
+                     {"iOldPass", _oldPass},
+                     {"iOldPassSalt", _oldPassSalt},
+                     {"iNewPass", _newPass},
+                 });
     return true;
 }
 
 bool Account::apiChangePassByUUID(const TAPI::RemoteIP_t& _REMOTE_IP, const TAPI::MD5_t& _uuid, const TAPI::MD5_t& _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADAC.callSP ("","AAA.sp_UPDATE_changePassByUUID", {
-                                 {"iUUID", _uuid},
-                                 {"iNewPass", _newPass},
-                             });
+    this->callSP("AAA.sp_UPDATE_changePassByUUID", {
+                     {"iUUID", _uuid},
+                     {"iNewPass", _newPass},
+                 });
     return true;
 }
 
@@ -190,22 +190,22 @@ bool Account::apiPOSTApproveEmail(const TAPI::RemoteIP_t& _REMOTE_IP,
                                   const TAPI::MD5_t& _uuid)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADAC.callSP("", "AAA.sp_UPDATE_acceptApproval", {
-                                {"iUUID", _uuid},
-                                {"iMobile", {}},
-                            });
+    this->callSP( "AAA.sp_UPDATE_acceptApproval", {
+                      {"iUUID", _uuid},
+                      {"iMobile", {}},
+                  });
     return true;
 }
 
 bool Account::apiPOSTApproveMobile(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                  const TAPI::Mobile_t _mobile,
-                                  const quint16& _code)
+                                   const TAPI::Mobile_t _mobile,
+                                   const quint16& _code)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    AAADAC.callSP("", "AAA.sp_UPDATE_acceptApproval", {
-                                {"iUUID", _code},
-                                {"iMobile", _mobile},
-                            });
+    this->callSP( "AAA.sp_UPDATE_acceptApproval", {
+                      {"iUUID", _code},
+                      {"iMobile", _mobile},
+                  });
     return true;
 }
 
@@ -242,19 +242,19 @@ Account::Account() :
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)
 {
     return clsJWT::createSigned({
-                                     {JWTItems::usrLogin, _login},
-                                     {JWTItems::usrName, _result["usrGivenName"]},
-                                     {JWTItems::usrFamily, _result["usrFamilyName"]},
-                                     {JWTItems::rolName, _result["rolName"]},
-                                     {JWTItems::rolID, _result["rolID"]},
-                                     {JWTItems::privs, _result["privs"]},
-                                     {JWTItems::usrID, _result["usrID"]},
-                                     {JWTItems::canChangePass, _result["hasPass"]},
-                                     {JWTItems::usrApproval, TAPI::enuUserApproval::toStr(_result["usrApprovalState"].toString())},
-                                     {JWTItems::usrStatus, TAPI::enuUserStatus::toStr(_result["usrStatus"].toString())},
-                                 },
-                                 QJsonObject({{"tlps",_requiredTLPs}}),
-                                 _result["ssnKey"].toString()
+                                    {JWTItems::usrLogin, _login},
+                                    {JWTItems::usrName, _result["usrGivenName"]},
+                                    {JWTItems::usrFamily, _result["usrFamilyName"]},
+                                    {JWTItems::rolName, _result["rolName"]},
+                                    {JWTItems::rolID, _result["rolID"]},
+                                    {JWTItems::privs, _result["privs"]},
+                                    {JWTItems::usrID, _result["usrID"]},
+                                    {JWTItems::canChangePass, _result["hasPass"]},
+                                    {JWTItems::usrApproval, TAPI::enuUserApproval::toStr(_result["usrApprovalState"].toString())},
+                                    {JWTItems::usrStatus, TAPI::enuUserStatus::toStr(_result["usrStatus"].toString())},
+                                },
+                                QJsonObject({{"tlps",_requiredTLPs}}),
+                                _result["ssnKey"].toString()
             );
 }
 

@@ -36,25 +36,29 @@ QJsonObject login(const QString&     _ip,
                   const QStringList& _requiredTLPs,
                   const QJsonObject& _info, const QString& _fingerPrint)
 {
-    QJsonObject UserInfo =  AAADAC.callSP ("","AAA.sp_UPDATE_login", {
-                                                         {"iLogin", _login},
-                                                         {"iIP", _ip},
-                                                         {"iPass", _pass},
-                                                         {"iSalt", _salt},
-                                                         {"iInfo", _info},
-                                                         {"iFingerPrint", _fingerPrint.isEmpty() ? QVariant() : _fingerPrint},
-                                                         {"iRemember", _rememberMe ? "1" : "0"},
-                                                         {"iOAuthInfo", QVariant()}
-                                                     }).toJson(true).object();
+    makeAAADAC(DAC);
+    QJsonObject UserInfo =  DAC.callSP({},
+                                       "AAA.sp_UPDATE_login", {
+                                           {"iLogin", _login},
+                                           {"iIP", _ip},
+                                           {"iPass", _pass},
+                                           {"iSalt", _salt},
+                                           {"iInfo", _info},
+                                           {"iFingerPrint", _fingerPrint.isEmpty() ? QVariant() : _fingerPrint},
+                                           {"iRemember", _rememberMe ? "1" : "0"},
+                                           {"iOAuthInfo", QVariant()}
+                                       }).toJson(true).object();
     return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs);
 }
 
 QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs)
 {
-    QJsonObject UserInfo =  AAADAC.callSP ("","AAA.sp_UPDATE_sessionActivity", {
-                                                         {"iIP", _ip},
-                                                         {"iSSID", _ssid},
-                                                     }).toJson(true).object();
+    makeAAADAC(DAC);
+    QJsonObject UserInfo =  DAC.callSP({},
+                                       "AAA.sp_UPDATE_sessionActivity", {
+                                           {"iIP", _ip},
+                                           {"iSSID", _ssid},
+                                       }).toJson(true).object();
     return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs.split(',', QString::SkipEmptyParts));
 }
 

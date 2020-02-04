@@ -33,11 +33,11 @@ QVariant PaymentOrders::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 PaymentOrders::PaymentOrders() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblPaymentOrders",
               { ///<ColName             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"pyoID",               S(quint64),             QFV.integer().minValue(1),          true},

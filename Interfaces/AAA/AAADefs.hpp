@@ -66,9 +66,10 @@ TARGOMAN_CREATE_CONSTEXPR(privs);
 }
 #pragma clang diagnostic pop
 
-using namespace DBManager;
+constexpr char AAASchema[] = "AAA";
+constexpr char AAADomain[] = "Account";
 
-#define AAADAC clsDAC("AAA")
+#define makeAAADAC(_varName) DBManager::clsDAC _varName(AAADomain, AAASchema)
 }
 }
 }

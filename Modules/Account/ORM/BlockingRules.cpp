@@ -31,30 +31,30 @@ using namespace ORM;
 QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool BlockingRules::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 
 bool BlockingRules::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toULongLong();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 BlockingRules::BlockingRules() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblBlockingRuless",
               { ///<ColName             Type                Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"blrID",               S(quint64),         QFV.integer().minValue(1),       ORM_PRIMARY_KEY},

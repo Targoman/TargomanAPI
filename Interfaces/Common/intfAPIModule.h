@@ -159,6 +159,7 @@ public: \
         return this->Methods; \
     } \
     void addSubModule(intfAPIModule* _submodule) { \
+        if(this->Methods.isEmpty()) listOfMethods(); \
         if (_submodule->parentModuleName() != this->moduleBaseName()) \
             throw Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
         for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
@@ -188,7 +189,7 @@ private: \
         static Common::Configuration::tmplConfigurable<QString>      User;   \
         static Common::Configuration::tmplConfigurable<QString>      Pass;   \
         static Common::Configuration::tmplConfigurable<QString>      Schema; \
-    };
+    }
 
 #define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module)     \
     using namespace Targoman::Common::Configuration;    \

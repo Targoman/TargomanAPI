@@ -32,20 +32,22 @@ namespace Authorization{
 
 void validateIPAddress(const QString& _ip)
 {
-    AAADAC.callSP("","AAA.sp_SYSTEM_validateIPAccess", {
-                             {"iIP", inet_addr(_ip.toLatin1().constData())},
-                         });
+    makeAAADAC(DAC);
+    DAC.callSP({}, "AAA.sp_SYSTEM_validateIPAccess", {
+                   {"iIP", inet_addr(_ip.toLatin1().constData())},
+               });
 }
 
 QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs)
 {
     PrivHelpers::validateToken(_token);
 
-    QJsonObject TokenInfo =  AAADAC.callSPCacheable(3600,
-                                                           "","AAA.sp_UPDATE_retrieveTokenInfo", {
-                                                               {"iToken", _token},
-                                                               {"iIP", _ip},
-                                                           }).toJson(true).object();
+    makeAAADAC(DAC);
+    QJsonObject TokenInfo =  DAC.callSPCacheable(3600,{},
+                                                 "AAA.sp_UPDATE_retrieveTokenInfo", {
+                                                     {"iToken", _token},
+                                                     {"iIP", _ip},
+                                                 }).toJson(true).object();
     return PrivHelpers::processObjectPrivs(TokenInfo, _requiredPrivs);
 }
 
@@ -72,7 +74,7 @@ void checkPriv(const TAPI::JWT_t &_jwt, const QStringList &_requiredAccess, bool
 QJsonObject privObjectFromInfo(const QJsonObject& _info)
 {
     return _info.contains(AAACommonItems::privs) ? _info[AAACommonItems::privs].toObject() : _info;
-}
+    }
 
 }
 }

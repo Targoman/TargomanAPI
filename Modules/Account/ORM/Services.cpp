@@ -31,30 +31,30 @@ using namespace ORM;
 QVariant Services::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Services::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(AAADAC, DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 
 bool Services::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(AAADAC, UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
 quint64 Services::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(AAADAC, CREATE_METHOD_CALL_ARGS).toULongLong();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 Services::Services() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblServices",
               { ///<ColName             Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"svcID",               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},

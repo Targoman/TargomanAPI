@@ -33,11 +33,11 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
-    return this->selectFromTable(AAADAC, {}, {}, GET_METHOD_CALL_ARGS);
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 WalletTransactions::WalletTransactions() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblWalletsTransactions",
               { ///<ColName         Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
                 {"wltID",           S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
@@ -57,7 +57,7 @@ WalletTransactions::WalletTransactions() :
 }
 
 WalletBalances::WalletBalances() :
-    clsTable("AAA",
+    clsTable(AAASchema,
               "tblWalletBalances",
               { ///<ColName         Type         Validation                       Default    RO   Sort  Filter Self  Virt   PK
 //              {"wbl_wltID",       S(quint64),  QFV.integer().minValue(1),       ORM_PRIMARY_KEY},

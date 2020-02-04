@@ -187,6 +187,8 @@ void clsRequestHandler::process(const QString& _api) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }catch(std::exception &ex){
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
+        }catch(...){
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", true);
         }
     });
 }
@@ -234,8 +236,9 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-void clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath)
+clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath)
 {
+    try{
     for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
         *QueryIter = QueryIter->replace('+', ' ');
 
@@ -261,18 +264,26 @@ void clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, con
 
     Headers.remove("cookie");
 
+    return stuResult(_apiObject->invoke(_queries,
+                              this->Request->userDefinedValues(),
+                              Headers,
+                              Cookies,
+                              JWT,
+                              this->toIPv4(this->Request->remoteAddress()),
+                              _extraPath
+                              ));
 
-    this->sendResponse(
-                StatusCodeOnMethod[this->Request->method()],
-            _apiObject->invoke(_queries,
-                               this->Request->userDefinedValues(),
-                               Headers,
-                               Cookies,
-                               JWT,
-                               this->toIPv4(this->Request->remoteAddress()),
-                               _extraPath
-                               )
-            );
+    }catch(exTargomanBase& ex){
+        return stuResult(ex.what(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+    }catch(QFieldValidator::exRequiredParam &ex){
+        return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
+    }catch(QFieldValidator::exInvalidValue &ex){
+        return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
+    }catch(std::exception &ex){
+        return stuResult(ex.what(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+    }catch(...){
+        return stuResult("INTERNAL SERVER ERROR!!!", qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+    }
 }
 
 void clsRequestHandler::findAndCallAPI(const QString& _api)
@@ -311,8 +322,18 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
 
     if(ServerConfigs::MultiThreaded.value()){
         this->connect(&this->FutureTimer, SIGNAL(timeout()), &this->FutureWatcher, SLOT(cancel()));
-        this->connect(&this->FutureWatcher, &QFutureWatcher<void>::canceled, [this](){
-            this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "");
+        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::canceled, [this](){
+            this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "Request Timed Out");
+        });
+        this->connect (&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this](){
+            stuResult Result = this->FutureWatcher.result();
+            if(Result.StatusCode == qhttp::ESTATUS_OK)
+            this->sendResponse(
+                        StatusCodeOnMethod[this->Request->method()],
+                        Result.Result
+                    );
+            else
+                this->sendError(Result.StatusCode, Result.Result.toString(), Result.StatusCode >= 500);
         });
         this->FutureWatcher.setFuture(
                     QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath)
@@ -565,7 +586,6 @@ void clsUpdateAndPruneThread::run()
 
     Timer.start(ServerConfigs::StatisticsInterval.value() * 1000);
     this->exec();
-
 }
 
 }
