@@ -56,6 +56,9 @@ struct ServerConfigs
     static Common::Configuration::tmplConfigurable<QString>       AccessControl;
     static Common::Configuration::tmplConfigurable<bool>          MultiThreaded;
     static Common::Configuration::tmplRangedConfigurable<qint32>  APICallTimeout;
+    static Common::Configuration::tmplConfigurable<FilePath_t>    PublicPath;
+    static Common::Configuration::tmplConfigurable<FilePath_t>    SwaggerUI;
+    static Common::Configuration::tmplRangedConfigurable<quint32> FileMaxChunk;
 
     static QString BasePathWithVersion;
     static QJsonObject BaseOpenAPIObject;

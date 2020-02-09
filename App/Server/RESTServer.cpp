@@ -64,8 +64,6 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     if(BasePath.startsWith('/') == false)
         BasePath='/'+BasePath;
 
-    //TODO server swagger UI
-
     if(ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
         throw exRESTRegistry("Invalid connector url specified for central cache");
 
@@ -103,6 +101,8 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             QString Path = _req->url().adjusted(QUrl::NormalizePathSegments |
                                                 QUrl::RemoveAuthority
                                                 ).path(QUrl::PrettyDecoded);
+            if(Path != _req->url().path())
+                return  RequestHandler->redirect(Path, false);
 
             if(Path.startsWith(BasePath) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", true);

@@ -125,6 +125,17 @@ tmplRangedConfigurable<qint64> ServerConfigs::MaxUploadSize(
         "max-upload-size",
         enuConfigSource::Arg | enuConfigSource::File);
 
+tmplRangedConfigurable<quint32> ServerConfigs::FileMaxChunk(
+        ServerConfigs::makeConfig("FileMaxChunk"),
+        "Max file size to send on each chunk.",
+        10*1024, 10*1024*1024,
+        10*1024,
+        ReturnTrueCrossValidator(),
+        "",
+        "SIZE",
+        "chunk-size",
+        enuConfigSource::Arg | enuConfigSource::File);
+
 tmplRangedConfigurable<qint64> ServerConfigs::MaxUploadedFileSize(
         ServerConfigs::makeConfig("MaxUploadedFileSize"),
         "Max Upload size for files",
@@ -189,6 +200,30 @@ tmplConfigurable<FilePath_t>     ServerConfigs::ModulesPath(
         "m",
         "DIRECTORY",
         "modules-path",
+        enuConfigSource::Arg | enuConfigSource::File);
+
+tmplConfigurable<FilePath_t>     ServerConfigs::SwaggerUI(
+        ServerConfigs::makeConfig("SwaggerUI"),
+        "Directory where swaggerUI files reside",
+        "",
+        Validators::tmplPathAccessValidator<
+        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
+        false>,
+        "",
+        "DIRECTORY",
+        "swaggerui-path",
+        enuConfigSource::Arg | enuConfigSource::File);
+
+tmplConfigurable<FilePath_t>     ServerConfigs::PublicPath(
+        ServerConfigs::makeConfig("PublicFolder"),
+        "Directory static files are stored",
+        "",
+        Validators::tmplPathAccessValidator<
+        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
+        false>,
+        "",
+        "DIRECTORY",
+        "public-path",
         enuConfigSource::Arg | enuConfigSource::File);
 
 QString ServerConfigs::BasePathWithVersion;

@@ -83,7 +83,7 @@ private:
     friend class clsRequestHandler;
 };
 
-class clsRequestHandler :QObject
+class clsRequestHandler : public QObject
 {
     Q_OBJECT
     struct stuResult {
@@ -104,20 +104,29 @@ public:
     void sendError(qhttp::TStatusCode _code,
                    const QString& _message,
                    bool _closeConnection = false);
+    void sendFile(const QString& _basePath, const QString _path);
     void sendResponse(qhttp::TStatusCode _code, QVariant _response);
     void sendCORSOptions();
+    void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
+
 private:
     void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
     stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath);
     QString toIPv4(const QString _ip);
+
+private slots:
+    void slotSendFileData();
 
 private:
     QByteArray                                          RemainingData;
     qhttp::server::QHttpRequest*                        Request;
     qhttp::server::QHttpResponse*                       Response;
     QScopedPointer<clsMultipartFormDataRequestHandler>  MultipartFormDataHandler;
-    QFutureWatcher<stuResult>                            FutureWatcher;
+    QFutureWatcher<stuResult>                           FutureWatcher;
     QTimer                                              FutureTimer;
+    QMimeDatabase                                       MIMEDB;
+    QScopedPointer<QFile>                               FileHandler;
+
     friend class clsMultipartFormDataRequestHandler;
 };
 

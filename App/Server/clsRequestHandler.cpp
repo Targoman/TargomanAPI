@@ -296,6 +296,19 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
     if(_api == "/openAPI.yaml")
         throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 
+    if(_api.startsWith("/swaggerUI")){
+        if(ServerConfigs::SwaggerUI.value().isEmpty())
+            return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not confiugured");
+
+
+        QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
+        if(File.isEmpty())
+            return this->redirect(_api + "/");
+        if(File == "/")
+            File = "index.html";
+        return this->sendFile(ServerConfigs::SwaggerUI.value(), File);
+    }
+
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
     if(_api == "/stats.json"){
@@ -359,6 +372,26 @@ void clsRequestHandler::sendError(qhttp::TStatusCode _code, const QString& _mess
                            _closeConnection);
 }
 
+void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
+{
+    if(QFile::exists(_basePath + _path) == false)
+        throw exHTTPNotFound(_path);
+    Q_ASSERT(this->FileHandler.isNull());
+    this->FileHandler.reset(new QFile(_basePath + _path));
+    this->FileHandler->open(QFile::ReadOnly);
+
+    if(this->FileHandler->isReadable() == false)
+        throw exHTTPForbidden(_path);
+
+    QMimeType FileMIME = this->MIMEDB.mimeTypeForFile(_basePath + _path);
+    qint64 FileSize = QFileInfo(*this->FileHandler).size();
+    this->Response->addHeaderValue("content-type", FileMIME.name());
+    this->Response->addHeaderValue("content-length", QString("%1").arg(FileSize));
+    this->Response->addHeaderValue("Connection", QString("keep-alive"));
+    this->Response->setStatusCode(qhttp::ESTATUS_OK);
+
+    QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
+}
 
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code, QVariant _response)
 {
@@ -391,6 +424,17 @@ void clsRequestHandler::sendCORSOptions()
     this->deleteLater();
 }
 
+void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet)
+{
+    QString Path = _appendBase ? ServerConfigs::BasePathWithVersion + _path : _path;
+    Path = Path.replace(QRegularExpression("//+"), "/");
+
+    this->Response->addHeaderValue("Location", Path);
+    this->Response->setStatusCode(_permananet ?  qhttp::ESTATUS_MOVED_PERMANENTLY : qhttp::ESTATUS_TEMPORARY_REDIRECT);
+    this->Response->end();
+    this->deleteLater();
+}
+
 void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection){
 
     QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()?
@@ -406,8 +450,21 @@ void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _
     this->Response->addHeaderValue("content-length", Data.length());
     this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
     this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
+    this->Response->addHeaderValue("Connection", QString("keep-alive"));
     this->Response->end(Data.constData());
     this->deleteLater();
+}
+
+void clsRequestHandler::slotSendFileData()
+{
+    if(this->FileHandler.isNull() || this->FileHandler->atEnd()){
+//        this->Response->end();
+        this->deleteLater();
+        return;
+    }
+
+    this->Response->write(this->FileHandler->read(ServerConfigs::FileMaxChunk.value()));
+    QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
 /**************************************************************************/
