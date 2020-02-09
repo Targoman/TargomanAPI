@@ -41,7 +41,8 @@ OTHER_FILES += \
     buildDependencies.sh \
     build.sh \
     conf/test.conf \
-    conf/api.server.conf
+    conf/api.server.conf \
+    conf/api.conf
 
 SUBDIRS += \
     unitTest

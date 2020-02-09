@@ -104,6 +104,9 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             if(Path != _req->url().path())
                 return  RequestHandler->redirect(Path, false);
 
+            if(ServerConfigs::PublicPath.value().size() && QFile::exists(ServerConfigs::PublicPath.value() + Path))
+                return RequestHandler->sendFile(ServerConfigs::PublicPath.value(), Path);
+
             if(Path.startsWith(BasePath) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", true);
             if(Path.startsWith(ServerConfigs::BasePathWithVersion) == false)
