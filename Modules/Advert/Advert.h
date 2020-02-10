@@ -47,6 +47,7 @@ class Advert : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
+    virtual QJsonObject todayPrivs(quint32 _usrID) final;
 
 private slots:
         stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),

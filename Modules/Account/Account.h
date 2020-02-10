@@ -40,6 +40,7 @@ class Account : public ORM::clsRESTAPIWithActionLogs
 
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
+    virtual QJsonObject todayPrivs(quint32 _usrID) final {Q_UNUSED(_usrID) return {}; }
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);

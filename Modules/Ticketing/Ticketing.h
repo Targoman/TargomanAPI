@@ -26,7 +26,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
-#include "./ORM/Defs.hpp"
+#include "ORM/Defs.hpp"
 
 namespace Targoman {
 namespace API {

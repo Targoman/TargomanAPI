@@ -34,7 +34,6 @@ class ActiveAds : public ORM::clsTable
 {
     Q_OBJECT
 private slots:
-    /// @TODO default GET descriptiopn
     QVariant ORMGET("Get ActiveAds information")
 
 private:

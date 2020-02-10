@@ -20,8 +20,8 @@
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_AAA_USERENUMS_HPP
-#define TARGOMAN_API_AAA_USERENUMS_HPP
+#ifndef TARGOMAN_API_AAA_GENERICENUMS_HPP
+#define TARGOMAN_API_AAA_GENERICENUMS_HPP
 
 #include <QJsonObject>
 #include <QVariantMap>
@@ -30,44 +30,50 @@
 //I used TAPI as namespace in order to make Targoman::API shorter
 namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
-                               Web = 'W',
+                               Web    = 'W',
                                Mobile = 'M',
-                               App = 'A'
+                               App    = 'A'
                                );
 
 TARGOMAN_DEFINE_ENUM(enuUserStatus,
-                     Active = 'A',
-                     Removed = 'R',
-                     Blocked = 'B',
+                     Active         = 'A',
+                     Removed        = 'R',
+                     Blocked        = 'B',
                      MustChangePass = 'C',
-                     MustValidate = 'V'
+                     MustValidate   = 'V'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuUserApproval,
-                     None = 'N',
-                     All = 'A',
+                     None       = 'N',
+                     All        = 'A',
                      JustMobile = 'M',
-                     JustEmail = 'E'
+                     JustEmail  = 'E'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuUserSex,
-                     Male = 'M',
-                     Female = 'F',
+                     Male         = 'M',
+                     Female       = 'F',
                      NotExpressed = 'N'
                      )
 
 TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
                      Pending = 'P',
-                     Active = 'A',
-                     Banned = 'B',
+                     Active  = 'A',
+                     Banned  = 'B',
                      Removed = 'R'
                      )
 
+TARGOMAN_DEFINE_ENUM (enuInvoiceTemplateStatus,
+                      Active  = 'A',
+                      Removed = 'R',
+                      Expired = 'E',
+                      );
 }
 
 Q_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
 Q_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
 Q_DECLARE_METATYPE(TAPI::enuUserSex::Type);
 Q_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
+Q_DECLARE_METATYPE(TAPI::enuInvoiceTemplateStatus::Type);
 
-#endif // TARGOMAN_API_AAA_USERENUMS_HPP
+#endif // TARGOMAN_API_AAA_GENERICENUMS_HPP

@@ -71,6 +71,7 @@ Invoice::Invoice() :
                 {"invID",               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
                 {"invCreationDateTime", S(TAPI::DateTime_t), QFV,                                        QNull,     true},
                 {"inv_svcID",           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid},
+                {"inv_ordID",           S(quint64),          QFV.integer().minValue(1),                  QInvalid,  true},
                 {"inv_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
                 {"invDesc",             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,    false,false,false},
                 {"invPaymentType",      S(TAPI::enuInvoiceType::Type), QFV,                              TAPI::enuInvoiceType::Payment},

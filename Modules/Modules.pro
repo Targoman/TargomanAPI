@@ -31,7 +31,7 @@ CONFIG += ordered
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 addSubdirs(Account, Dependencies)
 #addSubdirs(MT, Dependencies)
-#addSubdirs(Advert, Dependencies)
+addSubdirs(Advert, Dependencies)
 #addSubdirs(NGT, Dependencies)
 addSubdirs(Ticketing, Dependencies)
 #addSubdirs(TextProcessor, Dependencies)

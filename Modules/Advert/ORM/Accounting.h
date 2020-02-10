@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -20,41 +20,44 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
-#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+#ifndef TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
+#define TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
 
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI{
-TARGOMAN_DEFINE_ENUM(enuRoleStatus,
-                     Active   = 'A',
-                     Blocked  = 'B',
-                     Removed  = 'R'
-                                )
-}
-
 namespace Targoman {
 namespace API {
-namespace AAA {
+namespace Advertisement {
 
-class Roles : public ORM::clsTable
+
+class AccountOrders: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
-    QVariant ORMGET("Get roles information")
-    bool ORMDELETE("Delete a Role")
-    bool ORMUPDATE("Update role info by priviledged user")
-    quint32 ORMCREATE("Create a new Role by priviledged user")
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountOrders)
+};
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,Roles)
+/******************************************************/
+class AccountUsage: public ORM::clsTable
+{
+    Q_OBJECT
+private slots:
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUsage)
+};
+
+/******************************************************/
+class InvoiceTemplate: public ORM::clsTable
+{
+    Q_OBJECT
+private slots:
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,InvoiceTemplate)
 };
 
 }
 }
 }
-
-Q_DECLARE_METATYPE(TAPI::enuRoleStatus::Type);
-
-#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+#endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

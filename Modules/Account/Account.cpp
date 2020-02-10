@@ -34,7 +34,6 @@
 #include "ORM/IPBin.h"
 #include "ORM/IPStats.h"
 #include "ORM/PaymentOrders.h"
-#include "ORM/Roles.h"
 #include "ORM/Services.h"
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
@@ -64,6 +63,13 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
                             Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(",", QString::SkipEmptyParts), _sessionInfo.object(), _fingerprint),
                             _tlps);
 }
+
+//TODO cache to ban users for every service
+//TODO update cache for each module
+//TODO JWT lifetime dynamic based on current hour
+//Every module must have a method to report todays' priv for specific user
+//
+
 
 TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
@@ -219,6 +225,7 @@ Account::Account() :
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserApproval);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuGenericStatus);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAuditableStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceTemplateStatus);
 
     this->addSubModule(new ActiveSessions);
     this->addSubModule(new APITokens);
@@ -230,7 +237,6 @@ Account::Account() :
     this->addSubModule(new IPBin);
     this->addSubModule(new IPStats);
     this->addSubModule(new PaymentOrders);
-    this->addSubModule(new Roles);
     this->addSubModule(new Services);
     this->addSubModule(new User);
     this->addSubModule(new UserExtraInfo);

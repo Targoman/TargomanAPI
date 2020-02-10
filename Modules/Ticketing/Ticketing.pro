@@ -50,7 +50,6 @@ OBJECTS_DIR  = $$BaseBuildFolder/$$ModuleName/obj
 RCC_DIR      = $$BaseBuildFolder/$$ModuleName/rcc
 UI_DIR       = $$BaseBuildFolder/$$ModuleName/ui
 
-HEADERS +=     $$PRJDIR/App/Interfaces/ORM/clsRESTAPIWithActionLogs.h
 LIBS    +=     -lTargomanCommon
 
 QMAKE_CXXFLAGS_RELEASE += -Wl,--export-dynamic

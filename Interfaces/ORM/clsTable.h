@@ -188,6 +188,7 @@ private:
     QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
     inline QString domain();
+    virtual QJsonObject todayPrivs(quint32 _usrID) {Q_UNUSED(_usrID) return {}; }
 
 protected:
     QString Schema;

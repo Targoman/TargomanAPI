@@ -37,6 +37,8 @@ class URLProcessor : public intfAPIModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
+public:
+    virtual QJsonObject todayPrivs(quint32 _usrID) final { Q_UNUSED(_usrID) return {};}
 
 private slots:
     QString API(GET, canonicalize, (const QString _url, bool _removeWWW = true),

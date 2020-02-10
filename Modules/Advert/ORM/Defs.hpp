@@ -60,6 +60,15 @@ TARGOMAN_DEFINE_ENUM (enuBannerSizes,
                       Mobile_320x50            = 'P',
                       LargeMobile_320x100      = 'Q',
                       );
+
+TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
+                      New       = 'N',
+                      Pending   = 'P',
+                      Approved  = 'A',
+                      Removed   = 'R',
+                      );
+
+
 }
 
 constexpr char AdvertSchema[] = "Advert";
@@ -68,6 +77,7 @@ constexpr char AdvertDomain[] = "Advert";
 Q_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
 Q_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
 Q_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);
+Q_DECLARE_METATYPE(TAPI::enuAccountOrdersStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 

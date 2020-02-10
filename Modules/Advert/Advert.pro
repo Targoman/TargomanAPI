@@ -26,6 +26,7 @@ HEADERS += \
     ORM/Bin.h \
     ORM/Clicks.h \
     ORM/Props.h \
+    ORM/Accounting.h
 
 SOURCES += \
     Advert.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     ORM/Bin.cpp \
     ORM/Clicks.cpp \
     ORM/Props.cpp \
+    ORM/Accounting.cpp
 
 OTHER_FILES += \
 

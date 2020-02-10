@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include <QVariantMap>
 #include "libTargomanCommon/Macros.h"
-#include "GenericEnums.hpp"
+#include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 
 namespace Targoman {

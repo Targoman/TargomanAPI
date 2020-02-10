@@ -29,7 +29,6 @@ HEADERS += \
     AAA/Authentication.h \
     AAA/Authorization.h \
     AAA/clsJWT.hpp \
-    AAA/GenericEnums.hpp \
     AAA/PrivHelpers.h \
     ORM/clsORMField.h \
     ORM/clsRESTAPIWithActionLogs.h \
@@ -37,7 +36,8 @@ HEADERS += \
     NLP/FormalityChecker.h \
     NLP/TextProcessor.hpp \
     Common/HTTPExceptions.hpp \
-    Common/intfAPIModule.h
+    Common/intfAPIModule.h \
+    Common/GenericEnums.hpp
 
 SOURCES += \
     AAA/Accounting.cpp \

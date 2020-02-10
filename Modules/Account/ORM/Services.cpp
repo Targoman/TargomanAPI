@@ -59,15 +59,12 @@ Services::Services() :
               { ///<ColName             Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
                 {"svcID",               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                 {"svcName",             S(QString),          QFV,                             QInvalid, false},
-                {"svc_rolID",           S(quint32),          QFV,                             QInvalid},
-                {"svcInvoiceTemplate",  S(QString),          QFV,                             QInvalid, false, false, false},
                 {"svcCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QInvalid, true},
                 {"svcCreationDateTime", S(TAPI::DateTime_t), QFV,                             QNull,    true},
                 {"svcUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QNull,    true},
                 {"svcStatus",           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active},
               },
               { ///< Col                Reference Table     ForeignCol   Rename     LeftJoin
-                {"usr_rolID",           "AAA.tblRoles",     "rolID"},
                 {"svcCreatedBy_usrID",  "AAA.tblUser",      "usrID",     "Creator_", true},
                 {"svcUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
               })

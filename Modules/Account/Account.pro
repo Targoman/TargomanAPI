@@ -31,7 +31,6 @@ HEADERS += \
     ORM/IPBin.h \
     ORM/IPStats.h \
     ORM/PaymentOrders.h \
-    ORM/Roles.h \
     ORM/Services.h \
     ORM/User.h \
     ORM/UserWallets.h \
@@ -50,7 +49,6 @@ SOURCES += \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
     ORM/PaymentOrders.cpp \
-    ORM/Roles.cpp \
     ORM/Services.cpp \
     ORM/User.cpp \
     ORM/UserWallets.cpp \

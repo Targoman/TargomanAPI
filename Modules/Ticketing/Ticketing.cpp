@@ -24,7 +24,7 @@
 #include "QFieldValidator.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
-#include "Interfaces/AAA/GenericEnums.hpp"
+#include "Interfaces/Common/GenericEnums.hpp"
 
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
@@ -102,8 +102,8 @@ Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketType);
 
-    this->addSubModule(new ORM::Tickets);
-    this->addSubModule(new ORM::TicketRead);
+   // this->addSubModule(new ORM::Tickets);
+   // this->addSubModule(new ORM::TicketRead);
 }
 
 }

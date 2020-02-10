@@ -23,13 +23,14 @@
 #include "Advert.h"
 #include "QFieldValidator.h"
 #include "Interfaces/AAA/PrivHelpers.h"
-#include "Interfaces/AAA/GenericEnums.hpp"
+#include "Interfaces/Common/GenericEnums.hpp"
 
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
 #include "ORM/Bin.h"
 #include "ORM/Clicks.h"
 #include "ORM/Props.h"
+#include "ORM/Accounting.h"
 
 using namespace Targoman;
 using namespace Targoman::API;
@@ -61,10 +62,45 @@ Advert::Advert() :
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertType);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertOrder);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuBannerSizes);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAccountOrdersStatus);
+
+    this->addSubModule(new Advertisement::AccountOrders);
+    this->addSubModule(new Advertisement::AccountUsage);
+    this->addSubModule(new Advertisement::InvoiceTemplate);
 
     this->addSubModule(new Advertisement::ActiveAds);
     this->addSubModule(new Advertisement::Bin);
     this->addSubModule(new Advertisement::Banners);
     this->addSubModule(new Advertisement::Clicks);
     this->addSubModule(new Advertisement::Props);
+}
+
+QJsonObject Advert::todayPrivs(quint32 _usrID)
+{
+    DBManager::clsDACResult Result =
+            this->execQuery("SELECT tblAccountOrders.acoValidFrom,"
+                            "       tblAccountOrders.acoValidTo,"
+                            "       tblAccountOrders.acoMaxPerDayClicks,"
+                            "       tblAccountOrders.acoMaxPerWeekClicks,"
+                            "       tblAccountOrders.acoMaxPerMonthClicks,"
+                            "       tblAccountOrders.acoMaxTotalClicks"
+                            "  FROM tblAccountOrders"
+                            " WHERE tblAccountOrders.aco_usrID = ?"
+                            "   AND (ISNULL(tblAccountOrders.acoValidFrom) OR DATE(NOW()) >= tblAccountOrders.acoValidFrom)"
+                            "   AND (ISNULL(tblAccountOrders.acoValidTo)   OR DATE(NOW()) < tblAccountOrders.acoValidTo)"
+                            " ORDER BY tblAccountOrders.acoValidFrom ASC",
+                            {_usrID});
+
+    QJsonObject BestMatchedResult;
+    while(Result.next()){
+        if(BestMatchedResult.isEmpty()){
+            BestMatchedResult = Result.
+        }
+
+        QDateTime FromDate = Result.value(1).toDateTime();
+        QDateTime ToDate = Result.value(1).toDateTime();
+
+    }
+
+    return {{AdvertDomain, BestMatchedResult}};
 }

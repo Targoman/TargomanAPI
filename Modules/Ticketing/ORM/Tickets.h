@@ -20,8 +20,8 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H
-#define TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H
+#ifndef TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
+#define TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
 
 #include "Interfaces/ORM/clsTable.h"
 
@@ -53,10 +53,11 @@ class TicketRead : public ORM::clsTable
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
 };
+
 }
 }
 }
 
 Q_DECLARE_METATYPE(TAPI::enuTicketStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_TICKETING_ORM_ACTIVEADS_H
+#endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
