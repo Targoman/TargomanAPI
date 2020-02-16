@@ -56,6 +56,6 @@ private slots:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuAPITokensStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAPITokensStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H

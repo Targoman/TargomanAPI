@@ -29,15 +29,17 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 
-namespace Targoman {
-namespace API {
-
+namespace TAPI{
 struct stuAdvert{
     quint64 ID;
     QString Title;
     QString Description;
     QString PrettyURL;
 };
+}
+
+namespace Targoman {
+namespace API {
 
 class Advert : public ORM::clsRESTAPIWithActionLogs
 {
@@ -50,9 +52,9 @@ public:
     virtual QJsonObject todayPrivs(quint32 _usrID) final;
 
 private slots:
-        stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
+        TAPI::stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
                       "Get new banner based on location and order info")
-        stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
+        TAPI::stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
                       "Get new text advertisement")
         QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
                       "Retrieve URL of the specified Advertisement")
@@ -64,6 +66,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::stuAdvert);
+Q_DECLARE_METATYPE(TAPI::stuAdvert);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H

@@ -63,7 +63,7 @@ private slots:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuAPRStatus::Type);
-Q_DECLARE_METATYPE(TAPI::enuApprovalType::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAPRStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuApprovalType::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H

@@ -165,7 +165,7 @@ void WebSocketServer::processTextMessage(QString _message)
 
 
             QByteArray Data = QJsonDocument(QJsonObject({{"result",
-                                                          QJsonValue::fromVariant(APIObject->invoke(Queries))
+                                                          QJsonValue::fromVariant(APIObject->invoke(false, Queries))
                                                          }})).toJson(ServerConfigs::IndentedJson.value() ?
                                                                          QJsonDocument::Indented :
                                                                          QJsonDocument::Compact);

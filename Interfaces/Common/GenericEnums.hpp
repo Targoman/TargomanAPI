@@ -26,14 +26,10 @@
 #include <QJsonObject>
 #include <QVariantMap>
 #include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
 //I used TAPI as namespace in order to make Targoman::API shorter
 namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
-                               Web    = 'W',
-                               Mobile = 'M',
-                               App    = 'A'
-                               );
 
 TARGOMAN_DEFINE_ENUM(enuUserStatus,
                      Active         = 'A',
@@ -70,10 +66,10 @@ TARGOMAN_DEFINE_ENUM (enuInvoiceTemplateStatus,
                       );
 }
 
-Q_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
-Q_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
-Q_DECLARE_METATYPE(TAPI::enuUserSex::Type);
-Q_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
-Q_DECLARE_METATYPE(TAPI::enuInvoiceTemplateStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuUserSex::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuInvoiceTemplateStatus::Type);
 
 #endif // TARGOMAN_API_AAA_GENERICENUMS_HPP

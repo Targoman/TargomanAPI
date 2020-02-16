@@ -50,7 +50,7 @@ bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
-                            TAPI::enuUserSex::Type _sex,
+                            QSharedPointer<TAPI::enuUserSex::Type> _sex,
                             QString _name,
                             QString _family,
                             TAPI::ISO639_2_t _lang,
@@ -80,7 +80,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                          {"iSalt", _salt},
                      });
 
-    if(_name.size() || _family.size() || _sex != TAPI::enuUserSex::NotExpressed)
+    if(_name.size() || _family.size() || *_sex != TAPI::enuUserSex::NotExpressed)
         return this->update(
         {{"usrID", clsJWT(_JWT).usrID()}},
         {

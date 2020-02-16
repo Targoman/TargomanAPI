@@ -63,6 +63,8 @@ TARGOMAN_CREATE_CONSTEXPR(CRUD);
 
 namespace AAACommonItems {
 TARGOMAN_CREATE_CONSTEXPR(privs);
+TARGOMAN_CREATE_CONSTEXPR(acc);
+TARGOMAN_CREATE_CONSTEXPR(usrID);
 }
 #pragma clang diagnostic pop
 

@@ -79,7 +79,7 @@ void registerGenericTypes()
     );
 
     TAPI_REGISTER_METATYPE(
-                COMPLEXITY_String,
+                COMPLEXITY_Object,
                 TAPI::JWT_t,
                 nullptr,
                 [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::JWT_t {
@@ -101,7 +101,7 @@ void registerGenericTypes()
     );
 
     TAPI_REGISTER_METATYPE(
-                COMPLEXITY_String,
+                COMPLEXITY_Object,
                 TAPI::JSON_t,
                 [](const TAPI::JSON_t& _value) -> QVariant {return _value;},
                 [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::JSON_t {
@@ -113,6 +113,9 @@ void registerGenericTypes()
                        _value.canConvert<double>())
                         return QJsonDocument::fromVariant(_value);
 
+                    if(_value.toString().isEmpty())
+                        return QJsonDocument();
+
                     QJsonParseError Error;
                     QJsonDocument Doc;
                     Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
@@ -121,15 +124,13 @@ void registerGenericTypes()
                         throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
                     return  Doc;
                 },
-                nullptr,
-                [](const QList<ORM::clsORMField>&){ return "A valid JSON string"; }
+                [](const QList<ORM::clsORMField>&){ return "A valid JSON object"; }
     );
 
     TAPI_REGISTER_METATYPE(
                 COMPLEXITY_String,
                 TAPI::EncodedJWT_t,
                 [](const TAPI::EncodedJWT_t& _value) -> QVariant {return _value;},
-                nullptr,
                 nullptr,
                 [](const QList<ORM::clsORMField>&){ return "A signed JsonWebToken string"; }
     );
@@ -165,6 +166,8 @@ void registerGenericTypes()
     TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Date_t, optional(QFV.date()), _value, [](const QList<clsORMField>&){ return "A valid gregorian date"; });
     TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Time_t, optional(QFV.time()), _value, [](const QList<clsORMField>&){ return "A valid time"; });
     TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::DateTime_t, optional(QFV.dateTime()), _value, [](const QList<clsORMField>&){ return "A valid datetime"; });
+
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuGenericStatus);
 }
 
 stuFileInfo stuFileInfo::fromVariant(const QVariant& _value, const QByteArray& _paramName)

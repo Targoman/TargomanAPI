@@ -28,9 +28,9 @@ namespace API {
 namespace Server {
 
 #define USE_ARG_AT(_i) \
-    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
-    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i])
+        InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+        gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
+        gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
 
 #define CLEAN_ARG_AT(_i) \
     InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
@@ -72,7 +72,8 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
         return  gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(_paramIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
-QVariant clsAPIObject::invoke(const QStringList& _args,
+QVariant clsAPIObject::invoke(bool _isUpdateMethod,
+                              const QStringList& _args,
                               QList<QPair<QString, QString>> _bodyArgs,
                               qhttp::THeaderHash _headers,
                               qhttp::THeaderHash _cookies,
@@ -177,6 +178,8 @@ QVariant clsAPIObject::invoke(const QStringList& _args,
         if(ParamNotFound){
             if(i < this->RequiredParamsCount)
                 throw exHTTPBadRequest(QString("Required parameter <%1> not specified").arg(this->ParamNames.at(i).constData()));
+            else if (_isUpdateMethod)
+                Arguments.append(QVariant());
             else
                 Arguments.append(this->defaultValue(i));
             continue;

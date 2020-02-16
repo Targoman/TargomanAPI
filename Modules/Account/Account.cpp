@@ -32,6 +32,7 @@
 #include "ORM/ForgotPassRequest.h"
 #include "ORM/Invoice.h"
 #include "ORM/IPBin.h"
+#include "ORM/Roles.h"
 #include "ORM/IPStats.h"
 #include "ORM/PaymentOrders.h"
 #include "ORM/Services.h"
@@ -48,20 +49,27 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
                                      const QString& _login,
                                      const TAPI::MD5_t& _pass,
                                      const QString& _salt,
-                                     const QString& _tlps,
+                                     const QString& _services,
                                      bool _rememberMe,
                                      const TAPI::JSON_t& _sessionInfo,
                                      const TAPI::MD5_t& _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-    QFV.optional(QFV.asciiAlNum(false, ",")).validate(_tlps, "tlps");
+    QFV.optional(QFV.asciiAlNum(false, ",")).validate(_services, "tlps");
 
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    return this->createJWT (_login,
-                            Authentication::login(_REMOTE_IP, _login, _pass, _salt, _rememberMe, _tlps.split(",", QString::SkipEmptyParts), _sessionInfo.object(), _fingerprint),
-                            _tlps);
+    return this->createJWT(_login,
+                           Authentication::login(_REMOTE_IP,
+                                                 _login,
+                                                 _pass,
+                                                 _salt,
+                                                 _services.split(",", QString::SkipEmptyParts),
+                                                 _rememberMe,
+                                                 _sessionInfo.object(),
+                                                 _fingerprint),
+                           _services);
 }
 
 //TODO cache to ban users for every service
@@ -98,30 +106,32 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
         /*    default:
         throw exHTTPNotImplemented("Invalid oAuth type");*/
     }
-    return this->createJWT (OAuthInfo.Email,
-                            Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, true, _tlps.split(","), _sessionInfo.object(), _fingerprint),
-                            _tlps);
+    return this->createJWT(OAuthInfo.Email,
+                           Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _tlps.split(","), true, _sessionInfo.object(), _fingerprint),
+                           _tlps);
 }
 
-TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT)
+TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT, const QString& _services)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     clsJWT JWT(_JWT);
-    QString TLPs =  JWT.privatePart().value("tlps").toString();
+    QString Services = _services;
+    if(_services.isEmpty())
+        Services = JWT.privatePart().value("tlps").toString();
 
-    return this->createJWT (JWT.login(),
-                            Authentication::updatePrivs(_REMOTE_IP, JWT.session(), TLPs),
-                            TLPs);
+    return this->createJWT(JWT.login(),
+                           Authentication::updatePrivs(_REMOTE_IP, JWT.session(), Services),
+                           Services);
 }
 
-quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
-                              const QString& _emailOrMobile,
-                              const TAPI::MD5_t& _pass,
-                              const QString& _role,
-                              const QString& _name,
-                              const QString& _family,
-                              TAPI::JSON_t _specialPrivs,
-                              qint8 _maxSessions)
+QVariantMap Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                  const QString& _emailOrMobile,
+                                  const TAPI::MD5_t& _pass,
+                                  const QString& _role,
+                                  const QString& _name,
+                                  const QString& _family,
+                                  TAPI::JSON_t _specialPrivs,
+                                  qint8 _maxSessions)
 {
     QString Type;
     if(QFV.email().isValid(_emailOrMobile)){
@@ -129,26 +139,59 @@ quint32 Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
             Type = 'E';
         else
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }else if (QFV.mobile().isValid(_emailOrMobile))
+    }else if(QFV.mobile().isValid(_emailOrMobile))
         Type = 'M';
     else
-        throw exHTTPBadRequest("signup must be by a valid email or mobile");
+        throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
 
-    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_signup", {
-                                                 {"iBy", Type},
-                                                 {"iLogin", _emailOrMobile},
-                                                 {"iPass", _pass},
-                                                 {"iRole", _role},
-                                                 {"iIP", _REMOTE_IP},
-                                                 {"iName", _name.isEmpty()? QVariant() : _name},
-                                                 {"iFamily", _family.isEmpty()? QVariant() : _family},
-                                                 {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                                 {"iMaxSessions", _maxSessions},
-                                             }).spDirectOutputs().value("oUserID").toDouble());
-}
+    static QSet<QString> InvalidPasswords = {
+        "d41d8cd98f00b204e9800998ecf8427e",
+        "c4ca4238a0b923820dcc509a6f75849b",
+        "c81e728d9d4c2f636f067f89cc14862c",
+        "eccbc87e4b5ce2fe28308fd9f2a7baf3",
+        "a87ff679a2f3e71d9181a67b7542122c",
+        "e4da3b7fbbce2345d7772b0674a318d5",
+        "1679091c5a880faf6fb5e6087eb1b2dc",
+        "1679091c5a880faf6fb5e6087eb1b2dc",
+        "8f14e45fceea167a5a36dedd4bea2543",
+        "c9f0f895fb98ab9159f51fd0297e236d",
+        "45c48cce2e2d7fbdea1afc51c7c6ad26",
+        "cfcd208495d565ef66e7dff9f98764da",
+        "c20ad4d76fe97759aa27a0c99bff6710",
+        "202cb962ac59075b964b07152d234b70",
+        "81dc9bdb52d04dc20036dbd8313ed055",
+        "827ccb0eea8a706c4c34a16891f84e7b",
+        "21232f297a57a5a743894a0e4a801fc3",
+        "4eae18cf9e54a0f62b44176d074cbe2f",
+        "76419c58730d9f35de7ac538c2fd6737",
+        "d8578edf8458ce06fbc5bb76a58c5ca4",
+        "5ee43561ed4491c7d2b76f28574093fc"
+    };
 
-bool Account::apiLogout(TAPI::JWT_t _JWT)
-{
+    if(InvalidPasswords.contains(_pass))
+        throw exHTTPBadRequest("Invalid simple password");
+
+    return  {
+        {"type", Type == 'E' ? "email" : "mobile"},
+            {"usrID",
+                this->callSP("AAA.sp_CREATE_signup", {
+                                 {"iBy", Type},
+                                 {"iLogin", _emailOrMobile},
+                                 {"iPass", _pass},
+                                 {"iRole", _role},
+                                 {"iIP", _REMOTE_IP},
+                                 {"iName", _name.isEmpty()? QVariant() : _name},
+                                 {"iFamily", _family.isEmpty()? QVariant() : _family},
+                                 {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
+                                 {"iMaxSessions", _maxSessions},
+                                 {"iCreatorUserID", QVariant()},
+                             }).spDirectOutputs().value("oUserID").toDouble()
+            }
+        };
+    }
+
+    bool Account::apiLogout(TAPI::JWT_t _JWT)
+    {
     clsJWT JWT(_JWT);
     this->callSP("AAA.sp_UPDATE_logout", {
                      {"iByUserID", clsJWT(_JWT).usrID()},
@@ -157,16 +200,16 @@ bool Account::apiLogout(TAPI::JWT_t _JWT)
     return true;
 }
 
-bool Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _login, TAPI::enuForgotPassLinkVia::Type _via)
+QString Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _login)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP("AAA.sp_CREATE_forgotPassRequest", {
                      {"iLogin", _login},
-                     {"iVia", TAPI::enuForgotPassLinkVia::toStr(_via)},
+                     {"iVia", QString(_login.contains('@') ? 'E' : 'M')},
                  });
-    return true;
+    return _login.contains('@') ? "email" : "mobile";
 }
 
 bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const QString& _oldPassSalt, const TAPI::MD5_t& _newPass)
@@ -219,11 +262,9 @@ Account::Account() :
     clsRESTAPIWithActionLogs("AAA", "Account")
 {
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuOAuthType);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuForgotPassLinkVia);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserStatus);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserSex);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserApproval);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuGenericStatus);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAuditableStatus);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceTemplateStatus);
 
@@ -237,6 +278,7 @@ Account::Account() :
     this->addSubModule(new IPBin);
     this->addSubModule(new IPStats);
     this->addSubModule(new PaymentOrders);
+    this->addSubModule(new Roles);
     this->addSubModule(new Services);
     this->addSubModule(new User);
     this->addSubModule(new UserExtraInfo);
@@ -245,7 +287,7 @@ Account::Account() :
     this->addSubModule(new WalletBalances);
 }
 
-TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs)
+TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _services)
 {
     return clsJWT::createSigned({
                                     {JWTItems::usrLogin, _login},
@@ -259,7 +301,7 @@ TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _
                                     {JWTItems::usrApproval, TAPI::enuUserApproval::toStr(_result["usrApprovalState"].toString())},
                                     {JWTItems::usrStatus, TAPI::enuUserStatus::toStr(_result["usrStatus"].toString())},
                                 },
-                                QJsonObject({{"tlps",_requiredTLPs}}),
+                                QJsonObject({{"tlps", _services}}),
                                 _result["ssnKey"].toString()
             );
 }

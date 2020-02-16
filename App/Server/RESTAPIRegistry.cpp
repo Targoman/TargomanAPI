@@ -35,40 +35,14 @@ namespace Server {
 using namespace ORM;
 
 /***********************************************************************************************/
-#define DO_ON_TYPE_VALID(_isIntegral, _baseType)  new tmplAPIArg<_baseType, _isIntegral>(TARGOMAN_M2STR(_baseType))
+#define DO_ON_TYPE_VALID(_isIntegral, _baseType)  new tmplAPIArg<_baseType, _isIntegral, false>(TARGOMAN_M2STR(_baseType))
 #define DO_ON_TYPE_IGNORED(_isIntegral, _baseType) nullptr
-#define DO_ON_TYPE_SELECTOR(_1,_2,_N,...) _N
 #define DO_ON_TYPE_PROXY(_isIntegral, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_IGNORED, DO_ON_TYPE_VALID)(_isIntegral, _baseType)
 #define DO_ON_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
 
 #define MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE(_typeName, _id, _baseType) { _id, { DO_ON_TYPE(COMPLEXITY_Integral,  _typeName, _baseType) } },
 #define MAKE_INFO_FOR_VALID_COMPLEX_METATYPE(_typeName, _id, _baseType)  { _id, { DO_ON_TYPE(COMPLEXITY_Complex, _typeName, _baseType) } },
 #define MAKE_INVALID_METATYPE(_typeName, _id, _baseType) { _id, { nullptr } },
-
-#define IGNORE_TYPE_Void ,
-#define IGNORE_TYPE_Bool ,
-#define IGNORE_TYPE_QByteArray ,
-#define IGNORE_TYPE_QBitArray ,
-#define IGNORE_TYPE_QLocale ,
-#define IGNORE_TYPE_QRect ,
-#define IGNORE_TYPE_QRectF ,
-#define IGNORE_TYPE_QSize ,
-#define IGNORE_TYPE_QSizeF ,
-#define IGNORE_TYPE_QLine ,
-#define IGNORE_TYPE_QLineF ,
-#define IGNORE_TYPE_QPoint ,
-#define IGNORE_TYPE_QPointF ,
-#define IGNORE_TYPE_QEasingCurve ,
-#define IGNORE_TYPE_QModelIndex ,
-#define IGNORE_TYPE_QJsonValue ,
-#define IGNORE_TYPE_QJsonObject ,
-#define IGNORE_TYPE_QJsonArray ,
-#define IGNORE_TYPE_QJsonDocument ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_Nullptr ,
-#define IGNORE_TYPE_QVariantHash ,
-#define IGNORE_TYPE_QByteArrayList ,
 
 const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE)
@@ -78,14 +52,81 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     QT_FOR_EACH_STATIC_CORE_TEMPLATE(MAKE_INFO_FOR_VALID_COMPLEX_METATYPE)
     QT_FOR_EACH_STATIC_GUI_CLASS(MAKE_INVALID_METATYPE)
     QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_METATYPE)
-    {qMetaTypeId<bool>(), { new tmplAPIArg<bool, COMPLEXITY_Integral>("bool",{},
+    {qMetaTypeId<bool>(), { new tmplAPIArg<bool, COMPLEXITY_Integral, false>("bool",{},
                             [](const QVariant& _value, const QByteArray& _paramName) -> bool {
                                 if(_value.toString() == "false" || _value.toString() == "0") return false;
                                 if(_value.toString() == "true" || _value.toString() == "1") return true;
                                 throw exHTTPBadRequest(_paramName + " is not a valid bool");
                             },
-                            {},{},
+                            [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";},
                             [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");}) } }
+};
+
+#define DO_ON_TYPE_NULLABLE_VALID(_isIntegral, _baseType) { [](){ \
+    qRegisterMetaType<QSharedPointer<_baseType>>();},  \
+    new tmplAPIArg<QSharedPointer<_baseType>, _isIntegral, true>(QString("QSharedPointer<%1>").arg(TARGOMAN_M2STR(_baseType)), \
+        [](QSharedPointer<_baseType> _value) -> QVariant{return _value.isNull() ? QVariant() : *_value;}, \
+        [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<_baseType> { \
+            if(_value.isValid() == false || _value.isNull()) return QSharedPointer<_baseType>(); \
+            if(!_value.canConvert<_baseType>()) throw exHTTPBadRequest(_paramName + " is not a valid " + QByteArray(TARGOMAN_M2STR(_baseType))); \
+            QSharedPointer<_baseType> Value(new _baseType); *Value = _value.value<_baseType>(); \
+            return Value; \
+        } \
+    ) \
+},
+#define DO_ON_TYPE_NULLABLE_IGNORED(_isIntegral, _baseType) { nullptr, nullptr },
+#define DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_isIntegral, _baseType)
+#define DO_ON_NULLABLE_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
+
+#define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral,  _typeName, _baseType)
+#define MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Complex, _typeName, _baseType)
+#define MAKE_INVALID_NULLABLE_METATYPE(_typeName, _id, _baseType) {nullptr, nullptr},
+
+struct stuNullableQtType{
+    std::function<void()>  registerInMetaTypes;
+    intfAPIArgManipulator* ArgManipulator;
+
+    stuNullableQtType(const std::function<void()>& _registrar, intfAPIArgManipulator* _manipulator) :
+        registerInMetaTypes(_registrar),
+        ArgManipulator(_manipulator)
+    {}
+};
+
+const QList<stuNullableQtType> NullableQtTypes = {
+    //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE)
+    QT_FOR_EACH_STATIC_PRIMITIVE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
+    QT_FOR_EACH_STATIC_CORE_CLASS(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
+    QT_FOR_EACH_STATIC_CORE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
+    QT_FOR_EACH_STATIC_CORE_TEMPLATE(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
+    QT_FOR_EACH_STATIC_GUI_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
+    QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
+    { [](){qRegisterMetaType<QSharedPointer<bool>>();}, new tmplAPIArg<QSharedPointer<bool>, COMPLEXITY_Integral, true>("QSharedPointer<bool>",
+                            [](QSharedPointer<bool> _value) -> QVariant{return _value.isNull() ? QVariant() : *_value;},
+                            [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<bool> {
+                                if(_value.isValid() == false || _value.isNull()) return QSharedPointer<bool>();
+                                QSharedPointer<bool> Value(new bool);
+                                if(_value.toString() == "false" || _value.toString() == "0") *Value = false;
+                                else if(_value.toString() == "true" || _value.toString() == "1") *Value = true;
+                                else throw exHTTPBadRequest(_paramName + " is not a valid bool");
+                                return Value;
+                            },
+                            [](const QList<ORM::clsORMField>&) -> QString {return "Null to keep it as is or valid bool as 1|true|0|false";},
+                            [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");})
+    },
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned long)
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned int)
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned short)
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned char)
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, long long)
+    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned long long)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint8)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint16)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint32)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint64)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint8)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint16)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint32)
+    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint64)
 };
 
 QJsonObject RESTAPIRegistry::CachedOpenAPI;
@@ -100,7 +141,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
     foreach(auto Item, _module->filterItems())
         Item.registerTypeIfNotRegisterd(_module);
 
-    if(gOrderedMetaTypeInfo.isEmpty()){
+    if(Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())){
         gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
 
         for(auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
@@ -110,6 +151,12 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 gOrderedMetaTypeInfo.append(nullptr);
             gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
         }
+
+        foreach(auto QtType, NullableQtTypes)
+            if(QtType.ArgManipulator){
+                QtType.registerInMetaTypes();
+                registerUserDefinedType(QtType.ArgManipulator->RealTypeName, QtType.ArgManipulator);
+            }
     }
 
     try{
@@ -290,6 +337,8 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObje
                     case COMPLEXITY_Complex:
                     case COMPLEXITY_Enum:
                         return QString(" = \"%1\"").arg(_apiObject->defaultValue(i).toString().replace("\"", "\\\""));
+                    case COMPLEXITY_Object:
+                        return  "null"; //TODO update this
                     case COMPLEXITY_File:
                         return "";
                     }
@@ -386,6 +435,8 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
             case COMPLEXITY_Complex:
             case COMPLEXITY_Enum:
                 return  "string";
+            case COMPLEXITY_Object:
+                return "object";
             case COMPLEXITY_File:
                 if(_typeName == "TAPI::Files_t")
                     return "string";
@@ -407,8 +458,12 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
 
             if(_deafaultValue.isValid()){
                 ParamSpecs["default"] = _deafaultValue.toString();
-                if(addExample)
-                    ParamSpecs["example"] = _deafaultValue.toString();
+                if(addExample){
+                    if(_argMan->complexity() == COMPLEXITY_Object)
+                        ParamSpecs["example"] = QJsonObject();
+                    else
+                        ParamSpecs["example"] = _deafaultValue.toString();
+                }
             }else{
                 ParamSpecs["required"] = true;
                 if(addExample)
@@ -684,10 +739,10 @@ QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
         quint8 HasNonAutoParams = false;
         foreach(auto ParamType, APIObject->ParamTypes)
             if(/*ParamType != PARAM_HEADERS
-                        && ParamType != PARAM_REMOTE_IP
-                        && ParamType != PARAM_COOKIES
-                        && ParamType != PARAM_JWT
-                        &&*/ ParamType != PARAM_EXTRAPATH
+                           && ParamType != PARAM_REMOTE_IP
+                           && ParamType != PARAM_COOKIES
+                           && ParamType != PARAM_JWT
+                           &&*/ ParamType != PARAM_EXTRAPATH
                ){
                 HasNonAutoParams = true;
                 break;
@@ -818,7 +873,7 @@ void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry
         _registry.value(MethodKey)->updateDefaultValues(_method);
     } else {
         if(RESTAPIRegistry::getTagSeconds(_method, CACHE_INTERNAL) > 0
-                && RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL) >0)
+           && RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL) >0)
             throw exRESTRegistry("Both internal and central cache can not be defined on an API");
 
         _registry.insert(MethodKey,

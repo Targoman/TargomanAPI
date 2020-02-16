@@ -33,6 +33,10 @@ TARGOMAN_DEFINE_ENUM(enuFPRStatus,
                      Applied  = 'A',
                      Removed  = 'R'
                                 )
+TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
+                     Email    = 'E',
+                     Mobile   = 'M',
+                                )
 }
 
 namespace Targoman {
@@ -54,6 +58,7 @@ private slots:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuFPRStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuFPRStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuForgotPassLinkVia::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H

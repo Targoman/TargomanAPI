@@ -42,6 +42,10 @@ QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAl
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);
 }
 
+
+QString URLProcessor::apiPUTsample(QSharedPointer<quint16> b, QSharedPointer<TAPI::enuGenericStatus::Type> A){
+    return A.isNull() ? "NULL" : TAPI::enuGenericStatus::toStr(*A);
+}
 URLProcessor::URLProcessor()
 {;}
 

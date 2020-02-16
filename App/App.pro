@@ -27,13 +27,13 @@ HEADERS += \
     Server/clsRequestHandler.h \
     Server/clsSimpleCrypt.h \
     Server/intfCacheConnector.hpp \
-    Server/NumericTypes.hpp \
     Server/QJWT.h \
     Server/RESTAPIRegistry.h \
     Server/RESTServer.h \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
+    Server/QtTypes.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \

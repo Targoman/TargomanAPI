@@ -110,14 +110,15 @@ public:
         return this->BaseMethod.DefaultValues.at(_paramIndex);
     }
 
-    QVariant invoke(const QStringList& _args,
-                           QList<QPair<QString, QString>> _bodyArgs = {},
-                           qhttp::THeaderHash _headers = {},
-                           qhttp::THeaderHash _cookies = {},
-                           QJsonObject _jwt = {},
-                           QString _remoteIP = {},
-                           QString _extraAPIPath = {}
-                           ) const;
+    QVariant invoke(bool _isUpdateMethod,
+                    const QStringList& _args,
+                    QList<QPair<QString, QString>> _bodyArgs = {},
+                    qhttp::THeaderHash _headers = {},
+                    qhttp::THeaderHash _cookies = {},
+                    QJsonObject _jwt = {},
+                    QString _remoteIP = {},
+                    QString _extraAPIPath = {}
+                ) const;
 
 
     void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const;

@@ -35,6 +35,7 @@ HEADERS += \
     ORM/User.h \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
+    ORM/Roles.h
 
 
 SOURCES += \
@@ -53,6 +54,7 @@ SOURCES += \
     ORM/User.cpp \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \
+    ORM/Roles.cpp
 
 OTHER_FILES += \
 

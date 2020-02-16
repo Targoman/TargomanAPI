@@ -52,6 +52,6 @@ private slots:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuIPBinStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuIPBinStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H

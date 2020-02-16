@@ -56,6 +56,7 @@ ForgotPassRequest::ForgotPassRequest() :
               })
 {
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuFPRStatus);
+    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuForgotPassLinkVia);
 }
 
 }

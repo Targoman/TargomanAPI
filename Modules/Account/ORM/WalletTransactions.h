@@ -59,6 +59,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuWalletTransactionStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuWalletTransactionStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

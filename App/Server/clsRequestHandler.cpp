@@ -239,39 +239,41 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath)
 {
     try{
-    for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
-        *QueryIter = QueryIter->replace('+', ' ');
+        for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
+            *QueryIter = QueryIter->replace('+', ' ');
 
-    qhttp::THeaderHash Headers = this->Request->headers();
-    qhttp::THeaderHash Cookies;
-    QJsonObject JWT;
+        qhttp::THeaderHash Headers = this->Request->headers();
+        qhttp::THeaderHash Cookies;
+        QJsonObject JWT;
 
-    if(_apiObject->requiresJWT()){
-        QString Auth = Headers.value("authorization");
-        if(Auth.startsWith("Bearer ")){
-            JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
-            Headers.remove("authorization");
-        } else
-            throw exHTTPForbidden("No valid authentication header is present");
-    }
-
-    if(_apiObject->requiresCookies() && Headers.value("cookie").size()){
-        foreach (auto Cookie, Headers.value("cookie").split(';')) {
-            auto CookieParts = Cookie.split('=');
-            Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
+        if(_apiObject->requiresJWT()){
+            QString Auth = Headers.value("authorization");
+            if(Auth.startsWith("Bearer ")){
+                JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
+                Headers.remove("authorization");
+            } else
+                throw exHTTPForbidden("No valid authentication header is present");
         }
-    }
 
-    Headers.remove("cookie");
+        if(_apiObject->requiresCookies() && Headers.value("cookie").size()){
+            foreach (auto Cookie, Headers.value("cookie").split(';')) {
+                auto CookieParts = Cookie.split('=');
+                Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
+            }
+        }
 
-    return stuResult(_apiObject->invoke(_queries,
-                              this->Request->userDefinedValues(),
-                              Headers,
-                              Cookies,
-                              JWT,
-                              this->toIPv4(this->Request->remoteAddress()),
-                              _extraPath
-                              ));
+        Headers.remove("cookie");
+
+        return stuResult(_apiObject->invoke(
+                             this->Request->method() == qhttp::EHTTP_PATCH,
+                             _queries,
+                             this->Request->userDefinedValues(),
+                             Headers,
+                             Cookies,
+                             JWT,
+                             this->toIPv4(this->Request->remoteAddress()),
+                             _extraPath
+                             ));
 
     }catch(exTargomanBase& ex){
         return stuResult(ex.what(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
@@ -341,9 +343,9 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
         this->connect (&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this](){
             stuResult Result = this->FutureWatcher.result();
             if(Result.StatusCode == qhttp::ESTATUS_OK)
-            this->sendResponse(
+                this->sendResponse(
                         StatusCodeOnMethod[this->Request->method()],
-                        Result.Result
+                    Result.Result
                     );
             else
                 this->sendError(Result.StatusCode, Result.Result.toString(), Result.StatusCode >= 500);
@@ -458,7 +460,7 @@ void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _
 void clsRequestHandler::slotSendFileData()
 {
     if(this->FileHandler.isNull() || this->FileHandler->atEnd()){
-//        this->Response->end();
+        //        this->Response->end();
         this->deleteLater();
         return;
     }

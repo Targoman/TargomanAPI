@@ -20,44 +20,45 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
-#define TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
+
+
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+#define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
 #include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAA.hpp"
 
 namespace TAPI{
-TARGOMAN_DEFINE_ENUM(enuTicketStatus,
-                     New       = 'N',
-                     Removed   = 'R'
+TARGOMAN_DEFINE_ENUM(enuRoleStatus,
+                     Active   = 'A',
+                     Blocked  = 'B',
+                     Removed  = 'R'
                      )
 }
 
 namespace Targoman {
 namespace API {
-namespace ORM {
+namespace AAA {
 
-class Tickets : public ORM::clsTable
+class Roles : public ORM::clsTable
 {
     Q_OBJECT
 private slots:
-    QVariant ORMGET("Get Tickets")
+    QVariant ORMGET("Get roles information")
+    bool ORMDELETE("Delete a Role")
+    bool ORMUPDATE("Update role info by priviledged user")
+    quint32 ORMCREATE("Create a new Role by priviledged user")
 
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
-};
-
-class TicketRead : public ORM::clsTable
-{
-    Q_OBJECT
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,Roles)
 };
 
 }
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuTicketStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuRoleStatus::Type);
 
-#endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
+
+

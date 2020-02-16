@@ -40,16 +40,16 @@ private slots:
     quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
 
     bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
-                             TAPI::enuUserSex::Type _sex = {},
-                             QString _name = {},
-                             QString _family = {},
-                             TAPI::ISO639_2_t _lang = {},
-                             TAPI::Email_t _email = {},
-                             TAPI::Mobile_t _mobile = {},
-                             TAPI::MD5_t _pass = {},
-                             QString _salt = {}),
-             "Update User profile. Take note that this method does not change password "
-             "Password and Salt are required to change email or mobile")
+                              QSharedPointer<TAPI::enuUserSex::Type> _sex = {},
+                              QString _name = {},
+                              QString _family = {},
+                              TAPI::ISO639_2_t _lang = {},
+                              TAPI::Email_t _email = {},
+                              TAPI::Mobile_t _mobile = {},
+                              TAPI::MD5_t _pass = {},
+                              QString _salt = {}),
+              "Update User profile. Take note that this method does not change password "
+              "Password and Salt are required to change email or mobile")
 
     private:
         TARGOMAN_DEFINE_API_SUBMODULE(Account,User)
@@ -60,9 +60,9 @@ private slots:
         Q_OBJECT
     private slots:
         bool REST(UPDATE,Photo,(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image),
-                 "Updates user image based using a base64 encoded image")
+                  "Updates user image based using a base64 encoded image")
         bool REST(UPDATE,Sheba,(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba),
-                 "Updates user image based using a base64 encoded image")
+                  "Updates user image based using a base64 encoded image")
         private:
             TARGOMAN_DEFINE_API_SUBMODULE(Account,UserExtraInfo)
     };
@@ -70,5 +70,7 @@ private slots:
     }
 }
 }
+
+
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H

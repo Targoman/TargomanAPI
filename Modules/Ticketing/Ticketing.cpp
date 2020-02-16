@@ -102,8 +102,8 @@ Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketType);
 
-   // this->addSubModule(new ORM::Tickets);
-   // this->addSubModule(new ORM::TicketRead);
+    this->addSubModule(new ORM::Tickets);
+    this->addSubModule(new ORM::TicketRead);
 }
 
 }

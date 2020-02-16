@@ -43,18 +43,18 @@ public:
     virtual QJsonObject todayPrivs(quint32 _usrID) final {Q_UNUSED(_usrID) return {}; }
 
 private:
-    TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _requiredTLPs);
+    TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _services = {});
 
 private slots:
     TAPI::EncodedJWT_t REST(,Login,(const TAPI::RemoteIP_t& _REMOTE_IP,
                                     const QString& _login,
                                     const TAPI::MD5_t& _pass,
                                     const QString& _salt,
-                                    const QString& _tlps = "",
+                                    const QString& _services = {},
                                     bool _rememberMe = false,
                                     const TAPI::JSON_t& _sessionInfo = {},
                                     const TAPI::MD5_t& _fingerprint = {}),
-                            "Login user and return an encoded JWT you can provide toplevel privs as comma separated string")
+                            "Login user and return an encoded JWT if services are provided (as coma separated list) then user must have access to specified services")
 
     TAPI::EncodedJWT_t REST(,LoginByOAuth,(const TAPI::RemoteIP_t& _REMOTE_IP,
                                            TAPI::enuOAuthType::Type _type,
@@ -64,13 +64,13 @@ private slots:
                                            const TAPI::MD5_t& _fingerprint = {}),
                             "Login by Open Authentication and return an encoded JWT")
 
-    TAPI::EncodedJWT_t REST(,RefreshJWT,(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT),
-                            "Refresh JWT in order to update information or expiry time")
+    TAPI::EncodedJWT_t REST(,RefreshJWT,(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT, const QString& _services = {}),
+                            "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT")
 
-    quint32 REST(PUT,Signup,(const TAPI::RemoteIP_t& _REMOTE_IP,
+    QVariantMap REST(PUT,Signup,(const TAPI::RemoteIP_t& _REMOTE_IP,
                              const QString& _emailOrMobile,
                              const TAPI::MD5_t& _pass,
-                             const QString& _role,
+                             const QString& _role = "BaseUser",
                              const QString& _name = "",
                              const QString& _family = "",
                              TAPI::JSON_t _specialPrivs = {},
@@ -80,9 +80,8 @@ private slots:
     bool REST(,Logout,(TAPI::JWT_t _JWT),
               "Logout logged in user")
 
-    bool REST(,CreateForgotPasswordLink,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                         const QString& _login,
-                                         TAPI::enuForgotPassLinkVia::Type _via),
+    QString REST(,CreateForgotPasswordLink,(const TAPI::RemoteIP_t& _REMOTE_IP,
+                                         const QString& _login),
               "Create a forgot password request returning a UUID for the requiest")
 
     bool REST(,ChangePass,(TAPI::JWT_t _JWT,
@@ -113,7 +112,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuOAuthType::Type);
-Q_DECLARE_METATYPE(TAPI::enuForgotPassLinkVia::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuOAuthType::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

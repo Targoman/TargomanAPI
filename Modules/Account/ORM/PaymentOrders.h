@@ -53,6 +53,6 @@ private slots:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::enuPaymentStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuPaymentStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

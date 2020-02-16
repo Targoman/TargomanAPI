@@ -67,7 +67,6 @@ Tickets::Tickets() :
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketStatus);
 }
 
-
 /******************************************************************************/
 TicketRead::TicketRead() :
     clsTable("Ticketing",

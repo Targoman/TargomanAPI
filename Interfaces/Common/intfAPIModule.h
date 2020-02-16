@@ -152,7 +152,7 @@ public: \
     _name(); \
     QString moduleFullName(){return Targoman::Common::demangle(typeid(_name).name());}\
     QString moduleBaseName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
-    QString parentModuleName() const final{throw Common::exTargomanNotImplemented("Module can not be added as subModule");} \
+    QString parentModuleName() const final{return QString(); } \
     ModuleMethods_t listOfMethods() final { \
         if(this->Methods.size()) return  this->Methods; \
         for (int i=0; i<this->metaObject()->methodCount(); ++i) \

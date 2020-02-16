@@ -32,9 +32,11 @@
 #include "ORM/Props.h"
 #include "ORM/Accounting.h"
 
+namespace Targoman {
+namespace API {
+
 using namespace Targoman;
-using namespace Targoman::API;
-using namespace Targoman::API::Advertisement;
+using namespace TAPI;
 using namespace AAA;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
@@ -63,6 +65,7 @@ Advert::Advert() :
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertOrder);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuBannerSizes);
     TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAccountOrdersStatus);
+    TAPI_REGISTER_TARGOMAN_(TAPI::stuAdvert);
 
     this->addSubModule(new Advertisement::AccountOrders);
     this->addSubModule(new Advertisement::AccountUsage);
@@ -91,7 +94,7 @@ QJsonObject Advert::todayPrivs(quint32 _usrID)
                             " ORDER BY tblAccountOrders.acoValidFrom ASC",
                             {_usrID});
 
-    QJsonObject BestMatchedResult;
+/*    QJsonObject BestMatchedResult;
     while(Result.next()){
         if(BestMatchedResult.isEmpty()){
             BestMatchedResult = Result.
@@ -102,5 +105,9 @@ QJsonObject Advert::todayPrivs(quint32 _usrID)
 
     }
 
-    return {{AdvertDomain, BestMatchedResult}};
+    return {{AdvertDomain, BestMatchedResult}};*/
+    return {};
+}
+
+}
 }

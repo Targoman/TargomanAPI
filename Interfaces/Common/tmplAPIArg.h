@@ -32,20 +32,20 @@ namespace Server {
 class intfCacheConnector;
 }
 
-template<typename _itmplType, enuVarComplexity _itmplVarType>
+template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable>
 class tmplAPIArg : public intfAPIArgManipulator{
 public:
+//    std::function<QVariant(const _itmplType& _value)>
+//    std::function<_itmplType(const QVariant& _value, const QByteArray& _paramName)>
     tmplAPIArg(const QString& _typeName,
-               std::function<QVariant(const _itmplType& _value)> _toVariant = {},
-               std::function<_itmplType(const QVariant& _value, const QByteArray& _paramName)> _fromVariant = {},
-               std::function<QStringList()> _options = {},
                std::function<QString(const QList<ORM::clsORMField>& _allFields)> _description = {},
                std::function<QVariant(const QString& _val)> _toORMValue = {},
-               std::function<QVariant(const QVariant& _val)> _fromORMValue = {}
+               std::function<QVariant(const QVariant& _val)> _fromORMValue = {},
+               std::function<QStringList()> _options = {}
                ) :
         intfAPIArgManipulator(_typeName),
-        toVariantLambda(_toVariant),
-        fromVariantLambda(_fromVariant),
+//        toVariantLambda(_itmplToVariant),
+//        fromVariantLambda(_itmplFromVariant),
         toORMValueLambda(_toORMValue),
         fromORMValueLambda(_fromORMValue),
         optionsLambda(_options),
@@ -62,48 +62,59 @@ public:
                 this->fromVariantLambda == nullptr ? _val.value<_itmplType>() : this->fromVariantLambda(_val, _paramName);
         return QGenericArgument(this->RealTypeName, *_argStorage);
     }
+
     inline QVariant invokeMethod(const intfAPIObject *_apiObject, const QVariantList& _arguments) final {
            _itmplType Result;
            _apiObject->invokeMethod(_arguments, QReturnArgument<_itmplType >(this->RealTypeName, Result));
            return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
     }
+
     inline void validate(const QVariant& _val, const QByteArray& _paramName) const final {
         if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
                 throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName);
         if(this->fromVariantLambda)
             this->fromVariantLambda(_val, _paramName);
     }
-    inline QVariant defaultVariant() const final {
+
+    inline QVariant defaultVariant() const {
         _itmplType Default;
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Default) : this->toVariantLambda(Default);
     }
+
     inline void cleanup (void* _argStorage) final {if(_argStorage) delete (reinterpret_cast<_itmplType*>(_argStorage));}
     inline bool hasFromVariantMethod() const final {return this->fromVariantLambda != nullptr;}
     inline bool hasToVariantMethod() const final {return this->toVariantLambda != nullptr;}
     inline bool isPrimitiveType() const final { return _itmplVarType == COMPLEXITY_Integral;}
     inline QStringList options() const final { return this->optionsLambda ? this->optionsLambda() : QStringList() ;}
     inline enuVarComplexity complexity() const final { return _itmplVarType;}
-    inline QString description(const QList<ORM::clsORMField>& _allFields) const final { return this->descriptionLambda ? this->descriptionLambda(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);}
+    inline bool isNullable() const final {return _itmplNullable;}
+    inline QString description(const QList<ORM::clsORMField>& _allFields) const final { 
+        return this->descriptionLambda ? this->descriptionLambda(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);
+    }
     inline QString toString(const QVariant _val) const final {
         if(this->hasFromVariantMethod() && this->hasToVariantMethod())
             return this->toVariantLambda(this->fromVariantLambda(_val, {})).toString();
         return QString();
     }
+
     inline QVariant toORMValue(const QString& _val) const final {
         return this->toORMValueLambda  == nullptr ?
                     _val :
                     this->toORMValueLambda(_val);
     }
-
+    
     inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fromORMValueLambda;}
 
+    static _itmplType fromVariant(QVariant _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable>::fromVariantLambda(_value, {}); }
+    static QVariant toVariant(_itmplType _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable>::toVariant(_value); }
+
 private:
-    std::function<QVariant(_itmplType _value)> toVariantLambda;
-    std::function<_itmplType(QVariant _value, const QByteArray& _paramName)> fromVariantLambda;
-    std::function<QVariant(QString _value)> toORMValueLambda;
-    std::function<QVariant(const QVariant& _val)> fromORMValueLambda;
-    std::function<QStringList()> optionsLambda;
-    std::function<QString(const QList<ORM::clsORMField>& _allFields)> descriptionLambda;
+    static std::function<QVariant(_itmplType _value)> toVariantLambda;
+    static std::function<_itmplType(QVariant _value, const QByteArray& _paramName)> fromVariantLambda;
+    static std::function<QVariant(QString _value)> toORMValueLambda;
+    static std::function<QVariant(const QVariant& _val)> fromORMValueLambda;
+    static std::function<QStringList()> optionsLambda;
+    static std::function<QString(const QList<ORM::clsORMField>& _allFields)> descriptionLambda;
 
     friend class intfCacheConnector;
 };

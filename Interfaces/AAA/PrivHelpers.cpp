@@ -25,6 +25,7 @@
 #include "libTargomanCommon/Helpers.hpp"
 #include "3rdParty/QtCUrl/src/QtCUrl.h"
 #include "clsJWT.hpp"
+#include "Accounting.h"
 
 namespace Targoman {
 namespace API {
@@ -32,18 +33,26 @@ namespace AAA {
 
 using namespace DBManager;
 
-QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, const QStringList& _requiredTLPs) {
+QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services) {
     QJsonObject Privs;
+
+    foreach(auto Service, _services)
+        if(Accounting::serviceAccounting(Service) == nullptr)
+            throw exHTTPBadRequest("Service " + Service + " was not registered.");
+
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
         for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            if(PrivIter.key() == "ALL" || _requiredTLPs.isEmpty() || _requiredTLPs.contains(PrivIter.key()))
+            if(PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())){
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
+                if(PrivIter.key() != "ALL")
+                    Privs = Common::mergeJsonObjects(Privs, Accounting::serviceAccounting(PrivIter.key())->activeAccounts(_usrID).begin());
+            }
     }
     if(Privs.contains("ALL") == false)
-        foreach (auto TLP, _requiredTLPs)
-            if(Privs.contains(TLP) == false)
-                throw exAuthorization("Not enough priviledges to access <"+TLP+">");
+        foreach (auto Service, _services)
+            if(Privs.contains(Service) == false)
+                throw exAuthorization("Not enough priviledges to access <"+Service+">");
 
     return  Privs;
 }
@@ -121,13 +130,17 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
     return CurrCheckingPriv.value("");
 }
 
-QJsonObject PrivHelpers::processObjectPrivs(QJsonObject& _object, const QStringList& _requiredAccess, const QStringList& _requiredTLPs){
-    _object = _object[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
+QJsonObject PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
+    _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
-    if(_object.size())
-        _object[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(PrivHelpers::digestPrivileges(_object[AAACommonItems::privs].toArray(), _requiredTLPs), _requiredAccess);
+    if(_userObj.size())
+        _userObj[AAACommonItems::privs] =
+                PrivHelpers::confirmPriviledgeBase(PrivHelpers::digestPrivileges(
+                                                       _userObj[AAACommonItems::privs].toArray(),
+                                                   static_cast<quint32>(_userObj[AAACommonItems::usrID].toDouble()),
+                                                   _services), _requiredAccess);
 
-    return _object;
+    return _userObj;
 }
 
 QByteArray PrivHelpers::getURL(const QString& _url){

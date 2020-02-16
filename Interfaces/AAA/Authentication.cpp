@@ -32,9 +32,10 @@ QJsonObject login(const QString&     _ip,
                   const QString&     _login,
                   const QString&     _pass,
                   const QString&     _salt,
+                  const QStringList& _services,
                   bool               _rememberMe,
-                  const QStringList& _requiredTLPs,
-                  const QJsonObject& _info, const QString& _fingerPrint)
+                  const QJsonObject& _info,
+                  const QString&     _fingerPrint)
 {
     makeAAADAC(DAC);
     QJsonObject UserInfo =  DAC.callSP({},
@@ -48,7 +49,7 @@ QJsonObject login(const QString&     _ip,
                                            {"iRemember", _rememberMe ? "1" : "0"},
                                            {"iOAuthInfo", QVariant()}
                                        }).toJson(true).object();
-    return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs);
+    return PrivHelpers::processUserObject(UserInfo, {}, _services);
 }
 
 QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs)
@@ -59,7 +60,7 @@ QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString&
                                            {"iIP", _ip},
                                            {"iSSID", _ssid},
                                        }).toJson(true).object();
-    return PrivHelpers::processObjectPrivs(UserInfo, {}, _requiredTLPs.split(',', QString::SkipEmptyParts));
+    return PrivHelpers::processUserObject(UserInfo, {}, _requiredTLPs.split(',', QString::SkipEmptyParts));
 }
 
 QString retrievePhoto(const QString _url){
