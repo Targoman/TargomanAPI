@@ -31,6 +31,9 @@ namespace Server {
 using namespace Common;
 using namespace Common::Configuration;
 
+QString ServerConfigs::BasePathWithVersion;
+TAPI::stuStatistics gServerStats;
+
 tmplConfigurable<QString> ServerConfigs::BasePath(
         ServerConfigs::makeConfig("BasePath"),
         "Base path to access the REST API",
@@ -226,11 +229,6 @@ tmplConfigurable<FilePath_t>     ServerConfigs::PublicPath(
         "public-path",
         enuConfigSource::Arg | enuConfigSource::File);
 
-QString ServerConfigs::BasePathWithVersion;
-QJsonObject ServerConfigs::BaseOpenAPIObject;
-QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
-QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
-TAPI::stuStatistics gServerStats;
 
 /****************************************************************************/
 tmplConfigurable<QString> ServerConfigs::MasterDB::Host(

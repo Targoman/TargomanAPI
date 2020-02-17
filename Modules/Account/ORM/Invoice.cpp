@@ -22,6 +22,9 @@
 
 #include "Invoice.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceType);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -83,8 +86,6 @@ Invoice::Invoice() :
                 {"inv_svcID",  "AAA.tblServices", "svcID"},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceStatus);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceType);
 }
 
 }

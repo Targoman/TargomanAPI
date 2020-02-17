@@ -22,6 +22,8 @@
 
 #include "APITokens.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPITokensStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -80,7 +82,6 @@ APITokens::APITokens() :
                 {"aptUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAPITokensStatus);
 }
 
 }

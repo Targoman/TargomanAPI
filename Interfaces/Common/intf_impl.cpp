@@ -29,7 +29,8 @@ namespace API {
 intfAPIObject::~intfAPIObject() {;}
 
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
-    this->PrettyTypeName = (_realTypeName.startsWith('Q') ? _realTypeName.mid(1) : _realTypeName).toLower();
+    this->PrettyTypeName = _realTypeName.startsWith("QSharedPointer<") ? _realTypeName.mid(sizeof("QSharedPointer<"), _realTypeName.size() - static_cast<int>(sizeof("QSharedPointer<")) - 1) : _realTypeName;
+    this->PrettyTypeName = (this->PrettyTypeName.startsWith('Q') ? this->PrettyTypeName.mid(1) : this->PrettyTypeName).toLower();
     QByteArray RealTypeByteArray = _realTypeName.toLatin1();
     this->RealTypeName = new char[static_cast<uint>(RealTypeByteArray.size()+1)];
     strncpy(this->RealTypeName,

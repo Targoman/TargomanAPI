@@ -29,6 +29,58 @@
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 
+using namespace TAPI;
+using namespace TAPI;
+using namespace Targoman::API;
+using namespace Targoman::API::ORM;
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
+                                   QFieldValidator::allwaysValid(), _value,
+                                   [](const QList<clsORMField>& _fields){
+    QStringList Cols;
+    foreach(auto Col, _fields)
+        if(Col.isVirtual() == false)
+            Cols.append(clsTable::finalColName(Col));
+    return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+") "
+           "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
+           "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
+           "Availabale Cols are: \n* " + Cols.join("\n* ");
+});
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
+                                   QFieldValidator::allwaysValid(), _value,
+                                   [](const QList<clsORMField>& _fields){
+    return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
+           "Equality/Inequality operators are\n"
+           "* =: equal\n"
+           "* !=: not equal\n"
+           "* <, <=, >, >=: inequal\n"
+           "* ~=: LIKE on strings\n"
+           "Take note that just columns listed in GroupBy field can be filtered\n"
+           "example: \n"
+           "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
+});
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, OrderBy_t,
+                                   QFieldValidator::allwaysValid(), _value,
+                                   [](const QList<clsORMField>& _fields){
+    QStringList Cols;
+    foreach(auto Col, _fields)
+        if(Col.isSortable() && Col.isVirtual() == false)
+            Cols.append(clsTable::finalColName(Col));
+    return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
+    //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
+});
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
+                                   QFieldValidator::allwaysValid(), _value,
+                                   [](const QList<clsORMField>& _fields){
+    QStringList Cols;
+    foreach(auto Col, _fields)
+        if(Col.isFilterable())
+            Cols.append(clsTable::finalColName(Col));
+    return "Comma separated columns: \n* " + Cols.join(",\n* ");
+    //                                               return "Comma separated columns" ;
+});
+
 namespace Targoman {
 namespace API {
 namespace ORM {
@@ -37,7 +89,6 @@ using namespace TAPI;
 using namespace Targoman::DBManager;
 
 QHash<QString, clsTable*> clsTable::Registry;
-static bool TypesRegistered = false;
 
 clsTable::clsTable(const QString& _schema,
                    const QString& _name,
@@ -50,57 +101,6 @@ clsTable::clsTable(const QString& _schema,
     CountOfPKs(0)
 {
     clsTable::Registry.insert(Schema + "." + Name, this);
-
-    if(TypesRegistered)
-        return;
-
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Cols_t,
-                                       QFieldValidator::allwaysValid(), _value,
-                                       [](const QList<clsORMField>& _fields){
-        QStringList Cols;
-        foreach(auto Col, _fields)
-            if(Col.isVirtual() == false)
-                Cols.append(clsTable::finalColName(Col));
-        return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+") "
-                                                                                                "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
-                                                                                                                                                                   "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
-                                                                                                                                                                   "Availabale Cols are: \n* " + Cols.join("\n* ");
-        //                                               return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+")";
-    });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::Filter_t,
-                                       QFieldValidator::allwaysValid(), _value,
-                                       [](const QList<clsORMField>& _fields){
-        return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
-               "Equality/Inequality operators are\n"
-               "* =: equal\n"
-               "* !=: not equal\n"
-               "* <, <=, >, >=: inequal\n"
-               "* ~=: LIKE on strings\n"
-               "Take note that just columns listed in GroupBy field can be filtered\n"
-               "example: \n"
-               "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
-    });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::OrderBy_t,
-                                       QFieldValidator::allwaysValid(), _value,
-                                       [](const QList<clsORMField>& _fields){
-        QStringList Cols;
-        foreach(auto Col, _fields)
-            if(Col.isSortable() && Col.isVirtual() == false)
-                Cols.append(clsTable::finalColName(Col));
-        return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
-        //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
-    });
-    TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI::GroupBy_t,
-                                       QFieldValidator::allwaysValid(), _value,
-                                       [](const QList<clsORMField>& _fields){
-        QStringList Cols;
-        foreach(auto Col, _fields)
-            if(Col.isFilterable())
-                Cols.append(clsTable::finalColName(Col));
-        return "Comma separated columns: \n* " + Cols.join(",\n* ");
-        //                                               return "Comma separated columns" ;
-    });
-    TypesRegistered = true;
 }
 
 QList<clsORMField> clsTable::filterItems(THttpMethod _method)

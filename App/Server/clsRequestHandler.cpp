@@ -33,6 +33,7 @@
 #include "ServerConfigs.h"
 #include "QJWT.h"
 #include "APICache.hpp"
+#include "OpenAPIGenerator.h"
 
 namespace Targoman {
 namespace API {
@@ -292,7 +293,7 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
 {
     if(_api == "/openAPI.json"){
         gServerStats.Success.inc();
-        return this->sendResponseBase(qhttp::ESTATUS_OK, RESTAPIRegistry::retriveOpenAPIJson());
+        return this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson());
     }
 
     if(_api == "/openAPI.yaml")

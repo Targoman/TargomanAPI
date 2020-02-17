@@ -22,6 +22,8 @@
 
 #include "PaymentOrders.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -53,7 +55,6 @@ PaymentOrders::PaymentOrders() :
                 {"bpo_invID",  "AAA.tblInvoice",           "invID",     "",        true},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuPaymentStatus);
 }
 
 }

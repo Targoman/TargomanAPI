@@ -141,6 +141,7 @@ private:
     intfAPIModule*          Parent;
 
     friend class RESTAPIRegistry;
+    friend class OpenAPIGenerator;
 };
 
 }

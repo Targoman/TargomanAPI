@@ -22,6 +22,8 @@
 
 #include "UserWallets.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserWalletStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -137,7 +139,6 @@ UserWallets::UserWallets() :
                 {"walUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserWalletStatus);
 }
 
 }

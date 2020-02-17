@@ -22,6 +22,9 @@
 
 #include "ApprovalRequest.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPRStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuApprovalType);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -57,8 +60,6 @@ ApprovalRequest::ApprovalRequest() :
                 {"apr_usrID",          "AAA.tblUser",      "usrID"},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAPRStatus);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuApprovalType);
 }
 
 }

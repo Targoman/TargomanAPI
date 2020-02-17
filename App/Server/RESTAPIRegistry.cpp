@@ -30,57 +30,100 @@
 
 namespace Targoman {
 namespace API {
-namespace Server {
 
-using namespace ORM;
 
 /***********************************************************************************************/
-#define DO_ON_TYPE_VALID(_isIntegral, _baseType)  new tmplAPIArg<_baseType, _isIntegral, false>(TARGOMAN_M2STR(_baseType))
-#define DO_ON_TYPE_IGNORED(_isIntegral, _baseType) nullptr
+#define DO_ON_TYPE_VALID(_complexity, _baseType)  tmplAPIArg<_baseType, _complexity, false, true>::instance(TARGOMAN_M2STR(_baseType))
+#define DO_ON_TYPE_IGNORED(_complexity, _baseType) nullptr
 #define DO_ON_TYPE_PROXY(_isIntegral, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_IGNORED, DO_ON_TYPE_VALID)(_isIntegral, _baseType)
 #define DO_ON_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
 
 #define MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE(_typeName, _id, _baseType) { _id, { DO_ON_TYPE(COMPLEXITY_Integral,  _typeName, _baseType) } },
 #define MAKE_INFO_FOR_VALID_COMPLEX_METATYPE(_typeName, _id, _baseType)  { _id, { DO_ON_TYPE(COMPLEXITY_Complex, _typeName, _baseType) } },
 #define MAKE_INVALID_METATYPE(_typeName, _id, _baseType) { _id, { nullptr } },
+#define DIRECT_INFO_FOR_QT_PRIMITIVES(_type) {qMetaTypeId<_type>(), DO_ON_TYPE_VALID(COMPLEXITY_Integral, _type)},
+
 
 const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
-    QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE)
+    //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(qint8)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(qint16)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(qint32)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(qint64)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(quint8)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(quint16)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(quint32)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(quint64)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(double)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(float)
+    DIRECT_INFO_FOR_QT_PRIMITIVES(bool)
     QT_FOR_EACH_STATIC_PRIMITIVE_POINTER(MAKE_INVALID_METATYPE)
     QT_FOR_EACH_STATIC_CORE_CLASS(MAKE_INFO_FOR_VALID_COMPLEX_METATYPE)
     QT_FOR_EACH_STATIC_CORE_POINTER(MAKE_INVALID_METATYPE)
     QT_FOR_EACH_STATIC_CORE_TEMPLATE(MAKE_INFO_FOR_VALID_COMPLEX_METATYPE)
     QT_FOR_EACH_STATIC_GUI_CLASS(MAKE_INVALID_METATYPE)
     QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_METATYPE)
-    {qMetaTypeId<bool>(), { new tmplAPIArg<bool, COMPLEXITY_Integral, false>("bool",{},
-                            [](const QVariant& _value, const QByteArray& _paramName) -> bool {
-                                if(_value.toString() == "false" || _value.toString() == "0") return false;
-                                if(_value.toString() == "true" || _value.toString() == "1") return true;
-                                throw exHTTPBadRequest(_paramName + " is not a valid bool");
-                            },
-                            [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";},
-                            [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");}) } }
 };
 
-#define DO_ON_TYPE_NULLABLE_VALID(_isIntegral, _baseType) { [](){ \
-    qRegisterMetaType<QSharedPointer<_baseType>>();},  \
-    new tmplAPIArg<QSharedPointer<_baseType>, _isIntegral, true>(QString("QSharedPointer<%1>").arg(TARGOMAN_M2STR(_baseType)), \
-        [](QSharedPointer<_baseType> _value) -> QVariant{return _value.isNull() ? QVariant() : *_value;}, \
+#define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _lambdaFromVariant, _toORMValueLambda, _lambdaDesc) \
+    template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
+    template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _lambdaFromVariant; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _lambdaDesc; \
+    template<> std::function<QVariant(QString _value)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
+    template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
+    \
+    template<> std::function<QVariant(QSharedPointer<_baseType> _value)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toVariantLambda = \
+        [](QSharedPointer<_baseType> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
+    template<> std::function<QSharedPointer<_baseType>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromVariantLambda = \
         [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<_baseType> { \
-            if(_value.isValid() == false || _value.isNull()) return QSharedPointer<_baseType>(); \
-            if(!_value.canConvert<_baseType>()) throw exHTTPBadRequest(_paramName + " is not a valid " + QByteArray(TARGOMAN_M2STR(_baseType))); \
-            QSharedPointer<_baseType> Value(new _baseType); *Value = _value.value<_baseType>(); \
+            if(!_value.isValid() || _value.isNull()) return QSharedPointer<_baseType>(); \
+            QSharedPointer<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
-        } \
-    ) \
-},
-#define DO_ON_TYPE_NULLABLE_IGNORED(_isIntegral, _baseType) { nullptr, nullptr },
-#define DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_isIntegral, _baseType)
+        }; \
+    template<> std::function<QVariant(QString _value)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
+    template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::optionsLambda = nullptr; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
+    static tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::instance(QSP_M2STR(_baseType)); \
+
+#define DO_ON_TYPE_NULLABLE_IGNORED(...)
+#define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)
 #define DO_ON_NULLABLE_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
 
 #define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral,  _typeName, _baseType)
 #define MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Complex, _typeName, _baseType)
-#define MAKE_INVALID_NULLABLE_METATYPE(_typeName, _id, _baseType) {nullptr, nullptr},
+#define MAKE_INVALID_NULLABLE_METATYPE(_typeName, _id, _baseType)
+
+QT_FOR_EACH_STATIC_PRIMITIVE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
+QT_FOR_EACH_STATIC_CORE_CLASS(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
+QT_FOR_EACH_STATIC_CORE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
+QT_FOR_EACH_STATIC_CORE_TEMPLATE(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
+QT_FOR_EACH_STATIC_GUI_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
+QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint8,   nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint16,  nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint32,  nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint64,  nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint8,  nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint16, nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint32, nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint64, nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, float,   nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, double,  nullptr, nullptr, nullptr)
+DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
+                          [](const QVariant& _value, const QByteArray& _paramName) -> bool {
+                              if(_value.toString() == "false" || _value.toString() == "0") return false;
+                              if(_value.toString() == "true" || _value.toString() == "1") return true;
+                                  throw exHTTPBadRequest(_paramName + " is not a valid bool");
+                          },
+                          [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");},
+                          [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
+)
+
+namespace Server {
+
+using namespace ORM;
 
 struct stuNullableQtType{
     std::function<void()>  registerInMetaTypes;
@@ -91,45 +134,6 @@ struct stuNullableQtType{
         ArgManipulator(_manipulator)
     {}
 };
-
-const QList<stuNullableQtType> NullableQtTypes = {
-    //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE)
-    QT_FOR_EACH_STATIC_PRIMITIVE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
-    QT_FOR_EACH_STATIC_CORE_CLASS(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
-    QT_FOR_EACH_STATIC_CORE_POINTER(MAKE_INVALID_NULLABLE_METATYPE)
-    QT_FOR_EACH_STATIC_CORE_TEMPLATE(MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE)
-    QT_FOR_EACH_STATIC_GUI_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
-    QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_NULLABLE_METATYPE)
-    { [](){qRegisterMetaType<QSharedPointer<bool>>();}, new tmplAPIArg<QSharedPointer<bool>, COMPLEXITY_Integral, true>("QSharedPointer<bool>",
-                            [](QSharedPointer<bool> _value) -> QVariant{return _value.isNull() ? QVariant() : *_value;},
-                            [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<bool> {
-                                if(_value.isValid() == false || _value.isNull()) return QSharedPointer<bool>();
-                                QSharedPointer<bool> Value(new bool);
-                                if(_value.toString() == "false" || _value.toString() == "0") *Value = false;
-                                else if(_value.toString() == "true" || _value.toString() == "1") *Value = true;
-                                else throw exHTTPBadRequest(_paramName + " is not a valid bool");
-                                return Value;
-                            },
-                            [](const QList<ORM::clsORMField>&) -> QString {return "Null to keep it as is or valid bool as 1|true|0|false";},
-                            [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");})
-    },
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned long)
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned int)
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned short)
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned char)
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, long long)
-    //DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, unsigned long long)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint8)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint16)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint32)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, qint64)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint8)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint16)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint32)
-    DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, quint64)
-};
-
-QJsonObject RESTAPIRegistry::CachedOpenAPI;
 
 /***********************************************************************************************/
 void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
@@ -147,16 +151,11 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
         for(auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
             MetaTypeInfoMapIter != MetaTypeInfoMap.end();
             ++MetaTypeInfoMapIter){
-            for(int i = 0; i< MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size(); ++i)
+            int Gap = MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size();
+            for(int i = 0; i< Gap; ++i)
                 gOrderedMetaTypeInfo.append(nullptr);
             gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
         }
-
-        foreach(auto QtType, NullableQtTypes)
-            if(QtType.ArgManipulator){
-                QtType.registerInMetaTypes();
-                registerUserDefinedType(QtType.ArgManipulator->RealTypeName, QtType.ArgManipulator);
-            }
     }
 
     try{
@@ -177,7 +176,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             }
 
         if(!Found)
-            throw exRESTRegistry("Seems that you have not use API macro to define your API");
+            throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
         for (int i=0; i<_module->metaObject()->methodCount(); ++i)
             if(_module->metaObject()->method(i).name() == "docOf" + MethodName){
@@ -190,7 +189,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             }
 
         if(!Found)
-            throw exRESTRegistry("Seems that you have not use API macro to define your API");
+            throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
 
         auto makeMethodName = [MethodName](int _start) -> QString{
@@ -237,6 +236,14 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                _method.parameterType(ParamIndex) == qMetaTypeId<TAPI::Files_t>())
                 ContainsFileInput = true;
 
+            intfAPIArgManipulator* ArgSpecs;
+            if(_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
+                ArgSpecs = gOrderedMetaTypeInfo.at(_method.parameterType(ParamIndex));
+            else
+                ArgSpecs = gUserDefinedTypesInfo.at(_method.parameterType(ParamIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
+
+            Q_ASSERT(ArgSpecs);
+
             if(Param.contains('=')){
                 QString Value = Param.split('=').last().replace(COMMA_SIGN, ",").trimmed();
                 if(Value.startsWith("(")) Value = Value.mid(1);
@@ -248,13 +255,6 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 Value.replace("\\\"", "\"");
                 Value.replace("\\'", "'");
 
-                intfAPIArgManipulator* ArgSpecs;
-                if(_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
-                    ArgSpecs = gOrderedMetaTypeInfo.at(_method.parameterType(ParamIndex));
-                else
-                    ArgSpecs = gUserDefinedTypesInfo.at(_method.parameterType(ParamIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
-
-                Q_ASSERT(ArgSpecs);
 
                 if(Value == "{}" || Value.contains("()"))
                     DefaultValues.append(ArgSpecs->defaultVariant());
@@ -262,7 +262,9 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                     DefaultValues.append(Value.mid(Value.indexOf("::") + 2));
                 else
                     DefaultValues.append(Value);
-            }else
+            }else if (ArgSpecs->isNullable())
+                throw exRESTRegistry("Nullable parameter: <"+_method.parameterNames().value(ParamIndex)+"> on method: <" + MethodName + "> must have default value" );
+            else
                 DefaultValues.append(QVariant());
             ParamIndex++;
         }
@@ -270,7 +272,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
         QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
 
         if(MethodName.startsWith("GET")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with GET method");
+            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName(sizeof("GET")));
         }else if(MethodName.startsWith("POST"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", makeMethodName(sizeof("POST")));
@@ -281,13 +283,13 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
         else if(MethodName.startsWith("PATCH"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("PATCH")));
         else if (MethodName.startsWith("DELETE")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with DELETE method");
+            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with DELETE method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "DELETE", makeMethodName(sizeof("DELETE")));
         }else if (MethodName.startsWith("UPDATE"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("UPDATE")));
         else if (MethodName.startsWith("WS")){
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with WebSockets");
+            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with WebSockets: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::WSRegistry, _module, Method, "WS", makeMethodName(sizeof("WS")));
 #else
             throw exRESTRegistry("Websockets are not enabled in this QRestServer please compile with websockets support");
@@ -307,7 +309,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
 QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes)
 {
     static auto type2Str = [_prettifyTypes](int _typeID) {
-        if(_prettifyTypes == false || _typeID > 1023)
+        if(_prettifyTypes == false || _typeID > QMetaType::User)
             return QString(QMetaType::typeName(_typeID));
 
         return gOrderedMetaTypeInfo.at(_typeID)->PrettyTypeName;
@@ -370,417 +372,6 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObje
     return Methods;
 }
 
-QJsonObject RESTAPIRegistry::retriveOpenAPIJson(){
-    if(RESTAPIRegistry::CachedOpenAPI.isEmpty() == false)
-        return RESTAPIRegistry::CachedOpenAPI;
-    /**/
-
-    RESTAPIRegistry::CachedOpenAPI = ServerConfigs::BaseOpenAPIObject;
-
-    if(RESTAPIRegistry::CachedOpenAPI.isEmpty())
-        RESTAPIRegistry::CachedOpenAPI = QJsonObject({
-                                                         {"swagger","2.0"},
-                                                         {"info",QJsonObject({
-                                                              {"version", ServerConfigs::Version.value()},
-                                                              {"title", "NOT_SET"},
-                                                              {"description", ""},
-                                                              {"contact", QJsonObject({{"email", "sample@example.com"}})}
-                                                          })},
-                                                         {"host", QString("127.0.0.1:%1").arg(ServerConfigs::ListenPort.value())},
-                                                         {"securityDefinitions", QJsonObject({
-                                                              {"Bearer", QJsonObject({
-                                                                   {"type", "apiKey"},
-                                                                   {"name", "Authorization"},
-                                                                   {"in", "header"},
-                                                                   {"description", "For accessing the API a valid JWT token must be passed in all the queries in the 'Authorization' header.\n\n A valid JWT token is generated by the API and retourned as answer of a call     to the route /login giving a valid user & password.\n\nThe following syntax must be used in the 'Authorization' header :\n\nBearer xxxxxx.yyyyyyy.zzzzzz"},
-                                                               })}
-                                                          })},
-                                                         {"basePath", ServerConfigs::BasePathWithVersion},
-                                                         {"definitions", QJsonObject()},
-                                                         {"schemes", QJsonArray({"http", "https"})},
-                                                     });
-
-    if(RESTAPIRegistry::CachedOpenAPI.value("info").isObject() == false)
-        throw exHTTPInternalServerError("Invalid OpenAPI base json");
-
-    QJsonObject PathsObject;
-    QJsonArray TagsArray;
-    foreach(const QString& Key, RESTAPIRegistry::Registry.keys()){
-        QString PathString = Key.split(" ").last();
-        QString HTTPMethod = Key.split(" ").first().toLower();
-        QStringList ExtraPathsStorage;
-
-        clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
-
-        auto paramName = [APIObject](quint8 i) {
-            return APIObject->BaseMethod.parameterNames().at(i).startsWith('_') ?
-                        APIObject->BaseMethod.parameterNames().at(i).mid(1) :
-                        APIObject->BaseMethod.parameterNames().at(i);
-        };
-
-        auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, const QString& _typeName){
-            switch(_complexity){
-            case COMPLEXITY_Number:
-            case COMPLEXITY_Boolean:
-            case COMPLEXITY_Integral:
-                if(_typeName == "bool")
-                    return "boolean";
-                else if(_typeName.endsWith("int") || _typeName.endsWith("long"))
-                    return "integer";
-                else if(_typeName.endsWith("char"))
-                    return "string";
-                else
-                    return  "number";
-            case COMPLEXITY_String:
-            case COMPLEXITY_Complex:
-            case COMPLEXITY_Enum:
-                return  "string";
-            case COMPLEXITY_Object:
-                return "object";
-            case COMPLEXITY_File:
-                if(_typeName == "TAPI::Files_t")
-                    return "string";
-                return  "file";
-            }
-            return "ERROR";
-        };
-
-        auto fillParamTypeSpec = [mapTypeToValidOpenAPIType](intfAPIArgManipulator* _argMan,
-                const QList<clsORMField>& _fields,
-                QString _typeName,
-                QJsonObject& ParamSpecs,
-                QVariant _deafaultValue = {},
-                bool addExample = false) -> void{
-            ParamSpecs["description"] = _argMan->description(_fields);
-            ParamSpecs["type"] = mapTypeToValidOpenAPIType(_argMan->complexity(), _typeName);
-            if(_argMan->complexity() == COMPLEXITY_Enum)
-                ParamSpecs["enum"] = QJsonArray::fromStringList(_argMan->options());
-
-            if(_deafaultValue.isValid()){
-                ParamSpecs["default"] = _deafaultValue.toString();
-                if(addExample){
-                    if(_argMan->complexity() == COMPLEXITY_Object)
-                        ParamSpecs["example"] = QJsonObject();
-                    else
-                        ParamSpecs["example"] = _deafaultValue.toString();
-                }
-            }else{
-                ParamSpecs["required"] = true;
-                if(addExample)
-                    ParamSpecs["example"] = QJsonValue();
-            }
-
-        };
-
-        auto addParamSpecs = [APIObject, paramName, HTTPMethod, fillParamTypeSpec, mapTypeToValidOpenAPIType](QJsonArray& _parameters, quint8 _i, QStringList* _extraPathsStorage) -> void {
-            QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(_i));
-            if(   ParamType == PARAM_HEADERS
-                  || ParamType == PARAM_REMOTE_IP
-                  || ParamType == PARAM_COOKIES
-                  || ParamType == PARAM_JWT
-                  )
-                return;
-            QJsonObject ParamSpecs;
-
-            if(ParamType == PARAM_EXTRAPATH){
-                if(_extraPathsStorage){
-                    QList<clsORMField> PKs;
-                    foreach(auto Item, APIObject->Parent->filterItems(qhttp::EHTTP_DELETE))
-                        if(Item.isPrimaryKey())
-                            PKs.append(Item);
-                    foreach(auto PK, PKs){
-                        _extraPathsStorage->append(PK.name());
-                        intfAPIArgManipulator* ArgSpecs;
-                        if(PK.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
-                            ArgSpecs = gOrderedMetaTypeInfo.at(PK.parameterType());
-                        else
-                            ArgSpecs = gUserDefinedTypesInfo.at(PK.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
-
-                        Q_ASSERT(ArgSpecs);
-                        ParamSpecs["in"] = "path";
-                        ParamSpecs["name"] = _extraPathsStorage->last();
-                        ParamSpecs["required"] = true;
-                        ParamSpecs["description"] = ArgSpecs->description(APIObject->Parent->filterItems());
-                        ParamSpecs["type"] = mapTypeToValidOpenAPIType(ArgSpecs->complexity(), QMetaType::typeName(PK.parameterType()));
-                        _parameters.append(ParamSpecs);
-                    }
-                }
-                return;
-            }
-
-            if(HTTPMethod == "get" || HTTPMethod == "delete"){
-                if(_extraPathsStorage){
-                    if(ParamType == PARAM_ORMFILTER){
-                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "get" ? qhttp::EHTTP_GET : qhttp::EHTTP_DELETE)){
-                            if(Item.isFilterable()== false || Item.isPrimaryKey())
-                                continue;
-                            QJsonObject ParamSpecs;
-                            ParamSpecs["in"] = "query";
-                            ParamSpecs["name"] = Item.name();
-                            intfAPIArgManipulator* ArgSpecs;
-                            if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
-                                ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
-                            else
-                                ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
-
-                            Q_ASSERT(ArgSpecs);
-                            fillParamTypeSpec(ArgSpecs,
-                                              APIObject->Parent->filterItems(),
-                                              QMetaType::typeName(Item.parameterType()),
-                                              ParamSpecs,
-                                              Item.defaultValue()
-                                              );
-                            _parameters.append(ParamSpecs);
-                        }
-                    }
-                    return ;
-                }
-                if(ParamType == PARAM_ORMFILTER)
-                    return;
-
-                ParamSpecs["in"] = "query";
-                ParamSpecs["name"] = QString(paramName(_i));
-                ParamSpecs["required"] = APIObject->isRequiredParam(_i);
-
-                fillParamTypeSpec(APIObject->argSpecs(_i),
-                                  APIObject->Parent->filterItems(),
-                                  QMetaType::typeName(APIObject->BaseMethod.parameterType(_i)),
-                                  ParamSpecs,
-                                  APIObject->defaultValue(_i)
-                                  );
-                _parameters.append(ParamSpecs);
-            }
-        };
-
-        QStringList PathStringParts = PathString.split("/", QString::SkipEmptyParts);
-        if(APIObject->HasExtraMethodName)
-            PathStringParts.pop_back();
-        QString TagName  =  PathStringParts.join("_");
-
-        auto createPathInfo = [TagName, APIObject, HTTPMethod, addParamSpecs, paramName, fillParamTypeSpec](QStringList* _extraPathsStorage)->QJsonObject{
-            QJsonObject PathInfo = QJsonObject({{"summary", APIObject->BaseMethod.Doc}});
-
-            PathInfo["tags"] = QJsonArray({TagName});
-            PathInfo["produces"] = QJsonArray({"application/json"});
-            if(HTTPMethod != "get" && HTTPMethod != "delete"){
-                quint8 RequiredFiles = 0;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
-                    if(QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILE))
-                        RequiredFiles++;
-                    else if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILES))
-                        RequiredFiles += 2;
-
-                QJsonObject Properties;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
-                    QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(i));
-                    if(   ParamType == PARAM_HEADERS
-                          || ParamType == PARAM_REMOTE_IP
-                          || ParamType == PARAM_COOKIES
-                          || ParamType == PARAM_JWT
-                          )
-                        continue;
-
-                    if(ParamType == PARAM_ORMFILTER){
-                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "put" ? qhttp::EHTTP_PUT :
-                                                                          HTTPMethod == "patch" ? qhttp::EHTTP_PATCH :
-                                                                          qhttp::EHTTP_BIND)){
-                            if(Item.isReadOnly() && Item.isPrimaryKey() == false)
-                                continue;
-                            QJsonObject ParamSpecs;
-                            intfAPIArgManipulator* ArgSpecs;
-                            if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
-                                ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
-                            else
-                                ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
-
-                            if(!ArgSpecs){
-                                Item.registerTypeIfNotRegisterd(APIObject->Parent);
-                                if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
-                                    ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
-                                else
-                                    ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
-                            }
-
-                            Q_ASSERT(ArgSpecs);
-                            fillParamTypeSpec(ArgSpecs,
-                                              APIObject->Parent->filterItems(),
-                                              QMetaType::typeName(Item.parameterType()),
-                                              ParamSpecs,
-                                              HTTPMethod == "put" ? Item.toString(Item.defaultValue()) : QVariant(),
-                                              Item.isPrimaryKey() == false
-                                              );
-                            Properties[Item.name()] = ParamSpecs;
-                        }
-                    }else{
-                        QJsonObject ParamSpecs;
-                        fillParamTypeSpec(APIObject->argSpecs(i),
-                                          APIObject->Parent->filterItems(),
-                                          QMetaType::typeName(APIObject->BaseMethod.parameterType(i)),
-                                          ParamSpecs,
-                                          APIObject->defaultValue(i),
-                                          true);
-                        Properties[paramName(i)] = ParamSpecs;
-                    }
-                }
-
-                QJsonArray Parameters;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
-                    addParamSpecs( Parameters, i, _extraPathsStorage);
-
-
-                if(RequiredFiles > 0){
-                    PathInfo["consumes"] = QJsonArray({"multipart/form-data"});
-                    for(auto Prop = Properties.begin(); Prop != Properties.end(); ++Prop){
-                        QJsonObject PropVal = Prop.value().toObject();
-                        PropVal.insert("name", Prop.key());
-                        PropVal.insert("in", "formData");
-                        Parameters.append(PropVal);
-                    }
-                }else{
-                    QJsonArray RequiredFields;
-                    for(auto PropertyIter = Properties.begin();
-                        PropertyIter != Properties.end();
-                        PropertyIter++
-                        )
-                        if(PropertyIter->toObject().value("required").toBool())
-                            RequiredFields.append(PropertyIter.key());
-                    PathInfo["consumes"] = QJsonArray({"application/json"});
-                    Parameters.append(QJsonObject({
-                                                      {"in", "body"},
-                                                      {"name", "body"},
-                                                      {"description", "Pramaeter Object"},
-                                                      {"required", true},
-                                                      {"schema", QJsonObject({
-                                                           {"required", RequiredFields},
-                                                           {"type", "object"},
-                                                           {"properties", Properties}
-                                                       })}
-                                                  }));
-                }
-                PathInfo["parameters"] = Parameters;
-            }else{
-                QJsonArray Parameters;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
-                    addParamSpecs(Parameters, i, _extraPathsStorage);
-                }
-                if(Parameters.size())
-                    PathInfo["parameters"] = Parameters;
-            }
-
-            static QJsonObject DefaultResponses = QJsonObject({
-                                                                  {"200", QJsonObject({{"description", "Success."}})},
-                                                                  {"400", QJsonObject({{"description", "Bad request."}})},
-                                                                  {"404", QJsonObject({{"description", "Not found"}})},
-                                                                  //{"5XX", QJsonObject({{"description", "Unexpected error"}})},
-                                                              });
-            QJsonObject ResponseModel = DefaultResponses;
-            if(HTTPMethod == "get"){
-                QJsonObject Properties;
-                foreach(auto Item, APIObject->Parent->filterItems()){
-                    QJsonObject ParamSpecs;
-                    intfAPIArgManipulator* ArgSpecs;
-                    if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
-                        ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
-                    else
-                        ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
-
-                    Q_ASSERT(ArgSpecs);
-                    fillParamTypeSpec(ArgSpecs,
-                                      APIObject->Parent->filterItems(),
-                                      QMetaType::typeName(Item.parameterType()),
-                                      ParamSpecs
-                                      );
-
-                    Properties.insert(Item.name(), ParamSpecs);
-                }
-                if(Properties.size())
-                    ResponseModel["200"] =
-                            QJsonObject({
-                                            {"description", "Success"},
-                                            {"schema", QJsonObject({
-                                                 {"type", "object"},
-                                                 {"properties", Properties}
-                                             })}
-                                        });
-            }
-
-            if(APIObject->requiresJWT()){
-                ResponseModel["401"] = QJsonObject({{"description", "Authorization information is missing or invalid"}});
-                ResponseModel["403"] = QJsonObject({{"description", "Access forbidden"}});
-            }
-
-            PathInfo["responses"] = ResponseModel;
-
-            if(APIObject->requiresJWT()){
-                PathInfo["security"] =  QJsonArray({
-                                                       QJsonObject({
-                                                           {"Bearer", QJsonArray()}
-                                                       })
-                                                   });
-            }
-            return PathInfo;
-        };
-
-        auto add2Paths = [PathString, HTTPMethod](QJsonObject& PathsObject, const QJsonObject& _currPathMethodInfo, QStringList* _extraPathsStorage){
-            if(HTTPMethod == "delete" && _currPathMethodInfo.value("parameters").toArray().isEmpty())
-                return;
-            QString Path = PathString + (_extraPathsStorage ? ("/{" + _extraPathsStorage->join("},{") + "}") : "");
-            if(PathsObject.contains(Path)){
-                QJsonObject CurrPathObject = PathsObject.value(Path).toObject();
-                CurrPathObject[HTTPMethod] = _currPathMethodInfo;
-                PathsObject[Path] = CurrPathObject;
-            }else
-                PathsObject[Path] = QJsonObject({ {HTTPMethod, _currPathMethodInfo} });
-        };
-
-        if(APIObject->requiresExtraPath())
-            add2Paths(PathsObject, createPathInfo(&ExtraPathsStorage), &ExtraPathsStorage);
-
-        quint8 HasNonAutoParams = false;
-        foreach(auto ParamType, APIObject->ParamTypes)
-            if(/*ParamType != PARAM_HEADERS
-                           && ParamType != PARAM_REMOTE_IP
-                           && ParamType != PARAM_COOKIES
-                           && ParamType != PARAM_JWT
-                           &&*/ ParamType != PARAM_EXTRAPATH
-               ){
-                HasNonAutoParams = true;
-                break;
-            }
-
-
-        if(HasNonAutoParams)
-            add2Paths(PathsObject, createPathInfo(nullptr), nullptr);
-
-        QList<clsORMField> Filters = APIObject->Parent->filterItems();
-        QStringList ModelDescription;
-        foreach(auto Filter, Filters){
-            QString FilterInfo = "* " + Filter.name();
-            QStringList Flags;
-            if(Filter.isSortable()) Flags.append("Sortable");
-            if(Filter.isFilterable()) Flags.append("Filterable");
-            if(Filter.isPrimaryKey()) Flags.append("*PrimaryKey*");
-            if(Filter.isSelfIdentifier()) Flags.append("**SelfIdentifier**");
-            if(Filter.isVirtual()) Flags.append("Virtual");
-            if(Flags.size())
-                FilterInfo += " (" + Flags.join("|") + ")";
-            ModelDescription.append(FilterInfo);
-        }
-
-        if(false && ModelDescription.size()){
-            TagsArray.append(QJsonObject({
-                                             {"name", TagName},
-                                             {"description", QString("Model:\n" + ModelDescription.join("\n"))}
-                                         }));
-        }
-    }
-
-    RESTAPIRegistry::CachedOpenAPI["paths"] = PathsObject;
-    //RESTAPIRegistry::CachedOpenAPI["tags"] = TagsArray;
-
-    return RESTAPIRegistry::CachedOpenAPI;
-}
-
 QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showParams, bool _showTypes, bool _prettifyTypes){
     if(_showParams == false){
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
@@ -800,7 +391,7 @@ QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showPa
 }
 
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input){
-    if(_typeID == 0 || _typeID == QMetaType::User || _typeID == 1025)
+    if(_typeID == 0 || _typeID == QMetaType::User || _typeID == QMetaType::User)
         return  "is not registered with Qt MetaTypes";
     if(_typeID < TAPI_BASE_USER_DEFINED_TYPEID && (_typeID >= gOrderedMetaTypeInfo.size() || gOrderedMetaTypeInfo.at(_typeID) == nullptr))
         return "is complex type and not supported";

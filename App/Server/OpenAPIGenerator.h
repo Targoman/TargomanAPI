@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -17,34 +17,29 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  */
 
-#include "URLProcessor.h"
-#include "3rdParty/URLCanonicalizer/libsrc/libURLCanonicalizer/URLCanonicalizer.h"
 
-using namespace Targoman::Common;
+#ifndef TARGOMAN_API_SERVER_OPENAPIGENERATOR_H
+#define TARGOMAN_API_SERVER_OPENAPIGENERATOR_H
+
+#include "RESTAPIRegistry.h"
 
 namespace Targoman {
 namespace API {
+namespace Server {
 
-QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW)
+class OpenAPIGenerator
 {
-    char Normalized[MAX_URL_SIZE+1];
-    URLCanonicalizer::doJob (_url.toLatin1().constData(), Normalized, _removeWWW);
-    return Normalized;
-}
+public:
+    static QJsonObject retrieveJson();
 
-QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAll)
-{
-    char Normalized[MAX_URL_SIZE+1];
-    strncpy(Normalized, _url.toLatin1().constData(), MAX_URL_SIZE);
-    return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);
-}
-
-URLProcessor::URLProcessor()
-{;}
+private:
+    static QJsonObject CachedJson;
+};
 
 }
 }
-
+}
+#endif // TARGOMAN_API_SERVER_OPENAPIGENERATOR_H

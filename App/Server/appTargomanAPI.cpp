@@ -52,19 +52,6 @@ appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 void appTargomanAPI::slotExecute()
 {
     try{
-        TAPI::registerGenericTypes();
-
-        /*        if(gConfigs::Rest::BaseOpenAPIObjectFile.value().size()){
-            QFile File(gConfigs::Rest::BaseOpenAPIObjectFile.value());
-            File.open(QIODevice::ReadOnly);
-            if (File.isReadable() == false)
-                throw exTargomanAPI("Unable to open: <" + gConfigs::Rest::BaseOpenAPIObjectFile.value() + "> for reading");
-            QJsonDocument JsonDoc = QJsonDocument::fromBinaryData(File.readAll());
-            if(JsonDoc.isNull() || JsonDoc.isObject() == false)
-                throw exTargomanAPI("Invalid json reading from: <" + gConfigs::Rest::BaseOpenAPIObjectFile.value() + ">");
-            Configs.BaseOpenAPIObject = JsonDoc.object();
-        }
-*/
         // Load modules
         QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
         QDir PluginsDir = QDir(ServerConfigs::ModulesPath.value());

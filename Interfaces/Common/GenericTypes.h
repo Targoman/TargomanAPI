@@ -31,6 +31,15 @@
 
 #include "Interfaces/Common/tmplAPIArg.h"
 
+namespace Targoman {
+namespace API {
+namespace Server {
+extern QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+}
+}
+}
+
 //I used TAPI as namespace in order to make Targoman::API shorter
 namespace TAPI{
 
@@ -156,9 +165,6 @@ TAPI_ADD_SIMPLE_TYPE(QString, Base64Image_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
 TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
-
-/**********************************************************************/
-extern void registerGenericTypes();
 }
 
 /**********************************************************************/

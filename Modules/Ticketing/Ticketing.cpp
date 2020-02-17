@@ -29,6 +29,8 @@
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTicketType);
+
 namespace Targoman {
 namespace API {
 
@@ -100,7 +102,6 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
 
 Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketType);
 
     this->addSubModule(new ORM::Tickets);
     this->addSubModule(new ORM::TicketRead);

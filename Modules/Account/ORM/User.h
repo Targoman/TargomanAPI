@@ -40,14 +40,14 @@ private slots:
     quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
 
     bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
-                              QSharedPointer<TAPI::enuUserSex::Type> _sex = {},
-                              QString _name = {},
-                              QString _family = {},
-                              TAPI::ISO639_2_t _lang = {},
-                              TAPI::Email_t _email = {},
-                              TAPI::Mobile_t _mobile = {},
-                              TAPI::MD5_t _pass = {},
-                              QString _salt = {}),
+                              NULLABLE(TAPI::enuUserSex::Type) _sex = {},
+                              NULLABLE(QString) _name = {},
+                              NULLABLE(QString) _family = {},
+                              NULLABLE(TAPI::ISO639_2_t) _lang = {},
+                              NULLABLE(TAPI::Email_t) _email = {},
+                              NULLABLE(TAPI::Mobile_t) _mobile = {},
+                              NULLABLE(TAPI::MD5_t) _pass = {},
+                              NULLABLE(QString) _salt = {}),
               "Update User profile. Take note that this method does not change password "
               "Password and Salt are required to change email or mobile")
 

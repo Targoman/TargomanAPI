@@ -22,6 +22,8 @@
 
 #include "Roles.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuRoleStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -72,7 +74,6 @@ Roles::Roles() :
                 {"rolUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuRoleStatus);
 }
 
 }

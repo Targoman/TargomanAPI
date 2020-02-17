@@ -50,45 +50,44 @@ bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
-                            QSharedPointer<TAPI::enuUserSex::Type> _sex,
-                            QString _name,
-                            QString _family,
-                            TAPI::ISO639_2_t _lang,
-                            TAPI::Email_t _email,
-                            TAPI::Mobile_t _mobile,
-                            TAPI::MD5_t _pass,
-                            QString _salt){
-    if(_email.size() || _mobile.size ()){
-        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-        if(_pass.isEmpty())
+                            NULLABLE(TAPI::enuUserSex::Type) _sex,
+                            NULLABLE(QString) _name,
+                            NULLABLE(QString) _family,
+                            NULLABLE(TAPI::ISO639_2_t) _lang,
+                            NULLABLE(TAPI::Email_t) _email,
+                            NULLABLE(TAPI::Mobile_t) _mobile,
+                            NULLABLE(TAPI::MD5_t) _pass,
+                            NULLABLE(QString) _salt){
+    if(!_email.isNull() || !_mobile.isNull()){
+        if(_pass.isNull() || _pass->isEmpty() || _salt.isNull())
             throw exHTTPBadRequest("Password and salt are required to change email");
+        QFV.asciiAlNum().maxLenght(20).validate(*_salt, "salt");
     }
-    if(_email.size())
+    if(!_email.isNull() && _email->size())
         this->callSP("AAA.sp_CREATE_approvalRequest",{
                          {"iWhat2Approve", "E"},
                          {"iUserID", clsJWT(_JWT).usrID()},
-                         {"iValue", _email},
-                         {"iPass", _pass},
-                         {"iSalt", _salt},
+                         {"iValue", *_email},
+                         {"iPass", *_pass},
+                         {"iSalt", *_salt},
                      });
-    if(_mobile.size())
+    if(!_mobile.isNull() && _mobile->size())
         this->callSP("AAA.sp_CREATE_approvalRequest",{
                          {"iWhat2Approve", "E"},
                          {"iUserID", clsJWT(_JWT).usrID()},
-                         {"iValue", _email},
-                         {"iPass", _pass},
-                         {"iSalt", _salt},
+                         {"iValue", *_mobile},
+                         {"iPass", *_pass},
+                         {"iSalt", *_salt},
                      });
 
-    if(_name.size() || _family.size() || *_sex != TAPI::enuUserSex::NotExpressed)
-        return this->update(
-        {{"usrID", clsJWT(_JWT).usrID()}},
-        {
-                        {"usrName",   _name},
-                        {"usrFamily", _family},
-                        {"usrLanguage", _lang}
-                    }
-                    );
+    QVariantMap ToUpdate;
+    if(!_name.isNull()) ToUpdate.insert("usrName", *_name);
+    if(!_family.isNull()) ToUpdate.insert("usrFamily", *_family);
+    if(!_lang.isNull()) ToUpdate.insert("usrLanguage", *_lang);
+    if(!_sex.isNull()) ToUpdate.insert("usrSex", *_sex);
+
+    if(ToUpdate.size())
+        return this->update({{"usrID", clsJWT(_JWT).usrID()}}, ToUpdate );
     return true;
 }
 

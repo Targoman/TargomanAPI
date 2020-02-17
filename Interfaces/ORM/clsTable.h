@@ -177,6 +177,7 @@ public:
                         TAPI::ORMFilters_t& _ORMFILTERS);
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
+    static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
 
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
@@ -186,7 +187,6 @@ private:
                                     const QString _groupBy = {}) const;
     QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
-    static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
     inline QString domain();
     virtual QJsonObject todayPrivs(quint32 _usrID) {Q_UNUSED(_usrID) return {}; }
 
@@ -210,9 +210,9 @@ protected:
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::Cols_t);
-Q_DECLARE_METATYPE(TAPI::Filter_t);
-Q_DECLARE_METATYPE(TAPI::OrderBy_t);
-Q_DECLARE_METATYPE(TAPI::GroupBy_t);
+TAPI_DECLARE_METATYPE(TAPI::Cols_t);
+TAPI_DECLARE_METATYPE(TAPI::Filter_t);
+TAPI_DECLARE_METATYPE(TAPI::OrderBy_t);
+TAPI_DECLARE_METATYPE(TAPI::GroupBy_t);
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H

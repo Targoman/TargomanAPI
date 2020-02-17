@@ -22,6 +22,8 @@
 
 #include "IPBin.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuIPBinStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -51,7 +53,6 @@ IPBin::IPBin() :
                 {"ipbBlockedBy_usrID", "AAA.tblUser",      "usrID",   "Blocker_", true},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuIPBinStatus);
 }
 
 }

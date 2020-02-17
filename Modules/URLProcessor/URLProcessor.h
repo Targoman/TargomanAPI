@@ -40,14 +40,12 @@ class URLProcessor : public intfAPIModule
 public:
     virtual QJsonObject todayPrivs(quint32 _usrID) final { Q_UNUSED(_usrID) return {};}
 
+private slots:
     QString API(GET, canonicalize, (const QString _url, bool _removeWWW = true),
                 "normalizes url in a common format to be canonical")
 
     QString API(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
                 "helper method which converts URL encoded strings to normal strings")
-
-    private slots:
-        QString API(PUT, sample, (QSharedPointer<quint16> b, QSharedPointer<TAPI::enuGenericStatus::Type> A = {}), "sdasda")
 
     TARGOMAN_DEFINE_API_MODULE(URLProcessor)
 };

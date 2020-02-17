@@ -22,6 +22,9 @@
 
 #include "ForgotPassRequest.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuFPRStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuForgotPassLinkVia);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -55,8 +58,6 @@ ForgotPassRequest::ForgotPassRequest() :
                 {"fpr_usrID",  "AAA.tblUser",    "usrID"},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuFPRStatus);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuForgotPassLinkVia);
 }
 
 }

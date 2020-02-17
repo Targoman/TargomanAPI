@@ -43,7 +43,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 
 /*****************************************************/
 #define IGNORE_TYPE_Void ,
-#define IGNORE_TYPE_Bool ,
+#define IGNORE_TYPE_Char ,
 #define IGNORE_TYPE_QByteArray ,
 #define IGNORE_TYPE_QBitArray ,
 #define IGNORE_TYPE_QLocale ,
@@ -67,7 +67,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 #define IGNORE_TYPE_QVariantHash ,
 #define IGNORE_TYPE_QByteArrayList ,
 /*****************************************************/
-
+class OpenAPIGenerator;
 class RESTAPIRegistry
 {
 public:
@@ -87,7 +87,6 @@ public:
 
     static void registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
-    static QJsonObject retriveOpenAPIJson();
 
 private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
@@ -98,11 +97,11 @@ private:
 
 private:
     static QHash<QString, clsAPIObject*>  Registry;
-    static QJsonObject CachedOpenAPI;
 
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
     static QHash<QString, clsAPIObject*>  WSRegistry;
 #endif
+    friend class OpenAPIGenerator;
 };
 
 }

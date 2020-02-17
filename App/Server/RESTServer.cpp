@@ -173,7 +173,7 @@ QStringList RESTServer::registeredAPIs(bool _showParams, bool _showTypes, bool _
 void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator)
 {
     Q_ASSERT_X(QMetaType::type(_typeName), "registerUserDefinedType", "Seems that registering syntax is erroneous");
-    gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - 1025, _argManipulator);
+    gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - TAPI_BASE_USER_DEFINED_TYPEID, _argManipulator);
 }
 
 bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _peerPort)

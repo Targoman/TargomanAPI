@@ -22,6 +22,8 @@
 
 #include "ActiveSessions.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSessionStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -68,7 +70,6 @@ ActiveSessions::ActiveSessions() :
                 {"ssnUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuSessionStatus);
 }
 
 }

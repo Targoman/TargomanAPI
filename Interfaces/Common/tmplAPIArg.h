@@ -32,25 +32,9 @@ namespace Server {
 class intfCacheConnector;
 }
 
-template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable>
+template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
 class tmplAPIArg : public intfAPIArgManipulator{
 public:
-//    std::function<QVariant(const _itmplType& _value)>
-//    std::function<_itmplType(const QVariant& _value, const QByteArray& _paramName)>
-    tmplAPIArg(const QString& _typeName,
-               std::function<QString(const QList<ORM::clsORMField>& _allFields)> _description = {},
-               std::function<QVariant(const QString& _val)> _toORMValue = {},
-               std::function<QVariant(const QVariant& _val)> _fromORMValue = {},
-               std::function<QStringList()> _options = {}
-               ) :
-        intfAPIArgManipulator(_typeName),
-//        toVariantLambda(_itmplToVariant),
-//        fromVariantLambda(_itmplFromVariant),
-        toORMValueLambda(_toORMValue),
-        fromORMValueLambda(_fromORMValue),
-        optionsLambda(_options),
-        descriptionLambda(_description)
-    {}
     virtual ~tmplAPIArg(){;}
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final{
@@ -105,8 +89,20 @@ public:
     
     inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fromORMValueLambda;}
 
-    static _itmplType fromVariant(QVariant _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable>::fromVariantLambda(_value, {}); }
-    static QVariant toVariant(_itmplType _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable>::toVariant(_value); }
+    static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}){
+        return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda(_value, _paramName);
+    }
+    static QVariant toVariant(_itmplType _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariant(_value); }
+
+    static tmplAPIArg* instance(const char* _typeStr){
+        static tmplAPIArg* Instance = nullptr; return Q_LIKELY(Instance) ? Instance : (Instance = new tmplAPIArg(_typeStr));
+    }
+private:
+    tmplAPIArg(const char* _typeStr) : intfAPIArgManipulator(_typeStr) {
+        qRegisterMetaType<_itmplType>();
+        if(!_isQtType)
+            registerUserDefinedType(_typeStr, this);
+    }
 
 private:
     static std::function<QVariant(_itmplType _value)> toVariantLambda;

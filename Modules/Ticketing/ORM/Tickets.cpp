@@ -24,6 +24,8 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuTicketStatus);
+
 namespace Targoman {
 namespace API {
 using namespace ORM;
@@ -64,7 +66,6 @@ Tickets::Tickets() :
                 {"tktUpdatedBy_usrID",  "AAA.tblUser",     "usrID",     "Updater_",  true},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuTicketStatus);
 }
 
 /******************************************************************************/

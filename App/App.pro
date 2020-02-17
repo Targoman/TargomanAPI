@@ -33,7 +33,8 @@ HEADERS += \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
-    Server/QtTypes.hpp
+    Server/QtTypes.hpp \
+    Server/OpenAPIGenerator.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -49,6 +50,7 @@ SOURCES += \
     Server/appTargomanAPI.cpp \
     Server/main.cpp \
     $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
+    Server/OpenAPIGenerator.cpp
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #

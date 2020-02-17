@@ -61,7 +61,6 @@ struct ServerConfigs
     static Common::Configuration::tmplRangedConfigurable<quint32> FileMaxChunk;
 
     static QString BasePathWithVersion;
-    static QJsonObject BaseOpenAPIObject;
 
     struct MasterDB{
         static inline QString makeConfig(const QString& _name){return "/MasterDB/" + _name;}
@@ -73,10 +72,8 @@ struct ServerConfigs
     };
 };
 
-constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = 1026;
+constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 2;
 
-extern QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
-extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
 extern TAPI::stuStatistics gServerStats;
 
 }

@@ -40,6 +40,13 @@
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuOAuthType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserSex);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserApproval);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAuditableStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceTemplateStatus);
+
 namespace Targoman {
 namespace API {
 
@@ -261,13 +268,6 @@ bool Account::apiPOSTApproveMobile(const TAPI::RemoteIP_t& _REMOTE_IP,
 Account::Account() :
     clsRESTAPIWithActionLogs("AAA", "Account")
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuOAuthType);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserStatus);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserSex);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuUserApproval);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAuditableStatus);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuInvoiceTemplateStatus);
-
     this->addSubModule(new ActiveSessions);
     this->addSubModule(new APITokens);
     this->addSubModule(new APITokenValidIPs);

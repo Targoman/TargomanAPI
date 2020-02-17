@@ -22,6 +22,8 @@
 
 #include "WalletTransactions.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuWalletTransactionStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -53,7 +55,6 @@ WalletTransactions::WalletTransactions() :
                 {"wltID",     "AAA.tblWalletBalances",      "wbl_wltID"},
               })
 {
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuWalletTransactionStatus);
 }
 
 WalletBalances::WalletBalances() :
