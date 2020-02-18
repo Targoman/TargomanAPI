@@ -298,10 +298,6 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
 
         for(int i=0; i< _arguments.size(); ++i)
             CLEAN_ARG_AT(i);
-    }catch(std::exception &e){
-        TargomanLogError(e.what());
-        for(int i=0; i< _arguments.size(); ++i)
-            CLEAN_ARG_AT(i);
     }catch(...){
         for(int i=0; i< _arguments.size(); ++i)
             CLEAN_ARG_AT(i);
