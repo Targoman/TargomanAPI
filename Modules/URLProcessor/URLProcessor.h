@@ -47,6 +47,15 @@ private slots:
     QString API(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
                 "helper method which converts URL encoded strings to normal strings")
 
+    QVariantMap API(UPDATE, test, (TAPI::JWT_t _JWT,
+                            NULLABLE(TAPI::enuGenericStatus::Type) _sex = {},
+                            NULLABLE(QString) _name = {},
+                            NULLABLE(QString) _family = {},
+                            NULLABLE(TAPI::ISO639_2_t) _lang = {},
+                            NULLABLE(TAPI::Email_t) _email = {},
+                            NULLABLE(TAPI::Mobile_t) _mobile = {},
+                            NULLABLE(TAPI::MD5_t) _pass = {},
+                            NULLABLE(QString) _salt = {}), "")
     TARGOMAN_DEFINE_API_MODULE(URLProcessor)
 };
 

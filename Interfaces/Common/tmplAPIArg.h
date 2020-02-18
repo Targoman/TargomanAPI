@@ -90,9 +90,16 @@ public:
     inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fromORMValueLambda;}
 
     static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}){
-        return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda(_value, _paramName);
+        if(tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda)
+            return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda(_value, _paramName);
+        return _value.value<_itmplType>();
     }
-    static QVariant toVariant(_itmplType _value){ return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariant(_value); }
+
+    static QVariant toVariant(_itmplType _value){
+        if(tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariantLambda)
+            return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariantLambda(_value);
+        return QVariant::fromValue(_value);
+    }
 
     static tmplAPIArg* instance(const char* _typeStr){
         static tmplAPIArg* Instance = nullptr; return Q_LIKELY(Instance) ? Instance : (Instance = new tmplAPIArg(_typeStr));
