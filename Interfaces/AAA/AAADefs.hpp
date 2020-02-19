@@ -49,7 +49,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_PAYMENT_REQUIRED, exPaymentReq
 #pragma clang diagnostic pop
 
 
-#pragma clang diagnostic push
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace TOKENItems {
 TARGOMAN_CREATE_CONSTEXPR(tokID);
@@ -66,7 +66,29 @@ TARGOMAN_CREATE_CONSTEXPR(privs);
 TARGOMAN_CREATE_CONSTEXPR(acc);
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 }
-#pragma clang diagnostic pop
+
+namespace tblUser{
+constexpr char Name[] = "tblUser";
+TARGOMAN_CREATE_CONSTEXPR(usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrGender);
+TARGOMAN_CREATE_CONSTEXPR(usrName);
+TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+TARGOMAN_CREATE_CONSTEXPR(usrEmail);
+TARGOMAN_CREATE_CONSTEXPR(usrMobile);
+TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
+TARGOMAN_CREATE_CONSTEXPR(usrPass);
+TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
+TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
+TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
+TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
+TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
+TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
+TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+}
+#pragma GCC diagnostic pop
 
 constexpr char AAASchema[] = "AAA";
 constexpr char AAADomain[] = "Account";

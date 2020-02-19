@@ -176,8 +176,10 @@ stuActiveServiceAccount intfAccounting::activeAccountObject(quint32 _usrID)
 }
 
 intfAccounting::intfAccounting(const QString& _name) :
-    Name(_name)
-{;}
+    ServiceName(_name)
+{
+    ServiceRegistry.insert(_name, this);
+}
 
 intfAccounting::~intfAccounting()
 {;}
@@ -302,12 +304,12 @@ stuActiveServiceAccount intfAccounting::findActiveAccount(quint32 _usrID, const 
 void intfAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
-    if(Privs.contains(this->Name) == false)
-        throw exHTTPForbidden("[81] You don't have access to: " + this->Name);
+    if(Privs.contains(this->ServiceName) == false)
+        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
     stuActiveServiceAccount ActiveServiceAccount = this->findActiveAccount(clsJWT(_jwt).usrID(), _requestedUsage);
     if(ActiveServiceAccount.TTL == 0)
-        throw exHTTPForbidden("[82] You don't have access to: " + this->Name);
+        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
     auto checkCredit = [](auto _usageIter, auto _remaining, auto _type) {
         if(_remaining.PerDay >= 0 && _remaining.PerDay - _usageIter.value() <= 0)

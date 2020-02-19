@@ -41,12 +41,8 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
       DefaultValue(_o.DefaultValue),
       ExtraValidator(_o.ExtraValidator),
       RenameAs(_o.RenameAs),
-      IsSortable(_o.IsSortable),
-      IsFilterable(_o.IsFilterable),
-      IsReadOnly(_o.IsReadOnly),
-      IsSelfIdentifier(_o.IsSelfIdentifier),
-      IsVirtual(_o.IsVirtual),
-      IsPrimaryKey(_o.IsPrimaryKey)
+      UpdatableBy(_o.UpdatableBy),
+      Privs(_o.Privs)
 {}
 
 

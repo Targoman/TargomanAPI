@@ -41,6 +41,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblActiveSessions {
 constexpr char Name[] = "tblActiveSessions";
 TARGOMAN_CREATE_CONSTEXPR(ssnKey);
@@ -55,6 +57,7 @@ TARGOMAN_CREATE_CONSTEXPR(ssnRemember);
 TARGOMAN_CREATE_CONSTEXPR(ssnUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(ssnStatus);
 }
+#pragma GCC diagnostic pop
 
 class ActiveSessions : public ORM::clsTable
 {

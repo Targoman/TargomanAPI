@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -22,6 +22,8 @@
 
 #include "Clicks.h"
 #include "Defs.hpp"
+#include "Bin.h"
+#include "Locations.h"
 
 namespace Targoman {
 namespace API {
@@ -30,28 +32,29 @@ using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advert:Clicks:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 Clicks::Clicks() :
     clsTable(AdvertSchema,
-              "tblClicks",
-              { ///<ColName             Type                    Validation                      RO   Sort  Filter Self  Virt   PK
-                {"clkID",               S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"clk_binID",           S(quint32),             QFV.integer().minValue(1),      true, true, true},
-                {"clk_locID",           S(quint32),             QFV.integer().minValue(1),      true, true, true},
-                {"clkDateTime",         S(QHttp::DateTime_t),   QFV,                            true},
-                {"clkIP",               S(quint32),             QFV.ipv4(),                     true},
-                {"clkDevice",           S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkScreenSize",       S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkOS",               S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
-                {"clkBrowser",          S(quint32),             QFV.asciiAlNum().maxLenght(50), true},
+              tblClicks::Name,
+              { ///<ColName                 Type                    Validation                      UpBy   Sort  Filter Self  Virt   PK
+                {tblClicks::clkID,          S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblClicks::clk_binID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
+                {tblClicks::clk_locID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
+                {tblClicks::clkDateTime,    S(QHttp::DateTime_t),   QFV,                            QInvalid, UPNone},
+                {tblClicks::clkIP,          S(quint32),             QFV.ipv4(),                     QInvalid, UPNone},
+                {tblClicks::clkDevice,      S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
+                {tblClicks::clkScreenSize,  S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
+                {tblClicks::clkOS,          S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
+                {tblClicks::clkBrowser,     S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
               },
-              { ///< Col             Reference Table                 ForeignCol   Rename     LeftJoin
-                {"clk_binID",        "Advert.tblBin",                "binID"},
-                //{"clk_locID",        "Advert.tblLocations",          "locID"},
+              { ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
+                {tblClicks::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::binID},
+                {tblClicks::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::locID },
               })
 {
 }

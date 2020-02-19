@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -22,6 +22,7 @@
 
 #include "Bin.h"
 #include "Defs.hpp"
+#include "Modules/Account/ORM/User.h"
 
 namespace Targoman {
 namespace API {
@@ -30,46 +31,45 @@ using namespace ORM;
 
 QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advert:Bin:CRUD~0100"});
-
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 Bin::Bin() :
     clsTable(AdvertSchema,
-              "tblBin",
-              { ///<ColName             Type            Validation                      RO   Sort  Filter Self  Virt   PK
-                {"binID",               S(quint32),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"binType",             S(Targoman::API::enuAdvertType::Type)},
-                {"binTitle",            S(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binDesc",             S(QString),             QFV.unicodeAlNum(true, ":،-_*()")},
-                {"binPrettyURL",        S(QString),             QFV.url()},
-                {"binURL",              S(QString),             QFV.url()},
-                {"binShown",            S(quint64),             QFV.integer(),                  true},
-                {"binClicks",           S(quint64),             QFV.integer(),                  true},
-                {"binCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),      true},
-                {"binCreationDateTime", S(QHttp::DateTime_t),   QFV,                            true},
-                {"binUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
-                {"binStatus",           S(Targoman::API::enuAuditableStatus::Type)},
+              tblBin::Name,
+              { ///<ColName                   Type                    Validation                                Default   UpBy   Sort  Filter Self  Virt   PK
+                {tblBin::binID,               S(quint32),             QFV.integer().minValue(1),                ORM_PRIMARY_KEY},
+                {tblBin::binType,             S(TAPI::enuAdvertType::Type), QFV,                                TAPI::enuAdvertType::Text, UPAll},
+                {tblBin::binTitle,            S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QInvalid, UPAll},
+                {tblBin::binDesc,             S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QNull,    UPAll},
+                {tblBin::binPrettyURL,        S(QString),             QFV.url(),                                QInvalid, UPAll},
+                {tblBin::binURL,              S(QString),             QFV.url(),                                QInvalid, UPAll},
+                {tblBin::binShown,            S(quint64),             QFV.integer(),                            0,        UPNone},
+                {tblBin::binClicks,           S(quint64),             QFV.integer(),                            0,        UPNone},
+                {tblBin::binCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),                QNull,    UPNone},
+                {tblBin::binCreationDateTime, S(QHttp::DateTime_t),   QFV,                                      QNull,    UPNone},
+                {tblBin::binUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),                QNull,    UPNone},
+                {tblBin::binStatus,           S(TAPI::enuAuditableStatus::Type),QFV,                            TAPI::enuAuditableStatus::Pending, UPAll},
               },
-              { ///< Col                Reference Table        ForeignCol   Rename      LeftJoin
-                {"adbCreatedBy_usrID",  "AAA.tblUser",         "usrID",     "Creator_", true},
-                {"adbUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
-                //{"adbUpdatedBy_usrID",  "Advert.tblBanners",   "bnr_binID", "",         true},
+              { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
+                {tblBin::binID,                 R(AdvertSchema,tblUser::Name),  tblBanners::bnrID, "Banner_",  true},
+                {tblBin::binCreatedBy_usrID,    R(AAASchema,tblUser::Name),     tblUser::usrID,    "Creator_", true},
+                {tblBin::binUpdatedBy_usrID,    R(AAASchema,tblUser::Name),     tblUser::usrID,    "Updater_", true},
               })
 {
 }
 
 Banners::Banners() :
     clsTable("Advert",
-              "tblBanners",
-              { ///<ColName             Type                Validation        RO   Sort  Filter Self  Virt   PK
-                {"bnrImage",            S(QHttp::Base64_t), QFV,             false,false,false},
-                {"bnrSize",             S(Targoman::API::enuBannerSizes::Type)},
-                {"bnrUpdatedBy_usrID",  S(quint32),         QFV.integer().minValue(1)},
+              tblBanners::Name,
+              { ///<ColName                       Type                    Validation             Default   UpBy   Sort  Filter Self  Virt   PK
+                {tblBanners::bnrImage,            S(QHttp::Base64_t),     QFV,                   QInvalid, UPAll,false,false},
+                {tblBanners::bnrSize,             S(TAPI::enuBannerSizes::Type), QFV,            QInvalid, UPAll },
+                {tblBanners::bnrUpdatedBy_usrID,  S(quint32),         QFV.integer().minValue(1), QNull,    UPNone},
               },
-              {
-                {"bnrUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
+              {///< Col                             Reference Table             ForeignCol      Rename      LeftJoin
+                {tblBanners::bnrUpdatedBy_usrID,    R(AAASchema,tblUser::Name), tblUser::usrID, "Updater_", true},
               }
               )
 {

@@ -42,15 +42,15 @@ QVariant PaymentOrders::apiGET(GET_METHOD_ARGS_IMPL)
 PaymentOrders::PaymentOrders() :
     clsTable(AAASchema,
               tblPaymentOrders::Name,
-              { ///<ColName                             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {tblPaymentOrders::pyoID,               S(quint64),             QFV.integer().minValue(1),          true},
+              { ///<ColName                             Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
+                {tblPaymentOrders::pyoID,               S(quint64),             QFV.integer().minValue(1),          UPNone},
                 {tblPaymentOrders::pyoMD5,              S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
-                {tblPaymentOrders::pyoCreationDateTime, S(TAPI::DateTime_t),    QFV,                                QNull,      true},
-                {tblPaymentOrders::pyo_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      true},
-                {tblPaymentOrders::pyoBankTrnID,        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   true},
-                {tblPaymentOrders::pyoAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   true},
-                {tblPaymentOrders::pyoStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending},
-                {tblPaymentOrders::pyoResult,           S(QString),             QFV,                                QNull,      true,false,false},
+                {tblPaymentOrders::pyoCreationDateTime, S(TAPI::DateTime_t),    QFV,                                QNull,      UPNone},
+                {tblPaymentOrders::pyo_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
+                {tblPaymentOrders::pyoBankTrnID,        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
+                {tblPaymentOrders::pyoAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
+                {tblPaymentOrders::pyoStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPNone},
+                {tblPaymentOrders::pyoResult,           S(QString),             QFV,                                QNull,      UPNone,false,false},
               },
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
                 {tblPaymentOrders::pyo_invID,   R(AAASchema,tblInvoice::Name),   tblInvoice::invID},

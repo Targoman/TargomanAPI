@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -40,6 +40,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblRoles {
 constexpr char Name[] = "tblRoles";
 TARGOMAN_CREATE_CONSTEXPR(rolID);
@@ -52,6 +54,7 @@ TARGOMAN_CREATE_CONSTEXPR(rolCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(rolStatus);
 }
+#pragma GCC diagnostic pop
 
 class Roles : public ORM::clsTable
 {

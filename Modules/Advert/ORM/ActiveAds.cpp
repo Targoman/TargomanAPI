@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -23,6 +23,8 @@
 #include "ActiveAds.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
+#include "Bin.h"
+#include "Locations.h"
 
 namespace Targoman {
 namespace API {
@@ -31,22 +33,29 @@ using namespace ORM;
 
 QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advert:ActiveAds:CRUD~0100"});
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
+bool ActiveAds::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+}
+
+
 ActiveAds::ActiveAds() :
     clsTable(AdvertSchema,
-              "tblActiveAds",
-              { ///<ColName      Type           Validation                      RO   Sort  Filter Self  Virt   PK
-                {"act_binID",    S(quint32),    QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"act_locID",    S(quint32),    QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"actOrder",     S(Targoman::API::enuAdvertOrder::Type)},
-                {"actOnKeyword", S(QString),    QFV.unicodeAlNum().maxLenght(50)},
+              tblActiveAds::Name,
+              { ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
+                {tblActiveAds::act_binID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblActiveAds::act_locID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblActiveAds::actOrder,     S(Targoman::API::enuAdvertOrder::Type),QFV,      QInvalid, UPNone},
+                {tblActiveAds::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
               },
-              { ///< Col             Reference Table            ForeignCol   Rename     LeftJoin
-                {"act_binID",        "Advert.tblBin",           "binID"},
-                //{"act_locID",        "Advert.tblLocations",     "locID"},
+              { ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin
+                {tblActiveAds::act_binID,    R(AdvertSchema,tblBin::Name),   tblBin::binID},
+                {tblActiveAds::act_locID,    R(AdvertSchema,tblLocations::Name), tblLocations::locID },
               })
 {
 }

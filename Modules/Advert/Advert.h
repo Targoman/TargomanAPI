@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -35,37 +35,58 @@ struct stuAdvert{
     QString Title;
     QString Description;
     QString PrettyURL;
+    stuAdvert(quint64 _id = 0, QString _title = {}, QString _description = {}, QString _prettyURL = {}):
+        ID(_id),
+        Title(_title),
+        Description(_description),
+        PrettyURL(_prettyURL)
+    {}
+
+    QVariant toVariant() const{
+      return QVariantMap({
+                           {"id", this->ID},
+                             {"title", this->Title},
+                             {"description", this->Description},
+                             {"prettyURL", this->PrettyURL}
+                         });
+    }
 };
 }
 
 namespace Targoman {
 namespace API {
 
-class Advert : public ORM::clsRESTAPIWithActionLogs
+class Advert : public ORM::clsRESTAPIWithActionLogs, public Accounting::intfAccounting
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
+    TARGOMAN_DEFINE_API_MODULE(Advert);
+
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
     virtual QJsonObject todayPrivs(quint32 _usrID) final;
 
-private slots:
-        TAPI::stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
-                      "Get new banner based on location and order info")
-        TAPI::stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
-                      "Get new text advertisement")
-        QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
-                      "Retrieve URL of the specified Advertisement")
-
 private:
-    TARGOMAN_DEFINE_API_MODULE(Advert)
+    Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID);
+    void breakPackage(quint64 _pkgID);
+    bool isUnlimited(const Accounting::PackageRemaining_t& _limits) const;
+    bool isEmpty(const Accounting::PackageRemaining_t& _limits) const;
+
+private slots:
+    TAPI::stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
+                         "Get new banner based on location and order info")
+    TAPI::stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
+                         "Get new text advertisement")
+    QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
+                   "Retrieve URL of the specified Advertisement")
+
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(TAPI::stuAdvert);
+TAPI_DECLARE_METATYPE(TAPI::stuAdvert);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H

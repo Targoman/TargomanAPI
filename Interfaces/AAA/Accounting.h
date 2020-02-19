@@ -149,7 +149,7 @@ private:
     stuActiveServiceAccount findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 private:
-    QString Name;
+    QString ServiceName;
 };
 //Break on first start time and first start date
 extern intfAccounting* serviceAccounting(const QString& _serviceName);

@@ -39,6 +39,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblPaymentOrders {
 constexpr char Name[] = "tblPaymentOrders";
 TARGOMAN_CREATE_CONSTEXPR(pyoID);
@@ -50,6 +52,7 @@ TARGOMAN_CREATE_CONSTEXPR(pyoAmount);
 TARGOMAN_CREATE_CONSTEXPR(pyoStatus);
 TARGOMAN_CREATE_CONSTEXPR(pyoResult);
 }
+#pragma GCC diagnostic pop
 
 class PaymentOrders : public ORM::clsTable
 {

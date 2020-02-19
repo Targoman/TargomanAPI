@@ -44,6 +44,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblInvoice {
 constexpr char Name[] = "tblInvoice";
 TARGOMAN_CREATE_CONSTEXPR(invID);
@@ -55,8 +57,8 @@ TARGOMAN_CREATE_CONSTEXPR(invDesc);
 TARGOMAN_CREATE_CONSTEXPR(invPaymentType);
 TARGOMAN_CREATE_CONSTEXPR(invTotalAmount);
 TARGOMAN_CREATE_CONSTEXPR(invStatus);
-
 }
+#pragma GCC diagnostic pop
 
 class Invoice : public ORM::clsTable
 {

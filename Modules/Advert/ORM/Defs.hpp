@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -24,6 +24,7 @@
 #define TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 
 #include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
 namespace TAPI {
 
@@ -74,10 +75,10 @@ TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
 constexpr char AdvertSchema[] = "Advert";
 constexpr char AdvertDomain[] = "Advert";
 
-Q_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
-Q_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
-Q_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);
-Q_DECLARE_METATYPE(TAPI::enuAccountOrdersStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuAccountOrdersStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 

@@ -38,6 +38,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblIPBin {
 constexpr char Name[] = "tblIPBin";
 TARGOMAN_CREATE_CONSTEXPR(ipbIP);
@@ -49,6 +51,7 @@ TARGOMAN_CREATE_CONSTEXPR(ipbBlockedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(ipbBlockingTime);
 TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
 }
+#pragma GCC diagnostic pop
 
 
 class IPBin : public ORM::clsTable

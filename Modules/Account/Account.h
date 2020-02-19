@@ -37,6 +37,7 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Account);
+    TARGOMAN_DEFINE_API_MODULE(Account);
 
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
@@ -104,9 +105,6 @@ private slots:
                                   const TAPI::Mobile_t _mobile,
                                   const quint16& _code),
               "Approves Mobile by provided mobile no and code")
-
-private:
-    TARGOMAN_DEFINE_API_MODULE(Account)
 };
 
 }

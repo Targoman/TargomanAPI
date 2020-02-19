@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -32,6 +32,17 @@
 #include "ORM/Props.h"
 #include "ORM/Accounting.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertOrder);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuBannerSizes);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAccountOrdersStatus);
+
+TAPI_REGISTER_METATYPE(
+            COMPLEXITY_Complex,
+            TAPI, stuAdvert,
+            [](const TAPI::stuAdvert& _value) -> QVariant{return _value.toVariant();}
+);
+
 namespace Targoman {
 namespace API {
 
@@ -60,16 +71,12 @@ QString Advert::apiGETRetrieveURL(const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _i
 }
 
 Advert::Advert() :
-    ORM::clsRESTAPIWithActionLogs(AdvertSchema, AdvertDomain){
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertType);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAdvertOrder);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuBannerSizes);
-    TAPI_REGISTER_TARGOMAN_ENUM(TAPI::enuAccountOrdersStatus);
-    TAPI_REGISTER_TARGOMAN_(TAPI::stuAdvert);
+    ORM::clsRESTAPIWithActionLogs(AdvertSchema, AdvertDomain),
+    Accounting::intfAccounting(this->moduleBaseName()){
 
-    this->addSubModule(new Advertisement::AccountOrders);
+    this->addSubModule(new Advertisement::AccountPackages);
     this->addSubModule(new Advertisement::AccountUsage);
-    this->addSubModule(new Advertisement::InvoiceTemplate);
+    this->addSubModule(new Advertisement::AccountUserPackages);
 
     this->addSubModule(new Advertisement::ActiveAds);
     this->addSubModule(new Advertisement::Bin);
@@ -107,6 +114,26 @@ QJsonObject Advert::todayPrivs(quint32 _usrID)
 
     return {{AdvertDomain, BestMatchedResult}};*/
     return {};
+}
+
+Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint32 _usrID)
+{
+
+}
+
+void Advert::breakPackage(quint64 _pkgID)
+{
+
+}
+
+bool Advert::isUnlimited(const Accounting::PackageRemaining_t& _limits) const
+{
+
+}
+
+bool Advert::isEmpty(const Accounting::PackageRemaining_t& _limits) const
+{
+
 }
 
 }

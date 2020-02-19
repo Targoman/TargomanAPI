@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -37,6 +37,7 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
+    TARGOMAN_DEFINE_API_MODULE(Ticketing);
 
 private:
     quint64 insertTicket(quint32 _targetUser,
@@ -61,7 +62,6 @@ private slots:
               "create a new/reply feedback with")
     stuDBInfo requiredDB() const {return stuDBInfo("Ticketing");}
 
-    TARGOMAN_DEFINE_API_MODULE(Ticketing)
 };
 
 }

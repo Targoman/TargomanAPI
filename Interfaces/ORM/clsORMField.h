@@ -24,6 +24,7 @@
 #define TARGOMAN_API_ORM_CLSORMFIELD_H
 
 #include "QFieldValidator.h"
+#include "libTargomanCommon/Macros.h"
 
 namespace Targoman {
 namespace API {
@@ -35,6 +36,12 @@ namespace ORM {
 #define S(_type) #_type
 #define R(_schema, _table) QString("%1.%2").arg(_schema, _table)
 
+TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
+    ADMIN,
+    ALL,
+    NONE
+);
+
 class clsORMFieldData : public QSharedData{
 public:
     clsORMFieldData();
@@ -42,12 +49,12 @@ public:
                     const QString& _type,
                     QVariant _defaultValue,
                     const QFieldValidator& _extraValidator,
-                    bool _isReadOnly,
+                    enuUpdatableBy::Type _updatableBy,
                     bool _isSortable,
                     bool _isFilterable,
                     bool _isSelfIdentifier,
-                    bool _isVirtual,
                     bool _isPrimaryKey,
+                    bool _isVirtual,
                     const QString& _renameAs):
         ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
         Name(_name),
@@ -55,15 +62,17 @@ public:
         DefaultValue(_defaultValue),
         ExtraValidator(_extraValidator),
         RenameAs(_renameAs),
-        IsSortable(_isSortable),
-        IsFilterable(_isFilterable),
-        IsReadOnly(_isReadOnly),
-        IsSelfIdentifier(_isSelfIdentifier),
-        IsVirtual(_isVirtual),
-        IsPrimaryKey(_isPrimaryKey)
+        UpdatableBy(_updatableBy),
+        Privs((_isSortable ? 1 : 0) + (_isFilterable ? 0x2  : 0) + (_isSelfIdentifier ? 0x4 : 0) + (_isPrimaryKey ? 0x8 : 0) + (_isVirtual ? 0x10 : 0))
     {}
     clsORMFieldData(const clsORMFieldData& _o);
     ~clsORMFieldData() { }
+
+    inline bool isSortable() {return this->Privs & 0x01;}
+    inline bool isFilterable() {return this->Privs & 0x02;}
+    inline bool isSelfIdentifier() {return this->Privs & 0x04;}
+    inline bool isPrimaryKey() {return this->Privs & 0x08;}
+    inline bool isVirtual() {return this->Privs & 0x10;}
 
 public:
     QMetaType::Type ParameterType;
@@ -72,12 +81,9 @@ public:
     QVariant        DefaultValue;
     QFieldValidator ExtraValidator;
     QString         RenameAs;
-    bool            IsSortable;
-    bool            IsFilterable;
-    bool            IsReadOnly;
-    bool            IsSelfIdentifier;
-    bool            IsVirtual;
-    bool            IsPrimaryKey;
+    enuUpdatableBy::Type  UpdatableBy;
+private:
+    quint32         Privs;
 };
 
 class clsORMField{
@@ -96,24 +102,24 @@ public:
                 const QString& _type,
                 const QFieldValidator& _extraValidator = QFV.allwaysValid(),
                 QVariant _defaultValue = {},
-                bool _isReadOnly = false,
+                enuUpdatableBy::Type _updatableBy = enuUpdatableBy::ALL,
                 bool _isSortable = true,
                 bool _isFilterable = true,
                 bool _isSelfIdentifier = false,
-                bool _isVirtual = false,
                 bool _isPrimaryKey = false,
+                bool _isVirtual = false,
                 const QString& _renameAs = {}) :
         Data(new clsORMFieldData(
                  _name,
                  _type,
                  _defaultValue,
                  _extraValidator,
-                 _isReadOnly,
+                 _updatableBy,
                  _isSortable,
                  _isFilterable,
                  _isSelfIdentifier,
-                 _isVirtual,
                  _isPrimaryKey,
+                 _isVirtual,
                  _renameAs
                  ))
     {;}
@@ -125,12 +131,13 @@ public:
     inline int             parameterType() const {return this->Data->ParameterType;}
     inline QString         paramTypeName() const {return this->Data->ParamTypeName;}
     inline QFieldValidator extraValidator() const {return this->Data->ExtraValidator;}
-    inline bool            isSortable() const {return this->Data->IsSortable;}
-    inline bool            isFilterable() const {return this->Data->IsFilterable;}
-    inline bool            isReadOnly() const {return this->Data->IsReadOnly;}
-    inline bool            isSelfIdentifier() const {return this->Data->IsSelfIdentifier;}
-    inline bool            isVirtual() const {return this->Data->IsVirtual;}
-    inline bool            isPrimaryKey() const {return this->Data->IsPrimaryKey;}
+    inline bool            isSortable() const {return this->Data->isSortable();}
+    inline bool            isFilterable() const {return this->Data->isFilterable();}
+    inline enuUpdatableBy::Type  updatableBy() const {return this->Data->UpdatableBy;}
+    inline bool            isSelfIdentifier() const {return this->Data->isSelfIdentifier();}
+    inline bool            isPrimaryKey() const {return this->Data->isPrimaryKey();}
+    inline bool            isVirtual() const {return this->Data->isVirtual();}
+    inline bool            isReadOnly(bool _forAll = true) const {return this->Data->UpdatableBy == (_forAll ? enuUpdatableBy::NONE : enuUpdatableBy::ADMIN);}
     inline QString         renameAs() const {return this->Data->RenameAs;}
     inline QVariant        defaultValue() const {return this->Data->DefaultValue;}
     QString                toString(const QVariant& _value);
@@ -145,10 +152,13 @@ private:
 static const QVariant       QNull    = QVariant();
 static const QVariant       QInvalid = QVariant(QVariant::Invalid);
 
-///                         Default     RO   Sort  Filter Self  Virt   PK
-#define ORM_PRIMARY_KEY     QInvalid,   true, true, true, false, false, true
-#define ORM_SELF_REAL       QInvalid,   true, true, true, true, false
-#define ORM_SELF_VIRTUAL    QInvalid,   true, true, true, true, true
+constexpr enuUpdatableBy::Type UPNone   = enuUpdatableBy::NONE;
+constexpr enuUpdatableBy::Type UPAll    = enuUpdatableBy::ALL;
+constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;
+///                         Default     UPBy  Sort  Filter Self  Virt   PK
+#define ORM_PRIMARY_KEY     QInvalid,   UPNone, true, true, false, false, true
+#define ORM_SELF_REAL       QInvalid,   UPAll, true, true, true, false
+#define ORM_SELF_VIRTUAL    QInvalid,   UPAll, true, true, true, true
 
 }
 }

@@ -46,7 +46,7 @@ TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      JustEmail  = 'E'
                      )
 
-TARGOMAN_DEFINE_ENUM(enuUserSex,
+TARGOMAN_DEFINE_ENUM(enuUserGender,
                      Male         = 'M',
                      Female       = 'F',
                      NotExpressed = 'N'
@@ -68,7 +68,7 @@ TARGOMAN_DEFINE_ENUM (enuInvoiceTemplateStatus,
 
 TAPI_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuUserSex::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuUserGender::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuInvoiceTemplateStatus::Type);
 

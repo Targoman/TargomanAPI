@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -22,6 +22,8 @@
 
 #include "Props.h"
 #include "Defs.hpp"
+#include "Locations.h"
+#include "Bin.h"
 
 namespace Targoman {
 namespace API {
@@ -30,30 +32,55 @@ using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{"Advert:Props:CRUD~0100"});
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
+bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+}
+
+bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()))){
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+    }
+    return this->update(UPDATE_METHOD_CALL_ARGS);
+}
+
+quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+
+    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+}
+
 Props::Props() :
     clsTable(AdvertSchema,
-              "tblProps",
-              { ///<ColName             Type                    Validation                      RO   Sort  Filter Self  Virt   PK
-                {"prp_binID",           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {"prp_locID",           S(quint32),             QFV.integer().minValue(1)},
-                {"prpOrder",            S(Targoman::API::enuAdvertOrder::Type)},
-                {"prpKeyword",          S(QString),             QFV.unicodeAlNum().maxLenght(50)},
-                {"prpStartDate",        S(QHttp::DateTime_t),   QFV},
-                {"prpEndDate",          S(QHttp::DateTime_t),   QFV},
-                {"prpCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),        true},
-                {"prpCreationDateTime", S(QHttp::DateTime_t),   QFV,                              true},
-                {"prpUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1)},
+              tblProps::Name,
+              { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
+                {tblProps::prp_binID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblProps::prp_locID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblProps::prpOrder,            S(Targoman::API::enuAdvertOrder::Type), QFV,              QInvalid,  UPAll},
+                {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QInvalid,  UPAll},
+                {tblProps::prpStartDate,        S(QHttp::DateTime_t),   QFV,                              QInvalid,  UPAll},
+                {tblProps::prpEndDate,          S(QHttp::DateTime_t),   QFV,                              QInvalid,  UPAll},
+                {tblProps::prpCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QInvalid,  UPNone},
+                {tblProps::prpCreationDateTime, S(QHttp::DateTime_t),   QFV,                              QNull,     UPNone},
+                {tblProps::prpUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QNull,     UPNone},
               },
-              { ///< Col                Reference Table        ForeignCol   Rename     LeftJoin
-                {"prp_binID",           "Advert.tblBin",       "binID"},
-                //{"prp_locID",           "Advert.tblLocations", "locID"},
-                {"prpCreatedBy_usrID",  "AAA.tblUser",         "usrID",     "Creator_", true},
-                {"prpUpdatedBy_usrID",  "AAA.tblUser",         "usrID",     "Updater_", true},
+              { ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
+                {tblProps::prp_binID,           R(AdvertSchema,tblBin::Name),       tblBin::binID },
+                {tblProps::prp_locID,           R(AdvertSchema,tblLocations::Name), tblLocations::locID },
+                {tblProps::prpCreatedBy_usrID,  R(AAASchema,tblUser::Name),         tblUser::usrID,   "Creator_", true},
+                {tblProps::prpUpdatedBy_usrID,  R(AAASchema,tblUser::Name),         tblUser::usrID,   "Updater_", true}
               })
 {
 }

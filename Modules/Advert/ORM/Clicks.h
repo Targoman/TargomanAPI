@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -29,6 +29,22 @@
 namespace Targoman {
 namespace API {
 namespace Advertisement {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblClicks {
+constexpr char Name[] = "tblClicks";
+TARGOMAN_CREATE_CONSTEXPR(clkID);
+TARGOMAN_CREATE_CONSTEXPR(clk_binID);
+TARGOMAN_CREATE_CONSTEXPR(clk_locID);
+TARGOMAN_CREATE_CONSTEXPR(clkDateTime);
+TARGOMAN_CREATE_CONSTEXPR(clkIP);
+TARGOMAN_CREATE_CONSTEXPR(clkDevice);
+TARGOMAN_CREATE_CONSTEXPR(clkScreenSize);
+TARGOMAN_CREATE_CONSTEXPR(clkOS);
+TARGOMAN_CREATE_CONSTEXPR(clkBrowser);
+}
+#pragma GCC diagnostic pop
 
 class Clicks : public ORM::clsTable
 {

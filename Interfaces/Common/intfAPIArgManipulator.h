@@ -80,6 +80,7 @@ public:
 };
 
 extern void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator);
+#pragma clang diagnostic pop
 
 #define TAPI_ADD_SIMPLE_TYPE(_type, _name) \
     class _name:public _type{public:_name(){;}_name(const _type& _other):_type(_other){;}}\
@@ -215,6 +216,5 @@ namespace Targoman {namespace API { \
 #define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
 }
 }
-#pragma clang diagnostic pop
 
 #endif // TAPI_INTFAPIARGMANIPULATOR_H

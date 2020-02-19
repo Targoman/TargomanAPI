@@ -47,13 +47,13 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 ForgotPassRequest::ForgotPassRequest() :
     clsTable(AAASchema,
               tblForgotPassRequest::Name,
-              { ///<ColName                             Type                 Validation                         Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                             Type                 Validation                         Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
-                {tblForgotPassRequest::fpr_usrID,       S(quint32),          QFV.integer().minValue(1),         QInvalid,  true},
-                {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
-                {tblForgotPassRequest::fprRequestDate,  S(TAPI::DateTime_t), QFV,                               QNull,     true},
-                {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     true},
-                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New},
+                {tblForgotPassRequest::fpr_usrID,       S(quint32),          QFV.integer().minValue(1),         QInvalid,  UPNone},
+                {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  UPNone},
+                {tblForgotPassRequest::fprRequestDate,  S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},
+                {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},
+                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New, UPAdmin},
               },
               { ///< Col                            Reference Table                 ForeignCol
                 {tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID},

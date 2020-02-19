@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -37,6 +37,8 @@ class URLProcessor : public intfAPIModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_DEFINE_API_MODULE(URLProcessor);
+
 public:
     virtual QJsonObject todayPrivs(quint32 _usrID) final { Q_UNUSED(_usrID) return {};}
 
@@ -56,7 +58,6 @@ private slots:
                             NULLABLE(TAPI::Mobile_t) _mobile = {},
                             NULLABLE(TAPI::MD5_t) _pass = {},
                             NULLABLE(QString) _salt = {}), "")
-    TARGOMAN_DEFINE_API_MODULE(URLProcessor)
 };
 
 }

@@ -1,7 +1,7 @@
 ################################################################################
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -26,7 +26,8 @@ HEADERS += \
     ORM/Bin.h \
     ORM/Clicks.h \
     ORM/Props.h \
-    ORM/Accounting.h
+    ORM/Accounting.h \
+    ORM/Locations.h
 
 SOURCES += \
     Advert.cpp \
@@ -34,7 +35,8 @@ SOURCES += \
     ORM/Bin.cpp \
     ORM/Clicks.cpp \
     ORM/Props.cpp \
-    ORM/Accounting.cpp
+    ORM/Accounting.cpp \
+    ORM/Locations.cpp
 
 OTHER_FILES += \
 

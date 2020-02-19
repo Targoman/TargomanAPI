@@ -62,14 +62,14 @@ quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 APITokenValidIPs::APITokenValidIPs() :
     clsTable(AAASchema,
               tblAPITokenValidIPs::Name,
-              { ///<ColName             Type                 Validation                      Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName             Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblAPITokenValidIPs::tviID,               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QInvalid,  true},
-                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid},
-                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,  true,false, false},
-                {tblAPITokenValidIPs::tviCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QInvalid,  true},
-                {tblAPITokenValidIPs::tviCreationDateTime, S(TAPI::DateTime_t), QFV,                            QNull,     true},
-                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QNull,     true},
+                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPNone},
+                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPAll},
+                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,  UPNone,false, false},
+                {tblAPITokenValidIPs::tviCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QInvalid,  UPNone},
+                {tblAPITokenValidIPs::tviCreationDateTime, S(TAPI::DateTime_t), QFV,                            QNull,     UPNone},
+                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QNull,     UPNone},
                 {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
               { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin

@@ -39,6 +39,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblAPITokens {
 constexpr char Name[] = "tblAPITokens";
 TARGOMAN_CREATE_CONSTEXPR(aptID);
@@ -55,8 +57,8 @@ TARGOMAN_CREATE_CONSTEXPR(aptCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(aptCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(aptUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(aptStatus);
-
 }
+#pragma GCC diagnostic pop
 
 class APITokens : public ORM::clsTable
 {

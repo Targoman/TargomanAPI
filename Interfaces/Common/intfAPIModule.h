@@ -149,7 +149,6 @@ Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
-    _name(); \
     QString moduleFullName(){return Targoman::Common::demangle(typeid(_name).name());}\
     QString moduleBaseName(){return QStringLiteral(TARGOMAN_M2STR(_name));}  \
     QString parentModuleName() const final{return QString(); } \
@@ -169,6 +168,7 @@ public: \
     } \
 private: \
     Q_DISABLE_COPY(_name) \
+public: _name()
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \

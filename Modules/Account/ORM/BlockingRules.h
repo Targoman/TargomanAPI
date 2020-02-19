@@ -30,6 +30,8 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblBlockingRules {
 constexpr char Name[] = "tblBlockingRules";
 TARGOMAN_CREATE_CONSTEXPR(blrID);
@@ -42,8 +44,8 @@ TARGOMAN_CREATE_CONSTEXPR(blrCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(blrCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(blrUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(blrStatus);
-
 }
+#pragma GCC diagnostic pop
 
 class BlockingRules : public ORM::clsTable
 {

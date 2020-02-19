@@ -43,13 +43,13 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 WalletTransactions::WalletTransactions() :
     clsTable(AAASchema,
               tblWalletsTransactions::Name,
-              { ///<ColName                             Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                             Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblWalletsTransactions::wltID,         S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
-                {tblWalletsTransactions::wlt_invID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   true, true, true},
-                {tblWalletsTransactions::wltDateTime,   S(TAPI::DateTime_t),        QFV,                                QNull,      true},
-                {tblWalletsTransactions::wltAmount,     S(qint64),                  QFV,                                QInvalid,   true,false,false},
-                {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New},
+                {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   UPNone, true, true},
+                {tblWalletsTransactions::wlt_invID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   UPNone, true, true},
+                {tblWalletsTransactions::wltDateTime,   S(TAPI::DateTime_t),        QFV,                                QNull,      UPNone},
+                {tblWalletsTransactions::wltAmount,     S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
+                {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New, UPNone},
               },
               { ///< Col                            Reference Table                         ForeignCol     Rename   LeftJoin
                 {tblWalletsTransactions::wlt_walID, R(AAASchema,tblUserWallets::Name),      tblUserWallets::walID},
@@ -62,9 +62,9 @@ WalletTransactions::WalletTransactions() :
 WalletBalances::WalletBalances() :
     clsTable(AAASchema,
               tblWalletBalances::Name,
-              { ///<ColName                         Type         Validation                       Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                         Type         Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
 //              {tblWalletBalances::wbl_wltID,      S(quint64),  QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {tblWalletBalances::wblBalance,     S(qint64),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
+                {tblWalletBalances::wblBalance,     S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
               },
               {
               }

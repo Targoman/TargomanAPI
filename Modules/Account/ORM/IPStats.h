@@ -30,12 +30,15 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblIPStats {
 constexpr char Name[] = "tblIPStats";
 TARGOMAN_CREATE_CONSTEXPR(ips_ipbIP);
 TARGOMAN_CREATE_CONSTEXPR(ipsTimeStamp);
 TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
 }
+#pragma GCC diagnostic pop
 
 class IPStats : public ORM::clsTable
 {

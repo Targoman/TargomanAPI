@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -48,24 +48,24 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 Tickets::Tickets() :
     clsTable(TicketingSchema,
               tblTickets::Name,
-              { ///<ColName                       Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                       Type                    Validation                   Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblTickets::tktID,               S(quint64),             QFV.integer().minValue(1),   ORM_PRIMARY_KEY},
-                {tblTickets::tktCreationDateTime, S(TAPI::DateTime_t),    QFV,                         QNull,     true},
-                {tblTickets::tktTarget_usrID,     S(quint32),             QFV.integer().minValue(1),   QNull},
-                {tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1),   QNull},
-                {tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1),   QNull},
-                {tblTickets::tktType,             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message},
-                {tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                         QInvalid, false,false,false},
-                {tblTickets::tktBodyMarkdown,     S(TAPI::MD5_t),         QFV.allwaysInvalid(),        QInvalid, false,false,false},
-                {tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                         false,    false},
-                {tblTickets::tktCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
-                {tblTickets::tktUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull},
-                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New},
+                {tblTickets::tktCreationDateTime, S(TAPI::DateTime_t),    QFV,                         QNull,     UPNone},
+                {tblTickets::tktTarget_usrID,     S(quint32),             QFV.integer().minValue(1),   QNull,     UPNone},
+                {tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1),   QNull,     UPNone},
+                {tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1),   QNull,     UPNone},
+                {tblTickets::tktType,             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message, UPNone},
+                {tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                         QInvalid,  UPNone,false,false},
+                {tblTickets::tktBodyMarkdown,     S(TAPI::MD5_t),         QFV.allwaysInvalid(),        QInvalid,  UPNone,false,false},
+                {tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                         false,     UPNone},
+                {tblTickets::tktCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull,     UPNone},
+                {tblTickets::tktUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull,     UPNone},
+                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New,   UPNone},
               },
               { ///< Col                            Reference Table                           ForeignCol                 Rename     LeftJoin
                 {tblTickets::tktInReply_tktID,      R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true},
                 {tblTickets::tktTarget_usrID,       R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true},
-                {tblTickets::tktID,                 R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_",  true},
+                {tblTickets::tktID,                 R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_", true},
                 {tblTickets::tktCreatedBy_usrID,    R(AAASchema,tblUser::Name),               tblUser::usrID,             "Creator_"},
                 {tblTickets::tktUpdatedBy_usrID,    R(AAASchema,tblUser::Name),               tblUser::usrID,             "Updater_",  true},
               })
@@ -76,10 +76,10 @@ Tickets::Tickets() :
 TicketRead::TicketRead() :
     clsTable(TicketingSchema,
               tblTicketRead::Name,
-              { ///<ColName                     Type                   Validation                       Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                     Type                   Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
 //              {tblTicketRead::tkr_tktID",     S(quint64),            QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {tblTicketRead::tkrBy_usrID,    S(quint32),            QFV.integer().minValue(1),       QInvalid, true,false,false},
-                {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
+                {tblTicketRead::tkrBy_usrID,    S(quint32),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
+                {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
               },
               {
               }

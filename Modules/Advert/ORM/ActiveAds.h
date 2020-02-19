@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -30,11 +30,23 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblActiveAds {
+constexpr char Name[] = "tblActiveAds";
+TARGOMAN_CREATE_CONSTEXPR(act_binID);
+TARGOMAN_CREATE_CONSTEXPR(act_locID);
+TARGOMAN_CREATE_CONSTEXPR(actOrder);
+TARGOMAN_CREATE_CONSTEXPR(actOnKeyword);
+}
+#pragma GCC diagnostic pop
+
 class ActiveAds : public ORM::clsTable
 {
     Q_OBJECT
 private slots:
-    QVariant ORMGET("Get ActiveAds information")
+    QVariant ORMGET("Get Active Adveritsements")
+    bool ORMDELETE("Delete an Active Advertisement")
 
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,ActiveAds)

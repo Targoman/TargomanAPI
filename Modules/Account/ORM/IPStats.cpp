@@ -38,10 +38,10 @@ QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL)
 IPStats::IPStats() :
     clsTable(AAASchema,
               tblIPStats::Name,
-              { ///<ColName                       Type                 Validation                     Default    RO   Sort  Filter Self  Virt   PK
+              { ///<ColName                       Type                 Validation                     Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblIPStats::ips_ipbIP,           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
-                {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QInvalid, true},
-                {tblIPStats::ipsInsertionDate,    S(TAPI::DateTime_t), QFV.allwaysValid(),            QNull,    true},
+                {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QInvalid, UPNone},
+                {tblIPStats::ipsInsertionDate,    S(TAPI::DateTime_t), QFV.allwaysValid(),            QNull,    UPNone},
               },
               { ///< Col                  Reference Table                  ForeignCol
                 {tblIPStats::ips_ipbIP,   R(AAASchema,tblIPBin::Name),     tblIPBin::ipbIP },
