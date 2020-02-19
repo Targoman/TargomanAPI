@@ -172,9 +172,6 @@ private slots:
             QFAIL (e.what());
         }
     }
-/**/
-    //@TODO on update return updated info and update JWT
-    //@TODO If no old mobile it must be set on mobile update
 };
 
 

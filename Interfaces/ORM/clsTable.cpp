@@ -163,7 +163,7 @@ void clsTable::prepareFiltersList()
     foreach(auto Relation, this->ForeignKeys){
         clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
         if(ForeignTable == nullptr)
-            throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
+            throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: "+this->Name+")");
 
         foreach(auto Col, ForeignTable->BaseCols){
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
@@ -250,7 +250,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    + SelectItems.From.join(QUERY_SEPARATOR)
                                    + QUERY_SEPARATOR
                                    + "WHERE "
-                                   + SelectItems.Where.join(QUERY_SEPARATOR)
+                                   + (SelectItems.Where.isEmpty() ? "TRUE" : SelectItems.Where.join(QUERY_SEPARATOR))
                                    + QUERY_SEPARATOR
                                    + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
                                    + SelectItems.GroupBy.join(',')
@@ -292,7 +292,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                              + SelectItems.From.join(QUERY_SEPARATOR)
                                              + QUERY_SEPARATOR
                                              + "WHERE "
-                                             + Filters.join(" AND ")
+                                             + (Filters.isEmpty() ? "TRUE" : Filters.join(" AND "))
                                              + QUERY_SEPARATOR
                                              + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
                                              ).toJson(true, this->Converters);

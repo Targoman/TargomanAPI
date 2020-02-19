@@ -37,10 +37,10 @@ namespace ORM {
 #define R(_schema, _table) QString("%1.%2").arg(_schema, _table)
 
 TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
-    ADMIN,
-    ALL,
-    NONE
-);
+                     ADMIN,
+                     ALL,
+                     NONE
+                     );
 
 class clsORMFieldData : public QSharedData{
 public:
@@ -53,8 +53,8 @@ public:
                     bool _isSortable,
                     bool _isFilterable,
                     bool _isSelfIdentifier,
-                    bool _isPrimaryKey,
                     bool _isVirtual,
+                    bool _isPrimaryKey,
                     const QString& _renameAs):
         ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
         Name(_name),
@@ -63,7 +63,11 @@ public:
         ExtraValidator(_extraValidator),
         RenameAs(_renameAs),
         UpdatableBy(_updatableBy),
-        Privs((_isSortable ? 1 : 0) + (_isFilterable ? 0x2  : 0) + (_isSelfIdentifier ? 0x4 : 0) + (_isPrimaryKey ? 0x8 : 0) + (_isVirtual ? 0x10 : 0))
+        Privs((_isSortable ? 0x01 : 0) +
+              (_isFilterable ? 0x02 : 0) +
+              (_isSelfIdentifier ? 0x4 : 0) +
+              (_isPrimaryKey ? 0x8 : 0) +
+              (_isVirtual ? 0x10 : 0))
     {}
     clsORMFieldData(const clsORMFieldData& _o);
     ~clsORMFieldData() { }
@@ -99,16 +103,16 @@ public:
         }
     }
     inline clsORMField(const QString& _name,
-                const QString& _type,
-                const QFieldValidator& _extraValidator = QFV.allwaysValid(),
-                QVariant _defaultValue = {},
-                enuUpdatableBy::Type _updatableBy = enuUpdatableBy::ALL,
-                bool _isSortable = true,
-                bool _isFilterable = true,
-                bool _isSelfIdentifier = false,
-                bool _isPrimaryKey = false,
-                bool _isVirtual = false,
-                const QString& _renameAs = {}) :
+                       const QString& _type,
+                       const QFieldValidator& _extraValidator = QFV.allwaysValid(),
+                       QVariant _defaultValue = {},
+                       enuUpdatableBy::Type _updatableBy = enuUpdatableBy::ALL,
+                       bool _isSortable = true,
+                       bool _isFilterable = true,
+                       bool _isSelfIdentifier = false,
+                       bool _isVirtual = false,
+                       bool _isPrimaryKey = false,
+                       const QString& _renameAs = {}) :
         Data(new clsORMFieldData(
                  _name,
                  _type,
@@ -118,8 +122,8 @@ public:
                  _isSortable,
                  _isFilterable,
                  _isSelfIdentifier,
-                 _isPrimaryKey,
                  _isVirtual,
+                 _isPrimaryKey,
                  _renameAs
                  ))
     {;}

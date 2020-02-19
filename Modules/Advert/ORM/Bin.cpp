@@ -48,12 +48,12 @@ Bin::Bin() :
                 {tblBin::binShown,            S(quint64),             QFV.integer(),                            0,        UPNone},
                 {tblBin::binClicks,           S(quint64),             QFV.integer(),                            0,        UPNone},
                 {tblBin::binCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),                QNull,    UPNone},
-                {tblBin::binCreationDateTime, S(QHttp::DateTime_t),   QFV,                                      QNull,    UPNone},
+                {tblBin::binCreationDateTime, S(TAPI::DateTime_t),    QFV,                                      QNull,    UPNone},
                 {tblBin::binUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),                QNull,    UPNone},
                 {tblBin::binStatus,           S(TAPI::enuAuditableStatus::Type),QFV,                            TAPI::enuAuditableStatus::Pending, UPAll},
               },
               { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
-                {tblBin::binID,                 R(AdvertSchema,tblUser::Name),  tblBanners::bnrID, "Banner_",  true},
+                {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},
                 {tblBin::binCreatedBy_usrID,    R(AAASchema,tblUser::Name),     tblUser::usrID,    "Creator_", true},
                 {tblBin::binUpdatedBy_usrID,    R(AAASchema,tblUser::Name),     tblUser::usrID,    "Updater_", true},
               })
@@ -63,10 +63,10 @@ Bin::Bin() :
 Banners::Banners() :
     clsTable("Advert",
               tblBanners::Name,
-              { ///<ColName                       Type                    Validation             Default   UpBy   Sort  Filter Self  Virt   PK
-                {tblBanners::bnrImage,            S(QHttp::Base64_t),     QFV,                   QInvalid, UPAll,false,false},
-                {tblBanners::bnrSize,             S(TAPI::enuBannerSizes::Type), QFV,            QInvalid, UPAll },
-                {tblBanners::bnrUpdatedBy_usrID,  S(quint32),         QFV.integer().minValue(1), QNull,    UPNone},
+              { ///<ColName                       Type                          Validation                 Default   UpBy   Sort  Filter Self  Virt   PK
+                {tblBanners::bnrImage,            S(TAPI::Base64Image_t),       QFV,                       QInvalid, UPAll,false,false},
+                {tblBanners::bnrSize,             S(TAPI::enuBannerSizes::Type),QFV,                       QInvalid, UPAll },
+                {tblBanners::bnrUpdatedBy_usrID,  S(quint32),                   QFV.integer().minValue(1), QNull,    UPNone},
               },
               {///< Col                             Reference Table             ForeignCol      Rename      LeftJoin
                 {tblBanners::bnrUpdatedBy_usrID,    R(AAASchema,tblUser::Name), tblUser::usrID, "Updater_", true},

@@ -50,7 +50,7 @@ ActiveAds::ActiveAds() :
               { ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
                 {tblActiveAds::act_binID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
                 {tblActiveAds::act_locID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {tblActiveAds::actOrder,     S(Targoman::API::enuAdvertOrder::Type),QFV,      QInvalid, UPNone},
+                {tblActiveAds::actOrder,     S(TAPI::enuAdvertOrder::Type),QFV,               TAPI::enuAdvertOrder::Normal, UPNone},
                 {tblActiveAds::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
               },
               { ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin

@@ -31,6 +31,7 @@
 #include "ORM/Clicks.h"
 #include "ORM/Props.h"
 #include "ORM/Accounting.h"
+#include "ORM/Locations.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertOrder);
@@ -80,6 +81,7 @@ Advert::Advert() :
 
     this->addSubModule(new Advertisement::ActiveAds);
     this->addSubModule(new Advertisement::Bin);
+    this->addSubModule(new Advertisement::Locations);
     this->addSubModule(new Advertisement::Banners);
     this->addSubModule(new Advertisement::Clicks);
     this->addSubModule(new Advertisement::Props);

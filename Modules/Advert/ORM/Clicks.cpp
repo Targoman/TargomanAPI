@@ -45,7 +45,7 @@ Clicks::Clicks() :
                 {tblClicks::clkID,          S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
                 {tblClicks::clk_binID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
                 {tblClicks::clk_locID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
-                {tblClicks::clkDateTime,    S(QHttp::DateTime_t),   QFV,                            QInvalid, UPNone},
+                {tblClicks::clkDateTime,    S(TAPI::DateTime_t),    QFV,                            QInvalid, UPNone},
                 {tblClicks::clkIP,          S(quint32),             QFV.ipv4(),                     QInvalid, UPNone},
                 {tblClicks::clkDevice,      S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
                 {tblClicks::clkScreenSize,  S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},

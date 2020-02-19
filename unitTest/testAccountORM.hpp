@@ -50,7 +50,7 @@ private slots:
         QVERIFY(callAPI(GET,
                         QString("Account/ActiveSessions/"),
                         {
-                            {"filters",QString("ssn_usrID=%1 + ssnKey='%2'").arg(gUserID).arg(clsJWT(gJWT).session())},
+                            {"filters",QString("ssn_usrID=%1 + ssnKey=%2").arg(gUserID).arg(clsJWT(gJWT).session())},
                             {"cols", "ssnKey"}
                         }
                         ).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());

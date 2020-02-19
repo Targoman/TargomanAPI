@@ -33,6 +33,7 @@
 #include "RESTServer.h"
 #include "RESTAPIRegistry.h"
 #include "ServerConfigs.h"
+#include "OpenAPIGenerator.h"
 
 namespace Targoman {
 namespace API {
@@ -117,6 +118,8 @@ void appTargomanAPI::slotExecute()
         }
 
         RESTServer::instance().start();
+
+        OpenAPIGenerator::retrieveJson();
 
         TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("",true,true).join("\n"));
 

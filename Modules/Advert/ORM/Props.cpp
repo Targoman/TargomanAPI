@@ -68,12 +68,12 @@ Props::Props() :
               { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
                 {tblProps::prp_binID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
                 {tblProps::prp_locID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {tblProps::prpOrder,            S(Targoman::API::enuAdvertOrder::Type), QFV,              QInvalid,  UPAll},
+                {tblProps::prpOrder,            S(TAPI::enuAdvertOrder::Type), QFV,                       TAPI::enuAdvertOrder::Normal,  UPAll},
                 {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QInvalid,  UPAll},
-                {tblProps::prpStartDate,        S(QHttp::DateTime_t),   QFV,                              QInvalid,  UPAll},
-                {tblProps::prpEndDate,          S(QHttp::DateTime_t),   QFV,                              QInvalid,  UPAll},
+                {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPAll},
+                {tblProps::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPAll},
                 {tblProps::prpCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QInvalid,  UPNone},
-                {tblProps::prpCreationDateTime, S(QHttp::DateTime_t),   QFV,                              QNull,     UPNone},
+                {tblProps::prpCreationDateTime, S(TAPI::DateTime_t),    QFV,                              QNull,     UPNone},
                 {tblProps::prpUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QNull,     UPNone},
               },
               { ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
