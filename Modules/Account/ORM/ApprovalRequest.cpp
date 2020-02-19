@@ -21,6 +21,7 @@
  */
 
 #include "ApprovalRequest.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPRStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuApprovalType);
@@ -45,19 +46,19 @@ bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 
 ApprovalRequest::ApprovalRequest() :
     clsTable(AAASchema,
-              "tblApprovalRequest",
-              { ///<ColName             Type                    Validation                       Default    RO   Sort  Filter Self  Virt   PK
-                {"aprID",               S(quint64),             QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"apr_usrID",           S(quint32),             QFV.integer().minValue(1),       QInvalid,  true},
-                {"aprRequestedFor",     S(TAPI::enuApprovalType::Type),    QFV,         "",        true},
-                {"aprApprovalCode",     S(QString),             QFV.asciiAlNum().maxLenght(32),  "",        true},
-                {"aprApprovalValue",    S(QString),             QFV.allwaysInvalid(),            "",        true,false,false},
-                {"aprRequestDate",      S(TAPI::DateTime_t),    QFV,                             QNull,     true},
-                {"aprApplyDate",        S(TAPI::DateTime_t),    QFV,                             QNull,     true},
-                {"aprStatus",           S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New},
+              tblApprovalRequest::Name,
+              { ///<ColName                             Type                    Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                {tblApprovalRequest::aprID,             S(quint64),             QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblApprovalRequest::apr_usrID,         S(quint32),             QFV.integer().minValue(1),       QInvalid,  true},
+                {tblApprovalRequest::aprRequestedFor,   S(TAPI::enuApprovalType::Type),    QFV,                  TAPI::enuApprovalType::Email, true},
+                {tblApprovalRequest::aprApprovalCode,   S(QString),             QFV.asciiAlNum().maxLenght(32),  {},        true},
+                {tblApprovalRequest::aprApprovalValue,  S(QString),             QFV.allwaysInvalid(),            {},        true,false,false},
+                {tblApprovalRequest::aprRequestDate,    S(TAPI::DateTime_t),    QFV,                             QNull,     true},
+                {tblApprovalRequest::aprApplyDate,      S(TAPI::DateTime_t),    QFV,                             QNull,     true},
+                {tblApprovalRequest::aprStatus,         S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New},
               },
-              { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
-                {"apr_usrID",          "AAA.tblUser",      "usrID"},
+              { ///< Col                                 Reference Table                  ForeignCol        Rename     LeftJoin
+                {tblApprovalRequest::apr_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID},
               })
 {
 }

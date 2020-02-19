@@ -21,6 +21,7 @@
  */
 
 #include "PaymentOrders.h"
+#include "Invoice.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
 
@@ -33,26 +34,26 @@ using namespace ORM;
 QVariant PaymentOrders::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblInvoice::inv_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 PaymentOrders::PaymentOrders() :
     clsTable(AAASchema,
-              "tblPaymentOrders",
-              { ///<ColName             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {"pyoID",               S(quint64),             QFV.integer().minValue(1),          true},
-                {"pyoMD5",              S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
-                {"pyoCreationDateTime", S(TAPI::DateTime_t),    QFV,                                QNull,      true},
-                {"pyo_invID",           S(quint64),             QFV.integer().minValue(1),          QNull,      true},
-                {"pyoBankTrnID",        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   true},
-                {"pyoAmount",           S(TAPI::DateTime_t),    QFV,                                QInvalid,   true},
-                {"pyoStatus",           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending},
-                {"pyoResult",           S(QString),             QFV,                                QNull,      true,false,false},
+              tblPaymentOrders::Name,
+              { ///<ColName                             Type                    Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {tblPaymentOrders::pyoID,               S(quint64),             QFV.integer().minValue(1),          true},
+                {tblPaymentOrders::pyoMD5,              S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
+                {tblPaymentOrders::pyoCreationDateTime, S(TAPI::DateTime_t),    QFV,                                QNull,      true},
+                {tblPaymentOrders::pyo_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      true},
+                {tblPaymentOrders::pyoBankTrnID,        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   true},
+                {tblPaymentOrders::pyoAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   true},
+                {tblPaymentOrders::pyoStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending},
+                {tblPaymentOrders::pyoResult,           S(QString),             QFV,                                QNull,      true,false,false},
               },
-              { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
-                {"bpo_invID",  "AAA.tblInvoice",           "invID",     "",        true},
+              { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
+                {tblPaymentOrders::pyo_invID,   R(AAASchema,tblInvoice::Name),   tblInvoice::invID},
               })
 {
 }

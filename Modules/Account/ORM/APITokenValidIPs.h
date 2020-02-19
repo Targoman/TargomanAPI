@@ -30,6 +30,18 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblAPITokenValidIPs {
+constexpr char Name[] = "tblAPITokenValidIPs";
+TARGOMAN_CREATE_CONSTEXPR(tviID);
+TARGOMAN_CREATE_CONSTEXPR(tvi_aptID);
+TARGOMAN_CREATE_CONSTEXPR(tviIP);
+TARGOMAN_CREATE_CONSTEXPR(tviIPReadable);
+TARGOMAN_CREATE_CONSTEXPR(tviCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tviCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(tviUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tviStatus);
+}
+
 class APITokenValidIPs : public ORM::clsTable
 {
     Q_OBJECT

@@ -21,6 +21,8 @@
  */
 
 #include "APITokenValidIPs.h"
+#include "User.h"
+#include "APITokens.h"
 
 namespace Targoman {
 namespace API {
@@ -31,7 +33,7 @@ using namespace ORM;
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -39,7 +41,7 @@ QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, true);
 }
@@ -47,7 +49,7 @@ bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
@@ -59,21 +61,21 @@ quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 
 APITokenValidIPs::APITokenValidIPs() :
     clsTable(AAASchema,
-              "tblAPITokenValidIPs",
+              tblAPITokenValidIPs::Name,
               { ///<ColName             Type                 Validation                      Default    RO   Sort  Filter Self  Virt   PK
-                {"tviID",               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"tvi_aptID",           S(quint64),          QFV.integer().minValue(1),      QInvalid,  true},
-                {"tviIP",               S(quint64),          QFV.integer().minValue(1),      QInvalid},
-                {"tviIPReadable",       S(QString),          QFV.allwaysInvalid(),           QInvalid,  true,false, false},
-                {"tviCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QInvalid,  true},
-                {"tviCreationDateTime", S(TAPI::DateTime_t), QFV,                            QNull,     true},
-                {"tviUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),      QNull,     true},
-                {"tviStatus",           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
+                {tblAPITokenValidIPs::tviID,               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QInvalid,  true},
+                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid},
+                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,  true,false, false},
+                {tblAPITokenValidIPs::tviCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QInvalid,  true},
+                {tblAPITokenValidIPs::tviCreationDateTime, S(TAPI::DateTime_t), QFV,                            QNull,     true},
+                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QNull,     true},
+                {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
-              { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
-                {"tvi_aptID",          "AAA.tblAPITokens",  "aptID"},
-                {"tviCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"tviUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin
+                {tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID},
+                {tblAPITokenValidIPs::tviCreatedBy_usrID, R(AAASchema,tblUser::Name),       tblUser::usrID,         "Creator_", true},
+                {tblAPITokenValidIPs::tviUpdatedBy_usrID, R(AAASchema,tblUser::Name),       tblUser::usrID,         "Updater_", true}
               })
 {
 }

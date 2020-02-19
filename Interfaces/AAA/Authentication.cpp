@@ -28,11 +28,11 @@ namespace API {
 namespace AAA {
 namespace Authentication{
 
-QJsonObject login(const QString&     _ip,
+stuActiveAccount login(const QString&     _ip,
                   const QString&     _login,
                   const QString&     _pass,
                   const QString&     _salt,
-                  const QStringList& _services,
+                  const QStringList& _requiredServices,
                   bool               _rememberMe,
                   const QJsonObject& _info,
                   const QString&     _fingerPrint)
@@ -49,10 +49,10 @@ QJsonObject login(const QString&     _ip,
                                            {"iRemember", _rememberMe ? "1" : "0"},
                                            {"iOAuthInfo", QVariant()}
                                        }).toJson(true).object();
-    return PrivHelpers::processUserObject(UserInfo, {}, _services);
+    return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices);
 }
 
-QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs)
+stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices)
 {
     makeAAADAC(DAC);
     QJsonObject UserInfo =  DAC.callSP({},
@@ -60,7 +60,7 @@ QJsonObject updatePrivs(const QString& _ip, const QString& _ssid, const QString&
                                            {"iIP", _ip},
                                            {"iSSID", _ssid},
                                        }).toJson(true).object();
-    return PrivHelpers::processUserObject(UserInfo, {}, _requiredTLPs.split(',', QString::SkipEmptyParts));
+    return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices.split(',', QString::SkipEmptyParts));
 }
 
 QString retrievePhoto(const QString _url){

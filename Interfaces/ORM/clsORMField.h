@@ -33,6 +33,7 @@ class intfAPIArgManipulator;
 namespace ORM {
 
 #define S(_type) #_type
+#define R(_schema, _table) QString("%1.%2").arg(_schema, _table)
 
 class clsORMFieldData : public QSharedData{
 public:

@@ -32,16 +32,28 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+struct stuActiveAccount{
+    qint64 TTL;
+    QJsonObject Privs;
+
+    stuActiveAccount(qint64 _ttl, const QJsonObject& _privs) :
+        TTL(_ttl),
+        Privs(_privs)
+    {}
+};
+
 class PrivHelpers{
 public:
-    static QJsonObject digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services);
     static bool hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf = false);
     static QJsonObject confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess);
     static void validateToken(const QString& _token);
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector);
-    static QJsonObject processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess = {}, const QStringList& _services = {});
+    static stuActiveAccount processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess = {}, const QStringList& _services = {});
 
     static QByteArray getURL(const QString& _url);
+
+private:
+    static stuActiveAccount digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services);
 };
 
 }

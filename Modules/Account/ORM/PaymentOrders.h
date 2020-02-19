@@ -39,6 +39,18 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblPaymentOrders {
+constexpr char Name[] = "tblPaymentOrders";
+TARGOMAN_CREATE_CONSTEXPR(pyoID);
+TARGOMAN_CREATE_CONSTEXPR(pyoMD5);
+TARGOMAN_CREATE_CONSTEXPR(pyoCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(pyo_invID);
+TARGOMAN_CREATE_CONSTEXPR(pyoBankTrnID);
+TARGOMAN_CREATE_CONSTEXPR(pyoAmount);
+TARGOMAN_CREATE_CONSTEXPR(pyoStatus);
+TARGOMAN_CREATE_CONSTEXPR(pyoResult);
+}
+
 class PaymentOrders : public ORM::clsTable
 {
     Q_OBJECT

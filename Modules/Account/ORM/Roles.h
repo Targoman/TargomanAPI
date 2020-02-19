@@ -40,6 +40,19 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblRoles {
+constexpr char Name[] = "tblRoles";
+TARGOMAN_CREATE_CONSTEXPR(rolID);
+TARGOMAN_CREATE_CONSTEXPR(rolName);
+TARGOMAN_CREATE_CONSTEXPR(rolParent_rolID);
+TARGOMAN_CREATE_CONSTEXPR(rolPrivileges);
+TARGOMAN_CREATE_CONSTEXPR(rolSignupAllowedIPs);
+TARGOMAN_CREATE_CONSTEXPR(rolCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(rolCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(rolStatus);
+}
+
 class Roles : public ORM::clsTable
 {
     Q_OBJECT

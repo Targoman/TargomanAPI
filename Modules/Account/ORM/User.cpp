@@ -21,6 +21,7 @@
  */
 
 #include "User.h"
+#include "Roles.h"
 
 namespace Targoman {
 namespace API {
@@ -81,52 +82,52 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                      });
 
     QVariantMap ToUpdate;
-    if(!_name.isNull()) ToUpdate.insert("usrName", *_name);
-    if(!_family.isNull()) ToUpdate.insert("usrFamily", *_family);
-    if(!_lang.isNull()) ToUpdate.insert("usrLanguage", *_lang);
-    if(!_sex.isNull()) ToUpdate.insert("usrSex", *_sex);
+    if(!_name.isNull()) ToUpdate.insert(tblUser::usrName, *_name);
+    if(!_family.isNull()) ToUpdate.insert(tblUser::usrFamily, *_family);
+    if(!_lang.isNull()) ToUpdate.insert(tblUser::usrLanguage, *_lang);
+    if(!_sex.isNull()) ToUpdate.insert(tblUser::usrSex, *_sex);
 
     if(ToUpdate.size())
-        return this->update({{"usrID", clsJWT(_JWT).usrID()}}, ToUpdate );
+        return this->update({{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );
     return true;
 }
 
 quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    if(_ORMFILTERS.value("usrEmail").toString().isEmpty() && _ORMFILTERS.value("usrMobile").toString().isEmpty())
+    if(_ORMFILTERS.value(tblUser::usrEmail).toString().isEmpty() && _ORMFILTERS.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
 User::User() : clsTable(AAASchema,
-                         "tblUser",
-                         { ///<ColName             Type                      Validation                       Default    RO   Sort  Filter Self  Virt   PK
-                           {"usrID",               S(quint32),          QFV.integer().minValue(1),            QInvalid, true, true, true, true, false, true},
-                           {"usrSex",              S(TAPI::enuUserSex::Type), QFV,                            TAPI::enuUserSex::NotExpressed},
-                           {"usrName",             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
-                           {"usrFamily",           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
-                           {"usrEmail",            S(TAPI::Email_t),    QFV.emailNotFake(),                   QNull},
-                           {"usrMobile",           S(TAPI::Mobile_t),   QFV,                                  QNull},
-                           {"usrApprovalState",    S(TAPI::enuUserApproval::Type),QFV,                        TAPI::enuUserApproval::None},
-                         //{"usrPass"},
-                           {"usr_rolID",           S(quint32),          QFV.integer().minValue(1),            QInvalid},
-                           {"usrSpecialPrivs",     S(TAPI::JSON_t),     QFV,                                  QNull,   false,false,false},
-                           {"usrLanguage",         S(QString),          QFV.languageCode(),                   "fa"},
-                           {"usrMaxSessions",      S(quint32),          QFV.integer().betweenValues(-1, 100), -1},
-                           {"usrActiveSessions",   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, true},
-                           {"usrLastLogin",        S(TAPI::DateTime_t), QFV,                                  QInvalid, true},
-                           {"usrCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QInvalid, true},
-                           {"usrCreationDateTime", S(TAPI::DateTime_t), QFV,                                  QNull,    true},
-                           {"usrUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),            QNull},
-                           {"usrStatus",           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate},
+                         tblUser::Name,
+                         { ///<ColName                    Type                      Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                           {tblUser::usrID,               S(quint32),          QFV.integer().minValue(1),            QInvalid, true, true, true, true, false, true},
+                           {tblUser::usrSex,              S(TAPI::enuUserSex::Type), QFV,                            TAPI::enuUserSex::NotExpressed},
+                           {tblUser::usrName,             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
+                           {tblUser::usrFamily,           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull},
+                           {tblUser::usrEmail,            S(TAPI::Email_t),    QFV.emailNotFake(),                   QNull},
+                           {tblUser::usrMobile,           S(TAPI::Mobile_t),   QFV,                                  QNull},
+                           {tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type),QFV,                        TAPI::enuUserApproval::None},
+                         //{tblUser::usrPass,
+                           {tblUser::usr_rolID,           S(quint32),          QFV.integer().minValue(1),            QInvalid},
+                           {tblUser::usrSpecialPrivs,     S(TAPI::JSON_t),     QFV,                                  QNull,   false,false,false},
+                           {tblUser::usrLanguage,         S(QString),          QFV.languageCode(),                   "fa"},
+                           {tblUser::usrMaxSessions,      S(quint32),          QFV.integer().betweenValues(-1, 100), -1},
+                           {tblUser::usrActiveSessions,   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, true},
+                           {tblUser::usrLastLogin,        S(TAPI::DateTime_t), QFV,                                  QInvalid, true},
+                           {tblUser::usrCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),            QInvalid, true},
+                           {tblUser::usrCreationDateTime, S(TAPI::DateTime_t), QFV,                                  QNull,    true},
+                           {tblUser::usrUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),            QNull},
+                           {tblUser::usrStatus,           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
-                           {"usr_rolID",          "AAA.tblRoles",          "rolID"},
-                           {"usrID",              "AAA.tblUserExtraInfo",  "uei_usrID",  "",          true},
-                           {"usrCreatedBy_usrID", "AAA.tblUser",           "usrID",      "Creator_",  true},
-                           {"usrUpdatedBy_usrID", "AAA.tblUser",           "usrID",      "Updater_",  true},
+                           {tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},
+                           {tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  "uei_usrID",  "",          true},
+                           {tblUser::usrCreatedBy_usrID, R(AAASchema, tblUser::Name),           "usrID",      "Creator_",  true},
+                           {tblUser::usrUpdatedBy_usrID, R(AAASchema, tblUser::Name),           "usrID",      "Updater_",  true},
                          })
 {;}
 
@@ -134,9 +135,9 @@ bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
-                              + "SET ueiPhoto = ?, ueiUpdatedBy_usrID = ?"
+                              + "SET " + tblUserExtraInfo::ueiPhoto +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
                               + QUERY_SEPARATOR
-                              + "WHERE uei_usrID = ?",
+                              + "WHERE " + tblUserExtraInfo::uei_usrID + " = ?",
                               { _image, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
         );
 
@@ -147,7 +148,7 @@ bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
-                              + "SET ueiSheba = ?, ueiUpdatedBy_usrID = ?"
+                              + "SET " + tblUserExtraInfo::ueiSheba +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
                               + QUERY_SEPARATOR
                               + "WHERE uei_usrID = ?",
                               { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
@@ -159,16 +160,16 @@ bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
 
 UserExtraInfo::UserExtraInfo() :
     clsTable ("AAA",
-               "tblUserExtraInfo",
-               {  ///<ColName             Type                      Validation                      Default    RO   Sort  Filter Self  Virt   PK
-//                   {"uei_usrID",          S(quint32),               QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                   {"ueiExtraInfo",       S(QString),               QFV,                            QNull,  false,false,false},
-                   {"ueiPhoto",           S(TAPI::Base64Image_t),   QFV,                            QNull,  false,false,false},
-                   {"ueiUpdatedBy_usrID", S(quint32),               QFV.integer().minValue(1),      QNull},
-                   {"ueiOAuthAccounts",   S(TAPI::JSON_t),          QFV,                            QNull}
+               tblUserExtraInfo::Name,
+               {  ///<ColName                             Type                      Validation                      Default    RO   Sort  Filter Self  Virt   PK
+//                 {tblUserExtraInfo::uei_usrID,          S(quint32),               QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                   {tblUserExtraInfo::ueiExtraInfo,       S(QString),               QFV,                            QNull,  false,false,false},
+                   {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),   QFV,                            QNull,  false,false,false},
+                   {tblUserExtraInfo::ueiUpdatedBy_usrID, S(quint32),               QFV.integer().minValue(1),      QNull},
+                   {tblUserExtraInfo::ueiOAuthAccounts,   S(TAPI::JSON_t),          QFV,                            QNull}
                },
-               { ///< Col                 Reference Table       ForeignCol     Rename     LeftJoin
-                   {"ueiUpdatedBy_usrID", "AAA.tblUser",        "usrID",      "InfoUpdater_", true}
+               { ///< Col                                 Reference Table                        ForeignCol           Rename          LeftJoin
+                   {tblUserExtraInfo::ueiUpdatedBy_usrID, R(AAASchema, tblUserExtraInfo::Name),  tblUser::usrID,      "InfoUpdater_", true}
                })
 {
 }

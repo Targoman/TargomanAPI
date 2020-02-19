@@ -178,6 +178,8 @@ public:
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
+protected:
+    inline QString domain();
 
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
@@ -187,8 +189,8 @@ private:
                                     const QString _groupBy = {}) const;
     QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
-    inline QString domain();
     virtual QJsonObject todayPrivs(quint32 _usrID) {Q_UNUSED(_usrID) return {}; }
+
 
 protected:
     QString Schema;

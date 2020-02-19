@@ -39,6 +39,25 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblAPITokens {
+constexpr char Name[] = "tblAPITokens";
+TARGOMAN_CREATE_CONSTEXPR(aptID);
+TARGOMAN_CREATE_CONSTEXPR(aptToken);
+TARGOMAN_CREATE_CONSTEXPR(apt_usrID);
+TARGOMAN_CREATE_CONSTEXPR(apt_svcID);
+TARGOMAN_CREATE_CONSTEXPR(aptLang);
+TARGOMAN_CREATE_CONSTEXPR(aptValidateIP);
+TARGOMAN_CREATE_CONSTEXPR(aptExtraPriviledges);
+TARGOMAN_CREATE_CONSTEXPR(aptExpiryDate);
+TARGOMAN_CREATE_CONSTEXPR(aptLastActivity);
+TARGOMAN_CREATE_CONSTEXPR(aptAccessCount);
+TARGOMAN_CREATE_CONSTEXPR(aptCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(aptCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(aptUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(aptStatus);
+
+}
+
 class APITokens : public ORM::clsTable
 {
     Q_OBJECT

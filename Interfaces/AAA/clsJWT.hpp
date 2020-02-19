@@ -58,7 +58,7 @@ public:
     inline quint64 rolID() const {return static_cast<quint64>(this->Token.value(JWTItems::rolID).toDouble());}
     inline QVariantMap privs() const {return this->Token.value(JWTItems::privs).toObject().toVariantMap();}
     inline QJsonObject privsObject() const {return this->Token.value(JWTItems::privs).toObject();}
-    inline quint64 usrID() const {return static_cast<quint64>(this->Token.value(JWTItems::usrID).toDouble());}
+    inline quint32 usrID() const {return static_cast<quint32>(this->Token.value(JWTItems::usrID).toDouble());}
     inline TAPI::enuUserApproval::Type usrApproval() const {return TAPI::enuUserApproval::toEnum(this->Token.value(JWTItems::usrApproval).toString().toLatin1().constData());}
     inline TAPI::enuUserStatus::Type usrStatus() const {return TAPI::enuUserStatus::toEnum(this->Token.value(JWTItems::usrStatus).toString().toLatin1().constData());}
     inline QString session() const {return this->Token.value(JWTItems::jti).toString();}
@@ -80,6 +80,7 @@ public:
      */
     static TAPI::EncodedJWT_t createSigned(QJsonObject _payload,
                                            QJsonObject _privatePayload = QJsonObject(),
+                                           const qint64 _expiry = -1,
                                            const QString& _sessionID = QString());
 private:
     const QJsonObject& Token;

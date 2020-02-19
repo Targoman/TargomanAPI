@@ -24,7 +24,8 @@
 #ifndef TARGOMAN_API_AAA_AUTHENTICATION_H
 #define TARGOMAN_API_AAA_AUTHENTICATION_H
 
-#include "AAADefs.hpp"
+#include "Interfaces/AAA/AAADefs.hpp"
+#include "Interfaces/AAA/PrivHelpers.h"
 
 namespace TAPI {
 TARGOMAN_DEFINE_ENUM (enuOAuthType,
@@ -49,16 +50,16 @@ struct stuOAuthInfo{
     QString ID;
 };
 
-extern QJsonObject login(const QString& _ip,
+extern Targoman::API::AAA::stuActiveAccount login(const QString& _ip,
                          const QString& _login,
                          const QString& _pass,
                          const QString& _salt,
-                         const QStringList& _services,
+                         const QStringList& _requiredServices,
                          bool _rememberMe,
                          const QJsonObject& _info,
                          const QString& _fingerPrint);
 
-extern QJsonObject  updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredTLPs);
+extern Targoman::API::AAA::stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices);
 extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken);

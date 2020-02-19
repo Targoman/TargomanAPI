@@ -30,6 +30,21 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblBlockingRules {
+constexpr char Name[] = "tblBlockingRules";
+TARGOMAN_CREATE_CONSTEXPR(blrID);
+TARGOMAN_CREATE_CONSTEXPR(blr_ipbIP);
+TARGOMAN_CREATE_CONSTEXPR(blr_ipIPReadable);
+TARGOMAN_CREATE_CONSTEXPR(blrStartingTime);
+TARGOMAN_CREATE_CONSTEXPR(blrEndingTime);
+TARGOMAN_CREATE_CONSTEXPR(blrCause);
+TARGOMAN_CREATE_CONSTEXPR(blrCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(blrCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(blrUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(blrStatus);
+
+}
+
 class BlockingRules : public ORM::clsTable
 {
     Q_OBJECT

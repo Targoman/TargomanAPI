@@ -21,6 +21,8 @@
  */
 
 #include "Services.h"
+#include "User.h"
+#include "Roles.h"
 
 namespace Targoman {
 namespace API {
@@ -55,20 +57,20 @@ quint64 Services::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 
 Services::Services() :
     clsTable(AAASchema,
-              "tblServices",
-              { ///<ColName             Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
-                {"svcID",               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"svcName",             S(QString),          QFV,                             QInvalid, false},
-                {"svc_rolID",           S(quint32),          QFV,                             QInvalid},
-                {"svcCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QInvalid, true},
-                {"svcCreationDateTime", S(TAPI::DateTime_t), QFV,                             QNull,    true},
-                {"svcUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),       QNull,    true},
-                {"svcStatus",           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active},
+              tblServices::Name,
+              { ///<ColName                        Type                 Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                {tblServices::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblServices::svcName,             S(QString),          QFV,                             QInvalid, false},
+                {tblServices::svc_rolID,           S(quint32),          QFV,                             QInvalid},
+                {tblServices::svcCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),       QInvalid, true},
+                {tblServices::svcCreationDateTime, S(TAPI::DateTime_t), QFV,                             QNull,    true},
+                {tblServices::svcUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),       QNull,    true},
+                {tblServices::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active},
               },
-              { ///< Col                Reference Table     ForeignCol   Rename     LeftJoin
-                {"svc_rolID",           "AAA.tblRoles",     "rolID"},
-                {"svcCreatedBy_usrID",  "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"svcUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
+                {tblServices::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
+                {tblServices::svcCreatedBy_usrID,  R(AAASchema,tblUser::Name),      tblUser::usrID,     "Creator_", true},
+                {tblServices::svcUpdatedBy_usrID,  R(AAASchema,tblUser::Name),      tblUser::usrID,     "Updater_", true}
               })
 {
 }

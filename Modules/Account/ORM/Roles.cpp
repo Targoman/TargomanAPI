@@ -21,6 +21,7 @@
  */
 
 #include "Roles.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuRoleStatus);
 
@@ -56,22 +57,22 @@ quint32 Roles::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 
 Roles::Roles() :
     clsTable(AAASchema,
-              "tblRoles",
-              { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {"rolID",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"rolName",             S(QString),          QFV.unicodeAlNum().maxLenght(50),   QInvalid},
-                {"rolParent_rolID",     S(quint32),          QFV.integer().minValue(1),          QNull},
-                {"rolPrivileges",       S(TAPI::JSON_t),     QFV,                                QInvalid, false,false,false},
-                {"rolSignupAllowedIPs", S(QString),          QFV,                                QNull,    false,false,false}, //OJO This must be validated after splitting by comma
-                {"rolCreatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QInvalid, true},
-                {"rolCreationDateTime", S(TAPI::DateTime_t), QFV,                                QNull,    true},
-                {"rolUpdatedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull},
-                {"rolStatus",           S(TAPI::enuRoleStatus::Type), QFV,                       TAPI::enuRoleStatus::Active},
+              tblRoles::Name,
+              { ///<ColName                     Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {tblRoles::rolID,               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblRoles::rolName,             S(QString),          QFV.unicodeAlNum().maxLenght(50),   QInvalid},
+                {tblRoles::rolParent_rolID,     S(quint32),          QFV.integer().minValue(1),          QNull},
+                {tblRoles::rolPrivileges,       S(TAPI::JSON_t),     QFV,                                QInvalid, false,false,false},
+                {tblRoles::rolSignupAllowedIPs, S(QString),          QFV,                                QNull,    false,false,false}, //OJO This must be validated after splitting by comma
+                {tblRoles::rolCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),          QInvalid, true},
+                {tblRoles::rolCreationDateTime, S(TAPI::DateTime_t), QFV,                                QNull,    true},
+                {tblRoles::rolUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),          QNull},
+                {tblRoles::rolStatus,           S(TAPI::enuRoleStatus::Type), QFV,                       TAPI::enuRoleStatus::Active},
               },
-              { ///< Col               Reference Table     ForeignCol   Rename     LeftJoin
-                {"rolParent_rolID",    "AAA.tblRoles",     "rolID",     "Parent_",  true},
-                {"rolCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"rolUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                       Reference Table                ForeignCol        Rename      LeftJoin
+                {tblRoles::rolParent_rolID,    R(AAASchema,tblRoles::Name),   tblRoles::rolID,  "Parent_",  true},
+                {tblRoles::rolCreatedBy_usrID, R(AAASchema,tblUser::Name),    tblUser::usrID,   "Creator_", true},
+                {tblRoles::rolUpdatedBy_usrID, R(AAASchema,tblUser::Name),    tblUser::usrID,   "Updater_", true}
               })
 {
 }

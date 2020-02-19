@@ -21,6 +21,7 @@
  */
 
 #include "UserWallets.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserWalletStatus);
 
@@ -34,7 +35,7 @@ using namespace DBManager;
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -42,8 +43,8 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert("walDefault", 0);
-        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        _ORMFILTERS.insert(tblUserWallets::walDefault, 0);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
@@ -57,8 +58,8 @@ bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert("walDefault", 0);
-        this->setSelfFilters({{"wal_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        _ORMFILTERS.insert(tblUserWallets::walDefault, 0);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
 
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
@@ -69,10 +70,10 @@ bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
-                              + "SET walDefault = 1, ueiUpdatedBy_usrID = :usrID"
+                              + "SET " + tblUserWallets::walDefault + "= 1, " + tblUserWallets::walUpdatedBy_usrID + " = ?"
                               + QUERY_SEPARATOR
                               + "WHERE "
-                              + (IsPrivileged ? "TRUE" : "wal_usrID = ")
+                              + (IsPrivileged ? "TRUE" : (tblUserWallets::wal_usrID + QStringLiteral(" = ? ")))
                               + " AND walID = ?",
                               (IsPrivileged ?
                                    QVariantList({ clsJWT(_JWT).usrID(), _walID }) :
@@ -102,7 +103,7 @@ bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
                                                          }).spDirectOutputs().value("oUserID").toDouble());
 }
 
-bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, quint64 _walID){
+bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, TAPI::URL_t _callBack, quint64 _walID){
     return static_cast<quint32>(this->callSP("AAA.sp_CREATE_transfer", {
                                                              /*{"iBy", Type},
                                                              {"iLogin", _emailOrMobile},
@@ -118,25 +119,25 @@ bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, quint64 _w
 
 UserWallets::UserWallets() :
     clsTable(AAASchema,
-              "tblUserWallets",
+              tblUserWallets::Name,
               { ///<ColName             Type                        Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {"walID",               S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"wal_usrID",           S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
-                {"walName",             S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  QInvalid},
-                {"walDefault",          S(bool),                    QFV,                                false},
-                {"walMinBalance",       S(qint64),                  QFV,                                0,         false,false,false},
-                {"walLastBalance",      S(qint64),                  QFV,                                0,          true,false,false},
-                {"walSumIncome",        S(qint64),                  QFV,                                0,          true,false,false},
-                {"walSumExpenses",      S(qint64),                  QFV,                                0,          true,false,false},
-                {"walCreatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
-                {"walCreationDateTime", S(TAPI::DateTime_t),        QFV,                                QNull,      true},
-                {"walUpdatedBy_usrID",  S(quint32),                 QFV.integer().minValue(1),          QNull,      true},
-                {"walStatus",           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active},
+                {tblUserWallets::walID,               S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblUserWallets::wal_usrID,           S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
+                {tblUserWallets::walName,             S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  QInvalid},
+                {tblUserWallets::walDefault,          S(bool),                    QFV,                                false},
+                {tblUserWallets::walMinBalance,       S(qint64),                  QFV,                                0,         false,false,false},
+                {tblUserWallets::walLastBalance,      S(qint64),                  QFV,                                0,          true,false,false},
+                {tblUserWallets::walSumIncome,        S(qint64),                  QFV,                                0,          true,false,false},
+                {tblUserWallets::walSumExpenses,      S(qint64),                  QFV,                                0,          true,false,false},
+                {tblUserWallets::walCreatedBy_usrID,  S(quint32),                 QFV.integer().minValue(1),          QInvalid,   true},
+                {tblUserWallets::walCreationDateTime, S(TAPI::DateTime_t),        QFV,                                QNull,      true},
+                {tblUserWallets::walUpdatedBy_usrID,  S(quint32),                 QFV.integer().minValue(1),          QNull,      true},
+                {tblUserWallets::walStatus,           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active},
               },
-              { ///< Col                Reference Table     ForeignCol    Rename   LeftJoin
-                {"wal_usrID",           "AAA.tblUser",      "usrID"},
-                {"walCreatedBy_usrID",  "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"walUpdatedBy_usrID",  "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                              Reference Table               ForeignCol          Rename   LeftJoin
+                {tblUserWallets::wal_usrID,           R(AAASchema,tblUser::Name),   tblUser::usrID},
+                {tblUserWallets::walCreatedBy_usrID,  R(AAASchema,tblUser::Name),   tblUser::usrID,     "Creator_", true},
+                {tblUserWallets::walUpdatedBy_usrID,  R(AAASchema,tblUser::Name),   tblUser::usrID,     "Updater_", true}
               })
 {
 }

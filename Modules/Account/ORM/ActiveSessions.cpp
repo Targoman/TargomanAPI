@@ -21,6 +21,7 @@
  */
 
 #include "ActiveSessions.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSessionStatus);
 
@@ -33,7 +34,7 @@ using namespace ORM;
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -44,30 +45,30 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
         throw exHTTPForbidden("Deleting current session is not allowed");
 
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"ssn_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, true);
 }
 
 ActiveSessions::ActiveSessions() :
     clsTable(AAASchema,
-              "tblActiveSessions",
-              { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
-                {"ssnKey",              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
-                {"ssn_usrID",           S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
-                {"ssnIP",               S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
-                {"ssnIPReadable",       S(QString),            QFV.allwaysInvalid(),        QInvalid,  true,false,false},
-                {"ssnCreationDateTime", S(TAPI::DateTime_t),   QFV,                         QNull,     true},
-                {"ssnInfo",             S(TAPI::JSON_t),       QFV,                         QNull,     true,false,false},
-                {"ssnFingerPrint",      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,     true,false,false},
-                {"ssnLastActivity",     S(TAPI::DateTime_t),   QFV,                         QNull,     true},
-                {"ssnRemember",         S(bool),               QFV,                         false,     true},
-                {"ssnUpdatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),   QNull,     true},
-                {"ssnStatus",           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active},
+              tblActiveSessions::Name,
+              { ///<ColName                              Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
+                {tblActiveSessions::ssnKey,              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
+                {tblActiveSessions::ssn_usrID,           S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
+                {tblActiveSessions::ssnIP,               S(quint32),            QFV.integer().minValue(1),   QInvalid,  true},
+                {tblActiveSessions::ssnIPReadable,       S(QString),            QFV.allwaysInvalid(),        QInvalid,  true,false,false},
+                {tblActiveSessions::ssnCreationDateTime, S(TAPI::DateTime_t),   QFV,                         QNull,     true},
+                {tblActiveSessions::ssnInfo,             S(TAPI::JSON_t),       QFV,                         QNull,     true,false,false},
+                {tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,     true,false,false},
+                {tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t),   QFV,                         QNull,     true},
+                {tblActiveSessions::ssnRemember,         S(bool),               QFV,                         false,     true},
+                {tblActiveSessions::ssnUpdatedBy_usrID,  S(quint32),            QFV.integer().minValue(1),   QNull,     true},
+                {tblActiveSessions::ssnStatus,           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active},
               },
-              { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
-                {"ssn_usrID",          "AAA.tblUser",      "usrID",     "Owner_"},
-                {"ssnUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                                Reference Table                  ForeignCol          Rename      LeftJoin
+                {tblActiveSessions::ssn_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID,     "Owner_"},
+                {tblActiveSessions::ssnUpdatedBy_usrID, R(AAASchema,tblUser::Name),      tblUser::usrID,     "Updater_", true}
               })
 {
 }

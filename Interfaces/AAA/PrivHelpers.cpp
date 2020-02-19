@@ -33,20 +33,27 @@ namespace AAA {
 
 using namespace DBManager;
 
-QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services) {
+stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services) {
     QJsonObject Privs;
 
     foreach(auto Service, _services)
         if(Accounting::serviceAccounting(Service) == nullptr)
             throw exHTTPBadRequest("Service " + Service + " was not registered.");
 
+    qint64 MinTTL = LLONG_MAX;
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
         for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
             if(PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())){
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
-                if(PrivIter.key() != "ALL")
-                    Privs = Common::mergeJsonObjects(Privs, Accounting::serviceAccounting(PrivIter.key())->activeAccounts(_usrID).begin());
+                if(PrivIter.key() != "ALL"){
+                    Accounting::stuActiveServiceAccount ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
+                    if(ActiveAccount.TTL){
+                        Privs = Common::mergeJsonObjects(Privs, QJsonObject({ {PrivIter.key(), ActiveAccount.toJson(false)}}).begin());
+                        if(ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)
+                            MinTTL = ActiveAccount.TTL;
+                    }
+                }
             }
     }
     if(Privs.contains("ALL") == false)
@@ -54,7 +61,7 @@ QJsonObject PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usr
             if(Privs.contains(Service) == false)
                 throw exAuthorization("Not enough priviledges to access <"+Service+">");
 
-    return  Privs;
+    return  { MinTTL, Privs };
 }
 
 bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf){
@@ -69,8 +76,8 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
             QString CheckingPriv = CurrCheckingPriv.value(PRIVItems::CRUD).toString();
             for(quint8 i=0; i<4; ++i)
                 if (RequiredAccess[i] == '1' ||
-                        RequiredAccess[i].toUpper() == 'T'
-                        ){
+                    RequiredAccess[i].toUpper() == 'T'
+                    ){
                     if(CheckingPriv[i] == '0' || CheckingPriv[i].toUpper() == 'F')
                         return false;
                     else
@@ -90,8 +97,8 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
                 break;
             }
 
-        if(Found == false)
-            return false;
+            if(Found == false)
+                return false;
         }
     }
 
@@ -130,17 +137,19 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
     return CurrCheckingPriv.value("");
 }
 
-QJsonObject PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
+stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
     _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
-    if(_userObj.size())
-        _userObj[AAACommonItems::privs] =
-                PrivHelpers::confirmPriviledgeBase(PrivHelpers::digestPrivileges(
-                                                       _userObj[AAACommonItems::privs].toArray(),
-                                                   static_cast<quint32>(_userObj[AAACommonItems::usrID].toDouble()),
-                                                   _services), _requiredAccess);
-
-    return _userObj;
+    if(_userObj.size()){
+        stuActiveAccount ActiveAccount =
+                PrivHelpers::digestPrivileges(
+                    _userObj[AAACommonItems::privs].toArray(),
+                    static_cast<quint32>(_userObj[AAACommonItems::usrID].toDouble()),
+                    _services);
+        _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
+        return { ActiveAccount.TTL, _userObj };
+    }else
+        return { -1, _userObj };
 }
 
 QByteArray PrivHelpers::getURL(const QString& _url){
@@ -164,9 +173,12 @@ QByteArray PrivHelpers::getURL(const QString& _url){
 }
 
 /******************************************************************************/
-TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
+TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint64 _expiry, const QString& _sessionID)
 {
-    return Server::QJWT::createSigned(_payload, _privatePayload, Server::QJWT::TTL.value(), _sessionID);
+    return Server::QJWT::createSigned(_payload,
+                                      _privatePayload,
+                                      _expiry <0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),
+                                      _sessionID);
 }
 
 }

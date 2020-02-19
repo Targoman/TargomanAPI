@@ -56,14 +56,13 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
                                      const QString& _login,
                                      const TAPI::MD5_t& _pass,
                                      const QString& _salt,
-                                     const QString& _services,
+                                     const TAPI::CommaSeparatedStringList_t& _services,
                                      bool _rememberMe,
                                      const TAPI::JSON_t& _sessionInfo,
                                      const TAPI::MD5_t& _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-    QFV.optional(QFV.asciiAlNum(false, ",")).validate(_services, "tlps");
 
     Authorization::validateIPAddress(_REMOTE_IP);
 
@@ -82,20 +81,19 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
 //TODO cache to ban users for every service
 //TODO update cache for each module
 //TODO JWT lifetime dynamic based on current hour
-//Every module must have a method to report todays' priv for specific user
 //
-
 
 TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
                                             const QString& _oAuthToken,
-                                            const QString& _tlps,
+                                            const TAPI::CommaSeparatedStringList_t& _services,
                                             const TAPI::JSON_t& _sessionInfo,
                                             const TAPI::MD5_t& _fingerprint)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
     Authentication::stuOAuthInfo OAuthInfo;
+//TODO validate _oAuthToken
 
     switch(_type){
     case TAPI::enuOAuthType::Google:
@@ -114,8 +112,8 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
         throw exHTTPNotImplemented("Invalid oAuth type");*/
     }
     return this->createJWT(OAuthInfo.Email,
-                           Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _tlps.split(","), true, _sessionInfo.object(), _fingerprint),
-                           _tlps);
+                           Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _services.split(","), true, _sessionInfo.object(), _fingerprint),
+                           _services);
 }
 
 TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT, const QString& _services)
@@ -124,7 +122,7 @@ TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TA
     clsJWT JWT(_JWT);
     QString Services = _services;
     if(_services.isEmpty())
-        Services = JWT.privatePart().value("tlps").toString();
+        Services = JWT.privatePart().value("svc").toString();
 
     return this->createJWT(JWT.login(),
                            Authentication::updatePrivs(_REMOTE_IP, JWT.session(), Services),
@@ -287,22 +285,23 @@ Account::Account() :
     this->addSubModule(new WalletBalances);
 }
 
-TAPI::EncodedJWT_t Account::createJWT(const QString _login, const QJsonObject& _result, const QString& _services)
+TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
 {
     return clsJWT::createSigned({
-                                    {JWTItems::usrLogin, _login},
-                                    {JWTItems::usrName, _result["usrGivenName"]},
-                                    {JWTItems::usrFamily, _result["usrFamilyName"]},
-                                    {JWTItems::rolName, _result["rolName"]},
-                                    {JWTItems::rolID, _result["rolID"]},
-                                    {JWTItems::privs, _result["privs"]},
-                                    {JWTItems::usrID, _result["usrID"]},
-                                    {JWTItems::canChangePass, _result["hasPass"]},
-                                    {JWTItems::usrApproval, TAPI::enuUserApproval::toStr(_result["usrApprovalState"].toString())},
-                                    {JWTItems::usrStatus, TAPI::enuUserStatus::toStr(_result["usrStatus"].toString())},
+                                    {JWTItems::usrLogin,        _login},
+                                    {JWTItems::usrName,         _activeAccount.Privs["usrGivenName"]},
+                                    {JWTItems::usrFamily,       _activeAccount.Privs["usrFamilyName"]},
+                                    {JWTItems::rolName,         _activeAccount.Privs["rolName"]},
+                                    {JWTItems::rolID,           _activeAccount.Privs["rolID"]},
+                                    {JWTItems::privs,           _activeAccount.Privs["privs"]},
+                                    {JWTItems::usrID,           _activeAccount.Privs["usrID"]},
+                                    {JWTItems::canChangePass,   _activeAccount.Privs["hasPass"]},
+                                    {JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString())},
+                                    {JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString())},
                                 },
-                                QJsonObject({{"tlps", _services}}),
-                                _result["ssnKey"].toString()
+                                QJsonObject({{"svc", _services}}),
+                                _activeAccount.TTL,
+                                _activeAccount.Privs["ssnKey"].toString()
             );
 }
 

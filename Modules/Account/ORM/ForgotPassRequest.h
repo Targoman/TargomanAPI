@@ -43,6 +43,16 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblForgotPassRequest {
+constexpr char Name[] = "tblForgotPassRequest";
+TARGOMAN_CREATE_CONSTEXPR(fprUUID);
+TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
+TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
+TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
+TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
+TARGOMAN_CREATE_CONSTEXPR(fprStatus);
+}
+
 class ForgotPassRequest : public ORM::clsTable
 {
     Q_OBJECT

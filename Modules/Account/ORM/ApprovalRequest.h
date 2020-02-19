@@ -47,6 +47,17 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblApprovalRequest {
+constexpr char Name[] = "tblApprovalRequest";
+TARGOMAN_CREATE_CONSTEXPR(aprID);
+TARGOMAN_CREATE_CONSTEXPR(apr_usrID);
+TARGOMAN_CREATE_CONSTEXPR(aprRequestedFor);
+TARGOMAN_CREATE_CONSTEXPR(aprApprovalCode);
+TARGOMAN_CREATE_CONSTEXPR(aprApprovalValue);
+TARGOMAN_CREATE_CONSTEXPR(aprRequestDate);
+TARGOMAN_CREATE_CONSTEXPR(aprApplyDate);
+TARGOMAN_CREATE_CONSTEXPR(aprStatus);
+}
 
 class ApprovalRequest : public ORM::clsTable
 {

@@ -21,6 +21,7 @@
  */
 
 #include "BlockingRules.h"
+#include "User.h"
 
 namespace Targoman {
 namespace API {
@@ -55,22 +56,22 @@ quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 
 BlockingRules::BlockingRules() :
     clsTable(AAASchema,
-              "tblBlockingRuless",
-              { ///<ColName             Type                Validation                       Default    RO   Sort  Filter Self  Virt   PK
-                {"blrID",               S(quint64),         QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"blr_ipbIP",           S(quint32),         QFV.integer().minValue(1),       QNull},
-                {"blr_ipIPReadable",    S(TAPI::IPv4_t),    QFV,                             QInvalid, true,false,false},
-                {"blrStartingTime",     S(TAPI::DateTime_t),QFV,                             QNull,    true, true},
-                {"blrEndingTime",       S(TAPI::DateTime_t),QFV,                             QNull},
-                {"blrCause",            S(QString),         QFV,                             QNull,   false,false,false},
-                {"blrCreatedBy_usrID",  S(quint32),         QFV.integer().minValue(1),       QInvalid, true},
-                {"blrCreationDateTime", S(TAPI::DateTime_t),QFV,                             QNull,    true},
-                {"blrUpdatedBy_usrID",  S(quint32),         QFV.integer().minValue(1),       QNull,    true},
-                {"blrStatus",           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
+              tblBlockingRules::Name,
+              { ///<ColName                             Type                Validation                       Default    RO   Sort  Filter Self  Virt   PK
+                {tblBlockingRules::blrID,               S(quint64),         QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblBlockingRules::blr_ipbIP,           S(quint32),         QFV.integer().minValue(1),       QNull},
+                {tblBlockingRules::blr_ipIPReadable,    S(TAPI::IPv4_t),    QFV,                             QInvalid, true,false,false},
+                {tblBlockingRules::blrStartingTime,     S(TAPI::DateTime_t),QFV,                             QNull,    true, true},
+                {tblBlockingRules::blrEndingTime,       S(TAPI::DateTime_t),QFV,                             QNull},
+                {tblBlockingRules::blrCause,            S(QString),         QFV,                             QNull,   false,false,false},
+                {tblBlockingRules::blrCreatedBy_usrID,  S(quint32),         QFV.integer().minValue(1),       QInvalid, true},
+                {tblBlockingRules::blrCreationDateTime, S(TAPI::DateTime_t),QFV,                             QNull,    true},
+                {tblBlockingRules::blrUpdatedBy_usrID,  S(quint32),         QFV.integer().minValue(1),       QNull,    true},
+                {tblBlockingRules::blrStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
-              { ///< Col       Reference Table             ForeignCol   Rename     LeftJoin
-                {"blrCreatedBy_usrID", "AAA.tblUser",      "usrID",     "Creator_", true},
-                {"blrUpdatedBy_usrID", "AAA.tblUser",      "usrID",     "Updater_", true}
+              { ///< Col                               Reference Table              ForeignCol          Rename     LeftJoin
+                {tblBlockingRules::blrCreatedBy_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,     "Creator_", true},
+                {tblBlockingRules::blrUpdatedBy_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,     "Updater_", true}
               })
 {
 }

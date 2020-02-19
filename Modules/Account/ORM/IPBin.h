@@ -38,6 +38,19 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblIPBin {
+constexpr char Name[] = "tblIPBin";
+TARGOMAN_CREATE_CONSTEXPR(ipbIP);
+TARGOMAN_CREATE_CONSTEXPR(ipbReadable);
+TARGOMAN_CREATE_CONSTEXPR(ipbFirstAccess);
+TARGOMAN_CREATE_CONSTEXPR(ipbAccessCount);
+TARGOMAN_CREATE_CONSTEXPR(ipbLastAccess);
+TARGOMAN_CREATE_CONSTEXPR(ipbBlockedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ipbBlockingTime);
+TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
+}
+
+
 class IPBin : public ORM::clsTable
 {
     Q_OBJECT

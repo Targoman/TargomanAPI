@@ -44,6 +44,20 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblInvoice {
+constexpr char Name[] = "tblInvoice";
+TARGOMAN_CREATE_CONSTEXPR(invID);
+TARGOMAN_CREATE_CONSTEXPR(invCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(inv_svcID);
+TARGOMAN_CREATE_CONSTEXPR(inv_ordID);
+TARGOMAN_CREATE_CONSTEXPR(inv_usrID);
+TARGOMAN_CREATE_CONSTEXPR(invDesc);
+TARGOMAN_CREATE_CONSTEXPR(invPaymentType);
+TARGOMAN_CREATE_CONSTEXPR(invTotalAmount);
+TARGOMAN_CREATE_CONSTEXPR(invStatus);
+
+}
+
 class Invoice : public ORM::clsTable
 {
     Q_OBJECT

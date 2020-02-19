@@ -26,6 +26,13 @@
 #include "AAADefs.hpp"
 #include "clsJWT.hpp"
 
+namespace TAPI {
+TARGOMAN_DEFINE_ENUM(enuUserPrefOnPackage,
+                     JustThis,
+                     UntillFinished,
+                     Auto
+                     )
+}
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -48,80 +55,99 @@ struct stuUsage{
     stuUsage& fromJson(const QJsonObject& _obj);
 };
 
-typedef QMap<QString, stuUsage> AccountLimits_t;
+typedef QMap<QString, stuUsage> PackageRemaining_t;
 
-struct stuAccountPackage {
-
+struct stuPackage {
+    quint64 PackageID;
     qint32 RemainingDays; // can be -1 for unlimited
     qint32 RemainingHours; // can be -1 for unlimited
     QDateTime LastBreakDate;
-    AccountLimits_t  Limits;
+    PackageRemaining_t  Remaining;
+    QJsonObject Properties;
+    TAPI::enuUserPrefOnPackage::Type UserPreference;
 
     QDate StartDate; //can be invalid for normal accounts
     QDate EndDate; //can be invalid for normal accounts
     QTime StartTime; //can be invalid for normal accounts
     QTime EndTime; //can be invalid for normal accounts
 
-    stuAccountPackage(qint32    _remainingDays = -1,
-                      qint32    _remainingHours = -1,
-                      QDateTime _lastBreakDate = {},
-                      AccountLimits_t  _limits = {},
-                      QDate     _startDate = {},
-                      QDate     _endDate = {},
-                      QTime     _startTime = {},
-                      QTime     _endTime = {}
-                                           ) :
+    stuPackage(quint64 _pkgID = 0,
+               qint32    _remainingDays = -1,
+               qint32    _remainingHours = -1,
+               QDateTime _lastBreakDate = {},
+               PackageRemaining_t  _remaining = {},
+               QDate     _startDate = {},
+               QDate     _endDate = {},
+               QTime     _startTime = {},
+               QTime     _endTime = {},
+               QJsonObject _properties = {},
+               TAPI::enuUserPrefOnPackage::Type      _userPreference = TAPI::enuUserPrefOnPackage::Auto
+                                                                       ) :
+        PackageID(_pkgID),
         RemainingDays(_remainingDays),
         RemainingHours(_remainingHours),
         LastBreakDate(_lastBreakDate),
-        Limits(_limits),
+        Remaining(_remaining),
+        Properties(_properties),
+        UserPreference(_userPreference),
         StartDate(_startDate),
         EndDate(_endDate),
         StartTime(_startTime),
         EndTime(_endTime)
     {}
 
-    QJsonObject toJson();
-    stuAccountPackage& fromJson(const QJsonObject& _obj);
+    QJsonObject toJson(bool _full);
+    stuPackage& fromJson(const QJsonObject& _obj);
 };
 
-typedef QMap<QString, stuAccountPackage> ActivePackages_t;
+typedef QMap<QString, stuPackage> ActivePackages_t;
 
-struct stuUsageMap{
-    stuUsage Mine;
-    stuUsage Parent;
-
-    stuUsageMap(const stuUsage& _mine, const stuUsage& _parent) :
-        Mine(_mine),
-        Parent(_parent)
-    {}
-};
-
-struct stuAccountInfo{
+struct stuServiceAccountInfo{
     ActivePackages_t ActivePackages;
+    QSharedPointer<stuPackage> PreferedPackage;
     quint32          ParentID; // 0 for no parent
-    stuUsage         MyLimitsOnParent;
+    PackageRemaining_t  MyLimitsOnParent;
 
-    QJsonObject toJson();
-    stuAccountInfo& fromJson(const QJsonObject& _obj);
+    stuServiceAccountInfo(ActivePackages_t _activePackages,
+            QSharedPointer<stuPackage> _preferedPackage,
+            quint32          _parentID,
+            PackageRemaining_t  _myLimitsOnParent
+            );
 };
 
-typedef QMap<QString, quint32> AccountUsage_t;
+struct stuActiveServiceAccount{
+    stuPackage ActivePackage;
+    bool       IsFromParent;
+    PackageRemaining_t MyLimitsOnParent;
+    qint64     TTL;
+
+    stuActiveServiceAccount(const stuPackage& _package = {},
+                            bool _isFromParent = false,
+                            const PackageRemaining_t& _myLimitsOnParent = {},
+                            qint64 _ttl = 0);
+    QJsonObject toJson(bool _full);
+    stuActiveServiceAccount& fromJson(const QJsonObject _obj);
+};
+
+typedef QMap<QString, qint32> ServiceUsage_t;
+
 class intfAccounting{
 public:
-    QJsonObject activeAccounts(quint32 _usrID);
+    stuActiveServiceAccount activeAccountObject(quint32 _usrID);
 
 protected:
     intfAccounting(const QString& _name);
     virtual ~intfAccounting();
-    virtual stuAccountInfo retrieveAccountsInfo(quint32 _usrID) = 0;
-    virtual void breakActiveAccount(quint64 _accID) = 0;
-    virtual stuUsageMap updateUsage(quint64 _accID) = 0;
-    virtual bool isUnlimited(const AccountLimits_t& _limits) const = 0;
-    virtual bool isEmpty(const AccountLimits_t& _limits) const = 0;
+    virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID) = 0;
+    virtual void breakPackage(quint64 _pkgID) = 0;
+    virtual bool isUnlimited(const PackageRemaining_t& _limits) const = 0;
+    virtual bool isEmpty(const PackageRemaining_t& _limits) const = 0;
 
-    void hasCredit(const clsJWT& _jwt, const AccountUsage_t& _requestedUsage);
-    //TODO prune accounts based on least JWT
+    void hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
+
+private:
+    stuActiveServiceAccount findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage = {});
+
 private:
     QString Name;
 };

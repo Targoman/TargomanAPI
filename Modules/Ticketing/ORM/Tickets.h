@@ -36,6 +36,29 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
+namespace tblTickets {
+constexpr char Name[] = "tblTickets";
+TARGOMAN_CREATE_CONSTEXPR(tktID);
+TARGOMAN_CREATE_CONSTEXPR(tktCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
+TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
+TARGOMAN_CREATE_CONSTEXPR(tktType);
+TARGOMAN_CREATE_CONSTEXPR(tktTitle);
+TARGOMAN_CREATE_CONSTEXPR(tktBodyMarkdown);
+TARGOMAN_CREATE_CONSTEXPR(tktHasAttachment);
+TARGOMAN_CREATE_CONSTEXPR(tktCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tktStatus);
+}
+
+namespace tblTicketRead {
+constexpr char Name[] = "tblTicketRead";
+TARGOMAN_CREATE_CONSTEXPR(tkr_tktID);
+TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
+}
+
 class Tickets : public ORM::clsTable
 {
     Q_OBJECT

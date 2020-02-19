@@ -25,6 +25,7 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/clsCountAndSpeed.h"
@@ -153,6 +154,7 @@ TAPI_ADD_SIMPLE_TYPE(QJsonDocument, JSON_t);
 
 TAPI_ADD_SIMPLE_TYPE(QVariantMap, ORMFilters_t);
 TAPI_ADD_SIMPLE_TYPE(QString, EncodedJWT_t);
+TAPI_ADD_SIMPLE_TYPE(QString, CommaSeparatedStringList_t);
 TAPI_ADD_SIMPLE_TYPE(QString, ExtraPath_t);
 TAPI_ADD_SIMPLE_TYPE(QString, RemoteIP_t);
 TAPI_ADD_SIMPLE_TYPE(QString, MD5_t);
@@ -165,6 +167,7 @@ TAPI_ADD_SIMPLE_TYPE(QString, Base64Image_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
 TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
+TAPI_ADD_SIMPLE_TYPE(QString, URL_t);
 }
 
 /**********************************************************************/
@@ -175,6 +178,7 @@ TAPI_DECLARE_METATYPE(TAPI::HEADERS_t)
 TAPI_DECLARE_METATYPE(TAPI::COOKIES_t)
 TAPI_DECLARE_METATYPE(TAPI::JWT_t)
 TAPI_DECLARE_METATYPE(TAPI::EncodedJWT_t)
+TAPI_DECLARE_METATYPE(TAPI::CommaSeparatedStringList_t)
 TAPI_DECLARE_METATYPE(TAPI::JSON_t)
 TAPI_DECLARE_METATYPE(TAPI::ExtraPath_t)
 TAPI_DECLARE_METATYPE(TAPI::ORMFilters_t)
@@ -189,6 +193,7 @@ TAPI_DECLARE_METATYPE(TAPI::Date_t)
 TAPI_DECLARE_METATYPE(TAPI::Time_t)
 TAPI_DECLARE_METATYPE(TAPI::DateTime_t)
 TAPI_DECLARE_METATYPE(TAPI::Base64Image_t)
+TAPI_DECLARE_METATYPE(TAPI::URL_t)
 TAPI_DECLARE_METATYPE(TAPI::enuGenericStatus::Type);
 
 

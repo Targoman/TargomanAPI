@@ -21,6 +21,8 @@
  */
 
 #include "APITokens.h"
+#include "User.h"
+#include "Services.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPITokensStatus);
 
@@ -32,14 +34,14 @@ using namespace ORM;
 QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"apt_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
 
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
@@ -59,27 +61,27 @@ quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 APITokens::APITokens() :
     clsTable(AAASchema,
               "tblAPITokens",
-              { ///<ColName             Type                   Validation                      Default    RO   Sort  Filter Self  Virt   PK
-                {"aptID",               S(quint64),            QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {"aptToken",            S(QString),            QFV.asciiAlNum().maxLenght(50), QInvalid,  true, true, false},
-                {"apt_usrID",           S(quint32),            QFV.integer().minValue(1),      0},
-                {"apt_svcID",           S(quint32),            QFV.integer().minValue(1),      0},
-                {"aptLang",             S(TAPI::ISO639_2_t),   QFV,                            "en"},
-                {"aptValidateIP",       S(bool),               QFV,                            false},
-                {"aptExtraPriviledges", S(TAPI::JSON_t),       QFV,                            QNull,    false,false, false},
-                {"aptExpiryDate",       S(TAPI::DateTime_t),   QFV,                            QNull},
-                {"aptLastActivity",     S(TAPI::DateTime_t),   QFV,                            QNull ,    true},
-                {"aptAccessCount",      S(quint32),            QFV.integer().minValue(1),      0,         true},
-                {"aptCreatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),      QInvalid,  true},
-                {"aptCreationDateTime", S(TAPI::DateTime_t),   QFV,                            QNull,     true},
-                {"aptUpdatedBy_usrID",  S(quint32),            QFV.integer().minValue(1),      QNull,     true},
-                {"aptStatus",           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active},
+              { ///<ColName                         Type                   Validation                      Default    RO   Sort  Filter Self  Virt   PK
+                {tblAPITokens::aptID,               S(quint64),            QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QInvalid,  true, true, false},
+                {tblAPITokens::apt_usrID,           S(quint32),            QFV.integer().minValue(1),      0},
+                {tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      0},
+                {tblAPITokens::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en"},
+                {tblAPITokens::aptValidateIP,       S(bool),               QFV,                            false},
+                {tblAPITokens::aptExtraPriviledges, S(TAPI::JSON_t),       QFV,                            QNull,    false,false, false},
+                {tblAPITokens::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull},
+                {tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QNull ,    true},
+                {tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      0,         true},
+                {tblAPITokens::aptCreatedBy_usrID,  S(quint32),            QFV.integer().minValue(1),      QInvalid,  true},
+                {tblAPITokens::aptCreationDateTime, S(TAPI::DateTime_t),   QFV,                            QNull,     true},
+                {tblAPITokens::aptUpdatedBy_usrID,  S(quint32),            QFV.integer().minValue(1),      QNull,     true},
+                {tblAPITokens::aptStatus,           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active},
               },
-              { ///< Col               Reference Table    ForeignCol   Rename     LeftJoin
-                {"apt_svcID",          "AAA.tblServices", "svcID",     "",         true},
-                {"apt_usrID",          "AAA.tblUser",     "usrID",     "Owner_",   true},
-                {"aptCreatedBy_usrID", "AAA.tblUser",     "usrID",     "Creator_", true},
-                {"aptUpdatedBy_usrID", "AAA.tblUser",     "usrID",     "Updater_", true}
+              { ///< Col                           Reference Table                 ForeignCol             Rename      LeftJoin
+                {tblAPITokens::apt_svcID,          R(AAASchema,tblServices::Name), tblServices::svcID,    {},         true},
+                {tblAPITokens::apt_usrID,          R(AAASchema,tblUser::Name),     tblUser::usrID,        "Owner_",   true},
+                {tblAPITokens::aptCreatedBy_usrID, R(AAASchema,tblUser::Name),     tblUser::usrID,        "Creator_", true},
+                {tblAPITokens::aptUpdatedBy_usrID, R(AAASchema,tblUser::Name),     tblUser::usrID,        "Updater_", true}
               })
 {
 }

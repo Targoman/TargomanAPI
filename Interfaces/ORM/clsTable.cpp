@@ -445,6 +445,8 @@ QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInf
     for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
+        if(this->SelectableColsMap.contains(InfoIter.key()) == false)
+           throw exHTTPInternalServerError("Invalid filter: " + InfoIter.key());
         clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
         if(Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
@@ -456,9 +458,13 @@ QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInf
     for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
         if(FilterIter->isValid() == false)
             continue;
+        if(this->SelectableColsMap.contains(FilterIter.key()) == false)
+           throw exHTTPInternalServerError("Invalid filter: " + FilterIter.key());
+
         clsORMField& Col = this->SelectableColsMap[FilterIter.key()];
-        if(Col.isReadOnly())
-            continue;
+/*        if(Col.isReadOnly())
+            continue;*/
+        //TODO check if required
         Col.validate(FilterIter.value());
         CreateCommands.append(this->makeColName(Col) + "=?");
         Values.append(Col.toDB(FilterIter.value().toString()));
@@ -466,7 +472,7 @@ QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInf
 
     clsDAC DAC(this->domain(), this->Schema);
     clsDACResult Result = DAC.execQuery("",
-                                        QString("INSERT INTO ") + this->Name
+                                        QString("INSERT INTO ") + this->Schema + "." + this->Name
                                         + QUERY_SEPARATOR
                                         + "SET "
                                         + CreateCommands.join("," + QUERY_SEPARATOR)

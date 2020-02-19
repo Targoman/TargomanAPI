@@ -157,8 +157,12 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                 break;
             case COMPLEXITY_Complex:
             case COMPLEXITY_String:
-                if(_typeName != "string")
-                    _paramSpecs["format"] = _typeName.split("::").last().toLower();
+                if(_typeName != "string"){
+                    QString Format = _typeName.split("::").last().toLower();
+                    if(Format.endsWith("_t")) Format = Format.mid(0, Format.size() - 2);
+                    if(Format.startsWith('q')) Format = Format.mid(1);
+                    _paramSpecs["format"] = Format;
+                }
                 //ParamSpecs["pattern"] = ;
                 break;
             default: break;

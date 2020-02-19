@@ -21,6 +21,9 @@
  */
 
 #include "Invoice.h"
+#include "User.h"
+#include "Services.h"
+#include "UserWallets.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceType);
@@ -34,7 +37,7 @@ using namespace ORM;
 QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblInvoice::inv_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -42,8 +45,8 @@ QVariant Invoice::apiGET(GET_METHOD_ARGS_IMPL)
 bool Invoice::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
-        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        _ORMFILTERS.insert(tblInvoice::invPaymentType, TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
+        this->setSelfFilters({{tblInvoice::inv_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
     }
 
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
@@ -55,13 +58,13 @@ quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
 {
     TAPI::ORMFilters_t _ORMFILTERS;
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        this->setSelfFilters({{"inv_usrID", clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        this->setSelfFilters({{tblInvoice::inv_usrID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
     }
     _ORMFILTERS.insert("invPaymentType", TAPI::enuInvoiceType::toStr(TAPI::enuInvoiceType::Withdrawal));
     _ORMFILTERS.insert("invTotalAmount", _amount);
-    _ORMFILTERS.insert("invServiceCode", "WALT");
+    _ORMFILTERS.insert("inv_usrID", clsJWT(_JWT).usrID());
     _ORMFILTERS.insert("invDesc", QJsonDocument(QJsonObject{
-                                                    {"walletID", static_cast<double>(_walletID)}
+                                                    {tblUserWallets::walID, static_cast<double>(_walletID)}
                                                 }).toJson());
 
     return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
@@ -69,21 +72,21 @@ quint64 Invoice::apiCREATEwithdraw(TAPI::JWT_t _JWT,
 
 Invoice::Invoice() :
     clsTable(AAASchema,
-              "tblInvoice",
+              tblInvoice::Name,
               { ///<ColName             Type                 Validation                                  Default    RO   Sort  Filter Self  Virt   PK
-                {"invID",               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
-                {"invCreationDateTime", S(TAPI::DateTime_t), QFV,                                        QNull,     true},
-                {"inv_svcID",           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid},
-                {"inv_ordID",           S(quint64),          QFV.integer().minValue(1),                  QInvalid,  true},
-                {"inv_usrID",           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
-                {"invDesc",             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,    false,false,false},
-                {"invPaymentType",      S(TAPI::enuInvoiceType::Type), QFV,                              TAPI::enuInvoiceType::Payment},
-                {"invTotalAmount",      S(quint64),          QFV,                                        0},
-                {"invStatus",           S(TAPI::enuInvoiceStatus::Type), QFV,                            TAPI::enuInvoiceStatus::New},
+                {tblInvoice::invID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
+                {tblInvoice::invCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QNull,     true},
+                {tblInvoice::inv_svcID,           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid},
+                {tblInvoice::inv_ordID,           S(quint64),          QFV.integer().minValue(1),                  QInvalid,  true},
+                {tblInvoice::inv_usrID,           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  true},
+                {tblInvoice::invDesc,             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,    false,false,false},
+                {tblInvoice::invPaymentType,      S(TAPI::enuInvoiceType::Type), QFV,                              TAPI::enuInvoiceType::Payment},
+                {tblInvoice::invTotalAmount,      S(quint64),          QFV,                                        0},
+                {tblInvoice::invStatus,           S(TAPI::enuInvoiceStatus::Type), QFV,                            TAPI::enuInvoiceStatus::New},
               },
               { ///< Col       Reference Table   ForeignCol
-                {"inv_usrID",  "AAA.tblUser",     "usrID"},
-                {"inv_svcID",  "AAA.tblServices", "svcID"},
+                {tblInvoice::inv_usrID,  R(AAASchema,tblUser::Name),     tblUser::usrID},
+                {tblInvoice::inv_svcID,  R(AAASchema,tblServices::Name), tblServices::svcID},
               })
 {
 }

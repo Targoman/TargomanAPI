@@ -23,6 +23,7 @@
 #include "Tickets.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
+#include "Modules/Account/ORM/User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuTicketStatus);
 
@@ -35,47 +36,50 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     QString ExtraFilters;
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
+        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
+                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
+                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
+                       .arg(tblTickets::tktTarget_usrID)
+                       .arg(tblTickets::tktType).arg((enuTicketType::toStr(enuTicketType::Broadcast)));
 
-    ExtraFilters = QString ("( tktTarget_usrID=%1 | tktCreatedBy_usrID=%1 | ( tktTarget_usrID=NULL + tktType=%2 ) )").arg(clsJWT(_JWT).usrID()).arg(enuTicketType::toStr(enuTicketType::Broadcast));
     return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
 }
 
 Tickets::Tickets() :
-    clsTable("Ticketing",
-              "tblTickets",
-              { ///<ColName             Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
-                {"tktID",               S(quint64),             QFV.integer().minValue(1),   ORM_PRIMARY_KEY},
-                {"tktCreationDateTime", S(TAPI::DateTime_t),    QFV,                         QNull,     true},
-                {"tktTarget_usrID",     S(quint32),             QFV.integer().minValue(1),   QNull},
-                {"tkt_svcID",           S(quint32),             QFV.integer().minValue(1),   QNull},
-                {"tktInReply_tktID",    S(quint64),             QFV.integer().minValue(1),   QNull},
-                {"tktType",             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message},
-                {"tktTitle",            S(TAPI::JSON_t),        QFV,                         QInvalid, false,false,false},
-                {"tktBodyMarkdown",     S(TAPI::MD5_t),         QFV.allwaysInvalid(),        QInvalid, false,false,false},
-                {"tktHasAttachment",    S(TAPI::DateTime_t),    QFV,                         false,    false},
-                {"tktCreatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
-                {"tktUpdatedBy_usrID",  S(quint32),             QFV.integer().minValue(1),   QNull},
-                {"tktStatus",           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New},
+    clsTable(TicketingSchema,
+              tblTickets::Name,
+              { ///<ColName                       Type                    Validation                   Default    RO   Sort  Filter Self  Virt   PK
+                {tblTickets::tktID,               S(quint64),             QFV.integer().minValue(1),   ORM_PRIMARY_KEY},
+                {tblTickets::tktCreationDateTime, S(TAPI::DateTime_t),    QFV,                         QNull,     true},
+                {tblTickets::tktTarget_usrID,     S(quint32),             QFV.integer().minValue(1),   QNull},
+                {tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1),   QNull},
+                {tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1),   QNull},
+                {tblTickets::tktType,             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message},
+                {tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                         QInvalid, false,false,false},
+                {tblTickets::tktBodyMarkdown,     S(TAPI::MD5_t),         QFV.allwaysInvalid(),        QInvalid, false,false,false},
+                {tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                         false,    false},
+                {tblTickets::tktCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull,     true},
+                {tblTickets::tktUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),   QNull},
+                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New},
               },
-              { ///< Col                Reference Table    ForeignCol   Rename     LeftJoin
-                {"tktInReply_tktID",    "Ticketing.tblTickets", "tktID","InReply_" , true},
-                {"tktTarget_usrID",     "AAA.tblUser",     "usrID",     "Target_"  , true},
-                {"tktID",               "Ticketing.tblTicketRead",  "tkr_tktID", "ReadInfo_",  true},
-                {"tktCreatedBy_usrID",  "AAA.tblUser",     "usrID",     "Creator_"},
-                {"tktUpdatedBy_usrID",  "AAA.tblUser",     "usrID",     "Updater_",  true},
+              { ///< Col                            Reference Table                           ForeignCol                 Rename     LeftJoin
+                {tblTickets::tktInReply_tktID,      R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true},
+                {tblTickets::tktTarget_usrID,       R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true},
+                {tblTickets::tktID,                 R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_",  true},
+                {tblTickets::tktCreatedBy_usrID,    R(AAASchema,tblUser::Name),               tblUser::usrID,             "Creator_"},
+                {tblTickets::tktUpdatedBy_usrID,    R(AAASchema,tblUser::Name),               tblUser::usrID,             "Updater_",  true},
               })
 {
 }
 
 /******************************************************************************/
 TicketRead::TicketRead() :
-    clsTable("Ticketing",
-              "tblTicketRead",
-              { ///<ColName      Type                   Validation                       Default    RO   Sort  Filter Self  Virt   PK
-//              {"tkr_tktID",    S(quint64),            QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {"tkrBy_usrID",  S(quint32),            QFV.integer().minValue(1),       QInvalid, true,false,false},
-                {"tkrDateTime",  S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
+    clsTable(TicketingSchema,
+              tblTicketRead::Name,
+              { ///<ColName                     Type                   Validation                       Default    RO   Sort  Filter Self  Virt   PK
+//              {tblTicketRead::tkr_tktID",     S(quint64),            QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblTicketRead::tkrBy_usrID,    S(quint32),            QFV.integer().minValue(1),       QInvalid, true,false,false},
+                {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, true,false,false},
               },
               {
               }

@@ -48,7 +48,7 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
                                                      {"iToken", _token},
                                                      {"iIP", _ip},
                                                  }).toJson(true).object();
-    return PrivHelpers::processUserObject(TokenInfo, _requiredPrivs);
+    return PrivHelpers::processUserObject(TokenInfo, _requiredPrivs).Privs;
 }
 
 bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf)

@@ -30,6 +30,38 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblUser{
+constexpr char Name[] = "tblUser";
+TARGOMAN_CREATE_CONSTEXPR(usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrSex);
+TARGOMAN_CREATE_CONSTEXPR(usrName);
+TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+TARGOMAN_CREATE_CONSTEXPR(usrEmail);
+TARGOMAN_CREATE_CONSTEXPR(usrMobile);
+TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
+TARGOMAN_CREATE_CONSTEXPR(usrPass);
+TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
+TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
+TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
+TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
+TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
+TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
+TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+}
+
+namespace tblUserExtraInfo {
+constexpr char Name[] = "tblUserExtraInfo";
+TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
+TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
+TARGOMAN_CREATE_CONSTEXPR(ueiSheba);
+TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
+}
+
 class User : public ORM::clsTable
 {
     Q_OBJECT

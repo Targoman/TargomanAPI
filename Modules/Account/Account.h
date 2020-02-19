@@ -43,14 +43,14 @@ public:
     virtual QJsonObject todayPrivs(quint32 _usrID) final {Q_UNUSED(_usrID) return {}; }
 
 private:
-    TAPI::EncodedJWT_t createJWT(const QString _login, const QJsonObject& _result, const QString& _services = {});
+    TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
 
 private slots:
     TAPI::EncodedJWT_t REST(,Login,(const TAPI::RemoteIP_t& _REMOTE_IP,
                                     const QString& _login,
                                     const TAPI::MD5_t& _pass,
                                     const QString& _salt,
-                                    const QString& _services = {},
+                                    const TAPI::CommaSeparatedStringList_t& _services = {},
                                     bool _rememberMe = false,
                                     const TAPI::JSON_t& _sessionInfo = {},
                                     const TAPI::MD5_t& _fingerprint = {}),
@@ -59,7 +59,7 @@ private slots:
     TAPI::EncodedJWT_t REST(,LoginByOAuth,(const TAPI::RemoteIP_t& _REMOTE_IP,
                                            TAPI::enuOAuthType::Type _type,
                                            const QString& _oAuthToken,
-                                           const QString& _tlps,
+                                           const TAPI::CommaSeparatedStringList_t& _services,
                                            const TAPI::JSON_t& _sessionInfo = TAPI::JSON_t(),
                                            const TAPI::MD5_t& _fingerprint = {}),
                             "Login by Open Authentication and return an encoded JWT")

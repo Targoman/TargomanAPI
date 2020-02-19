@@ -30,6 +30,13 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblIPStats {
+constexpr char Name[] = "tblIPStats";
+TARGOMAN_CREATE_CONSTEXPR(ips_ipbIP);
+TARGOMAN_CREATE_CONSTEXPR(ipsTimeStamp);
+TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
+}
+
 class IPStats : public ORM::clsTable
 {
     Q_OBJECT

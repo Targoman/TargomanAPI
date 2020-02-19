@@ -24,6 +24,7 @@
 #define TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
 
 #include "libTargomanDBM/clsDAC.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
 namespace TAPI {
 
@@ -37,6 +38,7 @@ TARGOMAN_DEFINE_ENUM (enuTicketType,
                        );
 
 }
+constexpr char TicketingSchema[] = "Ticketing";
 
 TAPI_DECLARE_METATYPE(TAPI::enuTicketType::Type);
 

@@ -24,6 +24,7 @@
 #define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
 
 #include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/AAA/AAADefs.hpp"
 
 namespace Targoman {
 namespace API {
@@ -38,12 +39,12 @@ public:
                 { ///<ColName             Type                  Validation                      Default  RO   Sort  Filter Self  Virt   PK
                   {"atlID",               S(quint64),           QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
                   {"atlBy_usrID",         S(quint32),           QFV.integer().minValue(1),      {},     true},
-                  {"atlInsertionDateTime",S(TAPI::DateTime_t), QFV,                             {},     true},
+                  {"atlInsertionDateTime",S(TAPI::DateTime_t),  QFV,                            {},     true},
                   {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},     true},
                   {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},     true, false,false},
                 },
                 {
-                    {"atlBy_usrID",        "AAA.tblUser",      "usrID",     "By_"},
+                    {"atlBy_usrID",        R(AAA::AAASchema,  "tblUser"),      "usrID",     "By_"},
                 }),
         Module(_module)
     {;}

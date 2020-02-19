@@ -21,6 +21,7 @@
  */
 
 #include "IPBin.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuIPBinStatus);
 
@@ -38,19 +39,19 @@ QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL)
 
 IPBin::IPBin() :
     clsTable(AAASchema,
-              "tblIPBin",
-              { ///<ColName             Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
-                {"ipbIP",               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {"ipbReadable",         S(TAPI::IPv4_t),     QFV,                                QInvalid,  true},
-                {"ipbFirstAccess",      S(TAPI::DateTime_t), QFV,                                QNull,     true},
-                {"ipbAccessCount",      S(quint64),          QFV.integer().minValue(0),          0,         true},
-                {"ipbLastAccess",       S(TAPI::DateTime_t), QFV,                                QNull,     true},
-                {"ipbBlockedBy_usrID",  S(quint32),          QFV.integer().minValue(1),          QNull,     true},
-                {"ipbBlockingTime",     S(TAPI::DateTime_t), QFV,                                QNull,     true},
-                {"ipbStatus",           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active},
+              tblIPBin::Name,
+              { ///<ColName                     Type                 Validation                          Default    RO   Sort  Filter Self  Virt   PK
+                {tblIPBin::ipbIP,               S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblIPBin::ipbReadable,         S(TAPI::IPv4_t),     QFV,                                QInvalid,  true},
+                {tblIPBin::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                                QNull,     true},
+                {tblIPBin::ipbAccessCount,      S(quint64),          QFV.integer().minValue(0),          0,         true},
+                {tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                                QNull,     true},
+                {tblIPBin::ipbBlockedBy_usrID,  S(quint32),          QFV.integer().minValue(1),          QNull,     true},
+                {tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                                QNull,     true},
+                {tblIPBin::ipbStatus,           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active},
               },
-              { ///< Col               Reference Table     ForeignCol Rename      LeftJoin
-                {"ipbBlockedBy_usrID", "AAA.tblUser",      "usrID",   "Blocker_", true},
+              { ///< Col                        Reference Table             ForeignCol Rename      LeftJoin
+                {tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID,   "Blocker_", true},
               })
 {
 }

@@ -30,6 +30,17 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblServices {
+constexpr char Name[] = "tblServices";
+TARGOMAN_CREATE_CONSTEXPR(svcID);
+TARGOMAN_CREATE_CONSTEXPR(svcName);
+TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
+TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(svcStatus);
+}
+
 class Services : public ORM::clsTable
 {
     Q_OBJECT

@@ -21,6 +21,7 @@
  */
 
 #include "ForgotPassRequest.h"
+#include "User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuFPRStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuForgotPassLinkVia);
@@ -45,17 +46,17 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 
 ForgotPassRequest::ForgotPassRequest() :
     clsTable(AAASchema,
-              "tblForgotPassRequest",
-              { ///<ColName             Type                 Validation                         Default    RO   Sort  Filter Self  Virt   PK
-                {"fprUUID",             S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
-                {"fpr_usrID",           S(quint32),          QFV.integer().minValue(1),         QInvalid,  true},
-                {"fprRequestedVia",     S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
-                {"fprRequestDate",      S(TAPI::DateTime_t), QFV,                               QNull,     true},
-                {"fprApplyDate",        S(TAPI::DateTime_t), QFV,                               QNull,     true},
-                {"fprStatus",           S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New},
+              tblForgotPassRequest::Name,
+              { ///<ColName                             Type                 Validation                         Default    RO   Sort  Filter Self  Virt   PK
+                {tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
+                {tblForgotPassRequest::fpr_usrID,       S(quint32),          QFV.integer().minValue(1),         QInvalid,  true},
+                {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  true},
+                {tblForgotPassRequest::fprRequestDate,  S(TAPI::DateTime_t), QFV,                               QNull,     true},
+                {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     true},
+                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New},
               },
-              { ///< Col       Reference Table   ForeignCol
-                {"fpr_usrID",  "AAA.tblUser",    "usrID"},
+              { ///< Col                            Reference Table                 ForeignCol
+                {tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID},
               })
 {
 }

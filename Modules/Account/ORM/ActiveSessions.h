@@ -41,10 +41,25 @@ namespace Targoman {
 namespace API {
 namespace AAA {
 
+namespace tblActiveSessions {
+constexpr char Name[] = "tblActiveSessions";
+TARGOMAN_CREATE_CONSTEXPR(ssnKey);
+TARGOMAN_CREATE_CONSTEXPR(ssn_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ssnIP);
+TARGOMAN_CREATE_CONSTEXPR(ssnIPReadable);
+TARGOMAN_CREATE_CONSTEXPR(ssnCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(ssnInfo);
+TARGOMAN_CREATE_CONSTEXPR(ssnFingerPrint);
+TARGOMAN_CREATE_CONSTEXPR(ssnLastActivity);
+TARGOMAN_CREATE_CONSTEXPR(ssnRemember);
+TARGOMAN_CREATE_CONSTEXPR(ssnUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ssnStatus);
+}
 
 class ActiveSessions : public ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")
     bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")

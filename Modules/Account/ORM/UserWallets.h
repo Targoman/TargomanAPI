@@ -28,15 +28,31 @@
 
 namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuUserWalletStatus,
-                     Active = 'A',
+                     Active   = 'A',
                      Deactive = 'P',
-                     Removed = 'R'
+                     Removed  = 'R'
                                )
 }
 
 namespace Targoman {
 namespace API {
 namespace AAA {
+
+namespace tblUserWallets{
+constexpr char Name[] = "tblUserWallets";
+TARGOMAN_CREATE_CONSTEXPR(walID);
+TARGOMAN_CREATE_CONSTEXPR(wal_usrID);
+TARGOMAN_CREATE_CONSTEXPR(walName);
+TARGOMAN_CREATE_CONSTEXPR(walDefault);
+TARGOMAN_CREATE_CONSTEXPR(walMinBalance);
+TARGOMAN_CREATE_CONSTEXPR(walLastBalance);
+TARGOMAN_CREATE_CONSTEXPR(walSumIncome);
+TARGOMAN_CREATE_CONSTEXPR(walSumExpenses);
+TARGOMAN_CREATE_CONSTEXPR(walCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(walCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(walUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(walStatus);
+}
 
 class UserWallets : public ORM::clsTable
 {
@@ -57,7 +73,7 @@ private slots:
                               quint64 _walID = 0),
              "Transfer money to other user wallet. Default will be used if not defined")
 
-    bool REST(CREATE,deposit,(TAPI::JWT_t _JWT, quint32 _amount, quint64 _walID = 0),
+    bool REST(CREATE,deposit,(TAPI::JWT_t _JWT, quint32 _amount, TAPI::URL_t _callBack, quint64 _walID = 0),
              "Deposit money in the specified or default wallet")
 
     private:
