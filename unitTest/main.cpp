@@ -21,7 +21,7 @@
  */
 
 #include <QtTest>
-/*#include "testBase.hpp"
+#include "testBase.hpp"
 #include "testAccount.hpp"
 #include "testAccountORM.hpp"
 
@@ -30,25 +30,24 @@ QString APIURL = "http://127.0.0.1:10000/rest/v1";
 QString gEncodedJWT;
 QJsonObject gJWT;
 quint32 gUserID;
-*/
 
 int main(int argc, char *argv[])
 {
     QCoreApplication App(argc, argv);
-  /*  App.setAttribute(Qt::AA_Use96Dpi, true);
+    App.setAttribute(Qt::AA_Use96Dpi, true);
 
     clsDAC::addDBEngine(enuDBEngines::MySQL);
     clsDAC::setConnectionString("HOST=192.168.0.240;"
                                 "PORT=3306;"
                                 "USER=root;"
-                                "PASSWORD=targoman123;"
+                                "PASSWORD=targoman1234;"
                                 "SCHEMA=AAA");
 
     int FailedTests = 0;
     try{
         FailedTests += QTest::qExec(new testBase, argc, argv);
         FailedTests += QTest::qExec(new testAccount, argc, argv);
-        FailedTests += QTest::qExec(new testAccountORM, argc, argv);
+        //FailedTests += QTest::qExec(new testAccountORM, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }
@@ -61,7 +60,6 @@ int main(int argc, char *argv[])
     clsDAC::shutdown();
 
     return FailedTests;
-    */
-    return 0;
+    /**/
 }
 

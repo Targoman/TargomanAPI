@@ -23,9 +23,9 @@
 #define TESTACCOUNTORM_HPP
 
 #include "testCommon.hpp"
-#include "Helpers/AAA/clsJWT.hpp"
+#include "Interfaces/AAA/clsJWT.hpp"
 
-using namespace Targoman::API::Helpers::AAA;
+using namespace Targoman::API::AAA;
 
 class testAccountORM: public clsBaseTest
 {

@@ -23,11 +23,11 @@
 #define TESTACCOUNT_HPP
 
 #include "testCommon.hpp"
-#include "3rdParty/QRestServer/libsrc/Private/QJWT.h"
-#include "Helpers/AAA/clsJWT.hpp"
+#include "App/Server/QJWT.h"
+#include "Interfaces/AAA/clsJWT.hpp"
 
 using namespace Targoman::API;
-using namespace Targoman::API::Helpers::AAA;
+using namespace Targoman::API::AAA;
 
 class testAccount: public clsBaseTest
 {
@@ -36,8 +36,9 @@ class testAccount: public clsBaseTest
 private slots:
     void initTestCase(){
         clsDAC DAC;
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=?", {"unit_test@unittest.test"});
         DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=?", {"unit_test@unittest.test"});
-        DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName='unitTest', rolPrivileges='{}', rolSignupAllowedIPs='127.0.0.1'");
+        DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName='unitTest', rolCreatedBy_usrID=1");
     }
 
     void cleanupTestCase(){
@@ -51,11 +52,10 @@ private slots:
                                             {"emailOrMobile", "unit_test@unittest.test"},
                                             {"name", "unit"},
                                             {"family", "test"},
-                                            {"pass", "81dc9bdb52d04dc20036dbd8313ed055"},
+                                            {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", "unitTest"}
-                                        }).toUInt()) > 0);
+                                        }).toMap().value("usrID").toUInt()) > 0);
     }
-
     void ApproveEmail(){
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
@@ -74,14 +74,14 @@ private slots:
         QVERIFY((gEncodedJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test@unittest.test"},
-                                    {"pass", "1113183d7dc42beec92b6a393230db4b"},
+                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toString()).size());
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
         qDebug()<<gJWT;
 
         QVERIFY(clsJWT(gJWT).usrID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == enuUserStatus::Active);
+        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     void Logout(){
@@ -100,7 +100,7 @@ private slots:
         QVERIFY((gEncodedJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test@unittest.test"},
-                                    {"pass", "1113183d7dc42beec92b6a393230db4b"},
+                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toString()).size());
     }
@@ -137,36 +137,40 @@ private slots:
                         "Account/changePass", {},{
                             {"oldPass", "d769dd673f86addfe039dc2d2dab4f73"},
                             {"oldPassSalt", 1234},
-                            {"newPass", "81dc9bdb52d04dc20036dbd8313ed055"}
+                            {"newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0"}
                         }).toBool());
     }
 
     void ApproveMobile(){
         clsDAC DAC;
 
-        DAC.callSP("", "sp_CREATE_approvalRequest", {
-                       {"iWhat2Approve", "M"},
-                       {"iUserID", gUserID},
-                       {"iValue", "09121234567"},
-                       {"iPass","1113183d7dc42beec92b6a393230db4b"},
-                       {"iSalt", 1234}
-                   });
+        try{
+            DAC.callSP("", "sp_CREATE_approvalRequest", {
+                           {"iWhat2Approve", "M"},
+                           {"iUserID", gUserID},
+                           {"iValue", "09121234567"},
+                           {"iPass","5d12d36cd5f66fe3e72f7b03cbb75333"},
+                           {"iSalt", 1234}
+                       });
 
-        QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
-        {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
+            QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
+            {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
-        {gUserID});
+            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
+            {gUserID});
 
-        QVERIFY(callAPI(POST,
-                        "Account/approveMobile", {},{
-                            {"mobile", "09121234567"},
-                            {"code", Code}
-                        }).toBool());
-        QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
-        {gUserID}).toJson(true).object().value("usrMobile").toString();
+            QVERIFY(callAPI(POST,
+                            "Account/approveMobile", {},{
+                                {"mobile", "09121234567"},
+                                {"code", Code}
+                            }).toBool());
+            QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
+            {gUserID}).toJson(true).object().value("usrMobile").toString();
 
-        QVERIFY(Mobile == "09121234567");
+            QVERIFY(Mobile == "09121234567");
+        }catch(std::exception &e){
+            QFAIL (e.what());
+        }
     }
 /**/
     //@TODO on update return updated info and update JWT

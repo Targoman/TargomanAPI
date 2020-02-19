@@ -19,15 +19,15 @@
 PRJDIR = ".."
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
-#    testCommon.hpp \
-#    testBase.hpp \
-#    testAccount.hpp \
-#    testAccountORM.hpp \
+    testCommon.hpp \
+    testBase.hpp \
+    testAccount.hpp \
+    testAccountORM.hpp \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
     main.cpp \
-#    ../3rdParty/QtCUrl/src/QtCUrl.cpp \
+   ../3rdParty/QtCUrl/src/QtCUrl.cpp \
 
 
 ################################################################################
