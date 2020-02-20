@@ -24,6 +24,13 @@
 #include "PrivHelpers.h"
 #include "Server/ServerConfigs.h"
 
+TAPI_REGISTER_METATYPE(
+            COMPLEXITY_Complex,
+            TAPI, stuInvoice,
+            [](const TAPI::stuInvoice& _value) -> QVariant{return _value.toJson().toVariantMap();}
+);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceStatus);
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -31,7 +38,6 @@ namespace Accounting{
 
 constexpr char PKG_REMAININGDAYS[] = "RD";
 constexpr char PKG_REMAININGHOURS[] = "RH";
-constexpr char PKG_LASTBREAKDATE[] = "BD";
 constexpr char PKG_STARTDATE[] = "SD";
 constexpr char PKG_ENDDATE[] = "ED";
 constexpr char PKG_STARTTIME[] = "ST";
@@ -44,13 +50,6 @@ constexpr char ASA_ISFROMPARENT[] = "IP";
 constexpr char ASA_TTL[] = "TT";
 constexpr char ASA_LIMITSONPARENT[] = "LP";
 
-constexpr char LIMIT_PERDAY[] = "PD";
-constexpr char LIMIT_PERWEEK[] = "PW";
-constexpr char LIMIT_PERMONTH[] = "PM";
-constexpr char LIMIT_TOTAL[] = "TT";
-constexpr char INFO_PACKAGES[] = "PK";
-constexpr char INFO_PARENT[] = "PR";
-constexpr char INFO_LIMITS[] = "LM";
 
 static QMap<QString, intfAccounting*> ServiceRegistry;
 
@@ -60,7 +59,6 @@ QJsonObject stuPackage::toJson(bool _full)
     QJsonObject Info;
     if(this->RemainingDays > -1) Info[PKG_REMAININGDAYS] = this->RemainingDays;
     if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
-    if(this->LastBreakDate.isValid()) Info[PKG_LASTBREAKDATE] = this->LastBreakDate.toString();
     if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
     if(this->EndDate.isValid()) Info[PKG_ENDDATE] = this->EndDate.toString();
     if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
@@ -80,7 +78,6 @@ QJsonObject stuPackage::toJson(bool _full)
 stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
 {
     this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
-    this->LastBreakDate = _obj.contains(PKG_LASTBREAKDATE) ? QDateTime::fromString(_obj.value(PKG_LASTBREAKDATE).toString()) : QDateTime();
     this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
     this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
     this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
@@ -91,26 +88,6 @@ stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
         LimitIter != Limits.end();
         LimitIter++)
         this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
-    return *this;
-}
-
-/******************************************************************/
-QJsonObject stuUsage::toJson() const
-{
-    QJsonObject Limit;
-    if(this->PerDay > -1) Limit[LIMIT_PERDAY] = this->PerDay;
-    if(this->PerWeek > -1) Limit[LIMIT_PERWEEK] = this->PerWeek;
-    if(this->PerMonth > -1) Limit[LIMIT_PERMONTH] = this->PerMonth;
-    if(this->Total > -1) Limit[LIMIT_TOTAL] = this->Total;
-    return Limit;
-}
-
-stuUsage& stuUsage::fromJson(const QJsonObject& _obj)
-{
-    this->PerDay   = static_cast<qint16>(_obj.contains(LIMIT_PERDAY) ? _obj.value(LIMIT_PERDAY).toInt() : -1);
-    this->PerWeek  = static_cast<qint32>(_obj.contains(LIMIT_PERWEEK) ? _obj.value(LIMIT_PERWEEK).toInt() : -1);
-    this->PerMonth = static_cast<qint32>(_obj.contains(LIMIT_PERMONTH) ? _obj.value(LIMIT_PERMONTH).toInt() : -1);
-    this->Total    = static_cast<qint64>(_obj.contains(LIMIT_TOTAL) ? _obj.value(LIMIT_TOTAL).toInt() : -1);
     return *this;
 }
 

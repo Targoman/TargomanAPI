@@ -25,7 +25,6 @@
 #include "Services.h"
 #include "UserWallets.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceType);
 
 namespace Targoman {
@@ -75,7 +74,7 @@ Invoice::Invoice() :
               tblInvoice::Name,
               { ///<ColName             Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblInvoice::invID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
-                {tblInvoice::invCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QNull,     UPNone},
+                {tblInvoice::invCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
                 {tblInvoice::inv_svcID,           S(QString),          QFV.asciiAlNum().minLenght(4).maxLenght(4), QInvalid,  UPNone},
                 {tblInvoice::inv_ordID,           S(quint64),          QFV.integer().minValue(1),                  QInvalid,  UPNone},
                 {tblInvoice::inv_usrID,           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  UPNone},

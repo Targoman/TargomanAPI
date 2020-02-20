@@ -64,14 +64,14 @@ BlockingRules::BlockingRules() :
                 {tblBlockingRules::blrStartingTime,     S(TAPI::DateTime_t),QFV,                             QNull,    UPNone, true},
                 {tblBlockingRules::blrEndingTime,       S(TAPI::DateTime_t),QFV,                             QNull,    UPAdmin},
                 {tblBlockingRules::blrCause,            S(QString),         QFV,                             QNull,    UPAdmin,false,false},
-                {tblBlockingRules::blrCreatedBy_usrID,  S(quint32),         QFV.integer().minValue(1),       QInvalid, UPNone},
-                {tblBlockingRules::blrCreationDateTime, S(TAPI::DateTime_t),QFV,                             QNull,    UPNone},
-                {tblBlockingRules::blrUpdatedBy_usrID,  S(quint32),         QFV.integer().minValue(1),       QNull,    UPNone},
+                {tblBlockingRules::blrCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblBlockingRules::blrCreationDateTime, ORM_CREATED_ON},
+                {tblBlockingRules::blrUpdatedBy_usrID,  ORM_UPDATED_BY},
                 {tblBlockingRules::blrStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active,UPAdmin},
               },
               { ///< Col                               Reference Table              ForeignCol          Rename     LeftJoin
-                {tblBlockingRules::blrCreatedBy_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,     "Creator_", true},
-                {tblBlockingRules::blrUpdatedBy_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,     "Updater_", true}
+                {tblBlockingRules::blrCreatedBy_usrID, ORM_JOIN_CREATOR},
+                {tblBlockingRules::blrUpdatedBy_usrID, ORM_JOIN_UPDATER}
               })
 {
 }

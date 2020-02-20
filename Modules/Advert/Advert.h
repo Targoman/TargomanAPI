@@ -51,6 +51,10 @@ struct stuAdvert{
                          });
     }
 };
+
+struct stuAdvertBill{
+
+};
 }
 
 namespace Targoman {
@@ -66,7 +70,6 @@ class Advert : public ORM::clsRESTAPIWithActionLogs, public Accounting::intfAcco
 
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
-    virtual QJsonObject todayPrivs(quint32 _usrID) final;
 
 private:
     Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID);
@@ -75,13 +78,22 @@ private:
     bool isEmpty(const Accounting::PackageRemaining_t& _limits) const;
 
 private slots:
-    TAPI::stuAdvert REST(GET,NewBanner,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order),
+    TAPI::stuAdvert REST(GET,NewBanner,(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
                          "Get new banner based on location and order info")
-    TAPI::stuAdvert REST(GET,NewText,(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords),
+    TAPI::stuAdvert REST(GET,NewText,(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, QString _keywords),
                          "Get new text advertisement")
-    QString   REST(GET,RetrieveURL, (const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
-                   "Retrieve URL of the specified Advertisement")
+    QString         REST(GET,RetrieveURL, (TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
+                        "Retrieve URL of the specified Advertisement")
 
+/***************************************************************************************************************************/
+    TAPI::stuPreInvoice REST(POST, preInvoice, (TAPI::PackageCode_t _pkg, TAPI::DiscountCode_t _discountCode = {}, QString _referer = {}, QJsonObject _extraRefererParams = {}),
+                          "create a pre-invoice based on input params")
+
+    TAPI::stuInvoice REST(POST, createInvoice, (TAPI::PackageCode_t _pkg, TAPI::URL_t _callBack, TAPI::DiscountCode_t _discountCode = {}, QString _referer = {}, QJsonObject _extraRefererParams = {}),
+                          "create a pre-invoice based on input params")
+
+    TAPI::stuInvoice REST(POST, approveInvoice, (TAPI::MD5_t _invCode, TAPI::JSON_t _bankInfo),
+                          "approve invoce back from bank")
 };
 
 }

@@ -34,7 +34,8 @@ HEADERS += \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
     Server/QtTypes.hpp \
-    Server/OpenAPIGenerator.h
+    Server/OpenAPIGenerator.h \
+    Server/test.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \

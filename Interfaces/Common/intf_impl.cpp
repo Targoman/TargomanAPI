@@ -40,7 +40,6 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
 }
 
 intfAPIArgManipulator::~intfAPIArgManipulator() {;}
-
 /******************************************************************************/
 intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
     Host(_host),
@@ -67,3 +66,8 @@ intfAPIModule::~intfAPIModule(){;}
 
 }
 }
+
+extern QString toCammel(const QString& _name){
+    return _name.mid(0,1).toLower() + _name.mid(1);
+}
+

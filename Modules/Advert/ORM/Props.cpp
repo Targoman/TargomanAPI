@@ -68,19 +68,19 @@ Props::Props() :
               { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
                 {tblProps::prp_binID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
                 {tblProps::prp_locID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {tblProps::prpOrder,            S(TAPI::enuAdvertOrder::Type), QFV,                       TAPI::enuAdvertOrder::Normal,  UPAll},
-                {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QInvalid,  UPAll},
-                {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPAll},
-                {tblProps::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPAll},
-                {tblProps::prpCreatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QInvalid,  UPNone},
-                {tblProps::prpCreationDateTime, S(TAPI::DateTime_t),    QFV,                              QNull,     UPNone},
-                {tblProps::prpUpdatedBy_usrID,  S(quint32),             QFV.integer().minValue(1),        QNull,     UPNone},
+                {tblProps::prpOrder,            S(TAPI::enuAdvertOrder::Type), QFV,                       TAPI::enuAdvertOrder::Normal,  UPOwner},
+                {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QInvalid,  UPOwner},
+                {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPOwner},
+                {tblProps::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QInvalid,  UPOwner},
+                {tblProps::prpCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblProps::prpCreationDateTime, ORM_CREATED_ON},
+                {tblProps::prpUpdatedBy_usrID,  ORM_UPDATED_BY},
               },
               { ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
                 {tblProps::prp_binID,           R(AdvertSchema,tblBin::Name),       tblBin::binID },
                 {tblProps::prp_locID,           R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-                {tblProps::prpCreatedBy_usrID,  R(AAASchema,tblUser::Name),         tblUser::usrID,   "Creator_", true},
-                {tblProps::prpUpdatedBy_usrID,  R(AAASchema,tblUser::Name),         tblUser::usrID,   "Updater_", true}
+                {tblProps::prpCreatedBy_usrID,  ORM_JOIN_CREATOR},
+                {tblProps::prpUpdatedBy_usrID,  ORM_JOIN_UPDATER},
               })
 {
 }

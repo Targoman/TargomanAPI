@@ -25,46 +25,70 @@
 
 #include "AAADefs.hpp"
 #include "clsJWT.hpp"
+#include "Interfaces/Common/GenericTypes.h"
 
 namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuUserPrefOnPackage,
-                     JustThis,
-                     UntillFinished,
-                     Auto
-                     )
+TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
+                     New      = 'N',
+                     Canceled = 'C',
+                     Finished = 'F',
+                     Removed  = 'R'
+                                )
 }
+
 namespace Targoman {
 namespace API {
 namespace AAA {
 namespace Accounting{
 
-struct stuUsage{
-    qint16 PerDay;  // can be -1 for unlimited
-    qint32 PerWeek; // can be -1 for unlimited
-    qint32 PerMonth;// can be -1 for unlimited
-    qint64 Total;   // can be -1 for unlimited
+TARGOMAN_DEFINE_ENUM(enuDiscountType,
+                     Percent = '%',
+                     Amount  = '$',
+                     Free    = 'Z')
 
-    stuUsage(qint16 _perDay = -1, qint32 _perWeek = -1, qint32 _perMonth = -1, qint64 _total = -1) :
-        PerDay(_perDay),
-        PerWeek(_perWeek),
-        PerMonth(_perMonth),
-        Total(_total)
-    {;}
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuPrize,
+        QString,      Desc      , QString()    , v.size(), v, v.toString(),
+        QJsonObject , PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
+        );
 
-    QJsonObject toJson() const ;
-    stuUsage& fromJson(const QJsonObject& _obj);
-};
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuDiscount,
+        qint64 , ID       , 0        , v > -1  , v, static_cast<qint64>(v.toDouble()),
+        QString, Name     , QString(), v.size(), v, v.toString(),
+        qint64 , Amount   , 0        , v       , v, static_cast<qint64>(v.toDouble()),
+        qint32 , MaxAmount, 0        , v       , v, static_cast<qint32>(v.toDouble()),
+        enuDiscountType::Type, Type, enuDiscountType::Percent, v, v,static_cast<enuDiscountType::Type>(v.toString().toLatin1().constData()[0])
+        );
 
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuInvoiceItem,
+        QString     , Desc      , QString()    , v.size(), v         , v.toString(),
+        qint64      , Price     , 0            , v       , v         , static_cast<qint64>(v.toDouble()),
+        qint16      , Count     , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
+        stuDiscount , Discount  , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
+
+        qint8       , TaxPercent, 0            , v       , v         , static_cast<qint8>(v.toInt()),
+        qint64      , TaxAmount , 0            , v       , v         , static_cast<qint64>(v.toDouble())
+)
+
+/*****************************************************************************/
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuUsage,
+        qint16, PerDay,   -1, v>-1, v, static_cast<qint16>(v.toInt()),
+        qint32, PerWeek,  -1, v>-1, v, static_cast<qint16>(v.toInt()),
+        qint32, PerMonth, -1, v>-1, v, static_cast<qint16>(v.toInt()),
+        qint64, Total,    -1, v>-1, v, static_cast<qint16>(v.toInt())
+        );
 typedef QMap<QString, stuUsage> PackageRemaining_t;
 
 struct stuPackage {
     quint64 PackageID;
     qint32 RemainingDays; // can be -1 for unlimited
     qint32 RemainingHours; // can be -1 for unlimited
-    QDateTime LastBreakDate;
     PackageRemaining_t  Remaining;
     QJsonObject Properties;
-    TAPI::enuUserPrefOnPackage::Type UserPreference;
 
     QDate StartDate; //can be invalid for normal accounts
     QDate EndDate; //can be invalid for normal accounts
@@ -74,22 +98,17 @@ struct stuPackage {
     stuPackage(quint64 _pkgID = 0,
                qint32    _remainingDays = -1,
                qint32    _remainingHours = -1,
-               QDateTime _lastBreakDate = {},
                PackageRemaining_t  _remaining = {},
                QDate     _startDate = {},
                QDate     _endDate = {},
                QTime     _startTime = {},
                QTime     _endTime = {},
-               QJsonObject _properties = {},
-               TAPI::enuUserPrefOnPackage::Type      _userPreference = TAPI::enuUserPrefOnPackage::Auto
-                                                                       ) :
+               QJsonObject _properties = {}) :
         PackageID(_pkgID),
         RemainingDays(_remainingDays),
         RemainingHours(_remainingHours),
-        LastBreakDate(_lastBreakDate),
         Remaining(_remaining),
         Properties(_properties),
-        UserPreference(_userPreference),
         StartDate(_startDate),
         EndDate(_endDate),
         StartTime(_startTime),
@@ -109,10 +128,10 @@ struct stuServiceAccountInfo{
     PackageRemaining_t  MyLimitsOnParent;
 
     stuServiceAccountInfo(ActivePackages_t _activePackages,
-            QSharedPointer<stuPackage> _preferedPackage,
-            quint32          _parentID,
-            PackageRemaining_t  _myLimitsOnParent
-            );
+                          QSharedPointer<stuPackage> _preferedPackage,
+                          quint32          _parentID,
+                          PackageRemaining_t  _myLimitsOnParent
+                          );
 };
 
 struct stuActiveServiceAccount{
@@ -159,5 +178,33 @@ extern intfAccounting* serviceAccounting(const QString& _serviceName);
 }
 }
 }
+
+#include <QJsonArray>
+namespace TAPI {
+using namespace Targoman::API::AAA::Accounting;
+typedef QList<stuInvoiceItem> InvItems_t;
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuPreInvoice,
+        InvItems_t    , Items   , InvItems_t() , v.size(),
+            [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
+            [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuInvoiceItem().fromJson(I.toObject())); return L;}(v),
+        stuPrize      , Prize   , stuPrize()   , v.Desc.size(), v.toJson(), stuPrize().fromJson(v.toObject()),
+        QString       , Summary , QString()    , v.size()     , v          , v.toString(),
+        qint64        , ToPay   , 0            , v>-1         , v          , static_cast<qint64>(v.toDouble())
+)
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuInvoice,
+        MD5_t                 , ID          , MD5_t()              , v.size(), v         , v.toString(),
+        stuPreInvoice         , Info        , stuPreInvoice()      , v.ToPay , v.toJson(), stuPreInvoice().fromJson(v.toObject()),
+        QString               , PaymentLink , QString()            , v.size(), v         , v.toString(),
+        enuInvoiceStatus::Type, Status      , enuInvoiceStatus::New, v       , v         ,static_cast<enuInvoiceStatus::Type>(v.toString().toLatin1().constData()[0])
+)
+
+}
+
+TAPI_DECLARE_METATYPE(TAPI::stuInvoice)
+TAPI_DECLARE_METATYPE(TAPI::enuInvoiceStatus::Type)
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_H

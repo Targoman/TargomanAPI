@@ -45,21 +45,21 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserGender);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserApproval);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAuditableStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceTemplateStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuPackageType);
 
 namespace Targoman {
 namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
-TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                     const QString& _login,
-                                     const TAPI::MD5_t& _pass,
-                                     const QString& _salt,
-                                     const TAPI::CommaSeparatedStringList_t& _services,
+TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
+                                     QString _login,
+                                     TAPI::MD5_t _pass,
+                                     QString _salt,
+                                     TAPI::CommaSeparatedStringList_t _services,
                                      bool _rememberMe,
-                                     const TAPI::JSON_t& _sessionInfo,
-                                     const TAPI::MD5_t& _fingerprint)
+                                     TAPI::JSON_t _sessionInfo,
+                                     TAPI::MD5_t _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -83,12 +83,12 @@ TAPI::EncodedJWT_t Account::apiLogin(const TAPI::RemoteIP_t& _REMOTE_IP,
 //TODO JWT lifetime dynamic based on current hour
 //
 
-TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
+TAPI::EncodedJWT_t Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
-                                            const QString& _oAuthToken,
-                                            const TAPI::CommaSeparatedStringList_t& _services,
-                                            const TAPI::JSON_t& _sessionInfo,
-                                            const TAPI::MD5_t& _fingerprint)
+                                            QString _oAuthToken,
+                                            TAPI::CommaSeparatedStringList_t _services,
+                                            TAPI::JSON_t _sessionInfo,
+                                            TAPI::MD5_t _fingerprint)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
@@ -116,7 +116,7 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(const TAPI::RemoteIP_t& _REMOTE_IP,
                            _services);
 }
 
-TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT, const QString& _services)
+TAPI::EncodedJWT_t Account::apiRefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _JWT, QString _services)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     clsJWT JWT(_JWT);
@@ -129,12 +129,12 @@ TAPI::EncodedJWT_t Account::apiRefreshJWT(const TAPI::RemoteIP_t& _REMOTE_IP, TA
                            Services);
 }
 
-QVariantMap Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                  const QString& _emailOrMobile,
-                                  const TAPI::MD5_t& _pass,
-                                  const QString& _role,
-                                  const QString& _name,
-                                  const QString& _family,
+QVariantMap Account::apiPUTSignup(TAPI::RemoteIP_t _REMOTE_IP,
+                                  QString _emailOrMobile,
+                                  TAPI::MD5_t _pass,
+                                  QString _role,
+                                  QString _name,
+                                  QString _family,
                                   TAPI::JSON_t _specialPrivs,
                                   qint8 _maxSessions)
 {
@@ -205,7 +205,7 @@ QVariantMap Account::apiPUTSignup(const TAPI::RemoteIP_t& _REMOTE_IP,
     return true;
 }
 
-QString Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _login)
+QString Account::apiCreateForgotPasswordLink(TAPI::RemoteIP_t _REMOTE_IP, QString _login)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
@@ -217,7 +217,7 @@ QString Account::apiCreateForgotPasswordLink(const TAPI::RemoteIP_t& _REMOTE_IP,
     return _login.contains('@') ? "email" : "mobile";
 }
 
-bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const QString& _oldPassSalt, const TAPI::MD5_t& _newPass)
+bool Account::apiChangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _oldPassSalt, TAPI::MD5_t _newPass)
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
@@ -230,7 +230,7 @@ bool Account::apiChangePass(TAPI::JWT_t _JWT, const TAPI::MD5_t& _oldPass, const
     return true;
 }
 
-bool Account::apiChangePassByUUID(const TAPI::RemoteIP_t& _REMOTE_IP, const TAPI::MD5_t& _uuid, const TAPI::MD5_t& _newPass)
+bool Account::apiChangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid, TAPI::MD5_t _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP("AAA.sp_UPDATE_changePassByUUID", {
@@ -240,8 +240,8 @@ bool Account::apiChangePassByUUID(const TAPI::RemoteIP_t& _REMOTE_IP, const TAPI
     return true;
 }
 
-bool Account::apiPOSTApproveEmail(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                  const TAPI::MD5_t& _uuid)
+bool Account::apiPOSTApproveEmail(TAPI::RemoteIP_t _REMOTE_IP,
+                                  TAPI::MD5_t _uuid)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {
@@ -251,9 +251,9 @@ bool Account::apiPOSTApproveEmail(const TAPI::RemoteIP_t& _REMOTE_IP,
     return true;
 }
 
-bool Account::apiPOSTApproveMobile(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                   const TAPI::Mobile_t _mobile,
-                                   const quint16& _code)
+bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
+                                   TAPI::Mobile_t _mobile,
+                                   quint16 _code)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {

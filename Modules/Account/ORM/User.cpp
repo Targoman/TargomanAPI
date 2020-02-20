@@ -88,7 +88,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     if(!_gender.isNull()) ToUpdate.insert(tblUser::usrGender, *_gender);
 
     if(ToUpdate.size())
-        return this->update({{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );
+        return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );
     return true;
 }
 
@@ -105,29 +105,29 @@ User::User() : clsTable(AAASchema,
                          tblUser::Name,
                          { ///<ColName                    Type                      Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
                            {tblUser::usrID,               S(quint32),          QFV.integer().minValue(1),            QInvalid, UPNone, true, true, true, false, true},
-                           {tblUser::usrGender,           S(TAPI::enuUserGender::Type), QFV,                            TAPI::enuUserGender::NotExpressed, UPAll},
-                           {tblUser::usrName,             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,    UPAll},
-                           {tblUser::usrFamily,           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,    UPAll},
-                           {tblUser::usrEmail,            S(TAPI::Email_t),    QFV.emailNotFake(),                   QNull,    UPAll},
-                           {tblUser::usrMobile,           S(TAPI::Mobile_t),   QFV,                                  QNull,    UPAll},
+                           {tblUser::usrGender,           S(TAPI::enuUserGender::Type), QFV,                            TAPI::enuUserGender::NotExpressed, UPOwner},
+                           {tblUser::usrName,             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,    UPOwner},
+                           {tblUser::usrFamily,           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,    UPOwner},
+                           {tblUser::usrEmail,            S(TAPI::Email_t),    QFV.emailNotFake(),                   QNull,    UPOwner},
+                           {tblUser::usrMobile,           S(TAPI::Mobile_t),   QFV,                                  QNull,    UPOwner},
                            {tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type),QFV,                        TAPI::enuUserApproval::None},
                          //{tblUser::usrPass,
                            {tblUser::usr_rolID,           S(quint32),          QFV.integer().minValue(1),            QInvalid, UPAdmin},
                            {tblUser::usrSpecialPrivs,     S(TAPI::JSON_t),     QFV,                                  QNull,    UPAdmin,false,false},
-                           {tblUser::usrLanguage,         S(QString),          QFV.languageCode(),                   "fa",     UPAll},
+                           {tblUser::usrLanguage,         S(QString),          QFV.languageCode(),                   "fa",     UPOwner},
                            {tblUser::usrMaxSessions,      S(quint32),          QFV.integer().betweenValues(-1, 100), -1,       UPAdmin},
                            {tblUser::usrActiveSessions,   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, UPNone},
                            {tblUser::usrLastLogin,        S(TAPI::DateTime_t), QFV,                                  QInvalid, UPNone},
-                           {tblUser::usrCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),            QInvalid, UPNone},
-                           {tblUser::usrCreationDateTime, S(TAPI::DateTime_t), QFV,                                  QNull,    UPNone},
-                           {tblUser::usrUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),            QNull,    UPNone},
+                           {tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY},
+                           {tblUser::usrCreationDateTime, ORM_CREATED_ON},
+                           {tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY},
                            {tblUser::usrStatus,           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
                            {tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},
                            {tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  "uei_usrID",  "",          true},
-                           {tblUser::usrCreatedBy_usrID, R(AAASchema, tblUser::Name),           "usrID",      "Creator_",  true},
-                           {tblUser::usrUpdatedBy_usrID, R(AAASchema, tblUser::Name),           "usrID",      "Updater_",  true},
+                           {tblUser::usrCreatedBy_usrID, ORM_JOIN_CREATOR},
+                           {tblUser::usrUpdatedBy_usrID, ORM_JOIN_UPDATER},
                          })
 {;}
 
@@ -163,9 +163,9 @@ UserExtraInfo::UserExtraInfo() :
                tblUserExtraInfo::Name,
                {  ///<ColName                             Type                      Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
 //                 {tblUserExtraInfo::uei_usrID,          S(quint32),               QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                   {tblUserExtraInfo::ueiExtraInfo,       S(QString),               QFV,                            QNull,  UPAll,false,false},
-                   {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),   QFV,                            QNull,  UPAll,false,false},
-                   {tblUserExtraInfo::ueiUpdatedBy_usrID, S(quint32),               QFV.integer().minValue(1),      QNull,  UPNone},
+                   {tblUserExtraInfo::ueiExtraInfo,       S(QString),               QFV,                            QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),   QFV,                            QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiUpdatedBy_usrID, ORM_UPDATED_BY},
                    {tblUserExtraInfo::ueiOAuthAccounts,   S(TAPI::JSON_t),          QFV,                            QNull,  UPNone}
                },
                { ///< Col                                 Reference Table                        ForeignCol           Rename          LeftJoin

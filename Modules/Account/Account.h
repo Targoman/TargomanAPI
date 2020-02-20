@@ -47,63 +47,63 @@ private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
 
 private slots:
-    TAPI::EncodedJWT_t REST(,Login,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                    const QString& _login,
-                                    const TAPI::MD5_t& _pass,
-                                    const QString& _salt,
-                                    const TAPI::CommaSeparatedStringList_t& _services = {},
+    TAPI::EncodedJWT_t REST(,Login,(TAPI::RemoteIP_t _REMOTE_IP,
+                                    QString _login,
+                                    TAPI::MD5_t _pass,
+                                    QString _salt,
+                                    TAPI::CommaSeparatedStringList_t _services = {},
                                     bool _rememberMe = false,
-                                    const TAPI::JSON_t& _sessionInfo = {},
-                                    const TAPI::MD5_t& _fingerprint = {}),
+                                    TAPI::JSON_t _sessionInfo = {},
+                                    TAPI::MD5_t _fingerprint = {}),
                             "Login user and return an encoded JWT if services are provided (as coma separated list) then user must have access to specified services")
 
-    TAPI::EncodedJWT_t REST(,LoginByOAuth,(const TAPI::RemoteIP_t& _REMOTE_IP,
+    TAPI::EncodedJWT_t REST(,LoginByOAuth,(TAPI::RemoteIP_t _REMOTE_IP,
                                            TAPI::enuOAuthType::Type _type,
-                                           const QString& _oAuthToken,
-                                           const TAPI::CommaSeparatedStringList_t& _services,
-                                           const TAPI::JSON_t& _sessionInfo = TAPI::JSON_t(),
-                                           const TAPI::MD5_t& _fingerprint = {}),
+                                           QString _oAuthToken,
+                                           TAPI::CommaSeparatedStringList_t _services,
+                                           TAPI::JSON_t _sessionInfo = TAPI::JSON_t(),
+                                           TAPI::MD5_t _fingerprint = {}),
                             "Login by Open Authentication and return an encoded JWT")
 
-    TAPI::EncodedJWT_t REST(,RefreshJWT,(const TAPI::RemoteIP_t& _REMOTE_IP, TAPI::JWT_t _JWT, const QString& _services = {}),
+    TAPI::EncodedJWT_t REST(,RefreshJWT,(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _JWT, QString _services = {}),
                             "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT")
 
-    QVariantMap REST(PUT,Signup,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                             const QString& _emailOrMobile,
-                             const TAPI::MD5_t& _pass,
-                             const QString& _role = "BaseUser",
-                             const QString& _name = "",
-                             const QString& _family = "",
-                             TAPI::JSON_t _specialPrivs = {},
-                             qint8 _maxSessions = -1),
-                 "Base method for signup with email address. this method can be called just by predefined IPs")
+    QVariantMap REST(PUT,Signup,( TAPI::RemoteIP_t _REMOTE_IP,
+                                  QString _emailOrMobile,
+                                  TAPI::MD5_t _pass,
+                                  QString _role = "BaseUser",
+                                  QString _name = "",
+                                  QString _family = "",
+                                  TAPI::JSON_t _specialPrivs = {},
+                                  qint8 _maxSessions = -1),
+                     "Base method for signup with email address. this method can be called just by predefined IPs")
 
     bool REST(,Logout,(TAPI::JWT_t _JWT),
               "Logout logged in user")
 
-    QString REST(,CreateForgotPasswordLink,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                         const QString& _login),
-              "Create a forgot password request returning a UUID for the requiest")
+    QString REST(,CreateForgotPasswordLink,(TAPI::RemoteIP_t _REMOTE_IP,
+                                            QString _login),
+                 "Create a forgot password request returning a UUID for the requiest")
 
     bool REST(,ChangePass,(TAPI::JWT_t _JWT,
-                           const TAPI::MD5_t& _oldPass,
-                           const QString& _oldPassSalt,
-                           const TAPI::MD5_t& _newPass
+                           TAPI::MD5_t _oldPass,
+                           QString     _oldPassSalt,
+                           TAPI::MD5_t _newPass
                            ),
               "Changes password of the logged-in user")
 
-    bool REST(,ChangePassByUUID,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                 const TAPI::MD5_t& _uuid,
-                                 const TAPI::MD5_t& _newPass
+    bool REST(,ChangePassByUUID,(TAPI::RemoteIP_t _REMOTE_IP,
+                                 TAPI::MD5_t _uuid,
+                                 TAPI::MD5_t _newPass
                                  ),
               "Changes password based on a UUID provided by ")
-    bool REST(POST,ApproveEmail,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                 const TAPI::MD5_t& _uuid),
+    bool REST(POST,ApproveEmail,(TAPI::RemoteIP_t _REMOTE_IP,
+                                 TAPI::MD5_t _uuid),
               "Approves Email by provided UUID")
 
-    bool REST(POST,ApproveMobile,(const TAPI::RemoteIP_t& _REMOTE_IP,
-                                  const TAPI::Mobile_t _mobile,
-                                  const quint16& _code),
+    bool REST(POST,ApproveMobile,(TAPI::RemoteIP_t _REMOTE_IP,
+                                  TAPI::Mobile_t _mobile,
+                                  quint16 _code),
               "Approves Mobile by provided mobile no and code")
 };
 

@@ -42,9 +42,9 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
         if(Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
     return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+") "
-           "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
-           "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
-           "Availabale Cols are: \n* " + Cols.join("\n* ");
+                                                                                            "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
+                                                                                                                                                               "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
+                                                                                                                                                               "Availabale Cols are: \n* " + Cols.join("\n* ");
 });
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
@@ -189,7 +189,7 @@ QString clsTable::finalColName(const clsORMField& _col, const QString& _prefix){
 QString clsTable::domain()
 {
     return Q_LIKELY(this->Domain.size()) ? this->Domain :
-        this->Domain = this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName();
+                                           this->Domain = this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName();
 }
 
 QString clsTable::makeColRenamedAs(const clsORMField& _col, const QString& _prefix) const {
@@ -217,7 +217,8 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _filters,
                                    const QString& _orderBy,
                                    const QString& _groupBy,
-                                   bool _reportCount)
+                                   bool _reportCount,
+                                   quint32 _cacheTime)
 {
     this->prepareFiltersList();
     if(_ORMFILTERS.contains(COLS_KEY))
@@ -239,27 +240,31 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
         }
 
         clsDAC DAC(this->domain(), this->Schema);
-        Table.Rows = DAC.execQuery("",
-                                   QString("SELECT ")
-                                   + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
-                                   + QUERY_SEPARATOR
-                                   + SelectItems.Cols.join("," + QUERY_SEPARATOR)
-                                   + QUERY_SEPARATOR
-                                   + "FROM "
-                                   + QUERY_SEPARATOR
-                                   + SelectItems.From.join(QUERY_SEPARATOR)
-                                   + QUERY_SEPARATOR
-                                   + "WHERE "
-                                   + (SelectItems.Where.isEmpty() ? "TRUE" : SelectItems.Where.join(QUERY_SEPARATOR))
-                                   + QUERY_SEPARATOR
-                                   + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
-                                   + SelectItems.GroupBy.join(',')
-                                   + QUERY_SEPARATOR
-                                   + (SelectItems.OrderBy.size() ? "ORDER BY " : "")
-                                   + SelectItems.OrderBy.join(',')
-                                   + QUERY_SEPARATOR
-                                   + QString("LIMIT %1,%2").arg(_offset).arg(_limit)
-                                   ).toJson(false, this->Converters).toVariant().toList();
+        QString QueryString = QString("SELECT ")
+                              + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
+                              + QUERY_SEPARATOR
+                              + SelectItems.Cols.join("," + QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "FROM "
+                              + QUERY_SEPARATOR
+                              + SelectItems.From.join(QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "WHERE "
+                              + (SelectItems.Where.isEmpty() ? "TRUE" : SelectItems.Where.join(QUERY_SEPARATOR))
+                              + QUERY_SEPARATOR
+                              + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
+                              + SelectItems.GroupBy.join(',')
+                              + QUERY_SEPARATOR
+                              + (SelectItems.OrderBy.size() ? "ORDER BY " : "")
+                              + SelectItems.OrderBy.join(',')
+                              + QUERY_SEPARATOR
+                              + QString("LIMIT %1,%2").arg(_offset).arg(_limit);
+
+        if(_cacheTime)
+            Table.Rows = DAC.execQueryCacheable(_cacheTime, "", QueryString).toJson(false, this->Converters).toVariant().toList();
+        else
+            Table.Rows = DAC.execQuery("", QueryString).toJson(false, this->Converters).toVariant().toList();
+
         if(_reportCount)
             Table.TotalRows = static_cast<qint64>(DAC.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
         return Table.toVariant();
@@ -281,21 +286,26 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                 Filters.append(this->makeColName(Col) + " = \"" + FilterIter.value().toString() + "\"");
         }
 
+        QString QueryString = QString("SELECT ")
+                              + QUERY_SEPARATOR
+                              + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "FROM "
+                              + QUERY_SEPARATOR
+                              + SelectItems.From.join(QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "WHERE "
+                              + (Filters.isEmpty() ? "TRUE" : Filters.join(" AND "))
+                              + QUERY_SEPARATOR
+                              + "LIMIT 2"; //Limit is set to 2 in roder to produce error if multi values are selected instead of one
+
         clsDAC DAC(this->domain(), this->Schema);
-        QJsonDocument Result = DAC.execQuery("",
-                                             QString("SELECT ")
-                                             + QUERY_SEPARATOR
-                                             + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
-                                             + QUERY_SEPARATOR
-                                             + "FROM "
-                                             + QUERY_SEPARATOR
-                                             + SelectItems.From.join(QUERY_SEPARATOR)
-                                             + QUERY_SEPARATOR
-                                             + "WHERE "
-                                             + (Filters.isEmpty() ? "TRUE" : Filters.join(" AND "))
-                                             + QUERY_SEPARATOR
-                                             + "LIMIT 2" //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-                                             ).toJson(true, this->Converters);
+        QJsonDocument Result;
+        if(_cacheTime)
+            Result = DAC.execQueryCacheable(_cacheTime, "", QueryString).toJson(true, this->Converters);
+        else
+            Result = DAC.execQuery("", QueryString).toJson(true, this->Converters);
+
         if(Result.object().isEmpty())
             throw exHTTPNotFound("No item could be found");
 
@@ -303,7 +313,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     }
 }
 
-bool clsTable::update(const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
+bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
 {
     this->prepareFiltersList();
     if(_ORMFILTERS.isEmpty())
@@ -345,6 +355,12 @@ bool clsTable::update(const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
         Values.append(FilterIter.value());
     }
 
+    foreach(auto Col, this->SelectableColsMap)
+        if(Col.updatableBy() == enuUpdatableBy::__UPDATER__){
+            UpdateCommands.append(this->makeColName(Col) + "=?");
+            Values.append(_actorID);
+        }
+
     clsDAC DAC(this->domain(), this->Schema);
     clsDACResult Result = DAC.execQuery("",
                                         QString("UPDATE ") + this->Schema + "." + this->Name
@@ -360,7 +376,7 @@ bool clsTable::update(const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
     return Result.numRowsAffected() > 0;
 }
 
-bool clsTable::deleteByPKs(ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
+bool clsTable::deleteByPKs(quint32 _actorID, ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
 {
     this->prepareFiltersList();
 
@@ -375,7 +391,7 @@ bool clsTable::deleteByPKs(ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, boo
                 break;
             }
 
-    if(this->update(_ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
+    if(this->update(_actorID, _ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
         return false;
 
     if(_realDelete == false)
@@ -437,7 +453,7 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
-QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
+QVariant clsTable::create(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
 {
     this->prepareFiltersList();
     QStringList  CreateCommands;
@@ -446,7 +462,7 @@ QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInf
         if(InfoIter->isValid() == false)
             continue;
         if(this->SelectableColsMap.contains(InfoIter.key()) == false)
-           throw exHTTPInternalServerError("Invalid filter: " + InfoIter.key());
+            throw exHTTPInternalServerError("Invalid filter: " + InfoIter.key());
         clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
         if(Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
@@ -459,16 +475,22 @@ QVariant clsTable::create(const QVariantMap& _ORMFILTERS, QVariantMap _createInf
         if(FilterIter->isValid() == false)
             continue;
         if(this->SelectableColsMap.contains(FilterIter.key()) == false)
-           throw exHTTPInternalServerError("Invalid filter: " + FilterIter.key());
+            throw exHTTPInternalServerError("Invalid filter: " + FilterIter.key());
 
         clsORMField& Col = this->SelectableColsMap[FilterIter.key()];
-/*        if(Col.isReadOnly())
+        /*        if(Col.isReadOnly())
             continue;*/
         //TODO check if required
         Col.validate(FilterIter.value());
         CreateCommands.append(this->makeColName(Col) + "=?");
         Values.append(Col.toDB(FilterIter.value().toString()));
     }
+
+    foreach(auto Col, this->SelectableColsMap)
+        if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
+            CreateCommands.append(this->makeColName(Col) + "=?");
+            Values.append(_actorID);
+        }
 
     clsDAC DAC(this->domain(), this->Schema);
     clsDACResult Result = DAC.execQuery("",
@@ -538,12 +560,12 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                 Function = RequiredCol.split('(').first();
                 ColName  = RequiredCol.split('(').last().replace(')', "");
                 if(Function != "COUNT"
-                        && Function != "COUNT_DISTINCT"
-                        && Function != "SUM"
-                        && Function != "AVG"
-                        && Function != "MAX"
-                        && Function != "MIN"
-                        )
+                   && Function != "COUNT_DISTINCT"
+                   && Function != "SUM"
+                   && Function != "AVG"
+                   && Function != "MAX"
+                   && Function != "MIN"
+                   )
                     throw exHTTPBadRequest("Invalid agroupation rule: " + RequiredCol);
             }else{
                 if(_groupBy.size())
@@ -666,11 +688,19 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             else if(PatternMatches.captured(2) == "=") Rule += " = ";
             else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
 
-            FilteredCol.Col.argSpecs().validate(PatternMatches.captured(3), PatternMatches.captured(1).trimmed().toLatin1());
+            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
+            QString Value = PatternMatches.captured(3);
+            if(Value == "NOW()"
+                || Value.startsWith("DATE_ADD(")
+                || Value.startsWith("DATE_SUB(")
+               )
+                Rule += Value.replace("$SPACE$", " ");
+            else{
+                FilteredCol.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
+                Rule += FilteredCol.Col.toDB(Value).toString();
+            }
+            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
 
-            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
-            Rule += FilteredCol.Col.toDB(PatternMatches.captured(3)).toString();
-            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
             CanStartWithLogical = true;
             LastLogical.clear();
         }

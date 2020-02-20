@@ -69,6 +69,7 @@ TARGOMAN_CREATE_CONSTEXPR(usrID);
 
 namespace tblUser{
 constexpr char Name[] = "tblUser";
+constexpr quint32 MinNormalUserID = 100;
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 TARGOMAN_CREATE_CONSTEXPR(usrGender);
 TARGOMAN_CREATE_CONSTEXPR(usrName);

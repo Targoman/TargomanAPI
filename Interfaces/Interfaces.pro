@@ -37,7 +37,8 @@ HEADERS += \
     NLP/TextProcessor.hpp \
     Common/HTTPExceptions.hpp \
     Common/intfAPIModule.h \
-    Common/GenericEnums.hpp
+    Common/GenericEnums.hpp \
+    Common/APIArgHelperMacros.hpp
 
 SOURCES += \
     AAA/Accounting.cpp \

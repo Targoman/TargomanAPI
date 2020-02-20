@@ -65,17 +65,17 @@ APITokenValidIPs::APITokenValidIPs() :
               { ///<ColName             Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblAPITokenValidIPs::tviID,               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
                 {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPNone},
-                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPAll},
+                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPOwner},
                 {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,  UPNone,false, false},
-                {tblAPITokenValidIPs::tviCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QInvalid,  UPNone},
-                {tblAPITokenValidIPs::tviCreationDateTime, S(TAPI::DateTime_t), QFV,                            QNull,     UPNone},
-                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),      QNull,     UPNone},
+                {tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON},
+                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY},
                 {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
               },
               { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin
                 {tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID},
-                {tblAPITokenValidIPs::tviCreatedBy_usrID, R(AAASchema,tblUser::Name),       tblUser::usrID,         "Creator_", true},
-                {tblAPITokenValidIPs::tviUpdatedBy_usrID, R(AAASchema,tblUser::Name),       tblUser::usrID,         "Updater_", true}
+                {tblAPITokenValidIPs::tviCreatedBy_usrID, ORM_JOIN_CREATOR},
+                {tblAPITokenValidIPs::tviUpdatedBy_usrID, ORM_JOIN_UPDATER}
               })
 {
 }

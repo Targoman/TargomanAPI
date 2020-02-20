@@ -53,7 +53,7 @@ using namespace AAA;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
-stuAdvert Advert::apiGETNewBanner(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order)
+stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order)
 {
       /*clsDACResult Result = AdvertDACInstance().execQuery(
                                 "",
@@ -61,12 +61,12 @@ stuAdvert Advert::apiGETNewBanner(const TAPI::RemoteIP_t& _REMOTE_IP, const QStr
                                 )*/
 }
 
-stuAdvert Advert::apiGETNewText(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
+stuAdvert Advert::apiGETNewText(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
 {
 
 }
 
-QString Advert::apiGETRetrieveURL(const TAPI::RemoteIP_t& _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent)
+QString Advert::apiGETRetrieveURL(TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent)
 {
 
 }
@@ -78,6 +78,8 @@ Advert::Advert() :
     this->addSubModule(new Advertisement::AccountPackages);
     this->addSubModule(new Advertisement::AccountUsage);
     this->addSubModule(new Advertisement::AccountUserPackages);
+    this->addSubModule(new Advertisement::AccountDiscounts);
+    //this->addSubModule(new Advertisement::AccountPrizes); // There is no prize in advertisement module
 
     this->addSubModule(new Advertisement::ActiveAds);
     this->addSubModule(new Advertisement::Bin);
@@ -87,37 +89,7 @@ Advert::Advert() :
     this->addSubModule(new Advertisement::Props);
 }
 
-QJsonObject Advert::todayPrivs(quint32 _usrID)
-{
-    DBManager::clsDACResult Result =
-            this->execQuery("SELECT tblAccountOrders.acoValidFrom,"
-                            "       tblAccountOrders.acoValidTo,"
-                            "       tblAccountOrders.acoMaxPerDayClicks,"
-                            "       tblAccountOrders.acoMaxPerWeekClicks,"
-                            "       tblAccountOrders.acoMaxPerMonthClicks,"
-                            "       tblAccountOrders.acoMaxTotalClicks"
-                            "  FROM tblAccountOrders"
-                            " WHERE tblAccountOrders.aco_usrID = ?"
-                            "   AND (ISNULL(tblAccountOrders.acoValidFrom) OR DATE(NOW()) >= tblAccountOrders.acoValidFrom)"
-                            "   AND (ISNULL(tblAccountOrders.acoValidTo)   OR DATE(NOW()) < tblAccountOrders.acoValidTo)"
-                            " ORDER BY tblAccountOrders.acoValidFrom ASC",
-                            {_usrID});
-
-/*    QJsonObject BestMatchedResult;
-    while(Result.next()){
-        if(BestMatchedResult.isEmpty()){
-            BestMatchedResult = Result.
-        }
-
-        QDateTime FromDate = Result.value(1).toDateTime();
-        QDateTime ToDate = Result.value(1).toDateTime();
-
-    }
-
-    return {{AdvertDomain, BestMatchedResult}};*/
-    return {};
-}
-
+/*******************************************************************************************************************/
 Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint32 _usrID)
 {
 
@@ -137,6 +109,17 @@ bool Advert::isEmpty(const Accounting::PackageRemaining_t& _limits) const
 {
 
 }
+/*******************************************************************************************************************/
+TAPI::stuPreInvoice Advert::apiPOSTpreInvoice(TAPI::PackageCode_t _pkg, TAPI::DiscountCode_t _discountCode, QString _referer, QJsonObject _extraRefererParams){
+
+}
+
+TAPI::stuInvoice Advert::apiPOSTcreateInvoice(TAPI::PackageCode_t _pkg, TAPI::URL_t _callBack, TAPI::DiscountCode_t _discountCode, QString _referer, QJsonObject _extraRefererParams){
+}
+
+TAPI::stuInvoice Advert::apiPOSTapproveInvoice(TAPI::MD5_t _invCode, TAPI::JSON_t _bankInfo){
+}
+
 
 }
 }

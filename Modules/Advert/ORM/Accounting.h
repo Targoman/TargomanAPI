@@ -34,52 +34,80 @@ namespace Advertisement {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblAccountPackages {
 constexpr char Name[] = "tblAccountPackages";
-TARGOMAN_CREATE_CONSTEXPR(acpID);
-TARGOMAN_CREATE_CONSTEXPR(acpCode);
-TARGOMAN_CREATE_CONSTEXPR(acpValidFromDate);
-TARGOMAN_CREATE_CONSTEXPR(acpValidToDate);
-TARGOMAN_CREATE_CONSTEXPR(acpValidFromTime);
-TARGOMAN_CREATE_CONSTEXPR(acpValidToTime);
-TARGOMAN_CREATE_CONSTEXPR(acp_locID);
-TARGOMAN_CREATE_CONSTEXPR(acpShowPerDay);
-TARGOMAN_CREATE_CONSTEXPR(acpShowTotal);
-TARGOMAN_CREATE_CONSTEXPR(acpClicksPerDay);
-TARGOMAN_CREATE_CONSTEXPR(acpClicksPerMonth);
-TARGOMAN_CREATE_CONSTEXPR(acpClicksTotal);
-TARGOMAN_CREATE_CONSTEXPR(acpPrivs);
-TARGOMAN_CREATE_CONSTEXPR(acpInvoiceTemplate);
-TARGOMAN_CREATE_CONSTEXPR(acpCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(acpCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(acpUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(acpStatus);
+TARGOMAN_CREATE_CONSTEXPR(pkgID);
+TARGOMAN_CREATE_CONSTEXPR(pkgCode);
+TARGOMAN_CREATE_CONSTEXPR(pkgType);
+TARGOMAN_CREATE_CONSTEXPR(pkgValidFromDate);
+TARGOMAN_CREATE_CONSTEXPR(pkgValidToDate);
+TARGOMAN_CREATE_CONSTEXPR(pkgValidFromTime);
+TARGOMAN_CREATE_CONSTEXPR(pkgValidToTime);
+TARGOMAN_CREATE_CONSTEXPR(pkg_locID);
+TARGOMAN_CREATE_CONSTEXPR(pkgShowPerDay);
+TARGOMAN_CREATE_CONSTEXPR(pkgShowTotal);
+TARGOMAN_CREATE_CONSTEXPR(pkgClicksPerDay);
+TARGOMAN_CREATE_CONSTEXPR(pkgClicksPerMonth);
+TARGOMAN_CREATE_CONSTEXPR(pkgClicksTotal);
+TARGOMAN_CREATE_CONSTEXPR(pkgPrivs);
+TARGOMAN_CREATE_CONSTEXPR(pkgCanBePurchasedSince);
+TARGOMAN_CREATE_CONSTEXPR(pkgNotAvailableSince);
+TARGOMAN_CREATE_CONSTEXPR(pkgInvoiceTemplate);
+TARGOMAN_CREATE_CONSTEXPR(pkgCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(pkgCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(pkgUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(pkgStatus);
 }
 
 namespace tblAccountUsage {
 constexpr char Name[] = "tblAccountUsage";
-TARGOMAN_CREATE_CONSTEXPR(acg_aupID);
-TARGOMAN_CREATE_CONSTEXPR(acgDayShow);
-TARGOMAN_CREATE_CONSTEXPR(acgTotalShow);
-TARGOMAN_CREATE_CONSTEXPR(acgDayClicks);
-TARGOMAN_CREATE_CONSTEXPR(acgMonthClicks);
-TARGOMAN_CREATE_CONSTEXPR(acgTotalClicks);
+TARGOMAN_CREATE_CONSTEXPR(usg_aupID);
+TARGOMAN_CREATE_CONSTEXPR(usgRemainingDays);
+TARGOMAN_CREATE_CONSTEXPR(usgDayShow);
+TARGOMAN_CREATE_CONSTEXPR(usgTotalShow);
+TARGOMAN_CREATE_CONSTEXPR(usgDayClicks);
+TARGOMAN_CREATE_CONSTEXPR(usgMonthClicks);
+TARGOMAN_CREATE_CONSTEXPR(usgTotalClicks);
 }
 
 namespace tblAccountUserPackages {
 constexpr char Name[] = "tblAccountUserPackages";
 TARGOMAN_CREATE_CONSTEXPR(aupID);
 TARGOMAN_CREATE_CONSTEXPR(aup_usrID);
-TARGOMAN_CREATE_CONSTEXPR(aup_acpID);
+TARGOMAN_CREATE_CONSTEXPR(aup_pkgID);
+TARGOMAN_CREATE_CONSTEXPR(aupPrefered);
 TARGOMAN_CREATE_CONSTEXPR(aupPurchaseRequestDateTime);
 TARGOMAN_CREATE_CONSTEXPR(aupPaymentDataTime);
 TARGOMAN_CREATE_CONSTEXPR(aup_invID);
+TARGOMAN_CREATE_CONSTEXPR(aupUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(aupStatus);
 }
+
+namespace tblAccountDiscounts {
+constexpr char Name[] = "tblAccountDiscounts";
+TARGOMAN_CREATE_CONSTEXPR(disID);
+TARGOMAN_CREATE_CONSTEXPR(disCode);
+TARGOMAN_CREATE_CONSTEXPR(disType);
+TARGOMAN_CREATE_CONSTEXPR(disPackageBasedAmount);
+TARGOMAN_CREATE_CONSTEXPR(disValidFrom);
+TARGOMAN_CREATE_CONSTEXPR(disExpiryTime);
+TARGOMAN_CREATE_CONSTEXPR(disPrimaryCount);
+TARGOMAN_CREATE_CONSTEXPR(disUsedCount);
+TARGOMAN_CREATE_CONSTEXPR(disCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(disCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(disUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(disStatus);
+}
+
 #pragma GCC diagnostic pop
 
 class AccountPackages: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
+    QVariant ORMGET("Get Available Packages")
+    bool ORMDELETE("Delete a package")
+    bool ORMUPDATE("Update a package info by priviledged user")
+    quint32 ORMCREATE("Create a new package by priviledged user")
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountPackages)
 };
@@ -89,6 +117,8 @@ class AccountUsage: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
+    QVariant ORMGET("Get User Usage on each package")
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUsage)
 };
@@ -98,10 +128,39 @@ class AccountUserPackages: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
+    QVariant ORMGET("Get User Packages")
+    bool REST(UPDATE, disablePackage, (TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH),
+              "Mark a user package banned by priviledged user")
+    bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH),
+              "Mark a user package as prefered")
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUserPackages)
 };
 
+/******************************************************/
+class AccountDiscounts: public ORM::clsTable
+{
+    Q_OBJECT
+private slots:
+    QVariant ORMGET("Get Active Discounts")
+    bool ORMDELETE("Delete a Discount")
+    bool ORMUPDATE("Update a Discount info by priviledged user")
+    quint32 ORMCREATE("Create a new Discount by priviledged user")
+
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountDiscounts)
+};
+
+/******************************************************/
+//There is no Prize in the advertisement module
+/*class AccountPrizes: public ORM::clsTable
+{
+    Q_OBJECT
+private slots:
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountPrizes)
+};
+*/
 }
 }
 }

@@ -59,10 +59,9 @@ TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
                      Removed = 'R'
                      )
 
-TARGOMAN_DEFINE_ENUM (enuInvoiceTemplateStatus,
-                      Active  = 'A',
-                      Removed = 'R',
-                      Expired = 'E',
+TARGOMAN_DEFINE_ENUM (enuPackageType,
+                      Normal  = 'N',
+                      Special = 'S',
                       );
 }
 
@@ -70,6 +69,6 @@ TAPI_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuUserGender::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuInvoiceTemplateStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuPackageType::Type);
 
 #endif // TARGOMAN_API_AAA_GENERICENUMS_HPP

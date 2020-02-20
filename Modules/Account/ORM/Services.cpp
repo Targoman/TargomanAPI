@@ -62,15 +62,15 @@ Services::Services() :
                 {tblServices::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
                 {tblServices::svcName,             S(QString),          QFV,                             QInvalid, UPAdmin},
                 {tblServices::svc_rolID,           S(quint32),          QFV,                             QInvalid, UPAdmin},
-                {tblServices::svcCreatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),       QInvalid, UPNone},
-                {tblServices::svcCreationDateTime, S(TAPI::DateTime_t), QFV,                             QNull,    UPNone},
-                {tblServices::svcUpdatedBy_usrID,  S(quint32),          QFV.integer().minValue(1),       QNull,    UPNone},
+                {tblServices::svcCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblServices::svcCreationDateTime, ORM_CREATED_ON},
+                {tblServices::svcUpdatedBy_usrID,  ORM_UPDATED_BY},
                 {tblServices::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPAdmin},
               },
               { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
                 {tblServices::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
-                {tblServices::svcCreatedBy_usrID,  R(AAASchema,tblUser::Name),      tblUser::usrID,     "Creator_", true},
-                {tblServices::svcUpdatedBy_usrID,  R(AAASchema,tblUser::Name),      tblUser::usrID,     "Updater_", true}
+                {tblServices::svcCreatedBy_usrID,  ORM_JOIN_CREATOR},
+                {tblServices::svcUpdatedBy_usrID,  ORM_JOIN_UPDATER},
               })
 {
 }

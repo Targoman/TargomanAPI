@@ -45,7 +45,7 @@ PaymentOrders::PaymentOrders() :
               { ///<ColName                             Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblPaymentOrders::pyoID,               S(quint64),             QFV.integer().minValue(1),          UPNone},
                 {tblPaymentOrders::pyoMD5,              S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
-                {tblPaymentOrders::pyoCreationDateTime, S(TAPI::DateTime_t),    QFV,                                QNull,      UPNone},
+                {tblPaymentOrders::pyoCreationDateTime, S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
                 {tblPaymentOrders::pyo_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
                 {tblPaymentOrders::pyoBankTrnID,        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
                 {tblPaymentOrders::pyoAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},

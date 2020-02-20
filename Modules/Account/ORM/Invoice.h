@@ -27,12 +27,6 @@
 #include "Interfaces/AAA/AAA.hpp"
 
 namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuInvoiceStatus,
-                     New      = 'N',
-                     Canceled = 'C',
-                     Finished = 'F',
-                     Removed  = 'R'
-                                )
 
 TARGOMAN_DEFINE_ENUM(enuInvoiceType,
                      Payment    = 'P',
@@ -79,7 +73,6 @@ private slots:
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuInvoiceStatus::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuInvoiceType::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_INVOICE_H

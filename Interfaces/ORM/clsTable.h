@@ -47,17 +47,17 @@ namespace API {
 
 #define DELETE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}
 #define DELETE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS
-#define DELETE_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS
+#define DELETE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _EXTRAPATH, _ORMFILTERS
 #define ORMDELETE(_doc) apiDELETE (DELETE_METHOD_ARGS_HEADER); QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER)); } QString docOfDELETE(){ return _doc; }
 
 #define UPDATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS= {}
 #define UPDATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS
-#define UPDATE_METHOD_CALL_ARGS   _ORMFILTERS
+#define UPDATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _ORMFILTERS
 #define ORMUPDATE(_doc) apiUPDATE (UPDATE_METHOD_ARGS_HEADER); QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER)); } QString docOfUPDATE(){ return _doc; }
 
 #define CREATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS= {}
 #define CREATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS
-#define CREATE_METHOD_CALL_ARGS   _ORMFILTERS
+#define CREATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _ORMFILTERS
 #define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
 namespace ORM {
@@ -126,13 +126,17 @@ public:
                              const QString& _filters,
                              const QString& _orderBy,
                              const QString& _groupBy,
-                             bool _reportCount);
+                             bool _reportCount,
+                             quint32 _cacheTime = 0);
 
-    bool update(const QVariantMap& _ORMFILTERS,
+    bool update(quint32 _actorID,
+                const QVariantMap& _ORMFILTERS,
                 QVariantMap _updateInfo = {});
-    QVariant create(const QVariantMap& _ORMFILTERS,
+    QVariant create(quint32 _actorID,
+                    const QVariantMap& _ORMFILTERS,
                     QVariantMap _createInfo = {});
-    bool deleteByPKs(TAPI::ExtraPath_t _EXTRAPATH,
+    bool deleteByPKs(quint32 _actorID,
+                     TAPI::ExtraPath_t _EXTRAPATH,
                      TAPI::ORMFilters_t _ORMFILTERS,
                      bool _realDelete = false);
 
@@ -189,8 +193,6 @@ private:
                                     const QString _groupBy = {}) const;
     QString makeColName(const clsORMField& _col, bool _appendAS = false, const stuRelation& _relation = InvalidRelation) const;
     QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})  const ;
-    virtual QJsonObject todayPrivs(quint32 _usrID) {Q_UNUSED(_usrID) return {}; }
-
 
 protected:
     QString Schema;

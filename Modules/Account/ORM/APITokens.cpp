@@ -72,16 +72,16 @@ APITokens::APITokens() :
                 {tblAPITokens::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull,     UPAdmin},
                 {tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QNull ,    UPNone},
                 {tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      0,         UPNone},
-                {tblAPITokens::aptCreatedBy_usrID,  S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone},
-                {tblAPITokens::aptCreationDateTime, S(TAPI::DateTime_t),   QFV,                            QNull,     UPNone},
-                {tblAPITokens::aptUpdatedBy_usrID,  S(quint32),            QFV.integer().minValue(1),      QNull,     UPNone},
+                {tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblAPITokens::aptCreationDateTime, ORM_CREATED_ON},
+                {tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY},
                 {tblAPITokens::aptStatus,           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active, UPAdmin},
               },
               { ///< Col                           Reference Table                 ForeignCol             Rename      LeftJoin
                 {tblAPITokens::apt_svcID,          R(AAASchema,tblServices::Name), tblServices::svcID,    {},         true},
                 {tblAPITokens::apt_usrID,          R(AAASchema,tblUser::Name),     tblUser::usrID,        "Owner_",   true},
-                {tblAPITokens::aptCreatedBy_usrID, R(AAASchema,tblUser::Name),     tblUser::usrID,        "Creator_", true},
-                {tblAPITokens::aptUpdatedBy_usrID, R(AAASchema,tblUser::Name),     tblUser::usrID,        "Updater_", true}
+                {tblAPITokens::aptCreatedBy_usrID, ORM_JOIN_CREATOR},
+                {tblAPITokens::aptUpdatedBy_usrID, ORM_JOIN_UPDATER},
               })
 {
 }

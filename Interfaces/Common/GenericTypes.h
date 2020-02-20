@@ -168,6 +168,10 @@ TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
 TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
 TAPI_ADD_SIMPLE_TYPE(QString, URL_t);
+
+TAPI_ADD_SIMPLE_TYPE(QString, PackageCode_t);
+TAPI_ADD_SIMPLE_TYPE(QString, DiscountCode_t);
+
 }
 
 /**********************************************************************/
@@ -194,6 +198,8 @@ TAPI_DECLARE_METATYPE(TAPI::Time_t)
 TAPI_DECLARE_METATYPE(TAPI::DateTime_t)
 TAPI_DECLARE_METATYPE(TAPI::Base64Image_t)
 TAPI_DECLARE_METATYPE(TAPI::URL_t)
+TAPI_DECLARE_METATYPE(TAPI::PackageCode_t)
+TAPI_DECLARE_METATYPE(TAPI::DiscountCode_t)
 TAPI_DECLARE_METATYPE(TAPI::enuGenericStatus::Type);
 
 

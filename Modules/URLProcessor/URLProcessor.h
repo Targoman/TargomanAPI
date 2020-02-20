@@ -28,10 +28,6 @@
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
-#endif
-
 class URLProcessor : public intfAPIModule
 {
     Q_OBJECT
@@ -39,17 +35,14 @@ class URLProcessor : public intfAPIModule
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_DEFINE_API_MODULE(URLProcessor);
 
-public:
-    virtual QJsonObject todayPrivs(quint32 _usrID) final { Q_UNUSED(_usrID) return {};}
-
 private slots:
-    QString API(GET, canonicalize, (const QString _url, bool _removeWWW = true),
+    QString REST(GET, canonicalize, (const QString _url, bool _removeWWW = true),
                 "normalizes url in a common format to be canonical")
 
-    QString API(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
+    QString REST(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
                 "helper method which converts URL encoded strings to normal strings")
 
-    QVariantMap API(UPDATE, test, (TAPI::JWT_t _JWT,
+    QVariantMap REST(UPDATE, test, (TAPI::JWT_t _JWT,
                             NULLABLE(TAPI::enuGenericStatus::Type) _sex = {},
                             NULLABLE(QString) _name = {},
                             NULLABLE(QString) _family = {},

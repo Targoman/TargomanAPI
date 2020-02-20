@@ -160,6 +160,9 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Time_t, optional(QFV
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DateTime_t, optional(QFV.dateTime()), _value, [](const QList<clsORMField>&){ return "A valid datetime"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t, optional(QFV.url()), _value, [](const QList<clsORMField>&){ return "A valid URL"; });
 
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, PackageCode_t,  optional(QFV.asciiAlNum(false, "-_").minLenght(3).maxLenght(20)), _value, [](const QList<clsORMField>&){ return "A valid PackageCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DiscountCode_t, optional(QFV.asciiAlNum(false, "-_").minLenght(3).maxLenght(20)), _value, [](const QList<clsORMField>&){ return "A valid DiscountCode"; });
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 
 

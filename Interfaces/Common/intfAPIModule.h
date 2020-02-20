@@ -135,7 +135,6 @@ public:
     virtual bool requiresTextProcessor() const {return false;}
     virtual bool requiresFormalityChecker() const {return false;}
     virtual QString parentModuleName() const = 0;
-    virtual QJsonObject todayPrivs(quint32 _usrID) = 0;
     virtual void init() {}
 
 protected:
