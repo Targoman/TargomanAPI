@@ -67,7 +67,7 @@ BlockingRules::BlockingRules() :
                 {tblBlockingRules::blrCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblBlockingRules::blrCreationDateTime, ORM_CREATED_ON},
                 {tblBlockingRules::blrUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblBlockingRules::blrStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active,UPAdmin},
+                {tblBlockingRules::blrStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active,UPStatus},
               },
               { ///< Col                               Reference Table              ForeignCol          Rename     LeftJoin
                 {tblBlockingRules::blrCreatedBy_usrID, ORM_JOIN_CREATOR},

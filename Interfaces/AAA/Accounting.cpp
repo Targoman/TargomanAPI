@@ -36,6 +36,8 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
+constexpr char PKG_ID[] = "ID";
+constexpr char PKG_CODE[] = "CD";
 constexpr char PKG_REMAININGDAYS[] = "RD";
 constexpr char PKG_REMAININGHOURS[] = "RH";
 constexpr char PKG_STARTDATE[] = "SD";
@@ -57,13 +59,15 @@ static QMap<QString, intfAccounting*> ServiceRegistry;
 QJsonObject stuPackage::toJson(bool _full)
 {
     QJsonObject Info;
-    if(this->RemainingDays > -1) Info[PKG_REMAININGDAYS] = this->RemainingDays;
+    if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
+    if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
+    if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
     if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
     if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
-    if(this->EndDate.isValid()) Info[PKG_ENDDATE] = this->EndDate.toString();
+    if(this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
     if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
-    if(this->EndTime.isValid()) Info[PKG_ENDTIME] = this->EndTime.toString();
-    if(this->Properties.size()) Info[PKG_PROPS] = this->Properties;
+    if(this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
+    if(this->Properties.size())   Info[PKG_PROPS] = this->Properties;
     if(_full){
         QJsonObject Limits;
         for(auto LimitIter = this->Remaining.begin();
@@ -77,7 +81,10 @@ QJsonObject stuPackage::toJson(bool _full)
 
 stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
 {
+    this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
+    this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
     this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
+    this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
     this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
     this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
     this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();

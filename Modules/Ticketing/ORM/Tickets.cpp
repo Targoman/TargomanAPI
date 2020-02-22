@@ -60,7 +60,7 @@ Tickets::Tickets() :
                 {tblTickets::tktCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblTickets::tktCreationDateTime, ORM_CREATED_ON},
                 {tblTickets::tktUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New,   UPNone},
+                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New,   UPStatus},
               },
               { ///< Col                          Reference Table                           ForeignCol                 Rename     LeftJoin
                 {tblTickets::tktInReply_tktID,    R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true},

@@ -65,7 +65,7 @@ Services::Services() :
                 {tblServices::svcCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblServices::svcCreationDateTime, ORM_CREATED_ON},
                 {tblServices::svcUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblServices::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPAdmin},
+                {tblServices::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
                 {tblServices::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},

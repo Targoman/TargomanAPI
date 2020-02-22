@@ -50,7 +50,7 @@ Bin::Bin() :
                 {tblBin::binCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblBin::binCreationDateTime, ORM_CREATED_ON},
                 {tblBin::binUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblBin::binStatus,           S(TAPI::enuAuditableStatus::Type),QFV,                            TAPI::enuAuditableStatus::Pending, UPOwner},
+                {tblBin::binStatus,           S(TAPI::enuAuditableStatus::Type),QFV,                            TAPI::enuAuditableStatus::Pending, UPStatus},
               },
               { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
                 {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},

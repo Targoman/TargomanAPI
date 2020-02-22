@@ -64,7 +64,7 @@ ActiveSessions::ActiveSessions() :
                 {tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t),   QFV,                         QNull,      UPNone},
                 {tblActiveSessions::ssnRemember,         S(bool),               QFV,                         false,      UPNone},
                 {tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblActiveSessions::ssnStatus,           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active},
+                {tblActiveSessions::ssnStatus,           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active,UPStatus},
               },
               { ///< Col                                Reference Table                  ForeignCol          Rename      LeftJoin
                 {tblActiveSessions::ssn_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID,     "Owner_"},

@@ -49,7 +49,7 @@ PaymentOrders::PaymentOrders() :
                 {tblPaymentOrders::pyo_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
                 {tblPaymentOrders::pyoBankTrnID,        S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
                 {tblPaymentOrders::pyoAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
-                {tblPaymentOrders::pyoStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPNone},
+                {tblPaymentOrders::pyoStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPStatus},
                 {tblPaymentOrders::pyoResult,           S(QString),             QFV,                                QNull,      UPNone,false,false},
               },
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin

@@ -62,7 +62,7 @@ Locations::Locations() :
                 {tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblLocations::locCreationDateTime, ORM_CREATED_ON},
                 {tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
+                {tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
                 {tblLocations::locCreatedBy_usrID,  ORM_JOIN_CREATOR},

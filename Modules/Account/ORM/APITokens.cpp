@@ -75,7 +75,7 @@ APITokens::APITokens() :
                 {tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblAPITokens::aptCreationDateTime, ORM_CREATED_ON},
                 {tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblAPITokens::aptStatus,           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active, UPAdmin},
+                {tblAPITokens::aptStatus,           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active, UPStatus},
               },
               { ///< Col                           Reference Table                 ForeignCol             Rename      LeftJoin
                 {tblAPITokens::apt_svcID,          R(AAASchema,tblServices::Name), tblServices::svcID,    {},         true},

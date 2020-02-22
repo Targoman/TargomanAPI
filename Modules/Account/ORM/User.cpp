@@ -121,7 +121,7 @@ User::User() : clsTable(AAASchema,
                            {tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY},
                            {tblUser::usrCreationDateTime, ORM_CREATED_ON},
                            {tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY},
-                           {tblUser::usrStatus,           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate},
+                           {tblUser::usrStatus,           S(TAPI::enuUserStatus::Type), QFV,                         TAPI::enuUserStatus::MustValidate,UPStatus},
                          },
                          { ///< Col               Reference Table          ForeignCol    Rename     LeftJoin
                            {tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},

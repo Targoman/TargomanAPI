@@ -55,7 +55,7 @@ ApprovalRequest::ApprovalRequest() :
                 {tblApprovalRequest::aprApprovalValue,  S(QString),             QFV.allwaysInvalid(),            {},        UPNone,false,false},
                 {tblApprovalRequest::aprRequestDate,    S(TAPI::DateTime_t),    QFV,                             QNull,     UPNone},
                 {tblApprovalRequest::aprApplyDate,      S(TAPI::DateTime_t),    QFV,                             QNull,     UPNone},
-                {tblApprovalRequest::aprStatus,         S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New, UPNone},
+                {tblApprovalRequest::aprStatus,         S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New, UPStatus},
               },
               { ///< Col                                 Reference Table                  ForeignCol        Rename     LeftJoin
                 {tblApprovalRequest::apr_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID},

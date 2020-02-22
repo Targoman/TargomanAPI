@@ -70,7 +70,7 @@ APITokenValidIPs::APITokenValidIPs() :
                 {tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON},
                 {tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active},
+                {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin
                 {tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID},

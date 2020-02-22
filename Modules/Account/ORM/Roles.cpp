@@ -67,7 +67,7 @@ Roles::Roles() :
                 {tblRoles::rolCreatedBy_usrID,   ORM_CREATED_BY},
                 {tblRoles::rolCreationDateTime,  ORM_CREATED_ON},
                 {tblRoles::rolUpdatedBy_usrID,   ORM_UPDATED_BY},
-                {tblRoles::rolStatus,            S(TAPI::enuRoleStatus::Type), QFV,                       TAPI::enuRoleStatus::Active, UPAdmin},
+                {tblRoles::rolStatus,            S(TAPI::enuRoleStatus::Type), QFV,                       TAPI::enuRoleStatus::Active, UPStatus},
               },
               { ///< Col                       Reference Table                ForeignCol        Rename      LeftJoin
                 {tblRoles::rolParent_rolID,    R(AAASchema,tblRoles::Name),   tblRoles::rolID,  "Parent_",  true},

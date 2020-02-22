@@ -48,7 +48,7 @@ IPBin::IPBin() :
                 {tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                                QNull,     UPNone},
                 {tblIPBin::ipbBlockedBy_usrID,  S(quint32),          QFV.integer().minValue(1),          QNull,     UPNone},
                 {tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                                QNull,     UPNone},
-                {tblIPBin::ipbStatus,           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active,UPNone},
+                {tblIPBin::ipbStatus,           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active,UPStatus},
               },
               { ///< Col                        Reference Table             ForeignCol Rename      LeftJoin
                 {tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID,   "Blocker_", true},

@@ -76,17 +76,18 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         stuUsage,
-        qint16, PerDay,   -1, v>-1, v, static_cast<qint16>(v.toInt()),
-        qint32, PerWeek,  -1, v>-1, v, static_cast<qint16>(v.toInt()),
-        qint32, PerMonth, -1, v>-1, v, static_cast<qint16>(v.toInt()),
-        qint64, Total,    -1, v>-1, v, static_cast<qint16>(v.toInt())
+        qint32, PerDay,   -1, v>-1, v, static_cast<qint32>(v.toInt()),
+        qint32, PerWeek,  -1, v>-1, v, static_cast<qint32>(v.toInt()),
+        qint32, PerMonth, -1, v>-1, v, static_cast<qint32>(v.toInt()),
+        qint64, Total,    -1, v>-1, v, static_cast<qint64>(v.toInt())
         );
 typedef QMap<QString, stuUsage> PackageRemaining_t;
 
 struct stuPackage {
     quint64 PackageID;
+    QString PackageCode;
     qint32 RemainingDays; // can be -1 for unlimited
-    qint32 RemainingHours; // can be -1 for unlimited
+    qint8 RemainingHours; // can be -1 for unlimited
     PackageRemaining_t  Remaining;
     QJsonObject Properties;
 
@@ -95,9 +96,10 @@ struct stuPackage {
     QTime StartTime; //can be invalid for normal accounts
     QTime EndTime; //can be invalid for normal accounts
 
-    stuPackage(quint64 _pkgID = 0,
+    stuPackage(quint64   _pkgID = 0,
+               QString   _pkgCode = {},
                qint32    _remainingDays = -1,
-               qint32    _remainingHours = -1,
+               qint8     _remainingHours = -1,
                PackageRemaining_t  _remaining = {},
                QDate     _startDate = {},
                QDate     _endDate = {},
@@ -105,6 +107,7 @@ struct stuPackage {
                QTime     _endTime = {},
                QJsonObject _properties = {}) :
         PackageID(_pkgID),
+        PackageCode(_pkgCode),
         RemainingDays(_remainingDays),
         RemainingHours(_remainingHours),
         Remaining(_remaining),

@@ -81,7 +81,7 @@ Invoice::Invoice() :
                 {tblInvoice::invDesc,             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,     UPNone,false,false},
                 {tblInvoice::invPaymentType,      S(TAPI::enuInvoiceType::Type), QFV,                              TAPI::enuInvoiceType::Payment,UPNone},
                 {tblInvoice::invTotalAmount,      S(quint64),          QFV,                                        0,UPNone},
-                {tblInvoice::invStatus,           S(TAPI::enuInvoiceStatus::Type), QFV,                            TAPI::enuInvoiceStatus::New,UPNone},
+                {tblInvoice::invStatus,           S(TAPI::enuInvoiceStatus::Type), QFV,                            TAPI::enuInvoiceStatus::New,UPStatus},
               },
               { ///< Col       Reference Table   ForeignCol
                 {tblInvoice::inv_usrID,  R(AAASchema,tblUser::Name),     tblUser::usrID},

@@ -37,6 +37,7 @@ constexpr char Name[] = "tblAccountPackages";
 TARGOMAN_CREATE_CONSTEXPR(pkgID);
 TARGOMAN_CREATE_CONSTEXPR(pkgCode);
 TARGOMAN_CREATE_CONSTEXPR(pkgType);
+TARGOMAN_CREATE_CONSTEXPR(pkgRemainingDays);
 TARGOMAN_CREATE_CONSTEXPR(pkgValidFromDate);
 TARGOMAN_CREATE_CONSTEXPR(pkgValidToDate);
 TARGOMAN_CREATE_CONSTEXPR(pkgValidFromTime);
@@ -99,7 +100,7 @@ TARGOMAN_CREATE_CONSTEXPR(disStatus);
 
 #pragma GCC diagnostic pop
 
-class AccountPackages: public ORM::clsTable
+class clsAccountPackages: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -109,22 +110,22 @@ private slots:
     quint32 ORMCREATE("Create a new package by priviledged user")
 
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountPackages)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPackages)
 };
 
 /******************************************************/
-class AccountUsage: public ORM::clsTable
+class clsAccountUsage: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
     QVariant ORMGET("Get User Usage on each package")
 
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUsage)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountUsage)
 };
 
 /******************************************************/
-class AccountUserPackages: public ORM::clsTable
+class clsAccountUserPackages: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -134,11 +135,11 @@ private slots:
     bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH),
               "Mark a user package as prefered")
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUserPackages)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountUserPackages)
 };
 
 /******************************************************/
-class AccountDiscounts: public ORM::clsTable
+class clsAccountDiscounts: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -148,17 +149,17 @@ private slots:
     quint32 ORMCREATE("Create a new Discount by priviledged user")
 
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountDiscounts)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountDiscounts)
 };
 
 /******************************************************/
 //There is no Prize in the advertisement module
-/*class AccountPrizes: public ORM::clsTable
+/*class clsAccountPrizes: public ORM::clsTable
 {
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountPrizes)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPrizes)
 };
 */
 }

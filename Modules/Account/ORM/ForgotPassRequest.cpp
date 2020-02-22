@@ -53,7 +53,7 @@ ForgotPassRequest::ForgotPassRequest() :
                 {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                QInvalid,  UPNone},
                 {tblForgotPassRequest::fprRequestDate,  S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},
                 {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},
-                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New, UPAdmin},
+                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New, UPStatus},
               },
               { ///< Col                            Reference Table                 ForeignCol
                 {tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID},

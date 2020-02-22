@@ -132,7 +132,7 @@ UserWallets::UserWallets() :
                 {tblUserWallets::walCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblUserWallets::walCreationDateTime, ORM_CREATED_ON},
                 {tblUserWallets::walUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblUserWallets::walStatus,           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active, UPAdmin},
+                {tblUserWallets::walStatus,           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active, UPStatus},
               },
               { ///< Col                              Reference Table               ForeignCol          Rename   LeftJoin
                 {tblUserWallets::wal_usrID,           R(AAASchema,tblUser::Name),   tblUser::usrID},

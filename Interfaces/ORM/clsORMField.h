@@ -41,7 +41,8 @@ TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
                      ALL,
                      NONE,
                      __UPDATER__,
-                     __CREATOR__
+                     __CREATOR__,
+                     __STATUS__
                      );
 
 class clsORMFieldData : public QSharedData{
@@ -162,6 +163,7 @@ static const QVariant       QAuto = QVariant();
 constexpr enuUpdatableBy::Type UPNone   = enuUpdatableBy::NONE;
 constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::ALL;
 constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;
+constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 
 ///                         Default     UPBy  Sort  Filter Self  Virt   PK
 #define ORM_PRIMARY_KEY     QInvalid,   UPNone, true, true, false, false, true

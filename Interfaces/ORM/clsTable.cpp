@@ -228,17 +228,6 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     if(_extraPath.isEmpty()){
         TAPI::stuTable Table;
 
-        if(this->BaseCols.last().name().endsWith("Status")){
-            bool StatusFilterFound = false;
-            foreach(auto Filter, SelectItems.Where)
-                if(Filter.split(' ').contains(this->BaseCols.last().name())){
-                    StatusFilterFound = true;
-                    break;
-                }
-            if(StatusFilterFound == false)
-                SelectItems.Where.append((SelectItems.Where.size() ? "AND " : " ") + this->BaseCols.last().name() + "!='R'");
-        }
-
         clsDAC DAC(this->domain(), this->Schema);
         QString QueryString = QString("SELECT ")
                               + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
@@ -623,6 +612,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     /****************************************************************************/
     quint8 OpenParenthesis = 0;
+    bool StatusColHasCriteria = false;
     bool CanStartWithLogical = false;
     QString LastLogical = "";
     _filters = _filters.replace("\\ ", "$SPACE$");
@@ -661,6 +651,9 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                 Rule+=this->makeColName(FilteredCol.Col, false, FilteredCol.Relation);
             else
                 throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
+
+            if(FilteredCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                StatusColHasCriteria = true;
 
             if(FilteredCol.Relation.Column.size() && UsedJoins.contains(FilteredCol.Relation) == false)
                 UsedJoins.append(FilteredCol.Relation);
@@ -712,6 +705,11 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     if(SelectItems.Where.isEmpty())
         SelectItems.Where.append("TRUE");
+
+    if(StatusColHasCriteria == false)
+        foreach(auto FCol, this->FilterableColsMap)
+            if(FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                SelectItems.Where.append("AND "+this->makeColName(FCol.Col)+"!='R'");
 
     /****************************************************************************/
 

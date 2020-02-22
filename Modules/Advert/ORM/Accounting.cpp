@@ -33,7 +33,7 @@ using namespace ORM;
 using namespace TAPI;
 
 /******************************************************/
-QVariant AccountPackages::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant clsAccountPackages::apiGET(GET_METHOD_ARGS_IMPL)
 {
     constexpr quint16 CACHE_TIME  = 15 * 60;
     QString ExtraFilters;
@@ -45,25 +45,25 @@ QVariant AccountPackages::apiGET(GET_METHOD_ARGS_IMPL)
     return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
 }
 
-bool AccountPackages::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool clsAccountPackages::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
-bool AccountPackages::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool clsAccountPackages::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 AccountPackages::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint32 clsAccountPackages::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-AccountPackages::AccountPackages() :
+clsAccountPackages::clsAccountPackages() :
     clsTable(AdvertSchema,
               tblAccountPackages::Name,
               { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
@@ -87,7 +87,7 @@ AccountPackages::AccountPackages() :
                 {tblAccountPackages::pkgCreatedBy_usrID,    ORM_CREATED_BY},
                 {tblAccountPackages::pkgCreationDateTime,   ORM_CREATED_ON},
                 {tblAccountPackages::pkgUpdatedBy_usrID,    ORM_UPDATED_BY},
-                {tblAccountPackages::pkgStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPAdmin},
+                {tblAccountPackages::pkgStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                                    Reference Table                         ForeignCol          Rename     LeftJoin
                 {tblAccountPackages::pkg_locID,             R(AdvertSchema, tblLocations::Name),    tblLocations::locID},
@@ -97,7 +97,7 @@ AccountPackages::AccountPackages() :
 {;}
 
 /******************************************************/
-QVariant AccountUsage::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant clsAccountUsage::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
@@ -105,7 +105,7 @@ QVariant AccountUsage::apiGET(GET_METHOD_ARGS_IMPL)
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-AccountUsage::AccountUsage() :
+clsAccountUsage::clsAccountUsage() :
     clsTable(AdvertSchema,
               tblAccountUsage::Name,
               { ///<ColName                         Type                    Validation                              Default UpBy   Sort  Filter Self  Virt   PK
@@ -123,7 +123,7 @@ AccountUsage::AccountUsage() :
 {;}
 
 /******************************************************/
-QVariant AccountUserPackages::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant clsAccountUserPackages::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
@@ -131,7 +131,7 @@ QVariant AccountUserPackages::apiGET(GET_METHOD_ARGS_IMPL)
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool AccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
+bool clsAccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
     bool Ok;
     quint64 UserPackageID = _EXTRAPATH.toUInt(&Ok);
     if(!Ok || !UserPackageID )
@@ -144,7 +144,7 @@ bool AccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::ExtraPa
     return false;
 }
 
-bool AccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
+bool clsAccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
     bool Ok;
     quint64 UserPackageID = _EXTRAPATH.toUInt(&Ok);
     if(!Ok || !UserPackageID )
@@ -157,7 +157,7 @@ bool AccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::ExtraP
                         });
 }
 
-AccountUserPackages::AccountUserPackages() :
+clsAccountUserPackages::clsAccountUserPackages() :
     clsTable(AdvertSchema,
               tblAccountUserPackages::Name,
               { ///<ColName                                         Type                    Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
@@ -169,7 +169,7 @@ AccountUserPackages::AccountUserPackages() :
                 {tblAccountUserPackages::aupPaymentDataTime,        S(TAPI::DateTime_t),    QFV,                        QNull,     UPAdmin},
                 {tblAccountUserPackages::aup_invID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
                 {tblAccountUserPackages::aupUpdatedBy_usrID,        ORM_UPDATED_BY},
-                {tblAccountUserPackages::aupStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPNone},
+                {tblAccountUserPackages::aupStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus},
               },
               { ///< Col                            Reference Table                               ForeignCol                     Rename     LeftJoin
                 {tblAccountUserPackages::aup_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,    "Owner_"},
@@ -180,31 +180,31 @@ AccountUserPackages::AccountUserPackages() :
     )
 {;}
 /******************************************************/
-QVariant AccountDiscounts::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant clsAccountDiscounts::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool AccountDiscounts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool clsAccountDiscounts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
-bool AccountDiscounts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool clsAccountDiscounts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 AccountDiscounts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint32 clsAccountDiscounts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-AccountDiscounts::AccountDiscounts() :
+clsAccountDiscounts::clsAccountDiscounts() :
     clsTable(AdvertSchema,
              tblAccountDiscounts::Name,
             { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
@@ -219,7 +219,7 @@ AccountDiscounts::AccountDiscounts() :
               {tblAccountDiscounts::disCreatedBy_usrID,    ORM_CREATED_BY},
               {tblAccountDiscounts::disCreationDateTime,   ORM_CREATED_ON},
               {tblAccountDiscounts::disUpdatedBy_usrID,    ORM_UPDATED_BY},
-              {tblAccountDiscounts::disStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPAdmin},
+              {tblAccountDiscounts::disStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
             },
             { ///< Col                                     Reference Table                         ForeignCol          Rename     LeftJoin
               {tblAccountDiscounts::disCreatedBy_usrID,    ORM_JOIN_CREATOR},

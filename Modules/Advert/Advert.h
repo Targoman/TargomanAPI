@@ -28,33 +28,19 @@
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
+#include "ORM/Accounting.h"
 
 namespace TAPI{
-struct stuAdvert{
-    quint64 ID;
-    QString Title;
-    QString Description;
-    QString PrettyURL;
-    stuAdvert(quint64 _id = 0, QString _title = {}, QString _description = {}, QString _prettyURL = {}):
-        ID(_id),
-        Title(_title),
-        Description(_description),
-        PrettyURL(_prettyURL)
-    {}
 
-    QVariant toVariant() const{
-      return QVariantMap({
-                           {"id", this->ID},
-                             {"title", this->Title},
-                             {"description", this->Description},
-                             {"prettyURL", this->PrettyURL}
-                         });
-    }
-};
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+        stuAdvert,
+        qint64 , ID         , 0        , v>0      , v , static_cast<qint64>(v.toDouble()),
+        QString, Title      , QString(), v.size() , v , v.toString(),
+        QString, Description, QString(), v.size() , v , v.toString(),
+        QString, PrettyURL  , QString(), v.size() , v , v.toString(),
+        QString, URL        , QString(), v.size() , v , v.toString()
+)
 
-struct stuAdvertBill{
-
-};
 }
 
 namespace Targoman {
@@ -94,6 +80,12 @@ private slots:
 
     TAPI::stuInvoice REST(POST, approveInvoice, (TAPI::MD5_t _invCode, TAPI::JSON_t _bankInfo),
                           "approve invoce back from bank")
+private:
+    Advertisement::clsAccountPackages* AccountPackages;
+    Advertisement::clsAccountUserPackages* AccountUserPackages;
+    Advertisement::clsAccountUsage* AccountUsage;
+    Advertisement::clsAccountDiscounts* AccountDiscountss;
+    //    Advertisement::clsAccountPrizes* AccountUserPrizes;
 };
 
 }

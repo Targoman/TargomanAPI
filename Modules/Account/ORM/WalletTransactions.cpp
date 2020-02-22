@@ -49,7 +49,7 @@ WalletTransactions::WalletTransactions() :
                 {tblWalletsTransactions::wlt_invID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   UPNone, true, true},
                 {tblWalletsTransactions::wltDateTime,   S(TAPI::DateTime_t),        QFV,                                QNull,      UPNone},
                 {tblWalletsTransactions::wltAmount,     S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New, UPNone},
+                {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New, UPStatus},
               },
               { ///< Col                            Reference Table                         ForeignCol     Rename   LeftJoin
                 {tblWalletsTransactions::wlt_walID, R(AAASchema,tblUserWallets::Name),      tblUserWallets::walID},
