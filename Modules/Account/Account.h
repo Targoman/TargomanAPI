@@ -27,9 +27,15 @@
 
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "ORM/Payments.h"
+#include "Classes/Defs.hpp"
 
 namespace Targoman {
 namespace API {
+
+namespace AAA {
+class Voucher;
+}
 
 class Account : public ORM::clsRESTAPIWithActionLogs
 {
@@ -105,6 +111,42 @@ private slots:
                                   TAPI::Mobile_t _mobile,
                                   quint16 _code),
               "Approves Mobile by provided mobile no and code")
+
+    TAPI::stuVoucher REST(POST, finalizeBasket, (TAPI::JWT_t _JWT,
+                                                 TAPI::stuPreVoucher _preVoucher,
+                                                 QString _callBack = {},
+                                                 qint64 _walletID = -1,
+                                                 TAPI::enuPaymentGateways::Type _gateway = TAPI::enuPaymentGateways::Zibal),
+                          "create an Voucher based on preVoucher. "
+                          "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment, "
+                          "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
+                          "When callback is set to URL you must specify payment gateway")
+
+    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateways::Type _gateway, const QString _domain, QJsonObject _pgResponse),
+                          "approve payment back from payment gateway")
+
+    TAPI::stuVoucher REST(POST, approveOfflinePayment, (TAPI::JWT_t _JWT,
+                                                        quint64 _invID,
+                                                        const QString& _bank,
+                                                        const QString& _receiptCode,
+                                                        TAPI::Date_t _receiptDate,
+                                                        quint32 _amount,
+                                                        const QString& _note = {}),
+                          "approve Voucher by offline payment")
+
+    bool REST(POST, addPrizeTo,(TAPI::JWT_t _JWT,
+                                quint32 _targetUsrID,
+                                quint64 _amount,
+                                TAPI::JSON_t _desc),
+              "add prize to a user by priviledged user. "
+              "Description object must contain at least an string field named 'desc'")
+
+    bool REST(POST, addIncomeTo,(TAPI::JWT_t _JWT,
+                                 quint32 _targetUsrID,
+                                 quint64 _amount,
+                                 TAPI::JSON_t _desc),
+              "add income to a user by priviledged user. "
+              "Description object must contain at least an string field named 'desc'")
 };
 
 }

@@ -52,7 +52,7 @@ public:
     static QJsonObject verifyReturnPayload(const QString& _jwt);
 
 private:
-    static const QByteArray hash(const QByteArray& _data);
+    static QByteArray hash(const QByteArray& _data);
 
     friend class Targoman::API::AAA::clsJWT;
 };

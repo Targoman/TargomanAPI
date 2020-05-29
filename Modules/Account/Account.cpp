@@ -30,15 +30,17 @@
 #include "ORM/ApprovalRequest.h"
 #include "ORM/BlockingRules.h"
 #include "ORM/ForgotPassRequest.h"
-#include "ORM/Invoice.h"
+#include "ORM/Voucher.h"
 #include "ORM/IPBin.h"
 #include "ORM/Roles.h"
 #include "ORM/IPStats.h"
-#include "ORM/PaymentOrders.h"
+#include "ORM/Payments.h"
 #include "ORM/Services.h"
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
+
+#include "Classes/PaymentLogic.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
@@ -49,6 +51,8 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuPackageType);
 
 namespace Targoman {
 namespace API {
+
+using namespace DBManager;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
@@ -93,7 +97,7 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
     Authentication::stuOAuthInfo OAuthInfo;
-//TODO validate _oAuthToken
+    //TODO validate _oAuthToken
 
     switch(_type){
     case TAPI::enuOAuthType::Google:
@@ -263,26 +267,185 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
     return true;
 }
 
+TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
+                                                TAPI::stuPreVoucher _preVoucher,
+                                                QString _callBack,
+                                                qint64 _walletID,
+                                                TAPI::enuPaymentGateways::Type _gateway)
+{
+    if(_callBack.size() && _callBack != "OFFLINE")
+        QFV.url().validate(_callBack, "callBack");
+
+    if(_preVoucher.Items.isEmpty())
+        throw exHTTPBadRequest("seems that pre-Voucher is empty");
+
+    Accounting::checkPreVoucherSanity(_preVoucher);
+
+    TAPI::stuVoucher Voucher;
+    Voucher.Info = _preVoucher;
+    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), {}, {
+                                                  {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
+                                                  {tblVoucher::vchDesc, _preVoucher.toJson()},
+                                                  {tblVoucher::vchTotalAmount, _preVoucher.ToPay}
+                                              }).toULongLong();
+    try {
+        qint64 RemainingAfterWallet = 0;
+        if(_walletID>=0){
+            clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
+                                                   {"iWalletID", _walletID},
+                                                   {"iInvID", Voucher.ID},
+                                               });
+            RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay) - Result.spDirectOutputs().value("oAmount").toUInt();
+            if(RemainingAfterWallet < 0)
+                throw exHTTPInternalServerError("Remaining after wallet transaction is negative!");
+        }
+
+        if(RemainingAfterWallet > 0){
+            if(_callBack == "OFFLINE") {
+                //Do nothing as it will be created after information upload.
+            }else{
+                Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, _preVoucher.Summary, _preVoucher.ToPay, _callBack);
+            }
+        }
+    } catch (...) {
+        Voucher::instance().update(SYSTEM_USER_ID, {
+                                       {tblVoucher::vchID, Voucher.ID}
+                                   }, {
+                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
+                                   }
+                                   );
+        throw;
+    }
+
+    return Voucher;
+}
+
+TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateways::Type _gateway, const QString _domain, QJsonObject _pgResponse)
+{
+    quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
+    try{
+        this->callSP("sp_CREATE_walletTransactionOnPayment", {
+                         {"iVoucherID", VoucherID},
+                         {"iPaymentType", "O"}
+                     });
+        return PaymentLogic::processVoucher(VoucherID);
+    }catch(...){
+        Voucher::instance().update(SYSTEM_USER_ID, {
+                                       {tblVoucher::vchID, VoucherID}
+                                   }, {
+                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
+                                   }
+                                   );
+        throw;
+    }
+}
+
+TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
+                                                       quint64 _invID,
+                                                       const QString& _bank,
+                                                       const QString& _receiptCode,
+                                                       TAPI::Date_t _receiptDate,
+                                                       quint32 _amount,
+                                                       const QString& _note
+                                                       )
+{
+    qint64 ApprovalLimit = Authorization::getPrivValue(_JWT, "AAA:approveOffline:maxAmount").toLongLong();
+    if(ApprovalLimit == 0)
+        throw exAuthorization("Not enough access for offline approval");
+
+    if(ApprovalLimit > 0){
+        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_invID), {}, 0, 1, tblVoucher::vchTotalAmount).toMap();
+        if(Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
+            throw exAuthorization("Voucher total amount is greater than your approval limit");
+    }
+
+    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
+    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
+
+    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), {}, {
+                                           {"ofp_invID",_invID},
+                                           {"ofpBank",_bank},
+                                           {"ofpReceiptCode",_receiptCode},
+                                           {"ofpReceiptDate",_receiptDate},
+                                           {"ofpAmount",_amount},
+                                           {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
+                                       });
+
+    this->callSP("sp_CREATE_walletTransactionOnPayment", {
+                     {"iVoucherID", _invID},
+                     {"iPaymentType", "F"}
+                 });
+
+    return PaymentLogic::processVoucher(_invID);
+}
+
+bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+{
+    qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addPrizeTo:maxAmount").toLongLong();
+    if(Limit == 0)
+        throw exAuthorization("Not enough access to add prize");
+
+    if(Limit > 0){
+        if(_amount > static_cast<quint64>(Limit))
+            throw exAuthorization("Prize amount is greater than your limits");
+    }
+
+    QFV.hasKey("desc").validate(_desc, "desc");
+
+    this->callSP("sp_CREATE_increaseWallet", {
+                     {"iWalletID", 0},
+                     {"iToUsrID", _targetUsrID},
+                     {"iType", QString(static_cast<char>(TAPI::enuVoucherType::Prize))},
+                     {"iAmount", _amount},
+                     {"iDesc", _desc.toJson()},
+                 });
+    return true;
+}
+
+bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+{
+    qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addIncomeTo:maxAmount").toLongLong();
+    if(Limit == 0)
+        throw exAuthorization("Not enough access to add income");
+
+    if(Limit > 0){
+        if(_amount > static_cast<quint64>(Limit))
+            throw exAuthorization("Amount is greater than your limits");
+    }
+
+    QFV.hasKey("desc").validate(_desc, "desc");
+
+    this->callSP("sp_CREATE_increaseWallet", {
+                     {"iWalletID", 0},
+                     {"iToUsrID", _targetUsrID},
+                     {"iType", QString(static_cast<char>(TAPI::enuVoucherType::Income))},
+                     {"iAmount", _amount},
+                     {"iDesc", _desc.toJson()},
+                 });
+    return true;
+}
+
 Account::Account() :
     clsRESTAPIWithActionLogs("AAA", "Account")
 {
-    this->addSubModule(new ActiveSessions);
-    this->addSubModule(new APITokens);
-    this->addSubModule(new APITokenValidIPs);
-    this->addSubModule(new ApprovalRequest);
-    this->addSubModule(new BlockingRules);
-    this->addSubModule(new ForgotPassRequest);
-    this->addSubModule(new Invoice);
-    this->addSubModule(new IPBin);
-    this->addSubModule(new IPStats);
-    this->addSubModule(new PaymentOrders);
-    this->addSubModule(new Roles);
-    this->addSubModule(new Services);
-    this->addSubModule(new User);
-    this->addSubModule(new UserExtraInfo);
-    this->addSubModule(new UserWallets);
-    this->addSubModule(new WalletTransactions);
-    this->addSubModule(new WalletBalances);
+    this->addSubModule(&ActiveSessions::instance());
+    this->addSubModule(&APITokens::instance());
+    this->addSubModule(&APITokenValidIPs::instance());
+    this->addSubModule(&ApprovalRequest::instance());
+    this->addSubModule(&BlockingRules::instance());
+    this->addSubModule(&ForgotPassRequest::instance());
+    this->addSubModule(&Voucher::instance());
+    this->addSubModule(&IPBin::instance());
+    this->addSubModule(&IPStats::instance());
+    this->addSubModule(&OnlinePayments::instance());
+    this->addSubModule(&OfflinePayments::instance());
+    this->addSubModule(&Roles::instance());
+    this->addSubModule(&Services::instance());
+    this->addSubModule(&User::instance());
+    this->addSubModule(&UserExtraInfo::instance());
+    this->addSubModule(&UserWallets::instance());
+    this->addSubModule(&WalletTransactions::instance());
+    this->addSubModule(&WalletBalances::instance());
 }
 
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)

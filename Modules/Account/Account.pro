@@ -27,15 +27,19 @@ HEADERS += \
     ORM/ApprovalRequest.h \
     ORM/BlockingRules.h \
     ORM/ForgotPassRequest.h \
-    ORM/Invoice.h \
     ORM/IPBin.h \
     ORM/IPStats.h \
-    ORM/PaymentOrders.h \
     ORM/Services.h \
     ORM/User.h \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
-    ORM/Roles.h
+    ORM/Roles.h \
+    PaymentGateways/Zibal.hpp \
+    PaymentGateways/intfPaymentGateway.hpp \
+    ORM/Payments.h \
+    Classes/PaymentLogic.h \
+    ORM/Voucher.h \
+    Classes/Defs.hpp
 
 
 SOURCES += \
@@ -46,15 +50,16 @@ SOURCES += \
     ORM/ApprovalRequest.cpp \
     ORM/BlockingRules.cpp \
     ORM/ForgotPassRequest.cpp \
-    ORM/Invoice.cpp \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
-    ORM/PaymentOrders.cpp \
     ORM/Services.cpp \
     ORM/User.cpp \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \
-    ORM/Roles.cpp
+    ORM/Roles.cpp \
+    ORM/Payments.cpp \
+    Classes/PaymentLogic.cpp \
+    ORM/Voucher.cpp
 
 OTHER_FILES += \
 

@@ -38,7 +38,9 @@ HEADERS += \
     Common/HTTPExceptions.hpp \
     Common/intfAPIModule.h \
     Common/GenericEnums.hpp \
-    Common/APIArgHelperMacros.hpp
+    Common/APIArgHelperMacros.hpp \
+    AAA/Accounting_Interfaces.h \
+    AAA/Accounting_Defs.hpp
 
 SOURCES += \
     AAA/Accounting.cpp \
@@ -51,7 +53,8 @@ SOURCES += \
     ORM/clsTable.cpp \
     NLP/FormalityChecker.cpp \
     $$PRJDIR/3rdParty/E4MT/src/clsFormalityChecker.cpp \
-    Common/intf_impl.cpp
+    Common/intf_impl.cpp \
+    AAA/Accounting_Interfaces.cpp
 
 OTHER_FILES += \
 

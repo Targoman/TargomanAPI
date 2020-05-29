@@ -134,7 +134,7 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
             return QVariant();
         CurrCheckingPriv = CurrCheckingPriv.value(Part).toObject();
     }
-    return CurrCheckingPriv.value("");
+    return QVariant();
 }
 
 stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {

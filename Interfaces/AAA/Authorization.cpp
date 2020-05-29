@@ -55,12 +55,13 @@ bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _
 {
     if(_requiredAccess.isEmpty())
         return true;
+    QJsonObject Privs = privObjectFromInfo(_jwt);
 
-    if ( privObjectFromInfo(_jwt).isEmpty())
+    if ( Privs.isEmpty())
         return false;
 
     foreach(auto AccessItem, _requiredAccess)
-        if(PrivHelpers::hasPrivBase(privObjectFromInfo(_jwt), AccessItem, _isSelf) == false)
+        if(PrivHelpers::hasPrivBase(Privs, AccessItem, _isSelf) == false)
             return false;
     return true;
 }
@@ -71,10 +72,17 @@ void checkPriv(const TAPI::JWT_t &_jwt, const QStringList &_requiredAccess, bool
         throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
 }
 
+QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem){
+    QJsonObject Privs = privObjectFromInfo(_jwt);
+    if ( Privs.isEmpty()) return QVariant();
+    return  PrivHelpers::getPrivValue(Privs, _accessItem);
+}
+
 QJsonObject privObjectFromInfo(const QJsonObject& _info)
 {
     return _info.contains(AAACommonItems::privs) ? _info[AAACommonItems::privs].toObject() : _info;
-    }
+}
+
 
 }
 }

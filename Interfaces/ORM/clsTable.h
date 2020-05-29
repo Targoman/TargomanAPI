@@ -60,6 +60,8 @@ namespace API {
 #define CREATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _ORMFILTERS
 #define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
+static QString QUERY_SEPARATOR = "\n";
+
 namespace ORM {
 
 class clsTable;
@@ -79,7 +81,6 @@ struct stuRelation{
 };
 
 static stuRelation InvalidRelation("","","");
-static QString QUERY_SEPARATOR = "\n";
 static QString COLS_KEY = "cols";
 
 class clsTable : public intfAPIModule {

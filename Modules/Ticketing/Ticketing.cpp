@@ -103,8 +103,8 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
 Ticketing::Ticketing() :
     ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
 
-    this->addSubModule(new ORM::Tickets);
-    this->addSubModule(new ORM::TicketRead);
+    this->addSubModule(&ORM::Tickets::instance());
+    this->addSubModule(&ORM::TicketRead::instance());
 }
 
 }

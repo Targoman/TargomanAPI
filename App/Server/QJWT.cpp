@@ -147,7 +147,7 @@ QJsonObject QJWT::verifyReturnPayload(const QString& _jwt)
     return JWTPayload;
 }
 
-const QByteArray QJWT::hash(const QByteArray& _data)
+QByteArray QJWT::hash(const QByteArray& _data)
 {
     return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
     /*switch(QJWT::HashAlgorithm.value()){

@@ -24,6 +24,7 @@
 #define TAPI_HTTPEXCEPTIONS_H
 
 #include "libTargomanCommon/exTargomanBase.h"
+#include "QHttp/qhttpfwd.hpp"
 
 namespace Targoman {
 namespace API {

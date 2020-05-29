@@ -40,7 +40,7 @@ namespace Targoman {
 namespace API {
 
 /**********************************************************************/
-/** @TODO document QT_NO_CAST_FROM_ASCII */
+/**  document QT_NO_CAST_FROM_ASCII */
 /**********************************************************************/
 /**
   * @brief CACHEABLE macros are predefined macros in order to mark each API cache TTL. You can add more cache time as you wish while
@@ -171,14 +171,15 @@ public: _name()
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \
-    _name(); \
     QString moduleFullName(){return Targoman::Common::demangle(typeid(_name).name());}\
     QString moduleBaseName(){return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module,_name)));}  \
     ModuleMethods_t listOfMethods() final { \
         throw Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     QString parentModuleName() const final{return TARGOMAN_M2STR(_module);} \
+    static _name& instance(){static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name));} \
 private: \
+    _name(); \
     Q_DISABLE_COPY(_name) \
 
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \

@@ -44,8 +44,9 @@ namespace tblWalletsTransactions{
 constexpr char Name[] = "tblWalletsTransactions";
 TARGOMAN_CREATE_CONSTEXPR(wltID);
 TARGOMAN_CREATE_CONSTEXPR(wlt_walID);
-TARGOMAN_CREATE_CONSTEXPR(wlt_invID);
+TARGOMAN_CREATE_CONSTEXPR(wlt_vchID);
 TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
+TARGOMAN_CREATE_CONSTEXPR(wlt_vchType);
 TARGOMAN_CREATE_CONSTEXPR(wltAmount);
 TARGOMAN_CREATE_CONSTEXPR(wltStatus);
 }
@@ -54,6 +55,10 @@ namespace tblWalletBalances{
 constexpr char Name[] = "tblWalletBalances";
 TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
 TARGOMAN_CREATE_CONSTEXPR(wblBalance);
+TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
+TARGOMAN_CREATE_CONSTEXPR(wblSumExpense);
+TARGOMAN_CREATE_CONSTEXPR(wblSumCredit);
+TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
 }
 #pragma GCC diagnostic pop
 

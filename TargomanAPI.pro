@@ -42,7 +42,9 @@ OTHER_FILES += \
     build.sh \
     conf/test.conf \
     conf/api.server.conf \
-    conf/api.conf
+    conf/api.conf \
+    Docs/Models/Accounting.scxml
+
 
 SUBDIRS += \
     unitTest

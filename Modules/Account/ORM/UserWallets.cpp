@@ -78,8 +78,8 @@ bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
                               (IsPrivileged ?
                                    QVariantList({ clsJWT(_JWT).usrID(), _walID }) :
                                    QVariantList({ clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID(), _walID })
-                              )
-        );
+                                   )
+                              );
 
     return Result.numRowsAffected() > 0;
 }
@@ -90,31 +90,19 @@ bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
                                     const TAPI::MD5_t& _pass,
                                     const QString& _salt,
                                     quint64 _walID){
-    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_transfer", {
-                                                             /*{"iBy", Type},
-                                                             {"iLogin", _emailOrMobile},
-                                                             {"iPass", _pass},
-                                                             {"iRole", _role},
-                                                             {"iIP", _REMOTE_IP},
-                                                             {"iName", _name.isEmpty()? QVariant() : _name},
-                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
-                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                                             {"iMaxSessions", _maxSessions},*/
-                                                         }).spDirectOutputs().value("oUserID").toDouble());
-}
 
-bool UserWallets::apiCREATEdeposit(TAPI::JWT_t _JWT, quint32 _amount, TAPI::URL_t _callBack, quint64 _walID){
-    return static_cast<quint32>(this->callSP("AAA.sp_CREATE_transfer", {
-                                                             /*{"iBy", Type},
-                                                             {"iLogin", _emailOrMobile},
-                                                             {"iPass", _pass},
-                                                             {"iRole", _role},
-                                                             {"iIP", _REMOTE_IP},
-                                                             {"iName", _name.isEmpty()? QVariant() : _name},
-                                                             {"iFamily", _family.isEmpty()? QVariant() : _family},
-                                                             {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                                             {"iMaxSessions", _maxSessions},*/
-                                                         }).spDirectOutputs().value("oUserID").toDouble());
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destLogin, "login");
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+
+    this->callSP("AAA.sp_CREATE_transfer", {
+                     {"iFromUserID", clsJWT(_JWT).usrID()},
+                     {"iFromWalID", _walID},
+                     {"iToUserLogin", _destLogin},
+                     {"iAmount", _amount},
+                     {"iPass", _pass},
+                     {"iSalt", _salt},
+                 });
+    return true;
 }
 
 UserWallets::UserWallets() :

@@ -53,7 +53,7 @@ private slots:
     bool ORMUPDATE("Update Service info by priviledged user")
     quint64 ORMCREATE("Create a new Service by priviledged user")
 
-    private:
+private:
         TARGOMAN_DEFINE_API_SUBMODULE(Account,Services)
 };
 

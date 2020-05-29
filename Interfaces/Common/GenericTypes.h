@@ -135,8 +135,9 @@ struct stuFileInfo{
 class Files_t : public QList<stuFileInfo>{
 public:
     QVariant toVariant() const;
-    Files_t fromVariant(const QVariant& _value, const QByteArray& _paramName = {}) const;
+    Files_t& fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
 };
+
 
 /**********************************************************************/
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
@@ -168,10 +169,8 @@ TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
 TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
 TAPI_ADD_SIMPLE_TYPE(QString, URL_t);
-
 TAPI_ADD_SIMPLE_TYPE(QString, PackageCode_t);
 TAPI_ADD_SIMPLE_TYPE(QString, DiscountCode_t);
-
 }
 
 /**********************************************************************/

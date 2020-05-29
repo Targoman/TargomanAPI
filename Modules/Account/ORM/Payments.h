@@ -26,48 +26,65 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
-                     Pending  = 'N',
-                     Success  = 'S',
-                     Error    = 'A',
-                     Removed  = 'R'
-                                )
-}
-
 namespace Targoman {
 namespace API {
 namespace AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblPaymentOrders {
-constexpr char Name[] = "tblPaymentOrders";
-TARGOMAN_CREATE_CONSTEXPR(pyoID);
-TARGOMAN_CREATE_CONSTEXPR(pyoMD5);
-TARGOMAN_CREATE_CONSTEXPR(pyoCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(pyo_invID);
-TARGOMAN_CREATE_CONSTEXPR(pyoBankTrnID);
-TARGOMAN_CREATE_CONSTEXPR(pyoAmount);
-TARGOMAN_CREATE_CONSTEXPR(pyoStatus);
-TARGOMAN_CREATE_CONSTEXPR(pyoResult);
+namespace tblOnlinePayments {
+constexpr char Name[] = "tblOnlinePayments";
+TARGOMAN_CREATE_CONSTEXPR(onpID);
+TARGOMAN_CREATE_CONSTEXPR(onpMD5);
+TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
+TARGOMAN_CREATE_CONSTEXPR(onpPaymentGateway);
+TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
+TARGOMAN_CREATE_CONSTEXPR(onpAmount);
+TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
+TARGOMAN_CREATE_CONSTEXPR(onpStatus);
+TARGOMAN_CREATE_CONSTEXPR(onpResult);
+}
+namespace tblOfflinePayments {
+constexpr char Name[] = "tblOfflinePayments";
+TARGOMAN_CREATE_CONSTEXPR(ofpID);
+TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
+TARGOMAN_CREATE_CONSTEXPR(ofpBank);
+TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
+TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
+TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
+TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
+TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
 }
 #pragma GCC diagnostic pop
 
-class PaymentOrders : public ORM::clsTable
+class OnlinePayments : public ORM::clsTable
 {
     Q_OBJECT
 private slots:
-    QVariant ORMGET("Get PaymentOrders information.")
+    QVariant ORMGET("Get OnlinePayment information.")
 
     private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,PaymentOrders)
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
+};
+
+class OfflinePayments : public ORM::clsTable
+{
+    Q_OBJECT
+private slots:
+    QVariant ORMGET("Get OfflinePayment information.")
+    bool ORMUPDATE("Update OfflinePayment info by priviledged user")
+
+    private:
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,OfflinePayments)
 };
 
 }
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuPaymentStatus::Type);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

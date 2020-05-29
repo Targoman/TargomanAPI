@@ -17,24 +17,33 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "clsRESTAPIWithActionLogs.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "libTargomanDBM/clsDAC.h"
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
+#define TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
+
+#include "ORM/Payments.h"
+#include "ORM/Voucher.h"
+#include "ORM/UserWallets.h"
+#include "ORM/WalletTransactions.h"
+
+#include "Defs.hpp"
 
 namespace Targoman {
 namespace API {
-namespace ORM {
+namespace AAA {
 
-QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-}
+class PaymentLogic {
+public:
+    static QString createOnlinePaymentLink(TAPI::enuPaymentGateways::Type _gateway, quint64 _invID, const QString& _invDesc, quint32 _toPay, const QString _callback);
+    static quint64 approveOnlinePayment(TAPI::enuPaymentGateways::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain);
+    static TAPI::stuVoucher processVoucher(quint64 _VoucherID);
+};
 
 }
 }
 }
 
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H

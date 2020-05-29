@@ -26,6 +26,7 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 
+#include "ORM/Accounting.h"
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
 #include "ORM/Bin.h"
@@ -41,7 +42,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAccountOrdersStatus);
 TAPI_REGISTER_METATYPE(
         COMPLEXITY_Complex,
         TAPI, stuAdvert,
-        [](const TAPI::stuAdvert& _value) -> QVariant{return _value.toJson().toVariantMap();}
+        [](const TAPI::stuAdvert& _value) -> QVariant{return _value.toVariant();}
 );
 
 namespace Targoman {
@@ -73,29 +74,30 @@ QString Advert::apiGETRetrieveURL(TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI
 }
 
 Advert::Advert() :
-    ORM::clsRESTAPIWithActionLogs(AdvertSchema, AdvertDomain),
-    Accounting::intfAccounting(this->moduleBaseName()),
-    AccountPackages(new Advertisement::clsAccountPackages),
-    AccountUserPackages(new Advertisement::clsAccountUserPackages),
-    AccountUsage(new Advertisement::clsAccountUsage),
-    //    AccountPrizes(new Advertisement::clsAccountPrizes),
-    AccountDiscountss(new Advertisement::clsAccountDiscounts)
+    Accounting::clsRESTAPIWithAccounting(AdvertSchema,
+                                         AdvertDomain,
+                                         {
+                                            {"show", {"pkgShowPerDay", {}, {}, "pkgShowTotal"}},
+                                            {"click", {"pkgShowPerDay", {}, {}, "pkgShowTotal"}},
+                                         },
+                                         &Advertisement::AccountPackages::instance(),
+                                         &Advertisement::clsAccountUserPackages::instance(),
+                                         &Advertisement::AccountUsage::instance(),
+                                         &Advertisement::AccountDiscounts::instance()
+                                         )
 {
-    this->addSubModule(this->AccountPackages);
-    this->addSubModule(this->AccountUserPackages);
-    this->addSubModule(this->AccountUsage);
-    //this->addSubModule(this->AccountPrizes); // There is no prize in advertisement module
-    this->addSubModule(this->AccountDiscountss);
-    this->addSubModule(new Advertisement::clsAccountUsage);
-    this->addSubModule(new Advertisement::clsAccountUserPackages);
-    this->addSubModule(new Advertisement::clsAccountDiscounts);
+    this->addSubModule(AccountPackages.data());
+    this->addSubModule(AccountUserPackages.data());
+    this->addSubModule(AccountUsage.data());
+    this->addSubModule(AccountDiscounts.data());
+    //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
 
-    this->addSubModule(new Advertisement::ActiveAds);
-    this->addSubModule(new Advertisement::Bin);
-    this->addSubModule(new Advertisement::Locations);
-    this->addSubModule(new Advertisement::Banners);
-    this->addSubModule(new Advertisement::Clicks);
-    this->addSubModule(new Advertisement::Props);
+    this->addSubModule(&Advertisement::ActiveAds::instance());
+    this->addSubModule(&Advertisement::Bin::instance());
+    this->addSubModule(&Advertisement::Locations::instance());
+    this->addSubModule(&Advertisement::Banners::instance());
+    this->addSubModule(&Advertisement::Clicks::instance());
+    this->addSubModule(&Advertisement::Props::instance());
 }
 
 /*******************************************************************************************************************/
@@ -118,83 +120,8 @@ bool Advert::isEmpty(const Accounting::PackageRemaining_t& _limits) const
 {
 
 }
-/*******************************************************************************************************************/
-TAPI::stuPreInvoice Advert::apiPOSTpreInvoice(TAPI::PackageCode_t _pkg, TAPI::DiscountCode_t _discountCode, QString _referer, QJsonObject _extraRefererParams){
-    QString ExtraFilters = QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-            .arg(tblAccountPackages::pkgCanBePurchasedSince)
-            .arg(tblAccountPackages::pkgNotAvailableSince);
-
-    QVariantMap PackageInfo = this->AccountPackages->selectFromTable({}, ExtraFilters, _pkg, {}, 0, 1,
-                                                                     QStringList({
-                                                                                     tblAccountPackages::pkgID,
-                                                                                     tblAccountPackages::pkgCode,
-                                                                                     tblAccountPackages::pkgRemainingDays,
-                                                                                     tblAccountPackages::pkgShowPerDay,
-                                                                                     tblAccountPackages::pkgShowTotal,
-                                                                                     tblAccountPackages::pkgClicksPerDay,
-                                                                                     tblAccountPackages::pkgClicksPerMonth,
-                                                                                     tblAccountPackages::pkgClicksTotal,
-                                                                                     tblAccountPackages::pkgValidFromDate,
-                                                                                     tblAccountPackages::pkgValidToDate,
-                                                                                     tblAccountPackages::pkgValidFromTime,
-                                                                                     tblAccountPackages::pkgValidToTime,
-                                                                                     tblAccountPackages::pkgPrivs,
-                                                                                 }).join(',')
-                                                                     ).toMap();
-
-    stuPackage Package(
-                PackageInfo.value(tblAccountPackages::pkgID).toUInt(),
-                PackageInfo.value(tblAccountPackages::pkgCode).toString(),
-                PackageInfo.value(tblAccountPackages::pkgRemainingDays).toInt(),
-                -1,
-    {
-                    {"show", {
-                         PackageInfo.value(tblAccountPackages::pkgShowPerDay).toInt(),
-                         -1,
-                         -1,
-                         PackageInfo.value(tblAccountPackages::pkgShowTotal).toInt(),
-                     }},
-                    {"clicks", {
-                         PackageInfo.value(tblAccountPackages::pkgClicksPerDay).toInt(),
-                         -1,
-                         PackageInfo.value(tblAccountPackages::pkgClicksPerMonth).toInt(),
-                         PackageInfo.value(tblAccountPackages::pkgClicksTotal).toInt(),
-                     }},
-                },
-                PackageInfo.value(tblAccountPackages::pkgValidFromDate).toDate(),
-                PackageInfo.value(tblAccountPackages::pkgValidToDate).toDate(),
-                PackageInfo.value(tblAccountPackages::pkgValidFromTime).toTime(),
-                PackageInfo.value(tblAccountPackages::pkgValidToTime).toTime(),
-                QJsonObject::fromVariantMap(PackageInfo.value(tblAccountPackages::pkgPrivs).toMap())
-                );
-
-    stuDiscount Discount;
-    if(_discountCode.size()){
-        ExtraFilters = QString("%1 >= NOW()").arg(tblAccountDiscounts::disValidFrom);
-        QVariantMap DiscountInfo = this->AccountDiscountss->selectFromTable({}, ExtraFilters, _discountCode, {}, 0, 1,
-                                                                            QStringList({
-                                                                                            tblAccountDiscounts::disID,
-                                                                                            tblAccountDiscounts::disCode,
-                                                                                            tblAccountDiscounts::disType,
-                                                                                            tblAccountDiscounts::disStatus,
-                                                                                            tblAccountDiscounts::disPackageBasedAmount,
-                                                                                            tblAccountDiscounts::disPrimaryCount,
-                                                                                            tblAccountDiscounts::disUsedCount,
-                                                                                            tblAccountDiscounts::disValidFrom,
-                                                                                        }).join(',')
-                                                                            ).toMap();
-        if(DiscountInfo.value(tblAccountDiscounts::disExpiryTime).toDateTime() < )
-        if(DiscountInfo.value(tblAccountDiscounts::disPrimaryCount).toInt() <= DiscountInfo.value(tblAccountDiscounts::disUsedCount).toInt())
-            throw exHTTPBadRequest("Discount code has been finished");
-    }
-}
-
-TAPI::stuInvoice Advert::apiPOSTcreateInvoice(TAPI::PackageCode_t _pkg, TAPI::URL_t _callBack, TAPI::DiscountCode_t _discountCode, QString _referer, QJsonObject _extraRefererParams){
-}
-
-TAPI::stuInvoice Advert::apiPOSTapproveInvoice(TAPI::MD5_t _invCode, TAPI::JSON_t _bankInfo){
-}
-
 
 }
 }
+
+

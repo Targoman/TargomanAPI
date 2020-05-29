@@ -21,8 +21,6 @@
  */
 
 #include "Accounting.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "Interfaces/Common/GenericEnums.hpp"
 #include "Defs.hpp"
 #include "Locations.h"
 
@@ -31,82 +29,48 @@ namespace API {
 namespace Advertisement {
 using namespace ORM;
 using namespace TAPI;
+using namespace AAA;
+using namespace AAA::Accounting;
+using namespace Targoman::API::AAA::Accounting;
 
 /******************************************************/
-QVariant clsAccountPackages::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    constexpr quint16 CACHE_TIME  = 15 * 60;
-    QString ExtraFilters;
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-                       .arg(tblAccountPackages::pkgCanBePurchasedSince)
-                       .arg(tblAccountPackages::pkgNotAvailableSince);
 
-    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
-}
-
-bool clsAccountPackages::apiDELETE(DELETE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
-}
-
-bool clsAccountPackages::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(UPDATE_METHOD_CALL_ARGS);
-}
-
-quint32 clsAccountPackages::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
-}
-
-clsAccountPackages::clsAccountPackages() :
-    clsTable(AdvertSchema,
-              tblAccountPackages::Name,
+AccountPackages::AccountPackages() :
+    intfAccountPackages(AdvertSchema,
+              tblAccountPackagesBase::Name,
               { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountPackages::pkgID,                 S(quint64),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
-                {tblAccountPackages::pkgCode,               S(TAPI::PackageCode_t), QFV,                                    QInvalid,  UPAdmin},
-                {tblAccountPackages::pkgType,               S(TAPI::enuPackageType::Type), QFV,                             TAPI::enuPackageType::Normal, UPAdmin},
-                {tblAccountPackages::pkgValidFromDate,      S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
-                {tblAccountPackages::pkgValidToDate,        S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
-                {tblAccountPackages::pkgValidFromTime,      S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
-                {tblAccountPackages::pkgValidToTime,        S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
-                {tblAccountPackages::pkg_locID,             S(quint32),             QFV.integer().minValue(1),              QInvalid,  UPAdmin},
-                {tblAccountPackages::pkgShowPerDay,         S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackages::pkgShowTotal,          S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackages::pkgClicksPerDay,       S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackages::pkgClicksPerMonth,     S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackages::pkgClicksTotal,        S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackages::pkgPrivs,              S(JSON_t),              QFV,                                    QNull,     UPAdmin},
-                {tblAccountPackages::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
-                {tblAccountPackages::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
-                {tblAccountPackages::pkgInvoiceTemplate,    S(QString),             QFV,                                    QNull,     UPAdmin},
-                {tblAccountPackages::pkgCreatedBy_usrID,    ORM_CREATED_BY},
-                {tblAccountPackages::pkgCreationDateTime,   ORM_CREATED_ON},
-                {tblAccountPackages::pkgUpdatedBy_usrID,    ORM_UPDATED_BY},
-                {tblAccountPackages::pkgStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
+                {tblAccountPackagesBase::pkgID,                 S(quint64),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
+                {tblAccountPackagesBase::pkgCode,               S(TAPI::PackageCode_t), QFV,                                    QInvalid,  UPAdmin},
+                {tblAccountPackagesBase::pkgType,               S(TAPI::enuPackageType::Type), QFV,                             TAPI::enuPackageType::Normal, UPAdmin},
+                {tblAccountPackagesBase::pkgValidFromDate,      S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgValidToDate,        S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgValidFromTime,      S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgValidToTime,        S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkg_locID,             S(quint32),             QFV.integer().minValue(1),              QInvalid,  UPAdmin},
+                {tblAccountPackages::pkgShowPerDay,             S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
+                {tblAccountPackages::pkgShowTotal,              S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
+                {tblAccountPackages::pkgClicksPerDay,           S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
+                {tblAccountPackages::pkgClicksPerMonth,         S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
+                {tblAccountPackages::pkgClicksTotal,            S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
+                {tblAccountPackagesBase::pkgPrivs,              S(JSON_t),              QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
+                {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgVoucherTemplate,    S(QString),             QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgCreatedBy_usrID,    ORM_CREATED_BY},
+                {tblAccountPackagesBase::pkgCreationDateTime,   ORM_CREATED_ON},
+                {tblAccountPackagesBase::pkgUpdatedBy_usrID,    ORM_UPDATED_BY},
+                {tblAccountPackagesBase::pkgStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                                    Reference Table                         ForeignCol          Rename     LeftJoin
-                {tblAccountPackages::pkg_locID,             R(AdvertSchema, tblLocations::Name),    tblLocations::locID},
-                {tblAccountPackages::pkgCreatedBy_usrID,    ORM_JOIN_CREATOR},
-                {tblAccountPackages::pkgUpdatedBy_usrID,    ORM_JOIN_UPDATER},
+                {tblAccountPackagesBase::pkg_locID,             R(AdvertSchema, tblLocations::Name),    tblLocations::locID},
+                {tblAccountPackagesBase::pkgCreatedBy_usrID,    ORM_JOIN_CREATOR},
+                {tblAccountPackagesBase::pkgUpdatedBy_usrID,    ORM_JOIN_UPDATER},
               })
 {;}
 
 /******************************************************/
-QVariant clsAccountUsage::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
-
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-}
-
-clsAccountUsage::clsAccountUsage() :
-    clsTable(AdvertSchema,
+AccountUsage::AccountUsage() :
+    intfAccountUsage(AdvertSchema,
               tblAccountUsage::Name,
               { ///<ColName                         Type                    Validation                              Default UpBy   Sort  Filter Self  Virt   PK
                 {tblAccountUsage::usg_aupID,        S(quint64),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
@@ -123,42 +87,9 @@ clsAccountUsage::clsAccountUsage() :
 {;}
 
 /******************************************************/
-QVariant clsAccountUserPackages::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
-
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-}
-
-bool clsAccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
-    bool Ok;
-    quint64 UserPackageID = _EXTRAPATH.toUInt(&Ok);
-    if(!Ok || !UserPackageID )
-        throw exHTTPBadRequest("Invalid UserPackageID provided");
-
-    this->callSP("sp_UPDATE_setAsPrefered", {
-                     {"iUserID", clsJWT(_JWT).usrID()},
-                     {"iAUPID",  UserPackageID},
-                 });
-    return false;
-}
-
-bool clsAccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH){
-    bool Ok;
-    quint64 UserPackageID = _EXTRAPATH.toUInt(&Ok);
-    if(!Ok || !UserPackageID )
-        throw exHTTPBadRequest("Invalid UserPackageID provided");
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(clsJWT(_JWT).usrID(), {
-                            {tblAccountUserPackages::aupID, UserPackageID}
-                        }, {
-                            {tblAccountUserPackages::aupStatus, enuAuditableStatus::Banned},
-                        });
-}
 
 clsAccountUserPackages::clsAccountUserPackages() :
-    clsTable(AdvertSchema,
+    intfAccountUserPackages(AdvertSchema,
               tblAccountUserPackages::Name,
               { ///<ColName                                         Type                    Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblAccountUserPackages::aupID,                     S(quint64),             QFV.integer().minValue(1),  ORM_PRIMARY_KEY},
@@ -166,46 +97,22 @@ clsAccountUserPackages::clsAccountUserPackages() :
                 {tblAccountUserPackages::aup_pkgID,                 S(quint32),             QFV.integer().minValue(1),  QInvalid,  UPAdmin},
                 {tblAccountUserPackages::aupPrefered,               S(bool),                QFV,                        false,     UPOwner},
                 {tblAccountUserPackages::aupPurchaseRequestDateTime,S(TAPI::DateTime_t),    QFV,                        QNull,     UPNone},
-                {tblAccountUserPackages::aupPaymentDataTime,        S(TAPI::DateTime_t),    QFV,                        QNull,     UPAdmin},
+                {tblAccountUserPackages::aupPaymentDateTime,        S(TAPI::DateTime_t),    QFV,                        QNull,     UPAdmin},
                 {tblAccountUserPackages::aup_invID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
                 {tblAccountUserPackages::aupUpdatedBy_usrID,        ORM_UPDATED_BY},
                 {tblAccountUserPackages::aupStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus},
               },
               { ///< Col                            Reference Table                               ForeignCol                     Rename     LeftJoin
                 {tblAccountUserPackages::aup_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,    "Owner_"},
-                {tblAccountUserPackages::aup_pkgID, R(AdvertSchema,tblAccountPackages::Name),  tblAccountPackages::pkgID},
-                //Invoice is not accessible as it is in another schema
-                //{tblAccountUserPackages::aup_invID,        R(AAASchema,tblInvoice::Name),  tblInvoice::invID,    "", true},
+                {tblAccountUserPackages::aup_pkgID, R(AdvertSchema,tblAccountPackagesBase::Name),  tblAccountPackagesBase::pkgID},
+                //Voucher is not accessible as it is in another schema
+                //{tblAccountUserPackages::aup_invID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
               }
     )
 {;}
 /******************************************************/
-QVariant clsAccountDiscounts::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-}
-
-bool clsAccountDiscounts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
-}
-
-bool clsAccountDiscounts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(UPDATE_METHOD_CALL_ARGS);
-}
-
-quint32 clsAccountDiscounts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
-}
-
-clsAccountDiscounts::clsAccountDiscounts() :
-    clsTable(AdvertSchema,
+AccountDiscounts::AccountDiscounts() :
+    intfAccountDiscounts(AdvertSchema,
              tblAccountDiscounts::Name,
             { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
               {tblAccountDiscounts::disID,                 S(quint32),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},

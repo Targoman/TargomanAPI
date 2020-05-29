@@ -49,9 +49,7 @@ public:
         Module(_module)
     {;}
 private slots:
-    QVariant apiGETActionLogs(GET_METHOD_ARGS_HEADER);
-    QString signOfGETActionLogs(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); }
-    QString docOfGETActionLogs(){ return "Get ActionLogs information"; }
+    QVariant ORMGET("Get ActionLogs information")
 
 protected:
     QString Module;

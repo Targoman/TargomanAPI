@@ -27,7 +27,6 @@
 
 #include "libTargomanCommon/exTargomanBase.h"
 #include "libTargomanDBM/clsDAC.h"
-#include "QHttp/qhttpfwd.hpp"
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 
@@ -94,6 +93,7 @@ TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 constexpr char AAASchema[] = "AAA";
 constexpr char AAADomain[] = "Account";
 
+constexpr quint32 SYSTEM_USER_ID = 1;
 #define makeAAADAC(_varName) DBManager::clsDAC _varName(AAADomain, AAASchema)
 }
 }

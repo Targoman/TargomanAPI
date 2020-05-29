@@ -23,152 +23,83 @@
 #include "Accounting.h"
 #include "PrivHelpers.h"
 #include "Server/ServerConfigs.h"
-
-TAPI_REGISTER_METATYPE(
-            COMPLEXITY_Complex,
-            TAPI, stuInvoice,
-            [](const TAPI::stuInvoice& _value) -> QVariant{return _value.toJson().toVariantMap();}
-);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuInvoiceStatus);
+#include "Interfaces/AAA/Authorization.h"
+#include "Server/clsSimpleCrypt.h"
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 namespace Accounting{
 
-constexpr char PKG_ID[] = "ID";
-constexpr char PKG_CODE[] = "CD";
-constexpr char PKG_REMAININGDAYS[] = "RD";
-constexpr char PKG_REMAININGHOURS[] = "RH";
-constexpr char PKG_STARTDATE[] = "SD";
-constexpr char PKG_ENDDATE[] = "ED";
-constexpr char PKG_STARTTIME[] = "ST";
-constexpr char PKG_ENDTIME[] = "ET";
-constexpr char PKG_LIMITS[] = "LM";
-constexpr char PKG_PROPS[] = "PP";
+using namespace TAPI;
+using namespace Common;
+using namespace Common::Configuration;
 
-constexpr char ASA_PACKAGE[] = "PK";
-constexpr char ASA_ISFROMPARENT[] = "IP";
-constexpr char ASA_TTL[] = "TT";
-constexpr char ASA_LIMITSONPARENT[] = "LP";
+static QMap<QString, clsRESTAPIWithAccounting*> ServiceRegistry;
 
-
-static QMap<QString, intfAccounting*> ServiceRegistry;
-
-/******************************************************************/
-QJsonObject stuPackage::toJson(bool _full)
+QByteArray hash(const QByteArray& _data)
 {
-    QJsonObject Info;
-    if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
-    if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
-    if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
-    if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
-    if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
-    if(this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
-    if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
-    if(this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
-    if(this->Properties.size())   Info[PKG_PROPS] = this->Properties;
-    if(_full){
-        QJsonObject Limits;
-        for(auto LimitIter = this->Remaining.begin();
-            LimitIter != this->Remaining.end();
-            LimitIter++)
-            Limits.insert(LimitIter.key(), LimitIter->toJson());
-        Info[PKG_LIMITS] = Limits;
+   return QMessageAuthenticationCode::hash(_data, Accounting::Secret.value().toUtf8(), QCryptographicHash::Sha256);
+}
+
+void checkPreVoucherSanity(stuPreVoucher _preVoucher)
+{
+    if(_preVoucher.Items.isEmpty())
+        return;
+
+    QString Sign = _preVoucher.Sign;
+    _preVoucher.Sign.clear();
+    if (Sign != QString(Accounting::hash(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
+        throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
+
+    foreach(auto VoucherItem, _preVoucher.Items){
+        QString Sign = VoucherItem.Sign;
+        VoucherItem.Sign.clear();
+        if (Sign != QString(Accounting::hash(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
+            throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
-    return Info;
 }
 
-stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
-{
-    this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
-    this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
-    this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
-    this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
-    this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
-    this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
-    this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
-    this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
-    this->Properties = _obj.value(PKG_PROPS).toObject();
-    QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
-    for(auto LimitIter = Limits.begin();
-        LimitIter != Limits.end();
-        LimitIter++)
-        this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
-    return *this;
-}
-
-/******************************************************************/
-stuActiveServiceAccount::stuActiveServiceAccount(const stuPackage& _package, bool _isFromParent, const PackageRemaining_t& _myLimitsOnParent, qint64 _ttl) :
-    ActivePackage(_package),
-    IsFromParent(_isFromParent),
-    MyLimitsOnParent(_myLimitsOnParent),
-    TTL(_ttl)
-{;}
-
-QJsonObject stuActiveServiceAccount::toJson(bool _full)
-{
-    QJsonObject Account = {
-        {ASA_PACKAGE, this->ActivePackage.toJson(_full)},
-        {ASA_TTL, static_cast<double>(this->TTL)},
-    };
-    if(this->IsFromParent)
-        Account.insert(ASA_ISFROMPARENT, true);
-    for(auto LimitIter = this->MyLimitsOnParent.begin();
-        LimitIter != this->MyLimitsOnParent.end();
-        LimitIter++)
-        Account.insert(LimitIter.key(), LimitIter->toJson());
-    return Account;
-}
-
-stuActiveServiceAccount& stuActiveServiceAccount::fromJson(const QJsonObject _obj)
-{
-    this->ActivePackage = stuPackage().fromJson(_obj.value(ASA_PACKAGE).toObject());
-    this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
-    this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
-    QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
-    for(auto LimitIter = Limits.begin();
-        LimitIter != Limits.end();
-        LimitIter++)
-        this->MyLimitsOnParent.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
-
-    return *this;
-}
-
-/******************************************************************/
-stuServiceAccountInfo::stuServiceAccountInfo(
-        ActivePackages_t _activePackages,
-        QSharedPointer<stuPackage> _preferedPackage,
-        quint32 _parentID,
-        PackageRemaining_t _myLimitsOnParent) :
-    ActivePackages(_activePackages),
-    PreferedPackage(_preferedPackage),
-    ParentID(_parentID),
-    MyLimitsOnParent(_myLimitsOnParent)
-{}
-
-/******************************************************************/
-intfAccounting* serviceAccounting(const QString& _serviceName)
+clsRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
 {
     Q_UNUSED(serviceAccounting);
     return ServiceRegistry.value(_serviceName);
 }
 
-stuActiveServiceAccount intfAccounting::activeAccountObject(quint32 _usrID)
+stuActiveServiceAccount clsRESTAPIWithAccounting::activeAccountObject(quint32 _usrID)
 {
     return this->findActiveAccount(_usrID);
 }
 
-intfAccounting::intfAccounting(const QString& _name) :
-    ServiceName(_name)
+clsRESTAPIWithAccounting::clsRESTAPIWithAccounting(const QString& _schema,
+                                                   const QString& _module,
+                                                   PackageRemainingCols_t _packageRemainingCols,
+                                                   intfAccountPackages* _packages,
+                                                   intfAccountUserPackages* _userPackages,
+                                                   intfAccountUsage* _usage,
+                                                   intfAccountDiscounts* _discounts,
+                                                   intfAccountPrizes* _prizes) :
+    ORM::clsRESTAPIWithActionLogs(_schema, _module),
+    AccountPackages(_packages),
+    AccountUserPackages(_userPackages),
+    AccountUsage(_usage),
+    AccountDiscounts(_discounts),
+    AccountPrizes(_prizes),
+    PackageRemainingCols(_packageRemainingCols)
 {
-    ServiceRegistry.insert(_name, this);
+    ServiceRegistry.insert(_schema, this);
+    foreach(auto Col, this->PackageRemainingCols){
+        if(Col.PerDay.size()) this->PackageRemainingColName.append(Col.PerDay);
+        if(Col.PerWeek.size()) this->PackageRemainingColName.append(Col.PerWeek);
+        if(Col.PerMonth.size()) this->PackageRemainingColName.append(Col.PerMonth);
+        if(Col.Total.size()) this->PackageRemainingColName.append(Col.Total);
+    }
 }
 
-intfAccounting::~intfAccounting()
+clsRESTAPIWithAccounting::~clsRESTAPIWithAccounting()
 {;}
 
-stuActiveServiceAccount intfAccounting::findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage)
+stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage)
 {
     stuServiceAccountInfo AccountInfo = this->retrieveServiceAccountInfo(_usrID);
     if(AccountInfo.ActivePackages.isEmpty())
@@ -285,7 +216,133 @@ stuActiveServiceAccount intfAccounting::findActiveAccount(quint32 _usrID, const 
                                    NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-void intfAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
+                                                                 TAPI::PackageCode_t _packageCode,
+                                                                 qint16 _count,
+                                                                 TAPI::DiscountCode_t _discountCode,
+                                                                 QString _referer,
+                                                                 QJsonObject _extraRefererParams,
+                                                                 TAPI::stuPreVoucher _lastPreVoucher)
+{
+    Accounting::checkPreVoucherSanity(_lastPreVoucher);
+    QString ExtraFilters = QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
+                           .arg(tblAccountPackagesBase::pkgCanBePurchasedSince)
+                           .arg(tblAccountPackagesBase::pkgNotAvailableSince);
+
+
+    QVariantMap PackageInfo = this->AccountPackages->selectFromTable({}, ExtraFilters, _packageCode, {}, 0, 1,
+                                                                     QStringList({
+                                                                                     tblAccountPackagesBase::pkgID,
+                                                                                     tblAccountPackagesBase::pkgCode,
+                                                                                     tblAccountPackagesBase::pkgName,
+                                                                                     tblAccountPackagesBase::pkgRemainingDays,
+                                                                                     tblAccountPackagesBase::pkgPrice,
+                                                                                     tblAccountPackagesBase::pkgValidFromDate,
+                                                                                     tblAccountPackagesBase::pkgValidToDate,
+                                                                                     tblAccountPackagesBase::pkgValidFromTime,
+                                                                                     tblAccountPackagesBase::pkgValidToTime,
+                                                                                     tblAccountPackagesBase::pkgPrivs,
+                                                                                     this->PackageRemainingColName.join(',')
+                                                                                 }).join(',')
+                                                                     ).toMap();
+
+    PackageRemaining_t PackageOffer;
+    for(auto PackageRemIter = this->PackageRemainingCols.begin();
+        PackageRemIter != this->PackageRemainingCols.end();
+        PackageRemIter++)
+        PackageOffer.insert(PackageRemIter.key(), {
+                                PackageRemIter->PerDay.size() ? PackageInfo.value(PackageRemIter->PerDay).toInt() : -1,
+                                PackageRemIter->PerWeek.size() ? PackageInfo.value(PackageRemIter->PerWeek).toInt() : -1,
+                                PackageRemIter->PerMonth.size() ? PackageInfo.value(PackageRemIter->PerMonth).toInt() : -1,
+                                PackageRemIter->Total.size() ? PackageInfo.value(PackageRemIter->Total).toInt() : -1,
+                            });
+
+    stuPackage Package(
+                PackageInfo.value(tblAccountPackagesBase::pkgID).toUInt(),
+                PackageInfo.value(tblAccountPackagesBase::pkgCode).toString(),
+                PackageInfo.value(tblAccountPackagesBase::pkgRemainingDays).toInt(),
+                -1,
+                PackageOffer,
+                PackageInfo.value(tblAccountPackagesBase::pkgValidFromDate).toDate(),
+                PackageInfo.value(tblAccountPackagesBase::pkgValidToDate).toDate(),
+                PackageInfo.value(tblAccountPackagesBase::pkgValidFromTime).toTime(),
+                PackageInfo.value(tblAccountPackagesBase::pkgValidToTime).toTime(),
+                QJsonObject::fromVariantMap(PackageInfo.value(tblAccountPackagesBase::pkgPrivs).toMap())
+                );
+
+    stuDiscount Discount;
+    if(_discountCode.size()){
+        ExtraFilters = QString("%1 >= NOW()").arg(tblAccountDiscounts::disValidFrom);
+        QVariantMap DiscountInfo = this->AccountDiscounts->selectFromTable({}, ExtraFilters, _discountCode, {}, 0, 1,
+                                                                           QStringList({
+                                                                                           tblAccountDiscounts::disID,
+                                                                                           tblAccountDiscounts::disCode,
+                                                                                           tblAccountDiscounts::disType,
+                                                                                           tblAccountDiscounts::disStatus,
+                                                                                           tblAccountDiscounts::disPackageBasedAmount,
+                                                                                           tblAccountDiscounts::disMaxAmount,
+                                                                                           tblAccountDiscounts::disPrimaryCount,
+                                                                                           tblAccountDiscounts::disUsedCount,
+                                                                                           tblAccountDiscounts::disValidFrom,
+                                                                                       }).join(',')
+                                                                           ).toMap();
+        if(DiscountInfo.value(tblAccountDiscounts::disExpiryTime).toDateTime() < QDateTime::currentDateTime())
+            throw exHTTPBadRequest("Discount code has been expired");
+        if(DiscountInfo.value(tblAccountDiscounts::disPrimaryCount).toInt() <= DiscountInfo.value(tblAccountDiscounts::disUsedCount).toInt())
+            throw exHTTPBadRequest("Discount code has been finished");
+
+        qint64 Amount = DiscountInfo.value(tblAccountDiscounts::disPackageBasedAmount).toJsonObject().value(_packageCode).toInt(-1);
+        if(Amount <0)
+            throw exHTTPBadRequest("Discount code is not valid on selected package");
+        Discount.Amount = static_cast<quint32>(Amount);
+        Discount.ID = DiscountInfo.value(tblAccountDiscounts::disPrimaryCount).toULongLong();
+        Discount.Name = _discountCode;
+        Discount.Type = static_cast<enuDiscountType::Type>(DiscountInfo.value(tblAccountDiscounts::disType).toInt());
+        Discount.MaxAmount = DiscountInfo.value(tblAccountDiscounts::disMaxAmount).toUInt();
+    }
+
+    if(_referer.size()){
+        Q_UNUSED(_JWT)
+        Q_UNUSED (_extraRefererParams)
+        //TODO check for prize on referers
+    }
+
+
+    stuVoucherItem PreVoucherItem;
+    PreVoucherItem.Service = this->ServiceName;
+    PreVoucherItem.OrderID = this->AccountUserPackages->create(clsJWT(_JWT).usrID(), {}, {
+                                                                {tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()},
+                                                                {tblAccountUserPackages::aup_pkgID, Package.PackageID},
+                                                            }).toULongLong();
+    PreVoucherItem.Desc  = PackageInfo.value(tblAccountPackagesBase::Name).toString();
+    PreVoucherItem.Count = _count;
+    PreVoucherItem.Price = PackageInfo.value(tblAccountPackagesBase::pkgPrice).toUInt();
+    PreVoucherItem.Discount = Discount;
+    if(Discount.Amount)
+        switch(Discount.Type){
+        case enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.Price; break;
+        case enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.Price, Discount.Amount); break;
+        case enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.Price * Discount.Amount / 100.)));
+        }
+    PreVoucherItem.TaxPercent = 9;
+    PreVoucherItem.TaxAmount = ((PreVoucherItem.Price - PreVoucherItem.DisAmount) * PreVoucherItem.TaxPercent / 100);
+    PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
+
+    _lastPreVoucher.Items.append(PreVoucherItem);
+    _lastPreVoucher.Summary = _lastPreVoucher.Items.size() > 1 ?
+                                  QString("%1 items").arg(_lastPreVoucher.Items.size()) :
+                                  QString("%1 of %2").arg(PreVoucherItem.Count).arg(PreVoucherItem.Desc);
+    qint64 FinalPrice = PreVoucherItem.Price - PreVoucherItem.DisAmount + PreVoucherItem.TaxAmount;
+    if(FinalPrice<0) throw exHTTPInternalServerError("Final amount computed negative!");
+    _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
+    _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+    _lastPreVoucher.Sign.clear();
+    _lastPreVoucher.Sign =  QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+
+    return _lastPreVoucher;
+}
+
+void clsRESTAPIWithAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
     if(Privs.contains(this->ServiceName) == false)
@@ -332,9 +389,6 @@ void intfAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _reques
         }
     }
 }
-
-//TODO When a package is selected as JustThis then there is no need to store list in JWT
-//TODO reset if per day/perweek/per month are set
 
 }
 }
