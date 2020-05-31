@@ -397,7 +397,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
 
     this->callSP("sp_CREATE_walletTransactionOnPayment", {
                      {"iVoucherID", _invID},
-                     {"iPaymentType", "F"}
+                     {"iPaymentType", "F"} //TODO use enum
                  });
 
     return PaymentLogic::processVoucher(_invID);
@@ -409,10 +409,8 @@ bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 
     if(Limit == 0)
         throw exAuthorization("Not enough access to add prize");
 
-    if(Limit > 0){
-        if(_amount > static_cast<quint64>(Limit))
-            throw exAuthorization("Prize amount is greater than your limits");
-    }
+    if(Limit > 0 && _amount > static_cast<quint64>(Limit))
+        throw exAuthorization("Prize amount is greater than your limits");
 
     QFV.hasKey("desc").validate(_desc, "desc");
 
@@ -432,10 +430,8 @@ bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64
     if(Limit == 0)
         throw exAuthorization("Not enough access to add income");
 
-    if(Limit > 0){
-        if(_amount > static_cast<quint64>(Limit))
-            throw exAuthorization("Amount is greater than your limits");
-    }
+    if(Limit > 0 && _amount > static_cast<quint64>(Limit))
+        throw exAuthorization("Amount is greater than your limits");
 
     QFV.hasKey("desc").validate(_desc, "desc");
 
