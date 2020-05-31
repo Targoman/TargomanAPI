@@ -103,7 +103,7 @@ public:
     }
 
     static void log(const QString _gw, const QString _function, quint16 _line, const QVariantList& _info){
-        QFile File("output.txt"); // TODO read from config file
+        QFile File(intfPaymentGateway::TransactionLogFile.value()); // TODO read from config file
         if (File.open(QFile::WriteOnly | QFile::Append)) {
             QTextStream Out(&File);
             Out << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) <<

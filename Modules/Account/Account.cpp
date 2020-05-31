@@ -350,7 +350,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::T
     try{
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
                          {"iVoucherID", VoucherID},
-                         {"iPaymentType", "O"}
+                         {"iPaymentType", "O"} //TODO use enum
                      });
         return PaymentLogic::processVoucher(VoucherID);
     }catch(...){
