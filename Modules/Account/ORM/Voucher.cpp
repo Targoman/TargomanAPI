@@ -55,7 +55,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
                                                  quint32 _amount,
                                                  QString _callBack,
                                                  quint64 _walletID,
-                                                 TAPI::enuPaymentGateways::Type _gateway)
+                                                 TAPI::enuPaymentGateway::Type _gateway)
 {
     if(_callBack.size() && _callBack != "OFFLINE")
         QFV.url().validate(_callBack, "callBack");

@@ -41,6 +41,8 @@
 #include "ORM/WalletTransactions.h"
 
 #include "Classes/PaymentLogic.h"
+#include "PaymentGateways/intfPaymentGateway.hpp"
+#include "libTargomanCommon/Configuration/Validators.hpp"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
@@ -53,8 +55,30 @@ namespace Targoman {
 namespace API {
 
 using namespace DBManager;
+using namespace Common;
+using namespace Common::Configuration;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
+
+Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateWay> intfPaymentGateway::GatewayEndPoints(
+        QString("AAA/GatewayEndPoints"),
+        "Registered payment gateways",
+        0
+        );
+
+Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile(
+        QString("AAA/TransactionLogFile"),
+        "File to store transaction logs",
+        "",
+        Validators::tmplPathAccessValidator<
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Writeatble),
+        false>,
+        "",
+        "FILEPATH",
+        "transacton-log-file",
+        enuConfigSource::Arg | enuConfigSource::File
+        );
+
 
 TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                                      QString _login,
@@ -271,7 +295,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                                                 TAPI::stuPreVoucher _preVoucher,
                                                 QString _callBack,
                                                 qint64 _walletID,
-                                                TAPI::enuPaymentGateways::Type _gateway)
+                                                TAPI::enuPaymentGateway::Type _gateway)
 {
     if(_callBack.size() && _callBack != "OFFLINE")
         QFV.url().validate(_callBack, "callBack");
@@ -320,7 +344,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     return Voucher;
 }
 
-TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateways::Type _gateway, const QString _domain, QJsonObject _pgResponse)
+TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, QJsonObject _pgResponse)
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
     try{

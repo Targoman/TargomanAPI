@@ -47,7 +47,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      Removed  = 'R'
                                 )
 
-TARGOMAN_DEFINE_ENUM(enuPaymentGateways,
+TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
                      Zibal    = 'Z',
                      NextPay  = 'N',
                      Pardano  = 'O',
@@ -56,11 +56,17 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGateways,
                      Pasargad = 'G',
                      Saman    = 'S',
                      AsanPardakht = 'A',
+                     Gap      = 'W',
+                     VISA     = 'V',
+                     MasterCard= 'C',
                                 )
+
 }
+
+
 
 TAPI_DECLARE_METATYPE(TAPI::enuVoucherType::Type);
 TAPI_DECLARE_METATYPE(TAPI::enuPaymentStatus::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuPaymentGateways::Type);
+TAPI_DECLARE_METATYPE(TAPI::enuPaymentGateway::Type);
 
 #endif //TARGOMAN_API_MODULES_ACCOUNT_CLASSES_DEFS_HPP

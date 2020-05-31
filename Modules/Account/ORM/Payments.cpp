@@ -46,7 +46,7 @@ OnlinePayments::OnlinePayments() :
                 {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
                 {tblOnlinePayments::onpCreationDateTime,  S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
                 {tblOnlinePayments::onp_invID,            S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
-                {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateways::Type),QFV,                      TAPI::enuPaymentGateways::Zibal, UPNone},
+                {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateway::Type),QFV,                      TAPI::enuPaymentGateway::Zibal, UPNone},
                 {tblOnlinePayments::onpPGTrnID,           S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
                 {tblOnlinePayments::onpAmount,            S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
                 {tblOnlinePayments::onpLastUpdateDateTime,S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},

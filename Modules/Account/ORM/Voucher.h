@@ -56,7 +56,7 @@ private slots:
                                                   quint32 _amount,
                                                   QString _callBack = {},
                                                   quint64 _walletID = 0,
-                                                  TAPI::enuPaymentGateways::Type _gateway = TAPI::enuPaymentGateways::Zibal),
+                                                  TAPI::enuPaymentGateway::Type _gateway = TAPI::enuPaymentGateway::Zibal),
                           "Increase wallet balance by online payment"
                           "Set callbackURL = OFFLINE for offline payment, url for online payment"
                           "Also set walletID >0 to use specified wallet or 0 for using default wallet"

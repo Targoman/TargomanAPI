@@ -33,6 +33,7 @@ class clsJWT;
 }
 namespace Server {
 
+//TODO activate following
 /*TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
                               HS384,
@@ -48,7 +49,10 @@ public:
     static Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 
 public:
-    static QString createSigned(QJsonObject _payload, QJsonObject _privatePayload = QJsonObject(), const qint32 _expiry = -1, const QString& _sessionID = QString());
+    static QString createSigned(QJsonObject _payload,
+                                QJsonObject _privatePayload = QJsonObject(),
+                                const qint32 _expiry = -1,
+                                const QString& _sessionID = QString());
     static QJsonObject verifyReturnPayload(const QString& _jwt);
 
 private:

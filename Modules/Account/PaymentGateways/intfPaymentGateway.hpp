@@ -30,6 +30,8 @@
 #include <QTextStream>
 #include "3rdParty/QtCUrl/src/QtCUrl.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
+#include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
+#include "Classes/Defs.hpp"
 
 using namespace qhttp;
 
@@ -71,6 +73,35 @@ struct stuPaymentResponse{
 
 class intfPaymentGateway{
 public:
+    struct stuGateWay {
+        stuGateWay(const QString& _basePath) :
+            CallBackDomain(_basePath + "CallBackdomain", "Domain used for callback"),
+            GateWay(_basePath + "Gateway", "Gateway to be used for this callback"),
+            CustomerID(_basePath + "Gateway", "Customer ID on the gateway"),
+            PrivateToken(_basePath + "Gateway", "PrivateToken for gateway if required")
+        {}
+
+        Targoman::Common::Configuration::tmplConfigurable<QString>    CallBackDomain;
+        Targoman::Common::Configuration::tmplConfigurable<TAPI::enuPaymentGateway::Type> GateWay;
+        Targoman::Common::Configuration::tmplConfigurable<QString>    CustomerID;
+        Targoman::Common::Configuration::tmplConfigurable<QString>    PrivateToken;
+    };
+    static Targoman::Common::Configuration::tmplConfigurableArray<stuGateWay> GatewayEndPoints;
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> TransactionLogFile;
+
+    static QString merchantID(const QString _callBack, TAPI::enuPaymentGateway::Type _gateway){
+        QString CallBackDomain = _callBack;
+        CallBackDomain = CallBackDomain.replace("https://","").replace("http://", "");
+
+        for(size_t i=0; i<intfPaymentGateway::GatewayEndPoints.size(); ++i){
+            if(intfPaymentGateway::GatewayEndPoints.at(i).GateWay.value() == _gateway &&
+               CallBackDomain.startsWith(intfPaymentGateway::GatewayEndPoints.at(i).CallBackDomain.value())) {
+                return intfPaymentGateway::GatewayEndPoints.at(i).CustomerID.value();
+            }
+        }
+        throw exPayment(QString("callback unrecognized for %1: %2").arg(TAPI::enuPaymentGateway::toStr(_gateway), _callBack));
+    }
+
     static void log(const QString _gw, const QString _function, quint16 _line, const QVariantList& _info){
         QFile File("output.txt"); // TODO read from config file
         if (File.open(QFile::WriteOnly | QFile::Append)) {

@@ -25,7 +25,7 @@
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateways);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 
 namespace Targoman {
 namespace API {
@@ -33,7 +33,7 @@ namespace AAA {
 
 using namespace DBManager;
 
-QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateways::Type _gateway, quint64 _invID, const QString& _invDesc, quint32 _toPay, const QString _callback)
+QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _invID, const QString& _invDesc, quint32 _toPay, const QString _callback)
 {
     TAPI::MD5_t opyMD5;
     quint8 Retries = 0;
@@ -54,16 +54,19 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateways::Type _ga
     try{
         stuPaymentResponse PaymentResponse;
         switch(_gateway){
-        case TAPI::enuPaymentGateways::Zibal:
+        case TAPI::enuPaymentGateway::Zibal:
             PaymentResponse = Zibal::request(opyMD5, _toPay, _callback, _invDesc);
             break;
-        case TAPI::enuPaymentGateways::Saman:
-        case TAPI::enuPaymentGateways::Mellat:
-        case TAPI::enuPaymentGateways::NextPay:
-        case TAPI::enuPaymentGateways::Pardano:
-        case TAPI::enuPaymentGateways::Parsian:
-        case TAPI::enuPaymentGateways::Pasargad:
-        case TAPI::enuPaymentGateways::AsanPardakht:
+        case TAPI::enuPaymentGateway::Saman:
+        case TAPI::enuPaymentGateway::Mellat:
+        case TAPI::enuPaymentGateway::NextPay:
+        case TAPI::enuPaymentGateway::Pardano:
+        case TAPI::enuPaymentGateway::Parsian:
+        case TAPI::enuPaymentGateway::Pasargad:
+        case TAPI::enuPaymentGateway::AsanPardakht:
+        case TAPI::enuPaymentGateway::VISA:
+        case TAPI::enuPaymentGateway::MasterCard:
+        case TAPI::enuPaymentGateway::Gap:
             throw exHTTPBadRequest("Gateway not suppored yet");
         }
 
@@ -96,20 +99,23 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateways::Type _ga
 
 }
 
-quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateways::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain)
+quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain)
 {
     stuPaymentResponse PaymentResponse;
     switch(_gateway){
-    case TAPI::enuPaymentGateways::Zibal:
+    case TAPI::enuPaymentGateway::Zibal:
         PaymentResponse = Zibal::verify(_pgResponse, _domain);
         break;
-    case TAPI::enuPaymentGateways::Saman:
-    case TAPI::enuPaymentGateways::Mellat:
-    case TAPI::enuPaymentGateways::NextPay:
-    case TAPI::enuPaymentGateways::Pardano:
-    case TAPI::enuPaymentGateways::Parsian:
-    case TAPI::enuPaymentGateways::Pasargad:
-    case TAPI::enuPaymentGateways::AsanPardakht:
+    case TAPI::enuPaymentGateway::Saman:
+    case TAPI::enuPaymentGateway::Mellat:
+    case TAPI::enuPaymentGateway::NextPay:
+    case TAPI::enuPaymentGateway::Pardano:
+    case TAPI::enuPaymentGateway::Parsian:
+    case TAPI::enuPaymentGateway::Pasargad:
+    case TAPI::enuPaymentGateway::AsanPardakht:
+    case TAPI::enuPaymentGateway::VISA:
+    case TAPI::enuPaymentGateway::MasterCard:
+    case TAPI::enuPaymentGateway::Gap:
         throw exHTTPBadRequest("Gateway not suppored yet");
     }
 
@@ -123,7 +129,9 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateways::Type _gatew
     if(PaymentResponse.ErrorCode){
         OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}, {
                                               {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
-                                              {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result},
+                                              {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ?
+                                               QString(PaymentResponse.ErrorCode) :
+                                               PaymentResponse.Result},
                                           });
         throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
     }

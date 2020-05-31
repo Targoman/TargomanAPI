@@ -21,10 +21,10 @@
  */
 
 #include "Ticketing.h"
-#include "QFieldValidator.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
+#include "QFieldValidator.h"
 
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
@@ -38,40 +38,44 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
 using namespace TAPI;
 
 quint64 Ticketing::insertTicket(quint32 _targetUser,
-                  quint32 _serviceID,
-                  quint64 _inReplyTo,
-                  TAPI::enuTicketType::Type _ticketType,
-                  const QString& _title,
-                  const QString& _body,
-                  bool _hasAttachemnt,
-                  quint64 _createdBy){
-    return this->execQuery(
-                                     "INSERT INTO tblTickets "
-                                     "   SET tblTickets.tktTarget_usrID =?,"
-                                     "       tblTickets.tkt_svcID =?,"
-                                     "       tblTickets.tktInReply_tktID =?,"
-                                     "       tblTickets.tktType =?,"
-                                     "       tblTickets.tktTitle =?,"
-                                     "       tblTickets.tktBodyMarkdown =?,"
-                                     "       tblTickets.tktHasAttachment =?,"
-                                     "       tblTickets.tktCreatedBy_usrID =?"
-                                     , {
-                                         _targetUser ? _targetUser : QVariant(),
-                                         _serviceID ? _serviceID : QVariant(),
-                                         _inReplyTo ? _inReplyTo : QVariant(),
-                                         QString("%1").arg(_ticketType),
-                                         _title,
-                                         _body,
-                                         _hasAttachemnt,
-                                         _createdBy
-                                     }
-                                     ).lastInsertId().toULongLong();
+                                quint32 _serviceID,
+                                quint64 _inReplyTo,
+                                TAPI::enuTicketType::Type _ticketType,
+                                const QString& _title,
+                                const QString& _body,
+                                bool _hasAttachemnt,
+                                quint64 _createdBy) {
+  return this
+      ->execQuery(
+          "INSERT INTO tblTickets "
+          "   SET tblTickets.tktTarget_usrID =?,"
+          "       tblTickets.tkt_svcID =?,"
+          "       tblTickets.tktInReply_tktID =?,"
+          "       tblTickets.tktType =?,"
+          "       tblTickets.tktTitle =?,"
+          "       tblTickets.tktBodyMarkdown =?,"
+          "       tblTickets.tktHasAttachment =?,"
+          "       tblTickets.tktCreatedBy_usrID =?",
+          {_targetUser ? _targetUser : QVariant(),
+           _serviceID ? _serviceID : QVariant(),
+           _inReplyTo ? _inReplyTo : QVariant(), QString("%1").arg(_ticketType),
+           _title, _body, _hasAttachemnt, _createdBy})
+      .lastInsertId()
+      .toULongLong();
 }
 
-bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser){
-    Authorization::checkPriv(_JWT, {this->moduleBaseName() + ":canPUTNewMessage"});
+bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT,
+                                 const QString& _title,
+                                 const QString& _bodyMarkdown,
+                                 quint32 _serviceID,
+                                 quint32 _targetUser) {
+  Authorization::checkPriv(_JWT,
+                           {this->moduleBaseName() + ":canPUTNewMessage"});
 
-    return this->insertTicket(_targetUser, _serviceID, 0, _targetUser ? enuTicketType::Message : enuTicketType::Broadcast, _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
+  return this->insertTicket(
+             _targetUser, _serviceID, 0,
+             _targetUser ? enuTicketType::Message : enuTicketType::Broadcast,
+             _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
 bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
@@ -80,32 +84,35 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
                                   enuTicketType::Type _ticketType,
                                   quint32 _serviceID,
                                   quint64 _inReplyTo,
-                                  TAPI::stuFileInfo _file){
-    Authorization::checkPriv(_JWT, {});
+                                  TAPI::stuFileInfo _file) {
+  Authorization::checkPriv(_JWT, {});
 
-    if(_inReplyTo && (_ticketType != enuTicketType::Reply))
-        throw exHTTPBadRequest("Reply tickets must have reply type");
+  if (_inReplyTo && (_ticketType != enuTicketType::Reply))
+    throw exHTTPBadRequest("Reply tickets must have reply type");
 
-    if(_ticketType == enuTicketType::Message || _ticketType == enuTicketType::Broadcast)
-        throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
+  if (_ticketType == enuTicketType::Message ||
+      _ticketType == enuTicketType::Broadcast)
+    throw exHTTPBadRequest(
+        "Message and Broadcast tickets must be sent via newMessage method");
 
-    quint64 TicketID = this->insertTicket(_inReplyTo, _serviceID, 0, _ticketType, _title, _text, _file.Size > 0, clsJWT(_JWT).usrID());
+  quint64 TicketID =
+      this->insertTicket(_inReplyTo, _serviceID, 0, _ticketType, _title, _text,
+                         _file.Size > 0, clsJWT(_JWT).usrID());
 
-    if(_file.Size > 0){
-        //TODO move to tiockt attachemnts with ID
-        //QFile::rename(_file.TempName, )
-    }
+  if (_file.Size > 0) {
+    // TODO move to tiockt attachemnts with ID
+    // QFile::rename(_file.TempName, )
+  }
 
-    //TODO return  true if file moved
-    return true;
+  // TODO return  true if file moved
+  return true;
 }
 
-Ticketing::Ticketing() :
-    ORM::clsRESTAPIWithActionLogs ("Ticketing", "Ticketing"){
-
-    this->addSubModule(&ORM::Tickets::instance());
-    this->addSubModule(&ORM::TicketRead::instance());
+Ticketing::Ticketing()
+    : ORM::clsRESTAPIWithActionLogs("Ticketing", "Ticketing") {
+  this->addSubModule(&ORM::Tickets::instance());
+  this->addSubModule(&ORM::TicketRead::instance());
 }
 
-}
-}
+}  // namespace API
+}  // namespace Targoman

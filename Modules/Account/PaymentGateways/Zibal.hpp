@@ -35,13 +35,6 @@ namespace AAA {
 class Zibal
 {
 private:
-    static QString merchantID(const QString _callBack){
-        /*if(_callBack.startsWith("https://tarjomyar.ir"))
-            return "";*/
-        //TODO list must be loaded from config file
-        throw exPayment("callback unrecognized: " + _callBack);
-    }
-
     static QString errorString(int _errCode){
         switch(_errCode){
         case  100 : return "Ok";
@@ -58,15 +51,16 @@ public:
     static stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc){
         intfPaymentGateway::log("Zibal", __FUNCTION__, __LINE__, {_orderMD5, _amount, _callback, _desc});
         try{
-            QJsonDocument Json = intfPaymentGateway::postJsonWithCurl("https://gateway.zibal.ir/v1/request",
-                                                 QJsonDocument(QJsonObject({
-                                                                               {"merchant"    , merchantID(_callback)},
-                                                                               {"amount"      , _amount},
-                                                                               {"callbackUrl" , _callback},
-                                                                               {"description" , _desc},
-                                                                               {"orderId"     , _orderMD5}
-                                                                           }))
-                                                 );
+            QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
+                                     "https://gateway.zibal.ir/v1/request",
+                                     QJsonDocument(QJsonObject({
+                                                                   {"merchant"    , intfPaymentGateway::merchantID(_callback, TAPI::enuPaymentGateway::Zibal)},
+                                                                   {"amount"      , _amount},
+                                                                   {"callbackUrl" , _callback},
+                                                                   {"description" , _desc},
+                                                                   {"orderId"     , _orderMD5}
+                                                               }))
+                                     );
             intfPaymentGateway::log("Zibal", __FUNCTION__, __LINE__, {Json});
             if(Json.isObject() == false)
                 throw exPayment("JsonObject expected as Zibal response");
@@ -96,12 +90,13 @@ public:
             QFV.md5().validate(OrderMD5, "orderID");
             QFV.asciiAlNum(false).maxLenght(32).validate(TrackID, "trackId");
 
-            QJsonDocument Json = intfPaymentGateway::postJsonWithCurl("https://gateway.zibal.ir/v1/verify",
-                                                 QJsonDocument(QJsonObject({
-                                                                               {"merchant"    , merchantID(_domain)},
-                                                                               {"trackId"     , TrackID},
-                                                                           }))
-                                                 );
+            QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
+                                     "https://gateway.zibal.ir/v1/verify",
+                                     QJsonDocument(QJsonObject({
+                                                                   {"merchant" , intfPaymentGateway::merchantID(_domain, TAPI::enuPaymentGateway::Zibal)},
+                                                                   {"trackId"  , TrackID},
+                                                               }))
+                                     );
             intfPaymentGateway::log("Zibal", __FUNCTION__, __LINE__, {Json});
             if(Json.isObject() == false)
                 return {OrderMD5, Json.toJson(), -1, "JsonObject expected as Zibal response"};

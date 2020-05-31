@@ -116,13 +116,13 @@ private slots:
                                                  TAPI::stuPreVoucher _preVoucher,
                                                  QString _callBack = {},
                                                  qint64 _walletID = -1,
-                                                 TAPI::enuPaymentGateways::Type _gateway = TAPI::enuPaymentGateways::Zibal),
-                          "create an Voucher based on preVoucher. "
+                                                 TAPI::enuPaymentGateway::Type _gateway = TAPI::enuPaymentGateway::Zibal),
+                          "create a voucher based on preVoucher. "
                           "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment, "
                           "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
                           "When callback is set to URL you must specify payment gateway")
 
-    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateways::Type _gateway, const QString _domain, QJsonObject _pgResponse),
+    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateway::Type _gateway, const QString _domain, QJsonObject _pgResponse),
                           "approve payment back from payment gateway")
 
     TAPI::stuVoucher REST(POST, approveOfflinePayment, (TAPI::JWT_t _JWT,
