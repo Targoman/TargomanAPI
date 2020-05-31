@@ -207,6 +207,10 @@ QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stu
             (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
+QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
+    return this->selectFromTable({}, {}, QString("%1").arg(_id), {}, 0, 2, _cols, {}, {}, _groupBy, false, 0);
+}
+
 QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _extraFilters,
                                    const TAPI::ExtraPath_t& _extraPath,

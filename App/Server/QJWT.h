@@ -33,17 +33,16 @@ class clsJWT;
 }
 namespace Server {
 
-//TODO activate following
-/*TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
                               HS384,
                               HS512)
-*/
+
 class QJWT
 {
     static inline QString makeConfig(const QString& _name){return "/JWT/" + _name;}
     static Common::Configuration::tmplConfigurable<QString>                 Secret;
-//    static Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
+    static Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
     static Common::Configuration::tmplConfigurable<quint16>                 TTL;
 public:
     static Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;

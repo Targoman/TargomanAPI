@@ -36,9 +36,9 @@ namespace AAA {
 
 class PaymentLogic {
 public:
-    static QString createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _invID, const QString& _invDesc, quint32 _toPay, const QString _callback);
+    static QString createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _vchID, const QString& _invDesc, quint32 _toPay, const QString _callback);
     static quint64 approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain);
-    static TAPI::stuVoucher processVoucher(quint64 _VoucherID);
+    static TAPI::stuVoucher processVoucher(quint64 _voucherID);
 };
 
 }

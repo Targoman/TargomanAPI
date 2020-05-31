@@ -126,7 +126,7 @@ private slots:
                           "approve payment back from payment gateway")
 
     TAPI::stuVoucher REST(POST, approveOfflinePayment, (TAPI::JWT_t _JWT,
-                                                        quint64 _invID,
+                                                        quint64 _vchID,
                                                         const QString& _bank,
                                                         const QString& _receiptCode,
                                                         TAPI::Date_t _receiptDate,

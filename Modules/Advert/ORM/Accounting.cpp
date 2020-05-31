@@ -98,7 +98,7 @@ clsAccountUserPackages::clsAccountUserPackages() :
                 {tblAccountUserPackages::aupPrefered,               S(bool),                QFV,                        false,     UPOwner},
                 {tblAccountUserPackages::aupPurchaseRequestDateTime,S(TAPI::DateTime_t),    QFV,                        QNull,     UPNone},
                 {tblAccountUserPackages::aupPaymentDateTime,        S(TAPI::DateTime_t),    QFV,                        QNull,     UPAdmin},
-                {tblAccountUserPackages::aup_invID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
+                {tblAccountUserPackages::aup_vchID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
                 {tblAccountUserPackages::aupUpdatedBy_usrID,        ORM_UPDATED_BY},
                 {tblAccountUserPackages::aupStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus},
               },
@@ -106,7 +106,7 @@ clsAccountUserPackages::clsAccountUserPackages() :
                 {tblAccountUserPackages::aup_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,    "Owner_"},
                 {tblAccountUserPackages::aup_pkgID, R(AdvertSchema,tblAccountPackagesBase::Name),  tblAccountPackagesBase::pkgID},
                 //Voucher is not accessible as it is in another schema
-                //{tblAccountUserPackages::aup_invID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
+                //{tblAccountUserPackages::aup_vchID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
               }
     )
 {;}
