@@ -28,7 +28,6 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 using namespace ORM;
-using namespace TAPI;
 using namespace AAA;
 using namespace AAA::Accounting;
 using namespace Targoman::API::AAA::Accounting;
@@ -52,7 +51,7 @@ AccountPackages::AccountPackages() :
                 {tblAccountPackages::pkgClicksPerDay,           S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
                 {tblAccountPackages::pkgClicksPerMonth,         S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
                 {tblAccountPackages::pkgClicksTotal,            S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackagesBase::pkgPrivs,              S(JSON_t),              QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgPrivs,              S(TAPI::JSON_t),        QFV,                                    QNull,     UPAdmin},
                 {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
                 {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
                 {tblAccountPackagesBase::pkgVoucherTemplate,    S(QString),             QFV,                                    QNull,     UPAdmin},
@@ -118,7 +117,7 @@ AccountDiscounts::AccountDiscounts() :
               {tblAccountDiscounts::disID,                 S(quint32),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
               {tblAccountDiscounts::disCode,               S(TAPI::DiscountCode_t),QFV,                                    QInvalid,  UPAdmin},
               {tblAccountDiscounts::disType,               S(TAPI::enuDiscountType::Type), QFV,                            TAPI::enuDiscountType::Percent, UPAdmin},
-              {tblAccountDiscounts::disPackageBasedAmount, S(JSON_t),              QFV,                                    QInvalid,  UPAdmin, false, false},
+              {tblAccountDiscounts::disPackageBasedAmount, S(TAPI::JSON_t),        QFV,                                    QInvalid,  UPAdmin, false, false},
               {tblAccountDiscounts::disValidFrom,          S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
               {tblAccountDiscounts::disExpiryTime,         S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
               {tblAccountDiscounts::disPrimaryCount,       S(quint32),             QFV.integer().minValue(1),              1,         UPAdmin},

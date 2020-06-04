@@ -41,7 +41,7 @@ using namespace Common::Configuration;
 tmplConfigurable<QString> QJWT::Secret(
         QJWT::makeConfig("JWTSecret"),
         "Secret to be used for hashing JWT",
-        "~5KHeTc7.C^Ln%<X~YnE4<Kr",
+        "~5KHeTc7.C^Ln^<X~YnE4<Kr",
         ReturnTrueCrossValidator(),
         "",
         "SECRET",
@@ -163,4 +163,4 @@ QByteArray QJWT::hash(const QByteArray& _data)
 }
 }
 }
-//ENUM_CONFIGURABLE_IMPL(Targoman::API::Server::enuJWTHashAlgs)
+ENUM_CONFIGURABLE_IMPL(Targoman::API::Server::enuJWTHashAlgs)

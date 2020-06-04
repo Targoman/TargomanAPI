@@ -25,11 +25,9 @@ HEADERS += \
     testAccountORM.hpp \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-SOURCES += \
-    main.cpp \
-   ../3rdParty/QtCUrl/src/QtCUrl.cpp \
+SOURCES += main.cpp \
 
-
+include (../App/AppFiles.pri)
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################

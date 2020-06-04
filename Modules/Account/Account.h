@@ -122,7 +122,7 @@ private slots:
                           "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
                           "When callback is set to URL you must specify payment gateway")
 
-    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateway::Type _gateway, const QString _domain, QJsonObject _pgResponse),
+    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse),
                           "approve payment back from payment gateway")
 
     TAPI::stuVoucher REST(POST, approveOfflinePayment, (TAPI::JWT_t _JWT,

@@ -18,15 +18,24 @@
 ################################################################################
 ProjectName="TargomanAPI"
 VERSION=1.0.0
-#ACTIVE_MODULES= \
-#TextProcessor \
-#FormalityChecker \
-#URLProcessor \
-#  Account \
-#  Ticketing \
-#  Advert \
-#  NGT \
-#  MT \
+
+LIBS += -lTargomanAPIInterface \
+        -lTargomanCommon \
+        -lTargomanDBM \
+        -lQFieldValidator \
+        -lQJsonRPC \
+        -lqhttp \
+        -lcurl \
+        -lTargomanTextProcessor \
+        -lfasttext
+
+#defined (TARGOMAN_API_WEBSOCKET) {
+  QT+= websockets
+#}
+
+#defined (TARGOMAN_API_REDIS_PROTOCOL) {
+  LIBS+= -lhiredis
+#}
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 # Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough

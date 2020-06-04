@@ -18,40 +18,9 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 PRJDIR = ".."
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-HEADERS += \
-    Server/RESTServer.h \
-    Server/APICache.hpp \
-    Server/appTargomanAPI.h \
-    Server/clsRedisConnector.h \
-    Server/clsRequestHandler.h \
-    Server/clsSimpleCrypt.h \
-    Server/intfCacheConnector.hpp \
-    Server/QJWT.h \
-    Server/RESTAPIRegistry.h \
-    Server/RESTServer.h \
-    Server/WebSocketServer.h \
-    Server/ServerConfigs.h \
-    Server/clsAPIObject.h \
-    Server/QtTypes.hpp \
-    Server/OpenAPIGenerator.h \
-    Server/test.h
+include (./AppFiles.pri)
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-SOURCES += \
-    Server/ServerConfigs.cpp \
-    Server/clsAPIObject.cpp \
-    Server/clsRedisConnector.cpp \
-    Server/clsRequestHandler.cpp \
-    Server/clsSimpleCrypt.cpp \
-    Server/QJWT.cpp \
-    Server/WebSocketServer.cpp \
-    Server/RESTAPIRegistry.cpp \
-    Server/RESTServer.cpp \
-    Server/appTargomanAPI.cpp \
-    Server/main.cpp \
-    $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
-    Server/OpenAPIGenerator.cpp
+SOURCES += Server/main.cpp
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
@@ -86,19 +55,5 @@ DISTFILES += \
     conf/api.server.conf \
     build.sh
 
-LIBS += -lTargomanAPIInterface \
-        -lTargomanCommon \
-        -lTargomanDBM \
-        -lQFieldValidator \
-        -lqhttp \
-        -lcurl \
-        -lTargomanTextProcessor \
-        -lfasttext
 
-#defined (TARGOMAN_API_REDIS_PROTOCOL) {
-  LIBS+= -lhiredis
-#}
 
-#defined (TARGOMAN_API_REDIS_PROTOCOL) {
-  QT+= websockets
-#}

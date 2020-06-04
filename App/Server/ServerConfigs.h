@@ -49,7 +49,6 @@ struct ServerConfigs
     static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
     static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;
     static Common::Configuration::tmplConfigurable<FilePath_t>    BaseOpenAPIObjectFile;
-    static Common::Configuration::tmplConfigurable<FilePath_t>    ModulesPath;
     static Common::Configuration::tmplRangedConfigurable<quint8>  StatisticsInterval;
     static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
     static Common::Configuration::tmplConfigurable<QString>       CacheConnector;

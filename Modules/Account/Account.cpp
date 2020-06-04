@@ -67,14 +67,14 @@ TARGOMAN_DEFINE_ENUM (enuPaymentType,
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
 Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateWay> intfPaymentGateway::GatewayEndPoints(
-        QString("AAA/GatewayEndPoints"),
+        AAA::Accounting::makeConfig("GatewayEndPoints"),
         "Registered payment gateways",
         0
         );
 
 
 Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile(
-        Targoman::Common::Configuration::clsConfigPath(QString("AAA/TransactionLogFile")),
+        AAA::Accounting::makeConfig("TransactionLogFile"),
         "File to store transaction logs",
         "",
         Validators::tmplPathAccessValidator<
@@ -85,7 +85,6 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway
         "transacton-log-file",
         enuConfigSource::Arg | enuConfigSource::File
         );
-
 
 TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                                      QString _login,
@@ -350,7 +349,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     return Voucher;
 }
 
-TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, QJsonObject _pgResponse)
+TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse)
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
     try{

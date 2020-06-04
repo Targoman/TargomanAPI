@@ -26,7 +26,6 @@
 #include "Interfaces/AAA/Authorization.h"
 #include "Accounting_Interfaces.h"
 
-using namespace TAPI;
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
 
@@ -35,15 +34,36 @@ TAPI_REGISTER_METATYPE(
         TAPI, stuVoucher,
         [](const TAPI::stuVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();}
 );
+TAPI_REGISTER_METATYPE(
+        COMPLEXITY_Complex,
+        TAPI, stuPreVoucher,
+        [](const TAPI::stuPreVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();},
+        [](const QVariant& _value, const QByteArray& _param) -> TAPI::stuPreVoucher {
+            if(_value.isValid() == false)
+                return TAPI::stuPreVoucher();
+
+            if(_value.toString().isEmpty())
+                return TAPI::stuPreVoucher();
+
+            QJsonParseError Error;
+            QJsonDocument Doc;
+            Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+            if(Error.error != QJsonParseError::NoError)
+                throw exHTTPBadRequest(_param + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
+            if(Doc.isObject() == false)
+                throw exHTTPBadRequest(_param + " is not a valid Prevoucher object: <"+_value.toString()+">");
+            return  TAPI::stuPreVoucher().fromJson(Doc.object());
+        }
+);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuDiscountType);
 
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 namespace Accounting{
-
-using namespace TAPI;
 
 constexpr char PKG_ID[] = "ID";
 constexpr char PKG_CODE[] = "CD";
@@ -148,7 +168,7 @@ bool intfAccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::Ex
     return this->update(clsJWT(_JWT).usrID(), {
                             {tblAccountUserPackages::aupID, UserPackageID}
                         }, {
-                            {tblAccountUserPackages::aupStatus, enuAuditableStatus::Banned},
+                            {tblAccountUserPackages::aupStatus, TAPI::enuAuditableStatus::Banned},
                         });
 }
 intfAccountUserPackages::intfAccountUserPackages(const QString& _schema,

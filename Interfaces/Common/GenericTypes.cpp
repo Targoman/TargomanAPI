@@ -154,11 +154,13 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Mobile_t, optional(Q
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t, optional(QFV.ipv4()), _value, [](const QList<clsORMField>&){ return "A valid IP version 4"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t, optional(QFV.maxLenght(2).languageCode()), _value, [](const QList<clsORMField>&){ return "A valid ISO639 two-letter language code"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t, optional(QFV.base64Image()), _value, [](const QList<clsORMField>&){ return "A valid base64 encoded png/jpg image"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t, optional(QFV.iban()), _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t, optional(QFV.iban("IR")), _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Date_t, optional(QFV.date()), _value, [](const QList<clsORMField>&){ return "A valid gregorian date"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Time_t, optional(QFV.time()), _value, [](const QList<clsORMField>&){ return "A valid time"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DateTime_t, optional(QFV.dateTime()), _value, [](const QList<clsORMField>&){ return "A valid datetime"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t, optional(QFV.url()), _value, [](const QList<clsORMField>&){ return "A valid URL"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, PackageCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid PackageCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DiscountCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{5,10}"))), _value, [](const QList<clsORMField>&){ return "A valid DiscountCode"; });
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 

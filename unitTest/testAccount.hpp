@@ -23,7 +23,6 @@
 #define TESTACCOUNT_HPP
 
 #include "testCommon.hpp"
-#include "App/Server/QJWT.h"
 #include "Interfaces/AAA/clsJWT.hpp"
 
 using namespace Targoman::API;

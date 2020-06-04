@@ -30,7 +30,6 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuTicketStatus);
 namespace Targoman {
 namespace API {
 using namespace ORM;
-using namespace TAPI;
 
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -40,7 +39,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
                        .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
                        .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
                        .arg(tblTickets::tktTarget_usrID)
-                       .arg(tblTickets::tktType).arg((enuTicketType::toStr(enuTicketType::Broadcast)));
+                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
 
     return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
 }

@@ -99,7 +99,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
 
 }
 
-quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain)
+quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const TAPI::JSON_t& _pgResponse, const QString& _domain)
 {
     stuPaymentResponse PaymentResponse;
     switch(_gateway){

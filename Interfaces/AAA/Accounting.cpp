@@ -31,18 +31,22 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
-using namespace TAPI;
 using namespace Common;
 using namespace Common::Configuration;
 
 static QMap<QString, clsRESTAPIWithAccounting*> ServiceRegistry;
+
+Common::Configuration::tmplConfigurable<QString> Secret(
+        makeConfig("Secret"),
+        "Secret to be used for signing voucher and prevoucher",
+        "fcy^E?a*4<;auY?>^6s@");
 
 QByteArray hash(const QByteArray& _data)
 {
    return QMessageAuthenticationCode::hash(_data, Accounting::Secret.value().toUtf8(), QCryptographicHash::Sha256);
 }
 
-void checkPreVoucherSanity(stuPreVoucher _preVoucher)
+void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher)
 {
     if(_preVoucher.Items.isEmpty())
         return;
@@ -221,7 +225,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
                                                                  qint16 _count,
                                                                  TAPI::DiscountCode_t _discountCode,
                                                                  QString _referer,
-                                                                 QJsonObject _extraRefererParams,
+                                                                 TAPI::JSON_t _extraRefererParams,
                                                                  TAPI::stuPreVoucher _lastPreVoucher)
 {
     Accounting::checkPreVoucherSanity(_lastPreVoucher);
@@ -297,7 +301,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
         Discount.Amount = static_cast<quint32>(Amount);
         Discount.ID = DiscountInfo.value(tblAccountDiscounts::disPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
-        Discount.Type = static_cast<enuDiscountType::Type>(DiscountInfo.value(tblAccountDiscounts::disType).toInt());
+        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountDiscounts::disType).toInt());
         Discount.MaxAmount = DiscountInfo.value(tblAccountDiscounts::disMaxAmount).toUInt();
     }
 
@@ -320,9 +324,9 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
     PreVoucherItem.Discount = Discount;
     if(Discount.Amount)
         switch(Discount.Type){
-        case enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.Price; break;
-        case enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.Price, Discount.Amount); break;
-        case enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.Price * Discount.Amount / 100.)));
+        case TAPI::enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.Price; break;
+        case TAPI::enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.Price, Discount.Amount); break;
+        case TAPI::enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.Price * Discount.Amount / 100.)));
         }
     PreVoucherItem.TaxPercent = 9;
     PreVoucherItem.TaxAmount = ((PreVoucherItem.Price - PreVoucherItem.DisAmount) * PreVoucherItem.TaxPercent / 100);

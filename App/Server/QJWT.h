@@ -37,7 +37,6 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
                               HS384,
                               HS512)
-
 class QJWT
 {
     static inline QString makeConfig(const QString& _name){return "/JWT/" + _name;}
@@ -64,6 +63,6 @@ private:
 }
 }
 
-//ENUM_CONFIGURABLE(Targoman::API::Server::enuJWTHashAlgs)
+ENUM_CONFIGURABLE(Targoman::API::Server::enuJWTHashAlgs)
 
 #endif // TARGOMAN_API_SERVER_CLSJWT_H

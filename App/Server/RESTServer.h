@@ -58,37 +58,6 @@ using fnIsInBlackList_t = std::function<enuIPBlackListStatus::Type (QHostAddress
 /********************************************************************************/
 class RESTServer : public QObject
 {    
-private:
-/*    struct stuConfig{
-        static Common::Configuration::tmplConfigurable<QString>       BasePath;
-        static Common::Configuration::tmplConfigurable<QString>       Version;
-        static Common::Configuration::tmplConfigurable<bool>          JustLocal;
-        static Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
-        static Common::Configuration::tmplConfigurable<bool>          IndentedJson;
-        static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
-        static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;
-        static Common::Configuration::tmplConfigurable<FilePath_t>    BaseOpenAPIObjectFile;
-        static Common::Configuration::tmplRangedConfigurable<quint8>  StatisticsInterval;
-        static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
-        static Common::Configuration::tmplConfigurable<QString>       CacheConnector;
-        static Common::Configuration::tmplConfigurable<QString>       AccessControl;
-
-        static ;
-
-//        QHostAddress ListenAddress;
-//        QString      JWTSecret;
-//        enuJWTHashAlgs::Type JWTHashAlgorithm;
-//        quint64      SimpleCryptKey;
-//        QJsonObject BaseOpenAPIObject;
-
-#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-//        QString WebSocketServerName;
-//        quint16 WebSocketServerPort;
-//        QString WebSocketServerAdderss;
-//        bool    WebSocketSecure;
-#endif
-    };
-*/
 public:
     instanceGetter(RESTServer)
     /**
