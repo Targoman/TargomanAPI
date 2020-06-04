@@ -58,16 +58,16 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
             COMPLEXITY_Complex,
-            TAPI, COOKIES_t,
-            [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
-            [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
+            TAPI, HEADERS_t,
+            [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
+            [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(
             COMPLEXITY_Complex,
-            TAPI, HEADERS_t,
-            [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
-            [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
+            TAPI, COOKIES_t,
+            [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
+            [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(

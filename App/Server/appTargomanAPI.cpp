@@ -59,7 +59,11 @@ void appTargomanAPI::slotExecute()
         // Load modules
         QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
 
-        foreach(auto Plugin, Configuration::ConfigManager::instance().loadedPlugins()){
+        auto LoadedModules = Configuration::ConfigManager::instance().loadedPlugins();
+        if(LoadedModules.isEmpty())
+            throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
+
+        foreach(auto Plugin, LoadedModules){
             intfAPIModule* Module = qobject_cast<intfAPIModule*>(Plugin.Instance);
             if(!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
@@ -94,7 +98,6 @@ void appTargomanAPI::slotExecute()
                 ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
             }
-
 
             for(auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
                 if(DBInfoIter->Host.size()
