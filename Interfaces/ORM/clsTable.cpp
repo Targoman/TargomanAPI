@@ -29,8 +29,6 @@
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 
-using namespace TAPI;
-using namespace TAPI;
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
 
@@ -85,7 +83,6 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-using namespace TAPI;
 using namespace Targoman::DBManager;
 
 QHash<QString, clsTable*> clsTable::Registry;
@@ -206,6 +203,10 @@ QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stu
                  ) + "." + _col.name() +
             (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
+
+QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
+    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), {}, 0, 2, _cols, {}, {}, _groupBy, false, 0);
+}
 
 QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _extraFilters,
@@ -365,7 +366,7 @@ bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariant
     return Result.numRowsAffected() > 0;
 }
 
-bool clsTable::deleteByPKs(quint32 _actorID, ExtraPath_t _EXTRAPATH, ORMFilters_t _ORMFILTERS, bool _realDelete)
+bool clsTable::deleteByPKs(quint32 _actorID, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t _ORMFILTERS, bool _realDelete)
 {
     this->prepareFiltersList();
 

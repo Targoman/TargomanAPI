@@ -22,6 +22,8 @@
 
 #include "Account.h"
 #include "QFieldValidator.h"
+#include "libTargomanCommon/Configuration/Validators.hpp"
+
 
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
@@ -42,7 +44,6 @@
 
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.hpp"
-#include "libTargomanCommon/Configuration/Validators.hpp"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
@@ -58,16 +59,22 @@ using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
 
+TARGOMAN_DEFINE_ENUM (enuPaymentType,
+                      Online='N',
+                      Offline='F'
+)
+
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
 Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateWay> intfPaymentGateway::GatewayEndPoints(
-        QString("AAA/GatewayEndPoints"),
+        AAA::Accounting::makeConfig("GatewayEndPoints"),
         "Registered payment gateways",
         0
         );
 
+
 Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile(
-        QString("AAA/TransactionLogFile"),
+        AAA::Accounting::makeConfig("TransactionLogFile"),
         "File to store transaction logs",
         "",
         Validators::tmplPathAccessValidator<
@@ -78,7 +85,6 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway
         "transacton-log-file",
         enuConfigSource::Arg | enuConfigSource::File
         );
-
 
 TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                                      QString _login,
@@ -109,8 +115,6 @@ TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
 //TODO cache to ban users for every service
 //TODO update cache for each module
 //TODO JWT lifetime dynamic based on current hour
-//
-
 TAPI::EncodedJWT_t Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
                                             QString _oAuthToken,
@@ -307,6 +311,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
 
     TAPI::stuVoucher Voucher;
     Voucher.Info = _preVoucher;
+    //TODO remove sign from prevoucher before converting to JSON
     Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), {}, {
                                                   {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
                                                   {tblVoucher::vchDesc, _preVoucher.toJson()},
@@ -317,7 +322,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
         if(_walletID>=0){
             clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
                                                    {"iWalletID", _walletID},
-                                                   {"iInvID", Voucher.ID},
+                                                   {"iVoucherID", Voucher.ID},
                                                });
             RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay) - Result.spDirectOutputs().value("oAmount").toUInt();
             if(RemainingAfterWallet < 0)
@@ -344,13 +349,13 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     return Voucher;
 }
 
-TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, QJsonObject _pgResponse)
+TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse)
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
     try{
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
                          {"iVoucherID", VoucherID},
-                         {"iPaymentType", "O"} //TODO use enum
+                         {"iPaymentType", enuPaymentType::Online}
                      });
         return PaymentLogic::processVoucher(VoucherID);
     }catch(...){
@@ -365,7 +370,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::T
 }
 
 TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
-                                                       quint64 _invID,
+                                                       quint64 _vchID,
                                                        const QString& _bank,
                                                        const QString& _receiptCode,
                                                        TAPI::Date_t _receiptDate,
@@ -378,7 +383,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
         throw exAuthorization("Not enough access for offline approval");
 
     if(ApprovalLimit > 0){
-        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_invID), {}, 0, 1, tblVoucher::vchTotalAmount).toMap();
+        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), {}, 0, 1, tblVoucher::vchTotalAmount).toMap();
         if(Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
             throw exAuthorization("Voucher total amount is greater than your approval limit");
     }
@@ -387,7 +392,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
     OfflinePayments::instance().create(clsJWT(_JWT).usrID(), {}, {
-                                           {"ofp_invID",_invID},
+                                           {"ofp_vchID",_vchID},
                                            {"ofpBank",_bank},
                                            {"ofpReceiptCode",_receiptCode},
                                            {"ofpReceiptDate",_receiptDate},
@@ -396,11 +401,11 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                        });
 
     this->callSP("sp_CREATE_walletTransactionOnPayment", {
-                     {"iVoucherID", _invID},
-                     {"iPaymentType", "F"} //TODO use enum
+                     {"iVoucherID", _vchID},
+                     {"iPaymentType", enuPaymentType::Offline}
                  });
 
-    return PaymentLogic::processVoucher(_invID);
+    return PaymentLogic::processVoucher(_vchID);
 }
 
 bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)

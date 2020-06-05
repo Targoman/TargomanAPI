@@ -45,7 +45,7 @@ OnlinePayments::OnlinePayments() :
                 {tblOnlinePayments::onpID,                S(quint64),             QFV.integer().minValue(1),          UPNone},
                 {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
                 {tblOnlinePayments::onpCreationDateTime,  S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
-                {tblOnlinePayments::onp_invID,            S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
+                {tblOnlinePayments::onp_vchID,            S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
                 {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateway::Type),QFV,                      TAPI::enuPaymentGateway::Zibal, UPNone},
                 {tblOnlinePayments::onpPGTrnID,           S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
                 {tblOnlinePayments::onpAmount,            S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
@@ -54,7 +54,7 @@ OnlinePayments::OnlinePayments() :
                 {tblOnlinePayments::onpResult,            S(QString),             QFV,                                QNull,      UPNone,false,false},
               },
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                {tblOnlinePayments::onp_invID,   R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+                {tblOnlinePayments::onp_vchID,   R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
               })
 {
 }
@@ -79,7 +79,7 @@ OfflinePayments::OfflinePayments() :
               tblOnlinePayments::Name,
               { ///<ColName                             Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblOfflinePayments::ofpID,               S(quint64),             QFV.integer().minValue(1),          UPNone},
-                {tblOfflinePayments::ofp_invID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
+                {tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
                 {tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
                 {tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
                 {tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
@@ -92,7 +92,7 @@ OfflinePayments::OfflinePayments() :
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
                 {tblOfflinePayments::ofpCreatedBy_usrID, ORM_JOIN_CREATOR},
                 {tblOfflinePayments::ofpUpdatedBy_usrID, ORM_JOIN_UPDATER},
-                {tblOfflinePayments::ofp_invID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+                {tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
               })
 {
 }

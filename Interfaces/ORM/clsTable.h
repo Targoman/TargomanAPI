@@ -117,6 +117,8 @@ public:
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
     void prepareFiltersList();
 
+    QVariant selectFromTableByID(quint64 _id, QString _cols = {}, const QStringList& _extraJoins = {}, const QString& _groupBy = {});
+
     QVariant selectFromTable(const QStringList& _extraJoins,
                              const QString& _extraFilters,
                              const TAPI::ExtraPath_t& _extraPath={},

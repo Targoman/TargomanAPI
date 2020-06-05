@@ -48,14 +48,12 @@ TAPI_REGISTER_METATYPE(
 namespace Targoman {
 namespace API {
 
-using namespace Targoman;
-using namespace TAPI;
 using namespace AAA;
 using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
-stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order)
+TAPI::stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order)
 {
     /*clsDACResult Result = AdvertDACInstance().execQuery(
                                 "",
@@ -63,7 +61,7 @@ stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _location
                                 )*/
 }
 
-stuAdvert Advert::apiGETNewText(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
+TAPI::stuAdvert Advert::apiGETNewText(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
 {
 
 }

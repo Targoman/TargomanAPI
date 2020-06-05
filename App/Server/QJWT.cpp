@@ -41,14 +41,14 @@ using namespace Common::Configuration;
 tmplConfigurable<QString> QJWT::Secret(
         QJWT::makeConfig("JWTSecret"),
         "Secret to be used for hashing JWT",
-        "~5KHeTc7.C^Ln%<X~YnE4<Kr",
+        "~5KHeTc7.C^Ln^<X~YnE4<Kr",
         ReturnTrueCrossValidator(),
         "",
         "SECRET",
         "jwt-secret",
         enuConfigSource::Arg | enuConfigSource::File);
 
-/*tmplConfigurable<enuJWTHashAlgs::Type> QJWT::HashAlgorithm(
+tmplConfigurable<enuJWTHashAlgs::Type> QJWT::HashAlgorithm(
         QJWT::makeConfig("JWTHashAlgorithm"),
         "Hash algorithm toe be used for JWT",
         enuJWTHashAlgs::HS256,
@@ -57,7 +57,7 @@ tmplConfigurable<QString> QJWT::Secret(
         "ALGORITHM",
         "jwt-hash-alg",
         enuConfigSource::Arg | enuConfigSource::File);
-*/
+
 tmplConfigurable<quint64> QJWT::SimpleCryptKey(
         QJWT::makeConfig("SimpleCryptKey"),
         "Secret to be used for encrypting private JWT objects",
@@ -89,8 +89,7 @@ static clsSimpleCrypt* simpleCryptInstance(){
 
 QString QJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint32 _expiry, const QString& _sessionID)
 {
-//    const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
-    const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg("HS256");
+    const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
     _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
     if(_expiry >= 0)
@@ -149,8 +148,7 @@ QJsonObject QJWT::verifyReturnPayload(const QString& _jwt)
 
 QByteArray QJWT::hash(const QByteArray& _data)
 {
-    return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
-    /*switch(QJWT::HashAlgorithm.value()){
+    switch(QJWT::HashAlgorithm.value()){
     case enuJWTHashAlgs::HS256:
         return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
     case enuJWTHashAlgs::HS384:
@@ -159,10 +157,10 @@ QByteArray QJWT::hash(const QByteArray& _data)
         return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha512);
     default:
         throw exHTTPInternalServerError("Invalid JWT encryption algorithm");
-    }*/
+    }
 }
 
 }
 }
 }
-//ENUM_CONFIGURABLE_IMPL(Targoman::API::Server::enuJWTHashAlgs)
+ENUM_CONFIGURABLE_IMPL(Targoman::API::Server::enuJWTHashAlgs)

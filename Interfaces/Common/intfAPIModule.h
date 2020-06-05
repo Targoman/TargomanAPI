@@ -184,7 +184,7 @@ private: \
 
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
     struct DB{ \
-        static inline QString makeConfig(const QString& _name){return TARGOMAN_M2STR(_module) + _name;} \
+        static inline QString makeConfig(const QString& _name){return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name);} \
         static Common::Configuration::tmplConfigurable<QString>      Host;   \
         static Common::Configuration::tmplRangedConfigurable<quint16>Port;   \
         static Common::Configuration::tmplConfigurable<QString>      User;   \

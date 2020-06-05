@@ -33,14 +33,14 @@ namespace AAA {
 
 using namespace DBManager;
 
-QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _invID, const QString& _invDesc, quint32 _toPay, const QString _callback)
+QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _vchID, const QString& _invDesc, quint32 _toPay, const QString _callback)
 {
     TAPI::MD5_t opyMD5;
     quint8 Retries = 0;
     while(true){
         try{
             clsDACResult Result = OnlinePayments::instance().callSP("sp_CREATE_newOnlinePayment", {
-                                                                        {"iInvID", _invID},
+                                                                        {"iVoucherID", _vchID},
                                                                         {"iGateway", QString(_gateway)}
                                                                     });
             opyMD5 = Result.spDirectOutputs().value("oMD5").toString();
@@ -99,7 +99,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
 
 }
 
-quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QJsonObject& _pgResponse, const QString& _domain)
+quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const TAPI::JSON_t& _pgResponse, const QString& _domain)
 {
     stuPaymentResponse PaymentResponse;
     switch(_gateway){
@@ -144,9 +144,26 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
     return VoucherID.toULongLong();
 }
 
-TAPI::stuVoucher PaymentLogic::processVoucher(quint64 _VoucherID)
+TAPI::stuVoucher PaymentLogic::processVoucher(quint64 _voucherID)
 {
-    //TODO
+    QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
+    if(!VoucherDesc.canConvert<QJsonObject>())
+        throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
+    TAPI::stuPreVoucher PreVoucher;
+    PreVoucher.fromJson(VoucherDesc.toJsonObject());
+
+    //TODO process voucher and apply it
+
+    foreach(auto VoucherItem, PreVoucher.Items){
+
+    }
+    return TAPI::stuVoucher(
+                _voucherID,
+                PreVoucher,
+                QString(),
+                TAPI::enuVoucherStatus::Finished
+                );
+
 }
 
 }

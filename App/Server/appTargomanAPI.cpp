@@ -24,6 +24,7 @@
 #include <QPluginLoader>
 
 #include "libTargomanDBM/clsDAC.h"
+#include "libTargomanCommon/Configuration/ConfigManager.h"
 
 #include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/NLP/FormalityChecker.h"
@@ -38,6 +39,8 @@
 namespace Targoman {
 namespace API {
 namespace Server {
+
+using namespace Common;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -55,38 +58,30 @@ void appTargomanAPI::slotExecute()
     try{
         // Load modules
         QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
-        QDir PluginsDir = QDir(ServerConfigs::ModulesPath.value());
-        foreach (QString FileName, PluginsDir.entryList(QDir::Files))
-        {
-            TargomanDebug(5,"Loading Module: "<<PluginsDir.absoluteFilePath(FileName));
-            QPluginLoader* Loader = new QPluginLoader(PluginsDir.absoluteFilePath(FileName));
-            if (!Loader)
-                throw exModuleUnable2LoadFile(QString("Unable to load %1 ").arg(FileName));
-            QObject* ModuleObject = Loader->instance();
-            if (ModuleObject) {
-                intfAPIModule* Module = qobject_cast<intfAPIModule*>(ModuleObject);
-                if(!Module)
-                    throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(FileName));
 
-                foreach(auto ModuleMethod, Module->listOfMethods())
-                    RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
+        auto LoadedModules = Configuration::ConfigManager::instance().loadedPlugins();
+        if(LoadedModules.isEmpty())
+            throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
-                if(Module->requiredDB().Schema.size())
-                    RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
+        foreach(auto Plugin, LoadedModules){
+            intfAPIModule* Module = qobject_cast<intfAPIModule*>(Plugin.Instance);
+            if(!Module)
+                throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
-                if(Module->requiresTextProcessor())
-                    NLP::TextProcessor::instance().init(
-                                Targoman::Common::Configuration::ConfigManager::instance().configSettings());
+            foreach(auto ModuleMethod, Module->listOfMethods())
+                RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
-                if(Module->requiresFormalityChecker())
-                    NLP::FormalityChecker::instance();
-            }else{
-                TargomanWarn(5,"Unable to load Module :"<<Loader->errorString());
-                if (Loader->isLoaded())
-                    Loader->unload(); //Unload plugin if it canot be used by the application
-                delete Loader;
-            }
+            if(Module->requiredDB().Schema.size())
+                RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
+
+            if(Module->requiresTextProcessor())
+                NLP::TextProcessor::instance().init(
+                            Targoman::Common::Configuration::ConfigManager::instance().configSettings());
+
+            if(Module->requiresFormalityChecker())
+                NLP::FormalityChecker::instance();
         }
+
         //Prepare database connections
         if(RequiredDBs.size()) {
             DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
@@ -103,7 +98,6 @@ void appTargomanAPI::slotExecute()
                 ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
             }
-
 
             for(auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
                 if(DBInfoIter->Host.size()

@@ -49,7 +49,6 @@ struct ServerConfigs
     static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
     static Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;
     static Common::Configuration::tmplConfigurable<FilePath_t>    BaseOpenAPIObjectFile;
-    static Common::Configuration::tmplConfigurable<FilePath_t>    ModulesPath;
     static Common::Configuration::tmplRangedConfigurable<quint8>  StatisticsInterval;
     static Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
     static Common::Configuration::tmplConfigurable<QString>       CacheConnector;
@@ -72,7 +71,7 @@ struct ServerConfigs
     };
 };
 
-constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 2;
+constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 3;
 
 extern TAPI::stuStatistics gServerStats;
 

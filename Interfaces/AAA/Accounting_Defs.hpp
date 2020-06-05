@@ -38,6 +38,10 @@ TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      Finished = 'F',
                      Removed  = 'R'
                                 )
+TARGOMAN_DEFINE_ENUM(enuDiscountType,
+                     Percent = '%',
+                     Amount  = '$',
+                     Free    = 'Z')
 }
 
 namespace Targoman {
@@ -45,16 +49,8 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
-static inline QString makeConfig(const QString& _name){return "/AAA/Accounting/" + _name;}
-static Common::Configuration::tmplConfigurable<QString> Secret(
-        makeConfig("Secret"),
-        "Secret to be used for hashing JWT",
-        "~5KHeTc7.C^Ln%<X~YnE4<Kr");
-
-TARGOMAN_DEFINE_ENUM(enuDiscountType,
-                     Percent = '%',
-                     Amount  = '$',
-                     Free    = 'Z')
+inline QString makeConfig(const QString& _name){return "/zModule_Account/" + _name;}
+extern Common::Configuration::tmplConfigurable<QString> Secret;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         stuPrize,
@@ -68,7 +64,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         QString, Name     , QString(), v.size(), v       , v.toString(),
         quint32, Amount   , 0        , v       , C2DBL(v), static_cast<quint32>(v.toDouble()),
         quint32, MaxAmount, 0        , v       , C2DBL(v), static_cast<quint32>(v.toDouble()),
-        enuDiscountType::Type, Type, enuDiscountType::Percent, v, v,static_cast<enuDiscountType::Type>(v.toString().toLatin1().constData()[0])
+        TAPI::enuDiscountType::Type, Type, TAPI::enuDiscountType::Percent, v, v,static_cast<TAPI::enuDiscountType::Type>(v.toString().toLatin1().constData()[0])
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
@@ -247,7 +243,7 @@ TARGOMAN_CREATE_CONSTEXPR(aup_pkgID);
 TARGOMAN_CREATE_CONSTEXPR(aupPrefered);
 TARGOMAN_CREATE_CONSTEXPR(aupPurchaseRequestDateTime);
 TARGOMAN_CREATE_CONSTEXPR(aupPaymentDateTime);
-TARGOMAN_CREATE_CONSTEXPR(aup_invID);
+TARGOMAN_CREATE_CONSTEXPR(aup_vchID);
 TARGOMAN_CREATE_CONSTEXPR(aupUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(aupStatus);
 }
@@ -289,6 +285,8 @@ TARGOMAN_CREATE_CONSTEXPR(refStatus);
 
 
 TAPI_DECLARE_METATYPE(TAPI::stuVoucher)
+TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)
 TAPI_DECLARE_METATYPE(TAPI::enuVoucherStatus::Type)
+TAPI_DECLARE_METATYPE(TAPI::enuDiscountType::Type)
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

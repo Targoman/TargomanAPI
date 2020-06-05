@@ -35,7 +35,6 @@ namespace Targoman {
 namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
-using namespace TAPI;
 
 quint64 Ticketing::insertTicket(quint32 _targetUser,
                                 quint32 _serviceID,
@@ -74,24 +73,24 @@ bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT,
 
   return this->insertTicket(
              _targetUser, _serviceID, 0,
-             _targetUser ? enuTicketType::Message : enuTicketType::Broadcast,
+             _targetUser ? TAPI::enuTicketType::Message : TAPI::enuTicketType::Broadcast,
              _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
 bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
                                   const QString& _title,
                                   const QString& _text,
-                                  enuTicketType::Type _ticketType,
+                                  TAPI::enuTicketType::Type _ticketType,
                                   quint32 _serviceID,
                                   quint64 _inReplyTo,
                                   TAPI::stuFileInfo _file) {
   Authorization::checkPriv(_JWT, {});
 
-  if (_inReplyTo && (_ticketType != enuTicketType::Reply))
+  if (_inReplyTo && (_ticketType != TAPI::enuTicketType::Reply))
     throw exHTTPBadRequest("Reply tickets must have reply type");
 
-  if (_ticketType == enuTicketType::Message ||
-      _ticketType == enuTicketType::Broadcast)
+  if (_ticketType == TAPI::enuTicketType::Message ||
+      _ticketType == TAPI::enuTicketType::Broadcast)
     throw exHTTPBadRequest(
         "Message and Broadcast tickets must be sent via newMessage method");
 

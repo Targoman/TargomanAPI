@@ -78,11 +78,11 @@ public:
         }
     }
 
-    static stuPaymentResponse verify(const QJsonObject& _pgResponse, const QString& _domain){
+    static stuPaymentResponse verify(const TAPI::JSON_t& _pgResponse, const QString& _domain){
         intfPaymentGateway::log("Zibal", __FUNCTION__, __LINE__, {_pgResponse, _domain});
         try {
-            QString OrderMD5 = _pgResponse.value("orderId").toString();
-            QString TrackID = _pgResponse.value("trackId").toString();
+            QString OrderMD5 = _pgResponse.object().value("orderId").toString();
+            QString TrackID = _pgResponse.object().value("trackId").toString();
 
             if(OrderMD5.isEmpty() || TrackID.isEmpty())
                 throw exHTTPBadRequest("Invalid response not containing essential keys");

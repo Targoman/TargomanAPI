@@ -193,18 +193,6 @@ tmplConfigurable<FilePath_t>     ServerConfigs::BaseOpenAPIObjectFile(
         "openapi-file",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<FilePath_t>     ServerConfigs::ModulesPath(
-        ServerConfigs::makeConfig("ModulesPath"),
-        "Directory where API modules are stored",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
-        false>,
-        "m",
-        "DIRECTORY",
-        "modules-path",
-        enuConfigSource::Arg | enuConfigSource::File);
-
 tmplConfigurable<FilePath_t>     ServerConfigs::SwaggerUI(
         ServerConfigs::makeConfig("SwaggerUI"),
         "Directory where swaggerUI files reside",

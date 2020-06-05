@@ -28,7 +28,6 @@ namespace Targoman {
 namespace API {
 namespace Advertisement {
 using namespace ORM;
-using namespace TAPI;
 using namespace AAA;
 using namespace AAA::Accounting;
 using namespace Targoman::API::AAA::Accounting;
@@ -52,7 +51,7 @@ AccountPackages::AccountPackages() :
                 {tblAccountPackages::pkgClicksPerDay,           S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
                 {tblAccountPackages::pkgClicksPerMonth,         S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
                 {tblAccountPackages::pkgClicksTotal,            S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountPackagesBase::pkgPrivs,              S(JSON_t),              QFV,                                    QNull,     UPAdmin},
+                {tblAccountPackagesBase::pkgPrivs,              S(TAPI::JSON_t),        QFV,                                    QNull,     UPAdmin},
                 {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
                 {tblAccountPackagesBase::pkgNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
                 {tblAccountPackagesBase::pkgVoucherTemplate,    S(QString),             QFV,                                    QNull,     UPAdmin},
@@ -98,7 +97,7 @@ clsAccountUserPackages::clsAccountUserPackages() :
                 {tblAccountUserPackages::aupPrefered,               S(bool),                QFV,                        false,     UPOwner},
                 {tblAccountUserPackages::aupPurchaseRequestDateTime,S(TAPI::DateTime_t),    QFV,                        QNull,     UPNone},
                 {tblAccountUserPackages::aupPaymentDateTime,        S(TAPI::DateTime_t),    QFV,                        QNull,     UPAdmin},
-                {tblAccountUserPackages::aup_invID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
+                {tblAccountUserPackages::aup_vchID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,  UPNone},
                 {tblAccountUserPackages::aupUpdatedBy_usrID,        ORM_UPDATED_BY},
                 {tblAccountUserPackages::aupStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus},
               },
@@ -106,7 +105,7 @@ clsAccountUserPackages::clsAccountUserPackages() :
                 {tblAccountUserPackages::aup_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,    "Owner_"},
                 {tblAccountUserPackages::aup_pkgID, R(AdvertSchema,tblAccountPackagesBase::Name),  tblAccountPackagesBase::pkgID},
                 //Voucher is not accessible as it is in another schema
-                //{tblAccountUserPackages::aup_invID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
+                //{tblAccountUserPackages::aup_vchID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
               }
     )
 {;}
@@ -118,7 +117,7 @@ AccountDiscounts::AccountDiscounts() :
               {tblAccountDiscounts::disID,                 S(quint32),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
               {tblAccountDiscounts::disCode,               S(TAPI::DiscountCode_t),QFV,                                    QInvalid,  UPAdmin},
               {tblAccountDiscounts::disType,               S(TAPI::enuDiscountType::Type), QFV,                            TAPI::enuDiscountType::Percent, UPAdmin},
-              {tblAccountDiscounts::disPackageBasedAmount, S(JSON_t),              QFV,                                    QInvalid,  UPAdmin, false, false},
+              {tblAccountDiscounts::disPackageBasedAmount, S(TAPI::JSON_t),        QFV,                                    QInvalid,  UPAdmin, false, false},
               {tblAccountDiscounts::disValidFrom,          S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
               {tblAccountDiscounts::disExpiryTime,         S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
               {tblAccountDiscounts::disPrimaryCount,       S(quint32),             QFV.integer().minValue(1),              1,         UPAdmin},

@@ -62,7 +62,7 @@ private slots:
                                                  qint16 _count = 1,
                                                  TAPI::DiscountCode_t _discountCode = {},
                                                  QString _referer = {},
-                                                 QJsonObject _extraRefererParams = {},
+                                                 TAPI::JSON_t _extraRefererParams = {},
                                                  TAPI::stuPreVoucher _lastPreVoucher = {}),
                                 "add a package to basket and return updated pre-Voucher")
 protected:
