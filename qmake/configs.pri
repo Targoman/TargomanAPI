@@ -19,8 +19,7 @@
 ProjectName="TargomanAPI"
 VERSION=1.0.0
 
-LIBS += -lTargomanAPIInterface \
-        -lTargomanCommon \
+LIBS += -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
         -lQJsonRPC \

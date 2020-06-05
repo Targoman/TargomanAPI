@@ -26,6 +26,8 @@ HEADERS += \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += main.cpp \
+    $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
+
 
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #

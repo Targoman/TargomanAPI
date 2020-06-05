@@ -52,6 +52,8 @@ SOURCES += \
     Server/OpenAPIGenerator.cpp \
     Server/main.cpp
 
+LIBS += -lTargomanAPIInterface \
+
 ################################################################################
 #                       DO NOT CHANGE ANYTHING BELOW                           #
 ################################################################################
