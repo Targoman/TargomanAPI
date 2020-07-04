@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="Accounting" qt:editorversion="4.8.2" initial="PreVoucher">
+    <qt:editorinfo initialGeometry="91.58;234.89;-20;-20;40;40"/>
+    <state id="PreVoucher">
+        <qt:editorinfo scenegeometry="380.55;203.21;198.80;29.56;429.75;410.65" geometry="380.55;203.21;-181.75;-173.65;429.75;410.65"/>
+        <state id="retrieve">
+            <qt:editorinfo scenegeometry="310.34;114.98;250.34;64.98;120;100" geometry="-101.75;-59.01;-60;-50;120;100"/>
+        </state>
+    </state>
+</scxml>
