@@ -21,8 +21,9 @@ PRJDIR = ".."
 HEADERS += \
     testCommon.hpp \
     testBase.hpp \
-    testAccount.hpp \
-    testAccountORM.hpp \
+    Account/test.hpp \
+    Account/ORM/activeSessions.hpp \
+    Account/ORM/actionLogs.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += main.cpp \

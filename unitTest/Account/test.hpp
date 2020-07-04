@@ -19,11 +19,13 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TESTACCOUNT_HPP
-#define TESTACCOUNT_HPP
+#ifndef TEST_ACCOUNT_HPP
+#define TEST_ACCOUNT_HPP
 
 #include "testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
+#include "ORM/actionLogs.hpp"
+#include "ORM/activeSessions.hpp"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
@@ -174,4 +176,4 @@ private slots:
 };
 
 
-#endif // TESTACCOUNT_HPP
+#endif // TEST_ACCOUNT_HPP

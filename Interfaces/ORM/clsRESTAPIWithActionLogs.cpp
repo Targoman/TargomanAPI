@@ -30,7 +30,7 @@ namespace ORM {
 
 QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{this->Module + ":ActiveAds:CRUD~0100"});
+    Authorization::checkPriv(_JWT,{this->Module + ":ActionLogs:CRUD~0100"});
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 

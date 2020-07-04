@@ -299,7 +299,7 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
     if(_api == "/openAPI.yaml")
         throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 
-    if(_api.startsWith("/swaggerUI")){
+    if(_api.toLower().startsWith("/swaggerui")){
         if(ServerConfigs::SwaggerUI.value().isEmpty())
             return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not confiugured");
 

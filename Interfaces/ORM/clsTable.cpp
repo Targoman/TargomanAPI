@@ -19,8 +19,19 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#include "clsTable.h"
 
+namespace Targoman {
+namespace API {
+namespace ORM {
+struct stuRelation;
+}
+}
+}
+bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second);
+unsigned int qHash(const Targoman::API::ORM::stuRelation& _relation);
+
+#include <QSet>
+#include "clsTable.h"
 #include <QRegularExpression>
 
 #include "QFieldValidator.h"
@@ -31,6 +42,15 @@
 
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
+
+bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second)
+{
+    return _first.ReferenceTable == _second.ReferenceTable && _first.Column == _second.Column && _first.ForeignColumn == _second.ForeignColumn;
+}
+uint qHash(const Targoman::API::ORM::stuRelation& _relation){
+    return qHash(_relation.Column + _relation.ForeignColumn + _relation.ReferenceTable + _relation.RenamingPrefix);
+}
+
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
                                    QFieldValidator::allwaysValid(), _value,
@@ -194,13 +214,16 @@ QString clsTable::makeColRenamedAs(const clsORMField& _col, const QString& _pref
 };
 
 QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stuRelation& _relation) const {
+    QString ColName = _col.name();
+    if(_relation.Column.size() && _relation.RenamingPrefix.size())
+        ColName = ColName.replace(QRegularExpression("^" + _relation.RenamingPrefix), "");
     return  (_relation.Column.isEmpty() ?
                  this->Name :
                  (_relation.RenamingPrefix.isEmpty() ?
                       _relation.ReferenceTable :
                       _relation.RenamingPrefix
                       )
-                 ) + "." + _col.name() +
+                 ) + "." + ColName +
             (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
@@ -584,7 +607,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             addCol(SelectItems, Col);
     }
 
-    QList<stuRelation> UsedJoins;
+    QSet<stuRelation> UsedJoins;
     foreach(auto Relation, this->ForeignKeys){
         clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
         if(ForeignTable == nullptr)
@@ -602,7 +625,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         }
 
         if(Joined)
-            UsedJoins.append(Relation);
+            UsedJoins.insert(Relation);
     }
 
     if(SelectItems.Cols.isEmpty())
@@ -657,7 +680,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                 StatusColHasCriteria = true;
 
             if(FilteredCol.Relation.Column.size() && UsedJoins.contains(FilteredCol.Relation) == false)
-                UsedJoins.append(FilteredCol.Relation);
+                UsedJoins.insert(FilteredCol.Relation);
 
             if(PatternMatches.captured(3) == "NULL"){
                 if(PatternMatches.captured(2) == "=")
@@ -709,8 +732,14 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     if(StatusColHasCriteria == false)
         foreach(auto FCol, this->FilterableColsMap)
-            if(FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                SelectItems.Where.append("AND "+this->makeColName(FCol.Col)+"!='R'");
+            if(FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__){
+                if(FCol.Relation.LeftJoin)
+                    SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(this->makeColName(FCol.Col, false, FCol.Relation)));
+                else
+                    SelectItems.Where.append(QString("AND %1!='R'").arg(this->makeColName(FCol.Col, false, FCol.Relation)));
+                if(FCol.Relation.Column.size())
+                    UsedJoins.insert(FCol.Relation);
+            }
 
     /****************************************************************************/
 

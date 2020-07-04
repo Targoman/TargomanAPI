@@ -23,6 +23,8 @@
 #ifndef TARGOMAN_API_ORM_CLSTABLE_H
 #define TARGOMAN_API_ORM_CLSTABLE_H
 
+
+
 #include "QFieldValidator.h"
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
@@ -77,7 +79,7 @@ struct stuRelation{
         Column(_col), ReferenceTable(_referenceTable), ForeignColumn(_foreignCol), RenamingPrefix(_renamingPrefix), LeftJoin(_isLeftJoin)
     {;}
 
-    bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
+//    bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
 };
 
 static stuRelation InvalidRelation("","","");
@@ -221,5 +223,6 @@ TAPI_DECLARE_METATYPE(TAPI::Cols_t);
 TAPI_DECLARE_METATYPE(TAPI::Filter_t);
 TAPI_DECLARE_METATYPE(TAPI::OrderBy_t);
 TAPI_DECLARE_METATYPE(TAPI::GroupBy_t);
+
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H

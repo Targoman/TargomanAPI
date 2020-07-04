@@ -22,8 +22,7 @@
 
 #include <QtTest>
 #include "testBase.hpp"
-#include "testAccount.hpp"
-#include "testAccountORM.hpp"
+#include "Account/test.hpp"
 
 QString APIURL = "http://127.0.0.1:10000/rest/v1";
 
@@ -47,7 +46,8 @@ int main(int argc, char *argv[])
     try{
         FailedTests += QTest::qExec(new testBase, argc, argv);
         FailedTests += QTest::qExec(new testAccount, argc, argv);
-        FailedTests += QTest::qExec(new testAccountORM, argc, argv);
+        FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+        FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

@@ -19,43 +19,23 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TESTACCOUNTORM_HPP
-#define TESTACCOUNTORM_HPP
+#ifndef TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
+#define TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
 
 #include "testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 
 using namespace Targoman::API::AAA;
 
-class testAccountORM: public clsBaseTest
+class testActionLogs: public clsBaseTest
 {
     Q_OBJECT
 
 private slots:
-    void initTestCase(){
-
-    }
-
-    void cleanupTestCase(){
-
-    }
-
     void unprivActionLogs(){
         QVERIFY(callAPI(GET, "Account/ActionLogs").toString().isEmpty());
-    }
-
-    void ActiveSessions(){
-        QVERIFY(callAPI(GET, QString("Account/ActiveSessions/")).toString().isEmpty());
-        QVERIFY(callAPI(GET, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session()), {{"ssn_usrID",gUserID}, {"cols", "ssnKey"}}).toMap().value("ssnKey") == clsJWT(gJWT).session());
-        QVERIFY(callAPI(GET,
-                        QString("Account/ActiveSessions/"),
-                        {
-                            {"filters",QString("ssn_usrID=%1 + ssnKey=%2").arg(gUserID).arg(clsJWT(gJWT).session())},
-                            {"cols", "ssnKey"}
-                        }
-                        ).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
     }
 };
 
 
-#endif // TESTACCOUNTORM_HPP
+#endif // TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
