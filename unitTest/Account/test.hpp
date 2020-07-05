@@ -37,8 +37,8 @@ class testAccount: public clsBaseTest
 private slots:
     void initTestCase(){
         clsDAC DAC;
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=?", {"unit_test@unittest.test"});
-        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=?", {"unit_test@unittest.test"});
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
+        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
         DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName='unitTest', rolCreatedBy_usrID=1");
     }
 
@@ -56,7 +56,20 @@ private slots:
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", "unitTest"}
                                         }).toMap().value("usrID").toUInt()) > 0);
+
+        QVERIFY((gAdminUserID = callAPI(PUT,
+                                        "Account/signup", {}, {
+                                            {"emailOrMobile", "unit_test_admin@unittest.test"},
+                                            {"name", "unit"},
+                                            {"family", "test"},
+                                            {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
+                                            {"role", "unitTest"}
+                                        }).toMap().value("usrID").toUInt()) > 0);
+
+        clsDAC DAC;
+        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", {gAdminUserID});
     }
+
     void ApproveEmail(){
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
@@ -64,6 +77,20 @@ private slots:
 
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
         {gUserID});
+
+        QVERIFY(callAPI(POST,
+                        "Account/approveEmail", {},{
+                            {"uuid", Code}
+                        }).toBool());
+    }
+
+    void ApproveAdminEmail(){
+        clsDAC DAC;
+        QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
+        {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
+
+        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
+        {gAdminUserID});
 
         QVERIFY(callAPI(POST,
                         "Account/approveEmail", {},{
@@ -101,6 +128,14 @@ private slots:
         QVERIFY((gEncodedJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test@unittest.test"},
+                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
+                                    {"salt", 1234},
+                                }).toString()).size());
+        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY((gEncodedAdminJWT = callAPI(POST,
+                                "Account/login",{},{
+                                    {"login", "unit_test_admin@unittest.test"},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toString()).size());

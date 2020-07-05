@@ -358,6 +358,14 @@ bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariant
         Values.append(Column.toDB(FilterIter.value().toString()));
     }
 
+    foreach(auto FCol, this->FilterableColsMap)
+        if(FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__){
+            if(FCol.Relation.Column.isEmpty()){
+                UpdateCommands.append(this->makeColName(FCol.Col) + "=?");
+                Values.append(_actorID);
+            }
+        }
+
     for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
         if(FilterIter->isValid() == false)
             continue;
@@ -367,12 +375,6 @@ bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariant
         Filters.append(this->makeColName(Column) + "=?");
         Values.append(FilterIter.value());
     }
-
-    foreach(auto Col, this->SelectableColsMap)
-        if(Col.updatableBy() == enuUpdatableBy::__UPDATER__){
-            UpdateCommands.append(this->makeColName(Col) + "=?");
-            Values.append(_actorID);
-        }
 
     clsDAC DAC(this->domain(), this->Schema);
     clsDACResult Result = DAC.execQuery("",

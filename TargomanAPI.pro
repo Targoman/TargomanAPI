@@ -41,6 +41,7 @@ OTHER_FILES += \
     buildDependencies.sh \
     build.sh \
     conf/test.conf \
+    conf/invalidPass.tbl \
     conf/api.server.conf \
     conf/api.conf \
     Docs/Models/Accounting.scxml

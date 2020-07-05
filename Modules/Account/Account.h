@@ -45,6 +45,8 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_API_MODULE_DB_CONFIGS(Account);
     TARGOMAN_DEFINE_API_MODULE(Account);
 
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
+
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
     virtual QJsonObject todayPrivs(quint32 _usrID) final {Q_UNUSED(_usrID) return {}; }

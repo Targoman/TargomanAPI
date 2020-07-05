@@ -440,6 +440,8 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
 
 void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection){
 
+    if(!this->Request->connection()->tcpSocket())
+      return;
     QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()?
                                                             QJsonDocument::Indented : QJsonDocument::Compact);
 

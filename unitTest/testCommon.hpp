@@ -38,11 +38,22 @@ enum HTTPMethod{
 extern QString APIURL;
 extern QString gEncodedJWT;
 extern QJsonObject gJWT;
+extern QString gEncodedAdminJWT;
 extern quint32 gUserID;
+extern quint32 gAdminUserID;
 
 class clsBaseTest: public QObject{
 protected:
     QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
+      return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
+    }
+
+    QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
+      return callAPIImpl(gEncodedAdminJWT, _method, _api, _urlArgs, _postFields);
+    }
+
+private:
+    QVariant callAPIImpl(QString _encodedJWT , HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
@@ -62,8 +73,8 @@ protected:
         Opt[CURLOPT_TIMEOUT] = 10;
         Opt[CURLOPT_FAILONERROR] = true;
         QStringList Headers = QStringList({"Content-Type: application/json"});
-        if(gEncodedJWT.size())
-            Headers.append("Authorization: Bearer " + gEncodedJWT);
+        if(_encodedJWT.size())
+            Headers.append("Authorization: Bearer " + _encodedJWT);
         Opt[CURLOPT_HTTPHEADER] = Headers;
 
         switch(_method){

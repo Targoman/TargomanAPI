@@ -120,6 +120,8 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
                             ":"<<
                             _req->connection()->tcpSocket()->peerPort()<<
                             "]: "<<
+                            _req->methodString () <<
+                            " "<<
                             Path<<
                             "?"<<
                             _req->url().query());

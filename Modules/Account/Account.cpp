@@ -59,6 +59,30 @@ using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
 
+static QSet<QString> InvalidPasswords = {
+    "d41d8cd98f00b204e9800998ecf8427e",
+    "c4ca4238a0b923820dcc509a6f75849b",
+    "c81e728d9d4c2f636f067f89cc14862c",
+    "eccbc87e4b5ce2fe28308fd9f2a7baf3",
+    "a87ff679a2f3e71d9181a67b7542122c",
+    "e4da3b7fbbce2345d7772b0674a318d5",
+    "1679091c5a880faf6fb5e6087eb1b2dc",
+    "1679091c5a880faf6fb5e6087eb1b2dc",
+    "8f14e45fceea167a5a36dedd4bea2543",
+    "c9f0f895fb98ab9159f51fd0297e236d",
+    "45c48cce2e2d7fbdea1afc51c7c6ad26",
+    "cfcd208495d565ef66e7dff9f98764da",
+    "c20ad4d76fe97759aa27a0c99bff6710",
+    "202cb962ac59075b964b07152d234b70",
+    "81dc9bdb52d04dc20036dbd8313ed055",
+    "827ccb0eea8a706c4c34a16891f84e7b",
+    "21232f297a57a5a743894a0e4a801fc3",
+    "4eae18cf9e54a0f62b44176d074cbe2f",
+    "76419c58730d9f35de7ac538c2fd6737",
+    "d8578edf8458ce06fbc5bb76a58c5ca4",
+    "5ee43561ed4491c7d2b76f28574093fc"
+};
+
 TARGOMAN_DEFINE_ENUM (enuPaymentType,
                       Online='N',
                       Offline='F'
@@ -83,6 +107,19 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway
         "",
         "FILEPATH",
         "transacton-log-file",
+        enuConfigSource::Arg | enuConfigSource::File
+        );
+
+Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile(
+        AAA::Accounting::makeConfig("InvalidPasswordsFile"),
+        "File where invalid pasword MD5s are stored",
+        "",
+        Validators::tmplPathAccessValidator<
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
+        false>,
+        "",
+        "FILEPATH",
+        "invalid-md5-passwords",
         enuConfigSource::Arg | enuConfigSource::File
         );
 
@@ -181,29 +218,9 @@ QVariantMap Account::apiPUTSignup(TAPI::RemoteIP_t _REMOTE_IP,
     else
         throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
 
-    static QSet<QString> InvalidPasswords = {
-        "d41d8cd98f00b204e9800998ecf8427e",
-        "c4ca4238a0b923820dcc509a6f75849b",
-        "c81e728d9d4c2f636f067f89cc14862c",
-        "eccbc87e4b5ce2fe28308fd9f2a7baf3",
-        "a87ff679a2f3e71d9181a67b7542122c",
-        "e4da3b7fbbce2345d7772b0674a318d5",
-        "1679091c5a880faf6fb5e6087eb1b2dc",
-        "1679091c5a880faf6fb5e6087eb1b2dc",
-        "8f14e45fceea167a5a36dedd4bea2543",
-        "c9f0f895fb98ab9159f51fd0297e236d",
-        "45c48cce2e2d7fbdea1afc51c7c6ad26",
-        "cfcd208495d565ef66e7dff9f98764da",
-        "c20ad4d76fe97759aa27a0c99bff6710",
-        "202cb962ac59075b964b07152d234b70",
-        "81dc9bdb52d04dc20036dbd8313ed055",
-        "827ccb0eea8a706c4c34a16891f84e7b",
-        "21232f297a57a5a743894a0e4a801fc3",
-        "4eae18cf9e54a0f62b44176d074cbe2f",
-        "76419c58730d9f35de7ac538c2fd6737",
-        "d8578edf8458ce06fbc5bb76a58c5ca4",
-        "5ee43561ed4491c7d2b76f28574093fc"
-    };
+    QFV.asciiAlNum().maxLenght(50).validate(_role);
+    if(_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
+        throw exHTTPForbidden("Selected role is not allowed to signup");
 
     if(InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
@@ -471,6 +488,16 @@ Account::Account() :
     this->addSubModule(&UserWallets::instance());
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletBalances::instance());
+
+    if(Account::InvalidPasswordsFile.value().size()){
+        QFile InputFile(Account::InvalidPasswordsFile.value());
+        if (InputFile.open(QIODevice::ReadOnly)) {
+           QTextStream Stream(&InputFile);
+           while (!Stream.atEnd())
+              InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
+           InputFile.close();
+        }
+    }
 }
 
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)

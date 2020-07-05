@@ -27,8 +27,10 @@
 QString APIURL = "http://127.0.0.1:10000/rest/v1";
 
 QString gEncodedJWT;
+QString gEncodedAdminJWT;
 QJsonObject gJWT;
 quint32 gUserID;
+quint32 gAdminUserID;
 
 int main(int argc, char *argv[])
 {
