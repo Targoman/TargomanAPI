@@ -120,8 +120,8 @@ Voucher::Voucher() :
               { ///<ColName                       Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblVoucher::vchID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
                 {tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
-                {tblVoucher::vch_usrID,           S(quint32),          QFV.integer().minValue(1),                  QInvalid,  UPNone},
-                {tblVoucher::vchDesc,             S(TAPI::JSON_t),     QFV.allwaysInvalid(),                       QNull,     UPNone,false,false},
+                {tblVoucher::vch_usrID,           S(quint32),          QFV.integer().minValue(1),                  QRequired, UPNone},
+                {tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),                         QRequired, UPNone,false,false},
                 {tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                              TAPI::enuVoucherType::Expense,UPNone},
                 {tblVoucher::vchTotalAmount,      S(quint64),          QFV,                                        0,UPNone},
                 {tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,                            TAPI::enuVoucherStatus::New,UPStatus},

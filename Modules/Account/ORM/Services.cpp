@@ -60,8 +60,8 @@ Services::Services() :
               tblServices::Name,
               { ///<ColName                        Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblServices::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {tblServices::svcName,             S(QString),          QFV,                             QInvalid, UPAdmin},
-                {tblServices::svc_rolID,           S(quint32),          QFV,                             QInvalid, UPAdmin},
+                {tblServices::svcName,             S(QString),          QFV,                             QRequired, UPAdmin},
+                {tblServices::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin},
                 {tblServices::svcCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblServices::svcCreationDateTime, ORM_CREATED_ON},
                 {tblServices::svcUpdatedBy_usrID,  ORM_UPDATED_BY},

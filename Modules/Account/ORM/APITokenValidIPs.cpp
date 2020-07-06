@@ -62,11 +62,11 @@ quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 APITokenValidIPs::APITokenValidIPs() :
     clsTable(AAASchema,
               tblAPITokenValidIPs::Name,
-              { ///<ColName             Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+              { ///<ColName                                Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
                 {tblAPITokenValidIPs::tviID,               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPNone},
-                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QInvalid,  UPOwner},
-                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,  UPNone,false, false},
+                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone},
+                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner},
+                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone,false, false},
                 {tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON},
                 {tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY},

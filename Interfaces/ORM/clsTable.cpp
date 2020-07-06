@@ -135,12 +135,18 @@ QList<clsORMField> clsTable::filterItems(THttpMethod _method)
         break;
     case qhttp::EHTTP_PATCH:
         foreach(auto Filter, this->BaseCols)
-            if(Filter.isPrimaryKey() || Filter.isReadOnly() == false)
+            if(Filter.updatableBy() != enuUpdatableBy::__CREATOR__
+               && Filter.updatableBy() != enuUpdatableBy::__UPDATER__
+               && (Filter.isPrimaryKey() || Filter.isReadOnly() == false))
                 Filters.append(Filter);
         break;
     case qhttp::EHTTP_PUT:
         foreach(auto Filter, this->BaseCols)
-            if(Filter.isReadOnly() == false)
+            if(Filter.updatableBy() != enuUpdatableBy::__CREATOR__
+               && Filter.updatableBy() != enuUpdatableBy::__UPDATER__
+               && Filter.defaultValue() != QInvalid
+               && Filter.defaultValue() != QAuto
+               )
                 Filters.append(Filter);
         break;
     default:

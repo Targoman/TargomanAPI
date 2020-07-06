@@ -23,7 +23,8 @@ HEADERS += \
     testBase.hpp \
     Account/test.hpp \
     Account/ORM/activeSessions.hpp \
-    Account/ORM/actionLogs.hpp
+    Account/ORM/actionLogs.hpp \
+    Account/ORM/apiTokens.hpp
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += main.cpp \

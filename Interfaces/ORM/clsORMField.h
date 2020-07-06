@@ -38,7 +38,7 @@ namespace ORM {
 
 TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
                      ADMIN,
-                     ALL,
+                     OWNER,
                      NONE,
                      __UPDATER__,
                      __CREATOR__,
@@ -109,7 +109,7 @@ public:
                        const QString& _type,
                        const QFieldValidator& _extraValidator = QFV.allwaysValid(),
                        QVariant _defaultValue = {},
-                       enuUpdatableBy::Type _updatableBy = enuUpdatableBy::ALL,
+                       enuUpdatableBy::Type _updatableBy = enuUpdatableBy::OWNER,
                        bool _isSortable = true,
                        bool _isFilterable = true,
                        bool _isSelfIdentifier = false,
@@ -156,17 +156,18 @@ private:
     QExplicitlySharedDataPointer<clsORMFieldData> Data;
 };
 
-static const QVariant       QNull    = QVariant();
-static const QVariant       QInvalid = QVariant(QVariant::Invalid);
-static const QVariant       QAuto = QVariant();
+static const QVariant       QNull     = QVariant(QVariant::Line);
+static const QVariant       QInvalid  = QVariant(QVariant::Invalid);
+static const QVariant       QRequired = QVariant(QVariant::RectF);
+static const QVariant       QAuto     = QVariant(QVariant::PointF);
 
 constexpr enuUpdatableBy::Type UPNone   = enuUpdatableBy::NONE;
-constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::ALL;
+constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::OWNER;
 constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;
 constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 
 ///                         Default     UPBy  Sort  Filter Self  Virt   PK
-#define ORM_PRIMARY_KEY     QInvalid,   UPNone, true, true, false, false, true
+#define ORM_PRIMARY_KEY     QAuto,      UPNone, true, true, false, false, true
 #define ORM_SELF_REAL       QInvalid,   UPOwner, true, true, true, false
 #define ORM_SELF_VIRTUAL    QInvalid,   UPOwner, true, true, true, true
 

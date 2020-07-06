@@ -57,8 +57,8 @@ Locations::Locations() :
               tblLocations::Name,
               { ///<ColName                         Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblLocations::locID,               S(quint32),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
-                {tblLocations::locURL,              S(TAPI::URL_t),      QFV.integer().minValue(1),      QInvalid, UPAdmin},
-                {tblLocations::locPlaceCode,        S(TAPI::URL_t),      QFV.integer().minValue(1),      QInvalid, UPAdmin},
+                {tblLocations::locURL,              S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
+                {tblLocations::locPlaceCode,        S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
                 {tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblLocations::locCreationDateTime, ORM_CREATED_ON},
                 {tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY},

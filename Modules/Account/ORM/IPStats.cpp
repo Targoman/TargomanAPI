@@ -40,8 +40,8 @@ IPStats::IPStats() :
               tblIPStats::Name,
               { ///<ColName                       Type                 Validation                     Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblIPStats::ips_ipbIP,           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
-                {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QInvalid, UPNone},
-                {tblIPStats::ipsInsertionDate,    S(TAPI::DateTime_t), QFV.allwaysValid(),            QNull,    UPNone},
+                {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QRequired, UPNone},
+                {tblIPStats::ipsInsertionDate,    ORM_CREATED_ON},
               },
               { ///< Col                  Reference Table                  ForeignCol
                 {tblIPStats::ips_ipbIP,   R(AAASchema,tblIPBin::Name),     tblIPBin::ipbIP },

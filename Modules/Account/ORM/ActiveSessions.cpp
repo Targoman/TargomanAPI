@@ -55,10 +55,10 @@ ActiveSessions::ActiveSessions() :
               tblActiveSessions::Name,
               { ///<ColName                              Type                    Validation                   Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblActiveSessions::ssnKey,              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
-                {tblActiveSessions::ssn_usrID,           S(quint32),            QFV.integer().minValue(1),   QInvalid,   UPNone},
-                {tblActiveSessions::ssnIP,               S(quint32),            QFV.integer().minValue(1),   QInvalid,   UPNone},
+                {tblActiveSessions::ssn_usrID,           S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
+                {tblActiveSessions::ssnIP,               S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
                 {tblActiveSessions::ssnIPReadable,       S(QString),            QFV.allwaysInvalid(),        QInvalid,   UPNone,false,false},
-                {tblActiveSessions::ssnCreationDateTime, S(TAPI::DateTime_t),   QFV,                         QAuto,      UPNone},
+                {tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON},
                 {tblActiveSessions::ssnInfo,             S(TAPI::JSON_t),       QFV,                         QNull,      UPNone,false,false},
                 {tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,      UPNone,false,false},
                 {tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t),   QFV,                         QNull,      UPNone},

@@ -35,6 +35,7 @@ namespace AAA {
 namespace tblUserExtraInfo {
 constexpr char Name[] = "tblUserExtraInfo";
 TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ueiGender);
 TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
 TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
 TARGOMAN_CREATE_CONSTEXPR(ueiSheba);

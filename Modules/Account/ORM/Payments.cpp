@@ -42,19 +42,19 @@ OnlinePayments::OnlinePayments() :
     clsTable(AAASchema,
               tblOnlinePayments::Name,
               { ///<ColName                              Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblOnlinePayments::onpID,                S(quint64),             QFV.integer().minValue(1),          UPNone},
-                {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
-                {tblOnlinePayments::onpCreationDateTime,  S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
-                {tblOnlinePayments::onp_vchID,            S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
-                {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateway::Type),QFV,                      TAPI::enuPaymentGateway::Zibal, UPNone},
-                {tblOnlinePayments::onpPGTrnID,           S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
-                {tblOnlinePayments::onpAmount,            S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
-                {tblOnlinePayments::onpLastUpdateDateTime,S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
+                {tblOnlinePayments::onpID,                S(quint64),             QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                QRequired,  UPNone},
+                {tblOnlinePayments::onpCreationDateTime,  ORM_CREATED_ON},
+                {tblOnlinePayments::onp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPNone},
+                {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateway::Type),QFV,                       TAPI::enuPaymentGateway::Zibal, UPNone},
+                {tblOnlinePayments::onpPGTrnID,           S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,   UPNone},
+                {tblOnlinePayments::onpAmount,            S(TAPI::DateTime_t),    QFV,                                QRequired,   UPNone},
+                {tblOnlinePayments::onpLastUpdateDateTime,S(TAPI::DateTime_t),    QFV,                                QAuto,       UPNone},
                 {tblOnlinePayments::onpStatus,            S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPStatus},
                 {tblOnlinePayments::onpResult,            S(QString),             QFV,                                QNull,      UPNone,false,false},
               },
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                {tblOnlinePayments::onp_vchID,   R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+                {tblOnlinePayments::onp_vchID,  R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
               })
 {
 }
@@ -77,13 +77,14 @@ bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 OfflinePayments::OfflinePayments() :
     clsTable(AAASchema,
               tblOnlinePayments::Name,
-              { ///<ColName                             Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblOfflinePayments::ofpID,               S(quint64),             QFV.integer().minValue(1),          UPNone},
-                {tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QNull,      UPNone},
-                {tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                ORM_PRIMARY_KEY},
-                {tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QInvalid,   UPNone},
-                {tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QAuto,      UPNone},
-                {tblOfflinePayments::ofpAmount,           S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone},
+              { ///<ColName                               Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+                {tblOfflinePayments::ofpID,               S(quint64),             QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
+                {tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
+                {tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+                {tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
+                {tblOfflinePayments::ofpAmount,           S(quint32),             QFV,                                QRequired,  UPOwner},
+                {tblOfflinePayments::ofpNotes,            S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
                 {tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
                 {tblOfflinePayments::ofpCreationDateTime, ORM_CREATED_ON},
                 {tblOfflinePayments::ofpUpdatedBy_usrID,  ORM_UPDATED_BY},

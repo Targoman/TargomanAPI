@@ -46,9 +46,9 @@ WalletTransactions::WalletTransactions() :
               tblWalletsTransactions::Name,
               { ///<ColName                             Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblWalletsTransactions::wltID,         S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   UPNone, true, true},
-                {tblWalletsTransactions::wlt_vchID,     S(quint64),                 QFV.integer().minValue(1),          QInvalid,   UPNone, true, true},
-                {tblWalletsTransactions::wltDateTime,   S(TAPI::DateTime_t),        QFV,                                QNull,      UPNone},
+                {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
+                {tblWalletsTransactions::wlt_vchID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
+                {tblWalletsTransactions::wltDateTime,   ORM_CREATED_ON},
                 {tblWalletsTransactions::wlt_vchType,   S(TAPI::enuVoucherType::Type), QFV,                             TAPI::enuVoucherType::Expense,UPNone},
                 {tblWalletsTransactions::wltAmount,     S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
                 {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New, UPStatus},

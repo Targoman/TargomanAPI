@@ -49,6 +49,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
 
 TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
                      Zibal    = 'Z',
+                     ZarrinPal= 'L',
                      NextPay  = 'N',
                      Pardano  = 'O',
                      Parsian  = 'P',

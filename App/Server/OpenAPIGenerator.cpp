@@ -173,7 +173,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                 const QList<clsORMField>& _fields,
                 QString _typeName,
                 QJsonObject& ParamSpecs,
-                QVariant _deafaultValue = {},
+                QVariant _defaultValue = {},
                 bool addExample = false) -> void{
             ParamSpecs["description"] = (_argMan->isNullable() ? "Null to keep as is or "  : "") + _argMan->description(_fields);
             ParamSpecs["type"] = mapTypeToValidOpenAPIType(_argMan->complexity(), _typeName);
@@ -183,13 +183,15 @@ QJsonObject OpenAPIGenerator::retrieveJson()
             if(_argMan->complexity() == COMPLEXITY_Enum)
                 ParamSpecs["enum"] = QJsonArray::fromStringList(_argMan->options());
 
-            if(_deafaultValue.isValid()){
-                ParamSpecs["default"] = _argMan->isNullable() ? "null" : _deafaultValue.toString();
+            if(_defaultValue.isValid() && _defaultValue != QRequired){
+                ParamSpecs["default"] = _defaultValue == QNull || _argMan->isNullable() ? QJsonValue() : _defaultValue.toString();
                 if(addExample){
-                    if(_argMan->complexity() == COMPLEXITY_Object || _argMan->isNullable())
+                    if(_argMan->isNullable())
+                        ParamSpecs["example"] = QJsonValue();
+                    if(_argMan->complexity() == COMPLEXITY_Object)
                         ParamSpecs["example"] = QJsonObject();
                     else
-                        ParamSpecs["example"] = _deafaultValue.toString();
+                        ParamSpecs["example"] = _defaultValue.toString();
                 }
             }else{
                 if(_argMan->isNullable() == false){
@@ -200,8 +202,9 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                         ParamSpecs["example"] = QJsonValue();
                 }else if (addExample)
                     ParamSpecs["example"] = QJsonValue();
+                if(_defaultValue == QRequired)
+                    ParamSpecs["required"] = true;
             }
-
         };
 
         auto addParamSpecs = [APIObject, paramName, HTTPMethod, fillParamTypeSpec, mapTypeToValidOpenAPIType](
@@ -314,11 +317,10 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                         continue;
 
                     if(ParamType == PARAM_ORMFILTER){
-                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "put" ? qhttp::EHTTP_PUT :
-                                                                          HTTPMethod == "patch" ? qhttp::EHTTP_PATCH :
-                                                                          qhttp::EHTTP_BIND)){
-                            if(Item.isReadOnly() && Item.isPrimaryKey() == false)
-                                continue;
+                        auto Items = APIObject->Parent->filterItems(HTTPMethod == "put" ? qhttp::EHTTP_PUT :
+                                                                                          HTTPMethod == "patch" ? qhttp::EHTTP_PATCH :
+                                                                                          qhttp::EHTTP_BIND);
+                        foreach(auto Item, Items){
                             QJsonObject ParamSpecs;
                             intfAPIArgManipulator* ArgSpecs;
                             if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
@@ -335,11 +337,26 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                             }
 
                             Q_ASSERT(ArgSpecs);
+                            QVariant DefaultValue = QVariant();
+                            if(Item.defaultValue() == QAuto)
+                                continue;
+                            if(Item.defaultValue() == QInvalid)
+                                throw exTargomanAPI("Invalid Item exported for PUT method: " + Item.name());
+                            if(HTTPMethod == "put"){
+                                if(Item.defaultValue() == QNull)
+                                    DefaultValue = QNull;
+                                else if (Item.defaultValue() == QRequired)
+                                    DefaultValue = QRequired;
+                                else
+                                    DefaultValue = Item.toString(Item.defaultValue());
+                            }else if(Item.isReadOnly())
+                                continue;
+
                             fillParamTypeSpec(ArgSpecs,
                                               APIObject->Parent->filterItems(),
                                               QMetaType::typeName(Item.parameterType()),
                                               ParamSpecs,
-                                              HTTPMethod == "put" ? Item.toString(Item.defaultValue()) : QVariant(),
+                                              DefaultValue,
                                               Item.isPrimaryKey() == true || HTTPMethod == "put"
                                               );
                             Properties[Item.name()] = ParamSpecs;
