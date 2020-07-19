@@ -234,7 +234,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
                            .arg(tblAccountPackagesBase::pkgNotAvailableSince);
 
 
-    QVariantMap PackageInfo = this->AccountPackages->selectFromTable({}, ExtraFilters, _packageCode, {}, 0, 1,
+    QVariantMap PackageInfo = this->AccountPackages->selectFromTable({}, ExtraFilters, _packageCode, 0, 1,
                                                                      QStringList({
                                                                                      tblAccountPackagesBase::pkgID,
                                                                                      tblAccountPackagesBase::pkgCode,
@@ -277,7 +277,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
     stuDiscount Discount;
     if(_discountCode.size()){
         ExtraFilters = QString("%1 >= NOW()").arg(tblAccountDiscounts::disValidFrom);
-        QVariantMap DiscountInfo = this->AccountDiscounts->selectFromTable({}, ExtraFilters, _discountCode, {}, 0, 1,
+        QVariantMap DiscountInfo = this->AccountDiscounts->selectFromTable({}, ExtraFilters, _discountCode, 0, 1,
                                                                            QStringList({
                                                                                            tblAccountDiscounts::disID,
                                                                                            tblAccountDiscounts::disCode,
@@ -314,10 +314,10 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
 
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;
-    PreVoucherItem.OrderID = this->AccountUserPackages->create(clsJWT(_JWT).usrID(), {}, {
+    PreVoucherItem.OrderID = this->AccountUserPackages->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                                 {tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()},
                                                                 {tblAccountUserPackages::aup_pkgID, Package.PackageID},
-                                                            }).toULongLong();
+                                                            })).toULongLong();
     PreVoucherItem.Desc  = PackageInfo.value(tblAccountPackagesBase::Name).toString();
     PreVoucherItem.Count = _count;
     PreVoucherItem.Price = PackageInfo.value(tblAccountPackagesBase::pkgPrice).toUInt();

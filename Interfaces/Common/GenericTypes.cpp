@@ -87,9 +87,9 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
             COMPLEXITY_Complex,
-            TAPI, ORMFilters_t,
+            TAPI, ORMFields_t,
             nullptr,
-            [](const QVariant& _value, const QByteArray&) -> ORMFilters_t {return _value.toMap();}
+            [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
 );
 
 TAPI_REGISTER_METATYPE(
@@ -113,10 +113,89 @@ TAPI_REGISTER_METATYPE(
                 Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
                 if(Error.error != QJsonParseError::NoError)
-                    throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
+                    throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString());
                 return  Doc;
             },
-            [](const QList<ORM::clsORMField>&){ return "A valid JSON object"; }
+            [](const QList<ORM::clsORMField>&){ return "A valid JSON object"; },
+            [](const QVariant& _value) {
+                if(_value.isNull())
+                    return QJsonDocument();
+                QJsonParseError Error;
+                QJsonDocument Doc;
+                if(_value.canConvert<QVariantMap>() ||
+                   _value.canConvert<QVariantList>() ||
+                   _value.canConvert<double>())
+                    Doc = QJsonDocument::fromVariant(_value);
+                else
+                  Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+                qDebug()<<"===========>"<<_value;
+
+                if(Error.error != QJsonParseError::NoError)
+                    throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + Error.errorString());
+                return Doc;
+            },
+            [](const QVariant& _val) {
+                return QString::fromUtf8(QJsonDocument::fromVariant(_val).toJson(QJsonDocument::Compact));
+            }
+
+);
+
+TAPI_REGISTER_METATYPE(
+            COMPLEXITY_Object,
+            TAPI, PrivObject_t,
+            [](const PrivObject_t& _value) -> QVariant {return _value;},
+            [](const QVariant& _value, const QByteArray& _paramName) -> PrivObject_t {
+                if(_value.isValid() == false)
+                    return QJsonDocument();
+
+                QJsonDocument Doc;
+                if(_value.canConvert<QVariantMap>() ||
+                   _value.canConvert<QVariantList>() ||
+                   _value.canConvert<double>())
+                    Doc = QJsonDocument::fromVariant(_value);
+                else if(_value.toString().isEmpty())
+                    return QJsonDocument();
+                else {
+                    QJsonParseError Error;
+                    QJsonDocument Doc;
+                    Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+                    if(Error.error != QJsonParseError::NoError)
+                        throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
+                }
+
+                if(Doc.isNull() || Doc.isEmpty())
+                    return Doc;
+                if(Doc.isArray())
+                    throw exHTTPBadRequest(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> must be object not array");
+
+                QJsonObject PrivObj = Doc.object();
+                if(PrivObj.contains("ALL"))
+                    throw exHTTPUnauthorized(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> top level allowance is not valid");
+
+                return  Doc;
+            },
+            [](const QList<ORM::clsORMField>&){ return "A valid Privilege JSON object"; },
+            [](const QVariant& _value) {
+                if(_value.isNull())
+                    return QJsonDocument();
+                QJsonParseError Error;
+                QJsonDocument Doc;
+                if(_value.canConvert<QVariantMap>() ||
+                   _value.canConvert<QVariantList>() ||
+                   _value.canConvert<double>())
+                    Doc = QJsonDocument::fromVariant(_value);
+                else
+                  Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+                if(Error.error != QJsonParseError::NoError)
+                    throw exHTTPBadRequest("is not a valid Privilege: <"+_value.toString()+">" + Error.errorString());
+                return Doc;
+            },
+            [](const QVariant& _val) {
+                return QString::fromUtf8(QJsonDocument::fromVariant(_val).toJson(QJsonDocument::Compact));
+            }
 );
 
 TAPI_REGISTER_METATYPE(
@@ -136,10 +215,10 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
             COMPLEXITY_String,
-            TAPI, ExtraPath_t,
-            [](const ExtraPath_t& _value) -> QVariant {return _value;},
-            [](const QVariant& _value, const QByteArray&) -> ExtraPath_t {
-                ExtraPath_t Value;
+            TAPI, PKsByPath_t,
+            [](const PKsByPath_t& _value) -> QVariant {return _value;},
+            [](const QVariant& _value, const QByteArray&) -> PKsByPath_t {
+                PKsByPath_t Value;
                 QUrl URL = QUrl::fromPercentEncoding(("http://127.0.0.1/" + _value.toString()).toUtf8());
                 Value=URL.path().remove(0,1);
 

@@ -26,6 +26,10 @@
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/actionLogs.hpp"
 #include "ORM/activeSessions.hpp"
+#include "ORM/roles.hpp"
+#include "ORM/service.hpp"
+#include <cstdlib>
+#include <unistd.h>
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
@@ -37,6 +41,9 @@ class testAccount: public clsBaseTest
 private slots:
     void initTestCase(){
         clsDAC DAC;
+        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken=?", {UT_Token});
+        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
+        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName=?", {UT_RoleName});
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
         DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
         DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName='unitTest', rolCreatedBy_usrID=1");
@@ -189,8 +196,10 @@ private slots:
                            {"iSalt", 1234}
                        });
 
-            QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
-            {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
+            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
+            {gUserID}).toJson(true).object();
+
+            QString Code = Obj.value("aprApprovalCode").toString();
 
             DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
             {gUserID});

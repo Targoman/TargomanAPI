@@ -36,7 +36,7 @@ using namespace ORM;
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }

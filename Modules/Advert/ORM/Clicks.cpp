@@ -33,7 +33,7 @@ using namespace ORM;
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }

@@ -33,31 +33,34 @@ using namespace ORM;
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
+    QVariantMap ExtraFilters;
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters);
 }
 
 bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
+    QVariantMap ExtraFilters;
+
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()))){
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
-    return this->update(UPDATE_METHOD_CALL_ARGS);
+    return this->update(UPDATE_METHOD_CALL_ARGS, ExtraFilters);
 }
 
 quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _createInfo);
 
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }

@@ -35,12 +35,21 @@ enum HTTPMethod{
     DELETE,
 };
 
+static const char* HTTPMethodString[] = {
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE"
+};
+
 extern QString APIURL;
 extern QString gEncodedJWT;
 extern QJsonObject gJWT;
 extern QString gEncodedAdminJWT;
 extern quint32 gUserID;
 extern quint32 gAdminUserID;
+extern QVariant gInvalid;
 
 class clsBaseTest: public QObject{
 protected:
@@ -57,14 +66,14 @@ private:
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
-        auto makeURL = [_api, _urlArgs](){
+        auto makeURL = [_method, _api, _urlArgs](){
             QUrlQuery URLQuery;
             for(auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
                 URLQuery.addQueryItem(ArgIter.key(), ArgIter.value().toString());
             QUrl URL(APIURL + "/" + _api);
             URL.setQuery(URLQuery);
             QString URLStr = URL.toString().replace(" ", "%20").replace("+","%2B");
-            qDebug()<<"Request"<<URLStr;
+            qDebug()<<"Request"<<HTTPMethodString[_method]<<URLStr;
             return URLStr;
         };
 
@@ -99,7 +108,7 @@ private:
 
         if(CUrl.lastError().isOk() == false){
             qDebug()<<CUrl.errorBuffer();
-            return {};
+            return gInvalid;
         }else{
             QJsonParseError JsonError;
             QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);

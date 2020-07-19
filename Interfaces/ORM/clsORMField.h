@@ -148,8 +148,8 @@ public:
     inline QString         renameAs() const {return this->Data->RenameAs;}
     inline QVariant        defaultValue() const {return this->Data->DefaultValue;}
     QString                toString(const QVariant& _value);
-    QVariant               toDB(const QString& _value);
-    QVariant               fromDB(const QVariant& _value);
+    QVariant               fromDB(const QString& _value);
+    QVariant               toDB(const QVariant& _value);
     const intfAPIArgManipulator& argSpecs();
 
 private:

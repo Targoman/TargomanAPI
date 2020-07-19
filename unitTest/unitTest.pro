@@ -21,14 +21,18 @@ PRJDIR = ".."
 HEADERS += \
     testCommon.hpp \
     testBase.hpp \
-    Account/test.hpp \
     Account/ORM/activeSessions.hpp \
     Account/ORM/actionLogs.hpp \
-    Account/ORM/apiTokens.hpp
+    Account/ORM/service.hpp \
+    Account/ORM/roles.hpp \
+    Account/ORM/tokens.hpp \
+    Account/ORM/defs.hpp \
+    Account/test.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += main.cpp \
     $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
+    Account/test.cpp
 
 
 ################################################################################

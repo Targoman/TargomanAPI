@@ -41,7 +41,7 @@ QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL)
 bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, true);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, {}, true);
 }
 
 ApprovalRequest::ApprovalRequest() :

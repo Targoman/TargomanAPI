@@ -42,24 +42,25 @@ TAPI_ADD_SIMPLE_TYPE(QString, GroupBy_t);
 namespace Targoman {
 namespace API {
 
-#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}, quint64 _offset=0, quint16 _limit=10, TAPI::Cols_t _cols={}, TAPI::Filter_t _filters={}, TAPI::OrderBy_t _orderBy={}, TAPI::GroupBy_t _groupBy={}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS,     quint64 _offset  , quint16 _limit   , TAPI::Cols_t _cols   , TAPI::Filter_t _filters   , TAPI::OrderBy_t _orderBy   , TAPI::GroupBy_t _groupBy   , bool _reportCount
-#define GET_METHOD_CALL_ARGS   _EXTRAPATH, _ORMFILTERS, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define GET_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath={}, quint64 _offset=0, quint16 _limit=10, TAPI::Cols_t _cols={}, TAPI::Filter_t _filters={}, TAPI::OrderBy_t _orderBy={}, TAPI::GroupBy_t _groupBy={}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath   , quint64 _offset  , quint16 _limit   , TAPI::Cols_t _cols   , TAPI::Filter_t _filters   , TAPI::OrderBy_t _orderBy   , TAPI::GroupBy_t _groupBy   , bool _reportCount
+#define GET_METHOD_CALL_ARGS   _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 #define ORMGET(_doc) apiGET (GET_METHOD_ARGS_HEADER); QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER)); } QString docOfGET(){ return _doc; }
 
-#define DELETE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH = {}, TAPI::ORMFilters_t _ORMFILTERS= {}
-#define DELETE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH     , TAPI::ORMFilters_t _ORMFILTERS
-#define DELETE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _EXTRAPATH, _ORMFILTERS
+
+#define DELETE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _pksByPath
 #define ORMDELETE(_doc) apiDELETE (DELETE_METHOD_ARGS_HEADER); QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER)); } QString docOfDELETE(){ return _doc; }
 
-#define UPDATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS= {}
-#define UPDATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS
-#define UPDATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _ORMFILTERS
+#define UPDATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo= {}
+#define UPDATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath     , const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(),  _pksByPath,  _updateInfo
 #define ORMUPDATE(_doc) apiUPDATE (UPDATE_METHOD_ARGS_HEADER); QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER)); } QString docOfUPDATE(){ return _doc; }
 
-#define CREATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS= {}
-#define CREATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ORMFilters_t _ORMFILTERS
-#define CREATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _ORMFILTERS
+#define CREATE_METHOD_ARGS_HEADER TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo={}
+#define CREATE_METHOD_ARGS_IMPL   TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_CALL_ARGS   clsJWT(_JWT).usrID(), _createInfo
 #define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
 static QString QUERY_SEPARATOR = "\n";
@@ -119,12 +120,14 @@ public:
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
     void prepareFiltersList();
 
-    QVariant selectFromTableByID(quint64 _id, QString _cols = {}, const QStringList& _extraJoins = {}, const QString& _groupBy = {});
+    QVariant selectFromTableByID(quint64 _id,
+                                 QString _cols = {},
+                                 const QStringList& _extraJoins = {},
+                                 const QString& _groupBy = {});
 
     QVariant selectFromTable(const QStringList& _extraJoins,
                              const QString& _extraFilters,
-                             const TAPI::ExtraPath_t& _extraPath={},
-                             const TAPI::ORMFilters_t& _ORMFILTERS={},
+                             const TAPI::PKsByPath_t& _pksByPath={},
                              quint64 _offset = 0,
                              quint16 _limit = 10,
                              QString _cols = {},
@@ -135,15 +138,17 @@ public:
                              quint32 _cacheTime = 0);
 
     bool update(quint32 _actorID,
-                const QVariantMap& _ORMFILTERS,
-                QVariantMap _updateInfo = {});
-    QVariant create(quint32 _actorID,
-                    const QVariantMap& _ORMFILTERS,
-                    QVariantMap _createInfo = {});
+                TAPI::PKsByPath_t _pksByPath,
+                const TAPI::ORMFields_t& _updateInfo,
+                const QVariantMap& _extraFilters={});
+
     bool deleteByPKs(quint32 _actorID,
-                     TAPI::ExtraPath_t _EXTRAPATH,
-                     TAPI::ORMFilters_t _ORMFILTERS,
+                     const TAPI::PKsByPath_t& _pksByPath,
+                     QVariantMap _extraFilters={},
                      bool _realDelete = false);
+
+    QVariant create(quint32 _actorID, const TAPI::ORMFields_t& _createInfo);
+
 
     DBManager::clsDACResult callSP(const QString& _spName,
                                    const QVariantMap& _spArgs = QVariantMap(),
@@ -176,14 +181,9 @@ public:
                                                quint64* _executionTime = nullptr);
 
 
-    void setSelfFilters(const QVariantMap& _requiredFilters,
-                        TAPI::ExtraPath_t _EXTRAPATH,
-                        TAPI::ORMFilters_t& _ORMFILTERS,
-                        TAPI::Filter_t& _filters);
+    void setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters);
 
-    void setSelfFilters(const QVariantMap& _requiredFilters,
-                        TAPI::ExtraPath_t _EXTRAPATH,
-                        TAPI::ORMFilters_t& _ORMFILTERS);
+    void setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters);
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});

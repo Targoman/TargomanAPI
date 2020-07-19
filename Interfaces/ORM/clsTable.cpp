@@ -31,6 +31,7 @@ bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman:
 unsigned int qHash(const Targoman::API::ORM::stuRelation& _relation);
 
 #include <QSet>
+#include <QRegularExpressionMatch>
 #include "clsTable.h"
 #include <QRegularExpression>
 
@@ -59,10 +60,16 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
     foreach(auto Col, _fields)
         if(Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
-    return "Nothing for all or comma separated columns: (ex. "+Cols.first()+","+Cols.last()+") "
-                                                                                            "you can also use aggregation functions: (ex. COUNT("+Cols.first()+"))\n"
-                                                                                                                                                               "* COUNT\n* COUNT_DISTINCT\n* SUM\n* AVG\n* MAX\n* MIN\n\n"
-                                                                                                                                                               "Availabale Cols are: \n* " + Cols.join("\n* ");
+    return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
+                   "you can also use aggregation functions: (ex. COUNT(%3))\n"
+                   "* COUNT\n"
+                   "* COUNT_DISTINCT\n"
+                   "* SUM\n"
+                   "* AVG\n"
+                   "* MAX\n"
+                   "* MIN\n\n"
+                   "Available Cols are: \n"
+                   "* %4").arg(Cols.first()).arg(Cols.last()).arg(Cols.first()).arg(Cols.join("\n* "));
 });
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
@@ -201,8 +208,8 @@ void clsTable::prepareFiltersList()
     }
 
     foreach(auto Col, this->AllCols)
-        if(Col.argSpecs().fromORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
-            this->Converters.insert(this->finalColName(Col), Col.argSpecs().fromORMValueConverter());
+        if(Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
+            this->Converters.insert(this->finalColName(Col), Col.argSpecs().toORMValueConverter());
 }
 
 QString clsTable::finalColName(const clsORMField& _col, const QString& _prefix){
@@ -234,13 +241,12 @@ QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stu
 };
 
 QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
-    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), {}, 0, 2, _cols, {}, {}, _groupBy, false, 0);
+    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
 }
 
 QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _extraFilters,
-                                   const TAPI::ExtraPath_t& _extraPath,
-                                   const TAPI::ORMFilters_t& _ORMFILTERS,
+                                   const TAPI::PKsByPath_t& _pksByPath,
                                    quint64 _offset,
                                    quint16 _limit,
                                    QString _cols,
@@ -251,11 +257,11 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    quint32 _cacheTime)
 {
     this->prepareFiltersList();
-    if(_ORMFILTERS.contains(COLS_KEY))
-        _cols = _ORMFILTERS.value(COLS_KEY).toString();
+    /*if(_ormFields.contains(COLS_KEY))
+        _cols = _ormFields.value(COLS_KEY).toString();*/
 
     stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
-    if(_extraPath.isEmpty()){
+    if(_pksByPath.isEmpty()){
         TAPI::stuTable Table;
 
         clsDAC DAC(this->domain(), this->Schema);
@@ -288,7 +294,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
             Table.TotalRows = static_cast<qint64>(DAC.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
         return Table.toVariant();
     }else{
-        QStringList PrimaryKeyQueries = _extraPath.split(",");
+        QStringList PrimaryKeyQueries = _pksByPath.split(";");
         QStringList Filters;
         foreach(auto Query, PrimaryKeyQueries)
             foreach(auto Col, this->BaseCols)
@@ -298,12 +304,12 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                     break;
                 }
 
-        for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); ++FilterIter){
+        /*for(auto FilterIter = _ormFields.begin(); FilterIter != _ormFields.end(); ++FilterIter){
             if(FilterIter.key() == COLS_KEY) continue;
             const clsORMField& Col = this->SelectableColsMap.value(FilterIter.key());
             if(Col.isSelfIdentifier())
                 Filters.append(this->makeColName(Col) + " = \"" + FilterIter.value().toString() + "\"");
-        }
+        }*/
 
         QString QueryString = QString("SELECT ")
                               + QUERY_SEPARATOR
@@ -332,36 +338,40 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     }
 }
 
-bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariantMap _updateInfo)
+bool clsTable::update(quint32 _actorID,
+                      TAPI::PKsByPath_t _pksByPath,
+                      const TAPI::ORMFields_t& _updateInfo,
+                      const QVariantMap& _extraFilters)
 {
     this->prepareFiltersList();
-    if(_ORMFILTERS.isEmpty())
-        throw exHTTPBadRequest("No filter has been set for update");
+    if(_pksByPath.isEmpty() && _extraFilters.isEmpty())
+        throw exHTTPBadRequest("No key provided to update");
+
+    if(_updateInfo.isEmpty())
+        throw exHTTPBadRequest("No change provided to update");
+
+    QStringList PrimaryKeyQueries = _pksByPath.split(";");
+    QStringList Filters;
+    foreach(auto Query, PrimaryKeyQueries)
+        foreach(auto Col, this->BaseCols)
+            if(Col.isPrimaryKey()){
+                if(Query.size())
+                    Filters.append(this->makeColName(Col) + " = \"" + Query + "\"");
+                break;
+            }
 
     QStringList  UpdateCommands;
     QVariantList Values;
-    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter){
+    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter) {
         if(InfoIter->isValid() == false)
             continue;
-        clsORMField& Column = this->SelectableColsMap[InfoIter.key()];
-        if(Column.isReadOnly())
+        clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
+        if(Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        Column.validate(InfoIter.value());
-        UpdateCommands.append(this->makeColName(Column) + "=?");
-        Values.append(Column.toDB(InfoIter.value().toString()));
-    }
-
-    QStringList  Filters;
-    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
-        if(FilterIter->isValid() == false)
-            continue;
-        clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
-        if(Column.isReadOnly())
-            continue;
-        Column.validate(FilterIter.value());
-        UpdateCommands.append(this->makeColName(Column) + "=?");
-        Values.append(Column.toDB(FilterIter.value().toString()));
+        Col.validate(InfoIter.value());
+        UpdateCommands.append(this->makeColName(Col) + "=?");
+        Values.append(Col.toDB(InfoIter.value()));
     }
 
     foreach(auto FCol, this->FilterableColsMap)
@@ -372,7 +382,7 @@ bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariant
             }
         }
 
-    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
+    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
         if(FilterIter->isValid() == false)
             continue;
         clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
@@ -382,43 +392,59 @@ bool clsTable::update(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariant
         Values.append(FilterIter.value());
     }
 
-    clsDAC DAC(this->domain(), this->Schema);
-    clsDACResult Result = DAC.execQuery("",
-                                        QString("UPDATE ") + this->Schema + "." + this->Name
-                                        + QUERY_SEPARATOR
-                                        + "SET "
-                                        + UpdateCommands.join("," + QUERY_SEPARATOR)
-                                        + QUERY_SEPARATOR
-                                        + "WHERE "
-                                        + QUERY_SEPARATOR
-                                        + Filters.join(" AND " + QUERY_SEPARATOR)
-                                        ,Values);
+    try{
+        clsDAC DAC(this->domain(), this->Schema);
+        clsDACResult Result = DAC.execQuery("",
+                                            QString("UPDATE ") + this->Schema + "." + this->Name
+                                            + QUERY_SEPARATOR
+                                            + "SET "
+                                            + UpdateCommands.join("," + QUERY_SEPARATOR)
+                                            + QUERY_SEPARATOR
+                                            + "WHERE "
+                                            + QUERY_SEPARATOR
+                                            + Filters.join(" AND " + QUERY_SEPARATOR)
+                                            ,Values);
 
-    return Result.numRowsAffected() > 0;
+        return Result.numRowsAffected() > 0;
+
+    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
+        QStringList FKs;
+        foreach(auto FK, this->ForeignKeys)
+            if(FK.RenamingPrefix.isEmpty())
+                FKs.append(FK.Column);
+
+        QRegularExpressionMatch Matches;
+        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
+            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
+        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
+            throw exHTTPBadRequest(Matches.captured());
+        else
+            throw;
+    }
 }
 
-bool clsTable::deleteByPKs(quint32 _actorID, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t _ORMFILTERS, bool _realDelete)
+bool clsTable::deleteByPKs(quint32 _actorID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
 {
     this->prepareFiltersList();
 
-    QStringList PrimaryKeyQueries = _EXTRAPATH.split(",");
+    if(this->update(_actorID, _pksByPath, TAPI::ORMFields_t({{this->BaseCols.last().name(), "Removed"}}), _extraFilters) == 0)
+        return false;
+
+    if(_realDelete == false)
+        return true;
+
+    QStringList PrimaryKeyQueries = _pksByPath.split(";");
     QStringList Filters;
     QVariantList Values;
     foreach(auto Query, PrimaryKeyQueries)
         foreach(auto Col, this->BaseCols)
             if(Col.isPrimaryKey()){
                 if(Query.size())
-                    _ORMFILTERS.insert(this->finalColName(Col), Query);
+                    _extraFilters.insert(this->finalColName(Col), Query);
                 break;
             }
 
-    if(this->update(_actorID, _ORMFILTERS, {{this->BaseCols.last().name(), "Removed"}}) == false)
-        return false;
-
-    if(_realDelete == false)
-        return true;
-
-    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); ++FilterIter){
+    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); ++FilterIter){
         if(FilterIter->isValid() == false)
             continue;
         const clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
@@ -433,7 +459,7 @@ bool clsTable::deleteByPKs(quint32 _actorID, TAPI::ExtraPath_t _EXTRAPATH, TAPI:
                                         + "WHERE "
                                         + QUERY_SEPARATOR
                                         + Filters.join(" AND " + QUERY_SEPARATOR)
-                                        ,Values);
+                                        , Values);
 
     return Result.numRowsAffected() > 0;
 }
@@ -474,72 +500,83 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
-QVariant clsTable::create(quint32 _actorID, const QVariantMap& _ORMFILTERS, QVariantMap _createInfo)
+QVariant clsTable::create(quint32 _actorID, const TAPI::ORMFields_t& _createInfo)
 {
     this->prepareFiltersList();
     QStringList  CreateCommands;
     QVariantList Values;
+
+    const auto isEmpty = [](const QVariant& _value){
+        return  _value.isNull()
+                || (_value.canConvert<QVariantList>() && _value.toList().isEmpty())
+                || (_value.canConvert<QVariantMap>() && _value.toMap().isEmpty())
+                || (_value.canConvert<QString>() && _value.toString().isEmpty());
+    };
+
+    foreach(auto Item, this->BaseCols)
+        if(Item.defaultValue() == QRequired && (_createInfo.contains(Item.name()) == false || isEmpty(_createInfo.value(Item.name()))))
+            throw exHTTPBadRequest("Required field <"+ Item.name() +"> not provided: ");
+
     for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
         if(this->SelectableColsMap.contains(InfoIter.key()) == false)
-            throw exHTTPInternalServerError("Invalid filter: " + InfoIter.key());
+            throw exHTTPInternalServerError("Invalid create option: " + InfoIter.key());
         clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
-        if(Col.isReadOnly())
+        if(Col.defaultValue() == QInvalid || Col.defaultValue() == QAuto)
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
+
         Col.validate(InfoIter.value());
         CreateCommands.append(this->makeColName(Col) + "=?");
-        Values.append(InfoIter.value());
+        Values.append(Col.toDB(InfoIter.value()));
     }
 
-    for(auto FilterIter = _ORMFILTERS.begin(); FilterIter != _ORMFILTERS.end(); FilterIter++){
-        if(FilterIter->isValid() == false)
-            continue;
-        if(this->SelectableColsMap.contains(FilterIter.key()) == false)
-            throw exHTTPInternalServerError("Invalid filter: " + FilterIter.key());
-
-        clsORMField& Col = this->SelectableColsMap[FilterIter.key()];
-        /*        if(Col.isReadOnly())
-            continue;*/
-        //TODO check if required
-        Col.validate(FilterIter.value());
-        CreateCommands.append(this->makeColName(Col) + "=?");
-        Values.append(Col.toDB(FilterIter.value().toString()));
-    }
-
-    foreach(auto Col, this->SelectableColsMap)
+    foreach(auto Col, this->BaseCols)
         if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
             CreateCommands.append(this->makeColName(Col) + "=?");
-            Values.append(_actorID);
+            Values.append(Col.toDB(_actorID));
         }
 
     clsDAC DAC(this->domain(), this->Schema);
-    clsDACResult Result = DAC.execQuery("",
-                                        QString("INSERT INTO ") + this->Schema + "." + this->Name
-                                        + QUERY_SEPARATOR
-                                        + "SET "
-                                        + CreateCommands.join("," + QUERY_SEPARATOR)
-                                        + QUERY_SEPARATOR
-                                        ,Values);
+    try{
+        clsDACResult Result = DAC.execQuery("",
+                                            QString("INSERT INTO ") + this->Schema + "." + this->Name
+                                            + QUERY_SEPARATOR
+                                            + "SET "
+                                            + CreateCommands.join("," + QUERY_SEPARATOR)
+                                            + QUERY_SEPARATOR
+                                            ,Values);
+        return Result.lastInsertId();
+    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
+        QStringList FKs;
+        foreach(auto FK, this->ForeignKeys)
+            if(FK.RenamingPrefix.isEmpty())
+                FKs.append(FK.Column);
 
-    return Result.lastInsertId();
+        QRegularExpressionMatch Matches;
+        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
+            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
+        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
+            throw exHTTPBadRequest(Matches.captured());
+        else
+            throw;
+    }
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t& _ORMFILTERS, TAPI::Filter_t& _filters)
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters)
 {
-    if(_ORMFILTERS.size())
-        return this->setSelfFilters(_requiredFilters, _EXTRAPATH, _ORMFILTERS);
     QStringList Filters;
     for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
         Filters.append(QString("%1=%2").arg(FilterIter.key()).arg(FilterIter.value().toString()));
-    _filters.insert(0, QString("( %1 )").arg(Filters.join(" + ")));
+    QString Postfix = _providedFilters.size() ? " )" : "";
+    _providedFilters.insert(0, QString("( %1 )%2").arg(Filters.join(" + ")).arg(_providedFilters.size() ? " + ( " : ""));
+    _providedFilters+=Postfix;
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::ExtraPath_t _EXTRAPATH, TAPI::ORMFilters_t& _ORMFILTERS)
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters)
 {
-    Q_UNUSED(_EXTRAPATH);
     for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
-        _ORMFILTERS.insert(FilterIter.key(), FilterIter.value());
+        _extraFilters.insert(FilterIter.key(), FilterIter.value());
 }
 
 
@@ -716,8 +753,8 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
             QString Value = PatternMatches.captured(3);
             if(Value == "NOW()"
-                || Value.startsWith("DATE_ADD(")
-                || Value.startsWith("DATE_SUB(")
+               || Value.startsWith("DATE_ADD(")
+               || Value.startsWith("DATE_SUB(")
                )
                 Rule += Value.replace("$SPACE$", " ");
             else{

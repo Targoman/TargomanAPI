@@ -32,7 +32,7 @@ using namespace DBManager;
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(clsJWT(_JWT).usrID() != _EXTRAPATH.toUInt())
+    if(clsJWT(_JWT).usrID() != _pksByPath.toUInt())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
     return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
@@ -87,15 +87,15 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     if(!_lang.isNull()) ToUpdate.insert(tblUser::usrLanguage, *_lang);
     if(!_gender.isNull()) ToUpdate.insert(tblUser::usrGender, *_gender);
 
-    if(ToUpdate.size())
-        return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );
+    /*if(ToUpdate.size())
+        return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );*/
     return true;
 }
 
 quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    if(_ORMFILTERS.value(tblUser::usrEmail).toString().isEmpty() && _ORMFILTERS.value(tblUser::usrMobile).toString().isEmpty())
+    if(_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
@@ -113,7 +113,7 @@ User::User() : clsTable(AAASchema,
                            {tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type),QFV,                        TAPI::enuUserApproval::None},
                          //{tblUser::usrPass,
                            {tblUser::usr_rolID,           S(quint32),          QFV.integer().minValue(1),            QRequired,UPAdmin},
-                           {tblUser::usrSpecialPrivs,     S(TAPI::JSON_t),     QFV,                                  QNull,    UPAdmin,false,false},
+                           {tblUser::usrSpecialPrivs,     S(TAPI::PrivObject_t),QFV,                                 QNull,    UPAdmin,false,false},
                            {tblUser::usrLanguage,         S(QString),          QFV.languageCode(),                   "fa",     UPOwner},
                            {tblUser::usrMaxSessions,      S(quint32),          QFV.integer().betweenValues(-1, 100), -1,       UPAdmin},
                            {tblUser::usrActiveSessions,   S(quint32),          QFV.integer().betweenValues(-1, 1000),QInvalid, UPNone},

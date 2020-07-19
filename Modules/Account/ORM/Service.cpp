@@ -20,7 +20,7 @@
  @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-#include "Services.h"
+#include "Service.h"
 #include "User.h"
 #include "Roles.h"
 
@@ -30,47 +30,47 @@ namespace AAA {
 
 using namespace ORM;
 
-QVariant Services::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant Service::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool Services::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
     return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 
-bool Services::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool Service::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint64 Services::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint64 Service::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
-Services::Services() :
+Service::Service() :
     clsTable(AAASchema,
-              tblServices::Name,
+              tblService::Name,
               { ///<ColName                        Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblServices::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {tblServices::svcName,             S(QString),          QFV,                             QRequired, UPAdmin},
-                {tblServices::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin},
-                {tblServices::svcCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblServices::svcCreationDateTime, ORM_CREATED_ON},
-                {tblServices::svcUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblServices::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPStatus},
+                {tblService::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin},
+                {tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin},
+                {tblService::svcCreatedBy_usrID,  ORM_CREATED_BY},
+                {tblService::svcCreationDateTime, ORM_CREATED_ON},
+                {tblService::svcUpdatedBy_usrID,  ORM_UPDATED_BY},
+                {tblService::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPStatus},
               },
               { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
-                {tblServices::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
-                {tblServices::svcCreatedBy_usrID,  ORM_JOIN_CREATOR},
-                {tblServices::svcUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                {tblService::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
+                {tblService::svcCreatedBy_usrID,  ORM_JOIN_CREATOR},
+                {tblService::svcUpdatedBy_usrID,  ORM_JOIN_UPDATER},
               })
 {
 }

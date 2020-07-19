@@ -74,6 +74,7 @@ public:
     virtual void validate(const QVariant& _val, const QByteArray& _paramName) const = 0;
     virtual QVariant toORMValue(const QString& _val) const = 0;
     virtual std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const = 0;
+    virtual std::function<QVariant(const QVariant& _val)> toORMValueConverter() const = 0;
     virtual bool isNullable() const = 0;
 
     QString     PrettyTypeName;

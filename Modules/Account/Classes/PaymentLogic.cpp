@@ -58,6 +58,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
             PaymentResponse = Zibal::request(opyMD5, _toPay, _callback, _invDesc);
             break;
         case TAPI::enuPaymentGateway::Saman:
+        case TAPI::enuPaymentGateway::ZarrinPal:
         case TAPI::enuPaymentGateway::Mellat:
         case TAPI::enuPaymentGateway::NextPay:
         case TAPI::enuPaymentGateway::Pardano:
@@ -71,17 +72,21 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
         }
 
         if(PaymentResponse.ErrorCode){
-            OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, opyMD5}}, {
+            OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                                   {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
                                                   {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result},
+                                              }), {
+                                                  {{tblOnlinePayments::onpMD5, opyMD5}}
                                               });
             throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
         }
 
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, opyMD5}}, {
+        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                               {tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID},
                                               {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Pending},
                                               {tblOnlinePayments::onpResult, PaymentResponse.Result},
+                                          }), {
+                                              {{tblOnlinePayments::onpMD5, opyMD5}}
                                           });
 
         return PaymentResponse.PaymentLink;
@@ -90,9 +95,11 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
     }catch(exHTTPBadRequest&){
         throw;
     }catch(std::exception &e){
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, opyMD5}}, {
+        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                               {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
                                               {tblOnlinePayments::onpResult, e.what()},
+                                          }), {
+                                              {{tblOnlinePayments::onpMD5, opyMD5}}
                                           });
         throw;
     }
@@ -106,6 +113,7 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
     case TAPI::enuPaymentGateway::Zibal:
         PaymentResponse = Zibal::verify(_pgResponse, _domain);
         break;
+    case TAPI::enuPaymentGateway::ZarrinPal:
     case TAPI::enuPaymentGateway::Saman:
     case TAPI::enuPaymentGateway::Mellat:
     case TAPI::enuPaymentGateway::NextPay:
@@ -120,26 +128,30 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
     }
 
     QVariant VoucherID = OnlinePayments::instance().selectFromTable({},
-                                               QString("%1=%2").arg(tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5), {}, {},
-                                               0, 1,
-                                               tblOnlinePayments::onp_vchID).toMap().first();
+                                                                    QString("%1=%2").arg(tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5), {},
+                                                                    0, 1,
+                                                                    tblOnlinePayments::onp_vchID).toMap().first();
     if(VoucherID.isValid() == false)
         throw exHTTPBadRequest("Voucher not found");
 
     if(PaymentResponse.ErrorCode){
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}, {
+        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                               {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
                                               {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ?
                                                QString(PaymentResponse.ErrorCode) :
                                                PaymentResponse.Result},
+                                          }), {
+                                              {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}
                                           });
         throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
     }
 
-    OnlinePayments::instance().update(SYSTEM_USER_ID, {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}, {
+    OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                           {tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID},
                                           {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Payed},
                                           {tblOnlinePayments::onpResult, PaymentResponse.Result},
+                                      }), {
+                                          {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}
                                       });
     return VoucherID.toULongLong();
 }

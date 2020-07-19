@@ -22,7 +22,7 @@
 
 #include <QtTest>
 #include "testBase.hpp"
-#include "Account/test.hpp"
+#include "Account/test.h"
 
 QString APIURL = "http://127.0.0.1:10000/rest/v1";
 
@@ -31,6 +31,7 @@ QString gEncodedAdminJWT;
 QJsonObject gJWT;
 quint32 gUserID;
 quint32 gAdminUserID;
+QVariant gInvalid;
 
 int main(int argc, char *argv[])
 {
@@ -41,15 +42,18 @@ int main(int argc, char *argv[])
     clsDAC::setConnectionString("HOST=192.168.0.240;"
                                 "PORT=3306;"
                                 "USER=root;"
-                                "PASSWORD=targoman1234;"
+                                "PASSWORD=targoman123;"
                                 "SCHEMA=AAA");
 
+    bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try{
         FailedTests += QTest::qExec(new testBase, argc, argv);
-        FailedTests += QTest::qExec(new testAccount, argc, argv);
-        FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-        FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

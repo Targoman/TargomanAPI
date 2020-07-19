@@ -69,7 +69,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
     template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _lambdaFromVariant; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _lambdaDesc; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
     \
@@ -81,7 +81,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
             QSharedPointer<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::optionsLambda = nullptr; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
@@ -117,7 +117,7 @@ DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
                               if(_value.toString() == "true" || _value.toString() == "1") return true;
                                   throw exHTTPBadRequest(_paramName + " is not a valid bool");
                           },
-                          [](const QString& _val) -> QVariant {return !(_val == "false" || _val == "0");},
+                          [](const QVariant& _val) -> QVariant {return !(_val == "false" || _val == "0");},
                           [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
 )
 

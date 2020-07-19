@@ -36,8 +36,8 @@ namespace Server {
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
 #define PARAM_REMOTE_IP "TAPI::RemoteIP_t"
 #define PARAM_HEADERS   "TAPI::HEADERS_t"
-#define PARAM_EXTRAPATH "TAPI::ExtraPath_t"
-#define PARAM_ORMFILTER "TAPI::ORMFilters_t"
+#define PARAM_PKSBYPATH "TAPI::PKsByPath_t"
+#define PARAM_ORMFIELDS "TAPI::ORMFields_t"
 #define PARAM_FILE      "TAPI::stuFileInfo"
 #define PARAM_FILES     "TAPI::Files_t"
 
@@ -81,16 +81,16 @@ public:
         return this->ParamTypes.contains(PARAM_REMOTE_IP);
     }
 
-    inline bool requiresExtraPath() const {
-        return this->ParamTypes.contains(PARAM_EXTRAPATH);
+    inline bool requiresPrimaryKey() const {
+        return this->ParamTypes.contains(PARAM_PKSBYPATH);
     }
 
     inline bool requiresHeaders() const {
         return this->ParamTypes.contains(PARAM_HEADERS);
     }
 
-    inline bool requiresORMFilters() const {
-        return this->ParamTypes.contains(PARAM_ORMFILTER);
+    inline bool requiresORMFields() const {
+        return this->ParamTypes.contains(PARAM_ORMFIELDS);
     }
 
     inline bool ttl() const {return this->TTL;}

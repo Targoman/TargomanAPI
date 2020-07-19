@@ -82,12 +82,12 @@ QString  clsORMField::toString(const QVariant& _value)
     return this->argSpecs().toString(_value);
 }
 
-QVariant clsORMField::fromDB(const QVariant& _value)
+QVariant clsORMField::toDB(const QVariant& _value)
 {
-    return this->argSpecs().fromORMValueConverter()(_value);
+    return this->argSpecs().fromORMValueConverter() ? this->argSpecs().fromORMValueConverter()(_value) : _value;
 }
 
-QVariant clsORMField::toDB(const QString& _value)
+QVariant clsORMField::fromDB(const QString& _value)
 {
     return this->argSpecs().toORMValue(_value);
 }

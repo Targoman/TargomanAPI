@@ -22,7 +22,7 @@
 
 #include "Voucher.h"
 #include "User.h"
-#include "Services.h"
+#include "Service.h"
 #include "UserWallets.h"
 
 #include "Classes/PaymentLogic.h"
@@ -36,26 +36,28 @@ using namespace ORM;
 QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
+    TAPI::ORMFields_t ExtraFilters;
+
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert(tblVoucher::vchType, TAPI::enuVoucherType::toStr(TAPI::enuVoucherType::Withdrawal));
-        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        ExtraFilters.insert(tblVoucher::vchType, TAPI::enuVoucherType::toStr(TAPI::enuVoucherType::Withdrawal));
+        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
 
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters);
 }
 
 TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
-                                                 quint32 _amount,
-                                                 QString _callBack,
-                                                 quint64 _walletID,
-                                                 TAPI::enuPaymentGateway::Type _gateway)
+                                                   quint32 _amount,
+                                                   QString _callBack,
+                                                   quint64 _walletID,
+                                                   TAPI::enuPaymentGateway::Type _gateway)
 {
     if(_callBack.size() && _callBack != "OFFLINE")
         QFV.url().validate(_callBack, "callBack");
@@ -65,11 +67,11 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Summary = "Increase wallet";
 
-    Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), {}, {
+    Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                 {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
                                                 {tblVoucher::vchDesc, Voucher.Info.toJson()},
                                                 {tblVoucher::vchTotalAmount, Voucher.Info.ToPay}
-                                            }).toULongLong();
+                                            })).toULongLong();
 
     try {
         if(_callBack == "OFFLINE") {
@@ -78,12 +80,11 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, Voucher.Info.Summary, Voucher.Info.ToPay, _callBack);
         }
     } catch (...) {
-        Voucher::instance().update(SYSTEM_USER_ID, {
-                                       {tblVoucher::vchID, Voucher.ID}
-                                   }, {
+        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                        {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
-                                   }
-                                   );
+                                   }), {
+                                       {tblVoucher::vchID, Voucher.ID}
+                                   });
         throw;
     }
 
@@ -93,12 +94,12 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
 quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, quint64 _walID, const QString& _desc)
 {
     return this->callSP("sp_CREATE_withdrawalRequest", {
-                     {"iWalletID",_walID},
-                     {"iForUsrID", clsJWT(_JWT).usrID()},
-                     {"iByUserID", clsJWT(_JWT).usrID()},
-                     {"iAmount",_amount},
-                     {"iDesc",_desc},
-                 }).spDirectOutputs().value("oVoucherID").toULongLong();
+                            {"iWalletID",_walID},
+                            {"iForUsrID", clsJWT(_JWT).usrID()},
+                            {"iByUserID", clsJWT(_JWT).usrID()},
+                            {"iAmount",_amount},
+                            {"iDesc",_desc},
+                        }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
 quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
@@ -106,29 +107,29 @@ quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint32 _targetUs
     Authorization::checkPriv(_JWT, {"AAA:RequestWithdraw"});
 
     return this->callSP("sp_CREATE_withdrawalRequest", {
-                     {"iWalletID", 0},
-                     {"iForUsrID", _targetUsrID},
-                     {"iByUserID", clsJWT(_JWT).usrID()},
-                     {"iAmount",_amount},
-                     {"iDesc",_desc},
-                 }).spDirectOutputs().value("oVoucherID").toULongLong();
+                            {"iWalletID", 0},
+                            {"iForUsrID", _targetUsrID},
+                            {"iByUserID", clsJWT(_JWT).usrID()},
+                            {"iAmount",_amount},
+                            {"iDesc",_desc},
+                        }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
 Voucher::Voucher() :
     clsTable(AAASchema,
-              tblVoucher::Name,
-              { ///<ColName                       Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblVoucher::vchID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
-                {tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
-                {tblVoucher::vch_usrID,           S(quint32),          QFV.integer().minValue(1),                  QRequired, UPNone},
-                {tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),                         QRequired, UPNone,false,false},
-                {tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                              TAPI::enuVoucherType::Expense,UPNone},
-                {tblVoucher::vchTotalAmount,      S(quint64),          QFV,                                        0,UPNone},
-                {tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,                            TAPI::enuVoucherStatus::New,UPStatus},
-              },
-              { ///< Col       Reference Table   ForeignCol
-                {tblVoucher::vch_usrID,  R(AAASchema,tblUser::Name),     tblUser::usrID},
-              })
+             tblVoucher::Name,
+{ ///<ColName                       Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
+{tblVoucher::vchID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
+{tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
+{tblVoucher::vch_usrID,           S(quint32),          QFV.integer().minValue(1),                  QRequired, UPNone},
+{tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),                         QRequired, UPNone,false,false},
+{tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                              TAPI::enuVoucherType::Expense,UPNone},
+{tblVoucher::vchTotalAmount,      S(quint64),          QFV,                                        0,UPNone},
+{tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,                            TAPI::enuVoucherStatus::New,UPStatus},
+},
+{ ///< Col       Reference Table   ForeignCol
+{tblVoucher::vch_usrID,  R(AAASchema,tblUser::Name),     tblUser::usrID},
+})
 {
 }
 

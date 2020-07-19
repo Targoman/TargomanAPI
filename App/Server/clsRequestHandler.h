@@ -111,7 +111,7 @@ public:
 
 private:
     void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
-    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath);
+    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath);
     QString toIPv4(const QString _ip);
 
 private slots:

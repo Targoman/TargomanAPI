@@ -237,11 +237,14 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _extraPath)
+clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath)
 {
     try{
         for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
+
+        if(!this->Request)
+          throw exHTTPGone("Seems that client has gone");
 
         qhttp::THeaderHash Headers = this->Request->headers();
         qhttp::THeaderHash Cookies;
@@ -273,7 +276,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                              Cookies,
                              JWT,
                              this->toIPv4(this->Request->remoteAddress()),
-                             _extraPath
+                             _pksByPath
                              ));
 
     }catch(exTargomanBase& ex){
@@ -422,6 +425,7 @@ void clsRequestHandler::sendCORSOptions()
     this->Response->addHeaderValue("Access-Control-Max-Age", 1728000);
     this->Response->addHeaderValue("content-length", 0);
     this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
+    this->Response->addHeaderValue("Connection", QString("keep-alive"));
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
     this->Response->end();
     this->deleteLater();

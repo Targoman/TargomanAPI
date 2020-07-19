@@ -205,8 +205,8 @@ namespace Targoman {namespace API { \
     template<> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toVariantLambda = _lambdaToVariant; \
     template<> std::function<_namespace::_type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_type, _complexity, false>::fromVariantLambda = _lambdaFromVariant; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _lambdaDesc; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toORMValueLambda = _lambdaToORM; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _lambdaFromORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::toORMValueLambda = _lambdaToORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _lambdaFromORM; \
     template<> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
     static tmplAPIArg<_namespace::_type, _complexity, false>* Dangling_##_namespace##_type = tmplAPIArg<_namespace::_type, _complexity, false>::instance(TARGOMAN_M2STR(_namespace::_type)); \
     \
@@ -218,8 +218,8 @@ namespace Targoman {namespace API { \
             QSharedPointer<_namespace::_type> Value(new _namespace::_type); *Value = tmplAPIArg<_namespace::_type, _complexity, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::toORMValueLambda = _lambdaToORM; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::fromORMValueLambda = _lambdaFromORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::toORMValueLambda = _lambdaToORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::fromORMValueLambda = _lambdaFromORM; \
     template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::optionsLambda = _lambdaOptions; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::descriptionLambda = _lambdaDesc; \
     static tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>* Dangling_QSP_##_namespace##_type = tmplAPIArg<QSharedPointer<_namespace::_type>, _complexity, true>::instance(QSP_M2STR(_namespace::_type)); \
@@ -249,8 +249,8 @@ namespace Targoman {namespace API { \
 namespace Targoman {namespace API { \
     template<> std::function<QVariant(_namespace::_enum::Type _value)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariantLambda = _lambdaToVariant; \
     template<> std::function<_namespace::_enum::Type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariantLambda = _lambdaFromVariant; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toORMValueLambda = _lambdaToORM; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromORMValueLambda = _lambdaFromORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toORMValueLambda = _lambdaToORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromORMValueLambda = _lambdaFromORM; \
     template<> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::optionsLambda = _lambdaOptions; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _lambdaDesc; \
     static tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>* Dangling_##_namespace##_enum = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::instance(TARGOMAN_M2STR(_namespace::_enum::Type)); \
@@ -263,8 +263,8 @@ namespace Targoman {namespace API { \
             QSharedPointer<_namespace::_enum::Type> Value(new _namespace::_enum::Type); *Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(QString _value)> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::toORMValueLambda = _lambdaToORM; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::fromORMValueLambda = _lambdaFromORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::toORMValueLambda = _lambdaToORM; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::fromORMValueLambda = _lambdaFromORM; \
     template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::descriptionLambda = _lambdaDesc; \
     static tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>* Dangling_QSP_##_namespace##_enum = tmplAPIArg<QSharedPointer<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::instance(QSP_M2STR(_namespace::_enum::Type)); \
@@ -312,15 +312,14 @@ namespace Targoman {namespace API { \
                       QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
         }}, \
         [](const QList<ORM::clsORMField>&) -> QString {return QString("One of (%1)").arg(_namespace::_enum::options().join('|'));}, \
-        [](const QString& _value) -> QVariant { \
-          if(_namespace::_enum::options().contains(_value) == false) \
-              throw exHTTPBadRequest(QString("%1(%2) is not a valid %3.").arg( \
-                      _value).arg(_value).arg( \
-                      QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
-          return QString(_namespace::_enum::toEnum(_value)); \
-        },\
         [](const QVariant& _value) -> QVariant { \
             return _namespace::_enum::toStr(static_cast<_namespace::_enum::Type>(_value.toString().toLatin1().at(0))); \
+        },\
+        [](const QVariant& _value) -> QVariant { \
+            if(_namespace::_enum::options().contains(_value.toString()) == false) \
+                throw exHTTPBadRequest(QString("%1 is not a valid %2.").arg(_value.toString()).arg( \
+                        QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
+            return QString(_namespace::_enum::toEnum(_value.toString())); \
         }, \
         []() -> QStringList { return _namespace::_enum::options();} \
     )

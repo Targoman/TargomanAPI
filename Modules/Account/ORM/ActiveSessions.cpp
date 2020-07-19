@@ -33,43 +33,46 @@ using namespace ORM;
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+  QVariantMap ExtraFilters;
+  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
-    if(_EXTRAPATH.trimmed() == clsJWT(_JWT).session())
-        throw exHTTPForbidden("Deleting current session is not allowed");
+  TAPI::ORMFields_t ExtraFilters;
 
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+  if(_pksByPath.trimmed() == clsJWT(_JWT).session())
+    throw exHTTPForbidden("Deleting current session is not allowed");
 
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, true);
+  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+    this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+
+  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters, true);
 }
 
 ActiveSessions::ActiveSessions() :
-    clsTable(AAASchema,
-              tblActiveSessions::Name,
-              { ///<ColName                              Type                    Validation                   Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblActiveSessions::ssnKey,              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
-                {tblActiveSessions::ssn_usrID,           S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
-                {tblActiveSessions::ssnIP,               S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
-                {tblActiveSessions::ssnIPReadable,       S(QString),            QFV.allwaysInvalid(),        QInvalid,   UPNone,false,false},
-                {tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON},
-                {tblActiveSessions::ssnInfo,             S(TAPI::JSON_t),       QFV,                         QNull,      UPNone,false,false},
-                {tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,      UPNone,false,false},
-                {tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t),   QFV,                         QNull,      UPNone},
-                {tblActiveSessions::ssnRemember,         S(bool),               QFV,                         false,      UPNone},
-                {tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblActiveSessions::ssnStatus,           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active,UPStatus},
-              },
-              { ///< Col                                Reference Table                  ForeignCol          Rename      LeftJoin
-                {tblActiveSessions::ssn_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID,     "Owner_"},
-                {tblActiveSessions::ssnUpdatedBy_usrID, R(AAASchema,tblUser::Name),      tblUser::usrID,     "Updater_", true}
-              })
+  clsTable(AAASchema,
+           tblActiveSessions::Name,
+            { ///<ColName                              Type                    Validation                   Default    UpBy   Sort  Filter Self  Virt   PK
+              {tblActiveSessions::ssnKey,              S(TAPI::MD5_t),        QFV,                         ORM_PRIMARY_KEY},
+              {tblActiveSessions::ssn_usrID,           S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
+              {tblActiveSessions::ssnIP,               S(quint32),            QFV.integer().minValue(1),   QRequired,   UPNone},
+              {tblActiveSessions::ssnIPReadable,       S(QString),            QFV.allwaysInvalid(),        QInvalid,   UPNone,false,false},
+              {tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON},
+              {tblActiveSessions::ssnInfo,             S(TAPI::JSON_t),       QFV,                         QNull,      UPNone,false,false},
+              {tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),        QFV.allwaysInvalid(),        QNull,      UPNone,false,false},
+              {tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t),   QFV,                         QNull,      UPNone},
+              {tblActiveSessions::ssnRemember,         S(bool),               QFV,                         false,      UPNone},
+              {tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY},
+              {tblActiveSessions::ssnStatus,           S(TAPI::enuSessionStatus::Type), QFV,               TAPI::enuSessionStatus::Active,UPStatus},
+            },
+            { ///< Col                                Reference Table                  ForeignCol          Rename      LeftJoin
+              {tblActiveSessions::ssn_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID,     "Owner_"},
+              {tblActiveSessions::ssnUpdatedBy_usrID, R(AAASchema,tblUser::Name),      tblUser::usrID,     "Updater_", true}
+            })
 {
 }
 

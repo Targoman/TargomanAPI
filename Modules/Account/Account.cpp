@@ -37,7 +37,7 @@
 #include "ORM/Roles.h"
 #include "ORM/IPStats.h"
 #include "ORM/Payments.h"
-#include "ORM/Services.h"
+#include "ORM/Service.h"
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
@@ -86,7 +86,7 @@ static QSet<QString> InvalidPasswords = {
 TARGOMAN_DEFINE_ENUM (enuPaymentType,
                       Online='N',
                       Offline='F'
-)
+                              )
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
@@ -302,7 +302,7 @@ bool Account::apiPOSTApproveEmail(TAPI::RemoteIP_t _REMOTE_IP,
 
 bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
                                    TAPI::Mobile_t _mobile,
-                                   quint16 _code)
+                                   quint32 _code)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {
@@ -329,11 +329,11 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     TAPI::stuVoucher Voucher;
     Voucher.Info = _preVoucher;
     //TODO remove sign from prevoucher before converting to JSON
-    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), {}, {
+    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                   {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
                                                   {tblVoucher::vchDesc, _preVoucher.toJson()},
                                                   {tblVoucher::vchTotalAmount, _preVoucher.ToPay}
-                                              }).toULongLong();
+                                              })).toULongLong();
     try {
         qint64 RemainingAfterWallet = 0;
         if(_walletID>=0){
@@ -354,10 +354,10 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
             }
         }
     } catch (...) {
-        Voucher::instance().update(SYSTEM_USER_ID, {
-                                       {tblVoucher::vchID, Voucher.ID}
-                                   }, {
+        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                        {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
+                                   }), {
+                                       {tblVoucher::vchID, Voucher.ID}
                                    }
                                    );
         throw;
@@ -376,10 +376,10 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::T
                      });
         return PaymentLogic::processVoucher(VoucherID);
     }catch(...){
-        Voucher::instance().update(SYSTEM_USER_ID, {
-                                       {tblVoucher::vchID, VoucherID}
-                                   }, {
+        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                        {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
+                                   }), {
+                                       {tblVoucher::vchID, VoucherID}
                                    }
                                    );
         throw;
@@ -400,7 +400,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
         throw exAuthorization("Not enough access for offline approval");
 
     if(ApprovalLimit > 0){
-        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), {}, 0, 1, tblVoucher::vchTotalAmount).toMap();
+        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::vchTotalAmount).toMap();
         if(Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
             throw exAuthorization("Voucher total amount is greater than your approval limit");
     }
@@ -408,14 +408,14 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), {}, {
+    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                            {"ofp_vchID",_vchID},
                                            {"ofpBank",_bank},
                                            {"ofpReceiptCode",_receiptCode},
                                            {"ofpReceiptDate",_receiptDate},
                                            {"ofpAmount",_amount},
                                            {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
-                                       });
+                                       }));
 
     this->callSP("sp_CREATE_walletTransactionOnPayment", {
                      {"iVoucherID", _vchID},
@@ -482,7 +482,7 @@ Account::Account() :
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&OfflinePayments::instance());
     this->addSubModule(&Roles::instance());
-    this->addSubModule(&Services::instance());
+    this->addSubModule(&Service::instance());
     this->addSubModule(&User::instance());
     this->addSubModule(&UserExtraInfo::instance());
     this->addSubModule(&UserWallets::instance());
@@ -492,10 +492,10 @@ Account::Account() :
     if(Account::InvalidPasswordsFile.value().size()){
         QFile InputFile(Account::InvalidPasswordsFile.value());
         if (InputFile.open(QIODevice::ReadOnly)) {
-           QTextStream Stream(&InputFile);
-           while (!Stream.atEnd())
-              InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
-           InputFile.close();
+            QTextStream Stream(&InputFile);
+            while (!Stream.atEnd())
+                InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
+            InputFile.close();
         }
     }
 }

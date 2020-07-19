@@ -22,8 +22,8 @@ VERSION=1.0.0
 LIBS += -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
-        -lQJsonRPC \
         -lqhttp \
+        -lQJsonRPC \
         -lcurl \
         -lTargomanTextProcessor \
         -lfasttext

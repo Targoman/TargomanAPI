@@ -88,6 +88,7 @@ public:
     }
     
     inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fromORMValueLambda;}
+    inline std::function<QVariant(const QVariant& _val)> toORMValueConverter() const final {return this->toORMValueLambda;}
 
     static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}){
         if(tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda)
@@ -114,7 +115,7 @@ private:
 private:
     static std::function<QVariant(_itmplType _value)> toVariantLambda;
     static std::function<_itmplType(QVariant _value, const QByteArray& _paramName)> fromVariantLambda;
-    static std::function<QVariant(QString _value)> toORMValueLambda;
+    static std::function<QVariant(const QVariant& _val)> toORMValueLambda;
     static std::function<QVariant(const QVariant& _val)> fromORMValueLambda;
     static std::function<QStringList()> optionsLambda;
     static std::function<QString(const QList<ORM::clsORMField>& _allFields)> descriptionLambda;

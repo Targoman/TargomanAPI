@@ -92,9 +92,9 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
         ExtraArgCount++;
     if(this->ParamTypes.contains(PARAM_REMOTE_IP))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_EXTRAPATH))
+    if(this->ParamTypes.contains(PARAM_PKSBYPATH))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_ORMFILTER))
+    if(this->ParamTypes.contains(PARAM_ORMFIELDS))
         ExtraArgCount++;
 
     if(_args.size() + _bodyArgs.size() + ExtraArgCount < this->RequiredParamsCount)
@@ -109,7 +109,8 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
         bool ParamNotFound = true;
         QVariant ArgumentValue;
 
-        static auto parseArgValue = [ArgumentValue](const QString& _paramName, const QString& _value) -> QVariant {
+        static auto parseArgValue = [ArgumentValue](const QString& _paramName, QString _value) -> QVariant {
+            _value = _value.trimmed();
             if((_value.startsWith('[') && _value.endsWith(']')) ||
                (_value.startsWith('{') && _value.endsWith('}'))){
                 QJsonParseError Error;
@@ -142,18 +143,20 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
             ArgumentValue = _remoteIP;
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_EXTRAPATH){
+        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_PKSBYPATH){
             ParamNotFound = false;
             ArgumentValue = _extraAPIPath;
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_ORMFILTER){
+        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_ORMFIELDS){
             ParamNotFound = false;
-            TAPI::ORMFilters_t ORMFilters;
+            TAPI::ORMFields_t ORMFields;
             foreach (const QString& Arg, _args)
-                ORMFilters.insert(Arg.mid(0,Arg.indexOf('=')), parseArgValue(Arg.mid(0,Arg.indexOf('=')), QUrl::fromPercentEncoding(Arg.mid(Arg.indexOf('=') + 1).toUtf8())));
+                ORMFields.insert(Arg.mid(0,Arg.indexOf('=')), parseArgValue(Arg.mid(0,Arg.indexOf('=')), QUrl::fromPercentEncoding(Arg.mid(Arg.indexOf('=') + 1).toUtf8())));
 
-            ArgumentValue = ORMFilters;
+            foreach (auto BodyArg, _bodyArgs)
+                ORMFields.insert(BodyArg.first, parseArgValue(BodyArg.first, BodyArg.second));
+            ArgumentValue = ORMFields;
         }
 
         if(ParamNotFound)

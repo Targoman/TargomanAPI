@@ -71,9 +71,9 @@ public:
                             const QList<ORM::stuRelation>& _foreignKeys);
 private slots:
     QVariant ORMGET("Get User Packages")
-    bool REST(UPDATE, disablePackage, (TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH),
+    bool REST(UPDATE, disablePackage, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
               "Mark a user package banned by priviledged user")
-    bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::ExtraPath_t _EXTRAPATH),
+    bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
               "Mark a user package as prefered")
 };
 

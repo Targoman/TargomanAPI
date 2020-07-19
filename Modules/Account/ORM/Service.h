@@ -32,8 +32,8 @@ namespace AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblServices {
-constexpr char Name[] = "tblServices";
+namespace tblService {
+constexpr char Name[] = "tblService";
 TARGOMAN_CREATE_CONSTEXPR(svcID);
 TARGOMAN_CREATE_CONSTEXPR(svcName);
 TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
@@ -44,7 +44,7 @@ TARGOMAN_CREATE_CONSTEXPR(svcStatus);
 }
 #pragma GCC diagnostic pop
 
-class Services : public ORM::clsTable
+class Service : public ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -54,7 +54,7 @@ private slots:
     quint64 ORMCREATE("Create a new Service by priviledged user")
 
 private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,Services)
+        TARGOMAN_DEFINE_API_SUBMODULE(Account,Service)
 };
 
 }

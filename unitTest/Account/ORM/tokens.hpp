@@ -19,7 +19,7 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TEST_ACCOUNT_ORM_APITokens_HPP
+#ifndef TEST_ACCOUNT_ORM_APITOKENS_HPP
 #define TEST_ACCOUNT_ORM_APITOKENS_HPP
 
 #include "testCommon.hpp"
@@ -27,13 +27,19 @@
 
 using namespace Targoman::API::AAA;
 
+
 class testAPITokens: public clsBaseTest
 {
     Q_OBJECT
 
 private slots:
     void APITokens_CREATE_Unpriviledged(){
-        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+        clsDAC DAC;
+        DAC.execQuery("", "INSERT INTO tblAPITokens "
+                          "SET tblAPITokens.aptToken=?,"
+                          "    tblAPITokens.aptToken=?,"
+                          "WHERE tblUser.usrID=?", {gAdminUserID});
+        QVERIFY(callAdminAPI(PATCH, QString("Account/APITokens/"),{},{
 
                              }) == false);
     }
@@ -56,6 +62,7 @@ private slots:
                         }).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
         QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(clsJWT(gJWT).session())).toBool() == false);
     }
+
 
 };
 

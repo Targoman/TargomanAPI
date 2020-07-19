@@ -29,7 +29,6 @@ HEADERS += \
     ORM/ForgotPassRequest.h \
     ORM/IPBin.h \
     ORM/IPStats.h \
-    ORM/Services.h \
     ORM/User.h \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
@@ -39,7 +38,8 @@ HEADERS += \
     ORM/Payments.h \
     Classes/PaymentLogic.h \
     ORM/Voucher.h \
-    Classes/Defs.hpp
+    Classes/Defs.hpp \
+    ORM/Service.h
 
 
 SOURCES += \
@@ -52,14 +52,14 @@ SOURCES += \
     ORM/ForgotPassRequest.cpp \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
-    ORM/Services.cpp \
     ORM/User.cpp \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \
     ORM/Roles.cpp \
     ORM/Payments.cpp \
     Classes/PaymentLogic.cpp \
-    ORM/Voucher.cpp
+    ORM/Voucher.cpp \
+    ORM/Service.cpp
 
 OTHER_FILES += \
 

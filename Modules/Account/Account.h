@@ -111,7 +111,7 @@ private slots:
 
     bool REST(POST,ApproveMobile,(TAPI::RemoteIP_t _REMOTE_IP,
                                   TAPI::Mobile_t _mobile,
-                                  quint16 _code),
+                                  quint32 _code),
               "Approves Mobile by provided mobile no and code")
 
     TAPI::stuVoucher REST(POST, finalizeBasket, (TAPI::JWT_t _JWT,
@@ -120,7 +120,7 @@ private slots:
                                                  qint64 _walletID = -1,
                                                  TAPI::enuPaymentGateway::Type _gateway = TAPI::enuPaymentGateway::Zibal),
                           "create a voucher based on preVoucher. "
-                          "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment, "
+                          "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment,"
                           "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
                           "When callback is set to URL you must specify payment gateway")
 

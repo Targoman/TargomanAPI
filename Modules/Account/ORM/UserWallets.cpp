@@ -35,18 +35,20 @@ using namespace DBManager;
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS, _filters);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
+    TAPI::ORMFields_t ExtraFilters;
+
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert(tblUserWallets::walDefault, 0);
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _EXTRAPATH, _ORMFILTERS);
+        ExtraFilters.insert(tblUserWallets::walDefault, 0);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters);
 }
 
 bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
@@ -58,8 +60,8 @@ bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
-        _ORMFILTERS.insert(tblUserWallets::walDefault, 0);
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, {}, _ORMFILTERS);
+        _createInfo.insert(tblUserWallets::walDefault, 0);
+        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _createInfo);
     }
 
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
