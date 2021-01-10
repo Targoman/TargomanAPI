@@ -24,9 +24,12 @@
 
 constexpr char UT_RoleName[] = "UnitTest_Service_Role";
 constexpr char UT_ServiceName[] = "UnitTest_Service";
-constexpr char UT_Token[] = "Sample_UnitTest_Token";
+constexpr char UT_AdminToken[] = "Sample_UnitTest_Admin_Token";
+constexpr char UT_NormalToken[] = "Sample_UnitTest_Token";
 
 extern unsigned int gServiceRoleID;
 extern unsigned int gServiceID;
+extern unsigned int gAPITokenID;
+extern unsigned int gAPIAdminTokenID;
 
 #endif // TEST_ACCOUNT_ORM_DEFS_HPP

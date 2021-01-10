@@ -101,6 +101,22 @@ quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
     return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
+TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
+    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
+
+    QString Mime = "image/png";
+    QByteArray Image;
+    if (Photo.size() && Photo.startsWith("data:image/")){
+        Mime = Photo.split(';').first().mid(sizeof("data"));
+        Image = QByteArray::fromBase64(Photo.mid(Photo.indexOf("base64,") + sizeof ("base64,") - 1));
+    }
+
+    return TAPI::RawData_t(Image, Mime);
+}
+
+//TODO BAD Gender causes assert
+
+
 User::User() : clsTable(AAASchema,
                          tblUser::Name,
                          { ///<ColName                    Type                      Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
@@ -148,10 +164,23 @@ bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
-                              + "SET " + tblUserExtraInfo::ueiSheba +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
+                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
                               + QUERY_SEPARATOR
                               + "WHERE uei_usrID = ?",
                               { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+        );
+
+    return Result.numRowsAffected() > 0;
+}
+
+bool UserExtraInfo::apiUPDATEEtherAdress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress){
+    clsDACResult Result = this->execQuery(
+                              "UPDATE " + this->Name
+                              + QUERY_SEPARATOR
+                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
+                              + QUERY_SEPARATOR
+                              + "WHERE uei_usrID = ?",
+                              { _etherAddress, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
         );
 
     return Result.numRowsAffected() > 0;
@@ -164,8 +193,10 @@ UserExtraInfo::UserExtraInfo() :
                {  ///<ColName                             Type                      Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
 //                 {tblUserExtraInfo::uei_usrID,          S(quint32),               QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
                    {tblUserExtraInfo::ueiGender,          S(TAPI::enuUserGender::Type),QFV,                         TAPI::enuUserGender::NotExpressed,  UPOwner,false,false},
-                   {tblUserExtraInfo::ueiExtraInfo,       S(QString),               QFV,                            QNull,  UPOwner,false,false},
-                   {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),   QFV,                            QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiExtraInfo,       S(QString),                  QFV,                         QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),      QFV,                         QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiIBAN,            S(TAPI::Sheba_t),            QFV.iban("IR"),              QNull,  UPOwner,false,false},
+                   {tblUserExtraInfo::ueiEther,           S(TAPI::Ether_t),            QFV,                         QNull,  UPOwner,false,false},
                    {tblUserExtraInfo::ueiUpdatedBy_usrID, ORM_UPDATED_BY},
                    {tblUserExtraInfo::ueiOAuthAccounts,   S(TAPI::JSON_t),          QFV,                            QNull,  UPNone}
                },

@@ -23,3 +23,6 @@
 
 unsigned int gServiceRoleID;
 unsigned int gServiceID;
+unsigned int gAPITokenID;
+unsigned int gAPIAdminTokenID;
+

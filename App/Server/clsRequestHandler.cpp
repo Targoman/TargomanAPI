@@ -402,7 +402,22 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code, QVariant _response)
 {
     gServerStats.Success.inc();
-    this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}));
+    if(strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
+        TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
+        TargomanLogInfo(7, "Response ["<<
+                        this->Request->connection()->tcpSocket()->peerAddress().toString()<<
+                        ":"<<
+                        this->Request->connection()->tcpSocket()->peerPort()<<
+                        "]: (code:"<<_code<<"):"<<RawData.mime()<<":RAW_DATA_SIZE("<<RawData.data().length()<<")")
+                this->Response->setStatusCode(_code);
+        this->Response->addHeaderValue("content-length", RawData.data().length());
+        this->Response->addHeaderValue("content-type", QString(RawData.mime()));
+        this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
+        this->Response->addHeaderValue("Connection", QString("keep-alive"));
+        this->Response->end(RawData.data());
+        this->deleteLater();
+    } else
+        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}));
 }
 
 void clsRequestHandler::sendCORSOptions()

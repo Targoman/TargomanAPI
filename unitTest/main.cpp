@@ -29,6 +29,7 @@ QString APIURL = "http://127.0.0.1:10000/rest/v1";
 QString gEncodedJWT;
 QString gEncodedAdminJWT;
 QJsonObject gJWT;
+QJsonObject gAdminJWT;
 quint32 gUserID;
 quint32 gAdminUserID;
 QVariant gInvalid;
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
         if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
         if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
         if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

@@ -63,7 +63,7 @@ Roles::Roles() :
                 {tblRoles::rolName,              S(QString),          QFV.unicodeAlNum().maxLenght(50),   QRequired, UPAdmin},
                 {tblRoles::rolParent_rolID,      S(quint32),          QFV.integer().minValue(1),          QNull,     UPAdmin},
                 {tblRoles::rolPrivileges,        S(TAPI::PrivObject_t),QFV,                               QRequired, UPAdmin,false,false},
-                {tblRoles::rolSignUPOwnerowedIPs,S(QString),          QFV,                                QNull,     UPAdmin,false,false}, //OJO This must be validated after splitting by comma
+                {tblRoles::rolSignupAllowedIPs,  S(QString),          QFV,                                QNull,     UPAdmin,false,false}, //OJO This must be validated after splitting by comma
                 {tblRoles::rolCreatedBy_usrID,   ORM_CREATED_BY},
                 {tblRoles::rolCreationDateTime,  ORM_CREATED_ON},
                 {tblRoles::rolUpdatedBy_usrID,   ORM_UPDATED_BY},

@@ -31,14 +31,14 @@ using namespace Targoman::NLPLibs;
 using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 
-QString TextProcessor::apiNormalize(const QString _text, const TAPI::ISO639_2_t& _lang)
+QString TextProcessor::apiNormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector)
 {
-    return NLP::TextProcessor::instance().normalizeText(_text, _lang);
+    return NLP::TextProcessor::instance().normalizeText(_text, _useSpellCorrector ? _lang : TAPI::ISO639_2_t());
 }
 
 QString TextProcessor::apiText2IXML (const QString& _text,
-                                         const TAPI::ISO639_2_t& _lang,
-                                         bool _useSpellCorrector)
+                                     const TAPI::ISO639_2_t& _lang,
+                                     bool _useSpellCorrector)
 {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
@@ -58,17 +58,19 @@ QString TextProcessor::apiText2IXML (const QString& _text,
 }
 
 QString TextProcessor::apiIxml2Text(const QString& _ixml,
-                                        const TAPI::ISO639_2_t& _lang,
-                                        bool _detokenize,
-                                        bool _hinidiDigits,
-                                        bool _breakSentences)
+                                    bool _detokenize,
+                                    bool _hinidiDigits,
+                                    bool _arabicPunctuations,
+                                    bool _breakSentences)
 {
-    return NLP::TextProcessor::instance().ixml2Text(_ixml, _lang, _detokenize, _hinidiDigits, _breakSentences);
+    return NLP::TextProcessor::instance().ixml2Text(_ixml, _detokenize, _hinidiDigits, _arabicPunctuations, _breakSentences);
 }
 
 QString TextProcessor::apiTokenize (const QString& _text,
-                                        const TAPI::ISO639_2_t& _lang,
-                                        bool _useSpellCorrector)
+                                    const TAPI::ISO639_2_t& _lang,
+                                    bool _useSpellCorrector,
+                                    bool _hindiNumerals,
+                                    bool _arabicPunctuations)
 {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
@@ -78,15 +80,15 @@ QString TextProcessor::apiTokenize (const QString& _text,
                     "\\1\\2\\3")); //"\\1\\2\\n\\3"
 
     QString Tokenized = NLP::TextProcessor::instance().text2IXML(
-                _text,
-                SpellCorrected,
-                _lang,
-                _useSpellCorrector && (_lang == "fa"),
-                QList<enuTextTags::Type>(),
-                SentenceBreakReplacements
-                );
+                            _text,
+                            SpellCorrected,
+                            _lang,
+                            _useSpellCorrector,
+                            QList<enuTextTags::Type>(),
+                            SentenceBreakReplacements
+                            );
 
-    return NLP::TextProcessor::instance().ixml2Text(_text, _lang, false, false, false);
+    return NLP::TextProcessor::instance().ixml2Text(Tokenized, false, _hindiNumerals, _arabicPunctuations, false);
 }
 
 TextProcessor::TextProcessor()

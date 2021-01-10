@@ -46,6 +46,7 @@ static const char* HTTPMethodString[] = {
 extern QString APIURL;
 extern QString gEncodedJWT;
 extern QJsonObject gJWT;
+extern QJsonObject gAdminJWT;
 extern QString gEncodedAdminJWT;
 extern quint32 gUserID;
 extern quint32 gAdminUserID;

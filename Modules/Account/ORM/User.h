@@ -38,7 +38,8 @@ TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
 TARGOMAN_CREATE_CONSTEXPR(ueiGender);
 TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
 TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
-TARGOMAN_CREATE_CONSTEXPR(ueiSheba);
+TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
+TARGOMAN_CREATE_CONSTEXPR(ueiEther);
 TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
 }
@@ -52,6 +53,8 @@ private slots:
     bool ORMDELETE("Delete a User by priviledged user")
     bool ORMUPDATE("Update User info by priviledged user")
     quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
+    TAPI::RawData_t REST(GET,Photo, (quint64 _usrID),
+                             "Get user photo as image")
 
     bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
                               NULLABLE(TAPI::enuUserGender::Type) _gender = {},
@@ -76,7 +79,10 @@ private slots:
         bool REST(UPDATE,Photo,(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image),
                   "Updates user image based using a base64 encoded image")
         bool REST(UPDATE,Sheba,(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba),
-                  "Updates user image based using a base64 encoded image")
+                  "Updates user Sheba address")
+        bool REST(UPDATE,EtherAdress,(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress),
+                  "Updates user ethercoin address")
+
         private:
             TARGOMAN_DEFINE_API_SUBMODULE(Account,UserExtraInfo)
     };

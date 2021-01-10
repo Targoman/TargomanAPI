@@ -37,6 +37,7 @@ class FormalityChecker : public intfAPIModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_DEFINE_API_MODULE(FormalityChecker);
 
 public:
     void init();
@@ -46,7 +47,6 @@ private slots:
     QString API(, Check, (const QString _text, const TAPI::ISO639_2_t& _lang),
                 "Normalizes input text")
 
-    TARGOMAN_DEFINE_API_MODULE(FormalityChecker)
 };
 
 }

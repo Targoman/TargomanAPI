@@ -6,6 +6,8 @@ echo copying modules
 sudo docker cp out/modules activeAPI:/targoman/
 echo copying library 
 sudo docker cp out/lib64 activeAPI:/targoman/
+echo copying config files
+sudo docker cp 3rdParty/E4MT/TextProcessor/libsrc/conf/. activeAPI:/targoman/conf/TextProcessor/ 
 echo copying common library 
 home=/home/user/
 

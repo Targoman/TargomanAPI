@@ -53,6 +53,12 @@ bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
+quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+}
+
 APITokens::APITokens() :
     clsTable(AAASchema,
               "tblAPITokens",

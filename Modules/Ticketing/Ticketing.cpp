@@ -44,8 +44,7 @@ quint64 Ticketing::insertTicket(quint32 _targetUser,
                                 const QString& _body,
                                 bool _hasAttachemnt,
                                 quint64 _createdBy) {
-  return this
-      ->execQuery(
+  return this->execQuery(
           "INSERT INTO tblTickets "
           "   SET tblTickets.tktTarget_usrID =?,"
           "       tblTickets.tkt_svcID =?,"

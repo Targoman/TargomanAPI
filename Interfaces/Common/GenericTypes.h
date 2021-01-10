@@ -138,6 +138,21 @@ public:
     Files_t& fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
 };
 
+class RawData_t {
+public:
+    RawData_t() = default;
+    ~RawData_t() = default;
+    RawData_t(const RawData_t &) = default;
+    RawData_t &operator=(const RawData_t &) = default;
+    RawData_t(const QByteArray& _data, const QString& _mime);
+    QVariant toVariant() const;
+    const QString& mime() { return  this->Mime; }
+    const QByteArray& data() { return  this->Data; }
+
+private:
+    QString Mime;
+    QByteArray Data;
+};
 
 /**********************************************************************/
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
@@ -164,6 +179,7 @@ TAPI_ADD_SIMPLE_TYPE(QString, IPv4_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Email_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Mobile_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Sheba_t);
+TAPI_ADD_SIMPLE_TYPE(QString, Ether_t);
 TAPI_ADD_SIMPLE_TYPE(QString, ISO639_2_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Base64Image_t);
 TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
@@ -178,6 +194,7 @@ TAPI_ADD_SIMPLE_TYPE(QString, DiscountCode_t);
 TAPI_DECLARE_METATYPE(TAPI::stuTable)
 TAPI_DECLARE_METATYPE(TAPI::stuFileInfo)
 TAPI_DECLARE_METATYPE(TAPI::Files_t)
+TAPI_DECLARE_METATYPE(TAPI::RawData_t)
 TAPI_DECLARE_METATYPE(TAPI::HEADERS_t)
 TAPI_DECLARE_METATYPE(TAPI::COOKIES_t)
 TAPI_DECLARE_METATYPE(TAPI::JWT_t)
@@ -193,6 +210,7 @@ TAPI_DECLARE_METATYPE(TAPI::IPv4_t)
 TAPI_DECLARE_METATYPE(TAPI::Email_t)
 TAPI_DECLARE_METATYPE(TAPI::Mobile_t)
 TAPI_DECLARE_METATYPE(TAPI::Sheba_t)
+TAPI_DECLARE_METATYPE(TAPI::Ether_t)
 TAPI_DECLARE_METATYPE(TAPI::ISO639_2_t)
 TAPI_DECLARE_METATYPE(TAPI::Date_t)
 TAPI_DECLARE_METATYPE(TAPI::Time_t)

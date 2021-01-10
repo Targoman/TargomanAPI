@@ -33,32 +33,33 @@ class TextProcessor : public intfAPIModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
     Q_INTERFACES(Targoman::API::intfAPIModule)
+    TARGOMAN_DEFINE_API_MODULE(TextProcessor);
 
 public:
     bool requiresTextProcessor() const {return true;}
 
 private slots:
-    QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang),
-                "Normalizes input text")
+    QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector = true),
+                 "Normalizes input text")
     QString REST(, Text2IXML, (
-                    const QString& _text,
-                    const TAPI::ISO639_2_t& _lang,
-                    bool _useSpellCorrector = true),
-                "Normalizes and tokenizes text and tags special fields in an inline-XML format")
+                     const QString& _text,
+                     const TAPI::ISO639_2_t& _lang,
+                     bool _useSpellCorrector = true),
+                 "Normalizes and tokenizes text and tags special fields in an inline-XML format")
     QString REST(, Ixml2Text, (const QString& _ixml,
-                              const TAPI::ISO639_2_t& _lang,
-                              bool _detokenize = true,
-                              bool _hinidiDigits = true,
-                              bool _breakSentences = true),
-                "Removes IXML tags injected by text2IXML API")
+                               bool _detokenize = true,
+                               bool _hinidiDigits = false,
+                               bool _arabicPunctuations = false,
+                               bool _breakSentences = false),
+                 "Removes IXML tags injected by text2IXML API")
 
     QString REST(, Tokenize, (
-                    const QString& _text,
-                    const TAPI::ISO639_2_t& _lang,
-                    bool _useSpellCorrector = true),
-                "Tokenizes string without tagging special fields")
-
-    TARGOMAN_DEFINE_API_MODULE(TextProcessor)
+                     const QString& _text,
+                     const TAPI::ISO639_2_t& _lang,
+                     bool _useSpellCorrector = true,
+                     bool _hindiNumerals = false,
+                     bool _arabicPunctuations = false),
+                 "Tokenizes string without tagging special fields")
 };
 
 }

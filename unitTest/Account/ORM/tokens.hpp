@@ -24,9 +24,9 @@
 
 #include "testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
+#include "defs.hpp"
 
 using namespace Targoman::API::AAA;
-
 
 class testAPITokens: public clsBaseTest
 {
@@ -34,36 +34,101 @@ class testAPITokens: public clsBaseTest
 
 private slots:
     void APITokens_CREATE_Unpriviledged(){
-        clsDAC DAC;
-        DAC.execQuery("", "INSERT INTO tblAPITokens "
-                          "SET tblAPITokens.aptToken=?,"
-                          "    tblAPITokens.aptToken=?,"
-                          "WHERE tblUser.usrID=?", {gAdminUserID});
-        QVERIFY(callAdminAPI(PATCH, QString("Account/APITokens/"),{},{
-
-                             }) == false);
+        QVERIFY(callAPI(PUT, QString("Account/APITokens/"),{},{
+                                {"aptToken", UT_NormalToken},
+                             }) == gInvalid);
     }
 
     void APITokens_CREATE_Admin(){
-        QVERIFY(callAdminAPI(GET, QString("Account/APITokens/")).toMap().value("rows").toList().size() > 0);
-        QVERIFY(callAdminAPI(DELETE, QString("Account/APITokens/%1").arg(clsJWT(gJWT).session())).toBool());
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                               {"aptToken", UT_NormalToken},
+                             }) == gInvalid);
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                 {"aptToken", UT_NormalToken},
+                                 {"apt_svcID", gServiceID},
+                             }) == gInvalid);
+
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                 {"aptToken", UT_NormalToken},
+                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                             }) == gInvalid);
+
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                 {"aptToken", UT_NormalToken},
+                                 {"apt_svcID", gServiceID},
+                                 {"apt_usrID", 0},
+                             }) == gInvalid);
+
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                 {"aptToken", UT_NormalToken},
+                                 {"apt_svcID", 0},
+                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                             }) == gInvalid);
+
+
+        QVERIFY((gAPITokenID =  callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                                 {"aptToken", UT_NormalToken},
+                                                 {"apt_svcID", gServiceID},
+                                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                             }).toUInt()) > 0);
+        QVERIFY((gAPIAdminTokenID =  callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                                 {"aptToken", UT_AdminToken},
+                                                 {"apt_svcID", gServiceID},
+                                                 {"apt_usrID", clsJWT(gAdminJWT).usrID()},
+                                             }).toUInt()) > 0);
+    }
+
+    void APITokens_UPDATE_Unprivileged(){
+        QVERIFY(callAPI(PATCH, QString("Account/APITokens/%1").arg(gAPITokenID),{},{
+                                 {"aptStatus", "Removed"}
+                             })== gInvalid);
+        QVERIFY(callAPI(PATCH, QString("Account/APITokens/%1").arg(gAPIAdminTokenID),{},{
+                                 {"aptStatus", "Removed"}
+                             })== gInvalid);
+    }
+
+    void APITokens_UPDATE_Admin(){
+        QVERIFY(callAdminAPI(PATCH, QString("Account/APITokens/%1").arg(gAPIAdminTokenID),{},{
+                                 {"aptStatus", "Removed"}
+                             }).toBool());
+    }
+
+    void APITokens_DELETE_Unprivileged(){
+        QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(gAPIAdminTokenID)) == gInvalid);
+        QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool());
+    }
+
+    void APITokens_DELETE_Admin(){
+        QVERIFY(callAdminAPI(DELETE, QString("Account/APITokens/")) == gInvalid);
+        QVERIFY(callAdminAPI(DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool() == false);
+        QVERIFY(callAdminAPI(PATCH, QString("Account/APITokens/%1").arg(gAPITokenID),{},{
+                                 {"svcStatus", "Active"}
+                             }).toBool());
+        QVERIFY(callAdminAPI(DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool());
+        QVERIFY(callAdminAPI(PATCH, QString("Account/APITokens/%1").arg(gAPITokenID),{},{
+                                 {"svcStatus", "Active"}
+                             }).toBool());
+    }
+
+    void APITokens_CREATE_recreate(){
+        QVERIFY(callAdminAPI(PUT, QString("Account/APITokens/"),{},{
+                                                 {"aptToken", UT_NormalToken},
+                                                 {"apt_svcID", gServiceID},
+                                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                             }) == gInvalid);
     }
 
     void APITokens_GET_Unpriviledged(){
-        QVERIFY(callAPI(GET, QString("Account/APITokens/")).toString().isEmpty());
-        QVERIFY(callAPI(GET,
-                        QString("Account/APITokens/%1").arg(clsJWT(gJWT).session()), {
-                            {"ssn_usrID",gUserID}, {"cols", "ssnKey"}
-                        }).toMap().value("ssnKey") == clsJWT(gJWT).session());
-        QVERIFY(callAPI(GET,
-                        QString("Account/APITokens/"),{
-                            {"filters",QString("ssn_usrID=%1 + ssnKey=%2").arg(gUserID).arg(clsJWT(gJWT).session())},
-                            {"cols", "ssnKey"}
-                        }).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
-        QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(clsJWT(gJWT).session())).toBool() == false);
+        QVERIFY(callAPI(GET, QString("Account/APITokens/")).toMap().size() == 1);
+        QVERIFY(callAPI(GET, QString("Account/APITokens/%1").arg(gAPITokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_NormalToken);
+        QVERIFY(callAPI(GET, QString("Account/APITokens/%1").arg(gAPIAdminTokenID), {{"cols", "aptToken"}}).toMap().isEmpty());
     }
 
-
+    void APITokens_GET_Admin(){
+        QVERIFY(callAdminAPI(GET, QString("Account/APITokens/"),{{"cols", "aptToken"}}).toMap().size());
+        QVERIFY(callAPI(GET, QString("Account/APITokens/%1").arg(gAPITokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_NormalToken);
+        QVERIFY(callAPI(GET, QString("Account/APITokens/%1").arg(gAPIAdminTokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_AdminToken);
+    }
 };
 
 

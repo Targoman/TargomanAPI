@@ -28,6 +28,7 @@
 #include "ORM/activeSessions.hpp"
 #include "ORM/roles.hpp"
 #include "ORM/service.hpp"
+#include "ORM/tokens.hpp"
 #include <cstdlib>
 #include <unistd.h>
 
@@ -41,7 +42,7 @@ class testAccount: public clsBaseTest
 private slots:
     void initTestCase(){
         clsDAC DAC;
-        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken=?", {UT_Token});
+        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", {UT_NormalToken, UT_AdminToken});
         DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
         DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName=?", {UT_RoleName});
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
@@ -113,7 +114,6 @@ private slots:
                                     {"salt", 1234},
                                 }).toString()).size());
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
-        qDebug()<<gJWT;
 
         QVERIFY(clsJWT(gJWT).usrID() == gUserID);
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
@@ -146,6 +146,7 @@ private slots:
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toString()).size());
+        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
     }
 
     void RefreshJWT(){

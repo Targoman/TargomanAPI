@@ -40,20 +40,20 @@ public:
     }
 
     inline QString text2IXML(const QString& _inStr,
-                      INOUT bool &_spellCorrected,
-                      const QString& _lang,
-                      bool _useSpellCorrector = true,
-                      QList<NLPLibs::enuTextTags::Type> _removingTags = QList<NLPLibs::enuTextTags::Type>(),
-                      QList<NLPLibs::stuIXMLReplacement> _replacements = QList<NLPLibs::stuIXMLReplacement>()) const{
+                             INOUT bool &_spellCorrected,
+                             const QString& _lang,
+                             bool _useSpellCorrector = true,
+                             QList<NLPLibs::enuTextTags::Type> _removingTags = QList<NLPLibs::enuTextTags::Type>(),
+                             QList<NLPLibs::stuIXMLReplacement> _replacements = QList<NLPLibs::stuIXMLReplacement>()) const{
         return NLPLibs::TargomanTextProcessor::instance().text2IXML(_inStr, _spellCorrected, _lang, 0, false, _useSpellCorrector, _removingTags, _replacements);
     }
 
     inline QString ixml2Text(const QString& _ixml,
-                      const QString& _lang,
-                      bool _detokenize = true,
-                      bool _hinidiDigits = true,
-                      bool _breakSentences = true) const{
-        return NLPLibs::TargomanTextProcessor::instance().ixml2Text(_ixml, _lang, _detokenize, _hinidiDigits, _breakSentences);
+                             bool _detokenize = true,
+                             bool _hinidiDigits = false,
+                             bool _arabicPunctuations = false,
+                             bool _breakSentences = true) const{
+        return NLPLibs::TargomanTextProcessor::instance().ixml2Text(_ixml, _detokenize, _hinidiDigits, _arabicPunctuations, _breakSentences);
     }
 
     inline QString normalizeText(const QString _input,
@@ -63,8 +63,8 @@ public:
     }
 
     inline QString normalizeText(const QString _input,
-                          INOUT bool &_spellCorrected,
-                          const QString& _lang) const{
+                                 INOUT bool &_spellCorrected,
+                                 const QString& _lang) const{
         return NLPLibs::TargomanTextProcessor::instance().normalizeText(_input, _spellCorrected, false, _lang);
     }
 

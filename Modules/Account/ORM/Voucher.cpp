@@ -69,7 +69,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
 
     Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                 {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
-                                                {tblVoucher::vchDesc, Voucher.Info.toJson()},
+                                                {tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData()},
                                                 {tblVoucher::vchTotalAmount, Voucher.Info.ToPay}
                                             })).toULongLong();
 

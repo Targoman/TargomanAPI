@@ -58,6 +58,12 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
             COMPLEXITY_Complex,
+            TAPI, RawData_t,
+            [](const RawData_t& _value) -> QVariant{return _value.toVariant();}
+);
+
+TAPI_REGISTER_METATYPE(
+            COMPLEXITY_Complex,
             TAPI, HEADERS_t,
             [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
             [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
@@ -118,22 +124,23 @@ TAPI_REGISTER_METATYPE(
             },
             [](const QList<ORM::clsORMField>&){ return "A valid JSON object"; },
             [](const QVariant& _value) {
-                if(_value.isNull())
+    return QJsonDocument::fromVariant(5).toVariant();
+               /* if(_value.isNull())
                     return QJsonDocument();
-                QJsonParseError Error;
-                QJsonDocument Doc;
                 if(_value.canConvert<QVariantMap>() ||
                    _value.canConvert<QVariantList>() ||
                    _value.canConvert<double>())
-                    Doc = QJsonDocument::fromVariant(_value);
-                else
-                  Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+                    return QJsonDocument::fromVariant(_value);
+                else if(_value.toString().isNull() || _value.toString().isEmpty())
+                    return  QJsonDocument();
+                else {
+                    QJsonParseError Error;
+                    QJsonDocument Doc = QJsonDocument::fromJson(_value.toString().toUtf8(), &Error);
 
-                qDebug()<<"===========>"<<_value;
-
-                if(Error.error != QJsonParseError::NoError)
-                    throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + Error.errorString());
-                return Doc;
+                    if(Error.error != QJsonParseError::NoError)
+                        throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + QString("%1:%2").arg(Error.error).arg(Error.errorString()));
+                    return Doc;
+                }*/
             },
             [](const QVariant& _val) {
                 return QString::fromUtf8(QJsonDocument::fromVariant(_val).toJson(QJsonDocument::Compact));
@@ -178,7 +185,7 @@ TAPI_REGISTER_METATYPE(
             },
             [](const QList<ORM::clsORMField>&){ return "A valid Privilege JSON object"; },
             [](const QVariant& _value) {
-                if(_value.isNull())
+                if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
                     return QJsonDocument();
                 QJsonParseError Error;
                 QJsonDocument Doc;
@@ -234,6 +241,8 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t, optional(QFV
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t, optional(QFV.maxLenght(2).languageCode()), _value, [](const QList<clsORMField>&){ return "A valid ISO639 two-letter language code"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t, optional(QFV.base64Image()), _value, [](const QList<clsORMField>&){ return "A valid base64 encoded png/jpg image"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t, optional(QFV.iban("IR")), _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
+//TODO Ether/Bitcoin validator
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t, optional(QFV.allwaysValid()), _value, [](const QList<clsORMField>&){ return "A valid ethercoin address"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Date_t, optional(QFV.date()), _value, [](const QList<clsORMField>&){ return "A valid gregorian date"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Time_t, optional(QFV.time()), _value, [](const QList<clsORMField>&){ return "A valid time"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DateTime_t, optional(QFV.dateTime()), _value, [](const QList<clsORMField>&){ return "A valid datetime"; });
@@ -280,4 +289,15 @@ Files_t& Files_t::fromVariant(const QVariant& _value, const QByteArray& _paramNa
     foreach(auto ListItem, _value.toList())
         this->append(TAPI::stuFileInfo::fromVariant(ListItem, _paramName));
     return *this;
+}
+
+RawData_t::RawData_t(const QByteArray& _data, const QString& _mime) :
+  Mime(_mime),
+  Data(_data)
+{
+}
+
+QVariant RawData_t::toVariant() const
+{
+    return QVariant::fromValue(*this);
 }
