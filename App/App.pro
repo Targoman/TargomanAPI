@@ -1,24 +1,14 @@
-
 ################################################################################
-#   TargomanAPI: REST API for Targoman
+#   QBuildSystem
 #
-#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright(c) 2021 by Targoman Intelligent Processing <http://tip.co.ir>
 #
-#   TargomanAPI is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   TargomanAPI is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU AFFERO GENERAL PUBLIC LICENSE for more details.
-#
-#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
+#   Redistribution and use in source and binary forms are allowed under the
+#   terms of BSD License 2.0.
 ################################################################################
-PRJDIR = ".."
-
+APP_NAME=tsapasswd
+include(../../qmake/appConfigs.pri)
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS += \
     Server/RESTServer.h \
     Server/APICache.hpp \
@@ -51,41 +41,12 @@ SOURCES += \
     Server/appTargomanAPI.cpp \
     Server/OpenAPIGenerator.cpp \
     Server/main.cpp
-
-LIBS += -lTargomanAPIInterface \
-
-################################################################################
-#                       DO NOT CHANGE ANYTHING BELOW                           #
-################################################################################
-ConfigFile = ../qmake/configs.pri
-!exists($$ConfigFile){
-error("**** $$ProjectName: Unable to find Configuration file $$ConfigFile ****")
-}
-include ($$ConfigFile)
-
-TEMPLATE = app
-TARGET = $$ProjectName
-
-TARGET       = $$ProjectName
-DESTDIR      = $$BaseBinFolder
-MOC_DIR      = $$BaseBuildFolder/moc
-OBJECTS_DIR  = $$BaseBuildFolder/obj
-RCC_DIR      = $$BaseBuildFolder/rcc
-UI_DIR       = $$BaseBuildFolder/ui
-
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-OTHER_FILES += \
-    README.md \
-    INSTALL \
-    buildDependencies.sh
-
-include($$PRJDIR/qmake/install.pri)
+LIBS += -lTargomanAPIInterface \
 
 DISTFILES += \
     conf/test.conf \
-    Dockerfile \
     conf/api.server.conf \
-    build.sh
 
 
 

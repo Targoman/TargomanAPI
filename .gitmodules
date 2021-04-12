@@ -1,36 +1,18 @@
+[submodule "3rdParty/QBuildSystem"]
+	path = 3rdParty/QBuildSystem
+	url = https://github.com/Targoman/QBuildSystem.git
 [submodule "3rdParty/E4MT"]
 	path = 3rdParty/E4MT
-	url = https://github.com/Targoman/E4MT.git
-[submodule "3rdParty/QtCUrl"]
-	path = 3rdParty/QtCUrl
-	url = https://github.com/Targoman/qtcurl.git
-[submodule "3rdParty/QFieldValidator"]
-	path = 3rdParty/QFieldValidator
-	url = https://github.com/Targoman/QFieldValidator.git
-[submodule "3rdParty/TextProcessor"]
-	path = 3rdParty/TextProcessor
-	url = https://github.com/Targoman/TextProcessor.git
-[submodule "3rdParty/TargomanCommon"]
-	path = 3rdParty/TargomanCommon
-	url = https://github.com/Targoman/TargomanCommon.git
+	url = https://github.com/Targoman/E4MT
 [submodule "3rdParty/QHttp"]
 	path = 3rdParty/QHttp
-	url = https://github.com/Targoman/QHttp.git
-[submodule "3rdParty/ISO639"]
-	path = 3rdParty/ISO639
-	url = https://github.com/Targoman/ISO639.git
-[submodule "3rdParty/fasttext"]
-	path = 3rdParty/fasttext
-	url = https://github.com/facebookresearch/fastText.git
-[submodule "3rdParty/UA-Parser"]
-	path = 3rdParty/UA-Parser
-	url = https://github.com/ua-parser/uap-cpp.git
-[submodule "3rdParty/TargomanDBM"]
-	path = 3rdParty/TargomanDBM
-	url = https://github.com/Targoman/TargomanDBM.git
+	url = https://github.com/Targoman/QHttp
+[submodule "3rdParty/QFieldValidator"]
+	path = 3rdParty/QFieldValidator
+	url = https://github.com/Targoman/QFieldValidator
 [submodule "3rdParty/URLCanonicalizer"]
 	path = 3rdParty/URLCanonicalizer
-	url = https://github.com/Targoman/URLCanonicalizer.git
-[submodule "3rdParty/multipart-parser"]
-	path = 3rdParty/multipart-parser
-	url = https://github.com/Targoman/multipart-parser.git
+	url = https://github.com/Targoman/URLCanonicalizer
+[submodule "3rdParty/TargomanDBM"]
+	path = 3rdParty/TargomanDBM
+	url = https://github.com/Targoman/TargomanDBM
