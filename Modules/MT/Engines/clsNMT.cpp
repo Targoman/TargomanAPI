@@ -23,7 +23,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include "clsNMT.h"
-#include "3rdParty/QtCUrl/src/QtCUrl.h"
+#include "QtCUrl.h"
 #include "../Classes/TranslationDispatcher.h"
 
 #include <QtDebug>

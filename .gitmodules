@@ -19,3 +19,9 @@
 [submodule "3rdParty/QtCurl"]
 	path = 3rdParty/QtCurl
 	url = https://github.com/Targoman/qtcurl.git
+[submodule "3rdParty/ISO639"]
+	path = 3rdParty/ISO639
+	url = https://github.com/Targoman/ISO639.git
+[submodule "3rdParty/multipart-parser"]
+	path = 3rdParty/multipart-parser
+	url = https://github.com/Targoman/multipart-parser.git

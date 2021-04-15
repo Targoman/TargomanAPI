@@ -166,8 +166,8 @@ public: \
         _submodule->init(); \
     } \
 private: \
-    Q_DISABLE_COPY(_name) \
-public: _name()
+    Q_DISABLE_COPY(_name); \
+public: _name();
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \

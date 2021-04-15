@@ -14,12 +14,11 @@ LIBS += -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
         -lqhttp \
-        -lQJsonRPC \
         -lcurl \
-        -lTargomanTextProcessor \
+        -lTextProcessor \
         -lfasttext
 
-defined(QJsonRPC, var)&equals(QJsonRPC, 1) {
+defined(QJsonRPC, var) equals(QJsonRPC, 1) {
     DEFINES += WITH_QJsonRPC
     LIBS += -lQJsonRPC
 }else{

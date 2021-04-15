@@ -23,7 +23,7 @@
 #define TESTCOMMON_HPP
 
 #include <QtTest/QtTest>
-#include "3rdParty/QtCUrl/src/QtCUrl.h"
+#include "QtCUrl.h"
 #include "libTargomanDBM/clsDAC.h"
 using namespace Targoman::DBManager;
 

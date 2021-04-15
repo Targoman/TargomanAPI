@@ -90,6 +90,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
     QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
+/*    //TODO fix
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
@@ -99,7 +100,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-
+*/
     if(_dic){
         if(Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})){
             if(_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))

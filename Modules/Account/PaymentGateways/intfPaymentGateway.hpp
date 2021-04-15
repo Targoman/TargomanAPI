@@ -28,7 +28,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QTextStream>
-#include "3rdParty/QtCUrl/src/QtCUrl.h"
+#include "QtCUrl.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
 #include "Classes/Defs.hpp"

@@ -29,7 +29,7 @@ HEADERS += \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
-    $$PRJDIR/3rdParty/QtCUrl/src/QtCUrl.cpp \
+    $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
     Server/ServerConfigs.cpp \
     Server/clsAPIObject.cpp \
     Server/clsRedisConnector.cpp \
@@ -48,6 +48,5 @@ LIBS += -lTargomanAPIInterface \
 DISTFILES += \
     conf/test.conf \
     conf/api.server.conf \
-
 
 

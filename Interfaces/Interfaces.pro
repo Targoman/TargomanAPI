@@ -43,13 +43,14 @@ SOURCES += \
     ORM/clsRESTAPIWithActionLogs.cpp \
     ORM/clsTable.cpp \
     NLP/FormalityChecker.cpp \
-    $$PRJDIR/3rdParty/E4MT/src/clsFormalityChecker.cpp \
+    $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
     Common/intf_impl.cpp \
     AAA/Accounting_Interfaces.cpp
 
 OTHER_FILES += \
 
-INCLUDEPATH += ../App/
+INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
+               $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)

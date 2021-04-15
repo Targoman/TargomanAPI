@@ -80,7 +80,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
         _preprocessTime = Timer.elapsed();Timer.restart();
 
         if(TranslationEngine->specs().SupportsIXML == false)
-            _text = TargomanTextProcessor::instance().ixml2Text(_text, _dir.first, false, false,false);
+            _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
 
         CachedTranslation = TranslationEngine->doTranslation(_text, _detailed, _detokenize);
 
@@ -115,7 +115,7 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
 {
     Q_UNUSED(_engine);
     if(gConfigs::Classifier::SupportsIXML.value()== false)
-        return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, _lang, false, false,false));
+        return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, false, false,false));
     else
         return FormalityChecker::instance().check(_lang, _text);
 }
@@ -169,7 +169,7 @@ QString TranslationDispatcher::tokenize(const QString& _text, const QString& _la
 
 QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang)
 {
-    return TargomanTextProcessor::instance().ixml2Text(_text, _lang, true, _lang=="fa" || _lang=="ar", false);
+    return TargomanTextProcessor::instance().ixml2Text(_text, true, _lang=="fa" || _lang=="ar", false);
 }
 
 QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang)
