@@ -49,5 +49,7 @@ SOURCES += \
 
 OTHER_FILES += \
 
+INCLUDEPATH += ../App/
+
 ################################################################################
-include(../qmake/libConfigs.pri)
+include($$QBUILD_PATH/templates/libConfigs.pri)

@@ -31,6 +31,6 @@ SOURCES += \
 OTHER_FILES += \
 
 ################################################################################
-include(../../qmake/moduleConfigs.pri)
+include($$QBUILD_PATH/templates/moduleConfigs.pri)
 
 
