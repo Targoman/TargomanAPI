@@ -1,0 +1,10 @@
+FROM opensuse/leap:15.2
+LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
+
+WORKDIR /
+
+RUN zypper install -y libhiredis0_13 libQt5Sql5-mysql libQt5WebSockets5 vim mysql-client && mkdir -p /targoman/conf/TextProcessor/
+
+EXPOSE 10000
+ENTRYPOINT [ "/bin/bash" ]
+

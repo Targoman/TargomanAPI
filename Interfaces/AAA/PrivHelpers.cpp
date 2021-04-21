@@ -177,7 +177,14 @@ TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _priva
 {
     return Server::QJWT::createSigned(_payload,
                                       _privatePayload,
-                                      _expiry <0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),
+                                      _expiry < 0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),
+                                      _sessionID);
+}
+
+TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
+{
+    return Server::QJWT::createSigned(_payload, _privatePayload,
+                                      _remember ? Server::QJWT::RememberLoginTTL.value() : Server::QJWT::NormalLoginTTL.value(),
                                       _sessionID);
 }
 

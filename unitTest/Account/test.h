@@ -107,12 +107,15 @@ private slots:
     }
 
     void Login(){
-        QVERIFY((gEncodedJWT = callAPI(POST,
+        QJsonObject MultiJWT;
+        QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test@unittest.test"},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toString()).size());
+                                }).toJsonObject()).size());
+
+        gEncodedJWT = MultiJWT.value("ssn").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).usrID() == gUserID);
@@ -132,25 +135,32 @@ private slots:
 //    }
 
     void LoginAgain(){
-        QVERIFY((gEncodedJWT = callAPI(POST,
+        QJsonObject MultiJWT;
+        QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test@unittest.test"},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toString()).size());
+                                }).toJsonObject()).size());
+        gEncodedJWT = MultiJWT.value("ssn").toString();
+        gLoginJWT = MultiJWT.value("lgn").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY((gEncodedAdminJWT = callAPI(POST,
+        QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
                                     {"login", "unit_test_admin@unittest.test"},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toString()).size());
-        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+                                }).toJsonObject()).size());
+        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
+        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
     }
 
     void RefreshJWT(){
-        QVERIFY((gEncodedJWT = callAPI(GET, "Account/refreshJWT").toString()).size());
+        QJsonObject MultiJWT;
+
+        QVERIFY((MultiJWT = callRefreshAPI().toJsonObject()).size());
+        gEncodedJWT = MultiJWT.value("ssn").toString();
     }
 
     void CreateForgotPasswordLink(){

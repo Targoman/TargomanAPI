@@ -43,6 +43,8 @@ class QJWT
     static Common::Configuration::tmplConfigurable<QString>                 Secret;
     static Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
     static Common::Configuration::tmplConfigurable<quint16>                 TTL;
+    static Common::Configuration::tmplConfigurable<quint32>                 NormalLoginTTL;
+    static Common::Configuration::tmplConfigurable<quint32>                 RememberLoginTTL;
 public:
     static Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 

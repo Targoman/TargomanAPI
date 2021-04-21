@@ -45,6 +45,7 @@ static const char* HTTPMethodString[] = {
 
 extern QString APIURL;
 extern QString gEncodedJWT;
+extern QString gLoginJWT;
 extern QJsonObject gJWT;
 extern QJsonObject gAdminJWT;
 extern QString gEncodedAdminJWT;
@@ -56,6 +57,10 @@ class clsBaseTest: public QObject{
 protected:
     QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
       return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
+    }
+
+    QVariant callRefreshAPI(){
+      return callAPIImpl(gLoginJWT, GET, "Account/refreshJWT");
     }
 
     QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){

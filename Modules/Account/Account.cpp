@@ -51,7 +51,11 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserGender);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserApproval);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAuditableStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuPackageType);
-
+TAPI_REGISTER_METATYPE(
+    COMPLEXITY_Complex,
+    TAPI, stuMultiJWT,
+    [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn",_value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+);
 namespace Targoman {
 namespace API {
 
@@ -123,7 +127,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
         enuConfigSource::Arg | enuConfigSource::File
         );
 
-TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
+TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                                      QString _login,
                                      TAPI::MD5_t _pass,
                                      QString _salt,
@@ -137,22 +141,25 @@ TAPI::EncodedJWT_t Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
 
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    return this->createJWT(_login,
-                           Authentication::login(_REMOTE_IP,
-                                                 _login,
-                                                 _pass,
-                                                 _salt,
-                                                 _services.split(",", QString::SkipEmptyParts),
-                                                 _rememberMe,
-                                                 _sessionInfo.object(),
-                                                 _fingerprint),
-                           _services);
+    auto LoginInfo = Authentication::login(_REMOTE_IP,
+                                           _login,
+                                           _pass,
+                                           _salt,
+                                           _services.split(",", QString::SkipEmptyParts),
+                                           _rememberMe,
+                                           _sessionInfo.object(),
+                                           _fingerprint);
+
+    return TAPI::stuMultiJWT({
+                                 this->createLoginJWT(_rememberMe, _login, LoginInfo.Privs["ssnKey"].toString(), _services),
+                                 this->createJWT(_login, LoginInfo, _services)
+                             });
 }
 
 //TODO cache to ban users for every service
 //TODO update cache for each module
 //TODO JWT lifetime dynamic based on current hour
-TAPI::EncodedJWT_t Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
+TAPI::stuMultiJWT Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
                                             QString _oAuthToken,
                                             TAPI::CommaSeparatedStringList_t _services,
@@ -180,22 +187,30 @@ TAPI::EncodedJWT_t Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
         /*    default:
         throw exHTTPNotImplemented("Invalid oAuth type");*/
     }
-    return this->createJWT(OAuthInfo.Email,
-                           Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _services.split(","), true, _sessionInfo.object(), _fingerprint),
-                           _services);
+
+    auto LoginInfo = Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _services.split(","), true, _sessionInfo.object(), _fingerprint);
+    return TAPI::stuMultiJWT({
+                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
+                                 this->createJWT(OAuthInfo.Email, LoginInfo, _services)
+                             });
 }
 
-TAPI::EncodedJWT_t Account::apiRefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _JWT, QString _services)
+TAPI::stuMultiJWT Account::apiRefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
 {
+    QJsonObject Obj;
+
     Authorization::validateIPAddress(_REMOTE_IP);
-    clsJWT JWT(_JWT);
+
+    clsJWT LoginJWT(_loginJWT);
     QString Services = _services;
     if(_services.isEmpty())
-        Services = JWT.privatePart().value("svc").toString();
+        Services = LoginJWT.privatePart().value("svc").toString();
 
-    return this->createJWT(JWT.login(),
-                           Authentication::updatePrivs(_REMOTE_IP, JWT.session(), Services),
-                           Services);
+    auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
+    return TAPI::stuMultiJWT({
+                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
+                                 this->createJWT(LoginJWT.login(), NewPrivs, Services)
+                             });
 }
 
 QVariantMap Account::apiPUTSignup(TAPI::RemoteIP_t _REMOTE_IP,
@@ -518,6 +533,11 @@ TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccou
                                 _activeAccount.TTL,
                                 _activeAccount.Privs["ssnKey"].toString()
             );
+}
+
+TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
+{
+    return clsJWT::createSignedLogin(_remember, { {JWTItems::usrLogin, _login} }, QJsonObject({{"svc", _services}}), _ssid);
 }
 
 }

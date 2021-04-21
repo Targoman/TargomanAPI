@@ -29,3 +29,4 @@ LIBS += -lcurl
 
 ################################################################################
 include($$QBUILD_PATH/templates/unitTestConfigs.pri)
+LIBS -= -lTargomanAPI

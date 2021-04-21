@@ -6,8 +6,8 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ProjectName="TargomanCommon"
-VERSION=1.1.1
+ProjectName="TargomanAPI"
+VERSION=0.2
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 LIBS += -lTargomanCommon \
@@ -25,7 +25,7 @@ defined(QJsonRPC, var) equals(QJsonRPC, 1) {
     DISABLED_DPES += QJsonRPC
 }
 
-!defined(NoWebSocket, var)|equals(NoWebSocket, 1) {
+!defined(NoWebSockets, var)|equals(NoWebSockets, 1) {
   QT+= websockets
 }else{
     DEFINES += TARGOMAN_API_WEBSOCKET

@@ -30,6 +30,13 @@
 #include "ORM/Payments.h"
 #include "Classes/Defs.hpp"
 
+namespace TAPI {
+    struct stuMultiJWT{
+        TAPI::EncodedJWT_t Login;
+        TAPI::EncodedJWT_t Session;
+    };
+}
+
 namespace Targoman {
 namespace API {
 
@@ -53,9 +60,10 @@ public:
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
+    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
 
 private slots:
-    TAPI::EncodedJWT_t REST(,Login,(TAPI::RemoteIP_t _REMOTE_IP,
+    TAPI::stuMultiJWT REST(,Login,(TAPI::RemoteIP_t _REMOTE_IP,
                                     QString _login,
                                     TAPI::MD5_t _pass,
                                     QString _salt,
@@ -65,7 +73,7 @@ private slots:
                                     TAPI::MD5_t _fingerprint = {}),
                             "Login user and return an encoded JWT if services are provided (as coma separated list) then user must have access to specified services")
 
-    TAPI::EncodedJWT_t REST(,LoginByOAuth,(TAPI::RemoteIP_t _REMOTE_IP,
+    TAPI::stuMultiJWT REST(,LoginByOAuth,(TAPI::RemoteIP_t _REMOTE_IP,
                                            TAPI::enuOAuthType::Type _type,
                                            QString _oAuthToken,
                                            TAPI::CommaSeparatedStringList_t _services,
@@ -73,7 +81,7 @@ private slots:
                                            TAPI::MD5_t _fingerprint = {}),
                             "Login by Open Authentication and return an encoded JWT")
 
-    TAPI::EncodedJWT_t REST(,RefreshJWT,(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _JWT, QString _services = {}),
+    TAPI::stuMultiJWT REST(,RefreshJWT,(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services = {}),
                             "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT")
 
     QVariantMap REST(PUT,Signup,( TAPI::RemoteIP_t _REMOTE_IP,
@@ -155,5 +163,6 @@ private slots:
 }
 
 TAPI_DECLARE_METATYPE(TAPI::enuOAuthType::Type);
+TAPI_DECLARE_METATYPE(TAPI::stuMultiJWT);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

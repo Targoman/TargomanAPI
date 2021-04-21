@@ -27,6 +27,7 @@
 QString APIURL = "http://127.0.0.1:10000/rest/v1";
 
 QString gEncodedJWT;
+QString gLoginJWT;
 QString gEncodedAdminJWT;
 QJsonObject gJWT;
 QJsonObject gAdminJWT;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
     clsDAC::setConnectionString("HOST=192.168.0.240;"
                                 "PORT=3306;"
                                 "USER=root;"
-                                "PASSWORD=targoman123;"
+                                "PASSWORD=targoman1234;"
                                 "SCHEMA=AAA");
 
     bool BreakOnFirstFail = true;

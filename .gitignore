@@ -42,3 +42,4 @@ Makefile*
 .*.stash
 build
 out
+exportToOffice.sh

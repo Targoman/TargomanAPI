@@ -1,0 +1,20 @@
+FROM    alpine:3.7
+LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
+
+WORKDIR /
+
+RUN apk --no-cache add --update hiredis qt5-qtbase-mysql qt5-websockets
+RUN apk add --no-cache --virtual .build-deps \
+    qt5-qtbase-dev \
+    qt5-websockets-dev \
+    hiredis-dev \
+    bash \
+    vim
+    
+#RUN apk del --no-cache .build-deps 
+    
+#VOLUME . /etc/TargomanAPI
+
+#EXPOSE 10000
+#ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/api.server.conf" ]
+ENTRYPOINT [ "/bin/sh"]

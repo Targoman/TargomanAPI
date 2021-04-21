@@ -79,9 +79,21 @@ public:
      * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
      */
     static TAPI::EncodedJWT_t createSigned(QJsonObject _payload,
-                                           QJsonObject _privatePayload = QJsonObject(),
+                                           QJsonObject _privatePayload = {},
                                            const qint64 _expiry = -1,
-                                           const QString& _sessionID = QString());
+                                           const QString& _sessionID = {});
+    /**
+     * @brief createSignedLogin creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard used for login
+     * @param _payload The payload to include in JWT. The payload object must not include enteries with following keys:
+     *        - iat: reserved for initial time
+     *        - exp: reserved for expiration time
+     *        - jti: reserved for JWT session
+     *        - prv: reserved for private payload
+     * @param _privatePayload Optinally private object that will be included in JWT encrypted. There will be no restriction on key values
+     * @param _sessionID optinally a session key for each user to be stored in `jti`
+     * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
+     */
+    static TAPI::EncodedJWT_t createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID = {});
 private:
     const QJsonObject& Token;
 };

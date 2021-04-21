@@ -71,11 +71,31 @@ tmplConfigurable<quint64> QJWT::SimpleCryptKey(
 tmplConfigurable<quint16> QJWT::TTL(
         QJWT::makeConfig("TTL"),
         "Time to live for the token keep it small enough to be updated by Ux Logic",
-        static_cast<quint16>(600),
+        static_cast<quint16>(300),
         ReturnTrueCrossValidator(),
         "",
         "TTL",
         "jwt-ttl",
+        enuConfigSource::Arg | enuConfigSource::File);
+
+tmplConfigurable<quint32> QJWT::NormalLoginTTL(
+        QJWT::makeConfig("NormalLoginTTL"),
+        "Time to live for the login token",
+        static_cast<quint16>(24*60*60),
+        ReturnTrueCrossValidator(),
+        "",
+        "",
+        "jwt-login-ttl",
+        enuConfigSource::Arg | enuConfigSource::File);
+
+tmplConfigurable<quint32> QJWT::RememberLoginTTL(
+        QJWT::makeConfig("RememberLoginTTL"),
+        "Time to live for the login token when remembered",
+        static_cast<quint16>(7*24*60*60),
+        ReturnTrueCrossValidator(),
+        "",
+        "TTL",
+        "jwt-remember-ttl",
         enuConfigSource::Arg | enuConfigSource::File);
 
 thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
