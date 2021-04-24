@@ -100,7 +100,7 @@ public:
                       qhttp::server::QHttpResponse* _res,
                       QObject *_parent = nullptr);
     void process(const QString& _api);
-    void findAndCallAPI(const QString& _api);
+    void findAndCallAPI(QString _api);
     void sendError(qhttp::TStatusCode _code,
                    const QString& _message,
                    bool _closeConnection = false);

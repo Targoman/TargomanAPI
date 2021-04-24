@@ -94,7 +94,7 @@ private slots:
     }
 
     void APITokens_DELETE_Unprivileged(){
-        QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(gAPIAdminTokenID)) == gInvalid);
+        QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(gAPIAdminTokenID)).toBool() == false);
         QVERIFY(callAPI(DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool());
     }
 

@@ -292,7 +292,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
     }
 }
 
-void clsRequestHandler::findAndCallAPI(const QString& _api)
+void clsRequestHandler::findAndCallAPI(QString _api)
 {
     if(_api == "/openAPI.json"){
         gServerStats.Success.inc();
@@ -302,9 +302,11 @@ void clsRequestHandler::findAndCallAPI(const QString& _api)
     if(_api == "/openAPI.yaml")
         throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 
+    _api.replace(QRegularExpression("//+"), "/");
+
     if(_api.toLower().startsWith("/swaggerui")){
         if(ServerConfigs::SwaggerUI.value().isEmpty())
-            return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not confiugured");
+            return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
 
 
         QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
