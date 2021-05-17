@@ -144,6 +144,9 @@ private slots:
                                                         const QString& _note = {}),
                           "approve Voucher by offline payment")
 
+    ///TODO create API for cancelBasketItem
+    ///TODO create API for returnBasketItem
+
     bool REST(POST, addPrizeTo,(TAPI::JWT_t _JWT,
                                 quint32 _targetUsrID,
                                 quint64 _amount,

@@ -36,7 +36,7 @@ class TextProcessor : public intfAPIModule
     TARGOMAN_DEFINE_API_MODULE(TextProcessor);
 
 public:
-    bool requiresTextProcessor() const {return true;}
+    bool init();
 
 private slots:
     QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector = true),

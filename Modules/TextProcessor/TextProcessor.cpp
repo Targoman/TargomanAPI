@@ -22,7 +22,7 @@
 
 #include "TextProcessor.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
-#include "Interfaces/NLP/TextProcessor.hpp"
+#include "ModuleHelpers/NLP/TextProcessor.hpp"
 
 namespace Targoman {
 namespace API {
@@ -30,6 +30,7 @@ namespace API {
 using namespace Targoman::NLPLibs;
 using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
+using namespace Targoman::API::ModuleHelpers;
 
 QString TextProcessor::apiNormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector)
 {
@@ -89,6 +90,14 @@ QString TextProcessor::apiTokenize (const QString& _text,
                             );
 
     return NLP::TextProcessor::instance().ixml2Text(Tokenized, false, _hindiNumerals, _arabicPunctuations, false);
+}
+
+bool TextProcessor::init()
+{
+    NLP::TextProcessor::instance().init();
+        //Targoman::Common::Configuration::ConfigManager::instance().configSettings());
+
+    return true;
 }
 
 TextProcessor::TextProcessor()

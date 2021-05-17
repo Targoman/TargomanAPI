@@ -41,10 +41,10 @@ int main(int argc, char *argv[])
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
     clsDAC::addDBEngine(enuDBEngines::MySQL);
-    clsDAC::setConnectionString("HOST=192.168.0.240;"
+    clsDAC::setConnectionString("HOST=127.0.0.1;"
                                 "PORT=3306;"
                                 "USER=root;"
-                                "PASSWORD=targoman1234;"
+                                "PASSWORD=targoman123;"
                                 "SCHEMA=AAA");
 
     bool BreakOnFirstFail = true;

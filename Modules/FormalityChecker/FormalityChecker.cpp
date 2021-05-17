@@ -21,15 +21,18 @@
  */
 
 #include "FormalityChecker.h"
-#include "Interfaces/NLP/FormalityChecker.h"
-
+#include "ModuleHelpers/NLP/FormalityChecker.h"
 
 namespace Targoman {
 namespace API {
 
-void FormalityChecker::init()
+using namespace Targoman::API::ModuleHelpers;
+
+bool FormalityChecker::init()
 {
     NLP::FormalityChecker::instance();
+
+    return true;
 }
 
 QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang)

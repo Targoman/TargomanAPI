@@ -15,7 +15,7 @@ LIBS += -lTargomanCommon \
         -lQFieldValidator \
         -lqhttp \
         -lcurl \
-        -lTextProcessor \
+        -lTargomanTextProcessor \
         -lfasttext
 
 defined(QJsonRPC, var) equals(QJsonRPC, 1) {

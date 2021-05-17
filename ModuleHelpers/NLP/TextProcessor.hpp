@@ -23,11 +23,13 @@
 #ifndef TARGOMAN_API_NLP_TEXTPROCESSOR_H
 #define TARGOMAN_API_NLP_TEXTPROCESSOR_H
 
+#include "libTargomanCommon/Configuration/ConfigManager.h"
 #include "libTargomanCommon/Macros.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
 
 namespace Targoman {
 namespace API {
+namespace ModuleHelpers {
 namespace NLP {
 
 class TextProcessor
@@ -35,8 +37,9 @@ class TextProcessor
 public:
     instanceGetter (TextProcessor)
 
-    inline void init(QSharedPointer<QSettings> _configSettings = QSharedPointer<QSettings>()){
-        NLPLibs::TargomanTextProcessor::instance().init(_configSettings);
+    inline void init() { //QSharedPointer<QSettings> _configSettings = QSharedPointer<QSettings>()){
+        NLPLibs::TargomanTextProcessor::instance().init(
+                    Targoman::Common::Configuration::ConfigManager::instance().configSettings());
     }
 
     inline QString text2IXML(const QString& _inStr,
@@ -76,4 +79,6 @@ private:
 }
 }
 }
+}
+
 #endif // TARGOMAN_API_NLP_TEXTPROCESSOR_H

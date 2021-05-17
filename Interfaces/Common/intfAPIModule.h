@@ -132,10 +132,8 @@ public:
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID)}
     virtual ModuleMethods_t listOfMethods() = 0;
     virtual stuDBInfo requiredDB() const {return {};}
-    virtual bool requiresTextProcessor() const {return false;}
-    virtual bool requiresFormalityChecker() const {return false;}
     virtual QString parentModuleName() const = 0;
-    virtual void init() {}
+    virtual bool init() { return true; }
 
 protected:
     ModuleMethods_t Methods;

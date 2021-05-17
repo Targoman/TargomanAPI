@@ -59,12 +59,16 @@ private:
 private slots:
     TAPI::stuPreVoucher REST(POST, addToBasket, (TAPI::JWT_t _JWT,
                                                  TAPI::PackageCode_t _packageCode,
-                                                 qint16 _count = 1,
+                                                 ///TODO: addittive
+                                                 qint16 _qty = 1,
                                                  TAPI::DiscountCode_t _discountCode = {},
                                                  QString _referer = {},
                                                  TAPI::JSON_t _extraRefererParams = {},
                                                  TAPI::stuPreVoucher _lastPreVoucher = {}),
                                 "add a package to basket and return updated pre-Voucher")
+    ///TODO removeFromBasket
+    ///TODO updateItemInBasket
+
 protected:
     QScopedPointer<intfAccountPackages> AccountPackages;
     QScopedPointer<intfAccountUserPackages> AccountUserPackages;

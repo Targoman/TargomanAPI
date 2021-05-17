@@ -27,8 +27,8 @@
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 
 #include "Interfaces/Common/intfAPIModule.h"
-#include "Interfaces/NLP/FormalityChecker.h"
-#include "Interfaces/NLP/TextProcessor.hpp"
+//#include "Interfaces/NLP/FormalityChecker.h"
+//#include "Interfaces/NLP/TextProcessor.hpp"
 
 #include "appTargomanAPI.h"
 #include "RESTServer.h"
@@ -47,6 +47,7 @@ using namespace Common;
 TARGOMAN_ADD_EXCEPTION_HANDLER(exModuleLoader, Targoman::Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exModuleUnable2LoadFile, exModuleLoader);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exInvalidAPIModule, exModuleLoader);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exAPIModuleInitiailization, exModuleLoader);
 #pragma clang diagnostic pop
 
 
@@ -65,8 +66,10 @@ void appTargomanAPI::slotExecute()
 
         foreach(auto Plugin, LoadedModules){
             intfAPIModule* Module = qobject_cast<intfAPIModule*>(Plugin.Instance);
-            if(!Module)
+            if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
+
+            TargomanDebug(0, "Loading module <" << Module->moduleFullName() << ">");
 
             foreach(auto ModuleMethod, Module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
@@ -74,12 +77,8 @@ void appTargomanAPI::slotExecute()
             if(Module->requiredDB().Schema.size())
                 RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
 
-            if(Module->requiresTextProcessor())
-                NLP::TextProcessor::instance().init(
-                            Targoman::Common::Configuration::ConfigManager::instance().configSettings());
-
-            if(Module->requiresFormalityChecker())
-                NLP::FormalityChecker::instance();
+            if (!Module->init())
+                throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
         }
 
         //Prepare database connections

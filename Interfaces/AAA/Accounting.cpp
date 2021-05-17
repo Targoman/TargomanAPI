@@ -222,18 +222,21 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint32 _usr
 
 TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
                                                                  TAPI::PackageCode_t _packageCode,
-                                                                 qint16 _count,
+                                                                 ///TODO: addittive
+                                                                 qint16 _qty,
                                                                  TAPI::DiscountCode_t _discountCode,
                                                                  QString _referer,
                                                                  TAPI::JSON_t _extraRefererParams,
                                                                  TAPI::stuPreVoucher _lastPreVoucher)
 {
+    ///TODO reserve product and discount : bikhial
     Accounting::checkPreVoucherSanity(_lastPreVoucher);
     QString ExtraFilters = QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
                            .arg(tblAccountPackagesBase::pkgCanBePurchasedSince)
                            .arg(tblAccountPackagesBase::pkgNotAvailableSince);
 
-
+    ///TODO tell qty to select and join userAssets to count pending saleables -> reject addToBasket
+    ///TODO: fetch available addittives
     QVariantMap PackageInfo = this->AccountPackages->selectFromTable({}, ExtraFilters, _packageCode, 0, 1,
                                                                      QStringList({
                                                                                      tblAccountPackagesBase::pkgID,
@@ -246,6 +249,8 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
                                                                                      tblAccountPackagesBase::pkgValidFromTime,
                                                                                      tblAccountPackagesBase::pkgValidToTime,
                                                                                      tblAccountPackagesBase::pkgPrivs,
+                                                                                     tblAccountPackagesBase::pkgQuantity,
+                                                                                     tblAccountPackagesBase::pkgVAT,
                                                                                      this->PackageRemainingColName.join(',')
                                                                                  }).join(',')
                                                                      ).toMap();
@@ -261,6 +266,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
                                 PackageRemIter->Total.size() ? PackageInfo.value(PackageRemIter->Total).toInt() : -1,
                             });
 
+    ///TODO: apply addittives
     stuPackage Package(
                 PackageInfo.value(tblAccountPackagesBase::pkgID).toUInt(),
                 PackageInfo.value(tblAccountPackagesBase::pkgCode).toString(),
@@ -274,6 +280,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
                 QJsonObject::fromVariantMap(PackageInfo.value(tblAccountPackagesBase::pkgPrivs).toMap())
                 );
 
+    ///TODO: apply addittives to discounts
     stuDiscount Discount;
     if(_discountCode.size()){
         ExtraFilters = QString("%1 >= NOW()").arg(tblAccountDiscounts::disValidFrom);
@@ -311,32 +318,39 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
         //TODO check for prize on referers
     }
 
-
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;
+    ///TODO add ttl for order item
     PreVoucherItem.OrderID = this->AccountUserPackages->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                                 {tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()},
                                                                 {tblAccountUserPackages::aup_pkgID, Package.PackageID},
                                                             })).toULongLong();
     PreVoucherItem.Desc  = PackageInfo.value(tblAccountPackagesBase::Name).toString();
-    PreVoucherItem.Count = _count;
-    PreVoucherItem.Price = PackageInfo.value(tblAccountPackagesBase::pkgPrice).toUInt();
+
+    ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
+    /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
+    /// return: amount of using coupon
+
+    PreVoucherItem.Qty = _qty;
+    PreVoucherItem.UnitPrice = PackageInfo.value(tblAccountPackagesBase::pkgPrice).toUInt();
+    PreVoucherItem.SubTotal = PreVoucherItem.UnitPrice * PreVoucherItem.Qty;
     PreVoucherItem.Discount = Discount;
-    if(Discount.Amount)
+    if (Discount.Amount)
         switch(Discount.Type){
-        case TAPI::enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.Price; break;
-        case TAPI::enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.Price, Discount.Amount); break;
-        case TAPI::enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.Price * Discount.Amount / 100.)));
+        case TAPI::enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.SubTotal; break;
+        case TAPI::enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.SubTotal, Discount.Amount); break;
+        case TAPI::enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.SubTotal * Discount.Amount / 100.)));
         }
-    PreVoucherItem.TaxPercent = 9;
-    PreVoucherItem.TaxAmount = ((PreVoucherItem.Price - PreVoucherItem.DisAmount) * PreVoucherItem.TaxPercent / 100);
+    //TODO rename Tax to VAT
+    PreVoucherItem.TaxPercent = PackageInfo.value(tblAccountPackagesBase::pkgVAT).toUInt();
+    PreVoucherItem.TaxAmount = ((PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.TaxPercent / 100);
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     _lastPreVoucher.Items.append(PreVoucherItem);
     _lastPreVoucher.Summary = _lastPreVoucher.Items.size() > 1 ?
                                   QString("%1 items").arg(_lastPreVoucher.Items.size()) :
-                                  QString("%1 of %2").arg(PreVoucherItem.Count).arg(PreVoucherItem.Desc);
-    qint64 FinalPrice = PreVoucherItem.Price - PreVoucherItem.DisAmount + PreVoucherItem.TaxAmount;
+                                  QString("%1 of %2").arg(PreVoucherItem.Qty).arg(PreVoucherItem.Desc);
+    qint64 FinalPrice = PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.TaxAmount;
     if(FinalPrice<0) throw exHTTPInternalServerError("Final amount computed negative!");
     _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;

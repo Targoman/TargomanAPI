@@ -10,6 +10,7 @@ include($$QBUILD_PATH/templates/projectConfigs.pri)
 
 addSubdirs(Interfaces, Dependencies)
 addSubdirs(App, Interfaces)
+addSubdirs(ModuleHelpers, Interfaces)
 addSubdirs(Modules, App)
 addSubdirs(unitTest, Modules)
 
@@ -23,5 +24,3 @@ OTHER_FILES += \
     conf/api.server.conf \
     conf/api.conf \
     Docs/Models/Accounting.scxml
-
-

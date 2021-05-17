@@ -40,8 +40,7 @@ class FormalityChecker : public intfAPIModule
     TARGOMAN_DEFINE_API_MODULE(FormalityChecker);
 
 public:
-    void init();
-    bool requiresFormalityChecker() const {return true;}
+    bool init();
 
 private slots:
     QString API(, Check, (const QString _text, const TAPI::ISO639_2_t& _lang),

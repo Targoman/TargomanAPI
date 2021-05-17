@@ -6,17 +6,21 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=FormalityChecker
+LibName=NLPHelper
 
-HEADERS += \
+DIST_HEADERS += \
     FormalityChecker.h \
+    TextProcessor.hpp \
+
+PRIVATE_HEADERS += \
 
 SOURCES += \
-    FormalityChecker.cpp
+    FormalityChecker.cpp \
+    $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 
 OTHER_FILES += \
 
-LIBS += -lNLPHelper \
+INCLUDEPATH += $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
 ################################################################################
-include($$QBUILD_PATH/templates/moduleConfigs.pri)
+include($$QBUILD_PATH/templates/libConfigs.pri)

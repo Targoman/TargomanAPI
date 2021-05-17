@@ -327,6 +327,18 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
     return true;
 }
 
+TAPI::stuVoucher processVoucher(quint64 _vchID){
+    try {
+        return PaymentLogic::processVoucher(_vchID);
+    }  catch (...) {
+        ///TODO create cancel voucher and credit to wallet
+        throw;
+    }
+}
+
+///TODO remove _gateway from parameters
+///TODO select gateway (null|single|multiple) from service
+///TODO check for common gateway voucher
 TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                                                 TAPI::stuPreVoucher _preVoucher,
                                                 QString _callBack,
@@ -343,30 +355,36 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
 
     TAPI::stuVoucher Voucher;
     Voucher.Info = _preVoucher;
-    //TODO remove sign from prevoucher before converting to JSON
+    ///TODO remove sign from prevoucher before converting to JSON
+    ///TODO recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
+    ///TODO reserve saleables before returning voucher
+    ///TODO implement overall coupon at the end of checkout steps
     Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                   {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
                                                   {tblVoucher::vchDesc, _preVoucher.toJson()},
                                                   {tblVoucher::vchTotalAmount, _preVoucher.ToPay}
                                               })).toULongLong();
     try {
-        qint64 RemainingAfterWallet = 0;
-        if(_walletID>=0){
+        qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
+        if (_walletID>=0 && RemainingAfterWallet>0) {
             clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
                                                    {"iWalletID", _walletID},
                                                    {"iVoucherID", Voucher.ID},
                                                });
-            RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay) - Result.spDirectOutputs().value("oAmount").toUInt();
+            RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
             if(RemainingAfterWallet < 0)
                 throw exHTTPInternalServerError("Remaining after wallet transaction is negative!");
         }
 
-        if(RemainingAfterWallet > 0){
-            if(_callBack == "OFFLINE") {
+        if (RemainingAfterWallet > 0) {
+            ///TODO rename OFFLINE to COD (as constant)
+            if (_callBack == "OFFLINE") {
                 //Do nothing as it will be created after information upload.
-            }else{
-                Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, _preVoucher.Summary, _preVoucher.ToPay, _callBack);
+            } else {
+                Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, _preVoucher.Summary, RemainingAfterWallet, _callBack);
             }
+        } else {
+            return processVoucher(Voucher.ID);
         }
     } catch (...) {
         Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
@@ -381,16 +399,23 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     return Voucher;
 }
 
+/**
+ * @brief Account::apiPOSTapproveOnlinePayment: called back from callback
+ * @param _gateway
+ * @param _domain
+ * @param _pgResponse: ... voucherID ...
+ * @return
+ */
 TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse)
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
-    try{
+    try {
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
                          {"iVoucherID", VoucherID},
                          {"iPaymentType", enuPaymentType::Online}
                      });
-        return PaymentLogic::processVoucher(VoucherID);
-    }catch(...){
+        return processVoucher(VoucherID);
+    } catch(...) {
         Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                        {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
                                    }), {
@@ -400,6 +425,8 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::T
         throw;
     }
 }
+
+///TODO implement auto verify daemon OJO on failed payments in the daemon
 
 TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                                        quint64 _vchID,
@@ -432,12 +459,21 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                            {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
                                        }));
 
-    this->callSP("sp_CREATE_walletTransactionOnPayment", {
-                     {"iVoucherID", _vchID},
-                     {"iPaymentType", enuPaymentType::Offline}
-                 });
-
-    return PaymentLogic::processVoucher(_vchID);
+    try {
+        this->callSP("sp_CREATE_walletTransactionOnPayment", {
+                         {"iVoucherID", _vchID},
+                         {"iPaymentType", enuPaymentType::Offline}
+                     });
+        return processVoucher(_vchID);
+    }  catch (...) {
+        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
+                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
+                                   }), {
+                                       {tblVoucher::vchID, _vchID}
+                                   }
+                                   );
+        throw;
+    }
 }
 
 bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)

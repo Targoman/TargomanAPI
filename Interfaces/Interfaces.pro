@@ -22,8 +22,6 @@ DIST_HEADERS += \
     ORM/clsORMField.h \
     ORM/clsRESTAPIWithActionLogs.h \
     ORM/clsTable.h \
-    NLP/FormalityChecker.h \
-    NLP/TextProcessor.hpp \
     Common/HTTPExceptions.hpp \
     Common/intfAPIModule.h \
     Common/GenericEnums.hpp \
@@ -42,8 +40,6 @@ SOURCES += \
     ORM/clsORMField.cpp \
     ORM/clsRESTAPIWithActionLogs.cpp \
     ORM/clsTable.cpp \
-    NLP/FormalityChecker.cpp \
-    $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
     Common/intf_impl.cpp \
     AAA/Accounting_Interfaces.cpp
 

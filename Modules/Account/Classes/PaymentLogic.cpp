@@ -33,6 +33,7 @@ namespace AAA {
 
 using namespace DBManager;
 
+///TODO attention for Minimum Bank Transaction Amount
 QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _vchID, const QString& _invDesc, quint32 _toPay, const QString _callback)
 {
     TAPI::MD5_t opyMD5;
@@ -106,6 +107,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
 
 }
 
+///TODO settle after verify
 quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const TAPI::JSON_t& _pgResponse, const QString& _domain)
 {
     stuPaymentResponse PaymentResponse;
@@ -159,16 +161,20 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
 TAPI::stuVoucher PaymentLogic::processVoucher(quint64 _voucherID)
 {
     QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
-    if(!VoucherDesc.canConvert<QJsonObject>())
+
+    if (!VoucherDesc.canConvert<QJsonObject>())
         throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
+
     TAPI::stuPreVoucher PreVoucher;
     PreVoucher.fromJson(VoucherDesc.toJsonObject());
 
-    //TODO process voucher and apply it
+    ///TODO process voucher and apply it
 
     foreach(auto VoucherItem, PreVoucher.Items){
+        ///TODO call svcProcessVoucherEndPoint
 
     }
+
     return TAPI::stuVoucher(
                 _voucherID,
                 PreVoucher,

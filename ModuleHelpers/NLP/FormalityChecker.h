@@ -38,7 +38,9 @@ struct gConfigs{
     };
 };
 }
+
 namespace API {
+namespace ModuleHelpers {
 namespace NLP {
 
 class Q_DECL_EXPORT FormalityChecker
@@ -59,4 +61,6 @@ private:
 }
 }
 }
+}
+
 #endif // TARGOMAN_API_NLP_FORMALITYCHECKER_H

@@ -72,8 +72,9 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         QString     , Service   , QString()    , v.size(), v         , v.toString(),
         quint64     , OrderID   , 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
         QString     , Desc      , QString()    , v.size(), v         , v.toString(),
-        quint32     , Price     , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        qint16      , Count     , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
+        quint32     , UnitPrice , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+        qint16      , Qty       , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
+        quint32     , SubTotal  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
         stuDiscount , Discount  , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
         quint32     , DisAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
         quint8      , TaxPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
@@ -233,6 +234,8 @@ TARGOMAN_CREATE_CONSTEXPR(pkgCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(pkgCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(pkgUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(pkgStatus);
+TARGOMAN_CREATE_CONSTEXPR(pkgQuantity);
+TARGOMAN_CREATE_CONSTEXPR(pkgVAT);
 }
 
 namespace tblAccountUserPackages {
