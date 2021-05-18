@@ -18,6 +18,7 @@ SOURCES += \
     ORM/Tickets.cpp \
 
 OTHER_FILES += \
+    ORM/Schema.my.sql \
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)

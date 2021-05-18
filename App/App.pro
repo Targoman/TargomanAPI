@@ -44,9 +44,9 @@ SOURCES += \
     Server/main.cpp
 
 OTHER_FILES += \
-    Schemas/Common.sql \
-    Schemas/CommonFuncs.sql \
-    Schemas/I18N.sql \
+    Schemas/Common.my.sql \
+    Schemas/CommonFuncs.my.sql \
+    Schemas/I18N.my.sql \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \
