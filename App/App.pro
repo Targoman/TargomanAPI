@@ -42,6 +42,12 @@ SOURCES += \
     Server/appTargomanAPI.cpp \
     Server/OpenAPIGenerator.cpp \
     Server/main.cpp
+
+OTHER_FILES += \
+    Schemas/Common.sql \
+    Schemas/CommonFuncs.sql \
+    Schemas/I18N.sql \
+
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \
 

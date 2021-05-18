@@ -50,7 +50,7 @@ SOURCES += \
     ORM/Voucher.cpp \
     ORM/Service.cpp
 
-OTHER_FILES += \
+OTHER_FILES += Schema/schema.sql \
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
