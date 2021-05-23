@@ -102,7 +102,7 @@ quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, qui
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
 {
     Authorization::checkPriv(_JWT, {"AAA:RequestWithdraw"});
 
@@ -119,9 +119,9 @@ Voucher::Voucher() :
     clsTable(AAASchema,
              tblVoucher::Name,
 { ///<ColName                       Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
-{tblVoucher::vchID,               S(quint64),          QFV.integer().minValue(1),                  ORM_PRIMARY_KEY},
+{tblVoucher::vchID,               ORM_PRIMARY_KEY64},
 {tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
-{tblVoucher::vch_usrID,           S(quint32),          QFV.integer().minValue(1),                  QRequired, UPNone},
+{tblVoucher::vch_usrID,           S(quint64),          QFV.integer().minValue(1),                  QRequired, UPNone},
 {tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),                         QRequired, UPNone,false,false},
 {tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                              TAPI::enuVoucherType::Expense,UPNone},
 {tblVoucher::vchTotalAmount,      S(quint64),          QFV,                                        0,UPNone},

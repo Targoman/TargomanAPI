@@ -6,14 +6,10 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-TEST_NAME = accountFunctionalTest
+TEST_NAME = advertFunctionalTest
 
 HEADERS += \
-    ORM/activeSessions.hpp \
     ORM/actionLogs.hpp \
-    ORM/service.hpp \
-    ORM/roles.hpp \
-    ORM/tokens.hpp \
     test.hpp
 
 SOURCES += \

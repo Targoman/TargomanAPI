@@ -65,7 +65,7 @@ APITokenValidIPs::APITokenValidIPs() :
     clsTable(AAASchema,
               tblAPITokenValidIPs::Name,
               { ///<ColName                                Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblAPITokenValidIPs::tviID,               S(quint64),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblAPITokenValidIPs::tviID,               ORM_PRIMARY_KEY64},
                 {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone},
                 {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner},
                 {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone,false, false},

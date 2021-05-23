@@ -58,7 +58,7 @@ BlockingRules::BlockingRules() :
     clsTable(AAASchema,
               tblBlockingRules::Name,
               { ///<ColName                             Type                Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblBlockingRules::blrID,               S(quint64),         QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblBlockingRules::blrID,               ORM_PRIMARY_KEY64},
                 {tblBlockingRules::blr_ipbIP,           S(quint32),         QFV.integer().minValue(1),       QNull,    UPAdmin},
                 {tblBlockingRules::blr_ipIPReadable,    S(TAPI::IPv4_t),    QFV,                             QInvalid, UPNone,false,false},
                 {tblBlockingRules::blrStartingTime,     S(TAPI::DateTime_t),QFV,                             QNull,    UPNone, true},

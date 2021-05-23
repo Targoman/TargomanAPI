@@ -19,10 +19,31 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#include "test.h"
+#ifndef TEST_ADVERT_HPP
+#define TEST_ADVERT_HPP
 
-unsigned int gServiceRoleID;
-unsigned int gServiceID;
-unsigned int gAPITokenID;
-unsigned int gAPIAdminTokenID;
+#include "Interfaces/Test/testCommon.hpp"
+#include "Interfaces/AAA/clsJWT.hpp"
+#include "ORM/actionLogs.hpp"
+#include <cstdlib>
+#include <unistd.h>
 
+using namespace Targoman::API;
+using namespace Targoman::API::AAA;
+
+class testAdvert: public clsBaseTest
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase() {
+        initUnitTestData();
+    }
+
+    void cleanupTestCase() {
+//        cleanupUnitTestData();
+    }
+
+};
+
+#endif // TEST_ADVERT_HPP

@@ -40,7 +40,7 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
 
 private:
-    quint64 insertTicket(quint32 _targetUser,
+    quint64 insertTicket(quint64 _targetUserID,
                          quint32 _serviceID,
                          quint64 _inReplyTo,
                          TAPI::enuTicketType::Type _ticketType,
@@ -50,7 +50,7 @@ private:
                          quint64 _createdBy);
 
 private slots:
-    bool REST(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint32 _targetUser = 0),
+    bool REST(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint64 _targetUserID = 0),
               "create new message targeting a user or all users (if target user is 0)")
     bool REST(PUT, NewFeedback, (TAPI::JWT_t _JWT,
                                  const QString& _title,

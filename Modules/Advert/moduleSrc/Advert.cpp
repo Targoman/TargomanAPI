@@ -99,7 +99,7 @@ Advert::Advert() :
 }
 
 /*******************************************************************************************************************/
-Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint32 _usrID)
+Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint64 _usrID)
 {
 
 }

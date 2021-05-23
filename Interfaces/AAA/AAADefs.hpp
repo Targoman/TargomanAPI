@@ -68,7 +68,7 @@ TARGOMAN_CREATE_CONSTEXPR(usrID);
 
 namespace tblUser{
 constexpr char Name[] = "tblUser";
-constexpr quint32 MinNormalUserID = 100;
+constexpr quint64 MinNormalUserID = 100;
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 TARGOMAN_CREATE_CONSTEXPR(usrGender);
 TARGOMAN_CREATE_CONSTEXPR(usrName);
@@ -93,7 +93,7 @@ TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 constexpr char AAASchema[] = "AAA";
 constexpr char AAADomain[] = "Account";
 
-constexpr quint32 SYSTEM_USER_ID = 1;
+constexpr quint64 SYSTEM_USER_ID = 1;
 #define makeAAADAC(_varName) DBManager::clsDAC _varName(AAADomain, AAASchema)
 }
 }

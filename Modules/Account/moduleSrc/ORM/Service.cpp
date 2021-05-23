@@ -59,7 +59,7 @@ Service::Service() :
     clsTable(AAASchema,
               tblService::Name,
               { ///<ColName                        Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblService::svcID,               S(quint32),          QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+                {tblService::svcID,               ORM_PRIMARY_KEY32},
                 {tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin},
                 {tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin},
                 {tblService::svcCreatedBy_usrID,  ORM_CREATED_BY},

@@ -137,17 +137,17 @@ public:
                              bool _reportCount = false,
                              quint32 _cacheTime = 0);
 
-    bool update(quint32 _actorID,
+    bool update(quint64 _actorUserID,
                 TAPI::PKsByPath_t _pksByPath,
                 const TAPI::ORMFields_t& _updateInfo,
                 const QVariantMap& _extraFilters={});
 
-    bool deleteByPKs(quint32 _actorID,
+    bool deleteByPKs(quint64 _actorUserID,
                      const TAPI::PKsByPath_t& _pksByPath,
                      QVariantMap _extraFilters={},
                      bool _realDelete = false);
 
-    QVariant create(quint32 _actorID, const TAPI::ORMFields_t& _createInfo);
+    QVariant create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo);
 
 
     DBManager::clsDACResult callSP(const QString& _spName,

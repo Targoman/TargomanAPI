@@ -56,7 +56,7 @@ Locations::Locations() :
     clsTable(AdvertSchema,
               tblLocations::Name,
               { ///<ColName                         Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblLocations::locID,               S(quint32),          QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblLocations::locID,               ORM_PRIMARY_KEY32},
                 {tblLocations::locURL,              S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
                 {tblLocations::locPlaceCode,        S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
                 {tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY},

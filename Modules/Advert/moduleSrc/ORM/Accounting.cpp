@@ -38,7 +38,7 @@ AccountSaleables::AccountSaleables() :
     intfAccountSaleables(AdvertSchema,
               tblAccountSaleablesBase::Name,
               { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountSaleablesBase::slbID,                 S(quint64),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
+                {tblAccountSaleablesBase::slbID,                 ORM_PRIMARY_KEY32},
                 {tblAccountSaleablesBase::slbCode,               S(TAPI::PackageCode_t), QFV,                                    QRequired,  UPAdmin},
                 {tblAccountSaleablesBase::slbType,               S(TAPI::enuPackageType::Type), QFV,                             TAPI::enuPackageType::Normal, UPAdmin},
                 {tblAccountSaleablesBase::slbValidFromDate,      S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
@@ -72,7 +72,7 @@ AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(AdvertSchema,
               tblAccountAssetUsage::Name,
               { ///<ColName                         Type                    Validation                              Default UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountAssetUsage::usg_uasID,        S(quint64),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
+                {tblAccountAssetUsage::usg_uasID,        ORM_PRIMARY_KEY64},
                 {tblAccountAssetUsage::usgDayShow,       S(qint16),              QFV.integer().minValue(-1),             0,      UPNone,false,false},
                 {tblAccountAssetUsage::usgDayShow,       S(quint32),             QFV.integer().minValue(0),              0,      UPNone,false,false},
                 {tblAccountAssetUsage::usgTotalShow,     S(quint64),             QFV.integer().minValue(0),              0,      UPNone,false,false},
@@ -91,8 +91,8 @@ clsAccountUserAssets::clsAccountUserAssets() :
     intfAccountUserAssets(AdvertSchema,
               tblAccountUserAssets::Name,
               { ///<ColName                                         Type                    Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountUserAssets::uasID,                     S(quint64),             QFV.integer().minValue(1),  ORM_PRIMARY_KEY},
-                {tblAccountUserAssets::uas_usrID,                 S(quint32),             QFV.integer().minValue(1),  QRequired,  UPAdmin},
+                {tblAccountUserAssets::uasID,                     ORM_PRIMARY_KEY64},
+                {tblAccountUserAssets::uas_usrID,                 S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin},
                 {tblAccountUserAssets::uas_slbID,                 S(quint32),             QFV.integer().minValue(1),  QRequired,  UPAdmin},
                 {tblAccountUserAssets::uasPrefered,               S(bool),                QFV,                        false,      UPOwner},
                 {tblAccountUserAssets::uasPurchaseRequestDateTime,S(TAPI::DateTime_t),    QFV,                        QNull,      UPNone},
@@ -114,7 +114,7 @@ AccountCoupons::AccountCoupons() :
     intfAccountCoupons(AdvertSchema,
              tblAccountCoupons::Name,
             { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-              {tblAccountCoupons::cpnID,                 S(quint32),             QFV.integer().minValue(1),              ORM_PRIMARY_KEY},
+              {tblAccountCoupons::cpnID,                 ORM_PRIMARY_KEY32},
               {tblAccountCoupons::cpnCode,               S(TAPI::DiscountCode_t),QFV,                                    QRequired, UPAdmin},
               {tblAccountCoupons::cpnType,               S(TAPI::enuDiscountType::Type), QFV,                            TAPI::enuDiscountType::Percent, UPAdmin},
               {tblAccountCoupons::cpnPackageBasedAmount, S(TAPI::JSON_t),        QFV,                                    QRequired, UPAdmin, false, false},

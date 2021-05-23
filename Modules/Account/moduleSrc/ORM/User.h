@@ -52,7 +52,7 @@ private slots:
     QVariant ORMGET("Get user information")
     bool ORMDELETE("Delete a User by priviledged user")
     bool ORMUPDATE("Update User info by priviledged user")
-    quint32 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
+    quint64 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
     TAPI::RawData_t REST(GET,Photo, (quint64 _usrID),
                              "Get user photo as image")
 

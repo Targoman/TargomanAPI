@@ -166,16 +166,19 @@ constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::OWNER;
 constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;
 constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 
-///                         Default     UPBy  Sort  Filter Self  Virt   PK
-#define ORM_PRIMARY_KEY     QAuto,      UPNone, true, true, false, false, true
+///                         Default     UPBy     Sort  Filter Self  Virt   PK
+#define ORM_PRIMARY_KEY     QAuto,      UPNone,  true, true, false, false, true
 #define ORM_SELF_REAL       QInvalid,   UPOwner, true, true, true, false
 #define ORM_SELF_VIRTUAL    QInvalid,   UPOwner, true, true, true, true
 
-#define ORM_CREATED_BY S(quint32),          QFV.integer().minValue(1), QInvalid, enuUpdatableBy::__CREATOR__
-#define ORM_CREATED_ON S(TAPI::DateTime_t), QFV,                       QAuto,    UPNone
-#define ORM_UPDATED_BY S(quint32),          QFV.integer().minValue(1), QInvalid, enuUpdatableBy::__UPDATER__
-#define ORM_JOIN_CREATOR R(AAASchema,tblUser::Name),       tblUser::usrID,         "Creator_", true
-#define ORM_JOIN_UPDATER R(AAASchema,tblUser::Name),       tblUser::usrID,         "Updater_", true
+///                        type                 validator                  Default   UPBy    Sort  Filter Self  Virt   PK
+#define ORM_PRIMARY_KEY32  S(quint32),          QFV.integer().minValue(1), ORM_PRIMARY_KEY
+#define ORM_PRIMARY_KEY64  S(quint64),          QFV.integer().minValue(1), ORM_PRIMARY_KEY
+#define ORM_CREATED_BY     S(quint64),          QFV.integer().minValue(1), QInvalid, enuUpdatableBy::__CREATOR__
+#define ORM_CREATED_ON     S(TAPI::DateTime_t), QFV,                       QAuto,    UPNone
+#define ORM_UPDATED_BY     S(quint64),          QFV.integer().minValue(1), QInvalid, enuUpdatableBy::__UPDATER__
+#define ORM_JOIN_CREATOR   R(AAASchema,tblUser::Name),       tblUser::usrID,         "Creator_", true
+#define ORM_JOIN_UPDATER   R(AAASchema,tblUser::Name),       tblUser::usrID,         "Updater_", true
 }
 }
 }

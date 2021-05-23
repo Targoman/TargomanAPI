@@ -69,8 +69,8 @@ Props::Props() :
     clsTable(AdvertSchema,
               tblProps::Name,
               { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
-                {tblProps::prp_binID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {tblProps::prp_locID,           S(quint32),             QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblProps::prp_binID,           ORM_PRIMARY_KEY32},
+                {tblProps::prp_locID,           ORM_PRIMARY_KEY32},
                 {tblProps::prpOrder,            S(TAPI::enuAdvertOrder::Type), QFV,                       TAPI::enuAdvertOrder::Normal,  UPOwner},
                 {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QRequired,  UPOwner},
                 {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},

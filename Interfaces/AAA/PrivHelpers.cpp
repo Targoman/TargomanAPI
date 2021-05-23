@@ -33,7 +33,7 @@ namespace AAA {
 
 using namespace DBManager;
 
-stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services) {
+stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services) {
     QJsonObject Privs;
 
     foreach(auto Service, _services)
@@ -144,7 +144,7 @@ stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QSt
         stuActiveAccount ActiveAccount =
                 PrivHelpers::digestPrivileges(
                     _userObj[AAACommonItems::privs].toArray(),
-                    static_cast<quint32>(_userObj[AAACommonItems::usrID].toDouble()),
+                    static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble()),
                     _services);
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
         return { ActiveAccount.TTL, _userObj };

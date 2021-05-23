@@ -39,7 +39,7 @@ IPStats::IPStats() :
     clsTable(AAASchema,
               tblIPStats::Name,
               { ///<ColName                       Type                 Validation                     Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblIPStats::ips_ipbIP,           S(quint32),          QFV.integer().minValue(1),     ORM_PRIMARY_KEY},
+                {tblIPStats::ips_ipbIP,           ORM_PRIMARY_KEY32},
                 {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QRequired, UPNone},
                 {tblIPStats::ipsInsertionDate,    ORM_CREATED_ON},
               },

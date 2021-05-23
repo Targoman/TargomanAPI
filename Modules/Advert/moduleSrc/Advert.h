@@ -72,7 +72,7 @@ public:
     stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
 
 private:
-    Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID);
+    Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint64 _usrID);
     void breakPackage(quint64 _slbID);
     bool isUnlimited(const Accounting::PackageRemaining_t& _limits) const;
     bool isEmpty(const Accounting::PackageRemaining_t& _limits) const;

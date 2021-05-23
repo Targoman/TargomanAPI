@@ -45,7 +45,7 @@ WalletTransactions::WalletTransactions() :
     clsTable(AAASchema,
               tblWalletsTransactions::Name,
               { ///<ColName                             Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblWalletsTransactions::wltID,         S(quint32),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblWalletsTransactions::wltID,         ORM_PRIMARY_KEY64},
                 {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
                 {tblWalletsTransactions::wlt_vchID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
                 {tblWalletsTransactions::wltDateTime,   ORM_CREATED_ON},
@@ -65,7 +65,7 @@ WalletBalances::WalletBalances() :
     clsTable(AAASchema,
               tblWalletBalances::Name,
               { ///<ColName                         Type         Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-//              {tblWalletBalances::wbl_wltID,      S(quint64),  QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
+//              {tblWalletBalances::wbl_wltID,      ORM_PRIMARY_KEY64},
                 {tblWalletBalances::wblBalance,     S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
                 {tblWalletBalances::wblSumDebit,    S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
                 {tblWalletBalances::wblSumCredit,   S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},

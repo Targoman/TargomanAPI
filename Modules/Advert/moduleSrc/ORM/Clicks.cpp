@@ -42,7 +42,7 @@ Clicks::Clicks() :
     clsTable(AdvertSchema,
               tblClicks::Name,
               { ///<ColName                 Type                    Validation                      UpBy   Sort  Filter Self  Virt   PK
-                {tblClicks::clkID,          S(quint64),             QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblClicks::clkID,          ORM_PRIMARY_KEY64},
                 {tblClicks::clk_binID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
                 {tblClicks::clk_locID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
                 {tblClicks::clkDateTime,    S(TAPI::DateTime_t),    QFV,                            QInvalid, UPNone},

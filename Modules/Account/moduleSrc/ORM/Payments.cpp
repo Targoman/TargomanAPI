@@ -42,7 +42,7 @@ OnlinePayments::OnlinePayments() :
     clsTable(AAASchema,
               tblOnlinePayments::Name,
               { ///<ColName                              Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblOnlinePayments::onpID,                S(quint64),             QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblOnlinePayments::onpID,                ORM_PRIMARY_KEY64},
                 {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                QRequired,  UPNone},
                 {tblOnlinePayments::onpCreationDateTime,  ORM_CREATED_ON},
                 {tblOnlinePayments::onp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPNone},
@@ -78,7 +78,7 @@ OfflinePayments::OfflinePayments() :
     clsTable(AAASchema,
               tblOnlinePayments::Name,
               { ///<ColName                               Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblOfflinePayments::ofpID,               S(quint64),             QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblOfflinePayments::ofpID,               ORM_PRIMARY_KEY64},
                 {tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
                 {tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
                 {tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},

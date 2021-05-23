@@ -48,8 +48,8 @@ ActiveAds::ActiveAds() :
     clsTable(AdvertSchema,
               tblActiveAds::Name,
               { ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblActiveAds::act_binID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
-                {tblActiveAds::act_locID,    S(quint32),    QFV.integer().minValue(1),        ORM_PRIMARY_KEY},
+                {tblActiveAds::act_binID,    ORM_PRIMARY_KEY32},
+                {tblActiveAds::act_locID,    ORM_PRIMARY_KEY32},
                 {tblActiveAds::actOrder,     S(TAPI::enuAdvertOrder::Type),QFV,               TAPI::enuAdvertOrder::Normal, UPNone},
                 {tblActiveAds::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
               },

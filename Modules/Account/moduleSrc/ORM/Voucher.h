@@ -69,7 +69,7 @@ private slots:
                  "Create a new withdraw request by user.")
 
     quint64 REST(CREATE, requestWithdrawFor,(TAPI::JWT_t _JWT,
-                                             quint32 _targetUsrID,
+                                             quint64 _targetUsrID,
                                              quint64 _amount,
                                              TAPI::JSON_t _desc),
                  "Create a new withdraw request for another user by priviledged user. "

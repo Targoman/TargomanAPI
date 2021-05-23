@@ -48,8 +48,8 @@ ApprovalRequest::ApprovalRequest() :
     clsTable(AAASchema,
               tblApprovalRequest::Name,
               { ///<ColName                             Type                    Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblApprovalRequest::aprID,             S(quint64),             QFV.integer().minValue(1),       ORM_PRIMARY_KEY},
-                {tblApprovalRequest::apr_usrID,         S(quint32),             QFV.integer().minValue(1),       QInvalid,  UPNone},
+                {tblApprovalRequest::aprID,             ORM_PRIMARY_KEY64},
+                {tblApprovalRequest::apr_usrID,         S(quint64),             QFV.integer().minValue(1),       QInvalid,  UPNone},
                 {tblApprovalRequest::aprRequestedFor,   S(TAPI::enuApprovalType::Type),    QFV,                  TAPI::enuApprovalType::Email, UPNone},
                 {tblApprovalRequest::aprApprovalCode,   S(QString),             QFV.asciiAlNum().maxLenght(32),  QRequired,        UPNone},
                 {tblApprovalRequest::aprApprovalValue,  S(QString),             QFV.allwaysInvalid(),            QRequired,        UPNone,false,false},

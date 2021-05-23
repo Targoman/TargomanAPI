@@ -56,7 +56,7 @@ private slots:
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", UT_RoleName}
-                                        }).toMap().value("usrID").toUInt()) > 0);
+                                        }).toMap().value("usrID").toULongLong()) > 0);
 
         QVERIFY((gAdminUserID = callAPI(PUT,
                                         "Account/signup", {}, {
@@ -65,7 +65,7 @@ private slots:
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", UT_RoleName}
-                                        }).toMap().value("usrID").toUInt()) > 0);
+                                        }).toMap().value("usrID").toULongLong()) > 0);
 
         clsDAC DAC;
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});

@@ -67,7 +67,7 @@ private slots:
     QVariant ORMGET("Get APITokens information")
     bool ORMDELETE("Delete an APIToken")
     bool ORMUPDATE("Update token info by priviledged user")
-    quint32 ORMCREATE("Create a new APITokens by priviledged user")
+    quint64 ORMCREATE("Create a new APITokens by priviledged user")
 
     private:
         TARGOMAN_DEFINE_API_SUBMODULE(Account,APITokens)

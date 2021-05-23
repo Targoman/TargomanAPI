@@ -56,7 +56,7 @@ class Account : public ORM::clsRESTAPIWithActionLogs
 
 public:
     stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
-    virtual QJsonObject todayPrivs(quint32 _usrID) final {Q_UNUSED(_usrID) return {}; }
+    virtual QJsonObject todayPrivs(quint64 _usrID) final {Q_UNUSED(_usrID) return {}; }
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
@@ -148,14 +148,14 @@ private slots:
     ///TODO create API for returnBasketItem
 
     bool REST(POST, addPrizeTo,(TAPI::JWT_t _JWT,
-                                quint32 _targetUsrID,
+                                quint64 _targetUsrID,
                                 quint64 _amount,
                                 TAPI::JSON_t _desc),
               "add prize to a user by priviledged user. "
               "Description object must contain at least an string field named 'desc'")
 
     bool REST(POST, addIncomeTo,(TAPI::JWT_t _JWT,
-                                 quint32 _targetUsrID,
+                                 quint64 _targetUsrID,
                                  quint64 _amount,
                                  TAPI::JSON_t _desc),
               "add income to a user by priviledged user. "

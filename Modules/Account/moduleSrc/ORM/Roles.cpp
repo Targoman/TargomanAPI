@@ -59,7 +59,7 @@ Roles::Roles() :
     clsTable(AAASchema,
               tblRoles::Name,
               { ///<ColName                      Type                 Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblRoles::rolID,                S(quint32),          QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
+                {tblRoles::rolID,                ORM_PRIMARY_KEY32},
                 {tblRoles::rolName,              S(QString),          QFV.unicodeAlNum().maxLenght(50),   QRequired, UPAdmin},
                 {tblRoles::rolParent_rolID,      S(quint32),          QFV.integer().minValue(1),          QNull,     UPAdmin},
                 {tblRoles::rolPrivileges,        S(TAPI::PrivObject_t),QFV,                               QRequired, UPAdmin,false,false},

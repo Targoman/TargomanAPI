@@ -36,7 +36,7 @@ namespace API {
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
 
-quint64 Ticketing::insertTicket(quint32 _targetUser,
+quint64 Ticketing::insertTicket(quint64 _targetUserID,
                                 quint32 _serviceID,
                                 quint64 _inReplyTo,
                                 TAPI::enuTicketType::Type _ticketType,
@@ -54,7 +54,7 @@ quint64 Ticketing::insertTicket(quint32 _targetUser,
           "       tblTickets.tktBodyMarkdown =?,"
           "       tblTickets.tktHasAttachment =?,"
           "       tblTickets.tktCreatedBy_usrID =?",
-          {_targetUser ? _targetUser : QVariant(),
+          {_targetUserID ? _targetUserID : QVariant(),
            _serviceID ? _serviceID : QVariant(),
            _inReplyTo ? _inReplyTo : QVariant(), QString("%1").arg(_ticketType),
            _title, _body, _hasAttachemnt, _createdBy})
@@ -66,13 +66,13 @@ bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT,
                                  const QString& _title,
                                  const QString& _bodyMarkdown,
                                  quint32 _serviceID,
-                                 quint32 _targetUser) {
+                                 quint64 _targetUserID) {
   Authorization::checkPriv(_JWT,
                            {this->moduleBaseName() + ":canPUTNewMessage"});
 
   return this->insertTicket(
-             _targetUser, _serviceID, 0,
-             _targetUser ? TAPI::enuTicketType::Message : TAPI::enuTicketType::Broadcast,
+             _targetUserID, _serviceID, 0,
+             _targetUserID ? TAPI::enuTicketType::Message : TAPI::enuTicketType::Broadcast,
              _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 

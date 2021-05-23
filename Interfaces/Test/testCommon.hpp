@@ -51,9 +51,13 @@ extern unsigned int gAPIAdminTokenID;
     QString gEncodedAdminJWT; \
     QJsonObject gJWT; \
     QJsonObject gAdminJWT; \
-    quint32 gUserID; \
-    quint32 gAdminUserID; \
-    QVariant gInvalid;
+    quint64 gUserID; \
+    quint64 gAdminUserID; \
+    QVariant gInvalid; \
+    unsigned int gServiceRoleID; \
+    unsigned int gServiceID; \
+    unsigned int gAPITokenID; \
+    unsigned int gAPIAdminTokenID;
 
 enum HTTPMethod{
     GET,
@@ -77,8 +81,8 @@ extern QString gLoginJWT;
 extern QJsonObject gJWT;
 extern QJsonObject gAdminJWT;
 extern QString gEncodedAdminJWT;
-extern quint32 gUserID;
-extern quint32 gAdminUserID;
+extern quint64 gUserID;
+extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
 class clsBaseTest: public QObject{
@@ -124,7 +128,7 @@ protected:
                           }
                         );
 
-            gAdminUserID = res2.lastInsertId().toUInt();
+            gAdminUserID = res2.lastInsertId().toULongLong();
 
             DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", {gAdminUserID});
         }
@@ -152,7 +156,7 @@ private:
 
         DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", {UT_NormalToken, UT_AdminToken});
         DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {UT_UserEmail, UT_AdminUserEmail});
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail=? OR usrEmail=?", {UT_UserEmail, UT_AdminUserEmail});
 
         DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_AdminUserEmail});
         DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_UserEmail});

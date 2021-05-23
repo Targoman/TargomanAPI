@@ -338,7 +338,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     }
 }
 
-bool clsTable::update(quint32 _actorID,
+bool clsTable::update(quint64 _actorUserID,
                       TAPI::PKsByPath_t _pksByPath,
                       const TAPI::ORMFields_t& _updateInfo,
                       const QVariantMap& _extraFilters)
@@ -378,7 +378,7 @@ bool clsTable::update(quint32 _actorID,
         if(FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__){
             if(FCol.Relation.Column.isEmpty()){
                 UpdateCommands.append(this->makeColName(FCol.Col) + "=?");
-                Values.append(_actorID);
+                Values.append(_actorUserID);
             }
         }
 
@@ -423,11 +423,11 @@ bool clsTable::update(quint32 _actorID,
     }
 }
 
-bool clsTable::deleteByPKs(quint32 _actorID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
+bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
 {
     this->prepareFiltersList();
 
-    if(this->update(_actorID, _pksByPath, TAPI::ORMFields_t({{this->BaseCols.last().name(), "Removed"}}), _extraFilters) == 0)
+    if(this->update(_actorUserID, _pksByPath, TAPI::ORMFields_t({{this->BaseCols.last().name(), "Removed"}}), _extraFilters) == 0)
         return false;
 
     if(_realDelete == false)
@@ -500,7 +500,7 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
-QVariant clsTable::create(quint32 _actorID, const TAPI::ORMFields_t& _createInfo)
+QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo)
 {
     this->prepareFiltersList();
     QStringList  CreateCommands;
@@ -534,7 +534,7 @@ QVariant clsTable::create(quint32 _actorID, const TAPI::ORMFields_t& _createInfo
     foreach(auto Col, this->BaseCols)
         if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
             CreateCommands.append(this->makeColName(Col) + "=?");
-            Values.append(Col.toDB(_actorID));
+            Values.append(Col.toDB(_actorUserID));
         }
 
     clsDAC DAC(this->domain(), this->Schema);

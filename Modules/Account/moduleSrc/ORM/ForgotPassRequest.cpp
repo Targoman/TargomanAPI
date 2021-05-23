@@ -49,7 +49,7 @@ ForgotPassRequest::ForgotPassRequest() :
               tblForgotPassRequest::Name,
               { ///<ColName                             Type                 Validation                         Default    UpBy   Sort  Filter Self  Virt   PK
                 {tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
-                {tblForgotPassRequest::fpr_usrID,       S(quint32),          QFV.integer().minValue(1),         QRequired,  UPNone},
+                {tblForgotPassRequest::fpr_usrID,       S(quint64),          QFV.integer().minValue(1),         QRequired,  UPNone},
                 {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                TAPI::enuForgotPassLinkVia::Email,  UPNone},
                 {tblForgotPassRequest::fprRequestDate,  ORM_CREATED_ON},
                 {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},

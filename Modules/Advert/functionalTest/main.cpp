@@ -29,7 +29,7 @@ TAPI_MARSHAL_TEST_VARIABLES
 int main(int argc, char *argv[])
 {
     qDebug() << "--------------------------------------------------";
-    qDebug() << "-- test module: Account --------------------------";
+    qDebug() << "-- test module: Advert ---------------------------";
     qDebug() << "--------------------------------------------------";
 
     QCoreApplication App(argc, argv);
@@ -46,12 +46,8 @@ int main(int argc, char *argv[])
     int FailedTests = 0;
     try{
         FailedTests += QTest::qExec(new testBase, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
         if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

@@ -34,7 +34,7 @@ class clsRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs{
     Q_OBJECT
 
 public:
-    stuActiveServiceAccount activeAccountObject(quint32 _usrID);
+    stuActiveServiceAccount activeAccountObject(quint64 _usrID);
 
 protected:
     clsRESTAPIWithAccounting(const QString& _schema,
@@ -46,7 +46,7 @@ protected:
                              intfAccountCoupons* _discounts = nullptr,
                              intfAccountPrizes* _prizes = nullptr);
     virtual ~clsRESTAPIWithAccounting();
-    virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID) = 0;
+    virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint64 _usrID) = 0;
     virtual void breakPackage(quint64 _slbID) = 0;
     virtual bool isUnlimited(const PackageRemaining_t& _limits) const = 0;
     virtual bool isEmpty(const PackageRemaining_t& _limits) const = 0;
@@ -54,7 +54,7 @@ protected:
     void hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
 private:
-    stuActiveServiceAccount findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage = {});
+    stuActiveServiceAccount findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 private slots:
     TAPI::stuPreVoucher REST(POST, addToBasket, (TAPI::JWT_t _JWT,

@@ -32,7 +32,7 @@ using namespace DBManager;
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(clsJWT(_JWT).usrID() != _pksByPath.toUInt())
+    if(clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
     return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
@@ -92,13 +92,13 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     return true;
 }
 
-quint32 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
     if(_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
@@ -120,8 +120,8 @@ TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
 User::User() : clsTable(AAASchema,
                          tblUser::Name,
                          { ///<ColName                    Type                      Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-///TODO change usrID from INT(quint32) to BIGINT(quint64) and change all related fields in db
-                           {tblUser::usrID,               S(quint32),          QFV.integer().minValue(1),            QAuto,     UPNone, true, true, true, false, true},
+                           //ORM_PRIMARY_KEY64 with self:true
+                           {tblUser::usrID,               S(quint64),          QFV.integer().minValue(1),            QAuto,     UPNone, true, true, true, false, true},
                            {tblUser::usrGender,           S(TAPI::enuUserGender::Type), QFV,                         TAPI::enuUserGender::NotExpressed, UPOwner},
                            {tblUser::usrName,             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,     UPOwner},
                            {tblUser::usrFamily,           S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,     UPOwner},
@@ -192,7 +192,7 @@ UserExtraInfo::UserExtraInfo() :
     clsTable ("AAA",
                tblUserExtraInfo::Name,
                {  ///<ColName                             Type                      Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-//                 {tblUserExtraInfo::uei_usrID,          S(quint32),               QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+//                 {tblUserExtraInfo::uei_usrID,          ORM_PRIMARY_KEY64},
                    {tblUserExtraInfo::ueiGender,          S(TAPI::enuUserGender::Type),QFV,                         TAPI::enuUserGender::NotExpressed,  UPOwner,false,false},
                    {tblUserExtraInfo::ueiExtraInfo,       S(QString),                  QFV,                         QNull,  UPOwner,false,false},
                    {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),      QFV,                         QNull,  UPOwner,false,false},

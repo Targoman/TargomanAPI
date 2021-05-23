@@ -6,31 +6,7 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=Advert
+include($$QBUILD_PATH/templates/projectConfigs.pri)
 
-HEADERS += \
-    Advert.h \
-    ORM/ActiveAds.h \
-    ORM/Defs.hpp \
-    ORM/Bin.h \
-    ORM/Clicks.h \
-    ORM/Props.h \
-    ORM/Accounting.h \
-    ORM/Locations.h
-
-SOURCES += \
-    Advert.cpp \
-    ORM/ActiveAds.cpp \
-    ORM/Bin.cpp \
-    ORM/Clicks.cpp \
-    ORM/Props.cpp \
-    ORM/Accounting.cpp \
-    ORM/Locations.cpp
-
-OTHER_FILES += \
-    ORM/Schema.my.sql \
-
-################################################################################
-include($$QBUILD_PATH/templates/moduleConfigs.pri)
-
-
+addSubdirs(moduleSrc, Dependencies)
+addSubdirs(functionalTest, Dependencies)

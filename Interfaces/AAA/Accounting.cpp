@@ -70,7 +70,7 @@ clsRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
     return ServiceRegistry.value(_serviceName);
 }
 
-stuActiveServiceAccount clsRESTAPIWithAccounting::activeAccountObject(quint32 _usrID)
+stuActiveServiceAccount clsRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
 {
     return this->findActiveAccount(_usrID);
 }
@@ -103,7 +103,7 @@ clsRESTAPIWithAccounting::clsRESTAPIWithAccounting(const QString& _schema,
 clsRESTAPIWithAccounting::~clsRESTAPIWithAccounting()
 {;}
 
-stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint32 _usrID, const ServiceUsage_t& _requestedUsage)
+stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
     stuServiceAccountInfo AccountInfo = this->retrieveServiceAccountInfo(_usrID);
     if(AccountInfo.ActivePackages.isEmpty())

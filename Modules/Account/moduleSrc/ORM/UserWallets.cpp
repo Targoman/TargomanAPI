@@ -64,7 +64,7 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _createInfo);
     }
 
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
@@ -111,9 +111,9 @@ UserWallets::UserWallets() :
     clsTable(AAASchema,
               tblUserWallets::Name,
               { ///<ColName                           Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblUserWallets::walID,               S(quint64),                 QFV.integer().minValue(1),          ORM_PRIMARY_KEY},
-                {tblUserWallets::wal_usrID,           S(quint32),                 QFV.integer().minValue(1),          QRequired,  UPNone},
-                {tblUserWallets::walName,             S(quint32),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner},
+                {tblUserWallets::walID,               ORM_PRIMARY_KEY64},
+                {tblUserWallets::wal_usrID,           S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone},
+                {tblUserWallets::walName,             S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner},
                 {tblUserWallets::walDefault,          S(bool),                    QFV,                                false,      UPOwner},
                 {tblUserWallets::walMinBalance,       S(qint64),                  QFV,                                0,          UPAdmin,false,false},
                 {tblUserWallets::walNotTransferable,  S(qint64),                  QFV,                                0,          UPAdmin,false,false},

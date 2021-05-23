@@ -476,7 +476,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     }
 }
 
-bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addPrizeTo:maxAmount").toLongLong();
     if(Limit == 0)
@@ -497,7 +497,7 @@ bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 
     return true;
 }
 
-bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint32 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addIncomeTo:maxAmount").toLongLong();
     if(Limit == 0)

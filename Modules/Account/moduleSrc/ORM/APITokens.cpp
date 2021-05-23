@@ -53,19 +53,19 @@ bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
     return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint64 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 APITokens::APITokens() :
     clsTable(AAASchema,
               "tblAPITokens",
               { ///<ColName                         Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAPITokens::aptID,               S(quint64),            QFV.integer().minValue(1),      ORM_PRIMARY_KEY},
+                {tblAPITokens::aptID,               ORM_PRIMARY_KEY64},
                 {tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false},
-                {tblAPITokens::apt_usrID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPNone},
+                {tblAPITokens::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone},
                 {tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin},
                 {tblAPITokens::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en",      UPAdmin},
                 {tblAPITokens::aptValidateIP,       S(bool),               QFV,                            false,     UPAdmin},
