@@ -77,8 +77,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         quint32     , SubTotal  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
         stuDiscount , Discount  , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
         quint32     , DisAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        quint8      , TaxPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
-        quint32     , TaxAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+        quint8      , VATPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
+        quint32     , VATAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
         QString     , Sign      , QString()    , v.size(), v         , v.toString()
         )
 
@@ -117,8 +117,8 @@ struct stuPackage {
     QTime StartTime; //can be invalid for normal accounts
     QTime EndTime; //can be invalid for normal accounts
 
-    stuPackage(quint64   _pkgID = 0,
-               QString   _pkgCode = {},
+    stuPackage(quint64   _slbID = 0,
+               QString   _slbCode = {},
                qint32    _remainingDays = -1,
                qint8     _remainingHours = -1,
                PackageRemaining_t  _remaining = {},
@@ -127,8 +127,8 @@ struct stuPackage {
                QTime     _startTime = {},
                QTime     _endTime = {},
                QJsonObject _properties = {}) :
-        PackageID(_pkgID),
-        PackageCode(_pkgCode),
+        PackageID(_slbID),
+        PackageCode(_slbCode),
         RemainingDays(_remainingDays),
         RemainingHours(_remainingHours),
         Remaining(_remaining),
@@ -212,60 +212,60 @@ extern void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher);
 /***************************************************************************************************/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblAccountPackagesBase {
-constexpr char Name[] = "tblAccountPackages";
-TARGOMAN_CREATE_CONSTEXPR(pkgID);
-TARGOMAN_CREATE_CONSTEXPR(pkgCode);
-TARGOMAN_CREATE_CONSTEXPR(pkgName);
-TARGOMAN_CREATE_CONSTEXPR(pkgDesc);
-TARGOMAN_CREATE_CONSTEXPR(pkgType);
-TARGOMAN_CREATE_CONSTEXPR(pkgRemainingDays);
-TARGOMAN_CREATE_CONSTEXPR(pkgValidFromDate);
-TARGOMAN_CREATE_CONSTEXPR(pkgValidToDate);
-TARGOMAN_CREATE_CONSTEXPR(pkgValidFromTime);
-TARGOMAN_CREATE_CONSTEXPR(pkgValidToTime);
-TARGOMAN_CREATE_CONSTEXPR(pkg_locID);
-TARGOMAN_CREATE_CONSTEXPR(pkgPrivs);
-TARGOMAN_CREATE_CONSTEXPR(pkgPrice);
-TARGOMAN_CREATE_CONSTEXPR(pkgCanBePurchasedSince);
-TARGOMAN_CREATE_CONSTEXPR(pkgNotAvailableSince);
-TARGOMAN_CREATE_CONSTEXPR(pkgVoucherTemplate);
-TARGOMAN_CREATE_CONSTEXPR(pkgCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(pkgCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(pkgUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(pkgStatus);
-TARGOMAN_CREATE_CONSTEXPR(pkgQuantity);
-TARGOMAN_CREATE_CONSTEXPR(pkgVAT);
+namespace tblAccountSaleablesBase {
+constexpr char Name[] = "tblAccountSaleables";
+TARGOMAN_CREATE_CONSTEXPR(slbID);
+TARGOMAN_CREATE_CONSTEXPR(slbCode);
+TARGOMAN_CREATE_CONSTEXPR(slbName);
+TARGOMAN_CREATE_CONSTEXPR(slbDesc);
+TARGOMAN_CREATE_CONSTEXPR(slbType);
+TARGOMAN_CREATE_CONSTEXPR(slbRemainingDays);
+TARGOMAN_CREATE_CONSTEXPR(slbValidFromDate);
+TARGOMAN_CREATE_CONSTEXPR(slbValidToDate);
+TARGOMAN_CREATE_CONSTEXPR(slbValidFromTime);
+TARGOMAN_CREATE_CONSTEXPR(slbValidToTime);
+TARGOMAN_CREATE_CONSTEXPR(slb_locID);
+TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
+TARGOMAN_CREATE_CONSTEXPR(slbPrice);
+TARGOMAN_CREATE_CONSTEXPR(slbCanBePurchasedSince);
+TARGOMAN_CREATE_CONSTEXPR(slbNotAvailableSince);
+TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
+TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(slbStatus);
+TARGOMAN_CREATE_CONSTEXPR(slbQuantity);
+TARGOMAN_CREATE_CONSTEXPR(slbVAT);
 }
 
-namespace tblAccountUserPackages {
-constexpr char Name[] = "tblAccountUserPackages";
-TARGOMAN_CREATE_CONSTEXPR(aupID);
-TARGOMAN_CREATE_CONSTEXPR(aup_usrID);
-TARGOMAN_CREATE_CONSTEXPR(aup_pkgID);
-TARGOMAN_CREATE_CONSTEXPR(aupPrefered);
-TARGOMAN_CREATE_CONSTEXPR(aupPurchaseRequestDateTime);
-TARGOMAN_CREATE_CONSTEXPR(aupPaymentDateTime);
-TARGOMAN_CREATE_CONSTEXPR(aup_vchID);
-TARGOMAN_CREATE_CONSTEXPR(aupUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(aupStatus);
+namespace tblAccountUserAssets {
+constexpr char Name[] = "tblAccountUserAssets";
+TARGOMAN_CREATE_CONSTEXPR(uasID);
+TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
+TARGOMAN_CREATE_CONSTEXPR(uas_slbID);
+TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
+TARGOMAN_CREATE_CONSTEXPR(uasPurchaseRequestDateTime);
+TARGOMAN_CREATE_CONSTEXPR(uasPaymentDateTime);
+TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
+TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(uasStatus);
 }
 
-namespace tblAccountDiscounts {
-constexpr char Name[] = "tblAccountDiscounts";
-TARGOMAN_CREATE_CONSTEXPR(disID);
-TARGOMAN_CREATE_CONSTEXPR(disCode);
-TARGOMAN_CREATE_CONSTEXPR(disType);
-TARGOMAN_CREATE_CONSTEXPR(disPackageBasedAmount);
-TARGOMAN_CREATE_CONSTEXPR(disMaxAmount);
-TARGOMAN_CREATE_CONSTEXPR(disValidFrom);
-TARGOMAN_CREATE_CONSTEXPR(disExpiryTime);
-TARGOMAN_CREATE_CONSTEXPR(disPrimaryCount);
-TARGOMAN_CREATE_CONSTEXPR(disUsedCount);
-TARGOMAN_CREATE_CONSTEXPR(disCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(disCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(disUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(disStatus);
+namespace tblAccountCoupons {
+constexpr char Name[] = "tblAccountCoupons";
+TARGOMAN_CREATE_CONSTEXPR(cpnID);
+TARGOMAN_CREATE_CONSTEXPR(cpnCode);
+TARGOMAN_CREATE_CONSTEXPR(cpnType);
+TARGOMAN_CREATE_CONSTEXPR(cpnPackageBasedAmount);
+TARGOMAN_CREATE_CONSTEXPR(cpnMaxAmount);
+TARGOMAN_CREATE_CONSTEXPR(cpnValidFrom);
+TARGOMAN_CREATE_CONSTEXPR(cpnExpiryTime);
+TARGOMAN_CREATE_CONSTEXPR(cpnPrimaryCount);
+TARGOMAN_CREATE_CONSTEXPR(cpnUsedCount);
+TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
 }
 
 namespace tblAccountReferals {

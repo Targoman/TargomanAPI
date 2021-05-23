@@ -6,17 +6,26 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-PRJDIR = ".."
+TEST_NAME = accountFunctionalTest
 
-include($$BASE_PROJECT_PATH/Modules/Account/functionalTest/functionalTest.pri)
+HEADERS += \
+    ORM/activeSessions.hpp \
+    ORM/actionLogs.hpp \
+    ORM/service.hpp \
+    ORM/roles.hpp \
+    ORM/tokens.hpp \
+    test.h \
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-SOURCES += main.cpp \
-           $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
-           Account/test.cpp
+SOURCES += \
+    $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
+    test.cpp \
+    main.cpp \
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lcurl
+
+BASE_TEST_PATH = $$BASE_PROJECT_PATH/Interfaces/Test
+INCLUDEPATH += $$BASE_TEST_PATH
+include($$BASE_TEST_PATH/Test.pri)
 
 ################################################################################
 include($$QBUILD_PATH/templates/unitTestConfigs.pri)

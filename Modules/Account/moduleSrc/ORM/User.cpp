@@ -120,6 +120,7 @@ TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
 User::User() : clsTable(AAASchema,
                          tblUser::Name,
                          { ///<ColName                    Type                      Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+///TODO change usrID from INT(quint32) to BIGINT(quint64) and change all related fields in db
                            {tblUser::usrID,               S(quint32),          QFV.integer().minValue(1),            QAuto,     UPNone, true, true, true, false, true},
                            {tblUser::usrGender,           S(TAPI::enuUserGender::Type), QFV,                         TAPI::enuUserGender::NotExpressed, UPOwner},
                            {tblUser::usrName,             S(QString),          QFV.unicodeAlNum().maxLenght(100),    QNull,     UPOwner},

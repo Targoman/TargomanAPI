@@ -31,11 +31,11 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
-class intfAccountPackages: public ORM::clsTable
+class intfAccountSaleables: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountPackages(const QString& _schema,
+    intfAccountSaleables(const QString& _schema,
                         const QString& _name,
                         const QList<ORM::clsORMField>& _cols,
                         const QList<ORM::stuRelation>& _foreignKeys);
@@ -48,11 +48,11 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUsage: public ORM::clsTable
+class intfAccountAssetUsage: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountUsage(const QString& _schema,
+    intfAccountAssetUsage(const QString& _schema,
                      const QString& _name,
                      const QList<ORM::clsORMField>& _cols,
                      const QList<ORM::stuRelation>& _foreignKeys);
@@ -61,11 +61,11 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUserPackages: public ORM::clsTable
+class intfAccountUserAssets: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountUserPackages(const QString& _schema,
+    intfAccountUserAssets(const QString& _schema,
                             const QString& _name,
                             const QList<ORM::clsORMField>& _cols,
                             const QList<ORM::stuRelation>& _foreignKeys);
@@ -78,11 +78,11 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountDiscounts: public ORM::clsTable
+class intfAccountCoupons: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountDiscounts(const QString& _schema,
+    intfAccountCoupons(const QString& _schema,
                          const QString& _name,
                          const QList<ORM::clsORMField>& _cols,
                          const QList<ORM::stuRelation>& _foreignKeys);

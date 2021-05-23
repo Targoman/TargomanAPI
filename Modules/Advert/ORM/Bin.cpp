@@ -22,7 +22,6 @@
 
 #include "Bin.h"
 #include "Defs.hpp"
-#include "Modules/Account/ORM/User.h"
 
 namespace Targoman {
 namespace API {

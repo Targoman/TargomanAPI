@@ -83,37 +83,37 @@ constexpr char ASA_LIMITSONPARENT[] = "LP";
 
 
 /******************************************************************/
-QVariant intfAccountPackages::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 {
   constexpr quint16 CACHE_TIME  = 15 * 60;
   QString ExtraFilters;
   if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
     ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-                   .arg(tblAccountPackagesBase::pkgCanBePurchasedSince)
-                   .arg(tblAccountPackagesBase::pkgNotAvailableSince);
+                   .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
+                   .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 
   return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
 }
 
-bool intfAccountPackages::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
   return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
-bool intfAccountPackages::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
   return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 intfAccountPackages::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
   return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-intfAccountPackages::intfAccountPackages(const QString& _schema,
+intfAccountSaleables::intfAccountSaleables(const QString& _schema,
                                          const QString& _name,
                                          const QList<ORM::clsORMField>& _cols,
                                          const QList<ORM::stuRelation>& _foreignKeys) :
@@ -121,15 +121,15 @@ intfAccountPackages::intfAccountPackages(const QString& _schema,
 {;}
 
 /******************************************************************/
-QVariant intfAccountUsage::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
 {
   if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    this->setSelfFilters({{tblAccountUserAssets::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
   return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-intfAccountUsage::intfAccountUsage(const QString& _schema,
+intfAccountAssetUsage::intfAccountAssetUsage(const QString& _schema,
                                    const QString& _name,
                                    const QList<ORM::clsORMField>& _cols,
                                    const QList<ORM::stuRelation>& _foreignKeys) :
@@ -138,15 +138,15 @@ intfAccountUsage::intfAccountUsage(const QString& _schema,
 
 
 /******************************************************************/
-QVariant intfAccountUserPackages::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL)
 {
   if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserPackages::aup_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    this->setSelfFilters({{tblAccountUserAssets::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
   return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool intfAccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
+bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if(!Ok || !UserPackageID )
@@ -154,24 +154,24 @@ bool intfAccountUserPackages::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKs
 
   this->callSP("sp_UPDATE_setAsPrefered", {
                  {"iUserID", clsJWT(_JWT).usrID()},
-                 {"iAUPID",  UserPackageID},
+                 {"iUASID",  UserPackageID},
                });
   return false;
 }
 
-bool intfAccountUserPackages::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
+bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if(!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
   /*return this->update(clsJWT(_JWT).usrID(), {
-                            {tblAccountUserPackages::aupID, UserPackageID}
+                            {tblAccountUserAssets::uasID, UserPackageID}
                         }, {
-                            {tblAccountUserPackages::aupStatus, TAPI::enuAuditableStatus::Banned},
+                            {tblAccountUserAssets::uasStatus, TAPI::enuAuditableStatus::Banned},
                         });*/
 }
-intfAccountUserPackages::intfAccountUserPackages(const QString& _schema,
+intfAccountUserAssets::intfAccountUserAssets(const QString& _schema,
                                                  const QString& _name,
                                                  const QList<ORM::clsORMField>& _cols,
                                                  const QList<ORM::stuRelation>& _foreignKeys) :
@@ -179,31 +179,31 @@ intfAccountUserPackages::intfAccountUserPackages(const QString& _schema,
 {;}
 
 /******************************************************************/
-QVariant intfAccountDiscounts::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
   return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
-bool intfAccountDiscounts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
   return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
-bool intfAccountDiscounts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
   return this->update(UPDATE_METHOD_CALL_ARGS);
 }
 
-quint32 intfAccountDiscounts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
   return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-intfAccountDiscounts::intfAccountDiscounts(const QString& _schema,
+intfAccountCoupons::intfAccountCoupons(const QString& _schema,
                                            const QString& _name,
                                            const QList<ORM::clsORMField>& _cols,
                                            const QList<ORM::stuRelation>& _foreignKeys) :

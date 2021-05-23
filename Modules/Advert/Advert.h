@@ -73,7 +73,7 @@ public:
 
 private:
     Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID);
-    void breakPackage(quint64 _pkgID);
+    void breakPackage(quint64 _slbID);
     bool isUnlimited(const Accounting::PackageRemaining_t& _limits) const;
     bool isEmpty(const Accounting::PackageRemaining_t& _limits) const;
 

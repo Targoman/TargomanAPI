@@ -75,19 +75,19 @@ Advert::Advert() :
     Accounting::clsRESTAPIWithAccounting(AdvertSchema,
                                          AdvertDomain,
                                          {
-                                            {"show", {"pkgShowPerDay", {}, {}, "pkgShowTotal"}},
-                                            {"click", {"pkgShowPerDay", {}, {}, "pkgShowTotal"}},
+                                            {"show", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
+                                            {"click", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
                                          },
-                                         &Advertisement::AccountPackages::instance(),
-                                         &Advertisement::clsAccountUserPackages::instance(),
-                                         &Advertisement::AccountUsage::instance(),
-                                         &Advertisement::AccountDiscounts::instance()
+                                         &Advertisement::AccountSaleables::instance(),
+                                         &Advertisement::clsAccountUserAssets::instance(),
+                                         &Advertisement::AccountAssetUsage::instance(),
+                                         &Advertisement::AccountCoupons::instance()
                                          )
 {
-    this->addSubModule(AccountPackages.data());
-    this->addSubModule(AccountUserPackages.data());
-    this->addSubModule(AccountUsage.data());
-    this->addSubModule(AccountDiscounts.data());
+    this->addSubModule(AccountSaleables.data());
+    this->addSubModule(AccountUserAssets.data());
+    this->addSubModule(AccountAssetUsage.data());
+    this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
 
     this->addSubModule(&Advertisement::ActiveAds::instance());
@@ -104,7 +104,7 @@ Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint32 _us
 
 }
 
-void Advert::breakPackage(quint64 _pkgID)
+void Advert::breakPackage(quint64 _slbID)
 {
 
 }

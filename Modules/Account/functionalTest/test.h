@@ -22,7 +22,7 @@
 #ifndef TEST_ACCOUNT_HPP
 #define TEST_ACCOUNT_HPP
 
-#include "testCommon.hpp"
+#include "Interfaces/Test/testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/actionLogs.hpp"
 #include "ORM/activeSessions.hpp"
@@ -40,48 +40,45 @@ class testAccount: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void initTestCase(){
-        clsDAC DAC;
-        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", {UT_NormalToken, UT_AdminToken});
-        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
-        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName=?", {UT_RoleName});
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
-        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=? OR usrEmail=?", {"unit_test@unittest.test", "unit_test_admin@unittest.test"});
-        DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName='unitTest', rolCreatedBy_usrID=1");
+    void initTestCase() {
+        initUnitTestData(false);
     }
 
-    void cleanupTestCase(){
-        // clsDAC DAC;
-        // DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail=?", {"unit_test@unittest.test"});
+    void cleanupTestCase() {
+//        cleanupUnitTestData();
     }
 
     void Signup(){
         QVERIFY((gUserID = callAPI(PUT,
                                         "Account/signup", {}, {
-                                            {"emailOrMobile", "unit_test@unittest.test"},
+                                            {"emailOrMobile", UT_UserEmail},
                                             {"name", "unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                            {"role", "unitTest"}
+                                            {"role", UT_RoleName}
                                         }).toMap().value("usrID").toUInt()) > 0);
 
         QVERIFY((gAdminUserID = callAPI(PUT,
                                         "Account/signup", {}, {
-                                            {"emailOrMobile", "unit_test_admin@unittest.test"},
-                                            {"name", "unit"},
+                                            {"emailOrMobile", UT_AdminUserEmail},
+                                            {"name", "admin unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                            {"role", "unitTest"}
+                                            {"role", UT_RoleName}
                                         }).toMap().value("usrID").toUInt()) > 0);
 
         clsDAC DAC;
-        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", {gAdminUserID});
+        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
     void ApproveEmail(){
         clsDAC DAC;
-        QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
-        {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
+        QString Code = DAC.execQuery("",
+                                     "SELECT aprApprovalCode"
+                                     "  FROM tblApprovalRequest"
+                                     " WHERE apr_usrID=?",
+                                     {gUserID}
+                                     ).toJson(true).object().value("aprApprovalCode").toString();
 
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
         {gUserID});
@@ -110,7 +107,7 @@ private slots:
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
-                                    {"login", "unit_test@unittest.test"},
+                                    {"login", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -138,7 +135,7 @@ private slots:
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
-                                    {"login", "unit_test@unittest.test"},
+                                    {"login", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -148,7 +145,7 @@ private slots:
 
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
-                                    {"login", "unit_test_admin@unittest.test"},
+                                    {"login", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -166,7 +163,7 @@ private slots:
     void CreateForgotPasswordLink(){
         QVERIFY(callAPI(POST,
                         "Account/createForgotPasswordLink",{},{
-                            {"login", "unit_test@unittest.test"},
+                            {"login", UT_UserEmail},
                             {"via", "Web"},
                         }).toBool());
     }
@@ -229,6 +226,5 @@ private slots:
         }
     }
 };
-
 
 #endif // TEST_ACCOUNT_HPP

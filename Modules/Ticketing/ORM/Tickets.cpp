@@ -23,7 +23,6 @@
 #include "Tickets.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
-#include "Modules/Account/ORM/User.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuTicketStatus);
 

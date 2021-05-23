@@ -21,31 +21,26 @@
  */
 
 #include <QtTest>
-#include "Interfaces/Test/testBase.hpp"
-#include "Modules/Account/functionalTest/test.h"
+#include "testBase.hpp"
+#include "test.h"
 
-QString APIURL = "http://127.0.0.1:10000/rest/v1";
-
-QString gEncodedJWT;
-QString gLoginJWT;
-QString gEncodedAdminJWT;
-QJsonObject gJWT;
-QJsonObject gAdminJWT;
-quint32 gUserID;
-quint32 gAdminUserID;
-QVariant gInvalid;
+TAPI_MARSHAL_TEST_VARIABLES
 
 int main(int argc, char *argv[])
 {
+    qDebug() << "--------------------------------------------------";
+    qDebug() << "-- test module: Account --------------------------";
+    qDebug() << "--------------------------------------------------";
+
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
     clsDAC::addDBEngine(enuDBEngines::MySQL);
-    clsDAC::setConnectionString("HOST=127.0.0.1;"
-                                "PORT=3306;"
-                                "USER=root;"
-                                "PASSWORD=targoman123;"
-                                "SCHEMA=AAA");
+    clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
+                                "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
+                                "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
+                                "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
+                                "SCHEMA=" TARGOMAN_M2STR(UNITTEST_DB_SCHEMA) ";");
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;

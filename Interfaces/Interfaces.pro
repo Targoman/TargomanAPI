@@ -44,6 +44,8 @@ SOURCES += \
     AAA/Accounting_Interfaces.cpp
 
 OTHER_FILES += \
+    Test/testBase.hpp \
+    Test/testCommon.hpp \
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/

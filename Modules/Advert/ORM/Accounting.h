@@ -32,17 +32,17 @@ namespace Advertisement {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblAccountPackages {
-TARGOMAN_CREATE_CONSTEXPR(pkgShowPerDay);
-TARGOMAN_CREATE_CONSTEXPR(pkgShowTotal);
-TARGOMAN_CREATE_CONSTEXPR(pkgClicksPerDay);
-TARGOMAN_CREATE_CONSTEXPR(pkgClicksPerMonth);
-TARGOMAN_CREATE_CONSTEXPR(pkgClicksTotal);
+namespace tblAccountSaleables {
+TARGOMAN_CREATE_CONSTEXPR(slbShowPerDay);
+TARGOMAN_CREATE_CONSTEXPR(slbShowTotal);
+TARGOMAN_CREATE_CONSTEXPR(slbClicksPerDay);
+TARGOMAN_CREATE_CONSTEXPR(slbClicksPerMonth);
+TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
 }
 
-namespace tblAccountUsage {
-constexpr char Name[] = "tblAccountUsage";
-TARGOMAN_CREATE_CONSTEXPR(usg_aupID);
+namespace tblAccountAssetUsage {
+constexpr char Name[] = "tblAccountAssetUsage";
+TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
 TARGOMAN_CREATE_CONSTEXPR(usgRemainingDays);
 TARGOMAN_CREATE_CONSTEXPR(usgDayShow);
 TARGOMAN_CREATE_CONSTEXPR(usgTotalShow);
@@ -53,38 +53,38 @@ TARGOMAN_CREATE_CONSTEXPR(usgTotalClicks);
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class AccountPackages: public Accounting::intfAccountPackages
+class AccountSaleables: public Accounting::intfAccountSaleables
 {
     Q_OBJECT
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountPackages)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountSaleables)
 };
 
 /******************************************************/
-class AccountUsage: public Accounting::intfAccountUsage
+class AccountAssetUsage: public Accounting::intfAccountAssetUsage
 {
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountUsage)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountAssetUsage)
 };
 
 /******************************************************/
-class clsAccountUserPackages: public Accounting::intfAccountUserPackages
+class clsAccountUserAssets: public Accounting::intfAccountUserAssets
 {
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountUserPackages)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountUserAssets)
 };
 
 /******************************************************/
-class AccountDiscounts: public Accounting::intfAccountDiscounts
+class AccountCoupons: public Accounting::intfAccountCoupons
 {
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountDiscounts)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountCoupons)
 };
 
 /******************************************************/

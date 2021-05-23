@@ -22,9 +22,8 @@
 #ifndef TEST_ACCOUNT_ORM_APITOKENS_HPP
 #define TEST_ACCOUNT_ORM_APITOKENS_HPP
 
-#include "testCommon.hpp"
+#include "Interfaces/Test/testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
-#include "defs.hpp"
 
 using namespace Targoman::API::AAA;
 

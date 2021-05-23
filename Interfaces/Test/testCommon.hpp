@@ -25,7 +25,35 @@
 #include <QtTest/QtTest>
 #include "QtCUrl.h"
 #include "libTargomanDBM/clsDAC.h"
+
 using namespace Targoman::DBManager;
+
+constexpr char UT_UserEmail[] = "unit_test@unittest.test";
+constexpr char UT_AdminUserEmail[] = "unit_test_admin@unittest.test";
+constexpr quint32 UT_AdminRoleID = 3;
+constexpr quint64 UT_SystemUserID = 1;
+
+constexpr char UT_RoleName[] = "UnitTest_Role";
+constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
+constexpr char UT_ServiceName[] = "UnitTest_Service";
+constexpr char UT_AdminToken[] = "Sample_UnitTest_Admin_Token";
+constexpr char UT_NormalToken[] = "Sample_UnitTest_Token";
+
+extern unsigned int gServiceRoleID;
+extern unsigned int gServiceID;
+extern unsigned int gAPITokenID;
+extern unsigned int gAPIAdminTokenID;
+
+#define TAPI_MARSHAL_TEST_VARIABLES \
+    QString APIURL = "http://127.0.0.1:10000/rest/v1"; \
+    QString gEncodedJWT; \
+    QString gLoginJWT; \
+    QString gEncodedAdminJWT; \
+    QJsonObject gJWT; \
+    QJsonObject gAdminJWT; \
+    quint32 gUserID; \
+    quint32 gAdminUserID; \
+    QVariant gInvalid;
 
 enum HTTPMethod{
     GET,
@@ -55,6 +83,57 @@ extern QVariant gInvalid;
 
 class clsBaseTest: public QObject{
 protected:
+    void initUnitTestData(bool _createUsers=true) {
+        deleteOldTestData();
+
+        clsDAC DAC;
+        clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?",
+                            {UT_RoleName, UT_SystemUserID});
+        auto rolID = Result.lastInsertId().toUInt();
+
+        if (_createUsers) {
+            DAC.execQuery("",
+                          "INSERT IGNORE"
+                          "  INTO tblUser"
+                          "   SET usrEmail = ?,"
+                          "       usrName = 'unit',"
+                          "       usrFamily = 'test',"
+                          "       usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',"
+                          "       usrRole = ?"
+                          "       usrCreatedBy_usrID = ?",
+                          {
+                              UT_UserEmail,
+                              rolID,
+                              UT_SystemUserID
+                          }
+                        );
+
+            clsDACResult res2 = DAC.execQuery("",
+                          "INSERT IGNORE"
+                          "  INTO tblUser"
+                          "   SET usrEmail = ?,"
+                          "       usrName = 'admin unit',"
+                          "       usrFamily = 'test',"
+                          "       usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',"
+                          "       usrRole = ?"
+                          "       usrCreatedBy_usrID = ?",
+                          {
+                              UT_AdminUserEmail,
+                              UT_AdminRoleID,
+                              UT_SystemUserID
+                          }
+                        );
+
+            gAdminUserID = res2.lastInsertId().toUInt();
+
+            DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", {gAdminUserID});
+        }
+    }
+
+    void cleanupUnitTestData() {
+        deleteOldTestData();
+    }
+
     QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
       return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
     }
@@ -68,6 +147,19 @@ protected:
     }
 
 private:
+    void deleteOldTestData() { //bool _createUsers=false) {
+        clsDAC DAC;
+
+        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", {UT_NormalToken, UT_AdminToken});
+        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID = NULL WHERE usrEmail=? OR usrEmail=?", {UT_UserEmail, UT_AdminUserEmail});
+
+        DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_AdminUserEmail});
+        DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_UserEmail});
+
+        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+    }
+
     QVariant callAPIImpl(QString _encodedJWT , HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");

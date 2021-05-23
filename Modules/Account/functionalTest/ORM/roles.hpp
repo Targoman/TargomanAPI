@@ -22,9 +22,8 @@
 #ifndef TEST_ACCOUNT_ORM_ROLES_HPP
 #define TEST_ACCOUNT_ORM_ROLES_HPP
 
-#include "testCommon.hpp"
+#include "Interfaces/Test/testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
-#include "defs.hpp"
 
 using namespace Targoman::API::AAA;
 
@@ -35,28 +34,28 @@ class testRoles: public clsBaseTest
 private slots:
     void Roles_CREATE_Unprivileged(){
         QVERIFY(callAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
     }
 
     void Roles_CREATE_Admin(){
         QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
         QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonArray({"12"})}
                              }) == gInvalid);
         QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject()}
                              }) == gInvalid);
         QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject({{"ALL",1}})}
                              }) == gInvalid);
         QVERIFY((gServiceRoleID = callAdminAPI(PUT, QString("Account/Roles/"),{},{
-                                {"rolName", UT_RoleName},
+                                {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }).toUInt()) > 0);
     }
@@ -97,7 +96,7 @@ private slots:
         QVERIFY(callAPI(GET, QString("Account/Roles/")) == gInvalid);
         QVERIFY(callAPI(GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
-                            {"rolName",UT_RoleName}, {"cols", "rolName"}
+                            {"rolName",UT_ServiceRoleName}, {"cols", "rolName"}
                         }) == gInvalid);
     }
 
@@ -105,8 +104,8 @@ private slots:
         QVERIFY(callAdminAPI(GET, QString("Account/Roles/"),{{"cols", "rolName"}}).toMap().size());
         QVERIFY(callAdminAPI(GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
-                            {"rolName",UT_RoleName}, {"cols", "rolName"}
-                        }).toMap().value("rolName").toString() == UT_RoleName);
+                            {"rolName",UT_ServiceRoleName}, {"cols", "rolName"}
+                        }).toMap().value("rolName").toString() == UT_ServiceRoleName);
     }
 };
 

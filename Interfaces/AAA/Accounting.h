@@ -40,14 +40,14 @@ protected:
     clsRESTAPIWithAccounting(const QString& _schema,
                              const QString& _module,
                              PackageRemainingCols_t _packageRemainingCols,
-                             intfAccountPackages* _packages,
-                             intfAccountUserPackages* _userPackages,
-                             intfAccountUsage* _usage,
-                             intfAccountDiscounts* _discounts = nullptr,
+                             intfAccountSaleables* _packages,
+                             intfAccountUserAssets* _userPackages,
+                             intfAccountAssetUsage* _usage,
+                             intfAccountCoupons* _discounts = nullptr,
                              intfAccountPrizes* _prizes = nullptr);
     virtual ~clsRESTAPIWithAccounting();
     virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint32 _usrID) = 0;
-    virtual void breakPackage(quint64 _pkgID) = 0;
+    virtual void breakPackage(quint64 _slbID) = 0;
     virtual bool isUnlimited(const PackageRemaining_t& _limits) const = 0;
     virtual bool isEmpty(const PackageRemaining_t& _limits) const = 0;
 
@@ -70,10 +70,10 @@ private slots:
     ///TODO updateItemInBasket
 
 protected:
-    QScopedPointer<intfAccountPackages> AccountPackages;
-    QScopedPointer<intfAccountUserPackages> AccountUserPackages;
-    QScopedPointer<intfAccountUsage> AccountUsage;
-    QScopedPointer<intfAccountDiscounts> AccountDiscounts;
+    QScopedPointer<intfAccountSaleables> AccountSaleables;
+    QScopedPointer<intfAccountUserAssets> AccountUserAssets;
+    QScopedPointer<intfAccountAssetUsage> AccountAssetUsage;
+    QScopedPointer<intfAccountCoupons> AccountCoupons;
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
 private:

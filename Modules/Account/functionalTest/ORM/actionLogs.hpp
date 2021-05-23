@@ -19,27 +19,23 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
-#ifndef TESTBASE_HPP
-#define TESTBASE_HPP
+#ifndef TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
+#define TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
 
-#include "testCommon.hpp"
+#include "Interfaces/Test/testCommon.hpp"
+#include "Interfaces/AAA/clsJWT.hpp"
 
-class testBase: public clsBaseTest
+using namespace Targoman::API::AAA;
+
+class testActionLogs: public clsBaseTest
 {
     Q_OBJECT
+
 private slots:
-    void initTestCase(){
-
-    }
-
-    void cleanupTestCase(){
-
-    }
-
-    void openAPI(){
-
+    void unprivActionLogs(){
+        QVERIFY(callAPI(GET, "Account/ActionLogs").toString().isEmpty());
     }
 };
 
-#endif // TESTBASE_HPP
 
+#endif // TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
