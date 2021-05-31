@@ -345,6 +345,18 @@ namespace Targoman {namespace API { \
 /************************************************************/
 /************************************************************/
 /************************************************************/
+#define INTERNAL_SF_STRUCT_1(_validator) _validator
+#define INTERNAL_SF_STRUCT_0()           INTERNAL_SF_STRUCT_1(v)
+
+#define INTERNAL_SF_STRUCT(_type, _name, ...) \
+    _type, \
+    _name, \
+    _type(), \
+    TARGOMAN_M2CONCAT(INTERNAL_SF_STRUCT_, TARGOMAN_MACRO_ARG_COUNT(__VA_ARGS__))(__VA_ARGS__), \
+    v.toJson(), \
+    _type().fromJson(v.toObject())
+
+/************************************************************/
 #define INTERNAL_SF_STRING_2(_def, _validator) _def, _validator
 #define INTERNAL_SF_STRING_1(_def)             INTERNAL_SF_STRING_2(_def, v.size())
 #define INTERNAL_SF_STRING_0()                 INTERNAL_SF_STRING_1(QString())

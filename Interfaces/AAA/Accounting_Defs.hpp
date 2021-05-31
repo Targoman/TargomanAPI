@@ -183,31 +183,28 @@ namespace TAPI {
 using namespace Targoman::API::AAA::Accounting;
 typedef QList<stuVoucherItem> InvItems_t;
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuPreVoucher,
-        InvItems_t    , Items   , InvItems_t() , v.size(),
-            [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
-            [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuVoucherItem().fromJson(I.toObject())); return L;}(v),
-        stuPrize      , Prize     , stuPrize()   , v.Desc.size(), v.toJson(), stuPrize().fromJson(v.toObject()),
-        QString       , Summary   , QString()    , v.size()     , v          , v.toString(),
-        quint16       , Round     , 0            , v>0          , v          , static_cast<quint16>(v.toInt()),
-        quint32       , ToPay     , 0            , v>0          , C2DBL(v)   , static_cast<quint32>(v.toDouble()),
-        QString       , Sign      , QString()    , v.size()     , v         , v.toString()
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
+    SF_Generic(InvItems_t, Items, InvItems_t(), v.size(),
+        [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
+        [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+    ),
+    SF_Struct(stuPrize, Prize, v.Desc.size()),
+    SF_QString(Summary),
+    SF_quint16(Round),
+    SF_quint32(ToPay, 0, v>0),
+    SF_QString(Sign)
 );
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-    stuVoucher,
-    // quint64               , ID          , 0                    , v>0     , C2DBL(v)   , V2U64(v),
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
     SF_quint64(ID, 0, v>0),
-    stuPreVoucher         , Info        , stuPreVoucher()      , v.ToPay , v.toJson(), stuPreVoucher().fromJson(v.toObject()),
-    QString               , PaymentLink , QString()            , v.size(), v         , v.toString(),
-    enuVoucherStatus::Type, Status      , enuVoucherStatus::New, v       , v         , static_cast<enuVoucherStatus::Type>(v.toString().toLatin1().constData()[0])
+    SF_Struct(stuPreVoucher, Info, v.ToPay),
+    SF_QString(PaymentLink),
+    SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New)
 );
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-    stuDiscountSaleableBasedMultiplier,
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_QString(SaleableCode),
     SF_quint32(Multiplier),
     SF_NULLABLE_quint32(MinCount)
