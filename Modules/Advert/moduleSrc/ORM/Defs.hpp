@@ -75,10 +75,10 @@ TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
 constexpr char AdvertSchema[] = "Advert";
 constexpr char AdvertDomain[] = "Advert";
 
-TAPI_DECLARE_METATYPE(TAPI::enuAdvertOrder::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuAdvertType::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuBannerSizes::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuAccountOrdersStatus::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAdvertOrder);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAdvertType);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuBannerSizes);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAccountOrdersStatus);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
 

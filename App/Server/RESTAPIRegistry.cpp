@@ -65,6 +65,8 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_METATYPE)
 };
 
+
+
 #define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _lambdaFromVariant, _toORMValueLambda, _lambdaDesc) \
     template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
     template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _lambdaFromVariant; \
@@ -89,7 +91,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 
 #define DO_ON_TYPE_NULLABLE_IGNORED(...)
 #define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)
-#define DO_ON_NULLABLE_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
+#define DO_ON_NULLABLE_TYPE(_complexity, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, IGNORE_TYPE_##_typeName)
 
 #define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral,  _typeName, _baseType)
 #define MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Complex, _typeName, _baseType)

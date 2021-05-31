@@ -117,11 +117,13 @@ QHash<QString, clsTable*> clsTable::Registry;
 clsTable::clsTable(const QString& _schema,
                    const QString& _name,
                    const QList<clsORMField>& _cols,
-                   const QList<stuRelation>& _foreignKeys) :
+                   const QList<stuRelation>& _foreignKeys,
+                   const QList<stuDBIndex>& _indexes) :
     Schema(_schema),
     Name(_name),
     BaseCols(_cols),
     ForeignKeys(_foreignKeys),
+    Indexes(_indexes),
     CountOfPKs(0)
 {
     clsTable::Registry.insert(Schema + "." + Name, this);

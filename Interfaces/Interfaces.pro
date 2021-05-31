@@ -52,3 +52,6 @@ INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)
+
+HEADERS += \
+    Common/APIArgHelperMacrosPrivate.h

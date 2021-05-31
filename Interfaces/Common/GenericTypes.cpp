@@ -206,6 +206,77 @@ TAPI_REGISTER_METATYPE(
 );
 
 TAPI_REGISTER_METATYPE(
+            COMPLEXITY_Object,
+            TAPI, SaleableAdditive_t,
+            [](const SaleableAdditive_t& _value) -> QVariant {return _value;},
+            [](const QVariant& _value, const QByteArray& _paramName) -> SaleableAdditive_t {
+                if(_value.isValid() == false)
+                    return QJsonDocument();
+
+                QJsonDocument Doc;
+                if(_value.canConvert<QVariantMap>() ||
+                   _value.canConvert<QVariantList>() ||
+                   _value.canConvert<double>())
+                    Doc = QJsonDocument::fromVariant(_value);
+                else if(_value.toString().isEmpty())
+                    return QJsonDocument();
+                else {
+                    QJsonParseError Error;
+                    QJsonDocument Doc;
+                    Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+                    if(Error.error != QJsonParseError::NoError)
+                        throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
+                }
+
+                if(Doc.isNull() || Doc.isEmpty())
+                    return Doc;
+                if(Doc.isArray())
+                    throw exHTTPBadRequest(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> must be object not array");
+
+                QJsonObject PrivObj = Doc.object();
+
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+/// ///TODO
+throw Common::exTargomanMustBeImplemented("SaleableAdditive_t not implemented yet!");
+
+                return  Doc;
+            },
+            [](const QList<ORM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
+            [](const QVariant& _value) {
+    /// ///TODO
+                if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
+                    return QJsonDocument();
+                QJsonParseError Error;
+                QJsonDocument Doc;
+                if(_value.canConvert<QVariantMap>() ||
+                   _value.canConvert<QVariantList>() ||
+                   _value.canConvert<double>())
+                    Doc = QJsonDocument::fromVariant(_value);
+                else
+                  Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+                if(Error.error != QJsonParseError::NoError)
+                    throw exHTTPBadRequest("is not a valid Saleable Additive: <"+_value.toString()+">" + Error.errorString());
+                return Doc;
+            },
+            [](const QVariant& _val) {
+                return QString::fromUtf8(QJsonDocument::fromVariant(_val).toJson(QJsonDocument::Compact));
+            }
+);
+
+TAPI_REGISTER_METATYPE(
             COMPLEXITY_String,
             TAPI, EncodedJWT_t,
             [](const EncodedJWT_t& _value) -> QVariant {return _value;},
@@ -228,10 +299,19 @@ TAPI_REGISTER_METATYPE(
                 PKsByPath_t Value;
                 QUrl URL = QUrl::fromPercentEncoding(("http://127.0.0.1/" + _value.toString()).toUtf8());
                 Value=URL.path().remove(0,1);
-
                 return  Value;
             }
 );
+
+TAPI_REGISTER_METATYPE(
+        COMPLEXITY_String,
+        TAPI, CouponCode_t,
+        [](const CouponCode_t& _value) -> QVariant {return _value.mid(0, _value.indexOf('!'));},
+        [](const QVariant& _value, const QByteArray&) -> CouponCode_t {
+            auto ValueStr = _value.toString();
+            return ValueStr.mid(0, ValueStr.indexOf('!'));
+        }
+    );
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, MD5_t, optional(QFV.md5()), _value, [](const QList<clsORMField>&){ return "A valid MD5 string"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, CommaSeparatedStringList_t, optional(QFV.asciiAlNum(false, ",")), _value, [](const QList<clsORMField>&){ return "A valid comma separated string list"; });
@@ -247,8 +327,8 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Date_t, optional(QFV
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Time_t, optional(QFV.time()), _value, [](const QList<clsORMField>&){ return "A valid time"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DateTime_t, optional(QFV.dateTime()), _value, [](const QList<clsORMField>&){ return "A valid datetime"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t, optional(QFV.url()), _value, [](const QList<clsORMField>&){ return "A valid URL"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, PackageCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid PackageCode"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DiscountCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{5,10}"))), _value, [](const QList<clsORMField>&){ return "A valid DiscountCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid ProductCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, SaleableCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid SaleableCode"; });
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 

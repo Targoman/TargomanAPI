@@ -28,6 +28,7 @@
 #include "Interfaces/Common/GenericTypes.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
+#include "Server/QtTypes.hpp"
 #include <QString>
 
 namespace TAPI {
@@ -40,14 +41,13 @@ TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                                 )
 TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Percent = '%',
-                     Amount  = '$',
-                     Free    = 'Z')
+                     Currency  = '$')
 }
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-namespace Accounting{
+namespace Accounting {
 
 inline QString makeConfig(const QString& _name){return "/zModule_Account/" + _name;}
 extern Common::Configuration::tmplConfigurable<QString> Secret;
@@ -91,7 +91,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
         qint32, PerMonth, -1, v>-1, v, static_cast<qint32>(v.toInt()),
         qint64, Total,    -1, v>-1, v, static_cast<qint64>(v.toInt())
         );
-typedef QMap<QString, stuUsage> PackageRemaining_t;
+typedef QMap<QString, stuUsage> UsageLimits_t;
 
 struct stuUsageColDefinition{
     QString PerDay;
@@ -102,71 +102,73 @@ struct stuUsageColDefinition{
         PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
     {}
 };
-typedef QMap<QString, stuUsageColDefinition> PackageRemainingCols_t;
+typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
 
-struct stuPackage {
-    quint64 PackageID;
-    QString PackageCode;
-    qint32 RemainingDays; // can be -1 for unlimited
-    qint8 RemainingHours; // can be -1 for unlimited
-    PackageRemaining_t  Remaining;
-    QJsonObject Properties;
+typedef QMap<QString, QString> OrderAdditives_t;
 
-    QDate StartDate; //can be invalid for normal accounts
-    QDate EndDate; //can be invalid for normal accounts
-    QTime StartTime; //can be invalid for normal accounts
-    QTime EndTime; //can be invalid for normal accounts
+struct stuAssetItem {
+    //product
+    TAPI::ProductCode_t          prdCode;
+    QString                      prdName;
+    TAPI::Date_t                 prdValidFromDate;
+    TAPI::Date_t                 prdValidToDate;
+    NULLABLE(quint8)             prdValidFromHour;
+    NULLABLE(quint8)             prdValidToHour;
+    TAPI::PrivObject_t           prdPrivs;
+    qreal                        prdVAT;
+    quint32                      prdInStockCount;
+    quint32                      prdOrderedCount;
+    quint32                      prdReturnedCount;
+    TAPI::enuGenericStatus::Type prdStatus;
 
-    stuPackage(quint64   _slbID = 0,
-               QString   _slbCode = {},
-               qint32    _remainingDays = -1,
-               qint8     _remainingHours = -1,
-               PackageRemaining_t  _remaining = {},
-               QDate     _startDate = {},
-               QDate     _endDate = {},
-               QTime     _startTime = {},
-               QTime     _endTime = {},
-               QJsonObject _properties = {}) :
-        PackageID(_slbID),
-        PackageCode(_slbCode),
-        RemainingDays(_remainingDays),
-        RemainingHours(_remainingHours),
-        Remaining(_remaining),
-        Properties(_properties),
-        StartDate(_startDate),
-        EndDate(_endDate),
-        StartTime(_startTime),
-        EndTime(_endTime)
-    {}
+    //saleable
+    quint32                      slbID;
+    TAPI::SaleableCode_t         slbCode;
+    QString                      slbName;
+    TAPI::JSON_t                 slbPrivs;
+    qreal                        slbBasePrice;
+    TAPI::SaleableAdditive_t     slbAdditives;
+    quint32                      slbInStockCount;
+    quint32                      slbOrderedCount;
+    quint32                      slbReturnedCount;
+    QString                      slbVoucherTemplate;
+    TAPI::enuGenericStatus::Type slbStatus;
+
+    //digested
+    struct {
+        QJsonObject   Additives;
+        UsageLimits_t Limits;
+        QJsonObject   Privs;
+    } Digested;
 
     QJsonObject toJson(bool _full);
-    stuPackage& fromJson(const QJsonObject& _obj);
+    stuAssetItem& fromJson(const QJsonObject& _obj);
 };
 
-typedef QMap<QString, stuPackage> ActivePackages_t;
+typedef QMap<QString, stuAssetItem> ActivePackages_t;
 
 struct stuServiceAccountInfo{
     ActivePackages_t            ActivePackages;
-    QSharedPointer<stuPackage>  PreferedPackage;
+    QSharedPointer<stuAssetItem>  PreferedPackage;
     quint32                     ParentID; // 0 for no parent
-    PackageRemaining_t          MyLimitsOnParent;
+    UsageLimits_t          MyLimitsOnParent;
 
     stuServiceAccountInfo(ActivePackages_t _activePackages,
-                          QSharedPointer<stuPackage> _preferedPackage,
+                          QSharedPointer<stuAssetItem> _preferedPackage,
                           quint32          _parentID,
-                          PackageRemaining_t  _myLimitsOnParent
+                          UsageLimits_t  _myLimitsOnParent
                           );
 };
 
 struct stuActiveServiceAccount{
-    stuPackage ActivePackage;
+    stuAssetItem ActivePackage;
     bool       IsFromParent;
-    PackageRemaining_t MyLimitsOnParent;
+    UsageLimits_t MyLimitsOnParent;
     qint64     TTL;
 
-    stuActiveServiceAccount(const stuPackage& _package = {},
+    stuActiveServiceAccount(const stuAssetItem& _package = {},
                             bool _isFromParent = false,
-                            const PackageRemaining_t& _myLimitsOnParent = {},
+                            const UsageLimits_t& _myLimitsOnParent = {},
                             qint64 _ttl = 0);
     QJsonObject toJson(bool _full);
     stuActiveServiceAccount& fromJson(const QJsonObject _obj);
@@ -176,6 +178,8 @@ struct stuActiveServiceAccount{
 
 #include <QJsonArray>
 namespace TAPI {
+
+//using namespace Targoman::API;
 using namespace Targoman::API::AAA::Accounting;
 typedef QList<stuVoucherItem> InvItems_t;
 
@@ -192,14 +196,65 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuVoucher,
-        quint64               , ID          , 0                    , v>0     , C2DBL(v)   , static_cast<quint64>(v.toDouble()),
-        stuPreVoucher         , Info        , stuPreVoucher()      , v.ToPay , v.toJson(), stuPreVoucher().fromJson(v.toObject()),
-        QString               , PaymentLink , QString()            , v.size(), v         , v.toString(),
-        enuVoucherStatus::Type, Status      , enuVoucherStatus::New, v       , v         , static_cast<enuVoucherStatus::Type>(v.toString().toLatin1().constData()[0])
+    stuVoucher,
+    // quint64               , ID          , 0                    , v>0     , C2DBL(v)   , V2U64(v),
+    SF_quint64(ID, 0, v>0),
+    stuPreVoucher         , Info        , stuPreVoucher()      , v.ToPay , v.toJson(), stuPreVoucher().fromJson(v.toObject()),
+    QString               , PaymentLink , QString()            , v.size(), v         , v.toString(),
+    enuVoucherStatus::Type, Status      , enuVoucherStatus::New, v       , v         , static_cast<enuVoucherStatus::Type>(v.toString().toLatin1().constData()[0])
 );
 
-}
+//bool KKKKKKKKKKKKKKKKKK() {return true;}
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
+    stuDiscountSaleableBasedMultiplier,
+    SF_QString(SaleableCode),
+    SF_quint32(Multiplier),
+    SF_NULLABLE_quint32(MinCount)
+);
+
+/*
+struct stuVoucher {
+    quint64 ID;
+    stuPreVoucher Info;
+    QString PaymentLink;
+    enuVoucherStatus::Type Status;
+    stuVoucher(const quint64& _ID=0, const stuPreVoucher& _Info=stuPreVoucher(), const QString& _PaymentLink=QString(), const enuVoucherStatus::Type& _Status=enuVoucherStatus::New)
+        : ID(_ID), Info(_Info), PaymentLink(_PaymentLink), Status(_Status) {}
+    QJsonObject toJson() const {
+        QJsonObject Obj;
+        if([](auto v)->bool{return v>0;}(ID)) Obj[toCammel("ID")]=[](auto v)->QJsonValue{return static_cast<double>(v);}(ID);;
+        if([](auto v)->bool{return v.ToPay;}(Info)) Obj[toCammel("Info")]=[](auto v)->QJsonValue{return v.toJson();}(Info);;
+        if([](auto v)->bool{return v.size();}(PaymentLink)) Obj[toCammel("PaymentLink")]=[](auto v)->QJsonValue{return v;}(PaymentLink);;
+        if([](auto v)->bool{return v;}(Status)) Obj[toCammel("Status")]=[](auto v)->QJsonValue{return v;}(Status);;;
+        return Obj;
+    }
+    stuVoucher& fromJson(const QJsonObject& _obj){
+        ID=_obj.contains(toCammel("ID"))?[](auto v)->quint64{return static_cast<quint64>(v.toDouble());}(_obj.value(toCammel("ID"))):0;
+        Info=_obj.contains(toCammel("Info"))?[](auto v)->stuPreVoucher{return stuPreVoucher().fromJson(v.toObject());}(_obj.value(toCammel("Info"))):stuPreVoucher();
+        PaymentLink=_obj.contains(toCammel("PaymentLink"))?[](auto v)->QString{return v.toString();}(_obj.value(toCammel("PaymentLink"))):QString();
+        Status=_obj.contains(toCammel("Status"))?[](auto v)->enuVoucherStatus::Type{return static_cast<enuVoucherStatus::Type>(v.toString().toLatin1().constData()[0]);}(_obj.value(toCammel("Status"))):enuVoucherStatus::New; return *this;
+    }
+};
+
+
+struct stuDiscountSaleableBasedMultiplier {
+    TAPI_HELEPER_VARIANTSTRUCT_PARAMSFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount))
+    stuDiscountSaleableBasedMultiplier(TAPI_HELEPER_VARIANTSTRUCT_CONS_INPUTFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)))
+        : TAPI_HELEPER_VARIANTSTRUCT_CONS_INITFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)) {}
+    QJsonObject toJson() const {
+        QJsonObject Obj;
+        TAPI_HELEPER_VARIANTSTRUCT_TOJSONFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount));
+        return Obj;
+    }
+    stuDiscountSaleableBasedMultiplier& fromJson(const QJsonObject& _obj){
+        TAPI_HELEPER_VARIANTSTRUCT_FROMJSONFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)) return *this;}
+};
+*/
+
+
+
+} //namespace TAPI
 
 namespace Targoman {
 namespace API {
@@ -212,72 +267,117 @@ extern void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher);
 /***************************************************************************************************/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+namespace tblAccountProductsBase {
+constexpr char Name[] = "tblAccountProducts";
+TARGOMAN_CREATE_CONSTEXPR(prdID);
+TARGOMAN_CREATE_CONSTEXPR(prdCode);
+TARGOMAN_CREATE_CONSTEXPR(prdName);
+TARGOMAN_CREATE_CONSTEXPR(prdDesc);
+TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
+TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
+TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
+TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
+TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
+TARGOMAN_CREATE_CONSTEXPR(prdVAT);
+
+///TODO: create trigger for this 3 fields
+TARGOMAN_CREATE_CONSTEXPR(prdInStockCount);
+TARGOMAN_CREATE_CONSTEXPR(prdOrderedCount);
+TARGOMAN_CREATE_CONSTEXPR(prdReturnedCount);
+// prdRemainingCount = prdInStockCount - (prdOrderedCount - prdReturnedCount)
+
+TARGOMAN_CREATE_CONSTEXPR(prdStatus);
+TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
+}
+
 namespace tblAccountSaleablesBase {
 constexpr char Name[] = "tblAccountSaleables";
 TARGOMAN_CREATE_CONSTEXPR(slbID);
 TARGOMAN_CREATE_CONSTEXPR(slbCode);
+TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
 TARGOMAN_CREATE_CONSTEXPR(slbName);
 TARGOMAN_CREATE_CONSTEXPR(slbDesc);
 TARGOMAN_CREATE_CONSTEXPR(slbType);
-TARGOMAN_CREATE_CONSTEXPR(slbRemainingDays);
-TARGOMAN_CREATE_CONSTEXPR(slbValidFromDate);
-TARGOMAN_CREATE_CONSTEXPR(slbValidToDate);
-TARGOMAN_CREATE_CONSTEXPR(slbValidFromTime);
-TARGOMAN_CREATE_CONSTEXPR(slbValidToTime);
-TARGOMAN_CREATE_CONSTEXPR(slb_locID);
-TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
-TARGOMAN_CREATE_CONSTEXPR(slbPrice);
 TARGOMAN_CREATE_CONSTEXPR(slbCanBePurchasedSince);
 TARGOMAN_CREATE_CONSTEXPR(slbNotAvailableSince);
+TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
+TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
+TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
+
+///TODO: create trigger for this 3 fields and make changes to prd Count fields
+TARGOMAN_CREATE_CONSTEXPR(slbInStockCount);
+TARGOMAN_CREATE_CONSTEXPR(slbOrderedCount);
+TARGOMAN_CREATE_CONSTEXPR(slbReturnedCount);
+// slbRemainingCount = slbInStockCount - (slbOrderedCount - slbReturnedCount)
+
 TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
+TARGOMAN_CREATE_CONSTEXPR(slbStatus);
 TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(slbStatus);
-TARGOMAN_CREATE_CONSTEXPR(slbQuantity);
-TARGOMAN_CREATE_CONSTEXPR(slbVAT);
 }
 
-namespace tblAccountUserAssets {
+namespace tblAccountUserAssetsBase {
 constexpr char Name[] = "tblAccountUserAssets";
 TARGOMAN_CREATE_CONSTEXPR(uasID);
 TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
-TARGOMAN_CREATE_CONSTEXPR(uas_slbID);
-TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
-TARGOMAN_CREATE_CONSTEXPR(uasPurchaseRequestDateTime);
-TARGOMAN_CREATE_CONSTEXPR(uasPaymentDateTime);
 TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
-TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemUUID);
+TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
+TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
 TARGOMAN_CREATE_CONSTEXPR(uasStatus);
+TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
 }
 
-namespace tblAccountCoupons {
+namespace tblAccountAssetUsageBase {
+constexpr char Name[] = "tblAccountAssetUsage";
+TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
+}
+
+//TODO: max usage count (user, system)
+//TODO: CodeCommentMark
+namespace tblAccountCouponsBase {
 constexpr char Name[] = "tblAccountCoupons";
 TARGOMAN_CREATE_CONSTEXPR(cpnID);
 TARGOMAN_CREATE_CONSTEXPR(cpnCode);
-TARGOMAN_CREATE_CONSTEXPR(cpnType);
-TARGOMAN_CREATE_CONSTEXPR(cpnPackageBasedAmount);
-TARGOMAN_CREATE_CONSTEXPR(cpnMaxAmount);
+
+//rules
+TARGOMAN_CREATE_CONSTEXPR(cpnPrimaryCount);
+TARGOMAN_CREATE_CONSTEXPR(cpnTotalMaxAmount);   //nullable
+TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxCount);  //nullable
+TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxAmount); //nullable
 TARGOMAN_CREATE_CONSTEXPR(cpnValidFrom);
 TARGOMAN_CREATE_CONSTEXPR(cpnExpiryTime);
-TARGOMAN_CREATE_CONSTEXPR(cpnPrimaryCount);
-TARGOMAN_CREATE_CONSTEXPR(cpnUsedCount);
+
+//actions
+TARGOMAN_CREATE_CONSTEXPR(cpnAmount);
+TARGOMAN_CREATE_CONSTEXPR(cpnAmountType);
+TARGOMAN_CREATE_CONSTEXPR(cpnMaxAmount);
+TARGOMAN_CREATE_CONSTEXPR(cpnSaleableBasedMultiplier);
+
+//stats
+TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedCount);
+TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedAmount);
+
+TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
 TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
 }
 
-namespace tblAccountReferals {
+namespace tblAccountReferalsBase {
 constexpr char Name[] = "tblAccountReferals";
 TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
 TARGOMAN_CREATE_CONSTEXPR(refValidFromDateTime);
 TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
 TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
+TARGOMAN_CREATE_CONSTEXPR(refStatus);
 TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(refStatus);
 }
 
 #pragma GCC diagnostic pop
@@ -286,10 +386,9 @@ TARGOMAN_CREATE_CONSTEXPR(refStatus);
 }
 }
 
-
 TAPI_DECLARE_METATYPE(TAPI::stuVoucher)
 TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)
-TAPI_DECLARE_METATYPE(TAPI::enuVoucherStatus::Type)
-TAPI_DECLARE_METATYPE(TAPI::enuDiscountType::Type)
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherStatus)
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuDiscountType)
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

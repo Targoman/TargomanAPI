@@ -42,31 +42,6 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 #pragma clang diagnostic pop
 
 /*****************************************************/
-#define IGNORE_TYPE_Void ,
-#define IGNORE_TYPE_Char ,
-#define IGNORE_TYPE_QByteArray ,
-#define IGNORE_TYPE_QBitArray ,
-#define IGNORE_TYPE_QLocale ,
-#define IGNORE_TYPE_QRect ,
-#define IGNORE_TYPE_QRectF ,
-#define IGNORE_TYPE_QSize ,
-#define IGNORE_TYPE_QSizeF ,
-#define IGNORE_TYPE_QLine ,
-#define IGNORE_TYPE_QLineF ,
-#define IGNORE_TYPE_QPoint ,
-#define IGNORE_TYPE_QPointF ,
-#define IGNORE_TYPE_QEasingCurve ,
-#define IGNORE_TYPE_QModelIndex ,
-#define IGNORE_TYPE_QJsonValue ,
-#define IGNORE_TYPE_QJsonObject ,
-#define IGNORE_TYPE_QJsonArray ,
-#define IGNORE_TYPE_QJsonDocument ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_Nullptr ,
-#define IGNORE_TYPE_QVariantHash ,
-#define IGNORE_TYPE_QByteArrayList ,
-/*****************************************************/
 class OpenAPIGenerator;
 class RESTAPIRegistry
 {

@@ -33,104 +33,47 @@ using namespace AAA::Accounting;
 using namespace Targoman::API::AAA::Accounting;
 
 /******************************************************/
-
-AccountSaleables::AccountSaleables() :
-    intfAccountSaleables(AdvertSchema,
-              tblAccountSaleablesBase::Name,
-              { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountSaleablesBase::slbID,                 ORM_PRIMARY_KEY32},
-                {tblAccountSaleablesBase::slbCode,               S(TAPI::PackageCode_t), QFV,                                    QRequired,  UPAdmin},
-                {tblAccountSaleablesBase::slbType,               S(TAPI::enuPackageType::Type), QFV,                             TAPI::enuPackageType::Normal, UPAdmin},
-                {tblAccountSaleablesBase::slbValidFromDate,      S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbValidToDate,        S(TAPI::Date_t),        QFV,                                    QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbValidFromTime,      S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbValidToTime,        S(quint8),              QFV.integer().minValue(0).maxValue(23), QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slb_locID,             S(quint32),             QFV.integer().minValue(1),              QRequired, UPAdmin},
-                {tblAccountSaleables::slbShowPerDay,             S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountSaleables::slbShowTotal,              S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountSaleables::slbClicksPerDay,           S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountSaleables::slbClicksPerMonth,         S(quint32),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountSaleables::slbClicksTotal,            S(quint64),             QFV.integer().minValue(-1),             -1,        UPAdmin},
-                {tblAccountSaleablesBase::slbPrivs,              S(TAPI::JSON_t),        QFV,                                    QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QAuto,     UPAdmin},
-                {tblAccountSaleablesBase::slbNotAvailableSince,  S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbVoucherTemplate,    S(QString),             QFV,                                    QNull,     UPAdmin},
-                {tblAccountSaleablesBase::slbCreatedBy_usrID,    ORM_CREATED_BY},
-                {tblAccountSaleablesBase::slbCreationDateTime,   ORM_CREATED_ON},
-                {tblAccountSaleablesBase::slbUpdatedBy_usrID,    ORM_UPDATED_BY},
-                {tblAccountSaleablesBase::slbStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
-              },
-              { ///< Col                                    Reference Table                         ForeignCol          Rename     LeftJoin
-                {tblAccountSaleablesBase::slb_locID,             R(AdvertSchema, tblLocations::Name),    tblLocations::locID},
-                {tblAccountSaleablesBase::slbCreatedBy_usrID,    ORM_JOIN_CREATOR},
-                {tblAccountSaleablesBase::slbUpdatedBy_usrID,    ORM_JOIN_UPDATER},
-              })
-{;}
-
-/******************************************************/
-AccountAssetUsage::AccountAssetUsage() :
-    intfAccountAssetUsage(AdvertSchema,
-              tblAccountAssetUsage::Name,
-              { ///<ColName                         Type                    Validation                              Default UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountAssetUsage::usg_uasID,        ORM_PRIMARY_KEY64},
-                {tblAccountAssetUsage::usgDayShow,       S(qint16),              QFV.integer().minValue(-1),             0,      UPNone,false,false},
-                {tblAccountAssetUsage::usgDayShow,       S(quint32),             QFV.integer().minValue(0),              0,      UPNone,false,false},
-                {tblAccountAssetUsage::usgTotalShow,     S(quint64),             QFV.integer().minValue(0),              0,      UPNone,false,false},
-                {tblAccountAssetUsage::usgDayClicks,     S(quint32),             QFV.integer().minValue(0),              0,      UPNone,false,false},
-                {tblAccountAssetUsage::usgMonthClicks,   S(quint32),             QFV.integer().minValue(0),              0,      UPNone,false,false},
-                {tblAccountAssetUsage::usgTotalClicks,   S(quint64),             QFV.integer().minValue(0),              0,      UPNone,false,false},
-              },
-              { ///< Col                            Reference Table                               ForeignCol                     Rename     LeftJoin
-                {tblAccountAssetUsage::usg_uasID,        R(AdvertSchema,tblAccountUserAssets::Name), tblAccountUserAssets::uasID},
-              })
-{;}
-
-/******************************************************/
-
-clsAccountUserAssets::clsAccountUserAssets() :
-    intfAccountUserAssets(AdvertSchema,
-              tblAccountUserAssets::Name,
-              { ///<ColName                                         Type                    Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAccountUserAssets::uasID,                     ORM_PRIMARY_KEY64},
-                {tblAccountUserAssets::uas_usrID,                 S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin},
-                {tblAccountUserAssets::uas_slbID,                 S(quint32),             QFV.integer().minValue(1),  QRequired,  UPAdmin},
-                {tblAccountUserAssets::uasPrefered,               S(bool),                QFV,                        false,      UPOwner},
-                {tblAccountUserAssets::uasPurchaseRequestDateTime,S(TAPI::DateTime_t),    QFV,                        QNull,      UPNone},
-                {tblAccountUserAssets::uasPaymentDateTime,        S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin},
-                {tblAccountUserAssets::uas_vchID,                 S(quint64),             QFV.integer().minValue(1),  QInvalid,   UPNone},
-                {tblAccountUserAssets::uasUpdatedBy_usrID,        ORM_UPDATED_BY},
-                {tblAccountUserAssets::uasStatus,                 S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus},
-              },
-              { ///< Col                            Reference Table                               ForeignCol                     Rename     LeftJoin
-                {tblAccountUserAssets::uas_usrID, R(AAASchema,tblUser::Name),  tblUser::usrID,    "Owner_"},
-                {tblAccountUserAssets::uas_slbID, R(AdvertSchema,tblAccountSaleablesBase::Name),  tblAccountSaleablesBase::slbID},
-                //Voucher is not accessible as it is in another schema
-                //{tblAccountUserAssets::uas_vchID,        R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
-              }
+AccountProducts::AccountProducts()
+    : intfAccountProducts(AdvertSchema,
+        {///< ColName                                    Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+            { tblAccountProducts::prd_locID,             S(quint32), QFV.integer().minValue(1),  QRequired, UPOwner },
+            { tblAccountProducts::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountProducts::prdShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountProducts::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountProducts::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountProducts::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+        },
+        {///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            { tblAccountProducts::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::locID },
+        }
     )
 {;}
+
 /******************************************************/
-AccountCoupons::AccountCoupons() :
-    intfAccountCoupons(AdvertSchema,
-             tblAccountCoupons::Name,
-            { ///<ColName                                 Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-              {tblAccountCoupons::cpnID,                 ORM_PRIMARY_KEY32},
-              {tblAccountCoupons::cpnCode,               S(TAPI::DiscountCode_t),QFV,                                    QRequired, UPAdmin},
-              {tblAccountCoupons::cpnType,               S(TAPI::enuDiscountType::Type), QFV,                            TAPI::enuDiscountType::Percent, UPAdmin},
-              {tblAccountCoupons::cpnPackageBasedAmount, S(TAPI::JSON_t),        QFV,                                    QRequired, UPAdmin, false, false},
-              {tblAccountCoupons::cpnValidFrom,          S(TAPI::DateTime_t),    QFV,                                    QRequired, UPAdmin},
-              {tblAccountCoupons::cpnExpiryTime,         S(TAPI::DateTime_t),    QFV,                                    QNull,     UPAdmin},
-              {tblAccountCoupons::cpnPrimaryCount,       S(quint32),             QFV.integer().minValue(1),              1,         UPAdmin},
-              {tblAccountCoupons::cpnUsedCount,          S(quint32),             QFV.integer().minValue(0),              0,         UPNone},
-              {tblAccountCoupons::cpnCreatedBy_usrID,    ORM_CREATED_BY},
-              {tblAccountCoupons::cpnCreationDateTime,   ORM_CREATED_ON},
-              {tblAccountCoupons::cpnUpdatedBy_usrID,    ORM_UPDATED_BY},
-              {tblAccountCoupons::cpnStatus,             S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
-            },
-            { ///< Col                                     Reference Table                         ForeignCol          Rename     LeftJoin
-              {tblAccountCoupons::cpnCreatedBy_usrID,    ORM_JOIN_CREATOR},
-              {tblAccountCoupons::cpnUpdatedBy_usrID,    ORM_JOIN_UPDATER},
-            })
+AccountSaleables::AccountSaleables()
+    : intfAccountSaleables(AdvertSchema)
+{;}
+
+/******************************************************/
+AccountUserAssets::AccountUserAssets()
+    : intfAccountUserAssets(AdvertSchema,
+        {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
+            ADVERT_DEFINE_ASSET_FIELDS("uas")
+        })
+{;}
+
+/******************************************************/
+AccountAssetUsage::AccountAssetUsage()
+    : intfAccountAssetUsage(AdvertSchema,
+        {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
+            ADVERT_DEFINE_ASSET_FIELDS("usg")
+        }
+    )
+{;}
+
+/******************************************************/
+AccountCoupons::AccountCoupons()
+    : intfAccountCoupons(AdvertSchema)
 {;}
 
 }

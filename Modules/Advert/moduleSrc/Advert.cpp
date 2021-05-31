@@ -72,14 +72,14 @@ QString Advert::apiGETRetrieveURL(TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI
 }
 
 Advert::Advert() :
-    Accounting::clsRESTAPIWithAccounting(AdvertSchema,
+    Accounting::intfRESTAPIWithAccounting(AdvertSchema,
                                          AdvertDomain,
                                          {
                                             {"show", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
                                             {"click", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
                                          },
                                          &Advertisement::AccountSaleables::instance(),
-                                         &Advertisement::clsAccountUserAssets::instance(),
+                                         &Advertisement::AccountUserAssets::instance(),
                                          &Advertisement::AccountAssetUsage::instance(),
                                          &Advertisement::AccountCoupons::instance()
                                          )
@@ -109,12 +109,12 @@ void Advert::breakPackage(quint64 _slbID)
 
 }
 
-bool Advert::isUnlimited(const Accounting::PackageRemaining_t& _limits) const
+bool Advert::isUnlimited(const Accounting::UsageLimits_t& _limits) const
 {
 
 }
 
-bool Advert::isEmpty(const Accounting::PackageRemaining_t& _limits) const
+bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
 {
 
 }

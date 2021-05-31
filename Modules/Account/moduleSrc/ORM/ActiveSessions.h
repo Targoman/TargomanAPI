@@ -74,6 +74,6 @@ private slots:
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuSessionStatus::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuSessionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H

@@ -33,10 +33,10 @@
 #include "Interfaces/ORM/clsORMField.h"
 
 namespace TAPI{
-TAPI_ADD_SIMPLE_TYPE(QString, Cols_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Filter_t);
-TAPI_ADD_SIMPLE_TYPE(QString, OrderBy_t);
-TAPI_ADD_SIMPLE_TYPE(QString, GroupBy_t);
+TAPI_ADD_STRING_TYPE(QString, Cols_t);
+TAPI_ADD_STRING_TYPE(QString, Filter_t);
+TAPI_ADD_STRING_TYPE(QString, OrderBy_t);
+TAPI_ADD_STRING_TYPE(QString, GroupBy_t);
 }
 
 namespace Targoman {
@@ -83,6 +83,28 @@ struct stuRelation{
 //    bool operator == (const stuRelation& _other) { return ReferenceTable == _other.ReferenceTable && Column == _other.Column && ForeignColumn == _other.ForeignColumn;}
 };
 
+TARGOMAN_DEFINE_ENUM(enuDBIndex,
+    //Primary,
+    Unique,
+    Key,
+    FullText,
+    Spatial
+)
+
+struct stuDBIndex {
+    enuDBIndex::Type Type;
+    QStringList Columns;
+    QString Name;
+
+    stuDBIndex(QStringList _cols, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
+        Type(_type), Columns(_cols), Name(_name)
+    {;}
+
+    stuDBIndex(QString _col, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
+        stuDBIndex(QStringList()<<_col, _type, _name)
+    {;}
+};
+
 static stuRelation InvalidRelation("","","");
 static QString COLS_KEY = "cols";
 
@@ -111,10 +133,11 @@ protected:
     };
 
 public:
-    clsTable( const QString& _schema,
-              const QString& _name,
-              const QList<clsORMField>& _cols,
-              const QList<stuRelation>& _foreignKeys);
+    clsTable(const QString& _schema,
+             const QString& _name,
+             const QList<clsORMField>& _cols,
+             const QList<stuRelation>& _foreignKeys = {},
+             const QList<stuDBIndex>& _indexes = {});
 
     QList<clsORMField> filterItems(qhttp::THttpMethod _method);
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
@@ -209,6 +232,7 @@ protected:
     QList<clsORMField> AllCols;
     QList<clsORMField> BaseCols;
     QList<stuRelation> ForeignKeys;
+    QList<stuDBIndex> Indexes;
     quint8  CountOfPKs;
     QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
 

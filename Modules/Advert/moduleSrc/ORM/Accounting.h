@@ -32,6 +32,16 @@ namespace Advertisement {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+namespace tblAccountProducts {
+TARGOMAN_CREATE_CONSTEXPR(prd_locID);
+TARGOMAN_CREATE_CONSTEXPR(prdShowPerDay);
+TARGOMAN_CREATE_CONSTEXPR(prdShowTotal);
+TARGOMAN_CREATE_CONSTEXPR(prdClicksPerDay);
+TARGOMAN_CREATE_CONSTEXPR(prdClicksPerMonth);
+TARGOMAN_CREATE_CONSTEXPR(prdClicksTotal);
+}
+
 namespace tblAccountSaleables {
 TARGOMAN_CREATE_CONSTEXPR(slbShowPerDay);
 TARGOMAN_CREATE_CONSTEXPR(slbShowTotal);
@@ -40,24 +50,53 @@ TARGOMAN_CREATE_CONSTEXPR(slbClicksPerMonth);
 TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
 }
 
-namespace tblAccountAssetUsage {
-constexpr char Name[] = "tblAccountAssetUsage";
-TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
-TARGOMAN_CREATE_CONSTEXPR(usgRemainingDays);
-TARGOMAN_CREATE_CONSTEXPR(usgDayShow);
-TARGOMAN_CREATE_CONSTEXPR(usgTotalShow);
-TARGOMAN_CREATE_CONSTEXPR(usgDayClicks);
-TARGOMAN_CREATE_CONSTEXPR(usgMonthClicks);
-TARGOMAN_CREATE_CONSTEXPR(usgTotalClicks);
+namespace AccountAsset {
+TARGOMAN_CREATE_CONSTEXPR(Days);
+TARGOMAN_CREATE_CONSTEXPR(DayShow);
+TARGOMAN_CREATE_CONSTEXPR(TotalShow);
+TARGOMAN_CREATE_CONSTEXPR(DayClicks);
+TARGOMAN_CREATE_CONSTEXPR(MonthClicks);
+TARGOMAN_CREATE_CONSTEXPR(TotalClicks);
 }
+
+///<  ColName                                                    Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
+#define ADVERT_DEFINE_ASSET_FIELDS(_prefix) \
+    { QString("%1%2").arg(_prefix, AccountAsset::Days),          S(qint16),  QFV.integer().minValue(-1), 0,       UPNone, false, false }, \
+    { QString("%1%2").arg(_prefix, AccountAsset::DayShow),       S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
+    { QString("%1%2").arg(_prefix, AccountAsset::TotalShow),     S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
+    { QString("%1%2").arg(_prefix, AccountAsset::DayClicks),     S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
+    { QString("%1%2").arg(_prefix, AccountAsset::MonthClicks),   S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
+    { QString("%1%2").arg(_prefix, AccountAsset::TotalClicks),   S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false } \
+
+namespace tblAccountUserAsset {
+//Extra fields goes here
+}
+
 #pragma GCC diagnostic pop
+
+/******************************************************/
+class AccountProducts: public Accounting::intfAccountProducts
+{
+    Q_OBJECT
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
+};
 
 /******************************************************/
 class AccountSaleables: public Accounting::intfAccountSaleables
 {
     Q_OBJECT
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountSaleables)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
+};
+
+/******************************************************/
+class AccountUserAssets: public Accounting::intfAccountUserAssets
+{
+    Q_OBJECT
+private slots:
+public:
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssets)
 };
 
 /******************************************************/
@@ -66,16 +105,7 @@ class AccountAssetUsage: public Accounting::intfAccountAssetUsage
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountAssetUsage)
-};
-
-/******************************************************/
-class clsAccountUserAssets: public Accounting::intfAccountUserAssets
-{
-    Q_OBJECT
-private slots:
-public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountUserAssets)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountAssetUsage)
 };
 
 /******************************************************/
@@ -84,7 +114,7 @@ class AccountCoupons: public Accounting::intfAccountCoupons
     Q_OBJECT
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,AccountCoupons)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountCoupons)
 };
 
 /******************************************************/

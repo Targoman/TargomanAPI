@@ -73,7 +73,7 @@ private slots:
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuRoleStatus::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuRoleStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 

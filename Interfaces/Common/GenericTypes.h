@@ -162,32 +162,33 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
 
 /**********************************************************************/
 
-TAPI_ADD_COMPLEX_TYPE(qhttp::THeaderHash, HEADERS_t);
-TAPI_ADD_COMPLEX_TYPE(qhttp::THeaderHash, COOKIES_t);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonObject, JWT_t, this->fromVariantMap(_value.toMap()) );
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QVariantMap, ORMFields_t, _value.toMap() );
 
-TAPI_ADD_SIMPLE_TYPE(QJsonObject, JWT_t);
-TAPI_ADD_SIMPLE_TYPE(QJsonDocument, PrivObject_t);
-TAPI_ADD_SIMPLE_TYPE(QJsonDocument, JSON_t);
-
-TAPI_ADD_SIMPLE_TYPE(QVariantMap, ORMFields_t);
-TAPI_ADD_SIMPLE_TYPE(QString, EncodedJWT_t);
-TAPI_ADD_SIMPLE_TYPE(QString, CommaSeparatedStringList_t);
-TAPI_ADD_SIMPLE_TYPE(QString, PKsByPath_t);
-TAPI_ADD_SIMPLE_TYPE(QString, RemoteIP_t);
-TAPI_ADD_SIMPLE_TYPE(QString, MD5_t);
-TAPI_ADD_SIMPLE_TYPE(QString, IPv4_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Email_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Mobile_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Sheba_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Ether_t);
-TAPI_ADD_SIMPLE_TYPE(QString, ISO639_2_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Base64Image_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
-TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
-TAPI_ADD_SIMPLE_TYPE(QString, URL_t);
-TAPI_ADD_SIMPLE_TYPE(QString, PackageCode_t);
-TAPI_ADD_SIMPLE_TYPE(QString, DiscountCode_t);
+TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
+TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
+TAPI_ADD_TYPE(QJsonDocument, PrivObject_t);
+TAPI_ADD_TYPE(QJsonDocument, JSON_t);
+TAPI_ADD_TYPE(QJsonDocument, SaleableAdditive_t);
+TAPI_ADD_STRING_TYPE(QString, EncodedJWT_t);
+TAPI_ADD_STRING_TYPE(QString, CommaSeparatedStringList_t);
+TAPI_ADD_STRING_TYPE(QString, PKsByPath_t);
+TAPI_ADD_STRING_TYPE(QString, RemoteIP_t);
+TAPI_ADD_STRING_TYPE(QString, MD5_t);
+TAPI_ADD_STRING_TYPE(QString, IPv4_t);
+TAPI_ADD_STRING_TYPE(QString, Email_t);
+TAPI_ADD_STRING_TYPE(QString, Mobile_t);
+TAPI_ADD_STRING_TYPE(QString, Sheba_t);
+TAPI_ADD_STRING_TYPE(QString, Ether_t);
+TAPI_ADD_STRING_TYPE(QString, ISO639_2_t);
+TAPI_ADD_STRING_TYPE(QString, Base64Image_t);
+TAPI_ADD_STRING_TYPE(QString, Date_t);
+TAPI_ADD_STRING_TYPE(QString, Time_t);
+TAPI_ADD_STRING_TYPE(QString, DateTime_t);
+TAPI_ADD_STRING_TYPE(QString, URL_t);
+TAPI_ADD_STRING_TYPE(QString, ProductCode_t);
+TAPI_ADD_STRING_TYPE(QString, SaleableCode_t);
+TAPI_ADD_STRING_TYPE(QString, CouponCode_t);
 }
 
 /**********************************************************************/
@@ -202,6 +203,7 @@ TAPI_DECLARE_METATYPE(TAPI::PrivObject_t)
 TAPI_DECLARE_METATYPE(TAPI::EncodedJWT_t)
 TAPI_DECLARE_METATYPE(TAPI::CommaSeparatedStringList_t)
 TAPI_DECLARE_METATYPE(TAPI::JSON_t)
+TAPI_DECLARE_METATYPE(TAPI::SaleableAdditive_t)
 TAPI_DECLARE_METATYPE(TAPI::PKsByPath_t)
 TAPI_DECLARE_METATYPE(TAPI::ORMFields_t)
 TAPI_DECLARE_METATYPE(TAPI::RemoteIP_t)
@@ -217,9 +219,10 @@ TAPI_DECLARE_METATYPE(TAPI::Time_t)
 TAPI_DECLARE_METATYPE(TAPI::DateTime_t)
 TAPI_DECLARE_METATYPE(TAPI::Base64Image_t)
 TAPI_DECLARE_METATYPE(TAPI::URL_t)
-TAPI_DECLARE_METATYPE(TAPI::PackageCode_t)
-TAPI_DECLARE_METATYPE(TAPI::DiscountCode_t)
-TAPI_DECLARE_METATYPE(TAPI::enuGenericStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::ProductCode_t)
+TAPI_DECLARE_METATYPE(TAPI::SaleableCode_t)
+TAPI_DECLARE_METATYPE(TAPI::CouponCode_t)
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuGenericStatus);
 
 
 #endif // TAPI_GENERICTYPES_H

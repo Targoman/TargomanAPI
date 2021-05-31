@@ -60,7 +60,7 @@ struct stuAdvertBill{
 namespace Targoman {
 namespace API {
 
-class Advert : public Accounting::clsRESTAPIWithAccounting
+class Advert : public Accounting::intfRESTAPIWithAccounting
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
@@ -74,8 +74,8 @@ public:
 private:
     Accounting::stuServiceAccountInfo retrieveServiceAccountInfo(quint64 _usrID);
     void breakPackage(quint64 _slbID);
-    bool isUnlimited(const Accounting::PackageRemaining_t& _limits) const;
-    bool isEmpty(const Accounting::PackageRemaining_t& _limits) const;
+    bool isUnlimited(const Accounting::UsageLimits_t& _limits) const;
+    bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
 
 private slots:
     TAPI::stuAdvert REST(GET,NewBanner,(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),

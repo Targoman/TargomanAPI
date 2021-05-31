@@ -160,10 +160,11 @@ static const QVariant       QNull     = QVariant(QVariant::Line);
 static const QVariant       QInvalid  = QVariant(QVariant::Invalid);
 static const QVariant       QRequired = QVariant(QVariant::RectF);
 static const QVariant       QAuto     = QVariant(QVariant::PointF);
+static const QVariant       QNow      = QVariant(QVariant::PointF);
 
 constexpr enuUpdatableBy::Type UPNone   = enuUpdatableBy::NONE;
-constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::OWNER;
-constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;
+constexpr enuUpdatableBy::Type UPOwner  = enuUpdatableBy::OWNER;  // creator or record owner
+constexpr enuUpdatableBy::Type UPAdmin  = enuUpdatableBy::ADMIN;  // privileged user even if its not owner
 constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 
 ///                         Default     UPBy     Sort  Filter Self  Virt   PK

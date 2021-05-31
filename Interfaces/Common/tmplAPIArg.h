@@ -28,6 +28,7 @@
 
 namespace Targoman {
 namespace API {
+
 namespace Server {
 class intfCacheConnector;
 }

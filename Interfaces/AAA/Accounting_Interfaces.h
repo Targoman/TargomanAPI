@@ -31,33 +31,35 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
+/******************************************************/
+class intfAccountProducts: public ORM::clsTable
+{
+    Q_OBJECT
+public:
+    intfAccountProducts(const QString& _schema,
+                        const QList<ORM::clsORMField>& _exclusiveCols = {},
+                        const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                        const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+
+private slots:
+    QVariant ORMGET("Get Available Products")
+    bool ORMDELETE("Delete a Product")
+    bool ORMUPDATE("Update a Product info by priviledged user")
+    quint32 ORMCREATE("Create a new Product by priviledged user")
+};
+
+/******************************************************/
 class intfAccountSaleables: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountSaleables(const QString& _schema,
-                        const QString& _name,
-                        const QList<ORM::clsORMField>& _cols,
-                        const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountSaleables(const QString& _schema);
 
 private slots:
-    QVariant ORMGET("Get Available Packages")
-    bool ORMDELETE("Delete a package")
-    bool ORMUPDATE("Update a package info by priviledged user")
-    quint32 ORMCREATE("Create a new package by priviledged user")
-};
-
-/******************************************************/
-class intfAccountAssetUsage: public ORM::clsTable
-{
-    Q_OBJECT
-public:
-    intfAccountAssetUsage(const QString& _schema,
-                     const QString& _name,
-                     const QList<ORM::clsORMField>& _cols,
-                     const QList<ORM::stuRelation>& _foreignKeys);
-private slots:
-    QVariant ORMGET("Get User Usage on each package")
+    QVariant ORMGET("Get Available Saleables")
+    bool ORMDELETE("Delete a Saleable")
+    bool ORMUPDATE("Update a Saleable info by priviledged user")
+    quint32 ORMCREATE("Create a new Saleable by priviledged user")
 };
 
 /******************************************************/
@@ -66,15 +68,29 @@ class intfAccountUserAssets: public ORM::clsTable
     Q_OBJECT
 public:
     intfAccountUserAssets(const QString& _schema,
-                            const QString& _name,
-                            const QList<ORM::clsORMField>& _cols,
-                            const QList<ORM::stuRelation>& _foreignKeys);
+                          const QList<ORM::clsORMField>& _exclusiveCols = {},
+                          const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                          const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+
 private slots:
-    QVariant ORMGET("Get User Packages")
+    QVariant ORMGET("Get User Assets")
     bool REST(UPDATE, disablePackage, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
-              "Mark a user package banned by priviledged user")
+              "Mark a user Asset banned by priviledged user")
     bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
-              "Mark a user package as prefered")
+              "Mark a user Asset as prefered")
+};
+
+/******************************************************/
+class intfAccountAssetUsage: public ORM::clsTable
+{
+    Q_OBJECT
+public:
+    intfAccountAssetUsage(const QString& _schema,
+                          const QList<ORM::clsORMField>& _exclusiveCols = {},
+                          const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                          const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+private slots:
+    QVariant ORMGET("Get user Usage on each Asset")
 };
 
 /******************************************************/
@@ -82,10 +98,8 @@ class intfAccountCoupons: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountCoupons(const QString& _schema,
-                         const QString& _name,
-                         const QList<ORM::clsORMField>& _cols,
-                         const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountCoupons(const QString& _schema);
+
 private slots:
     QVariant ORMGET("Get Active Discounts")
     bool ORMDELETE("Delete a Discount")
@@ -93,6 +107,7 @@ private slots:
     quint32 ORMCREATE("Create a new Discount by priviledged user")
 };
 
+/******************************************************/
 class intfAccountPrizes: public ORM::clsTable
 {
     Q_OBJECT

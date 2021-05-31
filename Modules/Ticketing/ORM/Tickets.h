@@ -82,6 +82,6 @@ private:
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuTicketStatus::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuTicketStatus);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H

@@ -56,14 +56,14 @@ TAPI_REGISTER_METATYPE(
   return  TAPI::stuPreVoucher().fromJson(Doc.object());
 }
 );
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuVoucherStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuDiscountType);
 
 
 namespace Targoman {
 namespace API {
 namespace AAA {
-namespace Accounting{
+namespace Accounting {
 
 constexpr char PKG_ID[] = "ID";
 constexpr char PKG_CODE[] = "CD";
@@ -81,13 +81,91 @@ constexpr char ASA_ISFROMPARENT[] = "IP";
 constexpr char ASA_TTL[] = "TT";
 constexpr char ASA_LIMITSONPARENT[] = "LP";
 
+/******************************************************************/
+QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL)
+{
+    ///TODO: get just by priv. users
+    constexpr quint16 CACHE_TIME = 15 * 60;
+    QString ExtraFilters;
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
+            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
+            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
+
+    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
+}
+
+bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+}
+
+bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+{
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+  return this->update(UPDATE_METHOD_CALL_ARGS);
+}
+
+quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+  return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+}
+
+intfAccountProducts::intfAccountProducts(
+        const QString& _schema,
+        const QList<ORM::clsORMField>& _exclusiveCols,
+        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<ORM::stuDBIndex>& _exclusiveIndexes
+    )
+    : clsTable(_schema,
+        tblAccountProductsBase::Name,
+        QList<ORM::clsORMField>({
+        ///<  ColName                                      Type                     Validation                               Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountProductsBase::prdID,               ORM_PRIMARY_KEY32 },
+            { tblAccountProductsBase::prdCode,             S(TAPI::ProductCode_t),  QFV,                                     QRequired,  UPOwner },
+            { tblAccountProductsBase::prdName,             S(QString),              QFV,                                     QRequired,  UPOwner },
+            { tblAccountProductsBase::prdDesc,             S(QString),              QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidFromDate,    S(TAPI::Date_t),         QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidToDate,      S(TAPI::Date_t),         QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidFromHour,    S(NULLABLE(quint8)),               QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidToHour,      S(NULLABLE(quint8)),               QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdPrivs,            S(TAPI::PrivObject_t),   QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdVAT,              S(qreal),                QFV.real().minValue(0).maxValue(100),    0,          UPOwner },
+            { tblAccountProductsBase::prdInStockCount,     S(quint32),              QFV.integer().minValue(0),               QRequired,  UPAdmin },
+            { tblAccountProductsBase::prdOrderedCount,     S(quint32),              QFV,                                     QInvalid,   UPNone },
+            { tblAccountProductsBase::prdReturnedCount,    S(quint32),              QFV,                                     QInvalid,   UPNone },
+            { tblAccountProductsBase::prdStatus,           S(TAPI::enuGenericStatus::Type), QFV,                             TAPI::enuGenericStatus::Active, UPStatus },
+            { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblAccountProductsBase::prdCreationDateTime, ORM_CREATED_ON },
+            { tblAccountProductsBase::prdUpdatedBy_usrID,  ORM_UPDATED_BY },
+        }) + _exclusiveCols,
+        QList<ORM::stuRelation>({
+        ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
+            { tblAccountProductsBase::prdCreatedBy_usrID, ORM_JOIN_CREATOR },
+            { tblAccountProductsBase::prdUpdatedBy_usrID, ORM_JOIN_UPDATER },
+        }) + _exclusiveForeignKeys,
+        QList<ORM::stuDBIndex>({
+            { { tblAccountProductsBase::prdCode, tblAccountProductsBase::prdStatus }, enuDBIndex::Unique },
+            { tblAccountProductsBase::prdValidFromDate },
+            { tblAccountProductsBase::prdValidToDate },
+            { tblAccountProductsBase::prdValidFromHour },
+            { tblAccountProductsBase::prdValidToHour },
+            { tblAccountProductsBase::prdStatus },
+            { tblAccountProductsBase::prdCreatedBy_usrID },
+            { tblAccountProductsBase::prdCreationDateTime },
+            { tblAccountProductsBase::prdUpdatedBy_usrID },
+        }) + _exclusiveIndexes
+    )
+{;}
 
 /******************************************************************/
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 {
   constexpr quint16 CACHE_TIME  = 15 * 60;
   QString ExtraFilters;
-  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
     ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
                    .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
                    .arg(tblAccountSaleablesBase::slbNotAvailableSince);
@@ -113,35 +191,53 @@ quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL)
   return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-intfAccountSaleables::intfAccountSaleables(const QString& _schema,
-                                         const QString& _name,
-                                         const QList<ORM::clsORMField>& _cols,
-                                         const QList<ORM::stuRelation>& _foreignKeys) :
-  clsTable(_schema, _name, _cols, _foreignKeys)
+intfAccountSaleables::intfAccountSaleables(const QString& _schema)
+    : clsTable(_schema,
+        tblAccountSaleablesBase::Name,
+        {///< ColName                                          Type                     Validation                              Default     UpBy      Sort  Filter Self  Virt   PK
+            { tblAccountSaleablesBase::slbID,                  ORM_PRIMARY_KEY32 },
+            { tblAccountSaleablesBase::slbCode,                S(TAPI::SaleableCode_t), QFV,                                    QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slb_prdID,              S(quint32),              QFV.integer().minValue(1),              QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbName,                S(QString),              QFV,                                    QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbDesc,                S(QString),              QFV,                                    QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbType,                S(TAPI::enuSaleableType::Type), QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
+            { tblAccountSaleablesBase::slbCanBePurchasedSince, S(TAPI::DateTime_t),     QFV,                                    QNow,       UPOwner },
+            { tblAccountSaleablesBase::slbNotAvailableSince,   S(TAPI::DateTime_t),     QFV,                                    QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbPrivs,               S(TAPI::JSON_t),         QFV,                                    QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbBasePrice,           S(qreal),                QFV.real().minValue(0),                 QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbAdditives,           S(TAPI::SaleableAdditive_t), QFV,                                QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbInStockCount,        S(quint32),              QFV.integer().minValue(0),              QRequired,  UPAdmin },
+            { tblAccountSaleablesBase::slbOrderedCount,        S(quint32),              QFV,                                    QInvalid,   UPNone },
+            { tblAccountSaleablesBase::slbReturnedCount,       S(quint32),              QFV,                                    QInvalid,   UPNone },
+            { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),              QFV,                                    QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbStatus,              S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
+            { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
+            { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
+        },
+        {///< Col                                             Reference Table                           ForeignCol          Rename     LeftJoin
+            { tblAccountSaleablesBase::slb_prdID,             R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID,    ORM_JOIN_CREATOR },
+            { tblAccountSaleablesBase::slbUpdatedBy_usrID,    ORM_JOIN_UPDATER },
+        },
+        {
+            { { tblAccountSaleablesBase::slbCode, tblAccountSaleablesBase::slbStatus }, enuDBIndex::Unique },
+            { tblAccountSaleablesBase::slbType },
+            { tblAccountSaleablesBase::slbCanBePurchasedSince },
+            { tblAccountSaleablesBase::slbNotAvailableSince },
+            { tblAccountSaleablesBase::slbStatus },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID },
+            { tblAccountSaleablesBase::slbCreationDateTime },
+            { tblAccountSaleablesBase::slbUpdatedBy_usrID },
+        }
+    )
 {;}
-
-/******************************************************************/
-QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
-{
-  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssets::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
-
-  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-}
-
-intfAccountAssetUsage::intfAccountAssetUsage(const QString& _schema,
-                                   const QString& _name,
-                                   const QList<ORM::clsORMField>& _cols,
-                                   const QList<ORM::stuRelation>& _foreignKeys) :
-  clsTable(_schema, _name, _cols, _foreignKeys)
-{;}
-
 
 /******************************************************************/
 QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL)
 {
   if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssets::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
   return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
@@ -162,7 +258,7 @@ bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsBy
 bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
-  if(!Ok || !UserPackageID )
+  if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
   /*return this->update(clsJWT(_JWT).usrID(), {
@@ -170,12 +266,71 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
                         }, {
                             {tblAccountUserAssets::uasStatus, TAPI::enuAuditableStatus::Banned},
                         });*/
+  throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+  return Ok;
 }
-intfAccountUserAssets::intfAccountUserAssets(const QString& _schema,
-                                                 const QString& _name,
-                                                 const QList<ORM::clsORMField>& _cols,
-                                                 const QList<ORM::stuRelation>& _foreignKeys) :
-  clsTable(_schema, _name, _cols, _foreignKeys)
+intfAccountUserAssets::intfAccountUserAssets(
+        const QString& _schema,
+        const QList<ORM::clsORMField>& _exclusiveCols,
+        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<stuDBIndex>& _exclusiveIndexes)
+    : clsTable(_schema,
+        tblAccountUserAssetsBase::Name,
+        QList<ORM::clsORMField>({
+        ///< ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountUserAssetsBase::uasID,              ORM_PRIMARY_KEY64 },
+            { tblAccountUserAssetsBase::uas_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin },
+            { tblAccountUserAssetsBase::uas_vchID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),         QFV,                        QRequired,  UPNone },
+            { tblAccountUserAssetsBase::uasPrefered,        S(bool),                QFV,                        false,      UPOwner },
+            { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),    QFV,                        QNow,       UPNone },
+            { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus },
+            { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
+        }) + _exclusiveCols,
+        QList<ORM::stuRelation>({
+        ///< Col                                  Reference Table              ForeignCol      Rename     LeftJoin
+            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
+            //Voucher is not accessible as it is in another schema
+            //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
+        }) + _exclusiveForeignKeys,
+        QList<ORM::stuDBIndex>({
+            { { tblAccountUserAssetsBase::uas_usrID, tblAccountUserAssetsBase::uasVoucherItemUUID, tblAccountUserAssetsBase::uasStatus }, enuDBIndex::Unique },
+            { tblAccountUserAssetsBase::uas_usrID },
+            { tblAccountUserAssetsBase::uas_vchID },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID },
+            { tblAccountUserAssetsBase::uasOrderDateTime },
+            { tblAccountUserAssetsBase::uasStatus },
+            { tblAccountUserAssetsBase::uasUpdatedBy_usrID },
+        }) + _exclusiveIndexes
+    )
+{;}
+
+/******************************************************************/
+QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
+{
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+
+    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+}
+
+intfAccountAssetUsage::intfAccountAssetUsage(
+        const QString& _schema,
+        const QList<ORM::clsORMField>& _exclusiveCols,
+        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<stuDBIndex>& _exclusiveIndexes)
+    : clsTable(_schema,
+        tblAccountAssetUsageBase::Name,
+        QList<ORM::clsORMField>({
+        ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARY_KEY64},
+        }) + _exclusiveCols,
+        QList<ORM::stuRelation>({
+        ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
+            { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
+        }) + _exclusiveForeignKeys,
+        _exclusiveIndexes
+    )
 {;}
 
 /******************************************************************/
@@ -203,12 +358,46 @@ quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL)
   return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 }
 
-intfAccountCoupons::intfAccountCoupons(const QString& _schema,
-                                           const QString& _name,
-                                           const QList<ORM::clsORMField>& _cols,
-                                           const QList<ORM::stuRelation>& _foreignKeys) :
-  clsTable(_schema, _name, _cols, _foreignKeys)
+intfAccountCoupons::intfAccountCoupons(const QString& _schema)
+    : clsTable(_schema,
+        tblAccountCouponsBase::Name,
+        {///< ColName                                        Type                    Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountCouponsBase::cpnID,                  ORM_PRIMARY_KEY32},
+            { tblAccountCouponsBase::cpnCode,                S(TAPI::CouponCode_t),  QFV,                                    QRequired, UPAdmin},
+            { tblAccountCouponsBase::cpnPrimaryCount,        S(quint32),             QFV.integer().minValue(1),              1,         UPAdmin},
+            { tblAccountCouponsBase::cpnTotalMaxAmount,      S(quint32),             QFV.integer().minValue(1),              1,         UPAdmin},
+            { tblAccountCouponsBase::cpnPerUserMaxCount,     S(NULLABLE(quint32)),   QFV.optional(QFV.integer().minValue(1)),QNull,     UPAdmin},
+            { tblAccountCouponsBase::cpnPerUserMaxAmount,    S(NULLABLE(quint32)),   QFV.integer().minValue(1),              QNull,         UPAdmin},
+            { tblAccountCouponsBase::cpnValidFrom,           S(TAPI::DateTime_t),    QFV,                                    QRequired, UPAdmin},
+            { tblAccountCouponsBase::cpnExpiryTime,          S(NULLABLE(TAPI::DateTime_t)), QFV,                             QNull,     UPAdmin},
+            { tblAccountCouponsBase::cpnAmount,              S(quint32),             QFV,                                    QRequired, UPAdmin, false, false},
+            { tblAccountCouponsBase::cpnAmountType,          S(TAPI::enuDiscountType::Type), QFV,                            TAPI::enuDiscountType::Percent, UPAdmin},
+            { tblAccountCouponsBase::cpnMaxAmount,           S(quint32),             QFV,                                    1,         UPAdmin, false, false},
+            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),    QFV,                                    QRequired, UPAdmin, false, false},
+            { tblAccountCouponsBase::cpnTotalUsedCount,      S(quint32),             QFV.integer().minValue(0),              0,         UPNone},
+            { tblAccountCouponsBase::cpnTotalUsedAmount,     S(quint32),             QFV.integer().minValue(0),              0,         UPNone},
+            { tblAccountCouponsBase::cpnStatus,              S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus},
+            { tblAccountCouponsBase::cpnCreatedBy_usrID,     ORM_CREATED_BY},
+            { tblAccountCouponsBase::cpnCreationDateTime,    ORM_CREATED_ON},
+            { tblAccountCouponsBase::cpnUpdatedBy_usrID,     ORM_UPDATED_BY},
+        },
+        {///< Col                                       Reference Table                         ForeignCol          Rename     LeftJoin
+            {tblAccountCouponsBase::cpnCreatedBy_usrID, ORM_JOIN_CREATOR},
+            {tblAccountCouponsBase::cpnUpdatedBy_usrID, ORM_JOIN_UPDATER},
+        },
+        {
+            { { tblAccountCouponsBase::cpnCode, tblAccountCouponsBase::cpnStatus }, enuDBIndex::Unique },
+            { tblAccountCouponsBase::cpnAmountType },
+            { tblAccountCouponsBase::cpnValidFrom },
+            { tblAccountCouponsBase::cpnExpiryTime },
+            { tblAccountCouponsBase::cpnStatus },
+            { tblAccountCouponsBase::cpnCreatedBy_usrID },
+            { tblAccountCouponsBase::cpnCreationDateTime },
+            { tblAccountCouponsBase::cpnUpdatedBy_usrID },
+        }
+    )
 {;}
+
 /******************************************************************/
 QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL)
 {
@@ -242,7 +431,7 @@ intfAccountPrizes::intfAccountPrizes(const QString& _schema,
 {;}
 
 /******************************************************************/
-QJsonObject stuPackage::toJson(bool _full)
+QJsonObject stuAssetItem::toJson(bool _full)
 {
   QJsonObject Info;
   if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
@@ -265,7 +454,7 @@ QJsonObject stuPackage::toJson(bool _full)
   return Info;
 }
 
-stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
+stuAssetItem&stuAssetItem::fromJson(const QJsonObject& _obj)
 {
   this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
   this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
@@ -285,7 +474,7 @@ stuPackage&stuPackage::fromJson(const QJsonObject& _obj)
 }
 
 /******************************************************************/
-stuActiveServiceAccount::stuActiveServiceAccount(const stuPackage& _package, bool _isFromParent, const PackageRemaining_t& _myLimitsOnParent, qint64 _ttl) :
+stuActiveServiceAccount::stuActiveServiceAccount(const stuAssetItem& _package, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
   ActivePackage(_package),
   IsFromParent(_isFromParent),
   MyLimitsOnParent(_myLimitsOnParent),
@@ -309,7 +498,7 @@ QJsonObject stuActiveServiceAccount::toJson(bool _full)
 
 stuActiveServiceAccount& stuActiveServiceAccount::fromJson(const QJsonObject _obj)
 {
-  this->ActivePackage = stuPackage().fromJson(_obj.value(ASA_PACKAGE).toObject());
+  this->ActivePackage = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
   this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
   this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
   QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
@@ -324,9 +513,9 @@ stuActiveServiceAccount& stuActiveServiceAccount::fromJson(const QJsonObject _ob
 /******************************************************************/
 stuServiceAccountInfo::stuServiceAccountInfo(
     ActivePackages_t _activePackages,
-    QSharedPointer<stuPackage> _preferedPackage,
+    QSharedPointer<stuAssetItem> _preferedPackage,
     quint32 _parentID,
-    PackageRemaining_t _myLimitsOnParent) :
+    UsageLimits_t _myLimitsOnParent) :
   ActivePackages(_activePackages),
   PreferedPackage(_preferedPackage),
   ParentID(_parentID),
@@ -340,7 +529,7 @@ stuServiceAccountInfo::stuServiceAccountInfo(
 
 namespace TAPI {
 /******************************************************************/
-/*QVariant stuPackageReq_t::toVariant() const{
+/*QVariant stuAssetItemReq_t::toVariant() const{
     QVariantMap Value;
     for(auto Iter = this->begin(); Iter != this->end(); ++Iter)
         Value.insert(Iter.key(), Iter.value());
@@ -348,7 +537,7 @@ namespace TAPI {
     return Value;
 }
 
-stuPackageReq_t& stuPackageReq_t::fromVariant(const QVariant& _value, const QByteArray& _paramName){
+stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const QByteArray& _paramName){
     if(_value.canConvert<QMap<QString, QVariant>>() == false)
         throw exHTTPBadRequest("Invalid value specified for parameter:" + _paramName);
     this->clear();

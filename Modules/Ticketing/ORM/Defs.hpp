@@ -40,7 +40,7 @@ TARGOMAN_DEFINE_ENUM (enuTicketType,
 }
 constexpr char TicketingSchema[] = "Ticketing";
 
-TAPI_DECLARE_METATYPE(TAPI::enuTicketType::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuTicketType);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
 

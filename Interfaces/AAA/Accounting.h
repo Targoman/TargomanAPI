@@ -30,26 +30,48 @@ namespace API {
 namespace AAA {
 namespace Accounting{
 
-class clsRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs{
+class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs{
     Q_OBJECT
 
 public:
     stuActiveServiceAccount activeAccountObject(quint64 _usrID);
 
 protected:
-    clsRESTAPIWithAccounting(const QString& _schema,
+    intfRESTAPIWithAccounting(const QString& _schema,
                              const QString& _module,
-                             PackageRemainingCols_t _packageRemainingCols,
-                             intfAccountSaleables* _packages,
-                             intfAccountUserAssets* _userPackages,
-                             intfAccountAssetUsage* _usage,
+                             AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+                             intfAccountSaleables* _saleables,
+                             intfAccountUserAssets* _userAssets,
+                             intfAccountAssetUsage* _assetusage,
                              intfAccountCoupons* _discounts = nullptr,
                              intfAccountPrizes* _prizes = nullptr);
-    virtual ~clsRESTAPIWithAccounting();
+    virtual ~intfRESTAPIWithAccounting();
     virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint64 _usrID) = 0;
     virtual void breakPackage(quint64 _slbID) = 0;
-    virtual bool isUnlimited(const PackageRemaining_t& _limits) const = 0;
-    virtual bool isEmpty(const PackageRemaining_t& _limits) const = 0;
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
+
+    virtual void digestPrivs(TAPI::JWT_t _JWT,
+                             INOUT stuAssetItem& _assetItem) {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(_assetItem)
+    };
+    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
+                                     INOUT stuAssetItem& _assetItem,
+                                     const OrderAdditives_t& _orderAdditives) {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(_assetItem)
+        Q_UNUSED(_orderAdditives)
+    };
+    virtual void applyReferrer(TAPI::JWT_t _JWT,
+                               INOUT stuAssetItem& AssetItem,
+                               QString _referrer,
+                               TAPI::JSON_t _extraRefererParams) {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(AssetItem);
+        Q_UNUSED(_referrer);
+        Q_UNUSED(_extraRefererParams);
+    };
 
     void hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
@@ -58,11 +80,11 @@ private:
 
 private slots:
     TAPI::stuPreVoucher REST(POST, addToBasket, (TAPI::JWT_t _JWT,
-                                                 TAPI::PackageCode_t _packageCode,
-                                                 ///TODO: addittive
-                                                 qint16 _qty = 1,
-                                                 TAPI::DiscountCode_t _discountCode = {},
-                                                 QString _referer = {},
+                                                 TAPI::SaleableCode_t _saleableCode,
+                                                 TAPI::OrderAdditives_t _orderAdditives = {},
+                                                 quint16 _qty = 1,
+                                                 TAPI::CouponCode_t _discountCode = {},
+                                                 QString _referrer = {},
                                                  TAPI::JSON_t _extraRefererParams = {},
                                                  TAPI::stuPreVoucher _lastPreVoucher = {}),
                                 "add a package to basket and return updated pre-Voucher")
@@ -79,12 +101,12 @@ protected:
 private:
     QString ServiceName;
 
-    PackageRemainingCols_t PackageRemainingCols;
-    QStringList PackageRemainingColName;
+    AssetUsageLimitsCols_t AssetUsageLimitsCols;
+    QStringList AssetUsageLimitsColsName;
 
 };
 
-extern clsRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName);
+extern intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName);
 
 }
 }

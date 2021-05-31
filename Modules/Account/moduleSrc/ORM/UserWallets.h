@@ -88,6 +88,6 @@ private slots:
 }
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuUserWalletStatus::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuUserWalletStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H

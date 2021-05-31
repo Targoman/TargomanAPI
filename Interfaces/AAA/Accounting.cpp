@@ -25,6 +25,7 @@
 #include "Server/ServerConfigs.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Server/clsSimpleCrypt.h"
+#include "Server/QtTypes.hpp"
 
 namespace Targoman {
 namespace API {
@@ -34,7 +35,7 @@ namespace Accounting{
 using namespace Common;
 using namespace Common::Configuration;
 
-static QMap<QString, clsRESTAPIWithAccounting*> ServiceRegistry;
+static QMap<QString, intfRESTAPIWithAccounting*> ServiceRegistry;
 
 Common::Configuration::tmplConfigurable<QString> Secret(
         makeConfig("Secret"),
@@ -64,46 +65,46 @@ void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher)
     }
 }
 
-clsRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
+intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
 {
     Q_UNUSED(serviceAccounting);
     return ServiceRegistry.value(_serviceName);
 }
 
-stuActiveServiceAccount clsRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
+stuActiveServiceAccount intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
 {
     return this->findActiveAccount(_usrID);
 }
 
-clsRESTAPIWithAccounting::clsRESTAPIWithAccounting(const QString& _schema,
+intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
                                                    const QString& _module,
-                                                   PackageRemainingCols_t _packageRemainingCols,
-                                                   intfAccountSaleables* _packages,
-                                                   intfAccountUserAssets* _userPackages,
-                                                   intfAccountAssetUsage* _usage,
+                                                   AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+                                                   intfAccountSaleables* _saleables,
+                                                   intfAccountUserAssets* _userAssets,
+                                                   intfAccountAssetUsage* _assetusage,
                                                    intfAccountCoupons* _discounts,
                                                    intfAccountPrizes* _prizes) :
     ORM::clsRESTAPIWithActionLogs(_schema, _module),
-    AccountSaleables(_packages),
-    AccountUserAssets(_userPackages),
-    AccountAssetUsage(_usage),
+    AccountSaleables(_saleables),
+    AccountUserAssets(_userAssets),
+    AccountAssetUsage(_assetusage),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
-    PackageRemainingCols(_packageRemainingCols)
+    AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
     ServiceRegistry.insert(_schema, this);
-    foreach(auto Col, this->PackageRemainingCols){
-        if(Col.PerDay.size()) this->PackageRemainingColName.append(Col.PerDay);
-        if(Col.PerWeek.size()) this->PackageRemainingColName.append(Col.PerWeek);
-        if(Col.PerMonth.size()) this->PackageRemainingColName.append(Col.PerMonth);
-        if(Col.Total.size()) this->PackageRemainingColName.append(Col.Total);
+    foreach(auto Col, this->AssetUsageLimitsCols){
+        if(Col.PerDay.size()) this->AssetUsageLimitsColsName.append(Col.PerDay);
+        if(Col.PerWeek.size()) this->AssetUsageLimitsColsName.append(Col.PerWeek);
+        if(Col.PerMonth.size()) this->AssetUsageLimitsColsName.append(Col.PerMonth);
+        if(Col.Total.size()) this->AssetUsageLimitsColsName.append(Col.Total);
     }
 }
 
-clsRESTAPIWithAccounting::~clsRESTAPIWithAccounting()
+intfRESTAPIWithAccounting::~intfRESTAPIWithAccounting()
 {;}
 
-stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
+stuActiveServiceAccount intfRESTAPIWithAccounting::findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
     stuServiceAccountInfo AccountInfo = this->retrieveServiceAccountInfo(_usrID);
     if(AccountInfo.ActivePackages.isEmpty())
@@ -111,15 +112,15 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usr
 
     QDateTime Now = QDateTime::currentDateTime();
 
-    auto effectiveStartTime = [Now](const stuPackage& _package) -> QDateTime { return QDateTime(Now.date()).addMSecs(_package.StartTime.msecsSinceStartOfDay());};
-    auto effectiveEndTime  = [Now](const stuPackage& _package) -> QDateTime{
-        return _package.StartTime < _package.EndTime ?
-                    QDateTime(Now.date()).addMSecs(_package.EndTime.msecsSinceStartOfDay())
-                  : _package.EndDate == Now.date() ?
+    auto effectiveStartTime = [Now](const stuAssetItem& _assetItem) -> QDateTime { return QDateTime(Now.date()).addMSecs(_assetItem.StartTime.msecsSinceStartOfDay());};
+    auto effectiveEndTime  = [Now](const stuAssetItem& _assetItem) -> QDateTime{
+        return _assetItem.StartTime < _assetItem.EndTime ?
+                    QDateTime(Now.date()).addMSecs(_assetItem.EndTime.msecsSinceStartOfDay())
+                  : _assetItem.EndDate == Now.date() ?
                         QDateTime(Now.date().addDays(1)) :
-                        QDateTime(Now.date().addDays(1)).addMSecs(_package.EndTime.msecsSinceStartOfDay()) ;
+                        QDateTime(Now.date().addDays(1)).addMSecs(_assetItem.EndTime.msecsSinceStartOfDay()) ;
     };
-    auto isInvalidPackage = [this, Now, effectiveStartTime, effectiveEndTime, _requestedUsage](const stuPackage& _package) -> bool{
+    auto isInvalidPackage = [this, Now, effectiveStartTime, effectiveEndTime, _requestedUsage](const stuAssetItem& _package) -> bool{
         if((_package.StartDate.isValid() && _package.StartDate > Now.date())
            ||(_package.EndDate.isValid() && _package.EndDate < Now.date())
            ||(_package.StartTime.isValid() && Now < effectiveStartTime(_package))
@@ -152,8 +153,8 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usr
                                        AccountInfo.MyLimitsOnParent,
                                        -1);
 
-    QList<stuPackage> CandidatePackages;
-    auto comparePackages = [this, &effectiveEndTime] (const stuPackage& a, stuPackage& b) {
+    QList<stuAssetItem> CandidatePackages;
+    auto comparePackages = [this, &effectiveEndTime] (const stuAssetItem& a, stuAssetItem& b) {
         if(a.EndDate.isValid() && b.EndDate.isValid() == false) return -1;
         if(a.EndDate.isValid() == false && b.EndDate.isValid()) return 1;
         if(this->isUnlimited(a.Remaining) && this->isUnlimited(b.Remaining) == false) return -1;
@@ -172,7 +173,7 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usr
     for(auto AccountIter = AccountInfo.ActivePackages.begin();
         AccountIter != AccountInfo.ActivePackages.end();
         AccountIter++){
-        const stuPackage& Package = AccountIter.value();
+        const stuAssetItem& Package = AccountIter.value();
 
         if(isInvalidPackage(Package))
             continue;
@@ -204,7 +205,7 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usr
         return stuActiveServiceAccount();
     }
 
-    const stuPackage& ActivePackage = CandidatePackages.first();
+    const stuAssetItem& ActivePackage = CandidatePackages.first();
     QDateTime NextDigestTime;
     if(ActivePackage.EndDate.isValid()){
         if(ActivePackage.EndTime.isValid())
@@ -220,119 +221,182 @@ stuActiveServiceAccount clsRESTAPIWithAccounting::findActiveAccount(quint64 _usr
                                    NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
-                                                                 TAPI::PackageCode_t _packageCode,
-                                                                 ///TODO: addittive
-                                                                 qint16 _qty,
-                                                                 TAPI::DiscountCode_t _discountCode,
-                                                                 QString _referer,
-                                                                 TAPI::JSON_t _extraRefererParams,
-                                                                 TAPI::stuPreVoucher _lastPreVoucher)
+TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
+                                                                  TAPI::SaleableCode_t _saleableCode,
+                                                                  TAPI::OrderAdditives_t _orderAdditives,
+                                                                  quint16 _qty, ///TODO: use float for qty
+                                                                  TAPI::CouponCode_t _discountCode,
+                                                                  QString _referrer,
+                                                                  TAPI::JSON_t _extraRefererParams,
+                                                                  TAPI::stuPreVoucher _lastPreVoucher)
 {
-    ///TODO reserve product and discount : bikhial
     Accounting::checkPreVoucherSanity(_lastPreVoucher);
-    QString ExtraFilters = QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-                           .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-                           .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 
-    ///TODO tell qty to select and join userAssets to count pending saleables -> reject addToBasket
-    ///TODO: fetch available addittives
-    QVariantMap PackageInfo = this->AccountSaleables->selectFromTable({}, ExtraFilters, _packageCode, 0, 1,
-                                                                     QStringList({
-                                                                                     tblAccountSaleablesBase::slbID,
-                                                                                     tblAccountSaleablesBase::slbCode,
-                                                                                     tblAccountSaleablesBase::slbName,
-                                                                                     tblAccountSaleablesBase::slbRemainingDays,
-                                                                                     tblAccountSaleablesBase::slbPrice,
-                                                                                     tblAccountSaleablesBase::slbValidFromDate,
-                                                                                     tblAccountSaleablesBase::slbValidToDate,
-                                                                                     tblAccountSaleablesBase::slbValidFromTime,
-                                                                                     tblAccountSaleablesBase::slbValidToTime,
-                                                                                     tblAccountSaleablesBase::slbPrivs,
-                                                                                     tblAccountSaleablesBase::slbQuantity,
-                                                                                     tblAccountSaleablesBase::slbVAT,
-                                                                                     this->PackageRemainingColName.join(',')
-                                                                                 }).join(',')
-                                                                     ).toMap();
+    QVariantMap SaleableInfo = this->AccountSaleables->selectFromTable(
+        {},
+        QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )").arg(
+            tblAccountSaleablesBase::slbCanBePurchasedSince).arg(
+            tblAccountSaleablesBase::slbNotAvailableSince),
+        _saleableCode,
+        0,
+        1,
+        QStringList({
+            //tblAccountProductsBase::prdID,
+            tblAccountProductsBase::prdCode,
+            tblAccountProductsBase::prdName,
+            //tblAccountProductsBase::prdDesc,
+            tblAccountProductsBase::prdValidFromDate,
+            tblAccountProductsBase::prdValidToDate,
+            tblAccountProductsBase::prdValidFromHour,
+            tblAccountProductsBase::prdValidToHour,
+            //tblAccountProductsBase::prdPrivs,
+            tblAccountProductsBase::prdVAT,
+            tblAccountProductsBase::prdInStockCount,
+            tblAccountProductsBase::prdOrderedCount,
+            tblAccountProductsBase::prdReturnedCount,
+            tblAccountProductsBase::prdStatus,
+            //tblAccountProductsBase::prdCreatedBy_usrID,
+            //tblAccountProductsBase::prdCreationDateTime,
+            //tblAccountProductsBase::prdUpdatedBy_usrID,
 
-    PackageRemaining_t PackageOffer;
-    for(auto PackageRemIter = this->PackageRemainingCols.begin();
-        PackageRemIter != this->PackageRemainingCols.end();
-        PackageRemIter++)
-        PackageOffer.insert(PackageRemIter.key(), {
-                                PackageRemIter->PerDay.size() ? PackageInfo.value(PackageRemIter->PerDay).toInt() : -1,
-                                PackageRemIter->PerWeek.size() ? PackageInfo.value(PackageRemIter->PerWeek).toInt() : -1,
-                                PackageRemIter->PerMonth.size() ? PackageInfo.value(PackageRemIter->PerMonth).toInt() : -1,
-                                PackageRemIter->Total.size() ? PackageInfo.value(PackageRemIter->Total).toInt() : -1,
-                            });
+            tblAccountSaleablesBase::slbID,
+            tblAccountSaleablesBase::slbCode,
+            //tblAccountSaleablesBase::slb_prdID,
+            tblAccountSaleablesBase::slbName,
+            //tblAccountSaleablesBase::slbDesc,
+            //tblAccountSaleablesBase::slbType,
+            //tblAccountSaleablesBase::slbCanBePurchasedSince,
+            //tblAccountSaleablesBase::slbNotAvailableSince,
+            //tblAccountSaleablesBase::slbPrivs,
+            tblAccountSaleablesBase::slbBasePrice,
+            tblAccountSaleablesBase::slbAdditives,
+            tblAccountSaleablesBase::slbInStockCount,
+            tblAccountSaleablesBase::slbOrderedCount,
+            tblAccountSaleablesBase::slbReturnedCount,
+            tblAccountSaleablesBase::slbVoucherTemplate,
+            tblAccountSaleablesBase::slbStatus,
+            //tblAccountSaleablesBase::slbCreatedBy_usrID,
+            //tblAccountSaleablesBase::slbCreationDateTime,
+            //tblAccountSaleablesBase::slbUpdatedBy_usrID,
 
-    ///TODO: apply addittives
-    stuPackage Package(
-                PackageInfo.value(tblAccountSaleablesBase::slbID).toUInt(),
-                PackageInfo.value(tblAccountSaleablesBase::slbCode).toString(),
-                PackageInfo.value(tblAccountSaleablesBase::slbRemainingDays).toInt(),
-                -1,
-                PackageOffer,
-                PackageInfo.value(tblAccountSaleablesBase::slbValidFromDate).toDate(),
-                PackageInfo.value(tblAccountSaleablesBase::slbValidToDate).toDate(),
-                PackageInfo.value(tblAccountSaleablesBase::slbValidFromTime).toTime(),
-                PackageInfo.value(tblAccountSaleablesBase::slbValidToTime).toTime(),
-                QJsonObject::fromVariantMap(PackageInfo.value(tblAccountSaleablesBase::slbPrivs).toMap())
-                );
+            this->AssetUsageLimitsColsName.join(',')
+        }).join(',')
+    ).toMap();
 
-    ///TODO: apply addittives to discounts
+#define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
+    TAPI::setFromVariant(AssetItem._fieldName            ,SaleableInfo.value(_table::_fieldName))
+
+    stuAssetItem AssetItem;
+    SET_FIELD_FROM_VARIANMAP(prdCode            , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdName            , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidFromDate   , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidToDate     , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidFromHour   , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidToHour     , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdPrivs           , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdVAT             , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdInStockCount    , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdOrderedCount    , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdReturnedCount   , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdStatus          , tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(slbID              , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbCode            , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbName            , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbPrivs           , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbBasePrice       , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbAdditives       , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbInStockCount    , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbOrderedCount    , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbReturnedCount   , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbVoucherTemplate , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbStatus          , tblAccountSaleablesBase);
+
+    //check available count
+    qint64 AvailableProductCount = AssetItem.prdInStockCount - (AssetItem.prdOrderedCount - AssetItem.prdReturnedCount);
+    qint64 AvailableSaleableCount = AssetItem.slbInStockCount - (AssetItem.slbOrderedCount - AssetItem.slbReturnedCount);
+    if ((AvailableSaleableCount < 0) || (AvailableProductCount < 0))
+        throw exHTTPInternalServerError("AvailableSaleableCount or AvailableProductCount < 0");
+    if (AvailableSaleableCount > AvailableProductCount)
+        throw exHTTPInternalServerError("AvailableSaleableCount > AvailableProductCount");
+    if (AvailableSaleableCount < _qty)
+        throw exHTTPBadRequest(QString("Not enough %1 available in store.").arg(_saleableCode));
+
+    //---------
+    UsageLimits_t SaleableUsageLimits;
+    for (auto Iter = this->AssetUsageLimitsCols.begin();
+        Iter != this->AssetUsageLimitsCols.end();
+        Iter++)
+        SaleableUsageLimits.insert(
+            Iter.key(),
+            {
+                Iter->PerDay.size() ? SaleableInfo.value(Iter->PerDay).toInt() : -1,
+                Iter->PerWeek.size() ? SaleableInfo.value(Iter->PerWeek).toInt() : -1,
+                Iter->PerMonth.size() ? SaleableInfo.value(Iter->PerMonth).toInt() : -1,
+                Iter->Total.size() ? SaleableInfo.value(Iter->Total).toInt() : -1,
+            }
+        );
+    AssetItem.Digested.Limits = SaleableUsageLimits;
+
+    //---------
+    this->digestPrivs(_JWT, AssetItem);
+
+    this->applyAssetAdditives(_JWT, AssetItem, _orderAdditives);
+
+    this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
+
+
+    //TODO: modiriyate takhfif dar kenare poole jayeze :D
+
+
+    //---------
     stuDiscount Discount;
-    if(_discountCode.size()){
-        ExtraFilters = QString("%1 >= NOW()").arg(tblAccountCoupons::cpnValidFrom);
-        QVariantMap DiscountInfo = this->AccountCoupons->selectFromTable({}, ExtraFilters, _discountCode, 0, 1,
-                                                                           QStringList({
-                                                                                           tblAccountCoupons::cpnID,
-                                                                                           tblAccountCoupons::cpnCode,
-                                                                                           tblAccountCoupons::cpnType,
-                                                                                           tblAccountCoupons::cpnStatus,
-                                                                                           tblAccountCoupons::cpnPackageBasedAmount,
-                                                                                           tblAccountCoupons::cpnMaxAmount,
-                                                                                           tblAccountCoupons::cpnPrimaryCount,
-                                                                                           tblAccountCoupons::cpnUsedCount,
-                                                                                           tblAccountCoupons::cpnValidFrom,
-                                                                                       }).join(',')
-                                                                           ).toMap();
-        if(DiscountInfo.value(tblAccountCoupons::cpnExpiryTime).toDateTime() < QDateTime::currentDateTime())
+    if (_discountCode.size()) {
+        QVariantMap DiscountInfo = this->AccountCoupons->selectFromTable(
+            {},
+            QString("%1<=NOW()").arg(tblAccountCouponsBase::cpnValidFrom),
+            _discountCode,
+            0,
+            1,
+            QStringList({
+                tblAccountCouponsBase::cpnID,
+                tblAccountCouponsBase::cpnType,
+                tblAccountCouponsBase::cpnSaleableBasedAmount,
+                tblAccountCouponsBase::cpnMaxAmount,
+                tblAccountCouponsBase::cpnPrimaryCount,
+                tblAccountCouponsBase::cpnUsedCount,
+            }).join(',')
+        ).toMap();
+
+        if (DiscountInfo.value(tblAccountCouponsBase::cpnExpiryTime).toDateTime() < QDateTime::currentDateTime())
             throw exHTTPBadRequest("Discount code has been expired");
-        if(DiscountInfo.value(tblAccountCoupons::cpnPrimaryCount).toInt() <= DiscountInfo.value(tblAccountCoupons::cpnUsedCount).toInt())
+        if (DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toInt() <= DiscountInfo.value(tblAccountCouponsBase::cpnUsedCount).toInt())
             throw exHTTPBadRequest("Discount code has been finished");
 
-        qint64 Amount = DiscountInfo.value(tblAccountCoupons::cpnPackageBasedAmount).toJsonObject().value(_packageCode).toInt(-1);
-        if(Amount <0)
+        qint64 Amount = DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedAmount).toJsonObject().value(_saleableCode).toInt(-1);
+        if (Amount < 0)
             throw exHTTPBadRequest("Discount code is not valid on selected package");
         Discount.Amount = static_cast<quint32>(Amount);
-        Discount.ID = DiscountInfo.value(tblAccountCoupons::cpnPrimaryCount).toULongLong();
+        Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
-        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCoupons::cpnType).toInt());
-        Discount.MaxAmount = DiscountInfo.value(tblAccountCoupons::cpnMaxAmount).toUInt();
-    }
-
-    if(_referer.size()){
-        Q_UNUSED(_JWT)
-        Q_UNUSED (_extraRefererParams)
-        //TODO check for prize on referers
+        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnType).toInt());
+        Discount.MaxAmount = DiscountInfo.value(tblAccountCouponsBase::cpnMaxAmount).toUInt();
     }
 
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;
     ///TODO add ttl for order item
     PreVoucherItem.OrderID = this->AccountUserAssets->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-                                                                {tblAccountUserAssets::uas_usrID, clsJWT(_JWT).usrID()},
-                                                                {tblAccountUserAssets::uas_slbID, Package.PackageID},
+                                                                {tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()},
+                                                                {tblAccountUserAssetsBase::uas_slbID, Package.PackageID},
                                                             })).toULongLong();
-    PreVoucherItem.Desc  = PackageInfo.value(tblAccountSaleablesBase::Name).toString();
+    PreVoucherItem.Desc  = SaleableInfo.value(tblAccountSaleablesBase::Name).toString();
 
     ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
     /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
     /// return: amount of using coupon
 
     PreVoucherItem.Qty = _qty;
-    PreVoucherItem.UnitPrice = PackageInfo.value(tblAccountSaleablesBase::slbPrice).toUInt();
+    PreVoucherItem.UnitPrice = SaleableInfo.value(tblAccountSaleablesBase::slbPrice).toUInt();
     PreVoucherItem.SubTotal = PreVoucherItem.UnitPrice * PreVoucherItem.Qty;
     PreVoucherItem.Discount = Discount;
     if (Discount.Amount)
@@ -342,7 +406,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
         case TAPI::enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.SubTotal * Discount.Amount / 100.)));
         }
     //TODO rename Tax to VAT
-    PreVoucherItem.VATPercent = PackageInfo.value(tblAccountSaleablesBase::slbVAT).toUInt();
+    PreVoucherItem.VATPercent = SaleableInfo.value(tblAccountSaleablesBase::slbVAT).toUInt();
     PreVoucherItem.VATAmount = ((PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100);
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
@@ -360,7 +424,7 @@ TAPI::stuPreVoucher clsRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JW
     return _lastPreVoucher;
 }
 
-void clsRESTAPIWithAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+void intfRESTAPIWithAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
     if(Privs.contains(this->ServiceName) == false)
@@ -381,7 +445,7 @@ void clsRESTAPIWithAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
     };
 
-    const stuPackage& Package = ActiveServiceAccount.ActivePackage;
+    const stuAssetItem& Package = ActiveServiceAccount.ActivePackage;
     stuUsage CurrUsage;
     if(ActiveServiceAccount.IsFromParent){
         for(auto UsageIter = _requestedUsage.begin();
