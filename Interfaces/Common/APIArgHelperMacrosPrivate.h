@@ -331,7 +331,7 @@ namespace Targoman {namespace API { \
 #define INTERNAL_V2S64(v) static_cast<qint64>(v.toDouble())
 #define INTERNAL_V2int64(v) INTERNAL_V2S64(v)
 
-#define INTERNAL_N2J(_value)       [](auto v) { return toJsonValue(v); } (_value)
+#define INTERNAL_N2J(_value)       [](auto v) { return TAPI::toJsonValue(v); } (_value)
 #define INTERNAL_N2DBL(_value)     INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(double,  _value)
 #define INTERNAL_N2int8(_value)    INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(qint8,   _value)
 #define INTERNAL_N2int16(_value)   INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(qint16,  _value)

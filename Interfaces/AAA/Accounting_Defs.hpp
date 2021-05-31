@@ -52,45 +52,40 @@ namespace Accounting {
 inline QString makeConfig(const QString& _name){return "/zModule_Account/" + _name;}
 extern Common::Configuration::tmplConfigurable<QString> Secret;
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuPrize,
-        QString,      Desc      , QString()    , v.size(), v, v.toString(),
-        QJsonObject , PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
-        );
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuDiscount,
-        quint64, ID       , 0        , v       , C2DBL(v), static_cast<quint64>(v.toDouble()),
-        QString, Name     , QString(), v.size(), v       , v.toString(),
-        quint32, Amount   , 0        , v       , C2DBL(v), static_cast<quint32>(v.toDouble()),
-        quint32, MaxAmount, 0        , v       , C2DBL(v), static_cast<quint32>(v.toDouble()),
-        TAPI::enuDiscountType::Type, Type, TAPI::enuDiscountType::Percent, v, v,static_cast<TAPI::enuDiscountType::Type>(v.toString().toLatin1().constData()[0])
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
+    QString,      Desc      , QString()    , v.size(), v, v.toString(),
+    QJsonObject , PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
 );
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuVoucherItem,
-        QString     , Service   , QString()    , v.size(), v         , v.toString(),
-        quint64     , OrderID   , 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
-        QString     , Desc      , QString()    , v.size(), v         , v.toString(),
-        quint32     , UnitPrice , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        qint16      , Qty       , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
-        quint32     , SubTotal  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        stuDiscount , Discount  , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
-        quint32     , DisAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        quint8      , VATPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
-        quint32     , VATAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-        QString     , Sign      , QString()    , v.size(), v         , v.toString()
-        )
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
+    SF_quint64(ID),
+    SF_QString(Name),
+    SF_quint32(Amount),
+    SF_quint32(MaxAmount),
+    SF_Enum(TAPI::enuDiscountType, Type, TAPI::enuDiscountType::Percent)
+);
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
+    QString     , Service   , QString()    , v.size(), v         , v.toString(),
+    quint64     , OrderID   , 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
+    QString     , Desc      , QString()    , v.size(), v         , v.toString(),
+    quint32     , UnitPrice , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+    qint16      , Qty       , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
+    quint32     , SubTotal  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+    stuDiscount , Discount  , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
+    quint32     , DisAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+    quint8      , VATPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
+    quint32     , VATAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+    QString     , Sign      , QString()    , v.size(), v         , v.toString()
+);
 
 /*****************************************************************************/
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(
-        stuUsage,
-        qint32, PerDay,   -1, v>-1, v, static_cast<qint32>(v.toInt()),
-        qint32, PerWeek,  -1, v>-1, v, static_cast<qint32>(v.toInt()),
-        qint32, PerMonth, -1, v>-1, v, static_cast<qint32>(v.toInt()),
-        qint64, Total,    -1, v>-1, v, static_cast<qint64>(v.toInt())
-        );
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
+    SF_NULLABLE_quint32(PerDay),
+    SF_NULLABLE_quint32(PerWeek),
+    SF_NULLABLE_quint32(PerMonth),
+    SF_NULLABLE_quint64(Total)
+);
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
 struct stuUsageColDefinition{
@@ -209,47 +204,6 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_quint32(Multiplier),
     SF_NULLABLE_quint32(MinCount)
 );
-
-/*
-struct stuVoucher {
-    quint64 ID;
-    stuPreVoucher Info;
-    QString PaymentLink;
-    enuVoucherStatus::Type Status;
-    stuVoucher(const quint64& _ID=0, const stuPreVoucher& _Info=stuPreVoucher(), const QString& _PaymentLink=QString(), const enuVoucherStatus::Type& _Status=enuVoucherStatus::New)
-        : ID(_ID), Info(_Info), PaymentLink(_PaymentLink), Status(_Status) {}
-    QJsonObject toJson() const {
-        QJsonObject Obj;
-        if([](auto v)->bool{return v>0;}(ID)) Obj[toCammel("ID")]=[](auto v)->QJsonValue{return static_cast<double>(v);}(ID);;
-        if([](auto v)->bool{return v.ToPay;}(Info)) Obj[toCammel("Info")]=[](auto v)->QJsonValue{return v.toJson();}(Info);;
-        if([](auto v)->bool{return v.size();}(PaymentLink)) Obj[toCammel("PaymentLink")]=[](auto v)->QJsonValue{return v;}(PaymentLink);;
-        if([](auto v)->bool{return v;}(Status)) Obj[toCammel("Status")]=[](auto v)->QJsonValue{return v;}(Status);;;
-        return Obj;
-    }
-    stuVoucher& fromJson(const QJsonObject& _obj){
-        ID=_obj.contains(toCammel("ID"))?[](auto v)->quint64{return static_cast<quint64>(v.toDouble());}(_obj.value(toCammel("ID"))):0;
-        Info=_obj.contains(toCammel("Info"))?[](auto v)->stuPreVoucher{return stuPreVoucher().fromJson(v.toObject());}(_obj.value(toCammel("Info"))):stuPreVoucher();
-        PaymentLink=_obj.contains(toCammel("PaymentLink"))?[](auto v)->QString{return v.toString();}(_obj.value(toCammel("PaymentLink"))):QString();
-        Status=_obj.contains(toCammel("Status"))?[](auto v)->enuVoucherStatus::Type{return static_cast<enuVoucherStatus::Type>(v.toString().toLatin1().constData()[0]);}(_obj.value(toCammel("Status"))):enuVoucherStatus::New; return *this;
-    }
-};
-
-
-struct stuDiscountSaleableBasedMultiplier {
-    TAPI_HELEPER_VARIANTSTRUCT_PARAMSFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount))
-    stuDiscountSaleableBasedMultiplier(TAPI_HELEPER_VARIANTSTRUCT_CONS_INPUTFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)))
-        : TAPI_HELEPER_VARIANTSTRUCT_CONS_INITFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)) {}
-    QJsonObject toJson() const {
-        QJsonObject Obj;
-        TAPI_HELEPER_VARIANTSTRUCT_TOJSONFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount));
-        return Obj;
-    }
-    stuDiscountSaleableBasedMultiplier& fromJson(const QJsonObject& _obj){
-        TAPI_HELEPER_VARIANTSTRUCT_FROMJSONFAILK3(v.size()(SaleableCode), v>0(Multiplier), v(MinCount)) return *this;}
-};
-*/
-
-
 
 } //namespace TAPI
 
