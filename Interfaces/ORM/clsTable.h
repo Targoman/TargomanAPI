@@ -64,6 +64,7 @@ namespace API {
 #define ORMCREATE(_doc) apiCREATE (CREATE_METHOD_ARGS_HEADER); QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } QString docOfCREATE(){ return _doc; }
 
 static QString QUERY_SEPARATOR = "\n";
+static QString CURRENT_DATETIME = "CURRENT_DATETIME";
 
 namespace ORM {
 

@@ -38,7 +38,7 @@
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \
     Q_DECLARE_METATYPE(_type) \
-    Q_DECLARE_METATYPE(QSharedPointer<_type>)
+    Q_DECLARE_METATYPE(tmplNullable<_type>)
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE_ENUM(_enum) \
@@ -65,20 +65,19 @@
     INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum)
 
 /************************************************************/
+#define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
+#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
+#define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 #define SF_QString(_name, ...)          INTERNAL_SF(QString,           _name, STRING,   v,                 v.toString(),         __VA_ARGS__)
 
-#define SF_quint8(_name, ...)           INTERNAL_SF(quint8,            _name, INTEGRAL, INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
-#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE(quint8),  _name, INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
-#define SF_quint16(_name, ...)          INTERNAL_SF(quint16,           _name, INTEGRAL, INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
-#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE(quint16), _name, INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint16(v), __VA_ARGS__)
-#define SF_quint32(_name, ...)          INTERNAL_SF(quint32,           _name, INTEGRAL, INTERNAL_C2DBL(v), INTERNAL_V2uint32(v), __VA_ARGS__)
-#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE(quint32), _name, INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint32(v), __VA_ARGS__)
-#define SF_quint64(_name, ...)          INTERNAL_SF(quint64,           _name, INTEGRAL, INTERNAL_C2DBL(v), INTERNAL_V2uint64(v), __VA_ARGS__)
-#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE(quint64), _name, INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint64(v), __VA_ARGS__)
-
-#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
-#define SF_Struct(_type, _name, ...) INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
-#define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
+#define SF_quint8(_name, ...)           INTERNAL_SF(quint8,            _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
+#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
+#define SF_quint16(_name, ...)          INTERNAL_SF(quint16,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
+#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE(quint16), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint16(v), __VA_ARGS__)
+#define SF_quint32(_name, ...)          INTERNAL_SF(quint32,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint32(v), __VA_ARGS__)
+#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint32(v), __VA_ARGS__)
+#define SF_quint64(_name, ...)          INTERNAL_SF(quint64,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint64(v), __VA_ARGS__)
+#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint64(v), __VA_ARGS__)
 
 /************************************************************/
 #define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) struct _name { \
@@ -95,7 +94,7 @@
 #define V2U32(v) INTERNAL_V2U32(v)
 
 /************************************************************/
-#define NULLABLE(_type) QSharedPointer<_type>
+#define NULLABLE(_type) tmplNullable<_type>
 #define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)
 #define N2S8(_value)   INTERNAL_N2int8(_value)

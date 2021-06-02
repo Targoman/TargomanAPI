@@ -34,7 +34,7 @@ class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs{
     Q_OBJECT
 
 public:
-    stuActiveServiceAccount activeAccountObject(quint64 _usrID);
+    stuActiveCredit activeAccountObject(quint64 _usrID);
 
 protected:
     intfRESTAPIWithAccounting(const QString& _schema,
@@ -46,8 +46,8 @@ protected:
                              intfAccountCoupons* _discounts = nullptr,
                              intfAccountPrizes* _prizes = nullptr);
     virtual ~intfRESTAPIWithAccounting();
-    virtual stuServiceAccountInfo retrieveServiceAccountInfo(quint64 _usrID) = 0;
-    virtual void breakPackage(quint64 _slbID) = 0;
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
+    virtual void breakCredit(quint64 _slbID) = 0;
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
@@ -73,10 +73,10 @@ protected:
         Q_UNUSED(_extraRefererParams);
     };
 
-    void hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
+    void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
 private:
-    stuActiveServiceAccount findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 private slots:
     TAPI::stuPreVoucher REST(POST, addToBasket, (TAPI::JWT_t _JWT,

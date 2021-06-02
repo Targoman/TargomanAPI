@@ -126,6 +126,8 @@ clsTable::clsTable(const QString& _schema,
     Indexes(_indexes),
     CountOfPKs(0)
 {
+    this->BaseCols.append(clsORMField(CURRENT_DATETIME, S(TAPI::DateTime_t), QFV, QNull, UPNone, false, false, false, true));
+
     clsTable::Registry.insert(Schema + "." + Name, this);
 }
 

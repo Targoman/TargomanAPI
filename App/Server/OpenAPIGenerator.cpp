@@ -100,8 +100,9 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         };
 
         auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, QString _typeName){
-            if(_typeName.startsWith("QSharedPointer<"))
-                _typeName = _typeName.mid(sizeof("QSharedPointer<"), _typeName.size() - static_cast<int>(sizeof("QSharedPointer<")) - 1);
+            if (_typeName.startsWith("tmplNullable<"))
+                _typeName = _typeName.mid(sizeof("tmplNullable<"), _typeName.size() - static_cast<int>(sizeof("tmplNullable<")) - 1);
+
             switch(_complexity){
             case COMPLEXITY_Number:
             case COMPLEXITY_Boolean:
@@ -129,8 +130,8 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         };
 
         auto addExtraParamsByType = [](QJsonObject& _paramSpecs, enuVarComplexity _complexity, QString _typeName) {
-            if(_typeName.startsWith("QSharedPointer<"))
-                _typeName = _typeName.mid(sizeof("QSharedPointer<"), _typeName.size() - static_cast<int>(sizeof("QSharedPointer<")) - 1);
+            if (_typeName.startsWith("tmplNullable<"))
+                _typeName = _typeName.mid(sizeof("tmplNullable<"), _typeName.size() - static_cast<int>(sizeof("tmplNullable<")) - 1);
 
             switch(_complexity){
             case COMPLEXITY_Number:

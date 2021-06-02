@@ -99,12 +99,12 @@ Advert::Advert() :
 }
 
 /*******************************************************************************************************************/
-Accounting::stuServiceAccountInfo Advert::retrieveServiceAccountInfo(quint64 _usrID)
+Accounting::stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
 {
 
 }
 
-void Advert::breakPackage(quint64 _slbID)
+void Advert::breakCredit(quint64 _slbID)
 {
 
 }

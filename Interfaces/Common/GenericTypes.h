@@ -162,8 +162,11 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
 
 /**********************************************************************/
 
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonObject, JWT_t, this->fromVariantMap(_value.toMap()) );
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QVariantMap, ORMFields_t, _value.toMap() );
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonObject, JWT_t,       this->fromVariantMap(_value.toMap()));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QVariantMap, ORMFields_t, _value.toMap());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDate,       Date_t,      _value.toDate());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QTime,       Time_t,      _value.toTime());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
 
 TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
 TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
@@ -182,9 +185,6 @@ TAPI_ADD_STRING_TYPE(QString, Sheba_t);
 TAPI_ADD_STRING_TYPE(QString, Ether_t);
 TAPI_ADD_STRING_TYPE(QString, ISO639_2_t);
 TAPI_ADD_STRING_TYPE(QString, Base64Image_t);
-TAPI_ADD_STRING_TYPE(QString, Date_t);
-TAPI_ADD_STRING_TYPE(QString, Time_t);
-TAPI_ADD_STRING_TYPE(QString, DateTime_t);
 TAPI_ADD_STRING_TYPE(QString, URL_t);
 TAPI_ADD_STRING_TYPE(QString, ProductCode_t);
 TAPI_ADD_STRING_TYPE(QString, SaleableCode_t);

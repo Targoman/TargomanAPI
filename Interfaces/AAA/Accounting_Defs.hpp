@@ -123,13 +123,14 @@ struct stuAssetItem {
     TAPI::JSON_t                 slbPrivs;
     qreal                        slbBasePrice;
     TAPI::SaleableAdditive_t     slbAdditives;
+    quint32                      slbProductCount;
+    NULLABLE(quint32)            slbMaxSaleCountPerUser;
     quint32                      slbInStockCount;
     quint32                      slbOrderedCount;
     quint32                      slbReturnedCount;
     QString                      slbVoucherTemplate;
     TAPI::enuGenericStatus::Type slbStatus;
 
-    //digested
     struct {
         QJsonObject   Additives;
         UsageLimits_t Limits;
@@ -140,33 +141,34 @@ struct stuAssetItem {
     stuAssetItem& fromJson(const QJsonObject& _obj);
 };
 
-typedef QMap<QString, stuAssetItem> ActivePackages_t;
+typedef QMap<QString, stuAssetItem> ActiveCredits_t;
 
-struct stuServiceAccountInfo{
-    ActivePackages_t            ActivePackages;
-    QSharedPointer<stuAssetItem>  PreferedPackage;
-    quint32                     ParentID; // 0 for no parent
+struct stuServiceCreditsInfo {
+    ActiveCredits_t        ActiveCredits;
+    NULLABLE(stuAssetItem) PreferedCredit;
+    NULLABLE(quint32)      ParentID;
     UsageLimits_t          MyLimitsOnParent;
+    QDateTime              DBCurrentDateTime;
 
-    stuServiceAccountInfo(ActivePackages_t _activePackages,
-                          QSharedPointer<stuAssetItem> _preferedPackage,
-                          quint32          _parentID,
-                          UsageLimits_t  _myLimitsOnParent
-                          );
+    stuServiceCreditsInfo(ActiveCredits_t         _activeCredits,
+                          NULLABLE(stuAssetItem) _preferedCredit,
+                          NULLABLE(quint32)      _parentID,
+                          UsageLimits_t          _myLimitsOnParent,
+                          QDateTime              _dbCurrentDateTime);
 };
 
-struct stuActiveServiceAccount{
-    stuAssetItem ActivePackage;
-    bool       IsFromParent;
+struct stuActiveCredit {
+    stuAssetItem  Credit;
+    bool          IsFromParent;
     UsageLimits_t MyLimitsOnParent;
-    qint64     TTL;
+    qint64        TTL;
 
-    stuActiveServiceAccount(const stuAssetItem& _package = {},
-                            bool _isFromParent = false,
-                            const UsageLimits_t& _myLimitsOnParent = {},
-                            qint64 _ttl = 0);
+    stuActiveCredit(const stuAssetItem& _package = {},
+                    bool _isFromParent = false,
+                    const UsageLimits_t& _myLimitsOnParent = {},
+                    qint64 _ttl = 0);
     QJsonObject toJson(bool _full);
-    stuActiveServiceAccount& fromJson(const QJsonObject _obj);
+    stuActiveCredit& fromJson(const QJsonObject _obj);
 };
 
 }}}}
@@ -257,6 +259,8 @@ TARGOMAN_CREATE_CONSTEXPR(slbNotAvailableSince);
 TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
 TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
 TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
+TARGOMAN_CREATE_CONSTEXPR(slbProductCount);
+TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
 
 ///TODO: create trigger for this 3 fields and make changes to prd Count fields
 TARGOMAN_CREATE_CONSTEXPR(slbInStockCount);
@@ -277,6 +281,7 @@ TARGOMAN_CREATE_CONSTEXPR(uasID);
 TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
 TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
 TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemUUID);
+TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
 TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
 TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
 TARGOMAN_CREATE_CONSTEXPR(uasStatus);

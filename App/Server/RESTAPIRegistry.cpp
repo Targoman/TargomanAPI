@@ -75,19 +75,19 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
     \
-    template<> std::function<QVariant(QSharedPointer<_baseType> _value)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toVariantLambda = \
-        [](QSharedPointer<_baseType> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
-    template<> std::function<QSharedPointer<_baseType>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromVariantLambda = \
-        [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<_baseType> { \
-            if(!_value.isValid() || _value.isNull()) return QSharedPointer<_baseType>(); \
-            QSharedPointer<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
+    template<> std::function<QVariant(tmplNullable<_baseType> _value)> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::toVariantLambda = \
+        [](tmplNullable<_baseType> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
+    template<> std::function<tmplNullable<_baseType>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::fromVariantLambda = \
+        [](const QVariant& _value, const QByteArray& _paramName) -> tmplNullable<_baseType> { \
+            if(!_value.isValid() || _value.isNull()) return tmplNullable<_baseType>(); \
+            tmplNullable<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
-    template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
-    static tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::instance(QSP_M2STR(_baseType)); \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
+    template<> std::function<QStringList()> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::optionsLambda = nullptr; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
+    static tmplAPIArg<tmplNullable<_baseType>, _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<tmplNullable<_baseType>, _complexity, true>::instance(QSP_M2STR(_baseType)); \
 
 #define DO_ON_TYPE_NULLABLE_IGNORED(...)
 #define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)

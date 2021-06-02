@@ -71,9 +71,9 @@ intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
     return ServiceRegistry.value(_serviceName);
 }
 
-stuActiveServiceAccount intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
+stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
 {
-    return this->findActiveAccount(_usrID);
+    return this->findBestMatchedCredit(_usrID);
 }
 
 intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
@@ -104,42 +104,53 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
 intfRESTAPIWithAccounting::~intfRESTAPIWithAccounting()
 {;}
 
-stuActiveServiceAccount intfRESTAPIWithAccounting::findActiveAccount(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
+stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
-    stuServiceAccountInfo AccountInfo = this->retrieveServiceAccountInfo(_usrID);
-    if(AccountInfo.ActivePackages.isEmpty())
-        return stuActiveServiceAccount();
+    stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
+    if (ServiceCreditsInfo.ActiveCredits.isEmpty())
+        return stuActiveCredit();
 
-    QDateTime Now = QDateTime::currentDateTime();
+    QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
 
-    auto effectiveStartTime = [Now](const stuAssetItem& _assetItem) -> QDateTime { return QDateTime(Now.date()).addMSecs(_assetItem.StartTime.msecsSinceStartOfDay());};
-    auto effectiveEndTime  = [Now](const stuAssetItem& _assetItem) -> QDateTime{
-        return _assetItem.StartTime < _assetItem.EndTime ?
-                    QDateTime(Now.date()).addMSecs(_assetItem.EndTime.msecsSinceStartOfDay())
-                  : _assetItem.EndDate == Now.date() ?
-                        QDateTime(Now.date().addDays(1)) :
-                        QDateTime(Now.date().addDays(1)).addMSecs(_assetItem.EndTime.msecsSinceStartOfDay()) ;
+    auto effectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+        return _assetItem.prdValidFromHour.isNull()
+            ? QDateTime(Now.date())
+            : QDateTime(Now.date()).addSecs(*_assetItem.prdValidFromHour * 3600);
     };
-    auto isInvalidPackage = [this, Now, effectiveStartTime, effectiveEndTime, _requestedUsage](const stuAssetItem& _package) -> bool{
-        if((_package.StartDate.isValid() && _package.StartDate > Now.date())
-           ||(_package.EndDate.isValid() && _package.EndDate < Now.date())
-           ||(_package.StartTime.isValid() && Now < effectiveStartTime(_package))
-           ||(_package.EndTime.isValid() && Now > effectiveEndTime(_package))
-           ||this->isEmpty(_package.Remaining)
-           )
+
+    auto effectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+        if (_assetItem.prdValidFromHour.isNull() || _assetItem.prdValidToHour.isNull())
+            QDateTime(Now.date().addDays(1));
+
+        return _assetItem.prdValidFromHour < _assetItem.prdValidToHour
+            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidToHour * 3600)
+            : _assetItem.prdValidToDate == Now.date()
+                ? QDateTime(Now.date().addDays(1))
+                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.prdValidToHour * 3600);
+    };
+
+    auto isInvalidPackage = [this, Now, effectiveStartDateTime, effectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
+        if ((_assetItem.prdValidFromDate.isValid() && _assetItem.prdValidFromDate > Now.date())
+               || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
+               || (_assetItem.prdValidFromHour.isNull() == false && Now < effectiveStartDateTime(_assetItem))
+               || (_assetItem.prdValidToHour.isNull() == false && Now > effectiveEndDateTime(_assetItem))
+               || this->isEmpty(_assetItem.Digested.Limits)
+            )
             return false;
-        if(_requestedUsage.size()){
-            for(auto UsageIter = _requestedUsage.begin();
+
+        if (_requestedUsage.size()) {
+            for (auto UsageIter = _requestedUsage.begin();
                 UsageIter != _requestedUsage.end();
-                UsageIter++){
-                if(_package.Remaining.contains(UsageIter.key()) == false)
+                UsageIter++) {
+                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
-                if(this->isUnlimited(_package.Remaining) == false){
-                    stuUsage Remaining = _package.Remaining.value(UsageIter.key());
-                    if((Remaining.PerDay >= 0 && Remaining.PerDay - UsageIter.value() <= 0)
-                       ||(Remaining.PerWeek >= 0 && Remaining.PerWeek - UsageIter.value() <= 0)
-                       ||(Remaining.PerMonth >= 0 && Remaining.PerMonth - UsageIter.value() <= 0)
-                       ||(Remaining.Total >= 0 && Remaining.Total - UsageIter.value() <= 0))
+                if (this->isUnlimited(_assetItem.Digested.Limits) == false){
+                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+                    if ((Remaining.PerDay.isNull() == false && *Remaining.PerDay - UsageIter.value() <= 0)
+                           ||(Remaining.PerWeek.isNull() == false && *Remaining.PerWeek - UsageIter.value() <= 0)
+                           ||(Remaining.PerMonth.isNull() == false && *Remaining.PerMonth - UsageIter.value() <= 0)
+                           ||(Remaining.Total.isNull() == false && *Remaining.Total - UsageIter.value() <= 0)
+                        )
                         return false;
                 }
             }
@@ -147,78 +158,80 @@ stuActiveServiceAccount intfRESTAPIWithAccounting::findActiveAccount(quint64 _us
         return true;
     };
 
-    if(AccountInfo.PreferedPackage.isNull() == false && isInvalidPackage(*AccountInfo.PreferedPackage) == false)
-        return stuActiveServiceAccount(*AccountInfo.PreferedPackage,
-                                       AccountInfo.ParentID ? true : false,
-                                       AccountInfo.MyLimitsOnParent,
+    if (ServiceCreditsInfo.PreferedCredit.isNull() == false && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
+        return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
+                                       ServiceCreditsInfo.ParentID.isNull() == false,
+                                       ServiceCreditsInfo.MyLimitsOnParent,
                                        -1);
 
-    QList<stuAssetItem> CandidatePackages;
-    auto comparePackages = [this, &effectiveEndTime] (const stuAssetItem& a, stuAssetItem& b) {
-        if(a.EndDate.isValid() && b.EndDate.isValid() == false) return -1;
-        if(a.EndDate.isValid() == false && b.EndDate.isValid()) return 1;
-        if(this->isUnlimited(a.Remaining) && this->isUnlimited(b.Remaining) == false) return -1;
-        if(this->isUnlimited(a.Remaining) == false && this->isUnlimited(b.Remaining)) return 1;
-        if(a.EndTime.isValid() && b.EndTime.isValid() == false) return -1;
-        if(a.EndTime.isValid() == false && b.EndTime.isValid()) return 1;
-        if(a.EndTime.isValid() && b.EndTime.isValid()) {
-            if(effectiveEndTime(a) < effectiveEndTime(b)) return -1;
-            if(effectiveEndTime(a) > effectiveEndTime(b)) return 1;
+    auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
+        if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
+        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
+        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
+        if (a.prdValidToHour.isNull() == false && b.prdValidToHour.isNull()) return -1;
+        if (a.prdValidToHour.isNull() && b.prdValidToHour.isNull() == false) return 1;
+        if (a.prdValidToHour.isNull() == false && b.prdValidToHour.isNull() == false) {
+            if(effectiveEndDateTime(a) < effectiveEndDateTime(b)) return -1;
+            if(effectiveEndDateTime(a) > effectiveEndDateTime(b)) return 1;
         }
-        if(a.EndDate.isValid() && b.EndDate.isValid() && a.EndDate != b.EndDate)
-            return b.EndDate > a.EndDate ? -1 : 1;
+        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() && a.prdValidToDate != b.prdValidToDate)
+            return b.prdValidToDate > a.prdValidToDate ? -1 : 1;
         return 0;
     };
 
-    for(auto AccountIter = AccountInfo.ActivePackages.begin();
-        AccountIter != AccountInfo.ActivePackages.end();
-        AccountIter++){
-        const stuAssetItem& Package = AccountIter.value();
+    QList<stuAssetItem> CandidateCredit;
 
-        if(isInvalidPackage(Package))
+    for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
+        AccountIter != ServiceCreditsInfo.ActiveCredits.end();
+        AccountIter++) {
+
+        const stuAssetItem& Item = AccountIter.value();
+
+        if (isInvalidPackage(Item))
             continue;
 
-        if(CandidatePackages.isEmpty()){
-            CandidatePackages.append(Package);
+        if (CandidateCredit.isEmpty()) {
+            CandidateCredit.append(Item);
             continue;
         }
 
         bool Inserted = false;
-        for(auto CandidateIter = CandidatePackages.begin();
-            CandidateIter != CandidatePackages.end();
-            CandidateIter++){
-            if( comparePackages(Package, *CandidateIter) <0) {
-                this->breakPackage(CandidateIter->PackageID);
-                CandidatePackages.insert(CandidateIter, Package);
+        for (auto CandidateIter = CandidateCredit.begin();
+            CandidateIter != CandidateCredit.end();
+            CandidateIter++) {
+            if (comparePackages(Item, *CandidateIter) <0) {
+                this->breakCredit(CandidateIter->slbID);
+                CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
                 break;
             }
         }
-        if(Inserted == false)
-            CandidatePackages.append(Package);
+        if (Inserted == false)
+            CandidateCredit.append(Item);
     }
 
-    if(CandidatePackages.isEmpty()){
-        if(_requestedUsage.size())
+    if (CandidateCredit.isEmpty()) {
+        if (_requestedUsage.size())
             throw exPaymentRequired("You don't have any active account");
 
-        return stuActiveServiceAccount();
+        return stuActiveCredit();
     }
 
-    const stuAssetItem& ActivePackage = CandidatePackages.first();
+    const stuAssetItem& ActivePackage = CandidateCredit.first();
     QDateTime NextDigestTime;
-    if(ActivePackage.EndDate.isValid()){
-        if(ActivePackage.EndTime.isValid())
-            NextDigestTime = effectiveEndTime(ActivePackage);
+    if (ActivePackage.prdValidToDate.isNull() == false) {
+        if (ActivePackage.prdValidToHour.isNull() == false)
+            NextDigestTime = effectiveEndDateTime(ActivePackage);
         else
-            NextDigestTime = QDateTime(ActivePackage.EndDate.addDays(1));
-    }else if (ActivePackage.EndTime.isValid())
-        NextDigestTime = effectiveEndTime(ActivePackage);
+            NextDigestTime = QDateTime(ActivePackage.prdValidToDate.addDays(1));
+    } else if (ActivePackage.prdValidToHour.isNull() == false)
+        NextDigestTime = effectiveEndDateTime(ActivePackage);
 
-    return stuActiveServiceAccount(ActivePackage,
-                                   AccountInfo.ParentID ? true : false,
-                                   AccountInfo.MyLimitsOnParent,
-                                   NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
+    return stuActiveCredit(ActivePackage,
+                           ServiceCreditsInfo.ParentID.isNull() == false,
+                           ServiceCreditsInfo.MyLimitsOnParent,
+                           NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
 TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
@@ -284,32 +297,34 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     ).toMap();
 
 #define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
-    TAPI::setFromVariant(AssetItem._fieldName            ,SaleableInfo.value(_table::_fieldName))
+    TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName))
 
     stuAssetItem AssetItem;
-    SET_FIELD_FROM_VARIANMAP(prdCode            , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdName            , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidFromDate   , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidToDate     , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidFromHour   , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidToHour     , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdPrivs           , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdVAT             , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdInStockCount    , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdOrderedCount    , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdReturnedCount   , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdStatus          , tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(slbID              , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbCode            , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbName            , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbPrivs           , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbBasePrice       , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbAdditives       , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbInStockCount    , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbOrderedCount    , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbReturnedCount   , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbVoucherTemplate , tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbStatus          , tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(prdCode,                tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdName,                tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidFromDate,       tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidToDate,         tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidFromHour,       tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdValidToHour,         tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdPrivs,               tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdVAT,                 tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdInStockCount,        tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdOrderedCount,        tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdReturnedCount,       tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(prdStatus,              tblAccountProductsBase);
+    SET_FIELD_FROM_VARIANMAP(slbID,                  tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbCode,                tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbName,                tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbPrivs,               tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbBasePrice,           tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbAdditives,           tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbProductCount,        tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbMaxSaleCountPerUser, tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbInStockCount,        tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbOrderedCount,        tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbReturnedCount,       tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbVoucherTemplate,     tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANMAP(slbStatus,              tblAccountSaleablesBase);
 
     //check available count
     qint64 AvailableProductCount = AssetItem.prdInStockCount - (AssetItem.prdOrderedCount - AssetItem.prdReturnedCount);
@@ -329,10 +344,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         SaleableUsageLimits.insert(
             Iter.key(),
             {
-                Iter->PerDay.size() ? SaleableInfo.value(Iter->PerDay).toInt() : -1,
-                Iter->PerWeek.size() ? SaleableInfo.value(Iter->PerWeek).toInt() : -1,
-                Iter->PerMonth.size() ? SaleableInfo.value(Iter->PerMonth).toInt() : -1,
-                Iter->Total.size() ? SaleableInfo.value(Iter->Total).toInt() : -1,
+                tmplNullable<quint32>(SaleableInfo.value(Iter->PerDay)),
+                tmplNullable<quint32>(SaleableInfo.value(Iter->PerWeek)),
+                tmplNullable<quint32>(SaleableInfo.value(Iter->PerMonth)),
+                tmplNullable<quint64>(SaleableInfo.value(Iter->Total))
             }
         );
     AssetItem.Digested.Limits = SaleableUsageLimits;
@@ -344,11 +359,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
     this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
 
-
-    //TODO: modiriyate takhfif dar kenare poole jayeze :D
-
-
     //---------
+    ///TODO: what if some one uses discount code and at the same time will pay by prize credit
     stuDiscount Discount;
     if (_discountCode.size()) {
         QVariantMap DiscountInfo = this->AccountCoupons->selectFromTable(
@@ -359,26 +371,46 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             1,
             QStringList({
                 tblAccountCouponsBase::cpnID,
-                tblAccountCouponsBase::cpnType,
-                tblAccountCouponsBase::cpnSaleableBasedAmount,
-                tblAccountCouponsBase::cpnMaxAmount,
+                //tblAccountCouponsBase::cpnCode,
                 tblAccountCouponsBase::cpnPrimaryCount,
-                tblAccountCouponsBase::cpnUsedCount,
+                tblAccountCouponsBase::cpnTotalMaxAmount,
+                tblAccountCouponsBase::cpnPerUserMaxCount,
+                tblAccountCouponsBase::cpnPerUserMaxAmount,
+                //tblAccountCouponsBase::cpnValidFrom,
+                tblAccountCouponsBase::cpnExpiryTime,
+                tblAccountCouponsBase::cpnAmount,
+                tblAccountCouponsBase::cpnAmountType,
+                tblAccountCouponsBase::cpnMaxAmount,
+                tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+                tblAccountCouponsBase::cpnTotalUsedCount,
+                tblAccountCouponsBase::cpnTotalUsedAmount,
+                tblAccountCouponsBase::cpnStatus,
+                //tblAccountCouponsBase::cpnCreatedBy_usrID,
+                //tblAccountCouponsBase::cpnCreationDateTime,
+                //tblAccountCouponsBase::cpnUpdatedBy_usrID,
+                Targoman::API::CURRENT_DATETIME,
             }).join(',')
+///TODO: join with userAssets to count user discount usage per voucher
         ).toMap();
 
-        if (DiscountInfo.value(tblAccountCouponsBase::cpnExpiryTime).toDateTime() < QDateTime::currentDateTime())
+        if (DiscountInfo.size() == 0)
+            throw exHTTPBadRequest("Discount code not found.");
+
+        QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_DATETIME).toDateTime();
+
+        if (DiscountInfo.value(tblAccountCouponsBase::cpnExpiryTime).toDateTime() < Now)
             throw exHTTPBadRequest("Discount code has been expired");
-        if (DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toInt() <= DiscountInfo.value(tblAccountCouponsBase::cpnUsedCount).toInt())
+
+        if (DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toInt() <= DiscountInfo.value(tblAccountCouponsBase::cpnTotalUsedCount).toInt())
             throw exHTTPBadRequest("Discount code has been finished");
 
-        qint64 Amount = DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedAmount).toJsonObject().value(_saleableCode).toInt(-1);
+        qint64 Amount = DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier).toJsonObject().value(_saleableCode).toInt(-1);
         if (Amount < 0)
             throw exHTTPBadRequest("Discount code is not valid on selected package");
         Discount.Amount = static_cast<quint32>(Amount);
         Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
-        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnType).toInt());
+        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnAmountType).toInt());
         Discount.MaxAmount = DiscountInfo.value(tblAccountCouponsBase::cpnMaxAmount).toUInt();
     }
 
@@ -424,51 +456,55 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     return _lastPreVoucher;
 }
 
-void intfRESTAPIWithAccounting::hasCredit(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
-    if(Privs.contains(this->ServiceName) == false)
+    if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveServiceAccount ActiveServiceAccount = this->findActiveAccount(clsJWT(_jwt).usrID(), _requestedUsage);
-    if(ActiveServiceAccount.TTL == 0)
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+    if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
-    auto checkCredit = [](auto _usageIter, auto _remaining, auto _type) {
-        if(_remaining.PerDay >= 0 && _remaining.PerDay - _usageIter.value() <= 0)
+    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+        if (_remaining.PerDay.isNull() == false && *_remaining.PerDay - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
-        if(_remaining.PerWeek >= 0 && _remaining.PerWeek - _usageIter.value() <= 0)
+        if (_remaining.PerWeek.isNull() == false && *_remaining.PerWeek - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
-        if(_remaining.PerMonth >= 0 && _remaining.PerMonth - _usageIter.value() <= 0)
+        if (_remaining.PerMonth.isNull() == false && *_remaining.PerMonth - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
-        if(_remaining.Total >= 0 && _remaining.Total - _usageIter.value() <= 0)
+        if (_remaining.Total.isNull() == false && *_remaining.Total - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
     };
 
-    const stuAssetItem& Package = ActiveServiceAccount.ActivePackage;
-    stuUsage CurrUsage;
-    if(ActiveServiceAccount.IsFromParent){
+    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
+    if (BestMatchedCredit.IsFromParent) {
         for(auto UsageIter = _requestedUsage.begin();
             UsageIter != _requestedUsage.end();
-            UsageIter++){
-            if(Package.Remaining.contains(UsageIter.key()) == false)
-                continue;
-            if(this->isUnlimited(ActiveServiceAccount.MyLimitsOnParent) == false)
-                checkCredit(UsageIter, ActiveServiceAccount.MyLimitsOnParent.value(UsageIter.key()), "Own");
+            UsageIter++) {
 
-            checkCredit(UsageIter, Package.Remaining.value(UsageIter.key()), "Parent");
-        }
-        return;
-    }else if(this->isUnlimited(Package.Remaining))
-        return;
-    else{
-        for(auto UsageIter = _requestedUsage.begin();
-            UsageIter != _requestedUsage.end();
-            UsageIter++){
-            if(Package.Remaining.contains(UsageIter.key()) == false)
+            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
                 continue;
-            checkCredit(UsageIter, Package.Remaining.value(UsageIter.key()), "Self");
+
+            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
+                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
+
+            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
         }
+        return;
+    }
+
+    if (this->isUnlimited(ActiveCredit.Digested.Limits))
+        return;
+
+    for (auto UsageIter = _requestedUsage.begin();
+        UsageIter != _requestedUsage.end();
+        UsageIter++) {
+
+        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+            continue;
+
+        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
     }
 }
 

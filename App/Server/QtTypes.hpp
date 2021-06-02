@@ -66,8 +66,8 @@
 #define DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)  \
 namespace TAPI { \
     inline void setFromVariant(_baseType& _storage, const QVariant& _val){ _storage = _val.value<_baseType>(); } \
-    inline void setFromVariant(QSharedPointer<_baseType>& _storage, const QVariant& _val){ \
-        if(_val.isValid() && _val.isNull() == false) *_storage = _val.value<_baseType>(); \
+    inline void setFromVariant(tmplNullable<_baseType>& _storage, const QVariant& _val){ \
+        if (_val.isValid() && _val.isNull() == false) *_storage = _val.value<_baseType>(); \
     } \
 }
 
@@ -78,9 +78,9 @@ template<> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral,
     if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
-template<> inline  QGenericArgument tmplAPIArg<QSharedPointer<_numericType>, COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
-    bool Result = true; *_argStorage = new QSharedPointer<_numericType>; \
-    if(_val.isValid() && _val.isNull() == false) **(reinterpret_cast<QSharedPointer<_numericType>*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
+template<> inline QGenericArgument tmplAPIArg<tmplNullable<_numericType>, COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
+    bool Result = true; *_argStorage = new tmplNullable<_numericType>; \
+    if(_val.isValid() && _val.isNull() == false) **(reinterpret_cast<tmplNullable<_numericType>*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
@@ -90,11 +90,11 @@ inline void setFromVariant(_numericType& _storage, const QVariant& _val){ \
     bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
 } \
-inline void setFromVariant(QSharedPointer<_numericType>& _storage, const QVariant& _val){ \
+inline void setFromVariant(tmplNullable<_numericType>& _storage, const QVariant& _val){ \
     bool Result = true; if(_val.isValid() && _val.isNull() == false) *_storage = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
 } \
-inline QJsonValue toJsonValue(const QSharedPointer<_numericType>& _val){ QJsonValue JsonVal; JsonVal = _val.isNull() ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
+inline QJsonValue toJsonValue(const tmplNullable<_numericType>& _val){ QJsonValue JsonVal; JsonVal = _val.isNull() ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
 }
 
 TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(quint8,  toUInt)
@@ -112,7 +112,7 @@ TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(float,   toFloat)
 //}
 
 #define REGISTER_ON_TYPE_VALID(_baseType)  \
-    Q_DECLARE_METATYPE(QSharedPointer<_baseType>) \
+    Q_DECLARE_METATYPE(tmplNullable<_baseType>) \
     DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)
 
 #define REGISTER_ON_TYPE_IGNORED(_baseType)
@@ -121,17 +121,17 @@ TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(float,   toFloat)
 #define REGISTER_ON_TYPE(_typeName, _id, _baseType) REGISTER_ON_TYPE_PROXY(_baseType, IGNORE_TYPE_##_typeName)
 
 //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(REGISTER_ON_TYPE)
-Q_DECLARE_METATYPE(QSharedPointer<quint8>)
-Q_DECLARE_METATYPE(QSharedPointer<quint16>)
-Q_DECLARE_METATYPE(QSharedPointer<quint32>)
-Q_DECLARE_METATYPE(QSharedPointer<quint64>)
-Q_DECLARE_METATYPE(QSharedPointer<qint8>)
-Q_DECLARE_METATYPE(QSharedPointer<qint16>)
-Q_DECLARE_METATYPE(QSharedPointer<qint32>)
-Q_DECLARE_METATYPE(QSharedPointer<qint64>)
-Q_DECLARE_METATYPE(QSharedPointer<double>)
-Q_DECLARE_METATYPE(QSharedPointer<float>)
-Q_DECLARE_METATYPE(QSharedPointer<bool>)
+Q_DECLARE_METATYPE(tmplNullable<quint8>)
+Q_DECLARE_METATYPE(tmplNullable<quint16>)
+Q_DECLARE_METATYPE(tmplNullable<quint32>)
+Q_DECLARE_METATYPE(tmplNullable<quint64>)
+Q_DECLARE_METATYPE(tmplNullable<qint8>)
+Q_DECLARE_METATYPE(tmplNullable<qint16>)
+Q_DECLARE_METATYPE(tmplNullable<qint32>)
+Q_DECLARE_METATYPE(tmplNullable<qint64>)
+Q_DECLARE_METATYPE(tmplNullable<double>)
+Q_DECLARE_METATYPE(tmplNullable<float>)
+Q_DECLARE_METATYPE(tmplNullable<bool>)
 
 QT_FOR_EACH_STATIC_CORE_CLASS(REGISTER_ON_TYPE)
 QT_FOR_EACH_STATIC_CORE_TEMPLATE(REGISTER_ON_TYPE)

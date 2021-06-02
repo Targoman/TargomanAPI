@@ -129,8 +129,8 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdDesc,             S(QString),              QFV,                                     QNull,      UPOwner },
             { tblAccountProductsBase::prdValidFromDate,    S(TAPI::Date_t),         QFV,                                     QNull,      UPOwner },
             { tblAccountProductsBase::prdValidToDate,      S(TAPI::Date_t),         QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidFromHour,    S(NULLABLE(quint8)),               QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidToHour,      S(NULLABLE(quint8)),               QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidFromHour,    S(NULLABLE(quint8)),     QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidToHour,      S(NULLABLE(quint8)),     QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
             { tblAccountProductsBase::prdPrivs,            S(TAPI::PrivObject_t),   QFV,                                     QNull,      UPOwner },
             { tblAccountProductsBase::prdVAT,              S(qreal),                QFV.real().minValue(0).maxValue(100),    0,          UPOwner },
             { tblAccountProductsBase::prdInStockCount,     S(quint32),              QFV.integer().minValue(0),               QRequired,  UPAdmin },
@@ -206,11 +206,13 @@ intfAccountSaleables::intfAccountSaleables(const QString& _schema)
             { tblAccountSaleablesBase::slbPrivs,               S(TAPI::JSON_t),         QFV,                                    QNull,      UPOwner },
             { tblAccountSaleablesBase::slbBasePrice,           S(qreal),                QFV.real().minValue(0),                 QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbAdditives,           S(TAPI::SaleableAdditive_t), QFV,                                QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbProductCount,        S(quint32),              QFV.integer().minValue(1),              QRequired,  UPOwner},
+            { tblAccountSaleablesBase::slbMaxSaleCountPerUser, S(NULLABLE(quint32)),    QFV,                                    QNull,      UPOwner},
             { tblAccountSaleablesBase::slbInStockCount,        S(quint32),              QFV.integer().minValue(0),              QRequired,  UPAdmin },
             { tblAccountSaleablesBase::slbOrderedCount,        S(quint32),              QFV,                                    QInvalid,   UPNone },
             { tblAccountSaleablesBase::slbReturnedCount,       S(quint32),              QFV,                                    QInvalid,   UPNone },
             { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),              QFV,                                    QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbStatus,              S(TAPI::enuGenericStatus::Type), QFV,                           TAPI::enuGenericStatus::Active, UPStatus },
+            { tblAccountSaleablesBase::slbStatus,              S(TAPI::enuGenericStatus::Type), QFV,                            TAPI::enuGenericStatus::Active, UPStatus },
             { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
             { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
@@ -277,19 +279,21 @@ intfAccountUserAssets::intfAccountUserAssets(
     : clsTable(_schema,
         tblAccountUserAssetsBase::Name,
         QList<ORM::clsORMField>({
-        ///< ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+        ///<  ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
             { tblAccountUserAssetsBase::uasID,              ORM_PRIMARY_KEY64 },
             { tblAccountUserAssetsBase::uas_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin },
             { tblAccountUserAssetsBase::uas_vchID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),         QFV,                        QRequired,  UPNone },
+            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE(quint32)),   QFV,                        QNull,      UPNone },
             { tblAccountUserAssetsBase::uasPrefered,        S(bool),                QFV,                        false,      UPOwner },
             { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),    QFV,                        QNow,       UPNone },
             { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
-        ///< Col                                  Reference Table              ForeignCol      Rename     LeftJoin
-            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
+        ///<  Col                                  Reference Table                          ForeignCol                    Rename     LeftJoin
+            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name),             tblUser::usrID,               "Owner_" },
+            { tblAccountUserAssetsBase::uas_cpnID, R(_schema, tblAccountCouponsBase::Name), tblAccountCouponsBase::cpnID, "",       true },
             //Voucher is not accessible as it is in another schema
             //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
         }) + _exclusiveForeignKeys,
@@ -298,6 +302,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uas_usrID },
             { tblAccountUserAssetsBase::uas_vchID },
             { tblAccountUserAssetsBase::uasVoucherItemUUID },
+            { tblAccountUserAssetsBase::uas_cpnID },
             { tblAccountUserAssetsBase::uasOrderDateTime },
             { tblAccountUserAssetsBase::uasStatus },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID },
@@ -474,14 +479,14 @@ stuAssetItem&stuAssetItem::fromJson(const QJsonObject& _obj)
 }
 
 /******************************************************************/
-stuActiveServiceAccount::stuActiveServiceAccount(const stuAssetItem& _package, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
+stuActiveCredit::stuActiveCredit(const stuAssetItem& _package, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
   ActivePackage(_package),
   IsFromParent(_isFromParent),
   MyLimitsOnParent(_myLimitsOnParent),
   TTL(_ttl)
 {;}
 
-QJsonObject stuActiveServiceAccount::toJson(bool _full)
+QJsonObject stuActiveCredit::toJson(bool _full)
 {
   QJsonObject Account = {
     {ASA_PACKAGE, this->ActivePackage.toJson(_full)},
@@ -496,7 +501,7 @@ QJsonObject stuActiveServiceAccount::toJson(bool _full)
   return Account;
 }
 
-stuActiveServiceAccount& stuActiveServiceAccount::fromJson(const QJsonObject _obj)
+stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj)
 {
   this->ActivePackage = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
   this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
@@ -511,21 +516,23 @@ stuActiveServiceAccount& stuActiveServiceAccount::fromJson(const QJsonObject _ob
 }
 
 /******************************************************************/
-stuServiceAccountInfo::stuServiceAccountInfo(
-    ActivePackages_t _activePackages,
-    QSharedPointer<stuAssetItem> _preferedPackage,
-    quint32 _parentID,
-    UsageLimits_t _myLimitsOnParent) :
-  ActivePackages(_activePackages),
-  PreferedPackage(_preferedPackage),
-  ParentID(_parentID),
-  MyLimitsOnParent(_myLimitsOnParent)
+stuServiceCreditsInfo::stuServiceCreditsInfo(
+        ActiveCredits_t       _activeCredits,
+        NULLABLE(stuAssetItem) _preferedCredit,
+        NULLABLE(quint32)      _parentID,
+        UsageLimits_t          _myLimitsOnParent,
+        QDateTime              _dbCurrentDateTime) :
+    ActiveAccounts(_activeCredits),
+    PreferedCredit(_preferedCredit),
+    ParentID(_parentID),
+    MyLimitsOnParent(_myLimitsOnParent),
+    DBCurrentDateTime(_dbCurrentDateTime)
 {}
 
-}
-}
-}
-}
+} //namespace Accounting
+} //namespace AAA
+} //namespace API
+} //namespace Targoman
 
 namespace TAPI {
 /******************************************************************/
