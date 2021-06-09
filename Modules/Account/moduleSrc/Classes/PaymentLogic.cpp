@@ -23,6 +23,9 @@
 #include "PaymentLogic.h"
 #include "PaymentGateways/Zibal.hpp"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
@@ -129,14 +132,19 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
         throw exHTTPBadRequest("Gateway not suppored yet");
     }
 
-    QVariant VoucherID = OnlinePayments::instance().selectFromTable({},
-                                                                    QString("%1=%2").arg(tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5), {},
-                                                                    0, 1,
-                                                                    tblOnlinePayments::onp_vchID).toMap().first();
-    if(VoucherID.isValid() == false)
+//    QVariant VoucherID = OnlinePayments::instance().selectFromTable({},
+//                                                                    QString("%1=%2").arg(tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5), {},
+//                                                                    0, 1,
+//                                                                    tblOnlinePayments::onp_vchID).toMap().first();
+    QVariantMap VoucherID = SelectQuery(OnlinePayments::instance())
+        .addCol(tblOnlinePayments::onp_vchID)
+        .where({ tblOnlinePayments::onpMD5, enuConditinOperator::Equal, PaymentResponse.OrderMD5 })
+        .one();
+
+    if (VoucherID.isValid() == false)
         throw exHTTPBadRequest("Voucher not found");
 
-    if(PaymentResponse.ErrorCode){
+    if (PaymentResponse.ErrorCode) {
         OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
                                               {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
                                               {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ?

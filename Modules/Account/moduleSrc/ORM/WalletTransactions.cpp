@@ -25,6 +25,9 @@
 #include "Voucher.h"
 #include "Classes/PaymentLogic.h"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuWalletTransactionStatus);
 
 namespace Targoman {
@@ -38,7 +41,11 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    return query.one();
 }
 
 WalletTransactions::WalletTransactions() :

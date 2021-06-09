@@ -24,6 +24,9 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuTicketStatus);
 
 namespace Targoman {
@@ -33,14 +36,29 @@ using namespace ORM;
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
     QString ExtraFilters;
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
-                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
-                       .arg(tblTickets::tktTarget_usrID)
-                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
+//    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+//        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
+//                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
+//                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
+//                       .arg(tblTickets::tktTarget_usrID)
+//                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
 
-    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        query
+            .where({ tblTickets::tktTarget_usrID, enuConditinOperator::Equal, clsJWT(_JWT).usrID() })
+            .orWhere({ tblTickets::tktCreatedBy_usrID, enuConditinOperator::Equal, clsJWT(_JWT).usrID() })
+            .orWhere(clsCondition::scope(
+                clsCondition(tblTickets::tktTarget_usrID, enuConditinOperator::Null)
+                .orCond({ tblTickets::tktType, enuConditinOperator::Equal, TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast) })
+            ))
+        ;
+
+    return query.one();
 }
 
 Tickets::Tickets() :

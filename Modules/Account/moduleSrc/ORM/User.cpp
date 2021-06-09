@@ -23,6 +23,9 @@
 #include "User.h"
 #include "Roles.h"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -35,7 +38,11 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
     if(clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    return query.one();
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -102,7 +109,13 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 }
 
 TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
-    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
+//    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
+
+    auto photo = SelectQuery(this)
+        .addCol(tblUserExtraInfo::ueiPhoto)
+        .where({ tblUserExtraInfo::uei_usrID, enuConditinOperator::Equal, _usrID })
+        .one()
+        .value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
 
     QString Mime = "image/png";
     QByteArray Image;

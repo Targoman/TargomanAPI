@@ -26,6 +26,9 @@
 #include "Server/ServerConfigs.h"
 #include "Server/clsSimpleCrypt.h"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 namespace Targoman {
 namespace API {
 namespace AAA {
@@ -243,8 +246,67 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                                                                   TAPI::stuPreVoucher _lastPreVoucher)
 {
     Accounting::checkPreVoucherSanity(_lastPreVoucher);
+/*
+    QScopedPointer<intfAccountSaleables> a1;
+    intfAccountSaleables* b1 = a1.data();
+    intfAccountSaleables c1 = *a1;
 
-    QVariantMap SaleableInfo = this->AccountSaleables->selectFromTable(
+    QScopedPointer<clsTable> a3;
+    clsTable* b3 = a3.data();
+    clsTable c3 = *a3;
+
+    QScopedPointer<QString> a2;
+    QString* b2 = a2.data();
+    QString c2 = *a2;
+*/
+    QVariantMap SaleableInfo = SelectQuery(this->AccountSaleables)
+        .addCols(QStringList({
+            //tblAccountProductsBase::prdID,
+            tblAccountProductsBase::prdCode,
+            tblAccountProductsBase::prdName,
+            //tblAccountProductsBase::prdDesc,
+            tblAccountProductsBase::prdValidFromDate,
+            tblAccountProductsBase::prdValidToDate,
+            tblAccountProductsBase::prdValidFromHour,
+            tblAccountProductsBase::prdValidToHour,
+            //tblAccountProductsBase::prdPrivs,
+            tblAccountProductsBase::prdVAT,
+            tblAccountProductsBase::prdInStockCount,
+            tblAccountProductsBase::prdOrderedCount,
+            tblAccountProductsBase::prdReturnedCount,
+            tblAccountProductsBase::prdStatus,
+            //tblAccountProductsBase::prdCreatedBy_usrID,
+            //tblAccountProductsBase::prdCreationDateTime,
+            //tblAccountProductsBase::prdUpdatedBy_usrID,
+
+            tblAccountSaleablesBase::slbID,
+            tblAccountSaleablesBase::slbCode,
+            //tblAccountSaleablesBase::slb_prdID,
+            tblAccountSaleablesBase::slbName,
+            //tblAccountSaleablesBase::slbDesc,
+            //tblAccountSaleablesBase::slbType,
+            //tblAccountSaleablesBase::slbCanBePurchasedSince,
+            //tblAccountSaleablesBase::slbNotAvailableSince,
+            //tblAccountSaleablesBase::slbPrivs,
+            tblAccountSaleablesBase::slbBasePrice,
+            tblAccountSaleablesBase::slbAdditives,
+            tblAccountSaleablesBase::slbInStockCount,
+            tblAccountSaleablesBase::slbOrderedCount,
+            tblAccountSaleablesBase::slbReturnedCount,
+            tblAccountSaleablesBase::slbVoucherTemplate,
+            tblAccountSaleablesBase::slbStatus,
+            //tblAccountSaleablesBase::slbCreatedBy_usrID,
+            //tblAccountSaleablesBase::slbCreationDateTime,
+            //tblAccountSaleablesBase::slbUpdatedBy_usrID,
+
+            this->AssetUsageLimitsColsName.join(',')
+        }))
+        .where({ tblAccountSaleablesBase::slbID, enuConditinOperator::Equal, _saleableCode })
+        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditinOperator::GreaterEqual, "NOW()" })
+        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditinOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" }
+        .one();
+
+    /*QVariantMap OLD_SaleableInfo = this->AccountSaleables->selectFromTable(
         {},
         QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )").arg(
             tblAccountSaleablesBase::slbCanBePurchasedSince).arg(
@@ -293,7 +355,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
             this->AssetUsageLimitsColsName.join(',')
         }).join(',')
-    ).toMap();
+    ).toMap();*/
 
 #define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
     TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName))
@@ -359,52 +421,11 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
 
     //---------
-/*    class clsSelectQuery : public clsQuery;
-
-    class clsQuery;
-    class clsSPQuery : public clsQuery;
-    class clsSelectQuery : public clsQuery;
-    class clsInsertQuery : public clsQuery;
-
-    clsQuery query = clsQuery(this->AccountCoupons)
-        .select({
-            tblAccountCouponsBase::cpnID,
-            //tblAccountCouponsBase::cpnCode,
-            tblAccountCouponsBase::cpnPrimaryCount,
-            tblAccountCouponsBase::cpnTotalMaxAmount,
-            tblAccountCouponsBase::cpnPerUserMaxCount,
-            tblAccountCouponsBase::cpnPerUserMaxAmount,
-            //tblAccountCouponsBase::cpnValidFrom,
-            tblAccountCouponsBase::cpnExpiryTime,
-            tblAccountCouponsBase::cpnAmount,
-            tblAccountCouponsBase::cpnAmountType,
-            tblAccountCouponsBase::cpnMaxAmount,
-            tblAccountCouponsBase::cpnSaleableBasedMultiplier,
-            tblAccountCouponsBase::cpnTotalUsedCount,
-            tblAccountCouponsBase::cpnTotalUsedAmount,
-            tblAccountCouponsBase::cpnStatus,
-            //tblAccountCouponsBase::cpnCreatedBy_usrID,
-            //tblAccountCouponsBase::cpnCreationDateTime,
-            //tblAccountCouponsBase::cpnUpdatedBy_usrID,
-            Targoman::API::CURRENT_DATETIME,
-        })
-        .leftJoin(" tbl ", " ON ") -> join(" tbl ", " ON ", "LEFT")
-        .where({ tblAccountCouponsBase::cpnValidFrom, "<=", "NOW()" })
-        .andWhere({ tblAccountCouponsBase::cpnValidFrom, "<=", "NOW()" })
-    ;
-    query. ...
-    QVariantMap DiscountInfo = query.all();
-*/
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
     stuDiscount Discount;
     if (_discountCode.size()) {
-        QVariantMap DiscountInfo = this->AccountCoupons->selectFromTable(
-            {},
-            QString("%1<=NOW()").arg(tblAccountCouponsBase::cpnValidFrom),
-            _discountCode,
-            0,
-            1,
-            QStringList({
+        QVariantMap DiscountInfo = SelectQuery(this->AccountCoupons)
+            .addCols(QStringList({
                 tblAccountCouponsBase::cpnID,
                 //tblAccountCouponsBase::cpnCode,
                 tblAccountCouponsBase::cpnPrimaryCount,
@@ -424,9 +445,11 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 //tblAccountCouponsBase::cpnCreationDateTime,
                 //tblAccountCouponsBase::cpnUpdatedBy_usrID,
                 Targoman::API::CURRENT_DATETIME,
-            }).join(',')
-///TODO: join with userAssets to count user discount usage per voucher
-        ).toMap();
+            }))
+        ///TODO: join with userAssets to count user discount usage per voucher
+        .where(tblAccountCouponsBase::cpnID, enuConditinOperator::Equal, _discountCode)
+        .andWhere(tblAccountCouponsBase::cpnValidFrom, enuConditinOperator::LessEqual, "NOW()")
+        .one();
 
         if (DiscountInfo.size() == 0)
             throw exHTTPBadRequest("Discount code not found.");

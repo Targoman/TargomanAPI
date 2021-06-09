@@ -25,6 +25,9 @@
 #include "Interfaces/Common/QtTypes.hpp"
 #include "libTargomanDBM/clsDAC.h"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 namespace Targoman {
 namespace API {
 namespace ORM {
@@ -32,10 +35,13 @@ namespace ORM {
 QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT,{this->Module + ":ActionLogs:CRUD~0100"});
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    return query.one();
 }
 
 }
 }
 }
-

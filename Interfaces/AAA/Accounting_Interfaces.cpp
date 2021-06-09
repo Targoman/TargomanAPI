@@ -28,6 +28,8 @@
 #include "Interfaces/Common/QtTypes.hpp"
 
 using namespace Targoman::API;
+
+#include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
 
 TAPI_REGISTER_METATYPE(
@@ -100,13 +102,24 @@ QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL)
 {
     ///TODO: get just by priv. users
     constexpr quint16 CACHE_TIME = 15 * 60;
-    QString ExtraFilters;
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 
-    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
+//    QString ExtraFilters;
+//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+//        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
+//            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
+//            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
+//    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        query
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditinOperator::GreaterEqual, "NOW()" })
+            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditinOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+        ;
+
+    return query.one();
 }
 
 bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -178,13 +191,24 @@ intfAccountProducts::intfAccountProducts(
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 {
   constexpr quint16 CACHE_TIME  = 15 * 60;
-  QString ExtraFilters;
-  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-                   .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-                   .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 
-  return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
+//  QString ExtraFilters;
+//  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+//    ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
+//                   .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
+//                   .arg(tblAccountSaleablesBase::slbNotAvailableSince);
+//  return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        query
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditinOperator::GreaterEqual, "NOW()" })
+            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditinOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+        ;
+
+    return query.one();
 }
 
 bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -252,10 +276,20 @@ intfAccountSaleables::intfAccountSaleables(const QString& _schema)
 /******************************************************************/
 QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL)
 {
-  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+//  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+//    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        query
+            //    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+        ;
+
+    return query.one();
 }
 
 bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
@@ -327,10 +361,20 @@ intfAccountUserAssets::intfAccountUserAssets(
 /******************************************************************/
 QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+//      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        query
+            //      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+        ;
+
+    return query.one();
 }
 
 intfAccountAssetUsage::intfAccountAssetUsage(
@@ -356,7 +400,11 @@ intfAccountAssetUsage::intfAccountAssetUsage(
 QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+  SelectQuery query = SelectQuery(this);
+  APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+  return query.one();
 }
 
 bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -420,8 +468,12 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
 /******************************************************************/
 QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+  SelectQuery query = SelectQuery(this);
+  APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+  return query.one();
 }
 
 bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL)

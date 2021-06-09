@@ -441,9 +441,14 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     if(ApprovalLimit == 0)
         throw exAuthorization("Not enough access for offline approval");
 
-    if(ApprovalLimit > 0){
-        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::vchTotalAmount).toMap();
-        if(Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
+    if (ApprovalLimit > 0) {
+//        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::vchTotalAmount).toMap();
+        QVariantMap Voucher = SelectQuery(Voucher::instance())
+            .addCol(tblVoucher::vchTotalAmount)
+            .where({ tblVoucher::vchID, enuConditinOperator::Equal, _vchID })
+            .one();
+
+        if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
             throw exAuthorization("Voucher total amount is greater than your approval limit");
     }
 

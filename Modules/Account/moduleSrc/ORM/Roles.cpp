@@ -23,6 +23,9 @@
 #include "Roles.h"
 #include "User.h"
 
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuRoleStatus);
 
 namespace Targoman {
@@ -34,7 +37,11 @@ using namespace ORM;
 QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    SelectQuery query = SelectQuery(this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    return query.one();
 }
 
 bool Roles::apiDELETE(DELETE_METHOD_ARGS_IMPL)
