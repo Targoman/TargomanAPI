@@ -23,6 +23,7 @@
 #include "PrivHelpers.h"
 #include "App/Server/QJWT.h"
 #include "libTargomanCommon/Helpers.hpp"
+#include "Interfaces/Common/QtTypes.hpp"
 #include "QtCUrl.h"
 #include "clsJWT.hpp"
 #include "Accounting.h"

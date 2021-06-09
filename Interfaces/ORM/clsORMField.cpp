@@ -43,13 +43,19 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
       RenameAs(_o.RenameAs),
       UpdatableBy(_o.UpdatableBy),
       Privs(_o.Privs)
-{}
+{
+    if(this->ParamTypeName.startsWith("NULLABLE("))
+        this->ParamTypeName
+            .replace("(", "<")
+            .replace(")", ">")
+            .replace("NULLABLE", "TAPI::tmplNullable");
+}
 
 
 void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
 {
     if(Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)){
-        this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));
+        this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toLatin1()));
         if(this->Data->ParameterType == QMetaType::UnknownType)
             throw exRESTRegistry("Unregistered type: <"+this->Data->ParamTypeName+">");
         _module->updateFilterParamType(this->Data->ParamTypeName, this->Data->ParameterType);

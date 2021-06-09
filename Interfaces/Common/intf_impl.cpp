@@ -29,14 +29,14 @@ namespace API {
 intfAPIObject::~intfAPIObject() {;}
 
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
-    Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer"), "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
-    this->PrettyTypeName = _realTypeName.startsWith("tmplNullable<") ? _realTypeName.mid(sizeof("tmplNullable<"), _realTypeName.size() - static_cast<int>(sizeof("tmplNullable<")) - 1) : _realTypeName;
+    Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer") == false, "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
+    this->PrettyTypeName = _realTypeName.startsWith("TAPI::tmplNullable<") ? _realTypeName.mid(sizeof("TAPI::tmplNullable<") - 1, _realTypeName.size() - static_cast<int>(sizeof("TAPI::tmplNullable<"))) : _realTypeName;
     this->PrettyTypeName = (this->PrettyTypeName.startsWith('Q') ? this->PrettyTypeName.mid(1) : this->PrettyTypeName).toLower();
     QByteArray RealTypeByteArray = _realTypeName.toLatin1();
     this->RealTypeName = new char[static_cast<uint>(RealTypeByteArray.size()+1)];
     strncpy(this->RealTypeName,
-            _realTypeName.toLatin1().constData(),
-            static_cast<uint>(RealTypeByteArray.size()));
+            RealTypeByteArray.constData(),
+            static_cast<uint>(RealTypeByteArray.size()+1));
     this->RealTypeName[RealTypeByteArray.size()] = 0;
 }
 

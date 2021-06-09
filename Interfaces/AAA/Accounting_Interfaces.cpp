@@ -22,9 +22,10 @@
 
 #include "Accounting.h"
 #include "PrivHelpers.h"
+#include "Accounting_Interfaces.h"
 #include "Server/ServerConfigs.h"
 #include "Interfaces/AAA/Authorization.h"
-#include "Accounting_Interfaces.h"
+#include "Interfaces/Common/QtTypes.hpp"
 
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
@@ -38,24 +39,37 @@ TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
     TAPI, stuPreVoucher,
     [](const TAPI::stuPreVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();},
-[](const QVariant& _value, const QByteArray& _param) -> TAPI::stuPreVoucher {
-  if(_value.isValid() == false)
-    return TAPI::stuPreVoucher();
+    [](const QVariant& _value, const QByteArray& _param) -> TAPI::stuPreVoucher {
+          if(_value.isValid() == false)
+            return TAPI::stuPreVoucher();
 
-  if(_value.toString().isEmpty())
-    return TAPI::stuPreVoucher();
+          if(_value.toString().isEmpty())
+            return TAPI::stuPreVoucher();
 
-  QJsonParseError Error;
-  QJsonDocument Doc;
-  Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+          QJsonParseError Error;
+          QJsonDocument Doc;
+          Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
-  if(Error.error != QJsonParseError::NoError)
-    throw exHTTPBadRequest(_param + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
-  if(Doc.isObject() == false)
-    throw exHTTPBadRequest(_param + " is not a valid Prevoucher object: <"+_value.toString()+">");
-  return  TAPI::stuPreVoucher().fromJson(Doc.object());
-}
+          if(Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_param + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
+          if(Doc.isObject() == false)
+            throw exHTTPBadRequest(_param + " is not a valid Prevoucher object: <"+_value.toString()+">");
+          return  TAPI::stuPreVoucher().fromJson(Doc.object());
+        }
 );
+TAPI_REGISTER_METATYPE(
+    COMPLEXITY_Complex,
+    TAPI, OrderAdditives_t,
+    [](const TAPI::OrderAdditives_t& _value) -> QVariant{return QVariant::fromValue(_value);},
+    [](const QVariant& _value, const QByteArray&) -> TAPI::OrderAdditives_t {
+        auto Map = _value.toMap();
+        TAPI::OrderAdditives_t Additives;
+        for(auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
+            Additives.insert(Iter.key(), Iter.value().toString());
+        return Additives;
+    }
+);
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuDiscountType);
 
@@ -438,7 +452,8 @@ intfAccountPrizes::intfAccountPrizes(const QString& _schema,
 /******************************************************************/
 QJsonObject stuAssetItem::toJson(bool _full)
 {
-  QJsonObject Info;
+    ///TODO Complete me
+  QJsonObject Info;/*
   if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
   if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
   if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
@@ -455,12 +470,13 @@ QJsonObject stuAssetItem::toJson(bool _full)
         LimitIter++)
       Limits.insert(LimitIter.key(), LimitIter->toJson());
     Info[PKG_LIMITS] = Limits;
-  }
+  }*/
   return Info;
 }
 
 stuAssetItem&stuAssetItem::fromJson(const QJsonObject& _obj)
 {
+    /* TODO COMPLETE ME
   this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
   this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
   this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
@@ -475,12 +491,13 @@ stuAssetItem&stuAssetItem::fromJson(const QJsonObject& _obj)
       LimitIter != Limits.end();
       LimitIter++)
     this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
+    */
   return *this;
 }
 
 /******************************************************************/
-stuActiveCredit::stuActiveCredit(const stuAssetItem& _package, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
-  ActivePackage(_package),
+stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
+  Credit(_credit),
   IsFromParent(_isFromParent),
   MyLimitsOnParent(_myLimitsOnParent),
   TTL(_ttl)
@@ -489,7 +506,7 @@ stuActiveCredit::stuActiveCredit(const stuAssetItem& _package, bool _isFromParen
 QJsonObject stuActiveCredit::toJson(bool _full)
 {
   QJsonObject Account = {
-    {ASA_PACKAGE, this->ActivePackage.toJson(_full)},
+    {ASA_PACKAGE, this->Credit.toJson(_full)},
     {ASA_TTL, static_cast<double>(this->TTL)},
   };
   if(this->IsFromParent)
@@ -503,7 +520,7 @@ QJsonObject stuActiveCredit::toJson(bool _full)
 
 stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj)
 {
-  this->ActivePackage = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
+  this->Credit = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
   this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
   this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
   QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
@@ -522,7 +539,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
         NULLABLE(quint32)      _parentID,
         UsageLimits_t          _myLimitsOnParent,
         QDateTime              _dbCurrentDateTime) :
-    ActiveAccounts(_activeCredits),
+    ActiveCredits(_activeCredits),
     PreferedCredit(_preferedCredit),
     ParentID(_parentID),
     MyLimitsOnParent(_myLimitsOnParent),

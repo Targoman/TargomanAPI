@@ -22,6 +22,7 @@
 
 #include "clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/Common/QtTypes.hpp"
 #include "libTargomanDBM/clsDAC.h"
 
 namespace Targoman {

@@ -20,16 +20,6 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-namespace Targoman {
-namespace API {
-namespace ORM {
-struct stuRelation;
-}
-}
-}
-bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second);
-unsigned int qHash(const Targoman::API::ORM::stuRelation& _relation);
-
 #include <QSet>
 #include <QRegularExpressionMatch>
 #include "clsTable.h"
@@ -44,14 +34,10 @@ unsigned int qHash(const Targoman::API::ORM::stuRelation& _relation);
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
 
-bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second)
-{
+
+bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second) {
     return _first.ReferenceTable == _second.ReferenceTable && _first.Column == _second.Column && _first.ForeignColumn == _second.ForeignColumn;
 }
-uint qHash(const Targoman::API::ORM::stuRelation& _relation){
-    return qHash(_relation.Column + _relation.ForeignColumn + _relation.ReferenceTable + _relation.RenamingPrefix);
-}
-
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
                                    QFieldValidator::allwaysValid(), _value,
@@ -111,6 +97,12 @@ namespace API {
 namespace ORM {
 
 using namespace Targoman::DBManager;
+
+QString COLS_KEY = "cols";
+
+uint qHash(const Targoman::API::ORM::stuRelation& _relation){
+    return qHash(_relation.Column + _relation.ForeignColumn + _relation.ReferenceTable + _relation.RenamingPrefix);
+}
 
 QHash<QString, clsTable*> clsTable::Registry;
 
@@ -216,9 +208,6 @@ void clsTable::prepareFiltersList()
             this->Converters.insert(this->finalColName(Col), Col.argSpecs().toORMValueConverter());
 }
 
-QString clsTable::finalColName(const clsORMField& _col, const QString& _prefix){
-    return _prefix + (_col.renameAs().isEmpty() ? _col.name() : _col.renameAs());
-}
 
 QString clsTable::domain()
 {
@@ -226,23 +215,6 @@ QString clsTable::domain()
                                            this->Domain = this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName();
 }
 
-QString clsTable::makeColRenamedAs(const clsORMField& _col, const QString& _prefix) const {
-    return (_col.renameAs().isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ this->finalColName(_col, _prefix) + "`");
-};
-
-QString clsTable::makeColName(const clsORMField& _col, bool _appendAs, const stuRelation& _relation) const {
-    QString ColName = _col.name();
-    if(_relation.Column.size() && _relation.RenamingPrefix.size())
-        ColName = ColName.replace(QRegularExpression("^" + _relation.RenamingPrefix), "");
-    return  (_relation.Column.isEmpty() ?
-                 this->Name :
-                 (_relation.RenamingPrefix.isEmpty() ?
-                      _relation.ReferenceTable :
-                      _relation.RenamingPrefix
-                      )
-                 ) + "." + ColName +
-            (_appendAs ? this->makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
-};
 
 QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
     return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
@@ -304,16 +276,9 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
             foreach(auto Col, this->BaseCols)
                 if(Col.isPrimaryKey()){
                     if(Query.size())
-                        Filters.append(this->makeColName(Col) + " = \"" + Query + "\"");
+                        Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
                     break;
                 }
-
-        /*for(auto FilterIter = _ormFields.begin(); FilterIter != _ormFields.end(); ++FilterIter){
-            if(FilterIter.key() == COLS_KEY) continue;
-            const clsORMField& Col = this->SelectableColsMap.value(FilterIter.key());
-            if(Col.isSelfIdentifier())
-                Filters.append(this->makeColName(Col) + " = \"" + FilterIter.value().toString() + "\"");
-        }*/
 
         QString QueryString = QString("SELECT ")
                               + QUERY_SEPARATOR
@@ -360,7 +325,7 @@ bool clsTable::update(quint64 _actorUserID,
         foreach(auto Col, this->BaseCols)
             if(Col.isPrimaryKey()){
                 if(Query.size())
-                    Filters.append(this->makeColName(Col) + " = \"" + Query + "\"");
+                    Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
                 break;
             }
 
@@ -374,14 +339,14 @@ bool clsTable::update(quint64 _actorUserID,
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
         Col.validate(InfoIter.value());
-        UpdateCommands.append(this->makeColName(Col) + "=?");
+        UpdateCommands.append(makeColName(this->Name, Col) + "=?");
         Values.append(Col.toDB(InfoIter.value()));
     }
 
     foreach(auto FCol, this->FilterableColsMap)
         if(FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__){
             if(FCol.Relation.Column.isEmpty()){
-                UpdateCommands.append(this->makeColName(FCol.Col) + "=?");
+                UpdateCommands.append(makeColName(this->Name, FCol.Col) + "=?");
                 Values.append(_actorUserID);
             }
         }
@@ -392,7 +357,7 @@ bool clsTable::update(quint64 _actorUserID,
         clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
         if(Column.isFilterable() == false)
             throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-        Filters.append(this->makeColName(Column) + "=?");
+        Filters.append(makeColName(this->Name, Column) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -452,7 +417,7 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
         if(FilterIter->isValid() == false)
             continue;
         const clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
-        Filters.append(this->makeColName(Column) + "=?");
+        Filters.append(makeColName(this->Name, Column) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -531,13 +496,13 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
         Col.validate(InfoIter.value());
-        CreateCommands.append(this->makeColName(Col) + "=?");
+        CreateCommands.append(makeColName(this->Name, Col) + "=?");
         Values.append(Col.toDB(InfoIter.value()));
     }
 
     foreach(auto Col, this->BaseCols)
         if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
-            CreateCommands.append(this->makeColName(Col) + "=?");
+            CreateCommands.append(makeColName(this->Name, Col) + "=?");
             Values.append(Col.toDB(_actorUserID));
         }
 
@@ -599,6 +564,10 @@ QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
     return {_moduleName.replace("/", ":") + ":CRUD~" + CRUD };
 }
 
+QString clsTable::finalColName(const clsORMField &_col, const QString &_prefix) {
+    return Targoman::API::ORM::finalColName(_col, _prefix);
+}
+
 clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols.size())
@@ -637,13 +606,13 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             if(ColName == _relation.RenamingPrefix + _col.name () || ColName == _relation.RenamingPrefix + _col.renameAs()){
                 if(Function.size()){
-                    QString ColFinalName = this->makeColName(_col, true, _relation);
+                    QString ColFinalName = makeColName(this->Name, _col, true, _relation);
                     if(Function == "COUNT_DISTINCT")
                         _selectItems.Cols.append("COUNT(DISTINCT " + ColFinalName.split(' ').first()+ ") AS COUNT_" + ColFinalName.split(' ').last());
                     else
                         _selectItems.Cols.append(Function + "(" + ColFinalName.split(' ').first()+ ") AS " + Function + "_" + ColFinalName.split(' ').first().split('.').last());
                 }else
-                    _selectItems.Cols.append(this->makeColName(_col, true, _relation));
+                    _selectItems.Cols.append(makeColName(this->Name, _col, true, _relation));
                 return true;
             }
         }
@@ -651,7 +620,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     };
     foreach(auto Col, this->BaseCols){
         if(RequiredCols.isEmpty() || RequiredCols.contains("*"))
-            SelectItems.Cols.append(this->makeColName(Col, true));
+            SelectItems.Cols.append(makeColName(this->Name, Col, true));
         else
             addCol(SelectItems, Col);
     }
@@ -665,7 +634,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         bool Joined = false;
         foreach(auto Col, ForeignTable->BaseCols){
             if(RequiredCols.isEmpty() || RequiredCols.contains("*")){
-                SelectItems.Cols.append(this->makeColName(Col, true, Relation));
+                SelectItems.Cols.append(makeColName(this->Name, Col, true, Relation));
                 Joined = true;
             }else{
                 if(addCol(SelectItems, Col, Relation))
@@ -721,7 +690,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             stuFilteredCol FilteredCol = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
             if(FilteredCol.isValid())
-                Rule+=this->makeColName(FilteredCol.Col, false, FilteredCol.Relation);
+                Rule+=makeColName(this->Name, FilteredCol.Col, false, FilteredCol.Relation);
             else
                 throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
 
@@ -783,9 +752,9 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         foreach(auto FCol, this->FilterableColsMap)
             if(FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__){
                 if(FCol.Relation.LeftJoin)
-                    SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(this->makeColName(FCol.Col, false, FCol.Relation)));
+                    SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
                 else
-                    SelectItems.Where.append(QString("AND %1!='R'").arg(this->makeColName(FCol.Col, false, FCol.Relation)));
+                    SelectItems.Where.append(QString("AND %1!='R'").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
                 if(FCol.Relation.Column.size())
                     UsedJoins.insert(FCol.Relation);
             }
@@ -826,7 +795,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     foreach(auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
         stuFilteredCol Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
         if(Filter.isValid())
-            SelectItems.GroupBy.append(this->makeColName(Filter.Col, false, Filter.Relation));
+            SelectItems.GroupBy.append(makeColName(this->Name, Filter.Col, false, Filter.Relation));
         else
             throw exHTTPBadRequest("Invalid group by <"+GroupByCriteria+"> not found in columns");
     }

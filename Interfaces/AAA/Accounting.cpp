@@ -22,10 +22,9 @@
 
 #include "Accounting.h"
 #include "PrivHelpers.h"
-#include "Server/ServerConfigs.h"
 #include "Interfaces/AAA/Authorization.h"
+#include "Server/ServerConfigs.h"
 #include "Server/clsSimpleCrypt.h"
-#include "Server/QtTypes.hpp"
 
 namespace Targoman {
 namespace API {
@@ -344,10 +343,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         SaleableUsageLimits.insert(
             Iter.key(),
             {
-                tmplNullable<quint32>(SaleableInfo.value(Iter->PerDay)),
-                tmplNullable<quint32>(SaleableInfo.value(Iter->PerWeek)),
-                tmplNullable<quint32>(SaleableInfo.value(Iter->PerMonth)),
-                tmplNullable<quint64>(SaleableInfo.value(Iter->Total))
+                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerDay)),
+                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerWeek)),
+                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerMonth)),
+                TAPI::tmplNullable<quint64>(SaleableInfo.value(Iter->Total))
             }
         );
     AssetItem.Digested.Limits = SaleableUsageLimits;
@@ -360,6 +359,42 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
 
     //---------
+/*    class clsSelectQuery : public clsQuery;
+
+    class clsQuery;
+    class clsSPQuery : public clsQuery;
+    class clsSelectQuery : public clsQuery;
+    class clsInsertQuery : public clsQuery;
+
+    clsQuery query = clsQuery(this->AccountCoupons)
+        .select({
+            tblAccountCouponsBase::cpnID,
+            //tblAccountCouponsBase::cpnCode,
+            tblAccountCouponsBase::cpnPrimaryCount,
+            tblAccountCouponsBase::cpnTotalMaxAmount,
+            tblAccountCouponsBase::cpnPerUserMaxCount,
+            tblAccountCouponsBase::cpnPerUserMaxAmount,
+            //tblAccountCouponsBase::cpnValidFrom,
+            tblAccountCouponsBase::cpnExpiryTime,
+            tblAccountCouponsBase::cpnAmount,
+            tblAccountCouponsBase::cpnAmountType,
+            tblAccountCouponsBase::cpnMaxAmount,
+            tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+            tblAccountCouponsBase::cpnTotalUsedCount,
+            tblAccountCouponsBase::cpnTotalUsedAmount,
+            tblAccountCouponsBase::cpnStatus,
+            //tblAccountCouponsBase::cpnCreatedBy_usrID,
+            //tblAccountCouponsBase::cpnCreationDateTime,
+            //tblAccountCouponsBase::cpnUpdatedBy_usrID,
+            Targoman::API::CURRENT_DATETIME,
+        })
+        .leftJoin(" tbl ", " ON ") -> join(" tbl ", " ON ", "LEFT")
+        .where({ tblAccountCouponsBase::cpnValidFrom, "<=", "NOW()" })
+        .andWhere({ tblAccountCouponsBase::cpnValidFrom, "<=", "NOW()" })
+    ;
+    query. ...
+    QVariantMap DiscountInfo = query.all();
+*/
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
     stuDiscount Discount;
     if (_discountCode.size()) {
@@ -417,17 +452,19 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;
     ///TODO add ttl for order item
-    PreVoucherItem.OrderID = this->AccountUserAssets->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
+    /** TODO COMPLETE
+     * PreVoucherItem.OrderID = this->AccountUserAssets->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
                                                                 {tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()},
                                                                 {tblAccountUserAssetsBase::uas_slbID, Package.PackageID},
                                                             })).toULongLong();
+                                                            */
     PreVoucherItem.Desc  = SaleableInfo.value(tblAccountSaleablesBase::Name).toString();
 
     ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
     /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
     /// return: amount of using coupon
 
-    PreVoucherItem.Qty = _qty;
+/*    PreVoucherItem.Qty = _qty;
     PreVoucherItem.UnitPrice = SaleableInfo.value(tblAccountSaleablesBase::slbPrice).toUInt();
     PreVoucherItem.SubTotal = PreVoucherItem.UnitPrice * PreVoucherItem.Qty;
     PreVoucherItem.Discount = Discount;
@@ -452,6 +489,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();
     _lastPreVoucher.Sign =  QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    */
 
     return _lastPreVoucher;
 }

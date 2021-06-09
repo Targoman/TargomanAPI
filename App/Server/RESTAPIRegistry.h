@@ -26,9 +26,9 @@
 
 #include <QGenericArgument>
 #include <QMetaMethod>
+#include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Common/intfAPIModule.h"
 #include "clsAPIObject.h"
-#include "QtTypes.hpp"
 
 namespace Targoman {
 namespace API {

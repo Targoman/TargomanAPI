@@ -38,7 +38,7 @@
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \
     Q_DECLARE_METATYPE(_type) \
-    Q_DECLARE_METATYPE(tmplNullable<_type>)
+    Q_DECLARE_METATYPE(TAPI::tmplNullable<_type>)
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE_ENUM(_enum) \
@@ -94,7 +94,7 @@
 #define V2U32(v) INTERNAL_V2U32(v)
 
 /************************************************************/
-#define NULLABLE(_type) tmplNullable<_type>
+#define NULLABLE(_type) TAPI::tmplNullable<_type>
 #define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)
 #define N2S8(_value)   INTERNAL_N2int8(_value)

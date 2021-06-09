@@ -26,9 +26,9 @@
 #include "AAADefs.hpp"
 #include "clsJWT.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/Common/QtTypes.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
-#include "Server/QtTypes.hpp"
 #include <QString>
 
 namespace TAPI {
@@ -163,7 +163,7 @@ struct stuActiveCredit {
     UsageLimits_t MyLimitsOnParent;
     qint64        TTL;
 
-    stuActiveCredit(const stuAssetItem& _package = {},
+    stuActiveCredit(const stuAssetItem& _credit = {},
                     bool _isFromParent = false,
                     const UsageLimits_t& _myLimitsOnParent = {},
                     qint64 _ttl = 0);
@@ -343,6 +343,7 @@ TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
 }
 
 TAPI_DECLARE_METATYPE(TAPI::stuVoucher)
+TAPI_DECLARE_METATYPE(TAPI::OrderAdditives_t)
 TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherStatus)
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuDiscountType)

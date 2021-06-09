@@ -12,6 +12,11 @@ DIST_HEADERS += \
     Common/GenericTypes.h \
     Common/tmplAPIArg.h \
     Common/intfAPIArgManipulator.h \
+    Common/HTTPExceptions.hpp \
+    Common/intfAPIModule.h \
+    Common/GenericEnums.hpp \
+    Common/APIArgHelperMacros.hpp \
+    Common/QtTypes.hpp \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Accounting.h \
@@ -19,15 +24,11 @@ DIST_HEADERS += \
     AAA/Authorization.h \
     AAA/clsJWT.hpp \
     AAA/PrivHelpers.h \
+    AAA/Accounting_Interfaces.h \
+    AAA/Accounting_Defs.hpp \
     ORM/clsORMField.h \
     ORM/clsRESTAPIWithActionLogs.h \
     ORM/clsTable.h \
-    Common/HTTPExceptions.hpp \
-    Common/intfAPIModule.h \
-    Common/GenericEnums.hpp \
-    Common/APIArgHelperMacros.hpp \
-    AAA/Accounting_Interfaces.h \
-    AAA/Accounting_Defs.hpp
 
 PRIVATE_HEADERS += \
 
@@ -37,6 +38,7 @@ SOURCES += \
     AAA/Authorization.cpp \
     AAA/PrivHelpers.cpp \
     Common/GenericTypes.cpp \
+    ORM/QueryBuilders.cpp \
     ORM/clsORMField.cpp \
     ORM/clsRESTAPIWithActionLogs.cpp \
     ORM/clsTable.cpp \
@@ -54,4 +56,7 @@ INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
 include($$QBUILD_PATH/templates/libConfigs.pri)
 
 HEADERS += \
-    Common/APIArgHelperMacrosPrivate.h
+    Common/APIArgHelperMacrosPrivate.h \
+    Common/tmplNullable.hpp \
+    ORM/Defs.hpp \
+    ORM/QueryBuilders.h

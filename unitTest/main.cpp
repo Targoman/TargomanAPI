@@ -21,42 +21,18 @@
  */
 
 #include <QtTest>
-#include "Interfaces/Test/testBase.hpp"
-#include "Modules/Account/functionalTest/test.h"
-
-QString APIURL = "http://127.0.0.1:10000/rest/v1";
-
-QString gEncodedJWT;
-QString gLoginJWT;
-QString gEncodedAdminJWT;
-QJsonObject gJWT;
-QJsonObject gAdminJWT;
-quint32 gUserID;
-quint32 gAdminUserID;
-QVariant gInvalid;
+#include "QueryBuilders.hpp"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
-    clsDAC::addDBEngine(enuDBEngines::MySQL);
-    clsDAC::setConnectionString("HOST=127.0.0.1;"
-                                "PORT=3306;"
-                                "USER=root;"
-                                "PASSWORD=targoman123;"
-                                "SCHEMA=AAA");
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try{
-        FailedTests += QTest::qExec(new testBase, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new QueryBuilders, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }
@@ -65,8 +41,6 @@ int main(int argc, char *argv[])
     }else{
         qDebug() << "all tests passed :)";
     }
-
-    clsDAC::shutdown();
 
     return FailedTests;
     /**/

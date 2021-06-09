@@ -24,7 +24,6 @@ HEADERS += \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
-    Server/QtTypes.hpp \
     Server/OpenAPIGenerator.h \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
