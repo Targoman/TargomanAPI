@@ -136,9 +136,9 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
 //                                                                    QString("%1=%2").arg(tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5), {},
 //                                                                    0, 1,
 //                                                                    tblOnlinePayments::onp_vchID).toMap().first();
-    QVariantMap VoucherID = SelectQuery(OnlinePayments::instance())
+    QVariant VoucherID = SelectQuery(OnlinePayments::instance())
         .addCol(tblOnlinePayments::onp_vchID)
-        .where({ tblOnlinePayments::onpMD5, enuConditinOperator::Equal, PaymentResponse.OrderMD5 })
+        .where({ tblOnlinePayments::onpMD5, enuConditionOperator::Equal, PaymentResponse.OrderMD5 })
         .one();
 
     if (VoucherID.isValid() == false)

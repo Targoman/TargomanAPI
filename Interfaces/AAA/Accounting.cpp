@@ -246,20 +246,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                                                                   TAPI::stuPreVoucher _lastPreVoucher)
 {
     Accounting::checkPreVoucherSanity(_lastPreVoucher);
-/*
-    QScopedPointer<intfAccountSaleables> a1;
-    intfAccountSaleables* b1 = a1.data();
-    intfAccountSaleables c1 = *a1;
 
-    QScopedPointer<clsTable> a3;
-    clsTable* b3 = a3.data();
-    clsTable c3 = *a3;
-
-    QScopedPointer<QString> a2;
-    QString* b2 = a2.data();
-    QString c2 = *a2;
-*/
-    QVariantMap SaleableInfo = SelectQuery(this->AccountSaleables)
+    QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
             //tblAccountProductsBase::prdID,
             tblAccountProductsBase::prdCode,
@@ -301,9 +289,9 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
             this->AssetUsageLimitsColsName.join(',')
         }))
-        .where({ tblAccountSaleablesBase::slbID, enuConditinOperator::Equal, _saleableCode })
-        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditinOperator::GreaterEqual, "NOW()" })
-        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditinOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" }
+        .where({ tblAccountSaleablesBase::slbID, enuConditionOperator::Equal, _saleableCode })
+        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, "NOW()" })
+        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
         .one();
 
     /*QVariantMap OLD_SaleableInfo = this->AccountSaleables->selectFromTable(
@@ -424,7 +412,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
     stuDiscount Discount;
     if (_discountCode.size()) {
-        QVariantMap DiscountInfo = SelectQuery(this->AccountCoupons)
+        QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
             .addCols(QStringList({
                 tblAccountCouponsBase::cpnID,
                 //tblAccountCouponsBase::cpnCode,
@@ -447,8 +435,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 Targoman::API::CURRENT_DATETIME,
             }))
         ///TODO: join with userAssets to count user discount usage per voucher
-        .where(tblAccountCouponsBase::cpnID, enuConditinOperator::Equal, _discountCode)
-        .andWhere(tblAccountCouponsBase::cpnValidFrom, enuConditinOperator::LessEqual, "NOW()")
+        .where({ tblAccountCouponsBase::cpnID, enuConditionOperator::Equal, _discountCode })
+        .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, "NOW()" })
         .one();
 
         if (DiscountInfo.size() == 0)

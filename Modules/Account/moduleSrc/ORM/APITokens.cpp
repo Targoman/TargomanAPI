@@ -40,8 +40,8 @@ QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    SelectQuery query = SelectQuery(*this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
     return query.one();
 }
 

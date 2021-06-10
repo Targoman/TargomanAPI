@@ -18,7 +18,9 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
 #define TARGOMAN_API_ORM_QUERYBUILDERS_H
 
@@ -33,7 +35,7 @@ namespace ORM {
 class clsTable;
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 
-TARGOMAN_DEFINE_ENUM(enuConditinOperator,
+TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      Equal,
                      NotEqual,
                      Greater,
@@ -46,13 +48,14 @@ TARGOMAN_DEFINE_ENUM(enuConditinOperator,
 
 class clsConditionData;
 
-class clsCondition{
+class clsCondition {
 public:
     clsCondition();
-    clsCondition(QString _col, enuConditinOperator::Type _operator, QVariant _value = {});
+    clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
     ~clsCondition();
 
-    clsCondition& openPar(const clsCondition & _cond);
+    static clsCondition& scope(const clsCondition& _cond);
+    clsCondition& openPar(const clsCondition& _cond);
     clsCondition& closePar();
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
@@ -60,10 +63,27 @@ public:
 
     bool isEmpty() const;
 
+    QString buildQueryString();
+
 private:
     QSharedDataPointer<clsConditionData> Data;
     friend clsCondition& addCondition(clsCondition* _this, char _aggregator, const clsCondition& _nextCondition);
     friend QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString, stuFilteredCol>& _filterables);
+};
+
+class clsConditionData : public QSharedData
+{
+public:
+    clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {});
+    bool isAggregator() const;
+    bool isOpenPar() const;
+    bool isClosePar() const;
+
+public:
+    QString Col;
+    enuConditionOperator::Type Operator;
+    QVariant Value;
+    clsCondition NextCondition;
 };
 
 TARGOMAN_DEFINE_ENUM(enuAggregation,
@@ -81,38 +101,97 @@ TARGOMAN_DEFINE_ENUM(enuConditionalAggregation,
                      MAXIF,
                      MINIF)
 
+TARGOMAN_DEFINE_ENUM(enuJoinType,
+                     LEFT,
+                     INNER,
+                     RIGHT,
+                     CROSS)
+
 TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Ascending,
-                     Decending)
+                     Descending)
 
-class clsSelectQueryData;
+struct stuColSpecs {
+    QString Name;
+    QString RenameAs = {};
+    union unnAggregation {
+        enuAggregation::Type Simple;
+        enuConditionalAggregation::Type Conditional;
+    };
+    NULLABLE(unnAggregation) Aggregation = nullptr;
+    clsCondition Condition = {};
+};
+
+struct stuSelectItems {
+    QStringList Cols;
+    QStringList From;
+    QStringList Where;
+    QStringList OrderBy;
+    QStringList GroupBy;
+};
+
+struct stuQueryRelation {
+    enuJoinType::Type JoinType;
+    QString Table;
+    clsCondition On;
+};
+
+class clsSelectQueryData : public QSharedData
+{
+public:
+    clsSelectQueryData(const clsTable& _table);
+
+    void prepare();
+    clsORMField colByName(const QString& _col);
+
+public:
+    const clsTable&         Table;
+    QList<stuColSpecs>      RequiredCols;
+    QStringList             GroupByCols;
+    stuSelectItems          QueryItems;
+    QList<stuQueryRelation> Relations;
+};
+
+//class clsSelectQueryData;
+
 class SelectQuery
 {
 public:
     SelectQuery(const clsTable& _table);
     ~SelectQuery();
 
-    QVariant one(QVariantList _args = {});
-    QVariant one(QVariantMap _args = {});
-    TAPI::stuTable all(QVariantList _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
-    TAPI::stuTable all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
-
-    SelectQuery& cols(const QStringList& _cols);
+    SelectQuery& addCols(const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
 
-    SelectQuery& rightJoin(const QString _table, const clsCondition& _condition = {});
-    SelectQuery& leftJoin(const QString _table, const clsCondition& _condition = {});
-    SelectQuery& crossJoin(const QString _table, const clsCondition& _condition = {});
-    SelectQuery& innerJoin(const QString _table, const clsCondition& _condition = {});
+    SelectQuery& join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on);
+    SelectQuery& leftJoin(const QString _table, const clsCondition& _on);
+    SelectQuery& rightJoin(const QString _table, const clsCondition& _on);
+    SelectQuery& innerJoin(const QString _table, const clsCondition& _on);
+    SelectQuery& crossJoin(const QString _table);
 
     SelectQuery& where(const clsCondition& _condition);
     SelectQuery& andWhere(const clsCondition& _condition);
     SelectQuery& orWhere(const clsCondition& _condition);
 
-    SelectQuery& groupBy(const clsCondition& _condition);
-    SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir);
+    SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
+
+//    SelectQuery& groupBy(const clsCondition& _condition);
+    SelectQuery& groupBy(const QString& _col);
+    SelectQuery& groupBy(const QStringList& _cols);
+
+    SelectQuery& having(const clsCondition& _condition);
+
+    SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+
+    QVariantMap one(QVariantMap _args = {});
+    TAPI::stuTable all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
+
+    QString buildQueryString();
 
 private:
     QSharedDataPointer<clsSelectQueryData> Data;

@@ -24,7 +24,6 @@
 #include "QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 
-
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
@@ -44,6 +43,9 @@
 
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.hpp"
+
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuUserStatus);
@@ -445,7 +447,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
 //        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::vchTotalAmount).toMap();
         QVariantMap Voucher = SelectQuery(Voucher::instance())
             .addCol(tblVoucher::vchTotalAmount)
-            .where({ tblVoucher::vchID, enuConditinOperator::Equal, _vchID })
+            .where({ tblVoucher::vchID, enuConditionOperator::Equal, _vchID })
             .one();
 
         if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)

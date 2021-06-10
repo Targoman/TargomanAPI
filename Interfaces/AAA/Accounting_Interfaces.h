@@ -29,7 +29,7 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-namespace Accounting{
+namespace Accounting {
 
 /******************************************************/
 class intfAccountProducts: public ORM::clsTable

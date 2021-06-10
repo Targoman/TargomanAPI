@@ -29,6 +29,7 @@
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 #include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/ORM/Defs.hpp"
+//#include "Interfaces/ORM/QueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -38,7 +39,7 @@ class clsSelectQueryData;
 
 class clsTable : public intfAPIModule {
 protected:
-    struct stuSelectItems{
+    struct stuSelectItems {
         QStringList Cols;
         QStringList From;
         QStringList Where;

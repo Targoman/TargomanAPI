@@ -40,8 +40,8 @@ QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query)
+    SelectQuery query = SelectQuery(*this);
+    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
     return query.one();
 }
 
