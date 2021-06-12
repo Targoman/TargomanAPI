@@ -24,13 +24,11 @@
 #ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
 #define TARGOMAN_API_ORM_QUERYBUILDERS_H
 
+class TestSelectQuery;
+
 #include "Interfaces/ORM/Defs.hpp"
 #include "libTargomanCommon/exTargomanBase.h"
 #include "Interfaces/Common/GenericTypes.h"
-
-//#ifdef TARGOMAN_TEST_MODE
-class TestSelectQuery;
-//#endif
 
 namespace Targoman {
 namespace API {
@@ -115,7 +113,6 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Descending)
 
 class clsSelectQueryData;
-
 class SelectQuery
 {
 public:
@@ -146,20 +143,25 @@ public:
     SelectQuery& groupBy(const QStringList& _cols);
 
     SelectQuery& having(const clsCondition& _condition);
+    SelectQuery& andHaving(const clsCondition& _condition);
+    SelectQuery& orHaving(const clsCondition& _condition);
 
     SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 
+    quint64 count(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});
     TAPI::stuTable all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
 
 private:
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false);
+    QSharedDataPointer<clsSelectQueryData> Data;
+
 //#ifdef TARGOMAN_TEST_MODE
+//    quint32 testPrivateMember;
     friend TestSelectQuery;
 //#endif
-    quint32 testPrivateMember;
-    QSharedDataPointer<clsSelectQueryData> Data;
 };
 
 class ApiSelectQuery : public SelectQuery

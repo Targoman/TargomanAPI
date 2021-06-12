@@ -52,7 +52,9 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
             (_appendAs ? makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
-/***********************************************************************/
+/***************************************************************************************/
+/***************************************************************************************/
+/***************************************************************************************/
 class clsConditionData : public QSharedData
 {
 public:
@@ -81,11 +83,11 @@ clsCondition& addCondition(clsCondition* _this, char _aggregator, const clsCondi
         case '|': AggregatorString = " OR ";  break;
         case '^': AggregatorString = " XOR "; break;
         default:
-            throw exQueryBuilder(QString("Invalid condition Aggregator character: ") + _aggregator);
+            throw exQueryBuilder(QString("Invalid condition Aggregator character: '%1'").arg(_aggregator));
     }
 
     if (_aggregator != ')' && _nextCondition.isEmpty())
-        throw exQueryBuilder("aggregator must follow a valid condition");
+        throw exQueryBuilder(QString("aggregator '%1' must follow a valid condition").arg(_aggregator));
 
     _that.Data = new clsConditionData(AggregatorString);
     _that.Data->NextCondition = _nextCondition;
@@ -141,7 +143,9 @@ QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString,
     return CondStr;
 }
 
-/***********************************************************************/
+/***************************************************************************************/
+/***************************************************************************************/
+/***************************************************************************************/
 struct stuColSpecs {
     QString Name;
     QString RenameAs = {};
@@ -159,6 +163,7 @@ struct stuSelectItems {
     QStringList Where;
     QStringList OrderBy;
     QStringList GroupBy;
+    QStringList Having;
 };
 
 struct stuQueryRelation {
@@ -167,13 +172,33 @@ struct stuQueryRelation {
     clsCondition On;
 };
 
-/***********************************************************************/
+struct stuOrderBy {
+    QString Col;
+    enuOrderDir::Type Dir;
+
+//    stuOrderBy() {}
+    stuOrderBy(const stuOrderBy& _other) : Col(_other.Col), Dir(_other.Dir) {}
+    stuOrderBy(const QString& _col, enuOrderDir::Type _dir) : Col(_col), Dir(_dir) {}
+};
+
+struct stuConditionalClause {
+    bool IsAnd;
+    clsCondition Condition;
+
+//    stuConditionalClause() {}
+    stuConditionalClause(const stuConditionalClause& _other) : IsAnd(_other.IsAnd), Condition(_other.Condition) {}
+    stuConditionalClause(bool _isAnd, const clsCondition& _condition) : IsAnd(_isAnd), Condition(_condition) {}
+};
+
+/***************************************************************************************/
+/* clsSelectQueryData ******************************************************************/
+/***************************************************************************************/
 class clsSelectQueryData : public QSharedData
 {
 public:
-    clsSelectQueryData(const clsTable& _table) :
-        Table(_table)
-    {}
+    clsSelectQueryData(const clsTable& _table) : Table(_table) {}
+//    clsSelectQueryData(const clsSelectQueryData& _other) : Table(_other.Table) {}
+//    ~clsSelectQueryData() {}
 
     void prepare() {
         auto addCol = [this](const stuColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
@@ -220,12 +245,16 @@ public:
             return true;
         };
 
-        if (this->RequiredCols.isEmpty())
+        if (this->RequiredCols.isEmpty()) {
             foreach(auto Col, this->Table.BaseCols)
                 this->QueryItems.Cols.append(makeColName(this->Table.Name, Col, true));
-        else
-            foreach(auto RequiredCol, this->RequiredCols)
+        }
+        else {
+            foreach(auto RequiredCol, this->RequiredCols) {
                 addCol(RequiredCol);
+            }
+        }
+//throw exHTTPBadRequest("*********** EXEXEXEXEXEXEX");
 
         QSet<stuRelation> UsedJoins;
         foreach(auto Relation, this->Table.ForeignKeys) {
@@ -251,6 +280,27 @@ public:
 
         if (RequiredCols.size() && RequiredCols.size() > this->QueryItems.Cols.size())
             throw exHTTPBadRequest("Seems that some columns could not be resolved: Active Cols are: [" +this->QueryItems.Cols.join(", ")+ "]");
+
+
+
+
+
+
+
+
+        ///TODO: fill this fields
+//        QStringList this->QueryItems.From;
+//        QStringList this->QueryItems.Where;
+//        QStringList this->QueryItems.OrderBy;
+//        QStringList this->QueryItems.GroupBy;
+//        QStringList this->QueryItems.Having;
+
+
+
+
+
+
+
     }
 
     clsORMField colByName(const QString& _col) {
@@ -258,13 +308,23 @@ public:
     }
 
 public:
-    const clsTable&         Table;
-    QList<stuColSpecs>      RequiredCols;
-    QStringList             GroupByCols;
-    stuSelectItems          QueryItems;
-    QList<stuQueryRelation> Relations;
+    const clsTable&               Table;
+    QList<stuColSpecs>            RequiredCols;
+    QList<stuQueryRelation>       Relations;
+    QList<stuConditionalClause>   WhereClauses;
+    QList<stuOrderBy>             OrderByCols;
+    QStringList                   GroupByCols;
+    QList<stuConditionalClause>   HavingClauses;
+
+    TAPI::PKsByPath_t             PksByPath;
+    quint64                       Offset;
+    quint16                       Limit;
+
+    stuSelectItems                QueryItems;
 };
 
+/***************************************************************************************/
+/* clsCondition ************************************************************************/
 /***************************************************************************************/
 clsCondition::clsCondition() : Data(nullptr) {}
 clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value) : Data(new clsConditionData(_col, _operator, _value)) {}
@@ -277,8 +337,10 @@ clsCondition& clsCondition::closePar() { return addCondition(this, ')'); }
 clsCondition& clsCondition::andCond(const clsCondition& _cond) { return addCondition(this, '&', _cond); }
 clsCondition& clsCondition::orCond(const clsCondition& _cond)  { return addCondition(this, '|', _cond); }
 clsCondition& clsCondition::xorCond(const clsCondition& _cond) { return addCondition(this, '^', _cond); }
-bool clsCondition::isEmpty() const { return this->Data->Col.size(); }
+bool clsCondition::isEmpty() const { return (this->Data == nullptr || this->Data->Col.size() == 0); }
 
+/***************************************************************************************/
+/* SelectQuery *************************************************************************/
 /***************************************************************************************/
 SelectQuery::SelectQuery(const clsTable &_table) : Data(new clsSelectQueryData(_table)) {}
 SelectQuery::SelectQuery(const SelectQuery& _other) : Data(_other.Data) {}
@@ -338,15 +400,18 @@ SelectQuery& SelectQuery::crossJoin(const QString _table) { return this->join(en
 \***********************/
 SelectQuery& SelectQuery::where(const clsCondition& _condition)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->WhereClauses.append({ true, _condition });
+    return *this;
 }
 SelectQuery& SelectQuery::andWhere(const clsCondition& _condition)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->WhereClauses.append({ true, _condition });
+    return *this;
 }
 SelectQuery& SelectQuery::orWhere(const clsCondition& _condition)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->WhereClauses.append({ false, _condition });
+    return *this;
 }
 
 /***********************\
@@ -354,7 +419,8 @@ SelectQuery& SelectQuery::orWhere(const clsCondition& _condition)
 \***********************/
 SelectQuery& SelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->OrderByCols.append({ _col, _dir });
+    return *this;
 }
 
 /***********************\
@@ -363,11 +429,14 @@ SelectQuery& SelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir)
 //SelectQuery& SelectQuery::groupBy(const clsCondition& _condition);
 SelectQuery& SelectQuery::groupBy(const QString& _col)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->GroupByCols.append(_col);
+    return *this;
 }
 SelectQuery& SelectQuery::groupBy(const QStringList& _cols)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    foreach(auto Col, _cols)
+        this->groupBy(Col);
+    return *this;
 }
 
 /***********************\
@@ -375,7 +444,18 @@ SelectQuery& SelectQuery::groupBy(const QStringList& _cols)
 \***********************/
 SelectQuery& SelectQuery::having(const clsCondition& _condition)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->HavingClauses.append({ true, _condition });
+    return *this;
+}
+SelectQuery& SelectQuery::andHaving(const clsCondition& _condition)
+{
+    this->Data->HavingClauses.append({ true, _condition });
+    return *this;
+}
+SelectQuery& SelectQuery::orHaving(const clsCondition& _condition)
+{
+    this->Data->HavingClauses.append({ false, _condition });
+    return *this;
 }
 
 /***********************\
@@ -384,41 +464,188 @@ SelectQuery& SelectQuery::having(const clsCondition& _condition)
 //used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 SelectQuery& SelectQuery::pksByPath(TAPI::PKsByPath_t _pksByPath)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->PksByPath = _pksByPath;
+    return *this;
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 SelectQuery& SelectQuery::offset(quint64 _offset)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->Offset = _offset;
+    return *this;
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 SelectQuery& SelectQuery::limit(quint16 _limit)
 {
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+    this->Data->Limit = _limit;
+    return *this;
 }
 
 /***********************\
 |* Execute             *|
 \***********************/
-QVariantMap SelectQuery::one(QVariantMap _args)
+QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _reportCount)
 {
     this->Data->prepare();
 
+    //push
+    quint64 offset = this->Data->Offset;
+    quint16 limit = this->Data->Limit;
+
+    if (_reportCount)
+    {
+        this->Data->Offset = 0;
+        this->Data->Limit = 0;
+    }
+    else if (_selectOne)
+        this->Data->Limit = 1;
+
+    QStringList QueryParts;
+
+    //-----------
+    QueryParts.append("SELECT");
+    QueryParts.append(this->Data->QueryItems.Cols.join(","));
+
+    //-----------
+    QueryParts.append("FROM");
+    QueryParts.append(this->Data->QueryItems.From.join(" "));
+
+    //-----------
+    QStringList WhereParts;
+
+    if (this->Data->QueryItems.Where.size())
+        WhereParts.append(this->Data->QueryItems.Where.join(" "));
+
+    if (this->Data->PksByPath.size())
+    {
+        QStringList PrimaryKeyQueries = this->Data->PksByPath.split(";");
+        QStringList Filters;
+        foreach (auto Query, PrimaryKeyQueries)
+            foreach (auto Col, this->Data->Table.BaseCols)
+                if (Col.isPrimaryKey())
+                {
+                    if (Query.size())
+                        Filters.append(makeColName(this->Data->Table.Name, Col) + " = \"" + Query + "\"");
+                    break;
+                }
+
+        if (WhereParts.isEmpty())
+            WhereParts.append(Filters.join(" AND "));
+        else
+            WhereParts.append(QString("%1 AND (%2)")
+                              .arg(Filters.join(" AND "))
+                              .arg(WhereParts.join(" ")));
+    }
+
+    if (WhereParts.size())
+    {
+        QueryParts.append("WHERE");
+        QueryParts.append(WhereParts.join(" "));
+    }
+
+    //-----------
+    if (this->Data->QueryItems.OrderBy.size())
+    {
+        QueryParts.append("ORDER BY");
+        QueryParts.append(this->Data->QueryItems.OrderBy.join(","));
+    }
+
+    //-----------
+    if (this->Data->QueryItems.GroupBy.size())
+    {
+        QueryParts.append("GROUP BY");
+        QueryParts.append(this->Data->QueryItems.GroupBy.join(","));
+    }
+
+    //-----------
+    if (this->Data->QueryItems.Having.size())
+    {
+        QueryParts.append("HAVING");
+        QueryParts.append(this->Data->QueryItems.Having.join(" "));
+    }
+
+    //-----------
+    if (_reportCount == false)
+    {
+        if (this->Data->PksByPath.isEmpty())
+        {
+            if ((this->Data->Offset > 0) || (this->Data->Limit > 0))
+            {
+                QueryParts.append("LIMIT");
+                if (this->Data->Offset > 0)
+                {
+                    if (this->Data->Limit > 0)
+                        QueryParts.append(QString("%1,%2").arg(this->Data->Offset).arg(this->Data->Limit));
+                    else
+                        QueryParts.append(QString("%1").arg(this->Data->Offset));
+                }
+                else //limit > 0
+                    QueryParts.append(QString("0,%1").arg(this->Data->Limit));
+            }
+        }
+        else
+            QueryParts.append("LIMIT 2"); //Limit is set to 2 in order to produce error if multi values are selected instead of one
+    }
+
+    //-----------
+    QString QueryString = QueryParts.join(" ");
+
+    if (_args.size())
+    {
+        for (QVariantMap::const_iterator arg = _args.begin(); arg != _args.end(); ++arg)
+        {
+            QueryString.replace(arg.key(), arg.value().toString());
+        }
+    }
+
+    //-----------
+    if (_reportCount)
+        QueryString = "SELECT COUNT(*) AS cnt FROM (" + QueryString + ") qry";
+
+    //-----------
+    //pull
+    this->Data->Offset = offset;
+    this->Data->Limit = limit;
+
+    return QueryString;
+}
+
+quint64 SelectQuery::count(QVariantMap _args)
+{
+    QString QueryString = this->buildQueryString(_args, false, true);
+
+    //execute
+    quint64 count = 0;
+
+    return count;
+}
+
+QVariantMap SelectQuery::one(QVariantMap _args)
+{
+    QString QueryString = this->buildQueryString(_args, true, false);
+
+    //execute
     QVariantMap Result;
+
     return Result;
 }
 
 TAPI::stuTable SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from)
 {
-    this->Data->prepare();
+    this->Data->Offset = _from;
+    this->Data->Limit = _maxCount;
 
+    QString QueryString = this->buildQueryString(_args, false, false);
+
+    //execute
     TAPI::stuTable Result;
+
     return Result;
 }
 
 /***************************************************************************************/
+
 }
 }
 }

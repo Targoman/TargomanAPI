@@ -4,10 +4,6 @@
 #include <QtTest/QtTest>
 #include <QStringList>
 
-//#ifdef TARGOMAN_TEST_MODE
-//int aaaaa;
-//#endif
-
 //#include "Interfaces/Test/testCommon.hpp"
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
@@ -26,29 +22,21 @@ public:
     TestTable()
         : clsTable(
             "test",
-            "tblTestTable",
-            {///< ColName                                          Type                     Validation                              Default     UpBy      Sort  Filter Self  Virt   PK
-                { "slbID",                  ORM_PRIMARY_KEY32 },
-                { "slbCode",                S(TAPI::SaleableCode_t), QFV,                                    QRequired,  UPOwner },
-                { "slb_prdID",              S(quint32),              QFV.integer().minValue(1),              QRequired,  UPOwner },
-                { "slbName",                S(QString),              QFV,                                    QRequired,  UPOwner },
-                { "slbDesc",                S(QString),              QFV,                                    QNull,      UPOwner },
-                { "slbType",                S(TAPI::enuSaleableType::Type), QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-                { "slbCanBePurchasedSince", S(TAPI::DateTime_t),     QFV,                                    QNow,       UPOwner },
-                { "slbNotAvailableSince",   S(TAPI::DateTime_t),     QFV,                                    QNull,      UPOwner },
-                { "slbPrivs",               S(TAPI::JSON_t),         QFV,                                    QNull,      UPOwner },
-                { "slbBasePrice",           S(qreal),                QFV.real().minValue(0),                 QRequired,  UPOwner },
-                { "slbAdditives",           S(TAPI::SaleableAdditive_t), QFV,                                QNull,      UPOwner },
-                { "slbProductCount",        S(quint32),              QFV.integer().minValue(1),              QRequired,  UPOwner},
-                { "slbMaxSaleCountPerUser", S(NULLABLE(quint32)),    QFV,                                    QNull,      UPOwner},
-                { "slbInStockCount",        S(quint32),              QFV.integer().minValue(0),              QRequired,  UPAdmin },
-                { "slbOrderedCount",        S(quint32),              QFV,                                    QInvalid,   UPNone },
-                { "slbReturnedCount",       S(quint32),              QFV,                                    QInvalid,   UPNone },
-                { "slbVoucherTemplate",     S(QString),              QFV,                                    QNull,      UPOwner },
-                { "slbStatus",              S(TAPI::enuGenericStatus::Type), QFV,                            TAPI::enuGenericStatus::Active, UPStatus },
-                { "slbCreatedBy_usrID",     ORM_CREATED_BY },
-                { "slbCreationDateTime",    ORM_CREATED_ON },
-                { "slbUpdatedBy_usrID",     ORM_UPDATED_BY },
+            "tblTest",
+            {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
+                { "colA", ORM_PRIMARY_KEY32 },
+                { "colB", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
+                { "colC", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
+                { "colD", S(QString),                      QFV,                       QRequired,  UPOwner },
+                { "colE", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
+                { "colF", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
+                { "colG", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colH", S(TAPI::SaleableAdditive_t),     QFV,                       QNull,      UPOwner },
+                { "colI", S(NULLABLE(quint32)),            QFV,                       QNull,      UPOwner},
+                { "colJ", S(TAPI::enuGenericStatus::Type), QFV,                       TAPI::enuGenericStatus::Active, UPStatus },
+                { "colK", ORM_CREATED_BY },
+                { "colL", ORM_CREATED_ON },
+                { "colM", ORM_UPDATED_BY },
             }
         )
     {}
@@ -94,15 +82,15 @@ public:
 };
 */
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+//namespace Targoman {
+//namespace API {
+//namespace ORM {
 
-class clsSelectQueryData;
+//class clsSelectQueryData;
 
-}
-}
-}
+//}
+//}
+//}
 
 class TestSelectQuery : public SelectQuery
 {
@@ -112,11 +100,8 @@ public:
     TestSelectQuery(const TestSelectQuery& _other) : SelectQuery(_other) {}
     ~TestSelectQuery() {}
 
-    QString buildQueryString()
-    {
-        this->testPrivateMember = 123;
-        this->Data->prepare();
-        return "SELECT ...";
+    QString queryString() {
+        return this->buildQueryString();
     }
 
 //private:
@@ -149,12 +134,17 @@ class QueryBuilders: public QObject
 
 private slots:
     void condition() {
-        QVERIFY(clsCondition().isEmpty());
-        QVERIFY(clsCondition().closePar().isEmpty() == false);
-        QVERIFY(clsCondition().openPar(clsCondition()).isEmpty() == false);
-        QVERIFY(clsCondition().andCond(clsCondition()).isEmpty() == false);
-        QVERIFY(clsCondition().orCond(clsCondition()).isEmpty() == false);
-        QVERIFY(clsCondition().xorCond(clsCondition()).isEmpty() == false);
+        try {
+            QVERIFY(clsCondition().isEmpty());
+            QVERIFY(clsCondition().closePar().isEmpty() == false);
+            QVERIFY(clsCondition().openPar(clsCondition()).isEmpty() == false);
+            QVERIFY(clsCondition().andCond(clsCondition()).isEmpty() == false);
+            QVERIFY(clsCondition().orCond(clsCondition()).isEmpty() == false);
+            QVERIFY(clsCondition().xorCond(clsCondition()).isEmpty() == false);
+        }
+        catch (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
     };
 
     void equalityOfConditionQueryString() {
@@ -186,45 +176,24 @@ private slots:
 //        QVERIFY(qry == "(cola IS NULL OR (colb IS NULL AND colc = 123))");
     }
 
-    void equalityOfQueryString() {
-        QString qry;
-
+    void equalityOfQueryString1() {
         TestTable t;
         TestSelectQuery query = TestSelectQuery(t)
             .addCols(QStringList({
-                "slbID",
-                "slbCode",
-                "slb_prdID",
-                "slbName",
-                "slbDesc",
-                "slbType",
-                "slbCanBePurchasedSince",
-                "slbNotAvailableSince",
-                "slbPrivs",
-                "slbBasePrice",
-                "slbAdditives",
-                "slbProductCount",
-                "slbMaxSaleCountPerUser",
-                "slbInStockCount",
-                "slbOrderedCount",
-                "slbReturnedCount",
-                "slbVoucherTemplate",
-                "slbStatus",
-                "slbCreatedBy_usrID",
-                "slbCreationDateTime",
-                "slbUpdatedBy_usrID",
+                "colA",
+                "colB",
+                "colC",
             }))
-            .leftJoin("t2",
-                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
-                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
-            )
-            .where({ "slbID", enuConditionOperator::Equal, 123 })
-            .andWhere({ "slbCode", enuConditionOperator::GreaterEqual, "abc" })
-            .groupBy(QStringList({ "slbID", "slbStatus" }))
+//            .leftJoin("t2",
+//                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
+//                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
+//            )
+//            .where({ "colA", enuConditionOperator::Equal, 123 })
+//            .andWhere({ "colB", enuConditionOperator::GreaterEqual, "abc" })
+//            .groupBy(QStringList({ "colC", "slbStatus" }))
         ;
-        qry = query.buildQueryString();
-//        qry = buildQueryStringForTest(query);
-        QVERIFY(qry == "...");
+        QString qry = query.queryString();
+        QVERIFY(qry == "SELECT colA,colB,colC FROM tblTest");
     }
 };
 

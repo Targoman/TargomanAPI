@@ -38,7 +38,8 @@ SOURCES += main.cpp \
     $$BASE_PROJECT_PATH/App/Server/RESTAPIRegistry.cpp \
     $$BASE_PROJECT_PATH/App/Server/RESTServer.cpp \
     $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.cpp \
-    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.cpp \
+#    QueryBuilders.cpp \
+     #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.cpp \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lcurl

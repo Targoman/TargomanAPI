@@ -35,6 +35,7 @@ namespace API {
 namespace ORM {
 
 class clsSelectQueryData;
+class SelectQuery;
 
 class clsTable : public intfAPIModule {
 protected:
@@ -151,6 +152,7 @@ protected:
     static QHash<QString, clsTable*> Registry;
 
     friend clsSelectQueryData;
+    friend SelectQuery;
 };
 
 }
