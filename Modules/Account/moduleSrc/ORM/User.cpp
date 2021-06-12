@@ -35,13 +35,13 @@ using namespace DBManager;
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
+    if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
 //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+
     return query.one();
 }
 

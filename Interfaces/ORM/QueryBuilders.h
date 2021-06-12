@@ -28,6 +28,10 @@
 #include "libTargomanCommon/exTargomanBase.h"
 #include "Interfaces/Common/GenericTypes.h"
 
+//#ifdef TARGOMAN_TEST_MODE
+class TestSelectQuery;
+//#endif
+
 namespace Targoman {
 namespace API {
 namespace ORM {
@@ -52,6 +56,7 @@ class clsCondition {
 public:
     clsCondition();
     clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
+    clsCondition(const clsCondition& _other);
     ~clsCondition();
 
     static clsCondition& scope(const clsCondition& _cond);
@@ -63,28 +68,26 @@ public:
 
     bool isEmpty() const;
 
-    QString buildQueryString();
-
 private:
     QSharedDataPointer<clsConditionData> Data;
     friend clsCondition& addCondition(clsCondition* _this, char _aggregator, const clsCondition& _nextCondition);
     friend QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString, stuFilteredCol>& _filterables);
 };
 
-class clsConditionData : public QSharedData
-{
-public:
-    clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {});
-    bool isAggregator() const;
-    bool isOpenPar() const;
-    bool isClosePar() const;
+//class clsConditionData : public QSharedData
+//{
+//public:
+//    clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {});
+//    bool isAggregator() const;
+//    bool isOpenPar() const;
+//    bool isClosePar() const;
 
-public:
-    QString Col;
-    enuConditionOperator::Type Operator;
-    QVariant Value;
-    clsCondition NextCondition;
-};
+//public:
+//    QString Col;
+//    enuConditionOperator::Type Operator;
+//    QVariant Value;
+//    clsCondition NextCondition;
+//};
 
 TARGOMAN_DEFINE_ENUM(enuAggregation,
                      COUNT,
@@ -111,53 +114,13 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Ascending,
                      Descending)
 
-struct stuColSpecs {
-    QString Name;
-    QString RenameAs = {};
-    union unnAggregation {
-        enuAggregation::Type Simple;
-        enuConditionalAggregation::Type Conditional;
-    };
-    NULLABLE(unnAggregation) Aggregation = nullptr;
-    clsCondition Condition = {};
-};
-
-struct stuSelectItems {
-    QStringList Cols;
-    QStringList From;
-    QStringList Where;
-    QStringList OrderBy;
-    QStringList GroupBy;
-};
-
-struct stuQueryRelation {
-    enuJoinType::Type JoinType;
-    QString Table;
-    clsCondition On;
-};
-
-class clsSelectQueryData : public QSharedData
-{
-public:
-    clsSelectQueryData(const clsTable& _table);
-
-    void prepare();
-    clsORMField colByName(const QString& _col);
-
-public:
-    const clsTable&         Table;
-    QList<stuColSpecs>      RequiredCols;
-    QStringList             GroupByCols;
-    stuSelectItems          QueryItems;
-    QList<stuQueryRelation> Relations;
-};
-
-//class clsSelectQueryData;
+class clsSelectQueryData;
 
 class SelectQuery
 {
 public:
     SelectQuery(const clsTable& _table);
+    SelectQuery(const SelectQuery& _other);
     ~SelectQuery();
 
     SelectQuery& addCols(const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
@@ -191,10 +154,30 @@ public:
     QVariantMap one(QVariantMap _args = {});
     TAPI::stuTable all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
 
-    QString buildQueryString();
-
 private:
+//#ifdef TARGOMAN_TEST_MODE
+    friend TestSelectQuery;
+//#endif
+    quint32 testPrivateMember;
     QSharedDataPointer<clsSelectQueryData> Data;
+};
+
+class ApiSelectQuery : public SelectQuery
+{
+public:
+    ApiSelectQuery(const clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT) :
+        SelectQuery(_table)
+    {
+        this->pksByPath(_pksByPath);
+        this->offset(_offset);
+        this->limit(_limit);
+        this->addCols(_cols);
+        this->orderBy(_orderBy);
+        this->groupBy(_groupBy);
+
+        Q_UNUSED(_filters);
+        Q_UNUSED(_reportCount);
+    }
 };
 
 }

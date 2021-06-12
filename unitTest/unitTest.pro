@@ -8,10 +8,9 @@
 ################################################################################
 PRJDIR = ".."
 
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-HEADERS += \
-    QueryBuilders.hpp
+#DEFINES += TARGOMAN_TEST_MODE
 
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 HEADERS +=  \
     $$BASE_PROJECT_PATH/App/Server/RESTServer.h \
     $$BASE_PROJECT_PATH/App/Server/APICache.hpp \
@@ -25,20 +24,21 @@ HEADERS +=  \
     $$BASE_PROJECT_PATH/App/Server/ServerConfigs.h \
     $$BASE_PROJECT_PATH/App/Server/clsAPIObject.h \
     $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.h \
-    #    $$BASE_PROJECT_PATH/App/Server/WebSocketServer.h \
+    QueryBuilders.hpp \
+    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.h \
 
 SOURCES += main.cpp \
-           $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
-           $$BASE_PROJECT_PATH/App/Server/ServerConfigs.cpp \
-           $$BASE_PROJECT_PATH/App/Server/clsAPIObject.cpp \
-           $$BASE_PROJECT_PATH/App/Server/clsRedisConnector.cpp \
-           $$BASE_PROJECT_PATH/App/Server/clsRequestHandler.cpp \
-           $$BASE_PROJECT_PATH/App/Server/clsSimpleCrypt.cpp \
-           $$BASE_PROJECT_PATH/App/Server/QJWT.cpp \
-           $$BASE_PROJECT_PATH/App/Server/RESTAPIRegistry.cpp \
-           $$BASE_PROJECT_PATH/App/Server/RESTServer.cpp \
-           $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.cpp \
-#           $$BASE_PROJECT_PATH/App/Server/WebSocketServer.cpp \
+    $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
+    $$BASE_PROJECT_PATH/App/Server/ServerConfigs.cpp \
+    $$BASE_PROJECT_PATH/App/Server/clsAPIObject.cpp \
+    $$BASE_PROJECT_PATH/App/Server/clsRedisConnector.cpp \
+    $$BASE_PROJECT_PATH/App/Server/clsRequestHandler.cpp \
+    $$BASE_PROJECT_PATH/App/Server/clsSimpleCrypt.cpp \
+    $$BASE_PROJECT_PATH/App/Server/QJWT.cpp \
+    $$BASE_PROJECT_PATH/App/Server/RESTAPIRegistry.cpp \
+    $$BASE_PROJECT_PATH/App/Server/RESTServer.cpp \
+    $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.cpp \
+    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.cpp \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lcurl

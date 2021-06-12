@@ -110,13 +110,12 @@ QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL)
 //            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
             .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, "NOW()" })
-            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
         ;
 
     return query.one();
@@ -199,8 +198,7 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 //                   .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 //  return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS, CACHE_TIME);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
@@ -281,8 +279,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL)
 
 //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
@@ -366,8 +363,7 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
 
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
@@ -402,8 +398,8 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL)
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
 //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-  SelectQuery query = SelectQuery(*this);
-  APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+  ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+
   return query.one();
 }
 
@@ -471,8 +467,8 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL)
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-  SelectQuery query = SelectQuery(*this);
-  APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+  ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+
   return query.one();
 }
 

@@ -43,8 +43,8 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL)
 
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+
     return query.one();
 }
 

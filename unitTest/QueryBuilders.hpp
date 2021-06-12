@@ -4,6 +4,12 @@
 #include <QtTest/QtTest>
 #include <QStringList>
 
+//#ifdef TARGOMAN_TEST_MODE
+//int aaaaa;
+//#endif
+
+//#include "Interfaces/Test/testCommon.hpp"
+
 #include "Interfaces/AAA/Accounting_Interfaces.h"
 using namespace Targoman::API::AAA::Accounting;
 
@@ -61,6 +67,82 @@ public:
 
 };
 
+/*
+template<class TClient>
+class Attorney : public TClient {
+public:
+    Attorney(TClient& client) : client_(client) {}
+private:
+    TClient& client_;
+};
+
+class TestSelectQuery : public Attorney<SelectQuery>
+{
+public:
+    using Attorney<SelectQuery>::Attorney;
+    using SelectQuery::Data;
+
+    QString buildQueryString()
+    {
+        this->Data->prepare();
+    }
+
+//private:
+//    friend SelectQuery;
+//    SelectQuery* Query;
+//    using SelectQuery::Data;
+};
+*/
+
+namespace Targoman {
+namespace API {
+namespace ORM {
+
+class clsSelectQueryData;
+
+}
+}
+}
+
+class TestSelectQuery : public SelectQuery
+{
+public:
+    TestSelectQuery(const clsTable& _table) : SelectQuery(_table) {}
+    TestSelectQuery(const SelectQuery& _other) : SelectQuery(_other) {}
+    TestSelectQuery(const TestSelectQuery& _other) : SelectQuery(_other) {}
+    ~TestSelectQuery() {}
+
+    QString buildQueryString()
+    {
+        this->testPrivateMember = 123;
+        this->Data->prepare();
+        return "SELECT ...";
+    }
+
+//private:
+//    friend SelectQuery;
+//    SelectQuery* Query;
+//    using SelectQuery::Data;
+};
+
+//#define TEST_FIREND_buildQueryStringForTest friend QString buildQueryStringForTest(const SelectQuery& _this);
+
+//class TestSelectQuery
+//{
+//public:
+//    static QString buildQueryString(SelectQuery* _this)
+//    {
+//        _this->Data->prepare();
+//    }
+//};
+
+//class clsSelectQueryData;
+
+//QString buildQueryStringForTest(const SelectQuery& _this)
+//{
+//    _this.Data->prepare();
+//}
+
 class QueryBuilders: public QObject
 {
     Q_OBJECT
@@ -76,39 +158,39 @@ private slots:
     };
 
     void equalityOfConditionQueryString() {
-        QString qry;
+//        QString qry;
 
-        qry = clsCondition("cola",  enuConditionOperator::Less, 123).buildQueryString();
-        QVERIFY(qry == "cola < 123");
+//        qry = clsCondition("cola",  enuConditionOperator::Less, 123).buildQueryString();
+//        QVERIFY(qry == "cola < 123");
 
-        qry = clsCondition("cola",  enuConditionOperator::Equal, "test").buildQueryString();
-        QVERIFY(qry == "cola = 'test'");
+//        qry = clsCondition("cola",  enuConditionOperator::Equal, "test").buildQueryString();
+//        QVERIFY(qry == "cola = 'test'");
 
-        qry = clsCondition::scope(
-                clsCondition("cola", enuConditionOperator::Null)
-                .orCond({ "colb", enuConditionOperator::Equal, 123 })
-            )
-            .buildQueryString()
-        ;
-        QVERIFY(qry == "(cola IS NULL OR colb = 123)");
+//        qry = clsCondition::scope(
+//                clsCondition("cola", enuConditionOperator::Null)
+//                .orCond({ "colb", enuConditionOperator::Equal, 123 })
+//            )
+//            .buildQueryString()
+//        ;
+//        QVERIFY(qry == "(cola IS NULL OR colb = 123)");
 
-        qry = clsCondition::scope(
-                clsCondition("cola", enuConditionOperator::Null)
-                .orCond(clsCondition::scope(
-                    clsCondition("colb", enuConditionOperator::Null)
-                    .andCond({ "colc", enuConditionOperator::Equal, 123 })
-                ))
-            )
-            .buildQueryString()
-        ;
-        QVERIFY(qry == "(cola IS NULL OR (colb IS NULL AND colc = 123))");
+//        qry = clsCondition::scope(
+//                clsCondition("cola", enuConditionOperator::Null)
+//                .orCond(clsCondition::scope(
+//                    clsCondition("colb", enuConditionOperator::Null)
+//                    .andCond({ "colc", enuConditionOperator::Equal, 123 })
+//                ))
+//            )
+//            .buildQueryString()
+//        ;
+//        QVERIFY(qry == "(cola IS NULL OR (colb IS NULL AND colc = 123))");
     }
 
     void equalityOfQueryString() {
         QString qry;
 
         TestTable t;
-        SelectQuery query = SelectQuery(t)
+        TestSelectQuery query = TestSelectQuery(t)
             .addCols(QStringList({
                 "slbID",
                 "slbCode",
@@ -141,6 +223,7 @@ private slots:
             .groupBy(QStringList({ "slbID", "slbStatus" }))
         ;
         qry = query.buildQueryString();
+//        qry = buildQueryStringForTest(query);
         QVERIFY(qry == "...");
     }
 };

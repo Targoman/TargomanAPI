@@ -21,6 +21,7 @@
  */
 
 #include <QtTest>
+//#include "Interfaces/Test/testCommon.hpp"
 #include "QueryBuilders.hpp"
 
 int main(int argc, char *argv[])
@@ -45,4 +46,3 @@ int main(int argc, char *argv[])
     return FailedTests;
     /**/
 }
-

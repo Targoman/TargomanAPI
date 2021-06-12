@@ -36,7 +36,7 @@ using namespace ORM;
 
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    QString ExtraFilters;
+//    QString ExtraFilters;
 //    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
 //                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
@@ -46,9 +46,8 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 
 //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
 
-    SelectQuery query = SelectQuery(*this);
-    APPLY_GET_METHOD_CALL_ARGS_TO_QUERY(query);
-
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+\
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
             .where({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })

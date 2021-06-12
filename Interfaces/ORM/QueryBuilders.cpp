@@ -52,22 +52,23 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
             (_appendAs ? makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
-//class clsConditionData : public QSharedData
-//{
-//public:
-    clsConditionData::clsConditionData(QString _col, enuConditionOperator::Type _operator, QVariant _value) :
+/***********************************************************************/
+class clsConditionData : public QSharedData
+{
+public:
+    clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {}) :
         Col(_col), Operator(_operator), Value(_value)
     { ; }
-    bool clsConditionData::isAggregator() const { return this->Col.startsWith(" "); }
-    bool clsConditionData::isOpenPar() const { return  this->Col == " ( "; }
-    bool clsConditionData::isClosePar() const { return  this->Col == " ) "; }
+    bool isAggregator() const { return this->Col.startsWith(" "); }
+    bool isOpenPar() const { return  this->Col == " ( "; }
+    bool isClosePar() const { return  this->Col == " ) "; }
 
-//public:
-//    QString Col;
-//    enuConditionOperator::Type Operator;
-//    QVariant Value;
-//    clsCondition NextCondition;
-//};
+public:
+    QString Col;
+    enuConditionOperator::Type Operator;
+    QVariant Value;
+    clsCondition NextCondition;
+};
 
 clsCondition& addCondition(clsCondition* _this, char _aggregator, const clsCondition& _nextCondition = clsCondition()) {
     clsCondition& _that = _this->Data ? _this->Data->NextCondition : *_this;
@@ -140,39 +141,41 @@ QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString,
     return CondStr;
 }
 
-//struct stuColSpecs {
-//    QString Name;
-//    QString RenameAs = {};
-//    union unnAggregation {
-//        enuAggregation::Type Simple;
-//        enuConditionalAggregation::Type Conditional;
-//    };
-//    NULLABLE(unnAggregation) Aggregation = nullptr;
-//    clsCondition Condition = {};
-//};
+/***********************************************************************/
+struct stuColSpecs {
+    QString Name;
+    QString RenameAs = {};
+    union unnAggregation {
+        enuAggregation::Type Simple;
+        enuConditionalAggregation::Type Conditional;
+    };
+    NULLABLE(unnAggregation) Aggregation = nullptr;
+    clsCondition Condition = {};
+};
 
-//struct stuSelectItems {
-//    QStringList Cols;
-//    QStringList From;
-//    QStringList Where;
-//    QStringList OrderBy;
-//    QStringList GroupBy;
-//};
+struct stuSelectItems {
+    QStringList Cols;
+    QStringList From;
+    QStringList Where;
+    QStringList OrderBy;
+    QStringList GroupBy;
+};
 
-//struct stuQueryRelation {
-//    enuJoinType::Type JoinType;
-//    QString Table;
-//    clsCondition On;
-//};
+struct stuQueryRelation {
+    enuJoinType::Type JoinType;
+    QString Table;
+    clsCondition On;
+};
 
-//class clsSelectQueryData : public QSharedData
-//{
-//public:
-    clsSelectQueryData::clsSelectQueryData(const clsTable& _table) :
+/***********************************************************************/
+class clsSelectQueryData : public QSharedData
+{
+public:
+    clsSelectQueryData(const clsTable& _table) :
         Table(_table)
     {}
 
-    void clsSelectQueryData::prepare() {
+    void prepare() {
         auto addCol = [this](const stuColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
             auto updateRename = [_col](QString _fieldString) {
                 if (_col.RenameAs.isEmpty())
@@ -250,23 +253,22 @@ QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString,
             throw exHTTPBadRequest("Seems that some columns could not be resolved: Active Cols are: [" +this->QueryItems.Cols.join(", ")+ "]");
     }
 
-    clsORMField clsSelectQueryData::colByName(const QString& _col) {
+    clsORMField colByName(const QString& _col) {
         return this->Table.SelectableColsMap[_col];
     }
 
-//public:
-//    const clsTable&         Table;
-//    QList<stuColSpecs>      RequiredCols;
-//    QStringList             GroupByCols;
-//    stuSelectItems          QueryItems;
-//    QList<stuQueryRelation> Relations;
-//};
+public:
+    const clsTable&         Table;
+    QList<stuColSpecs>      RequiredCols;
+    QStringList             GroupByCols;
+    stuSelectItems          QueryItems;
+    QList<stuQueryRelation> Relations;
+};
 
 /***************************************************************************************/
-clsCondition::clsCondition() :
-    Data(nullptr) {}
-clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value) :
-    Data(new clsConditionData(_col, _operator, _value)) {}
+clsCondition::clsCondition() : Data(nullptr) {}
+clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value) : Data(new clsConditionData(_col, _operator, _value)) {}
+clsCondition::clsCondition(const clsCondition& _other) : Data(_other.Data) {}
 clsCondition::~clsCondition() {}
 
 /* static */ clsCondition& clsCondition::scope(const clsCondition& _cond) { return clsCondition().openPar(_cond).closePar(); }
@@ -276,18 +278,11 @@ clsCondition& clsCondition::andCond(const clsCondition& _cond) { return addCondi
 clsCondition& clsCondition::orCond(const clsCondition& _cond)  { return addCondition(this, '|', _cond); }
 clsCondition& clsCondition::xorCond(const clsCondition& _cond) { return addCondition(this, '^', _cond); }
 bool clsCondition::isEmpty() const { return this->Data->Col.size(); }
-QString clsCondition::buildQueryString()
-{
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
-}
 
 /***************************************************************************************/
-SelectQuery::SelectQuery(const clsTable &_table) :
-    Data(new clsSelectQueryData(_table))
-{}
-
-SelectQuery::~SelectQuery()
-{}
+SelectQuery::SelectQuery(const clsTable &_table) : Data(new clsSelectQueryData(_table)) {}
+SelectQuery::SelectQuery(const SelectQuery& _other) : Data(_other.Data) {}
+SelectQuery::~SelectQuery() {}
 
 /***********************\
 |* Columns             *|
@@ -421,11 +416,6 @@ TAPI::stuTable SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _f
 
     TAPI::stuTable Result;
     return Result;
-}
-/***********************/
-QString SelectQuery::buildQueryString()
-{
-    throw Common::exTargomanMustBeImplemented(__FUNCTION__);
 }
 
 /***************************************************************************************/
