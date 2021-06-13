@@ -45,6 +45,7 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
+///TODO: deprecated. must be delete
 struct stuRelation{
     QString Column;
     QString ReferenceTable;

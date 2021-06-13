@@ -60,12 +60,16 @@ class clsConditionData : public QSharedData
 public:
     clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {}) :
         Col(_col), Operator(_operator), Value(_value)
-    { ; }
+    {}
+    clsConditionData(QString _tableAlias, QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {}) :
+        TableAlias(_tableAlias), Col(_col), Operator(_operator), Value(_value)
+    {}
     bool isAggregator() const { return this->Col.startsWith(" "); }
     bool isOpenPar() const { return  this->Col == " ( "; }
     bool isClosePar() const { return  this->Col == " ) "; }
 
 public:
+    QString TableAlias;
     QString Col;
     enuConditionOperator::Type Operator;
     QVariant Value;
@@ -155,6 +159,8 @@ struct stuColSpecs {
     };
     NULLABLE(unnAggregation) Aggregation = nullptr;
     clsCondition Condition = {};
+    QVariant TrueValue = {};
+    QVariant FalseValue = {};
 };
 
 struct stuSelectItems {
@@ -168,8 +174,9 @@ struct stuSelectItems {
 
 struct stuQueryRelation {
     enuJoinType::Type JoinType;
-    QString Table;
+    QString ReferenceTable;
     clsCondition On;
+    QString RenamingPrefix;
 };
 
 struct stuOrderBy {
@@ -208,53 +215,101 @@ public:
                 if (_fieldString.contains(" AS "))
                     _fieldString.replace(QRegularExpression(" AS .*"), "");
                 return _fieldString + " AS " + _col.RenameAs;
-            };
+            }; //updateRename
 
-            if (_col.Condition.isEmpty()) {
-                auto AggFunction = enuAggregation::toStr(_col.Aggregation->Simple) + '(';
-                auto Field = this->Table.SelectableColsMap[_col.Name];
+            if (_col.Condition.isEmpty() == false) {
+throw exQueryBuilder(QString("000000000000 (%1)").arg(this->QueryItems.Cols.join("|")));
+                if (_col.TrueValue.isNull() != _col.FalseValue.isNull())
+                    throw exQueryBuilder(QString("Both TrueValue and FalseValue must be empty or not empty").arg(_col.Name));
+
+                QStringList parts;
+
+                auto AggFunction = enuConditionalAggregation::toStr(_col.Aggregation->Conditional);
+                AggFunction.chop(2);
+                AggFunction += "(";
+                if (_col.TrueValue.isNull() != false)
+                    AggFunction += "IF(";
+                parts.append(AggFunction);
+
+                parts.append(toStr(this->Table.Name, _col.Condition, this->Table.FilterableColsMap));
+                if (_col.TrueValue.isNull() != false) // _col.FalseValue.isNull()
+                {
+                    parts.append(",");
+                    parts.append(_col.TrueValue.value<QString>());
+                    parts.append(",");
+                    parts.append(_col.FalseValue.value<QString>());
+                }
+
+                parts.append(")");
+                if (_col.TrueValue.isNull() != false)
+                    parts.append(")");
+
+                parts.append(" AS ");
+                parts.append(_col.RenameAs);
+
+                this->QueryItems.Cols.append(parts.join(""));
+            }
+            else {
+                QString AggFunction;
+
                 if (_col.Aggregation.isNull()) {
+                    ///TODO: why using ANY_VALUE?
                     if (this->GroupByCols.size())
                         AggFunction = "ANY_VALUE(";
                 }
                 else if(_col.Aggregation->Simple == enuAggregation::DISTINCT_COUNT)
                     AggFunction = "COUNT(DISTINCT ";
+                else
+                    AggFunction = enuAggregation::toStr(_col.Aggregation->Simple) + '(';
 
+                throw exQueryBuilder(QString("****************** (%1) (%2)").arg(_col.Name).arg(this->Table.SelectableColsMap.size()));
+                auto Field = this->Table.SelectableColsMap[_col.Name];
+
+throw exQueryBuilder(QString("****************** (%1) (%2)").arg(_col.Name).arg(Field.name()));
                 if (Field.name().isNull())
                     return false;
 
                 auto ColFinalName = makeColName(this->Table.Name, Field, true, _relation);
                 if (AggFunction.size()) {
-                    this->QueryItems.Cols.append(AggFunction + ColFinalName.split(' ').first()+ ") AS " + (
-                                                     _col.RenameAs.size() ?
-                                                         _col.RenameAs :
-                                                         AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
-                                                         )
+                    this->QueryItems.Cols.append(AggFunction
+                                                 + ColFinalName.split(' ').first()
+                                                 + ") AS "
+                                                 + (_col.RenameAs.size()
+                                                    ? _col.RenameAs
+                                                    : AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
+                                                   )
                                                  );
                 }
                 else
                     this->QueryItems.Cols.append(updateRename(ColFinalName));
+throw exQueryBuilder(QString("111111111 (%1)").arg(this->QueryItems.Cols.join("|")));
             }
-            else {
-                auto AggFunction = enuConditionalAggregation::toStr(_col.Aggregation->Conditional).replace("IF", "(IF(");
-                this->QueryItems.Cols.append(AggFunction +
-                                                toStr(this->Table.Name, _col.Condition, this->Table.FilterableColsMap) +
-                                                ")) AS " + _col.RenameAs
-                                             );
-            }
-            return true;
-        };
 
-        if (this->RequiredCols.isEmpty()) {
+            return true;
+        }; //addCol
+
+//        QStringList bbb, rrr;
+//        foreach(auto Col, this->Table.BaseCols)
+//            bbb.append(Col.name());
+//        foreach(stuColSpecs Col, this->RequiredCols)
+//            rrr.append(Col.Name);
+//        throw exQueryBuilder(QString("2222222222222222222222 (%1) (%2) (%3)").arg(this->Table.BaseCols.size()).arg(bbb.join("|")).arg(rrr.join("|")));
+
+        if (this->RequiredCols.isEmpty())
+        {
             foreach(auto Col, this->Table.BaseCols)
                 this->QueryItems.Cols.append(makeColName(this->Table.Name, Col, true));
         }
-        else {
-            foreach(auto RequiredCol, this->RequiredCols) {
-                addCol(RequiredCol);
+        else
+        {
+            foreach(stuColSpecs Col, this->RequiredCols)
+            {
+//                throw exQueryBuilder(QString("111111111 (%1)").arg(Col.Name));
+                addCol(Col);
             }
         }
-//throw exHTTPBadRequest("*********** EXEXEXEXEXEXEX");
+
+        throw exQueryBuilder(QString("2222222222222222222222 (%1)").arg(this->QueryItems.Cols.join("|")));
 
         QSet<stuRelation> UsedJoins;
         foreach(auto Relation, this->Table.ForeignKeys) {
@@ -380,20 +435,36 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
     this->Data->RequiredCols.append({ {}, _renameAs, { _aggFunc }, _condition });
     return *this;
 }
+SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs)
+{
+    this->Data->RequiredCols.append({ {}, _renameAs, { _aggFunc }, _condition, _trueValue, _falseValue });
+    return *this;
+}
+
+/***********************\
+|* From                *|
+\***********************/
+//SelectQuery& from(const QString _table, const QString& _renameAs = {});
+//SelectQuery& from(const SelectQuery& _nestedQuery);
 
 /***********************\
 |* Join                *|
 \***********************/
-SelectQuery& SelectQuery::join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on)
-{
-    this->Data->Relations.append({ _joinType, _table, _on });
-    return *this;
-}
-
 SelectQuery& SelectQuery::leftJoin(const QString _table, const clsCondition& _on) { return this->join(enuJoinType::LEFT, _table, _on); }
 SelectQuery& SelectQuery::rightJoin(const QString _table, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _table, _on); }
 SelectQuery& SelectQuery::innerJoin(const QString _table, const clsCondition& _on) { return this->join(enuJoinType::INNER, _table, _on); }
 SelectQuery& SelectQuery::crossJoin(const QString _table) { return this->join(enuJoinType::CROSS, _table, {}); }
+SelectQuery& SelectQuery::join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on, const QString& _renamingPrefix)
+{
+    this->Data->Relations.append({ _joinType, _table, _on, _renamingPrefix });
+    return *this;
+}
+
+//    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
+//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on, const QString& _renamingPrefix);
 
 /***********************\
 |* Where               *|
@@ -611,17 +682,8 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     return QueryString;
 }
 
-quint64 SelectQuery::count(QVariantMap _args)
-{
-    QString QueryString = this->buildQueryString(_args, false, true);
-
-    //execute
-    quint64 count = 0;
-
-    return count;
-}
-
 QVariantMap SelectQuery::one(QVariantMap _args)
+
 {
     QString QueryString = this->buildQueryString(_args, true, false);
 
@@ -644,6 +706,15 @@ TAPI::stuTable SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _f
     return Result;
 }
 
+quint64 SelectQuery::count(QVariantMap _args)
+{
+    QString QueryString = this->buildQueryString(_args, false, true);
+
+    //execute
+    quint64 count = 0;
+
+    return count;
+}
 /***************************************************************************************/
 
 }

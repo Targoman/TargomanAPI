@@ -169,43 +169,45 @@ void clsTable::updateFilterParamType(const QString& _fieldTypeName, QMetaType::T
 
 void clsTable::prepareFiltersList()
 {
-    if(this->AllCols.size())
+    if (this->AllCols.size())
         return;
 
-    foreach(auto Col, this->BaseCols){
-        if(Col.isPrimaryKey())
+    foreach (auto Col, this->BaseCols) {
+        if (Col.isPrimaryKey())
             ++this->CountOfPKs;
 
         QString FinalColName = this->finalColName(Col);
         clsORMField NewCol = clsORMField(Col, FinalColName);
         this->AllCols.append(NewCol);
         this->SelectableColsMap.insert(FinalColName, NewCol);
-        if(Col.isFilterable())
+        if (Col.isFilterable())
             this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol));
-        if(Col.isSortable())
+        if (Col.isSortable())
             this->SortableColsMap.insert(FinalColName, NewCol);
     }
 
-    foreach(auto Relation, this->ForeignKeys){
+    foreach (auto Relation, this->ForeignKeys) {
         clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
-        if(ForeignTable == nullptr)
+        if (ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: "+this->Name+")");
 
-        foreach(auto Col, ForeignTable->BaseCols){
+        foreach (auto Col, ForeignTable->BaseCols) {
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
             clsORMField NewCol = clsORMField(Col, FinalColName);
             this->AllCols.append(NewCol);
             this->SelectableColsMap.insert(FinalColName, NewCol);
-            if(Col.isFilterable())
+            if (Col.isFilterable())
                 this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol, Relation));
-            if(Col.isSortable())
+            if (Col.isSortable())
                 this->SortableColsMap.insert(FinalColName, NewCol);
         }
     }
 
-    foreach(auto Col, this->AllCols)
-        if(Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
+    foreach (clsORMField Col, this->AllCols)
+    {
+        if (Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
             this->Converters.insert(this->finalColName(Col), Col.argSpecs().toORMValueConverter());
+    }
 }
 
 

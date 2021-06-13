@@ -128,23 +128,38 @@ public:
 //    _this.Data->prepare();
 //}
 
+#define QVERIFY_TRY(expression) \
+    do { \
+        QT_TRY { \
+            QVERIFY(expression); \
+        } QT_CATCH (const std::exception &e) { \
+            QTest::qFail(e.what(), __FILE__, __LINE__);\
+            return; \
+        } \
+    } while (false)
+
 class QueryBuilders: public QObject
 {
     Q_OBJECT
 
 private slots:
-    void condition() {
-        try {
-            QVERIFY(clsCondition().isEmpty());
-            QVERIFY(clsCondition().closePar().isEmpty() == false);
-            QVERIFY(clsCondition().openPar(clsCondition()).isEmpty() == false);
-            QVERIFY(clsCondition().andCond(clsCondition()).isEmpty() == false);
-            QVERIFY(clsCondition().orCond(clsCondition()).isEmpty() == false);
-            QVERIFY(clsCondition().xorCond(clsCondition()).isEmpty() == false);
-        }
-        catch (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
-        }
+    void condition1() {
+        QVERIFY_TRY(clsCondition().isEmpty() == true);
+    };
+    void condition2() {
+        QVERIFY_TRY(clsCondition().closePar().isEmpty() == false);
+    };
+    void condition3() {
+        QVERIFY_TRY(clsCondition().openPar(clsCondition({ "cola",  enuConditionOperator::Less, 123 })).isEmpty() == false);
+    };
+    void condition4() {
+        QVERIFY_TRY(clsCondition().andCond(clsCondition()).isEmpty() == false);
+    };
+    void condition5() {
+        QVERIFY_TRY(clsCondition().orCond(clsCondition()).isEmpty() == false);
+    };
+    void condition6() {
+        QVERIFY_TRY(clsCondition().xorCond(clsCondition()).isEmpty() == false);
     };
 
     void equalityOfConditionQueryString() {
@@ -177,6 +192,28 @@ private slots:
     }
 
     void equalityOfQueryString1() {
+        QT_TRY {
+            TestTable t;
+            t.prepareFiltersList();
+//            TestSelectQuery query = TestSelectQuery(t)
+//                .addCols(QStringList({
+//                    "colA",
+//                    "colB",
+//                    "colC",
+//                }))
+//            ;
+//            QString qry = query.queryString();
+//            QCOMPARE(qry, "SELECT colA,colB,colC FROM tblTest");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+
+
+
+public:
+    void equalityOfQueryString2() {
         TestTable t;
         TestSelectQuery query = TestSelectQuery(t)
             .addCols(QStringList({
@@ -184,6 +221,17 @@ private slots:
                 "colB",
                 "colC",
             }))
+            .addCol(enuAggregation::AVG, "colA", "avg_colA")
+            .addCol(enuConditionalAggregation::COUNTIF,
+                    { "colB", enuConditionOperator::Equal, 123 },
+                    "countif_colB"
+                    )
+            .addCol(enuConditionalAggregation::SUMIF,
+                    { "colC", enuConditionOperator::Greater, 123 },
+                    10,
+                    20,
+                    "sumif_colC"
+                    )
 //            .leftJoin("t2",
 //                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
 //                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
@@ -192,8 +240,12 @@ private slots:
 //            .andWhere({ "colB", enuConditionOperator::GreaterEqual, "abc" })
 //            .groupBy(QStringList({ "colC", "slbStatus" }))
         ;
-        QString qry = query.queryString();
-        QVERIFY(qry == "SELECT colA,colB,colC FROM tblTest");
+        QT_TRY {
+            QString qry = query.queryString();
+            QCOMPARE(qry, "SELECT colA,colB,colC,AVG(colA) AS colA,COUNT(colB=123) AS countif_colB,SUM(IF(colC>123,10,20)) AS sumif_colC FROM tblTest");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
     }
 };
 

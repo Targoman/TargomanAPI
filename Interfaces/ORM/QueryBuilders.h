@@ -120,17 +120,34 @@ public:
     SelectQuery(const SelectQuery& _other);
     ~SelectQuery();
 
+    SelectQuery& alias(const QString& _alias);
+
     SelectQuery& addCols(const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
+    SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
 
-    SelectQuery& join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on);
+//    SelectQuery& addCols(const QString& _tableAlias, const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+//    SelectQuery& addCols(const QString& _tableAlias, const QStringList& _cols);
+//    SelectQuery& addCol(const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
+//    SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
+
+//    SelectQuery& from(const QString _table, const QString& _renameAs = {});
+//    SelectQuery& from(const SelectQuery& _nestedQuery, const QString _alias);
+
     SelectQuery& leftJoin(const QString _table, const clsCondition& _on);
     SelectQuery& rightJoin(const QString _table, const clsCondition& _on);
     SelectQuery& innerJoin(const QString _table, const clsCondition& _on);
     SelectQuery& crossJoin(const QString _table);
+    SelectQuery& join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on, const QString& _renamingPrefix = {});
+
+//    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
+//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on, const QString& _renamingPrefix = {});
 
     SelectQuery& where(const clsCondition& _condition);
     SelectQuery& andWhere(const clsCondition& _condition);
@@ -150,9 +167,9 @@ public:
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 
-    quint64 count(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});
     TAPI::stuTable all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
+    quint64 count(QVariantMap _args = {});
 
 private:
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false);

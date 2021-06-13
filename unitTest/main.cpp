@@ -22,13 +22,29 @@
 
 #include <QtTest>
 //#include "Interfaces/Test/testCommon.hpp"
+//#include "Interfaces/Common/GenericTypes.h"
 #include "QueryBuilders.hpp"
+
+using namespace Targoman::API;
+using namespace Targoman::API::Server;
 
 int main(int argc, char *argv[])
 {
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
+//    if(Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())){
+//        gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
+
+//        for(auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
+//            MetaTypeInfoMapIter != MetaTypeInfoMap.end();
+//            ++MetaTypeInfoMapIter){
+//            int Gap = MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size();
+//            for(int i = 0; i< Gap; ++i)
+//                gOrderedMetaTypeInfo.append(nullptr);
+//            gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
+//        }
+//    }
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;

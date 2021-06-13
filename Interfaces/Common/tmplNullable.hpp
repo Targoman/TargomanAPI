@@ -13,7 +13,7 @@ public:
     tmplNullable()                : QSharedPointer<itmplType>(nullptr) {}
     tmplNullable(std::nullptr_t)  : QSharedPointer<itmplType>(nullptr) {}
     tmplNullable(itmplType *_ptr) : QSharedPointer<itmplType>(_ptr) {};
-    tmplNullable(itmplType _val)  : QSharedPointer<itmplType>(new itmplType) { *this = _val; }
+    tmplNullable(itmplType _val)  : QSharedPointer<itmplType>(new itmplType) { this->operator=(_val); }
     tmplNullable(const tmplNullable<itmplType> &_val) : QSharedPointer<itmplType>(_val) { }
     tmplNullable(const QVariant& _val) {
         if (_val.isNull() == false)

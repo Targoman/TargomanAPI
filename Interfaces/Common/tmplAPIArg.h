@@ -34,7 +34,7 @@ class intfCacheConnector;
 }
 
 template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
-class tmplAPIArg : public intfAPIArgManipulator{
+class tmplAPIArg : public intfAPIArgManipulator {
 public:
     virtual ~tmplAPIArg(){;}
 
@@ -83,7 +83,7 @@ public:
     }
 
     inline QVariant toORMValue(const QString& _val) const final {
-        return this->toORMValueLambda  == nullptr ?
+        return this->toORMValueLambda == nullptr ?
                     _val :
                     this->toORMValueLambda(_val);
     }
@@ -126,4 +126,5 @@ private:
 
 }
 }
+
 #endif // TARGOMAN_API_TMPLAPIARG_HPP
