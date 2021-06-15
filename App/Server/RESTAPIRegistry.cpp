@@ -74,19 +74,22 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
     \
-    template<> std::function<QVariant(TAPI::tmplNullable<_baseType> _value)> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::toVariantLambda = \
-        [](TAPI::tmplNullable<_baseType> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
-    template<> std::function<TAPI::tmplNullable<_baseType>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::fromVariantLambda = \
-        [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::tmplNullable<_baseType> { \
-            if(!_value.isValid() || _value.isNull()) return TAPI::tmplNullable<_baseType>(); \
-            TAPI::tmplNullable<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
+    template<> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toVariantLambda = \
+        [](NULLABLE_TYPE(_baseType) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
+    template<> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
+        [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
+            if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
+            NULLABLE_VAR(_baseType, Value); \
+            *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
-    template<> std::function<QStringList()> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
-    static tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<TAPI::tmplNullable<_baseType>, _complexity, true>::instance(QSP_M2STR(_baseType)); \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
+    template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
+//NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
+
 
 #define DO_ON_TYPE_NULLABLE_IGNORED(...)
 #define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)
@@ -137,15 +140,7 @@ struct stuNullableQtType{
 };
 
 /***********************************************************************************************/
-void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
-    if ((_method.name().startsWith("api") == false &&
-         _method.name().startsWith("asyncApi") == false)||
-        _method.typeName() == nullptr)
-        return;
-
-    foreach(auto Item, _module->filterItems())
-        Item.registerTypeIfNotRegisterd(_module);
-
+void RESTAPIRegistry::registerMetaTypeInfoMap() {
     if(Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())){
         gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
 
@@ -158,6 +153,17 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
         }
     }
+}
+void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
+    if ((_method.name().startsWith("api") == false &&
+         _method.name().startsWith("asyncApi") == false)||
+        _method.typeName() == nullptr)
+        return;
+
+    foreach(auto Item, _module->filterItems())
+        Item.registerTypeIfNotRegisterd(_module);
+
+    RESTAPIRegistry::registerMetaTypeInfoMap();
 
     try{
         RESTAPIRegistry::validateMethodInputAndOutput(_method);

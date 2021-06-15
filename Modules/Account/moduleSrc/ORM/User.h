@@ -57,14 +57,14 @@ private slots:
                              "Get user photo as image")
 
     bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
-                              NULLABLE(TAPI::enuUserGender::Type) _gender = {},
-                              NULLABLE(QString) _name = {},
-                              NULLABLE(QString) _family = {},
-                              NULLABLE(TAPI::ISO639_2_t) _lang = {},
-                              NULLABLE(TAPI::Email_t) _email = {},
-                              NULLABLE(TAPI::Mobile_t) _mobile = {},
-                              NULLABLE(TAPI::MD5_t) _pass = {},
-                              NULLABLE(QString) _salt = {}),
+                              NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender = {},
+                              NULLABLE_TYPE(QString) _name = {},
+                              NULLABLE_TYPE(QString) _family = {},
+                              NULLABLE_TYPE(TAPI::ISO639_2_t) _lang = {},
+                              NULLABLE_TYPE(TAPI::Email_t) _email = {},
+                              NULLABLE_TYPE(TAPI::Mobile_t) _mobile = {},
+                              NULLABLE_TYPE(TAPI::MD5_t) _pass = {},
+                              NULLABLE_TYPE(QString) _salt = {}),
               "Update User profile. Take note that this method does not change password "
               "Password and Salt are required to change email or mobile")
 

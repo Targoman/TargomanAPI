@@ -4,6 +4,9 @@
 #include <QtTest/QtTest>
 #include <QStringList>
 
+#include <optional>
+using namespace std;
+
 //#include "Interfaces/Test/testCommon.hpp"
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
@@ -32,7 +35,7 @@ public:
                 { "colF", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
                 { "colG", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
                 { "colH", S(TAPI::SaleableAdditive_t),     QFV,                       QNull,      UPOwner },
-                { "colI", S(NULLABLE(quint32)),            QFV,                       QNull,      UPOwner},
+                { "colI", S(NULLABLE_TYPE(quint32)),            QFV,                       QNull,      UPOwner},
                 { "colJ", S(TAPI::enuGenericStatus::Type), QFV,                       TAPI::enuGenericStatus::Active, UPStatus },
                 { "colK", ORM_CREATED_BY },
                 { "colL", ORM_CREATED_ON },
@@ -143,6 +146,38 @@ class QueryBuilders: public QObject
     Q_OBJECT
 
 private slots:
+    void testOptional()
+    {
+        optional<quint32> a;
+        *a = 1234;
+
+        //    std::optional<enuAggregation::Type> z1;
+        //    z1 = enuAggregation::MAX;
+        //    *zzz = enuAggregation::MAX;
+
+        //    NULLABLE_TYPE(enuAggregation::Type) a1, a2;
+        //    TAPI::tmplNullable<enuAggregation::Type> a1, a2;
+        //    enuAggregation::Type a3 = a1;
+        //    std::optional<enuAggregation::Type> a1, a2;
+        //    if (a1 < a2)
+        //    {
+        //    }
+    }
+
+    void testQSharedPointer()
+    {
+        QSharedPointer<quint32> a = QSharedPointer<quint32>::create();
+        *a = 1234;
+    }
+
+    void testNullable()
+    {
+        NULLABLE_TYPE(quint32) a;
+        *a = 1234;
+
+        TAPI::setFromVariant(a, QVariant());
+    }
+
     void condition1() {
         QVERIFY_TRY(clsCondition().isEmpty() == true);
     };
@@ -153,16 +188,16 @@ private slots:
         QVERIFY_TRY(clsCondition().openPar(clsCondition({ "cola",  enuConditionOperator::Less, 123 })).isEmpty() == false);
     };
     void condition4() {
-        QVERIFY_TRY(clsCondition().andCond(clsCondition()).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().andCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
     void condition5() {
-        QVERIFY_TRY(clsCondition().orCond(clsCondition()).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().orCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
     void condition6() {
-        QVERIFY_TRY(clsCondition().xorCond(clsCondition()).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().xorCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
 
-    void equalityOfConditionQueryString() {
+//    void equalityOfConditionQueryString() {
 //        QString qry;
 
 //        qry = clsCondition("cola",  enuConditionOperator::Less, 123).buildQueryString();
@@ -189,49 +224,47 @@ private slots:
 //            .buildQueryString()
 //        ;
 //        QVERIFY(qry == "(cola IS NULL OR (colb IS NULL AND colc = 123))");
-    }
+//    }
 
     void equalityOfQueryString1() {
         QT_TRY {
             TestTable t;
             t.prepareFiltersList();
-//            TestSelectQuery query = TestSelectQuery(t)
-//                .addCols(QStringList({
-//                    "colA",
-//                    "colB",
-//                    "colC",
-//                }))
-//            ;
-//            QString qry = query.queryString();
-//            QCOMPARE(qry, "SELECT colA,colB,colC FROM tblTest");
+            TestSelectQuery query = TestSelectQuery(t)
+                .addCols(QStringList({
+                    "colA",
+                    "colB",
+                    "colC",
+                }))
+                .addCol("colD", "ren_colD")
+            ;
+            QString qry = query.queryString();
+            QCOMPARE(qry, "SELECT tblTest.colA,tblTest.colB,tblTest.colC,tblTest.colD AS ren_colD FROM tblTest");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
-
-
-
-public:
     void equalityOfQueryString2() {
         TestTable t;
+        t.prepareFiltersList();
         TestSelectQuery query = TestSelectQuery(t)
-            .addCols(QStringList({
-                "colA",
-                "colB",
-                "colC",
-            }))
+//            .addCols(QStringList({
+//                "colA",
+//                "colB",
+//                "colC",
+//            }))
             .addCol(enuAggregation::AVG, "colA", "avg_colA")
-            .addCol(enuConditionalAggregation::COUNTIF,
-                    { "colB", enuConditionOperator::Equal, 123 },
-                    "countif_colB"
-                    )
-            .addCol(enuConditionalAggregation::SUMIF,
-                    { "colC", enuConditionOperator::Greater, 123 },
-                    10,
-                    20,
-                    "sumif_colC"
-                    )
+//            .addCol(enuConditionalAggregation::COUNTIF,
+//                    { "colB", enuConditionOperator::Equal, 123 },
+//                    "countif_colB"
+//                    )
+//            .addCol(enuConditionalAggregation::SUMIF,
+//                    { "colC", enuConditionOperator::Greater, 123 },
+//                    10,
+//                    20,
+//                    "sumif_colC"
+//                    )
 //            .leftJoin("t2",
 //                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
 //                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})

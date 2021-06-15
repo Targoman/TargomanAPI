@@ -107,8 +107,8 @@ struct stuAssetItem {
     QString                      prdName;
     TAPI::Date_t                 prdValidFromDate;
     TAPI::Date_t                 prdValidToDate;
-    NULLABLE(quint8)             prdValidFromHour;
-    NULLABLE(quint8)             prdValidToHour;
+    NULLABLE_TYPE(quint8)             prdValidFromHour;
+    NULLABLE_TYPE(quint8)             prdValidToHour;
     TAPI::PrivObject_t           prdPrivs;
     qreal                        prdVAT;
     quint32                      prdInStockCount;
@@ -124,7 +124,7 @@ struct stuAssetItem {
     qreal                        slbBasePrice;
     TAPI::SaleableAdditive_t     slbAdditives;
     quint32                      slbProductCount;
-    NULLABLE(quint32)            slbMaxSaleCountPerUser;
+    NULLABLE_TYPE(quint32)            slbMaxSaleCountPerUser;
     quint32                      slbInStockCount;
     quint32                      slbOrderedCount;
     quint32                      slbReturnedCount;
@@ -145,14 +145,14 @@ typedef QMap<QString, stuAssetItem> ActiveCredits_t;
 
 struct stuServiceCreditsInfo {
     ActiveCredits_t        ActiveCredits;
-    NULLABLE(stuAssetItem) PreferedCredit;
-    NULLABLE(quint32)      ParentID;
+    NULLABLE_TYPE(stuAssetItem) PreferedCredit;
+    NULLABLE_TYPE(quint32)      ParentID;
     UsageLimits_t          MyLimitsOnParent;
     QDateTime              DBCurrentDateTime;
 
     stuServiceCreditsInfo(ActiveCredits_t         _activeCredits,
-                          NULLABLE(stuAssetItem) _preferedCredit,
-                          NULLABLE(quint32)      _parentID,
+                          NULLABLE_TYPE(stuAssetItem) _preferedCredit,
+                          NULLABLE_TYPE(quint32)      _parentID,
                           UsageLimits_t          _myLimitsOnParent,
                           QDateTime              _dbCurrentDateTime);
 };

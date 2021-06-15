@@ -58,20 +58,20 @@ bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
-                            NULLABLE(TAPI::enuUserGender::Type) _gender,
-                            NULLABLE(QString) _name,
-                            NULLABLE(QString) _family,
-                            NULLABLE(TAPI::ISO639_2_t) _lang,
-                            NULLABLE(TAPI::Email_t) _email,
-                            NULLABLE(TAPI::Mobile_t) _mobile,
-                            NULLABLE(TAPI::MD5_t) _pass,
-                            NULLABLE(QString) _salt){
-    if(!_email.isNull() || !_mobile.isNull()){
-        if(_pass.isNull() || _pass->isEmpty() || _salt.isNull())
+                            NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender,
+                            NULLABLE_TYPE(QString) _name,
+                            NULLABLE_TYPE(QString) _family,
+                            NULLABLE_TYPE(TAPI::ISO639_2_t) _lang,
+                            NULLABLE_TYPE(TAPI::Email_t) _email,
+                            NULLABLE_TYPE(TAPI::Mobile_t) _mobile,
+                            NULLABLE_TYPE(TAPI::MD5_t) _pass,
+                            NULLABLE_TYPE(QString) _salt){
+    if (NULLABLE_HAS_VALUE(_email) || NULLABLE_HAS_VALUE(_mobile)){
+        if (NULLABLE_IS_NULL(_pass) || _pass->isEmpty() || NULLABLE_IS_NULL(_salt))
             throw exHTTPBadRequest("Password and salt are required to change email");
         QFV.asciiAlNum().maxLenght(20).validate(*_salt, "salt");
     }
-    if(!_email.isNull() && _email->size())
+    if (NULLABLE_HAS_VALUE(_email) && _email->size())
         this->callSP("AAA.sp_CREATE_approvalRequest",{
                          {"iWhat2Approve", "E"},
                          {"iUserID", clsJWT(_JWT).usrID()},
@@ -79,7 +79,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                          {"iPass", *_pass},
                          {"iSalt", *_salt},
                      });
-    if(!_mobile.isNull() && _mobile->size())
+    if (NULLABLE_HAS_VALUE(_mobile) && _mobile->size())
         this->callSP("AAA.sp_CREATE_approvalRequest",{
                          {"iWhat2Approve", "E"},
                          {"iUserID", clsJWT(_JWT).usrID()},
@@ -89,10 +89,10 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
                      });
 
     QVariantMap ToUpdate;
-    if(!_name.isNull()) ToUpdate.insert(tblUser::usrName, *_name);
-    if(!_family.isNull()) ToUpdate.insert(tblUser::usrFamily, *_family);
-    if(!_lang.isNull()) ToUpdate.insert(tblUser::usrLanguage, *_lang);
-    if(!_gender.isNull()) ToUpdate.insert(tblUser::usrGender, *_gender);
+    if (NULLABLE_HAS_VALUE(_name)) ToUpdate.insert(tblUser::usrName, *_name);
+    if (NULLABLE_HAS_VALUE(_family)) ToUpdate.insert(tblUser::usrFamily, *_family);
+    if (NULLABLE_HAS_VALUE(_lang)) ToUpdate.insert(tblUser::usrLanguage, *_lang);
+    if (NULLABLE_HAS_VALUE(_gender)) ToUpdate.insert(tblUser::usrGender, *_gender);
 
     /*if(ToUpdate.size())
         return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );*/

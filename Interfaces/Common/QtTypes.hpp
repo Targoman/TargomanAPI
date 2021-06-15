@@ -63,7 +63,7 @@
 #define DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)  \
 namespace TAPI { \
     inline void setFromVariant(_baseType& _storage, const QVariant& _val){ _storage = _val.value<_baseType>(); } \
-    inline void setFromVariant(TAPI::tmplNullable<_baseType>& _storage, const QVariant& _val){ \
+    inline void setFromVariant(NULLABLE_TYPE(_baseType)& _storage, const QVariant& _val){ \
         if (_val.isValid() && _val.isNull() == false) *_storage = _val.value<_baseType>(); \
     } \
 }
@@ -75,9 +75,9 @@ template<> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral,
     if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
-template<> inline QGenericArgument tmplAPIArg<TAPI::tmplNullable<_numericType>, COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
-    bool Result = true; *_argStorage = new TAPI::tmplNullable<_numericType>; \
-    if(_val.isValid() && _val.isNull() == false) **(reinterpret_cast<TAPI::tmplNullable<_numericType>*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
+template<> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
+    bool Result = true; *_argStorage = new NULLABLE_TYPE(_numericType); \
+    if(_val.isValid() && _val.isNull() == false) **(reinterpret_cast<NULLABLE_TYPE(_numericType)*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
@@ -87,11 +87,11 @@ inline void setFromVariant(_numericType& _storage, const QVariant& _val){ \
     bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
 } \
-inline void setFromVariant(TAPI::tmplNullable<_numericType>& _storage, const QVariant& _val){ \
+inline void setFromVariant(NULLABLE_TYPE(_numericType)& _storage, const QVariant& _val){ \
     bool Result = true; if(_val.isValid() && _val.isNull() == false) *_storage = static_cast<_numericType>(_val._convertor(&Result)); \
     if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
 } \
-inline QJsonValue toJsonValue(const TAPI::tmplNullable<_numericType>& _val){ QJsonValue JsonVal; JsonVal = _val.isNull() ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
+inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val){ QJsonValue JsonVal; JsonVal = NULLABLE_IS_NULL(_val) ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
 }
 
 TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(quint8,  toUInt)
@@ -106,7 +106,7 @@ TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(double,  toDouble)
 TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(float,   toFloat)
 
 #define REGISTER_ON_TYPE_VALID(_baseType)  \
-    Q_DECLARE_METATYPE(TAPI::tmplNullable<_baseType>) \
+    Q_DECLARE_METATYPE(NULLABLE_TYPE(_baseType)) \
     DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)
 
 #define REGISTER_ON_TYPE_IGNORED(_baseType)
@@ -115,17 +115,17 @@ TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(float,   toFloat)
 #define REGISTER_ON_TYPE(_typeName, _id, _baseType) REGISTER_ON_TYPE_PROXY(_baseType, IGNORE_TYPE_##_typeName)
 
 //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(REGISTER_ON_TYPE)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<quint8>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<quint16>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<quint32>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<quint64>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<qint8>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<qint16>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<qint32>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<qint64>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<double>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<float>)
-Q_DECLARE_METATYPE(TAPI::tmplNullable<bool>)
+Q_DECLARE_METATYPE(NULLABLE_TYPE(quint8))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(quint16))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(quint32))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(quint64))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(qint8))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(qint16))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(qint32))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(qint64))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(double))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(float))
+Q_DECLARE_METATYPE(NULLABLE_TYPE(bool))
 
 QT_FOR_EACH_STATIC_CORE_CLASS(REGISTER_ON_TYPE)
 QT_FOR_EACH_STATIC_CORE_TEMPLATE(REGISTER_ON_TYPE)

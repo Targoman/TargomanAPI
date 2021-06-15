@@ -196,7 +196,8 @@ extern QString toCammel(const QString& n);
     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_MACRO_SELECTOR( TAPI_HELEPER_VARIANTSTRUCT_FROMJSON, __VA_ARGS__)(__VA_ARGS__)
 
 /**********************************************************/
-#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
+//#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
+#define TAPI_HELEPER_QSP_M2STR_PREFIX "std::optional<"
 #define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
 
 #define TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, _lambdaOptions) \
@@ -209,22 +210,23 @@ namespace Targoman {namespace API { \
     template<> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
     static tmplAPIArg<_namespace::_type, _complexity, false>* Dangling_##_namespace##_type = tmplAPIArg<_namespace::_type, _complexity, false>::instance(TARGOMAN_M2STR(_namespace::_type)); \
     \
-    template<> std::function<QVariant(TAPI::tmplNullable<_namespace::_type> _value)> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::toVariantLambda = \
-        [](TAPI::tmplNullable<_namespace::_type> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
-    template<> std::function<TAPI::tmplNullable<_namespace::_type>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::fromVariantLambda = \
-        [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::tmplNullable<_namespace::_type> { \
+    template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toVariantLambda = \
+        [](NULLABLE_TYPE(_namespace::_type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
+    template<> std::function<NULLABLE_TYPE(_namespace::_type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromVariantLambda = \
+        [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_type) { \
             if (!_value.isValid() || _value.isNull()) \
-                return TAPI::tmplNullable<_namespace::_type>(); \
-            TAPI::tmplNullable<_namespace::_type> Value(new _namespace::_type); \
+                return NULLABLE_TYPE(_namespace::_type)(); \
+            NULLABLE_VAR(_namespace::_type, Value); \
             *Value = tmplAPIArg<_namespace::_type, _complexity, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::toORMValueLambda = _toORMValueLambda; \
-    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::fromORMValueLambda = _fromORMValueLambda; \
-    template<> std::function<QStringList()> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::optionsLambda = _lambdaOptions; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::descriptionLambda = _descriptionLambda; \
-    static tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>* Dangling_QSP_##_namespace##_type = tmplAPIArg<TAPI::tmplNullable<_namespace::_type>, _complexity, true>::instance(QSP_M2STR(_namespace::_type)); \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toORMValueLambda = _toORMValueLambda; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromORMValueLambda = _fromORMValueLambda; \
+    template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::optionsLambda = _lambdaOptions; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
+    static tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>* Dangling_QSP_##_namespace##_type = tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::instance(QSP_M2STR(_namespace::_type)); \
 }}
+//            NULLABLE_TYPE(_namespace::_type) Value(new _namespace::_type);
 
 #define TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda) \
     TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, nullptr)
@@ -256,20 +258,22 @@ namespace Targoman {namespace API { \
     template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
     static tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>* Dangling_##_namespace##_enum = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::instance(TARGOMAN_M2STR(_namespace::_enum::Type)); \
     \
-    template<> std::function<QVariant(TAPI::tmplNullable<_namespace::_enum::Type> _value)> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::toVariantLambda = \
-        [](TAPI::tmplNullable<_namespace::_enum::Type> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
-    template<> std::function<TAPI::tmplNullable<_namespace::_enum::Type>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::fromVariantLambda = \
-        [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::tmplNullable<_namespace::_enum::Type> { \
-            if(!_value.isValid() || _value.isNull()) return TAPI::tmplNullable<_namespace::_enum::Type>(); \
-            TAPI::tmplNullable<_namespace::_enum::Type> Value(new _namespace::_enum::Type); *Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
+    template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toVariantLambda = \
+        [](NULLABLE_TYPE(_namespace::_enum::Type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
+    template<> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
+        [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
+            if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
+            NULLABLE_VAR(_namespace::_enum::Type, Value); \
+            *Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
-    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::fromORMValueLambda = _fromORMValueLambda; \
-    template<> std::function<QStringList()> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
-    static tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>* Dangling_QSP_##_namespace##_enum = tmplAPIArg<TAPI::tmplNullable<_namespace::_enum::Type>, COMPLEXITY_Enum, true>::instance(QSP_M2STR(_namespace::_enum::Type)); \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
+    template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromORMValueLambda = _fromORMValueLambda; \
+    template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
+    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
+    static tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>* Dangling_QSP_##_namespace##_enum = tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::instance(QSP_M2STR(_namespace::_enum::Type)); \
 }}
+//NULLABLE_TYPE(_namespace::_enum::Type) Value(new _namespace::_enum::Type);
 
 /************************************************************/
 #define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
@@ -281,7 +285,7 @@ namespace Targoman {namespace API { \
     inline void setFromVariant(_typeName& _storage, const QVariant& _val) { \
         _storage.customFromVariant (_val); \
     } \
-    inline void setFromVariant(TAPI::tmplNullable<_typeName>& _storage, const QVariant& _val){ \
+    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val){ \
         if (_val.isValid() && _val.isNull() == false) _storage->customFromVariant (_val); \
     }
 
@@ -371,7 +375,7 @@ namespace Targoman {namespace API { \
 
 #define INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, _validator) _def, _validator
 #define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v==v)
-#define INTERNAL_SF_NULLABLE_INTEGRAL_0()                 INTERNAL_SF_NULLABLE_INTEGRAL_1(nullptr)
+#define INTERNAL_SF_NULLABLE_INTEGRAL_0()                 INTERNAL_SF_NULLABLE_INTEGRAL_1(NULLABLE_NULL_VALUE)
 
 /************************************************************/
 #define INTERNAL_SF(_type, _name, _typeGroup, _fromVariant, _toVariant, ...) \
@@ -385,10 +389,10 @@ namespace Targoman {namespace API { \
 /************************************************************/
 /************************************************************/
 #define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(_type, _value) \
-    [](auto v)->TAPI::tmplNullable<_type> { \
+    [](auto v)->NULLABLE_TYPE(_type) { \
         if (v.isNull()) \
-            return nullptr; \
-        auto Storage = TAPI::tmplNullable<_type>(); \
+            return NULLABLE_NULL_VALUE; \
+        auto Storage = NULLABLE_TYPE(_type)(); \
         *Storage = v.toDouble(); \
         return Storage; \
     } (_value)
@@ -398,7 +402,7 @@ namespace Targoman {namespace API { \
     TAPI_DECLARE_METATYPE(_enum::Type); \
 namespace TAPI { \
     inline void setFromVariant(_enum::Type& _storage, const QVariant& _val){ _storage = _enum::toEnum(_val.toString()); } \
-    inline void setFromVariant(TAPI::tmplNullable<_enum::Type>& _storage, const QVariant& _val){ \
+    inline void setFromVariant(NULLABLE_TYPE(_enum::Type)& _storage, const QVariant& _val){ \
         if(_val.isValid() && _val.isNull() == false) *_storage = _enum::toEnum(_val.toString()); \
     } \
 }

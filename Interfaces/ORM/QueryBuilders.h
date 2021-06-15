@@ -122,7 +122,7 @@ public:
 
     SelectQuery& alias(const QString& _alias);
 
-    SelectQuery& addCols(const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});

@@ -60,6 +60,7 @@ public:
     }
 #endif
 
+    static void registerMetaTypeInfoMap();
     static void registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
 

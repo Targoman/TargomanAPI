@@ -23,6 +23,7 @@
 #ifndef TAPI_APIARGHELPERMACROS_HPP
 #define TAPI_APIARGHELPERMACROS_HPP
 
+#include <optional>
 #include "APIArgHelperMacrosPrivate.h"
 
 /************************************************************/
@@ -38,7 +39,7 @@
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \
     Q_DECLARE_METATYPE(_type) \
-    Q_DECLARE_METATYPE(TAPI::tmplNullable<_type>)
+    Q_DECLARE_METATYPE(NULLABLE_TYPE(_type))
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE_ENUM(_enum) \
@@ -71,13 +72,13 @@
 #define SF_QString(_name, ...)          INTERNAL_SF(QString,           _name, STRING,   v,                 v.toString(),         __VA_ARGS__)
 
 #define SF_quint8(_name, ...)           INTERNAL_SF(quint8,            _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
-#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
+#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
 #define SF_quint16(_name, ...)          INTERNAL_SF(quint16,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
-#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE(quint16), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint16(v), __VA_ARGS__)
+#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint16), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint16(v), __VA_ARGS__)
 #define SF_quint32(_name, ...)          INTERNAL_SF(quint32,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint32(v), __VA_ARGS__)
-#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint32(v), __VA_ARGS__)
+#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint32(v), __VA_ARGS__)
 #define SF_quint64(_name, ...)          INTERNAL_SF(quint64,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint64(v), __VA_ARGS__)
-#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint64(v), __VA_ARGS__)
+#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint64(v), __VA_ARGS__)
 
 /************************************************************/
 #define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) struct _name { \
@@ -94,8 +95,26 @@
 #define V2U32(v) INTERNAL_V2U32(v)
 
 /************************************************************/
-#define NULLABLE(_type) TAPI::tmplNullable<_type>
-#define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
+// METHOD 1: tmplNullable(QSharedPointer)
+//#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
+//#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name = NULLABLE_TYPE(_type)::create();
+//#define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
+//#define NULLABLE_NULL_VALUE nullptr
+//#define NULLABLE_IS_NULL(_nullable) _nullable.isNull()
+//#define NULLABLE_HAS_VALUE(_nullable) _nullable.isNull() == false
+//#define QVARIANT_TO_NULLABLE(_type, _val) NULLABLE_TYPE(_type)(_val)
+
+// METHOD 2: std::optional
+//#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
+#define NULLABLE_TYPE(_type) std::optional<_type>
+#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
+#define NULLABLE_VALUE(_value) _value ? *_value : QVariant()
+#define NULLABLE_NULL_VALUE std::nullopt
+#define NULLABLE_IS_NULL(_nullable) (bool)_nullable == false
+#define NULLABLE_HAS_VALUE(_nullable) (bool)_nullable
+#define QVARIANT_TO_NULLABLE(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
+
+/************************************************************/
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)
 #define N2S8(_value)   INTERNAL_N2int8(_value)
 #define N2S16(_value)  INTERNAL_N2int16(_value)

@@ -44,11 +44,13 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
       UpdatableBy(_o.UpdatableBy),
       Privs(_o.Privs)
 {
-    if(this->ParamTypeName.startsWith("NULLABLE("))
+    if(this->ParamTypeName.startsWith("NULLABLE_TYPE("))
         this->ParamTypeName
             .replace("(", "<")
             .replace(")", ">")
-            .replace("NULLABLE", "TAPI::tmplNullable");
+            .replace("NULLABLE_TYPE", "std::optional")
+//            .replace("NULLABLE_TYPE", "TAPI::tmplNullable")
+        ;
 }
 
 

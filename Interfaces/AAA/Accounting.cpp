@@ -115,13 +115,13 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
     QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
 
     auto effectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        return _assetItem.prdValidFromHour.isNull()
-            ? QDateTime(Now.date())
-            : QDateTime(Now.date()).addSecs(*_assetItem.prdValidFromHour * 3600);
+        return _assetItem.prdValidFromHour //.isNull() == fasle
+            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidFromHour * 3600)
+            : QDateTime(Now.date());
     };
 
     auto effectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        if (_assetItem.prdValidFromHour.isNull() || _assetItem.prdValidToHour.isNull())
+        if (NULLABLE_IS_NULL(_assetItem.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.prdValidToHour))
             QDateTime(Now.date().addDays(1));
 
         return _assetItem.prdValidFromHour < _assetItem.prdValidToHour
@@ -134,8 +134,8 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
     auto isInvalidPackage = [this, Now, effectiveStartDateTime, effectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
         if ((_assetItem.prdValidFromDate.isValid() && _assetItem.prdValidFromDate > Now.date())
                || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
-               || (_assetItem.prdValidFromHour.isNull() == false && Now < effectiveStartDateTime(_assetItem))
-               || (_assetItem.prdValidToHour.isNull() == false && Now > effectiveEndDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
                || this->isEmpty(_assetItem.Digested.Limits)
             )
             return false;
@@ -148,10 +148,10 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
                     continue;
                 if (this->isUnlimited(_assetItem.Digested.Limits) == false){
                     stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
-                    if ((Remaining.PerDay.isNull() == false && *Remaining.PerDay - UsageIter.value() <= 0)
-                           ||(Remaining.PerWeek.isNull() == false && *Remaining.PerWeek - UsageIter.value() <= 0)
-                           ||(Remaining.PerMonth.isNull() == false && *Remaining.PerMonth - UsageIter.value() <= 0)
-                           ||(Remaining.Total.isNull() == false && *Remaining.Total - UsageIter.value() <= 0)
+                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - UsageIter.value() <= 0)
                         )
                         return false;
                 }
@@ -160,20 +160,20 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
         return true;
     };
 
-    if (ServiceCreditsInfo.PreferedCredit.isNull() == false && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
         return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
-                                       ServiceCreditsInfo.ParentID.isNull() == false,
-                                       ServiceCreditsInfo.MyLimitsOnParent,
-                                       -1);
+                               NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
+                               ServiceCreditsInfo.MyLimitsOnParent,
+                               -1);
 
     auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
         if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
         if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
         if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
-        if (a.prdValidToHour.isNull() == false && b.prdValidToHour.isNull()) return -1;
-        if (a.prdValidToHour.isNull() && b.prdValidToHour.isNull() == false) return 1;
-        if (a.prdValidToHour.isNull() == false && b.prdValidToHour.isNull() == false) {
+        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_IS_NULL(b.prdValidToHour)) return -1;
+        if (NULLABLE_IS_NULL(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) return 1;
+        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) {
             if(effectiveEndDateTime(a) < effectiveEndDateTime(b)) return -1;
             if(effectiveEndDateTime(a) > effectiveEndDateTime(b)) return 1;
         }
@@ -223,15 +223,15 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
     const stuAssetItem& ActivePackage = CandidateCredit.first();
     QDateTime NextDigestTime;
     if (ActivePackage.prdValidToDate.isNull() == false) {
-        if (ActivePackage.prdValidToHour.isNull() == false)
+        if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
             NextDigestTime = effectiveEndDateTime(ActivePackage);
         else
             NextDigestTime = QDateTime(ActivePackage.prdValidToDate.addDays(1));
-    } else if (ActivePackage.prdValidToHour.isNull() == false)
+    } else if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
         NextDigestTime = effectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
-                           ServiceCreditsInfo.ParentID.isNull() == false,
+                           NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
                            ServiceCreditsInfo.MyLimitsOnParent,
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
@@ -393,10 +393,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         SaleableUsageLimits.insert(
             Iter.key(),
             {
-                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerDay)),
-                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerWeek)),
-                TAPI::tmplNullable<quint32>(SaleableInfo.value(Iter->PerMonth)),
-                TAPI::tmplNullable<quint64>(SaleableInfo.value(Iter->Total))
+                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerDay)),
+                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerWeek)),
+                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerMonth)),
+                QVARIANT_TO_NULLABLE(quint64, SaleableInfo.value(Iter->Total))
             }
         );
     AssetItem.Digested.Limits = SaleableUsageLimits;
@@ -516,13 +516,13 @@ void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const Se
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
     auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
-        if (_remaining.PerDay.isNull() == false && *_remaining.PerDay - _usageIter.value() <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
-        if (_remaining.PerWeek.isNull() == false && *_remaining.PerWeek - _usageIter.value() <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
-        if (_remaining.PerMonth.isNull() == false && *_remaining.PerMonth - _usageIter.value() <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
-        if (_remaining.Total.isNull() == false && *_remaining.Total - _usageIter.value() <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
     };
 

@@ -52,6 +52,10 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
             (_appendAs ? makeColRenamedAs(_col, _relation.RenamingPrefix) : "");
 };
 
+#define KZ_TRACE(msg) \
+    throw exQueryBuilder(QString(">>>>>>>>>>>>>>>> [%1:%2] %3").arg(__FUNCTION__).arg(__LINE__) \
+        .arg(msg));
+
 /***************************************************************************************/
 /***************************************************************************************/
 /***************************************************************************************/
@@ -153,14 +157,41 @@ QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString,
 struct stuColSpecs {
     QString Name;
     QString RenameAs = {};
-    union unnAggregation {
-        enuAggregation::Type Simple;
-        enuConditionalAggregation::Type Conditional;
-    };
-    NULLABLE(unnAggregation) Aggregation = nullptr;
+//    union unnAggregation {
+//        enuAggregation::Type Simple;
+//        enuConditionalAggregation::Type Conditional;
+//    };
+//    NULLABLE_TYPE(unnAggregation) Aggregation;
+    NULLABLE_TYPE(enuAggregation::Type) Aggregation_Simple = std::nullopt;
+    NULLABLE_TYPE(enuConditionalAggregation::Type) Aggregation_Conditional = std::nullopt;
     clsCondition Condition = {};
     QVariant TrueValue = {};
     QVariant FalseValue = {};
+
+//    stuColSpecs(const stuColSpecs& _other) :
+//        Name(_other.Name),
+//        RenameAs(_other.RenameAs),
+//        Aggregation_Simple(_other.Aggregation_Simple),
+//        Aggregation_Conditional(_other.Aggregation_Conditional),
+//        Condition(_other.Condition),
+//        TrueValue(_other.TrueValue),
+//        FalseValue(_other.FalseValue)
+//    {}
+//    stuColSpecs(
+//        const QString& _name,
+//        const QString& _renameAs = {},
+//        const NULLABLE_TYPE(unnAggregation)& _aggregation = std::nullopt,
+//        const clsCondition& _condition = {},
+//        const QVariant& _trueValue = {},
+//        const QVariant& _falseValue = {}
+//        ) :
+//        Name(_name),
+//        RenameAs(_renameAs),
+//        Aggregation(_aggregation),
+//        Condition(_condition),
+//        TrueValue(_trueValue),
+//        FalseValue(_falseValue)
+//    {}
 };
 
 struct stuSelectItems {
@@ -185,7 +216,7 @@ struct stuOrderBy {
 
 //    stuOrderBy() {}
     stuOrderBy(const stuOrderBy& _other) : Col(_other.Col), Dir(_other.Dir) {}
-    stuOrderBy(const QString& _col, enuOrderDir::Type _dir) : Col(_col), Dir(_dir) {}
+    stuOrderBy(const QString& _col, const enuOrderDir::Type& _dir) : Col(_col), Dir(_dir) {}
 };
 
 struct stuConditionalClause {
@@ -217,14 +248,60 @@ public:
                 return _fieldString + " AS " + _col.RenameAs;
             }; //updateRename
 
-            if (_col.Condition.isEmpty() == false) {
-throw exQueryBuilder(QString("000000000000 (%1)").arg(this->QueryItems.Cols.join("|")));
+            if (_col.Condition.isEmpty()) {
+                QString AggFunction;
+
+//                KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(_col.Aggregation.isNull()));
+
+                if (!_col.Aggregation_Simple && !_col.Aggregation_Conditional) {
+                   ///TODO: why using ANY_VALUE?
+                   if (this->GroupByCols.size())
+                       AggFunction = "ANY_VALUE(";
+                }
+                else if (_col.Aggregation_Simple) {
+                    if (*_col.Aggregation_Simple == enuAggregation::DISTINCT_COUNT) {
+                       KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(*_col.Aggregation_Simple));
+                       AggFunction = "COUNT(DISTINCT ";
+                    }
+                    else {
+                       KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(*_col.Aggregation_Simple));
+                       AggFunction = enuAggregation::toStr(*_col.Aggregation_Simple) + '(';
+                    }
+                }
+
+                //KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(this->Table.SelectableColsMap.size()));
+                auto Field = this->Table.SelectableColsMap[_col.Name];
+
+                //KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(Field.name()));
+                if (Field.name().isNull())
+                   return false;
+
+                auto ColFinalName = makeColName(this->Table.Name, Field, true, _relation);
+                if (AggFunction.size()) {
+                   this->QueryItems.Cols.append(AggFunction
+                                                + ColFinalName.split(' ').first()
+                                                + ") AS "
+                                                + (_col.RenameAs.size()
+                                                   ? _col.RenameAs
+                                                   : AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
+                                                  )
+                                                );
+                }
+                else
+                   this->QueryItems.Cols.append(updateRename(ColFinalName));
+
+                //KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
+            }
+            else
+            {
+                KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
+
                 if (_col.TrueValue.isNull() != _col.FalseValue.isNull())
                     throw exQueryBuilder(QString("Both TrueValue and FalseValue must be empty or not empty").arg(_col.Name));
 
                 QStringList parts;
 
-                auto AggFunction = enuConditionalAggregation::toStr(_col.Aggregation->Conditional);
+                auto AggFunction = enuConditionalAggregation::toStr(*_col.Aggregation_Conditional);
                 AggFunction.chop(2);
                 AggFunction += "(";
                 if (_col.TrueValue.isNull() != false)
@@ -248,41 +325,6 @@ throw exQueryBuilder(QString("000000000000 (%1)").arg(this->QueryItems.Cols.join
                 parts.append(_col.RenameAs);
 
                 this->QueryItems.Cols.append(parts.join(""));
-            }
-            else {
-                QString AggFunction;
-
-                if (_col.Aggregation.isNull()) {
-                    ///TODO: why using ANY_VALUE?
-                    if (this->GroupByCols.size())
-                        AggFunction = "ANY_VALUE(";
-                }
-                else if(_col.Aggregation->Simple == enuAggregation::DISTINCT_COUNT)
-                    AggFunction = "COUNT(DISTINCT ";
-                else
-                    AggFunction = enuAggregation::toStr(_col.Aggregation->Simple) + '(';
-
-                throw exQueryBuilder(QString("****************** (%1) (%2)").arg(_col.Name).arg(this->Table.SelectableColsMap.size()));
-                auto Field = this->Table.SelectableColsMap[_col.Name];
-
-throw exQueryBuilder(QString("****************** (%1) (%2)").arg(_col.Name).arg(Field.name()));
-                if (Field.name().isNull())
-                    return false;
-
-                auto ColFinalName = makeColName(this->Table.Name, Field, true, _relation);
-                if (AggFunction.size()) {
-                    this->QueryItems.Cols.append(AggFunction
-                                                 + ColFinalName.split(' ').first()
-                                                 + ") AS "
-                                                 + (_col.RenameAs.size()
-                                                    ? _col.RenameAs
-                                                    : AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
-                                                   )
-                                                 );
-                }
-                else
-                    this->QueryItems.Cols.append(updateRename(ColFinalName));
-throw exQueryBuilder(QString("111111111 (%1)").arg(this->QueryItems.Cols.join("|")));
             }
 
             return true;
@@ -309,7 +351,7 @@ throw exQueryBuilder(QString("111111111 (%1)").arg(this->QueryItems.Cols.join("|
             }
         }
 
-        throw exQueryBuilder(QString("2222222222222222222222 (%1)").arg(this->QueryItems.Cols.join("|")));
+//        KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
 
         QSet<stuRelation> UsedJoins;
         foreach(auto Relation, this->Table.ForeignKeys) {
@@ -372,8 +414,8 @@ public:
     QList<stuConditionalClause>   HavingClauses;
 
     TAPI::PKsByPath_t             PksByPath;
-    quint64                       Offset;
-    quint16                       Limit;
+    quint64                       Offset = 0;
+    quint16                       Limit = 0;
 
     stuSelectItems                QueryItems;
 };
@@ -397,7 +439,10 @@ bool clsCondition::isEmpty() const { return (this->Data == nullptr || this->Data
 /***************************************************************************************/
 /* SelectQuery *************************************************************************/
 /***************************************************************************************/
-SelectQuery::SelectQuery(const clsTable &_table) : Data(new clsSelectQueryData(_table)) {}
+SelectQuery::SelectQuery(const clsTable &_table) : Data(new clsSelectQueryData(_table)) {
+    if (_table.AllCols.isEmpty())
+        throw exQueryBuilder("Call prepareFiltersList on table before creating a QueryBuilder");
+}
 SelectQuery::SelectQuery(const SelectQuery& _other) : Data(_other.Data) {}
 SelectQuery::~SelectQuery() {}
 
@@ -405,9 +450,12 @@ SelectQuery::~SelectQuery() {}
 |* Columns             *|
 \***********************/
 //used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
-SelectQuery& SelectQuery::addCols(const TAPI::Cols_t& _cols)
+SelectQuery& SelectQuery::addCols(const TAPI::Cols_t& _commaSeperatedCols)
 {
-    this->Data->RequiredCols.append({ _cols });
+    ///TODO: split _commaSeperatedCols by comma -> iterate and addCol
+
+    stuColSpecs colspec = { _commaSeperatedCols };
+    this->Data->RequiredCols.append(colspec);
     return *this;
 }
 
@@ -420,24 +468,28 @@ SelectQuery& SelectQuery::addCols(const QStringList& _cols)
 
 SelectQuery& SelectQuery::addCol(const QString& _col, const QString& _renameAs)
 {
-    this->Data->RequiredCols.append({ _col, _renameAs });
+    stuColSpecs colspec{ _col, _renameAs };
+    this->Data->RequiredCols.append(colspec);
     return *this;
 }
 
 SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs)
 {
-    this->Data->RequiredCols.append({ _col, _renameAs, { _aggFunc } });
+    stuColSpecs colspec = { _col, _renameAs, _aggFunc };
+    this->Data->RequiredCols.append(colspec);
     return *this;
 }
 
 SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs)
 {
-    this->Data->RequiredCols.append({ {}, _renameAs, { _aggFunc }, _condition });
+    stuColSpecs colspec = { {}, _renameAs, std::nullopt, _aggFunc, _condition };
+    this->Data->RequiredCols.append(colspec);
     return *this;
 }
 SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs)
 {
-    this->Data->RequiredCols.append({ {}, _renameAs, { _aggFunc }, _condition, _trueValue, _falseValue });
+    stuColSpecs colspec = { {}, _renameAs, std::nullopt, _aggFunc, _condition, _trueValue, _falseValue };
+    this->Data->RequiredCols.append(colspec);
     return *this;
 }
 
@@ -721,4 +773,4 @@ quint64 SelectQuery::count(QVariantMap _args)
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::ORM::stuColSpecs::unnAggregation);
+//Q_DECLARE_METATYPE(Targoman::API::ORM::stuColSpecs::unnAggregation);
