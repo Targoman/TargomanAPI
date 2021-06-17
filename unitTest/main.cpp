@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try{
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new QueryBuilders, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new TestQueryBuilders, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

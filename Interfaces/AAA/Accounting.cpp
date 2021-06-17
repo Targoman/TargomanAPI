@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Accounting.h"
@@ -393,10 +394,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         SaleableUsageLimits.insert(
             Iter.key(),
             {
-                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerDay)),
-                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerWeek)),
-                QVARIANT_TO_NULLABLE(quint32, SaleableInfo.value(Iter->PerMonth)),
-                QVARIANT_TO_NULLABLE(quint64, SaleableInfo.value(Iter->Total))
+                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerDay)),
+                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerWeek)),
+                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerMonth)),
+                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
             }
         );
     AssetItem.Digested.Limits = SaleableUsageLimits;

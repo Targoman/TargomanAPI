@@ -48,8 +48,7 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
         this->ParamTypeName
             .replace("(", "<")
             .replace(")", ">")
-            .replace("NULLABLE_TYPE", "std::optional")
-//            .replace("NULLABLE_TYPE", "TAPI::tmplNullable")
+            .replace("NULLABLE_TYPE", NULLABLE_UNDERLAYER_CLASS_NAME)
         ;
 }
 

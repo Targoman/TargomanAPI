@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QSet>
@@ -172,7 +173,7 @@ void clsTable::prepareFiltersList()
     if (this->AllCols.size())
         return;
 
-    foreach (auto Col, this->BaseCols) {
+    foreach (clsORMField Col, this->BaseCols) {
         if (Col.isPrimaryKey())
             ++this->CountOfPKs;
 
@@ -663,17 +664,17 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     foreach(auto Filter, _filters.split(" ", QString::SkipEmptyParts)){
         QString Rule;
         Filter = Filter.trimmed ();
-        if(Filter == ")"){
-            if(OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
-            Rule = " )";
-            OpenParenthesis--;
-            CanStartWithLogical = true;
-        }else if(Filter == "("){
+        if (Filter == "(") {
             Rule = LastLogical + "(";
             CanStartWithLogical = false;
             LastLogical.clear();
             OpenParenthesis++;
-        }else if(Filter == '+' || Filter == '|' || Filter == '*'){
+        } else if(Filter == ")") {
+            if(OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
+            Rule = " )";
+            OpenParenthesis--;
+            CanStartWithLogical = true;
+        } else if(Filter == '+' || Filter == '|' || Filter == '*') {
             if(CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
             if(Filter == '+') LastLogical = "AND ";
             else if(Filter == '|') LastLogical = "OR ";
@@ -681,7 +682,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             CanStartWithLogical = false;
             continue;
-        }else{
+        } else {
             static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
             Filter = Filter.replace("$SPACE$", " ");
             QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);

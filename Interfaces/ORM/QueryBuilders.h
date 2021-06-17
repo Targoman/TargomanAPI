@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
 #define TARGOMAN_API_ORM_QUERYBUILDERS_H
 
-class TestSelectQuery;
+class TestQueryBuilders;
 
 #include "Interfaces/ORM/Defs.hpp"
 #include "libTargomanCommon/exTargomanBase.h"
@@ -37,6 +37,11 @@ namespace ORM {
 class clsTable;
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuPreConditionOperator,
+                     AND,
+                     OR,
+                     XOR)
+
 TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      Equal,
                      NotEqual,
@@ -48,76 +53,70 @@ TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      NotNull,
                      Like)
 
+class clsSelectQueryData;
 class clsConditionData;
-
 class clsCondition {
 public:
     clsCondition();
-    clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
     clsCondition(const clsCondition& _other);
+    clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
     ~clsCondition();
 
-    static clsCondition& scope(const clsCondition& _cond);
-    clsCondition& openPar(const clsCondition& _cond);
-    clsCondition& closePar();
+    bool isEmpty() const;
+    bool hasMany() const;
+
+//    clsCondition& andScope(const clsCondition& _cond);
+//    clsCondition& orScope(const clsCondition& _cond);
+//    clsCondition& xorScope(const clsCondition& _cond);
+
+//    clsCondition& openPar(const clsCondition& _cond);
+//    clsCondition& closePar();
+
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
     clsCondition& xorCond(const clsCondition& _cond);
 
-    bool isEmpty() const;
-
 private:
     QSharedDataPointer<clsConditionData> Data;
-    friend clsCondition& addCondition(clsCondition* _this, char _aggregator, const clsCondition& _nextCondition);
-    friend QString toStr(QString _tableName, const clsCondition& _this, const QMap<QString, stuFilteredCol>& _filterables);
+    void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
+    QString buildConditionString(QString _tableName, const QMap<QString, stuFilteredCol>& _filterables) const;
+
+    friend clsSelectQueryData;
+    friend TestQueryBuilders;
+//    QString dump();
 };
 
-//class clsConditionData : public QSharedData
-//{
-//public:
-//    clsConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {});
-//    bool isAggregator() const;
-//    bool isOpenPar() const;
-//    bool isClosePar() const;
+///TODO: BUG: libTargomanCommon/Macros.h #(273, 287) error in LastID. Strings[0] not served
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuAggregation,
+    COUNT,
+    DISTINCT_COUNT,
+    SUM,
+    AVG,
+    MAX,
+    MIN)
 
-//public:
-//    QString Col;
-//    enuConditionOperator::Type Operator;
-//    QVariant Value;
-//    clsCondition NextCondition;
-//};
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuConditionalAggregation,
+    COUNTIF,
+    SUMIF,
+    AVGIF,
+    MAXIF,
+    MINIF)
 
-TARGOMAN_DEFINE_ENUM(enuAggregation,
-                     COUNT,
-                     DISTINCT_COUNT,
-                     SUM,
-                     AVG,
-                     MAX,
-                     MIN)
-
-TARGOMAN_DEFINE_ENUM(enuConditionalAggregation,
-                     COUNTIF,
-                     SUMIF,
-                     AVGIF,
-                     MAXIF,
-                     MINIF)
-
-TARGOMAN_DEFINE_ENUM(enuJoinType,
-                     LEFT,
-                     INNER,
-                     RIGHT,
-                     CROSS)
+TARGOMAN_DEFINE_ENHANCED_ENUM(enuJoinType,
+    LEFT,
+    INNER,
+    RIGHT,
+    CROSS)
 
 TARGOMAN_DEFINE_ENUM(enuOrderDir,
-                     Ascending,
-                     Descending)
+    Ascending,
+    Descending)
 
-class clsSelectQueryData;
 class SelectQuery
 {
 public:
-    SelectQuery(const clsTable& _table);
     SelectQuery(const SelectQuery& _other);
+    SelectQuery(const clsTable& _table);
     ~SelectQuery();
 
     SelectQuery& alias(const QString& _alias);
@@ -137,21 +136,25 @@ public:
 //    SelectQuery& from(const QString _table, const QString& _renameAs = {});
 //    SelectQuery& from(const SelectQuery& _nestedQuery, const QString _alias);
 
-    SelectQuery& leftJoin(const QString _table, const clsCondition& _on);
-    SelectQuery& rightJoin(const QString _table, const clsCondition& _on);
-    SelectQuery& innerJoin(const QString _table, const clsCondition& _on);
-    SelectQuery& crossJoin(const QString _table);
-    SelectQuery& join(enuJoinType::Type _joinType, const QString _table, const clsCondition& _on, const QString& _renamingPrefix = {});
+    SelectQuery& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    SelectQuery& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    SelectQuery& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    SelectQuery& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    SelectQuery& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    SelectQuery& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    SelectQuery& crossJoin(const QString& _foreignTable, const QString& _alias = {});
+    SelectQuery& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
 //    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
-//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on, const QString& _renamingPrefix = {});
+//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 
     SelectQuery& where(const clsCondition& _condition);
     SelectQuery& andWhere(const clsCondition& _condition);
     SelectQuery& orWhere(const clsCondition& _condition);
+    SelectQuery& xorWhere(const clsCondition& _condition);
 
     SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
 
@@ -162,6 +165,7 @@ public:
     SelectQuery& having(const clsCondition& _condition);
     SelectQuery& andHaving(const clsCondition& _condition);
     SelectQuery& orHaving(const clsCondition& _condition);
+    SelectQuery& xorHaving(const clsCondition& _condition);
 
     SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
@@ -172,13 +176,9 @@ public:
     quint64 count(QVariantMap _args = {});
 
 private:
-    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false);
     QSharedDataPointer<clsSelectQueryData> Data;
-
-//#ifdef TARGOMAN_TEST_MODE
-//    quint32 testPrivateMember;
-    friend TestSelectQuery;
-//#endif
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false);
+    friend TestQueryBuilders;
 };
 
 class ApiSelectQuery : public SelectQuery

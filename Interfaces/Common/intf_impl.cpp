@@ -30,7 +30,7 @@ intfAPIObject::~intfAPIObject() {;}
 
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
     Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer") == false, "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
-    this->PrettyTypeName = _realTypeName.startsWith("TAPI::tmplNullable<") ? _realTypeName.mid(sizeof("TAPI::tmplNullable<") - 1, _realTypeName.size() - static_cast<int>(sizeof("TAPI::tmplNullable<"))) : _realTypeName;
+    this->PrettyTypeName = _realTypeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX) ? _realTypeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX) - 1, _realTypeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX))) : _realTypeName;
     this->PrettyTypeName = (this->PrettyTypeName.startsWith('Q') ? this->PrettyTypeName.mid(1) : this->PrettyTypeName).toLower();
     QByteArray RealTypeByteArray = _realTypeName.toLatin1();
     this->RealTypeName = new char[static_cast<uint>(RealTypeByteArray.size()+1)];

@@ -100,8 +100,8 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         };
 
         auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, QString _typeName){
-            if (_typeName.startsWith("TAPI::tmplNullable<"))
-                _typeName = _typeName.mid(sizeof("TAPI::tmplNullable<"), _typeName.size() - static_cast<int>(sizeof("TAPI::tmplNullable<")) - 1);
+            if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
+                _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
             switch(_complexity){
             case COMPLEXITY_Number:
@@ -130,8 +130,8 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         };
 
         auto addExtraParamsByType = [](QJsonObject& _paramSpecs, enuVarComplexity _complexity, QString _typeName) {
-            if (_typeName.startsWith("TAPI::tmplNullable<"))
-                _typeName = _typeName.mid(sizeof("TAPI::tmplNullable<"), _typeName.size() - static_cast<int>(sizeof("TAPI::tmplNullable<")) - 1);
+            if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
+                _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
             switch(_complexity){
             case COMPLEXITY_Number:

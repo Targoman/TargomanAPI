@@ -52,10 +52,10 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
         query
             .where({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
             .orWhere({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
-            .orWhere(clsCondition::scope(
+            .orWhere(//clsCondition::scope(
                 clsCondition(tblTickets::tktTarget_usrID, enuConditionOperator::Null)
                 .orCond({ tblTickets::tktType, enuConditionOperator::Equal, TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast) })
-            ))
+            )//)
         ;
 
     return query.one();

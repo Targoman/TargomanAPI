@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TAPI_APIARGHELPERMACROS_HPP
@@ -96,23 +97,28 @@
 
 /************************************************************/
 // METHOD 1: tmplNullable(QSharedPointer)
+//#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
+//#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
+//#define NULLABLE_UNDERLAYER_CLASS_NAME "TAPI::tmplNullable"
 //#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
 //#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name = NULLABLE_TYPE(_type)::create();
 //#define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
 //#define NULLABLE_NULL_VALUE nullptr
 //#define NULLABLE_IS_NULL(_nullable) _nullable.isNull()
 //#define NULLABLE_HAS_VALUE(_nullable) _nullable.isNull() == false
-//#define QVARIANT_TO_NULLABLE(_type, _val) NULLABLE_TYPE(_type)(_val)
+//#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) NULLABLE_TYPE(_type)(_val)
 
 // METHOD 2: std::optional
-//#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
+#define TAPI_HELEPER_QSP_M2STR_PREFIX "std::optional<"
+#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
+#define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
 #define NULLABLE_TYPE(_type) std::optional<_type>
 #define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
 #define NULLABLE_VALUE(_value) _value ? *_value : QVariant()
 #define NULLABLE_NULL_VALUE std::nullopt
 #define NULLABLE_IS_NULL(_nullable) (bool)_nullable == false
 #define NULLABLE_HAS_VALUE(_nullable) (bool)_nullable
-#define QVARIANT_TO_NULLABLE(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
+#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
 
 /************************************************************/
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)

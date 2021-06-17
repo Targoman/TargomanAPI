@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_ORM_CLSTABLE_H
@@ -29,6 +30,8 @@
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 #include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/ORM/Defs.hpp"
+
+class TestQueryBuilders;
 
 namespace Targoman {
 namespace API {
@@ -153,6 +156,7 @@ protected:
 
     friend clsSelectQueryData;
     friend SelectQuery;
+    friend TestQueryBuilders;
 };
 
 }

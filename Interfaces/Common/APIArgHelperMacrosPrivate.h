@@ -16,6 +16,10 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
+/**
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
+ */
 
 #ifndef APIARGHELPERMACROSPRIVATE_H
 #define APIARGHELPERMACROSPRIVATE_H
@@ -196,10 +200,6 @@ extern QString toCammel(const QString& n);
     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_MACRO_SELECTOR( TAPI_HELEPER_VARIANTSTRUCT_FROMJSON, __VA_ARGS__)(__VA_ARGS__)
 
 /**********************************************************/
-//#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
-#define TAPI_HELEPER_QSP_M2STR_PREFIX "std::optional<"
-#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
-
 #define TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, _lambdaOptions) \
 namespace Targoman {namespace API { \
     template<> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toVariantLambda = _toVariantLambda; \
