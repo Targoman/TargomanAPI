@@ -68,17 +68,22 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
 struct stuConditionData
 {
     bool IsAggregator = false;
-    QString TableAlias;
+    QString TableName;
     QString Col;
     enuConditionOperator::Type Operator;
     QVariant Value;
+    QString OtherTableName;
+    QString OtherCol;
     clsCondition Condition;
 
-    stuConditionData(QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {}) :
+    stuConditionData(QString _col, enuConditionOperator::Type _operator, QVariant _value = {}) :
         IsAggregator(false), Col(_col), Operator(_operator), Value(_value)
     {}
-    stuConditionData(QString _tableAlias, QString _col, enuConditionOperator::Type _operator = enuConditionOperator::Null, QVariant _value = {}) :
-        IsAggregator(false), TableAlias(_tableAlias), Col(_col), Operator(_operator), Value(_value)
+    stuConditionData(QString _tableName, QString _col, enuConditionOperator::Type _operator, QVariant _value = {}) :
+        IsAggregator(false), TableName(_tableName), Col(_col), Operator(_operator), Value(_value)
+    {}
+    stuConditionData(QString _tableName, QString _col, enuConditionOperator::Type _operator, QString _otherTableName, QString _otherCol) :
+        IsAggregator(false), TableName(_tableName), Col(_col), Operator(_operator), OtherTableName(_otherTableName), OtherCol(_otherCol)
     {}
     stuConditionData(bool _isAggregator, QString _col) :
         IsAggregator(_isAggregator), Col(_col)
@@ -116,34 +121,32 @@ public:
 /***************************************************************************************/
 /* clsCondition ************************************************************************/
 /***************************************************************************************/
-clsCondition::clsCondition()                                                                    : Data(new clsConditionData) {}
-clsCondition::clsCondition(const clsCondition& _other)                                          : Data(_other.Data) {}
-clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value) : Data(new clsConditionData) {
-    this->Data->Conditions.append({ _col.trimmed(), _operator, _value });
+clsCondition::clsCondition()
+    : Data(new clsConditionData) {}
+clsCondition::clsCondition(const clsCondition& _other)
+    : Data(_other.Data) {}
+clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value)
+    : Data(new clsConditionData) {
+    this->Data->Conditions.append({ _col, _operator, _value });
+}
+clsCondition::clsCondition(
+        QString _tableName,
+        QString _col,
+        enuConditionOperator::Type _operator,
+        QVariant _value)
+    : Data(new clsConditionData) {
+    this->Data->Conditions.append({ _tableName, _col, _operator, _value });
+}
+clsCondition::clsCondition(
+        QString _leftHandTableName,
+        QString _leftHandCol,
+        enuConditionOperator::Type _operator,
+        QString _rightHandTableName,
+        QString _rightHandCol)
+    : Data(new clsConditionData) {
+    this->Data->Conditions.append({ _leftHandTableName, _leftHandCol, _operator, _rightHandTableName, _rightHandCol });
 }
 clsCondition::~clsCondition() {}
-
-bool clsCondition::isEmpty() const { return this->Data->Conditions.isEmpty(); }
-bool clsCondition::hasMany() const { return (this->Data->Conditions.length() > 1); }
-
-//clsCondition& clsCondition::andScope(const clsCondition& _cond) {
-//    return this->openPar(_cond).closePar();
-//}
-//clsCondition& clsCondition::orScope(const clsCondition& _cond) {
-//    return this->openPar(_cond).closePar();
-//}
-//clsCondition& clsCondition::xorScope(const clsCondition& _cond) {
-//    return this->openPar(_cond).closePar();
-//}
-
-//clsCondition& clsCondition::openPar(const clsCondition& _cond) {
-//    this->Data.addAggregatorCondition(this, '(', _cond);
-//    return *this;
-//}
-//clsCondition& clsCondition::closePar() {
-//    this->Data.addAggregatorCondition(this, ')');
-//    return *this;
-//}
 
 clsCondition& clsCondition::andCond(const clsCondition& _cond) {
     this->addCondition(enuPreConditionOperator::AND, _cond);
@@ -157,36 +160,18 @@ clsCondition& clsCondition::xorCond(const clsCondition& _cond) {
     this->addCondition(enuPreConditionOperator::XOR, _cond);
     return *this;
 }
-
 void clsCondition::addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition) {
-//        clsCondition& _that = _this->Data ? _this->Data->NextCondition : *_this;
-//    QString AggregatorString;
-//    switch (_aggregator) {
-//        case '(': AggregatorString = "(";   break;
-//        case ')': AggregatorString = ")";   break;
-//        case '&': AggregatorString = "AND"; break;
-//        case '|': AggregatorString = "OR";  break;
-//        case '^': AggregatorString = "XOR"; break;
-//        default:
-//            throw exQueryBuilder(QString("Invalid condition Aggregator character: '%1'").arg(_aggregator));
-//    }
-
-    if (/*(_aggregator != ')' && */_nextCondition.isEmpty())
+    if (_nextCondition.isEmpty())
         throw exQueryBuilder(QString("aggregator '%1' must follow a valid condition").arg(enuPreConditionOperator::toStr(_aggregator)));
 
     if (this->Data->Conditions.isEmpty() == false)
         this->Data->Conditions.append({ true, enuPreConditionOperator::toStr(_aggregator) });
 
     this->Data->Conditions.append(stuConditionData(_nextCondition));
-
-//    return _that;
-//    return _that.Data->NextCondition;
 }
 
-//QString clsCondition::dump() {
-//    return QString("col(%1)").arg(this->Data->Col);
-    //    return QString("firstCondition.Col(%1) col(%2)").arg(this->Data->FirstCondition->Data->Col).arg(this->Data->Col);
-//}
+bool clsCondition::isEmpty() const { return this->Data->Conditions.isEmpty(); }
+bool clsCondition::hasMany() const { return (this->Data->Conditions.length() > 1); }
 
 QString clsCondition::buildConditionString(QString _tableName, const QMap<QString, stuFilteredCol>& _filterables) const {
     if (this->Data->Conditions.isEmpty())
@@ -281,6 +266,44 @@ QString clsCondition::buildConditionString(QString _tableName, const QMap<QStrin
 
     return CondStr;
 }
+/***************************************************************************************/
+/* clsCondition ********************************************************************/
+/***************************************************************************************/
+/*clsCondition::clsCondition() :
+    clsCondition() {}
+clsCondition::clsCondition(const clsCondition& _other) :
+    clsCondition(_other) {}
+
+clsCondition::clsCondition(
+        QString _tableName,
+        QString _col,
+        enuConditionOperator::Type _operator,
+        QVariant _value) :
+    clsCondition(_foreignCol.trimmed(), _operator, _value) {}
+clsCondition::clsCondition(
+        QString _leftHandTableName,
+        QString _leftHandCol,
+        enuConditionOperator::Type _operator,
+        QString _rightHandTableName,
+        QString _rightHandCol)
+    clsCondition(_foreignCol.trimmed(), _operator, QString("{:{:{:%1").arg(_otherCol)) {
+    Q_UNUSED(_otherIsColumnName)
+}
+
+clsCondition::~clsCondition() {}
+
+clsCondition& clsCondition::andCond(const clsCondition& _cond) {
+    clsCondition::andCond(_cond);
+    return *this;
+}
+clsCondition& clsCondition::orCond(const clsCondition& _cond)  {
+    clsCondition::orCond(_cond);
+    return *this;
+}
+clsCondition& clsCondition::xorCond(const clsCondition& _cond) {
+    clsCondition::xorCond(_cond);
+    return *this;
+}*/
 /***************************************************************************************/
 /***************************************************************************************/
 /***************************************************************************************/

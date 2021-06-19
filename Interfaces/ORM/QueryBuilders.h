@@ -59,33 +59,65 @@ class clsCondition {
 public:
     clsCondition();
     clsCondition(const clsCondition& _other);
-    clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
+    clsCondition(
+            QString _col,
+            enuConditionOperator::Type _operator,
+            QVariant _value = {});
+    clsCondition(
+            QString _tableName,
+            QString _col,
+            enuConditionOperator::Type _operator,
+            QVariant _value = {});
+    clsCondition(
+            QString _leftHandTableName,
+            QString _leftHandCol,
+            enuConditionOperator::Type _operator,
+            QString _rightHandTableName,
+            QString _rightHandCol);
     ~clsCondition();
-
-    bool isEmpty() const;
-    bool hasMany() const;
-
-//    clsCondition& andScope(const clsCondition& _cond);
-//    clsCondition& orScope(const clsCondition& _cond);
-//    clsCondition& xorScope(const clsCondition& _cond);
-
-//    clsCondition& openPar(const clsCondition& _cond);
-//    clsCondition& closePar();
 
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
     clsCondition& xorCond(const clsCondition& _cond);
 
-private:
+    bool isEmpty() const;
+    bool hasMany() const;
+    QString buildConditionString(QString _tableName, const QMap<QString, stuFilteredCol>& _filterables) const;
+
+protected:
     QSharedDataPointer<clsConditionData> Data;
     void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
-    QString buildConditionString(QString _tableName, const QMap<QString, stuFilteredCol>& _filterables) const;
 
     friend clsSelectQueryData;
     friend TestQueryBuilders;
-//    QString dump();
 };
+/*
+class clsJoinCondition : public clsCondition {
+public:
+    clsJoinCondition();
+    ~clsJoinCondition();
+    clsJoinCondition(const clsJoinCondition& _other);
+//    clsJoinCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
+    clsJoinCondition(
+            QString _tableName,
+            QString _col,
+            enuConditionOperator::Type _operator,
+            QVariant _value = {});
+    clsJoinCondition(
+            QString _leftHandTableName,
+            QString _leftHandCol,
+            enuConditionOperator::Type _operator,
+            QString _rightHandTableName,
+            QString _rightHandCol);
 
+    clsJoinCondition& andCond(const clsJoinCondition& _cond);
+    clsJoinCondition& orCond(const clsJoinCondition& _cond);
+    clsJoinCondition& xorCond(const clsJoinCondition& _cond);
+
+    friend clsSelectQueryData;
+    friend TestQueryBuilders;
+};
+*/
 ///TODO: BUG: libTargomanCommon/Macros.h #(273, 287) error in LastID. Strings[0] not served
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuAggregation,
     COUNT,

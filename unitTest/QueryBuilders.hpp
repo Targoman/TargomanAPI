@@ -359,12 +359,13 @@ private slots:
                 "colC",
             }))
             .leftJoin("t2", "alias_t2",
-                clsCondition({ "colA", enuConditionOperator::Equal, "alias_t2.tA" })
-                    .andCond({ "colB", enuConditionOperator::Equal, "123"})
-                    .andCond({ "alias_t2.tB", enuConditionOperator::Equal, "456"})
+//                "alias_t2.tA=tblTest.colB AND alias_t2.tB='colB' AND t77777777.ffffff7=456"
+                clsCondition({ "t2", "tA", enuConditionOperator::Equal, "tblTest", "colB" })
+                    .andCond({ "t2", "tB", enuConditionOperator::Equal, "col B" })
+                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, "456"})
             )
-//            .where({ "colA", enuConditionOperator::Equal, 123 })
-//            .andWhere({ "colB", enuConditionOperator::GreaterEqual, "abc" })
+            .where({ "colA", enuConditionOperator::Equal, 123 })
+            .andWhere({ "t2", "tA", enuConditionOperator::GreaterEqual, "abc" })
 //            .groupBy(QStringList({ "colC", "slbStatus" }))
         ;
         QT_TRY {
