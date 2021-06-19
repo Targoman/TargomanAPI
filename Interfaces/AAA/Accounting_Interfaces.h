@@ -38,7 +38,7 @@ class intfAccountProducts: public ORM::clsTable
 public:
     intfAccountProducts(const QString& _schema,
                         const QList<ORM::clsORMField>& _exclusiveCols = {},
-                        const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                        const QList<ORM::stuRelation>& _exclusiveRelations = {},
                         const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
@@ -69,7 +69,7 @@ class intfAccountUserAssets: public ORM::clsTable
 public:
     intfAccountUserAssets(const QString& _schema,
                           const QList<ORM::clsORMField>& _exclusiveCols = {},
-                          const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                          const QList<ORM::stuRelation>& _exclusiveRelations = {},
                           const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
@@ -87,7 +87,7 @@ class intfAccountAssetUsage: public ORM::clsTable
 public:
     intfAccountAssetUsage(const QString& _schema,
                           const QList<ORM::clsORMField>& _exclusiveCols = {},
-                          const QList<ORM::stuRelation>& _exclusiveForeignKeys = {},
+                          const QList<ORM::stuRelation>& _exclusiveRelations = {},
                           const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
     QVariant ORMGET("Get user Usage on each Asset")
@@ -115,7 +115,7 @@ public:
     intfAccountPrizes(const QString& _schema,
                          const QString& _name,
                          const QList<ORM::clsORMField>& _cols,
-                         const QList<ORM::stuRelation>& _foreignKeys);
+                         const QList<ORM::stuRelation>& _relations);
 private slots:
     QVariant ORMGET("Get Active Prizes")
     bool ORMDELETE("Delete a Prizes")

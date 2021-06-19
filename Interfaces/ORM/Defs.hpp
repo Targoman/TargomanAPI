@@ -68,17 +68,30 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-///TODO: deprecated. must be delete
 struct stuRelation{
+    QString RelationName; //used by joinWith
     QString Column;
     QString ReferenceTable;
     QString ForeignColumn;
     QString RenamingPrefix;
-    bool    LeftJoin;
+    bool    IsLeftJoin;
 
-    stuRelation(QString _col, QString _referenceTable, QString _foreignCol, QString _renamingPrefix = {}, bool _isLeftJoin = false) :
-        Column(_col), ReferenceTable(_referenceTable), ForeignColumn(_foreignCol), RenamingPrefix(_renamingPrefix), LeftJoin(_isLeftJoin)
-    {;}
+    stuRelation(QString _col, QString _referenceTable, QString _foreignColumn, QString _renamingPrefix = {}, bool _isLeftJoin = false) :
+        Column(_col),
+        ReferenceTable(_referenceTable),
+        ForeignColumn(_foreignColumn),
+        RenamingPrefix(_renamingPrefix),
+        IsLeftJoin(_isLeftJoin)
+    {}
+
+    stuRelation(QString _relationName, const stuRelation& _relation) :
+        RelationName(_relationName),
+        Column(_relation.Column),
+        ReferenceTable(_relation.ReferenceTable),
+        ForeignColumn(_relation.ForeignColumn),
+        RenamingPrefix(_relation.RenamingPrefix),
+        IsLeftJoin(_relation.IsLeftJoin)
+    {}
 };
 
 TARGOMAN_DEFINE_ENUM(enuDBIndex,

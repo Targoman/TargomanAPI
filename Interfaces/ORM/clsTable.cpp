@@ -110,12 +110,12 @@ QHash<QString, clsTable*> clsTable::Registry;
 clsTable::clsTable(const QString& _schema,
                    const QString& _name,
                    const QList<clsORMField>& _cols,
-                   const QList<stuRelation>& _foreignKeys,
+                   const QList<stuRelation>& _relations,
                    const QList<stuDBIndex>& _indexes) :
     Schema(_schema),
     Name(_name),
     BaseCols(_cols),
-    ForeignKeys(_foreignKeys),
+    Relations(_relations),
     Indexes(_indexes),
     CountOfPKs(0)
 {
@@ -187,8 +187,8 @@ void clsTable::prepareFiltersList()
             this->SortableColsMap.insert(FinalColName, NewCol);
     }
 
-    foreach (auto Relation, this->ForeignKeys) {
-        clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
+    foreach (auto Relation, this->Relations) {
+        clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
         if (ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: "+this->Name+")");
 
@@ -381,7 +381,7 @@ bool clsTable::update(quint64 _actorUserID,
 
     }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
         QStringList FKs;
-        foreach(auto FK, this->ForeignKeys)
+        foreach(auto FK, this->Relations)
             if(FK.RenamingPrefix.isEmpty())
                 FKs.append(FK.Column);
 
@@ -521,7 +521,7 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
         return Result.lastInsertId();
     }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
         QStringList FKs;
-        foreach(auto FK, this->ForeignKeys)
+        foreach(auto FK, this->Relations)
             if(FK.RenamingPrefix.isEmpty())
                 FKs.append(FK.Column);
 
@@ -629,8 +629,8 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     }
 
     QSet<stuRelation> UsedJoins;
-    foreach(auto Relation, this->ForeignKeys){
-        clsTable* ForeignTable = this->Registry[Relation.ReferenceTable];
+    foreach(auto Relation, this->Relations){
+        clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
         if(ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 
@@ -754,7 +754,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     if(StatusColHasCriteria == false)
         foreach(auto FCol, this->FilterableColsMap)
             if(FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__){
-                if(FCol.Relation.LeftJoin)
+                if(FCol.Relation.IsLeftJoin)
                     SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
                 else
                     SelectItems.Where.append(QString("AND %1!='R'").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
@@ -766,7 +766,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     SelectItems.From.append(this->Schema + "." + this->Name);
     foreach(auto Join, UsedJoins){
-        SelectItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
+        SelectItems.From.append((Join.IsLeftJoin ? "LEFT JOIN " : "JOIN ")
                                 + Join.ReferenceTable
                                 + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
                                 + " ON "

@@ -121,20 +121,20 @@ public:
 /***************************************************************************************/
 /* clsCondition ************************************************************************/
 /***************************************************************************************/
-clsCondition::clsCondition()
-    : Data(new clsConditionData) {}
-clsCondition::clsCondition(const clsCondition& _other)
-    : Data(_other.Data) {}
-clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value)
-    : Data(new clsConditionData) {
+clsCondition::clsCondition() :
+    Data(new clsConditionData) {}
+clsCondition::clsCondition(const clsCondition& _other) :
+    Data(_other.Data) {}
+clsCondition::clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value) :
+    Data(new clsConditionData) {
     this->Data->Conditions.append({ _col, _operator, _value });
 }
 clsCondition::clsCondition(
         QString _tableName,
         QString _col,
         enuConditionOperator::Type _operator,
-        QVariant _value)
-    : Data(new clsConditionData) {
+        QVariant _value) :
+    Data(new clsConditionData) {
     this->Data->Conditions.append({ _tableName, _col, _operator, _value });
 }
 clsCondition::clsCondition(
@@ -142,8 +142,8 @@ clsCondition::clsCondition(
         QString _leftHandCol,
         enuConditionOperator::Type _operator,
         QString _rightHandTableName,
-        QString _rightHandCol)
-    : Data(new clsConditionData) {
+        QString _rightHandCol) :
+    Data(new clsConditionData) {
     this->Data->Conditions.append({ _leftHandTableName, _leftHandCol, _operator, _rightHandTableName, _rightHandCol });
 }
 clsCondition::~clsCondition() {}
@@ -355,26 +355,58 @@ struct stuSelectItems {
     QStringList GroupBy;
     QString     Having;
 };
+/*
+struct stuJoin {
+    bool IsWith = false;
+    enuJoinType::Type JoinType;
+//    union {
+        QString ForeignTable;
+        QString RelationName;
+//    };
+    QString Alias;
+    clsCondition On;
 
-struct stuQueryRelation {
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable) :
+        IsWith(false), JoinType(_joinType), ForeignTable(_foreignTable)
+    {}
+
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias) :
+        IsWith(false), JoinType(_joinType), ForeignTable(_foreignTable), Alias(_alias)
+    {}
+
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const clsCondition& _on) :
+        IsWith(false), JoinType(_joinType), ForeignTable(_foreignTable), On(_on)
+    {}
+
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias, const clsCondition& _on) :
+        IsWith(false), JoinType(_joinType), ForeignTable(_foreignTable), Alias(_alias), On(_on)
+    {}
+
+    stuJoin(bool _isWith, const enuJoinType::Type& _joinType, const QString& _relationName, const QString& _alias = {}) :
+        IsWith(_isWith), JoinType(_joinType), RelationName(_relationName), Alias(_alias)
+    {}
+};
+*/
+
+struct stuJoin {
     enuJoinType::Type JoinType;
     QString ForeignTable;
     QString Alias;
     clsCondition On;
 
-    stuQueryRelation(const enuJoinType::Type& _joinType, const QString& _foreignTable) :
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable) :
         JoinType(_joinType), ForeignTable(_foreignTable)
     {}
 
-    stuQueryRelation(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias) :
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias) :
         JoinType(_joinType), ForeignTable(_foreignTable), Alias(_alias)
     {}
 
-    stuQueryRelation(const enuJoinType::Type& _joinType, const QString& _foreignTable, const clsCondition& _on) :
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const clsCondition& _on) :
         JoinType(_joinType), ForeignTable(_foreignTable), On(_on)
     {}
 
-    stuQueryRelation(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias, const clsCondition& _on) :
+    stuJoin(const enuJoinType::Type& _joinType, const QString& _foreignTable, const QString& _alias, const clsCondition& _on) :
         JoinType(_joinType), ForeignTable(_foreignTable), Alias(_alias), On(_on)
     {}
 };
@@ -405,12 +437,24 @@ struct stuOrderBy {
 class clsSelectQueryData : public QSharedData
 {
 public:
-    clsSelectQueryData(const clsTable& _table) : Table(_table) {}
+    clsSelectQueryData(const clsTable& _table, const QString& _alias = {}) : Table(_table), Alias(_alias) {}
 //    clsSelectQueryData(const clsSelectQueryData& _other) : Table(_other.Table) {}
 //    ~clsSelectQueryData() {}
 
     void prepare() {
-        auto addCol = [this](const stuColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
+        /****************************************************************************/
+        QString MainTableName;
+        if (this->Alias.length()) {
+            MainTableName = this->Alias;
+            this->QueryItems.From.append(this->Table.Schema + "." + this->Table.Name + " " + this->Alias);
+        }
+        else {
+            MainTableName = this->Table.Name;
+            this->QueryItems.From.append(this->Table.Schema + "." + this->Table.Name);
+        }
+
+        /****************************************************************************/
+        auto addCol = [this, &MainTableName](const stuColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
             auto updateRename = [_col](QString _fieldString) {
                 if (_col.RenameAs.isEmpty())
                     return _fieldString;
@@ -422,34 +466,27 @@ public:
             if (_col.Condition.isEmpty()) {
                 QString AggFunction;
 
-//                KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(_col.Aggregation.isNull()));
-
                 if (NULLABLE_IS_NULL(_col.Aggregation_Simple) && NULLABLE_IS_NULL(_col.Aggregation_Conditional)) {
                    ///TODO: why using ANY_VALUE?
                    if (this->GroupByCols.size())
                        AggFunction = "ANY_VALUE(";
                 }
                 else if (NULLABLE_HAS_VALUE(_col.Aggregation_Simple)) {
-//                    KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(*_col.Aggregation_Simple));
                     if (*_col.Aggregation_Simple == enuAggregation::DISTINCT_COUNT) {
-//                        KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(*_col.Aggregation_Simple));
                         AggFunction = "COUNT(DISTINCT ";
                     }
                     else {
-//                       KZ_TRACE(QString("(%1) (%2) (%3)").arg(_col.Name).arg(*_col.Aggregation_Simple).arg(enuAggregation::options().join("|")));
                         AggFunction = enuAggregation::toStr(*_col.Aggregation_Simple);
                         AggFunction += "(";
                     }
                 }
 
-                //KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(this->Table.SelectableColsMap.size()));
                 auto Field = this->Table.SelectableColsMap[_col.Name];
 
-                //KZ_TRACE(QString("(%1) (%2)").arg(_col.Name).arg(Field.name()));
                 if (Field.name().isNull())
                    return false;
 
-                auto ColFinalName = makeColName(this->Table.Name, Field, true, _relation);
+                auto ColFinalName = makeColName(MainTableName, Field, true, _relation);
                 if (AggFunction.size()) {
                    this->QueryItems.Cols.append(AggFunction
                                                 + ColFinalName.split(' ').first()
@@ -462,12 +499,8 @@ public:
                 }
                 else
                    this->QueryItems.Cols.append(updateRename(ColFinalName));
-
-                //KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
             } //if (_col.Condition.isEmpty())
             else {
-//                KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
-
                 if (_col.TrueValue.isValid() != _col.FalseValue.isValid())
                     throw exQueryBuilder(QString("Both TrueValue and FalseValue must be empty or not empty").arg(_col.Name));
 
@@ -480,7 +513,7 @@ public:
                     AggFunction += "IF(";
                 parts.append(AggFunction);
 
-                parts.append(_col.Condition.buildConditionString(this->Table.Name, this->Table.FilterableColsMap));
+                parts.append(_col.Condition.buildConditionString(MainTableName, this->Table.FilterableColsMap));
 
                 if (_col.TrueValue.isValid())
                 {
@@ -505,31 +538,29 @@ public:
 
         if (this->RequiredCols.isEmpty())
             foreach(auto Col, this->Table.BaseCols)
-                this->QueryItems.Cols.append(makeColName(this->Table.Name, Col, true));
+                this->QueryItems.Cols.append(makeColName(MainTableName, Col, true));
         else
             foreach(stuColSpecs Col, this->RequiredCols)
                 addCol(Col);
 
-//        KZ_TRACE(QString("(%1)").arg(this->QueryItems.Cols.join("|")));
+//        QSet<stuRelation> UsedJoins;
+//        foreach (stuRelation Relation, this->Table.Relations) {
+//            clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
+//            if (ForeignTable == nullptr)
+//                throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 
-        QSet<stuRelation> UsedJoins;
-        foreach (stuRelation Relation, this->Table.ForeignKeys) {
-            clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
-            if (ForeignTable == nullptr)
-                throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
+//            bool Joined = false;
+//            if (this->RequiredCols.isEmpty())
+//                foreach(auto Col, ForeignTable->BaseCols)
+//                    this->QueryItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
+//            else
+//                foreach(auto RequiredCol, this->RequiredCols)
+//                    if (addCol(RequiredCol, Relation))
+//                        Joined = true;
 
-            bool Joined = false;
-            if (this->RequiredCols.isEmpty())
-                foreach(auto Col, ForeignTable->BaseCols)
-                    this->QueryItems.Cols.append(makeColName(this->Table.Name, Col, true, Relation));
-            else
-                foreach(auto RequiredCol, this->RequiredCols)
-                    if (addCol(RequiredCol, Relation))
-                        Joined = true;
-
-            if (Joined)
-                UsedJoins.insert(Relation);
-        }
+//            if (Joined)
+//                UsedJoins.insert(Relation);
+//        }
 
         if (this->QueryItems.Cols.isEmpty())
             throw exHTTPBadRequest("No columns found to be reported");
@@ -647,58 +678,117 @@ public:
 
 */
 
-
         /****************************************************************************/
-        this->QueryItems.From.append(this->Table.Schema + "." + this->Table.Name);
+//        foreach (auto Join, UsedJoins) {
+//            this->QueryItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
+//                + Join.ReferenceTable
+//                + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
+//                + " ON "
+//                + (Join.RenamingPrefix.size() ? "`" + Join.RenamingPrefix + "`" : Join.ReferenceTable) + "." + Join.ForeignColumn
+//                + " = "
+//                + MainTableName + "." + Join.Column
+//            );
+//        }
 
-        foreach (auto Join, UsedJoins) {
-            this->QueryItems.From.append((Join.LeftJoin ? "LEFT JOIN " : "JOIN ")
-                + Join.ReferenceTable
-                + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
-                + " ON "
-                + (Join.RenamingPrefix.size() ? "`" + Join.RenamingPrefix + "`" : Join.ReferenceTable) + "." + Join.ForeignColumn
-                + " = "
-                + this->Table.Name + "." + Join.Column
-            );
-        }
-
-        if (this->Relations.size())
+        if (this->Joins.size())
         {
-            foreach (auto Relation, this->Relations) {
-                QString j = enuJoinType::toStr(Relation.JoinType);
-                j += " JOIN ";
-                j += Relation.ForeignTable;
-                if (Relation.Alias.size())
-                    j += " `" + Relation.Alias + "`";
-                if (Relation.JoinType != enuJoinType::CROSS)
-                {
-                    j += " ON ";
-                    if (Relation.On.isEmpty())
-                    {
-                        //auto create 'on' clause
+            QSet<QString> AppliedJoins;
 
-                        if (Relation.Alias.size())
-                            j += " `" + Relation.Alias + "`";
-                        else
-                            j += Relation.ForeignTable;
-
-                        ///TODO: find primary and foreign column names
-                        throw exQueryBuilder("find primary and foreign column names");
-//                        j += "." + Relation.ForeignColumn;
-                    }
+            foreach (stuJoin Join, this->Joins) {
+                if (Join.On.isEmpty()) {
+                    if (Join.Alias.length())
+                        throw exHTTPInternalServerError(QString("Condition not defined for join on table (%1) alias (%2).").arg(Join.ForeignTable).arg(Join.Alias));
                     else
-                    {
-                        j += Relation.On.buildConditionString(
-                            Relation.Alias.size() ? Relation.Alias : this->Table.Name,
-                            this->Table.FilterableColsMap);
+                        throw exHTTPInternalServerError(QString("Condition not defined for join on table (%1).").arg(Join.ForeignTable));
+                }
+
+                //1: check duplication
+                if (Join.Alias.length())
+                {
+                    if (AppliedJoins.contains(Join.Alias))
+                        throw exHTTPInternalServerError(QString("Duplicated join on table (%1) alias (%2).").arg(Join.ForeignTable).arg(Join.Alias));
+                    AppliedJoins.insert(Join.Alias);
+                }
+                else
+                {
+                    if (AppliedJoins.contains(Join.ForeignTable))
+                        throw exHTTPInternalServerError(QString("Duplicated join on table (%1).").arg(Join.ForeignTable));
+                    AppliedJoins.insert(Join.ForeignTable);
+                }
+
+                //2: find relation definition
+                stuRelation* Relation = nullptr;
+                foreach (stuRelation Rel, this->Table.Relations)
+                {
+                    if (Rel.ReferenceTable == Join.ForeignTable) {
+                        Relation = &Rel;
+                        break;
                     }
                 }
+                if (Relation == nullptr) {
+                    throw exHTTPInternalServerError(QString("Relation to table (%1) has not been defined.").arg(Join.ForeignTable));
+                }
+
+                clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+                if (ForeignTable == nullptr)
+                    throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+
+//                Join.JoinType;
+//                Join.ForeignTable;
+//                Join.Alias;
+//                Join.On;
+
+                //3: create join clause
+                QString j = enuJoinType::toStr(Join.JoinType);
+                j += " JOIN ";
+                j += Relation->ReferenceTable;
+                if (Join.Alias.size())
+                    j += " `" + Join.Alias + "`";
+                if (Join.JoinType != enuJoinType::CROSS)
+                {
+                    j += " ON ";
+                    if (Join.IsWith)
+                    {
+                        j += Join.Alias.length() ? Join.Alias : ForeignTable->Name;
+                        j += ".";
+                        j += Relation->ForeignColumn;
+                        j += "=";
+                        j +=
+
+                    }
+                    else if (Join.On.isEmpty())
+                        throw exHTTPInternalServerError("Condition part of relation not defined.");
+
+                    j += Join.On.buildConditionString(
+                        Join.Alias.size() ? Join.Alias : MainTableName,
+                        this->Table.FilterableColsMap);
+                }
                 this->QueryItems.From.append(j);
+
+                //4: append columns
+                QSet<stuRelation> UsedJoins;
+                foreach (stuRelation Relation, this->Table.Relations) {
+                    clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
+                    if (ForeignTable == nullptr)
+                        throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
+
+                    bool Joined = false;
+                    if (this->RequiredCols.isEmpty())
+                        foreach(auto Col, ForeignTable->BaseCols)
+                            this->QueryItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
+                    else
+                        foreach(auto RequiredCol, this->RequiredCols)
+                            if (addCol(RequiredCol, Relation))
+                                Joined = true;
+
+                    if (Joined)
+                        UsedJoins.insert(Relation);
+                }
             }
         }
 
         /****************************************************************************/
-        this->QueryItems.Where = this->WhereClauses.buildConditionString(this->Table.Name, this->Table.FilterableColsMap);
+        this->QueryItems.Where = this->WhereClauses.buildConditionString(MainTableName, this->Table.FilterableColsMap);
 
         /****************************************************************************/
 //        QStringList this->QueryItems.OrderBy;
@@ -707,7 +797,7 @@ public:
 //        QStringList this->QueryItems.GroupBy;
 
         /****************************************************************************/
-        this->QueryItems.Having = this->HavingClauses.buildConditionString(this->Table.Name, this->Table.FilterableColsMap);
+        this->QueryItems.Having = this->HavingClauses.buildConditionString(MainTableName, this->Table.FilterableColsMap);
     }
 
     clsORMField colByName(const QString& _col) {
@@ -715,26 +805,27 @@ public:
     }
 
 public:
-    const clsTable&               Table;
-    QList<stuColSpecs>            RequiredCols;
-    QList<stuQueryRelation>       Relations;
-    clsCondition                  WhereClauses;
-    QList<stuOrderBy>             OrderByCols;
-    QStringList                   GroupByCols;
-    clsCondition                  HavingClauses;
+    const clsTable&      Table;
+    const QString&       Alias;
+    QList<stuColSpecs>   RequiredCols;
+    QList<stuJoin>       Joins;
+    clsCondition         WhereClauses;
+    QList<stuOrderBy>    OrderByCols;
+    QStringList          GroupByCols;
+    clsCondition         HavingClauses;
 
-    TAPI::PKsByPath_t             PksByPath;
-    quint64                       Offset = 0;
-    quint16                       Limit = 0;
+    TAPI::PKsByPath_t    PksByPath;
+    quint64              Offset = 0;
+    quint16              Limit = 0;
 
-    stuSelectItems                QueryItems;
+    stuSelectItems       QueryItems;
 };
 
 /***************************************************************************************/
 /* SelectQuery *************************************************************************/
 /***************************************************************************************/
 SelectQuery::SelectQuery(const SelectQuery& _other) : Data(_other.Data) {}
-SelectQuery::SelectQuery(const clsTable &_table) : Data(new clsSelectQueryData(_table)) {
+SelectQuery::SelectQuery(const clsTable &_table, const QString& _alias) : Data(new clsSelectQueryData(_table, _alias)) {
     if (_table.AllCols.isEmpty())
         throw exQueryBuilder("Call prepareFiltersList on table before creating a QueryBuilder");
 }
@@ -796,24 +887,98 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
 /***********************\
 |* Join                *|
 \***********************/
-SelectQuery& SelectQuery::leftJoin(const QString& _foreignTable, const clsCondition& _on) { return this->join(enuJoinType::LEFT, _foreignTable, {}, _on); }
-SelectQuery& SelectQuery::leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT, _foreignTable, _alias, _on); }
-SelectQuery& SelectQuery::rightJoin(const QString& _foreignTable, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable, {}, _on); }
-SelectQuery& SelectQuery::rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
-SelectQuery& SelectQuery::innerJoin(const QString& _foreignTable, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, {}, _on); }
-SelectQuery& SelectQuery::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
-SelectQuery& SelectQuery::crossJoin(const QString& _foreignTable, const QString& _alias) { return this->join(enuJoinType::CROSS, _foreignTable, _alias); }
 SelectQuery& SelectQuery::join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias, const clsCondition& _on)
 {
-    this->Data->Relations.append({ _joinType, _foreignTable, _alias, _on });
+    if (_foreignTable.isEmpty())
+        throw exHTTPInternalServerError("Foreign Table is empty.");
+
+    if ((_joinType == enuJoinType::CROSS) || !_on.isEmpty()) {
+        this->Data->Joins.append({ _joinType, _foreignTable, _alias, _on });
+        return *this;
+    }
+
+    //find relation definition
+    stuRelation* Relation = nullptr;
+    foreach (stuRelation Rel, this->Data->Table.Relations)
+    {
+        if (Rel.ReferenceTable == _foreignTable) {
+            Relation = &Rel;
+            break;
+        }
+    }
+    if (Relation == nullptr)
+        throw exHTTPInternalServerError(QString("Relation on table (%1) has not been defined.").arg(_foreignTable));
+
+    clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+
+    if (ForeignTable == nullptr)
+        throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+
+    clsCondition On(
+        _alias.length() ? _alias : ForeignTable->Name,
+        Relation->ForeignColumn,
+        enuConditionOperator::Equal,
+        this->Data->Alias.length() ? this->Data->Alias : this->Data->Table.Name,
+        Relation->Column
+    );
+
+    this->Data->Joins.append({ _joinType, _foreignTable, _alias, On });
     return *this;
 }
 
-//    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
-//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+SelectQuery& SelectQuery::leftJoin (const QString& _foreignTable, const clsCondition& _on)                          { return this->join(enuJoinType::LEFT,  _foreignTable, {},     _on); }
+SelectQuery& SelectQuery::leftJoin (const QString& _foreignTable, const QString& _alias, const clsCondition& _on)   { return this->join(enuJoinType::LEFT,  _foreignTable, _alias, _on); }
+SelectQuery& SelectQuery::rightJoin(const QString& _foreignTable, const clsCondition& _on)                          { return this->join(enuJoinType::RIGHT, _foreignTable, {},     _on); }
+SelectQuery& SelectQuery::rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on)   { return this->join(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
+SelectQuery& SelectQuery::innerJoin(const QString& _foreignTable, const clsCondition& _on)                          { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
+SelectQuery& SelectQuery::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on)   { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
+SelectQuery& SelectQuery::crossJoin(const QString& _foreignTable, const QString& _alias)                            { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+
+//SelectQuery& SelectQuery::leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on)
+//{
+//    return this->join(enuJoinType::LEFT, _nestedQuery.buildQueryString(), _alias, _on);
+//}
+//SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
+//SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+
+SelectQuery& SelectQuery::joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias)
+{
+    if (_relationName.isEmpty())
+        throw exHTTPInternalServerError("Relation Name is empty.");
+
+    //find relation definition
+    stuRelation* Relation = nullptr;
+    foreach (stuRelation Rel, this->Data->Table.Relations)
+    {
+        if (Rel.RelationName == _relationName) {
+            Relation = &Rel;
+            break;
+        }
+    }
+    if (Relation == nullptr)
+        throw exHTTPInternalServerError(QString("Relation with name (%1) has not been defined.").arg(_relationName));
+
+    clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+
+    if (ForeignTable == nullptr)
+        throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+
+    clsCondition On(
+        _alias.length() ? _alias : ForeignTable->Name,
+        Relation->ForeignColumn,
+        enuConditionOperator::Equal,
+        this->Data->Alias.length() ? this->Data->Alias : this->Data->Table.Name,
+        Relation->Column
+    );
+
+    this->join(_joinType, Relation->ReferenceTable, _alias, On);
+    return *this;
+}
+SelectQuery& SelectQuery::leftJoinWith (const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::LEFT,  _relationName, _alias); }
+SelectQuery& SelectQuery::rightJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::RIGHT, _relationName, _alias); }
+SelectQuery& SelectQuery::innerJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::INNER, _relationName, _alias); }
 
 /***********************\
 |* Where               *|

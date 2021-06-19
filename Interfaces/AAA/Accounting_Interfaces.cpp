@@ -143,7 +143,7 @@ quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 intfAccountProducts::intfAccountProducts(
         const QString& _schema,
         const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<ORM::stuRelation>& _exclusiveRelations,
         const QList<ORM::stuDBIndex>& _exclusiveIndexes
     )
     : clsTable(_schema,
@@ -172,7 +172,7 @@ intfAccountProducts::intfAccountProducts(
         ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
             { tblAccountProductsBase::prdCreatedBy_usrID, ORM_JOIN_CREATOR },
             { tblAccountProductsBase::prdUpdatedBy_usrID, ORM_JOIN_UPDATER },
-        }) + _exclusiveForeignKeys,
+        }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
             { { tblAccountProductsBase::prdCode, tblAccountProductsBase::prdStatus }, enuDBIndex::Unique },
             { tblAccountProductsBase::prdValidFromDate },
@@ -254,10 +254,10 @@ intfAccountSaleables::intfAccountSaleables(const QString& _schema)
             { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
         },
-        {///< Col                                             Reference Table                           ForeignCol          Rename     LeftJoin
-            { tblAccountSaleablesBase::slb_prdID,             R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID,    ORM_JOIN_CREATOR },
-            { tblAccountSaleablesBase::slbUpdatedBy_usrID,    ORM_JOIN_UPDATER },
+        {///< Col                                          Reference Table                           ForeignCol                    Rename LeftJoin
+            { tblAccountSaleablesBase::slb_prdID,          R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID, ORM_JOIN_CREATOR },
+            { tblAccountSaleablesBase::slbUpdatedBy_usrID, ORM_JOIN_UPDATER },
         },
         {
             { { tblAccountSaleablesBase::slbCode, tblAccountSaleablesBase::slbStatus }, enuDBIndex::Unique },
@@ -320,9 +320,10 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
 intfAccountUserAssets::intfAccountUserAssets(
         const QString& _schema,
         const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<ORM::stuRelation>& _exclusiveRelations,
         const QList<stuDBIndex>& _exclusiveIndexes)
-    : clsTable(_schema,
+    : clsTable(
+        _schema,
         tblAccountUserAssetsBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
@@ -342,7 +343,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uas_cpnID, R(_schema, tblAccountCouponsBase::Name), tblAccountCouponsBase::cpnID, "",       true },
             //Voucher is not accessible as it is in another schema
             //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
-        }) + _exclusiveForeignKeys,
+        }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
             { { tblAccountUserAssetsBase::uas_usrID, tblAccountUserAssetsBase::uasVoucherItemUUID, tblAccountUserAssetsBase::uasStatus }, enuDBIndex::Unique },
             { tblAccountUserAssetsBase::uas_usrID },
@@ -377,7 +378,7 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL)
 intfAccountAssetUsage::intfAccountAssetUsage(
         const QString& _schema,
         const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveForeignKeys,
+        const QList<ORM::stuRelation>& _exclusiveRelations,
         const QList<stuDBIndex>& _exclusiveIndexes)
     : clsTable(_schema,
         tblAccountAssetUsageBase::Name,
@@ -388,7 +389,7 @@ intfAccountAssetUsage::intfAccountAssetUsage(
         QList<ORM::stuRelation>({
         ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
             { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
-        }) + _exclusiveForeignKeys,
+        }) + _exclusiveRelations,
         _exclusiveIndexes
     )
 {;}
@@ -494,8 +495,8 @@ quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 intfAccountPrizes::intfAccountPrizes(const QString& _schema,
                                      const QString& _name,
                                      const QList<ORM::clsORMField>& _cols,
-                                     const QList<ORM::stuRelation>& _foreignKeys) :
-  clsTable(_schema, _name, _cols, _foreignKeys)
+                                     const QList<ORM::stuRelation>& _relations) :
+  clsTable(_schema, _name, _cols, _relations)
 {;}
 
 /******************************************************************/

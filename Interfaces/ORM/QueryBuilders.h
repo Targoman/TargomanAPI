@@ -37,7 +37,7 @@ namespace ORM {
 class clsTable;
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 
-TARGOMAN_DEFINE_ENHANCED_ENUM(enuPreConditionOperator,
+TARGOMAN_DEFINE_ENUM(enuPreConditionOperator,
                      AND,
                      OR,
                      XOR)
@@ -118,8 +118,8 @@ public:
     friend TestQueryBuilders;
 };
 */
-///TODO: BUG: libTargomanCommon/Macros.h #(273, 287) error in LastID. Strings[0] not served
-TARGOMAN_DEFINE_ENHANCED_ENUM(enuAggregation,
+
+TARGOMAN_DEFINE_ENUM(enuAggregation,
     COUNT,
     DISTINCT_COUNT,
     SUM,
@@ -127,14 +127,14 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuAggregation,
     MAX,
     MIN)
 
-TARGOMAN_DEFINE_ENHANCED_ENUM(enuConditionalAggregation,
+TARGOMAN_DEFINE_ENUM(enuConditionalAggregation,
     COUNTIF,
     SUMIF,
     AVGIF,
     MAXIF,
     MINIF)
 
-TARGOMAN_DEFINE_ENHANCED_ENUM(enuJoinType,
+TARGOMAN_DEFINE_ENUM(enuJoinType,
     LEFT,
     INNER,
     RIGHT,
@@ -148,10 +148,8 @@ class SelectQuery
 {
 public:
     SelectQuery(const SelectQuery& _other);
-    SelectQuery(const clsTable& _table);
+    SelectQuery(const clsTable& _table, const QString& _alias = {});
     ~SelectQuery();
-
-    SelectQuery& alias(const QString& _alias);
 
     SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
@@ -168,6 +166,8 @@ public:
 //    SelectQuery& from(const QString _table, const QString& _renameAs = {});
 //    SelectQuery& from(const SelectQuery& _nestedQuery, const QString _alias);
 
+    SelectQuery& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
+
     SelectQuery& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
     SelectQuery& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     SelectQuery& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
@@ -175,13 +175,17 @@ public:
     SelectQuery& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
     SelectQuery& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     SelectQuery& crossJoin(const QString& _foreignTable, const QString& _alias = {});
-    SelectQuery& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
 //    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 //    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
 //    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+
+    SelectQuery& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
+    SelectQuery& leftJoinWith(const QString& _relationName, const QString& _alias = {});
+    SelectQuery& rightJoinWith(const QString& _relationName, const QString& _alias = {});
+    SelectQuery& innerJoinWith(const QString& _relationName, const QString& _alias = {});
 
     SelectQuery& where(const clsCondition& _condition);
     SelectQuery& andWhere(const clsCondition& _condition);

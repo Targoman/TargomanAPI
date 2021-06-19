@@ -54,7 +54,7 @@ public:
     clsTable(const QString& _schema,
              const QString& _name,
              const QList<clsORMField>& _cols,
-             const QList<stuRelation>& _foreignKeys = {},
+             const QList<stuRelation>& _relations = {},
              const QList<stuDBIndex>& _indexes = {});
 
     QList<clsORMField> filterItems(qhttp::THttpMethod _method);
@@ -147,7 +147,7 @@ protected:
     QMap<QString, clsORMField> SortableColsMap;
     QList<clsORMField> AllCols;
     QList<clsORMField> BaseCols;
-    QList<stuRelation> ForeignKeys;
+    QList<stuRelation> Relations;
     QList<stuDBIndex> Indexes;
     quint8  CountOfPKs;
     QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
