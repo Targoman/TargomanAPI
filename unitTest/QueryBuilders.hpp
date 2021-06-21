@@ -27,17 +27,18 @@ public:
             "test",
             "t1",
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "colA", ORM_PRIMARY_KEY32 },
-                { "colB", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
-                { "colC", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
-                { "colD", S(QString),                      QFV,                       QRequired,  UPOwner },
-                { "colE", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
-                { "colF", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
-                { "colG", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
-                { "colH", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colA1", ORM_PRIMARY_KEY32 },
+                { "colB1", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
+                { "colC1", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
+                { "colD1", S(QString),                      QFV,                       QRequired,  UPOwner },
+                { "colE1", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
+                { "colF1", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
+                { "colG1", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colH1", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
             },
             {///< Col     Reference Table  ForeignCol  Rename  LeftJoin
-                { "rel_a", { "colC", R("test", "t2"), "tcolID" } },
+//                           { "colC1", R("test", "t2"), "colA2" },
+                { "rel_a", { "colC1", R("test", "t2"), "colA2" } },
             }
         )
     {}
@@ -66,14 +67,14 @@ public:
             "test",
             "t2",
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "tcolA", ORM_PRIMARY_KEY32 },
-                { "tcolB", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
-                { "tcolC", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
-                { "tcolD", S(QString),                      QFV,                       QRequired,  UPOwner },
-                { "tcolE", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
-                { "tcolF", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
-                { "tcolG", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
-                { "tcolH", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colA2", ORM_PRIMARY_KEY32 },
+                { "colB2", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
+                { "colC2", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
+                { "colD2", S(QString),                      QFV,                       QRequired,  UPOwner },
+                { "colE2", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
+                { "colF2", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
+                { "colG2", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colH2", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
             }
         )
     {}
@@ -185,17 +186,17 @@ class TestQueryBuilders: public QObject
         optional<quint32> a;
         *a = 1234;
 
-        //    std::optional<enuAggregation::Type> z1;
-        //    z1 = enuAggregation::MAX;
-        //    *zzz = enuAggregation::MAX;
+//            std::optional<enuAggregation::Type> z1;
+//            z1 = enuAggregation::MAX;
+//            *zzz = enuAggregation::MAX;
 
-        //    NULLABLE_TYPE(enuAggregation::Type) a1, a2;
-        //    TAPI::tmplNullable<enuAggregation::Type> a1, a2;
-        //    enuAggregation::Type a3 = a1;
-        //    std::optional<enuAggregation::Type> a1, a2;
-        //    if (a1 < a2)
-        //    {
-        //    }
+//            NULLABLE_TYPE(enuAggregation::Type) a1, a2;
+//            TAPI::tmplNullable<enuAggregation::Type> a1, a2;
+//            enuAggregation::Type a3 = a1;
+//            std::optional<enuAggregation::Type> a1, a2;
+//            if (a1 < a2)
+//            {
+//            }
     }
 
     void testQSharedPointer()
@@ -235,23 +236,23 @@ private slots:
 //        QVERIFY_TRY(clsCondition().openPar(clsCondition({ "cola",  enuConditionOperator::Less, 123 })).isEmpty() == false);
 //    };
     void condition4() {
-        QVERIFY_TRY(clsCondition().andCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().andCond(clsCondition("colA1", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
     void condition5() {
-        QVERIFY_TRY(clsCondition().orCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().orCond(clsCondition("colA1", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
     void condition6() {
-        QVERIFY_TRY(clsCondition().xorCond(clsCondition("colA", enuConditionOperator::Equal, 123)).isEmpty() == false);
+        QVERIFY_TRY(clsCondition().xorCond(clsCondition("colA1", enuConditionOperator::Equal, 123)).isEmpty() == false);
     };
     void condition7() {
-        QVERIFY_TRY(clsCondition("colA", enuConditionOperator::Equal, 123)
-                    .orCond({ "colB", enuConditionOperator::Equal, 123 })
+        QVERIFY_TRY(clsCondition("colA1", enuConditionOperator::Equal, 123)
+                    .orCond({ "colB1", enuConditionOperator::Equal, 123 })
                     .andCond(
-                        clsCondition("colC", enuConditionOperator::Equal, 123)
-                        .orCond({ "colD", enuConditionOperator::Equal, 123 })
+                        clsCondition("colC1", enuConditionOperator::Equal, 123)
+                        .orCond({ "colD1", enuConditionOperator::Equal, 123 })
                         .xorCond(
-                            clsCondition("colE", enuConditionOperator::Equal, 123)
-                            .orCond({ "colF", enuConditionOperator::Equal, 123 })
+                            clsCondition("colE1", enuConditionOperator::Equal, 123)
+                            .orCond({ "colF1", enuConditionOperator::Equal, 123 })
                         )
                     )
                     .isEmpty() == false);
@@ -260,22 +261,24 @@ private slots:
     void condition_buildString()
     {
         QT_TRY {
-            clsCondition cnd = clsCondition({ "colA", enuConditionOperator::Equal, 101 })
-                .andCond({ "colB", enuConditionOperator::NotNull })
-                .orCond({ "colC", enuConditionOperator::Equal, 102 })
-                .andCond(
-                    clsCondition("colD", enuConditionOperator::Equal, 103)
-                    .orCond({ "colE", enuConditionOperator::Equal, 104 })
-                    .xorCond(
-                        clsCondition("colF", enuConditionOperator::Equal, 105)
-                        .orCond({ "colG", enuConditionOperator::Equal, 106 })
+            clsCondition cnd =
+                clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
+                    .andCond({ "colB1", enuConditionOperator::NotNull })
+                    .orCond({ "colC1", enuConditionOperator::Equal, 102 })
+                    .andCond(
+                        clsCondition("colD1", enuConditionOperator::Equal, 103)
+                            .orCond({ "colE1", enuConditionOperator::Equal, 104 })
+                            .xorCond(
+                                clsCondition("colF1", enuConditionOperator::Equal, 105)
+                                    .orCond({ "colG1", enuConditionOperator::Equal, 106 })
                     )
                 )
-                .orCond({ "colH", enuConditionOperator::Equal, 107 })
+                .orCond({ "colH1", enuConditionOperator::Equal, 107 })
             ;
 
             QCOMPARE(cnd.buildConditionString(t1.Name, t1.FilterableColsMap),
-                     "t1.colA=101 AND t1.colB IS NOT NULL OR t1.colC=102 AND (t1.colD=103 OR t1.colE=104 XOR (t1.colF=105 OR t1.colG=106)) OR t1.colH=107");
+                     "t1.colA1=101 AND t1.colB1 IS NOT NULL OR t1.colC1=102 AND (t1.colD1=103 OR t1.colE1=104 XOR (t1.colF1=105 OR t1.colG1=106)) OR t1.colH1=107"
+                     );
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -285,7 +288,7 @@ private slots:
         QT_TRY {
             SelectQuery query = SelectQuery(t1);
             QString qry = query.buildQueryString();
-            QCOMPARE(qry, "SELECT t1.colA,t1.colB,t1.colC,t1.colD,t1.colE,t1.colF,t1.colG,t1.colH,t1.CURRENT_DATETIME,test.t2.tcolA,test.t2.tcolB,test.t2.tcolC,test.t2.tcolD,test.t2.tcolE,test.t2.tcolF,test.t2.tcolG,test.t2.tcolH,test.t2.CURRENT_DATETIME FROM test.t1");
+            QCOMPARE(qry, "SELECT t1.colA1,t1.colB1,t1.colC1,t1.colD1,t1.colE1,t1.colF1,t1.colG1,t1.colH1,t1.CURRENT_DATETIME FROM test.t1");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -295,14 +298,14 @@ private slots:
         QT_TRY {
             SelectQuery query = SelectQuery(t1)
                 .addCols(QStringList({
-                    "colA",
-                    "colB",
-                    "colC",
+                    "colA1",
+                    "colB1",
+                    "colC1",
                 }))
-                .addCol("colD", "ren_colD")
+                .addCol("colD1", "ren_colD1")
             ;
             QString qry = query.buildQueryString();
-            QCOMPARE(qry, "SELECT t1.colA,t1.colB,t1.colC,t1.colD AS ren_colD FROM test.t1");
+            QCOMPARE(qry, "SELECT t1.colA1,t1.colB1,t1.colC1,t1.colD1 AS ren_colD1 FROM test.t1");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -312,111 +315,138 @@ private slots:
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
                 .addCols(QStringList({
-                    "colA",
-                    "colB",
-                    "colC",
+                    "colA1",
+                    "colB1",
+                    "colC1",
                 }))
-                .addCol("colD", "ren_colD")
+                .addCol("colD1", "ren_colD1")
             ;
             QString qry = query.buildQueryString();
-            QCOMPARE(qry, "SELECT alias_t1.colA,alias_t1.colB,alias_t1.colC,alias_t1.colD AS ren_colD FROM test.t1 alias_t1");
+            QCOMPARE(qry, "SELECT alias_t1.colA1,alias_t1.colB1,alias_t1.colC1,alias_t1.colD1 AS ren_colD1 FROM test.t1 alias_t1");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
     void queryString_aggregateCols() {
-        SelectQuery query = SelectQuery(t1)
-//            .addCols(QStringList({
-//                "colA",
-//                "colB",
-//                "colC",
-//            }))
-            .addCol(enuAggregation::AVG, "colA", "avg_colA")
-            .addCol(enuAggregation::SUM, "colB", "sum_colB")
-//            .leftJoin("t2",
-//                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
-//                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
-//            )
-//            .where({ "colA", enuConditionOperator::Equal, 123 })
-//            .andWhere({ "colB", enuConditionOperator::GreaterEqual, "abc" })
-//            .groupBy(QStringList({ "colC", "slbStatus" }))
-        ;
         QT_TRY {
+            SelectQuery query = SelectQuery(t1)
+//                .addCols(QStringList({
+//                    "colA1",
+//                    "colB1",
+//                    "colC1",
+//                }))
+                .addCol(enuAggregation::AVG, "colA1", "avg_colA1")
+                .addCol(enuAggregation::SUM, "colB1", "sum_colB1")
+//                .leftJoin("t2",
+//                    clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
+//                        .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
+//                )
+//                .where({ "colA1", enuConditionOperator::Equal, 123 })
+//                .andWhere({ "colB1", enuConditionOperator::GreaterEqual, "abc" })
+//                .groupBy(QStringList({ "colC1", "slbStatus" }))
+            ;
             QString qry = query.buildQueryString();
-            QCOMPARE(qry, "SELECT AVG(t1.colA) AS avg_colA,SUM(t1.colB) AS sum_colB FROM test.t1");
+            QCOMPARE(qry, "SELECT AVG(t1.colA1) AS avg_colA1,SUM(t1.colB1) AS sum_colB1 FROM test.t1");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
     void queryString_aggregateConditionalCols() {
-        SelectQuery query = SelectQuery(t1)
-//            .addCols(QStringList({
-//                "colA",
-//                "colB",
-//                "colC",
-//            }))
-//            .addCol(enuAggregation::AVG, "colA", "avg_colA")
-//            .addCol(enuConditionalAggregation::COUNTIF,
-//                    { "colB", enuConditionOperator::Equal, 123 },
-//                    "countif_colB"
-//                    )
-            .addCol(enuConditionalAggregation::COUNTIF,
-                    { "colB", enuConditionOperator::Equal, 123 },
-                    "countif_colB"
-                    )
-            .addCol(enuConditionalAggregation::COUNTIF,
-                    clsCondition("colB", enuConditionOperator::Equal, 123)
-                        .andCond({ "colC", enuConditionOperator::Like, "test it"})
-                        .xorCond(
-                            clsCondition("colF", enuConditionOperator::Equal, 105)
-                            .orCond({ "colG", enuConditionOperator::Equal, 106 })
-                        )
-                    ,
-                    "countif_colB"
-                    )
-            .addCol(enuConditionalAggregation::SUMIF,
-                    { "colC", enuConditionOperator::Greater, 123 },
-                    10,
-                    20,
-                    "sumif_colC"
-                    )
-//            .leftJoin("t2",
-//                clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
-//                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
-//            )
-//            .where({ "colA", enuConditionOperator::Equal, 123 })
-//            .andWhere({ "colB", enuConditionOperator::GreaterEqual, "abc" })
-//            .groupBy(QStringList({ "colC", "slbStatus" }))
-        ;
         QT_TRY {
+            SelectQuery query = SelectQuery(t1)
+                .addCols(QStringList({
+                    "colA1",
+//                    "colB1",
+//                    "colC1",
+                }))
+                .addCol("colB1", "alias_colB1")
+//                .addCol(enuAggregation::AVG, "colA1", "avg_colA1")
+//                .addCol(enuConditionalAggregation::COUNTIF,
+//                        { "colB1", enuConditionOperator::Equal, 123 },
+//                        "countif_colB"
+//                        )
+//                .addCol(enuConditionalAggregation::COUNTIF,
+//                        { "alias_colB1", enuConditionOperator::Equal, 456 },
+//                        "countif_colB1"
+//                        )
+                .addCol(enuConditionalAggregation::COUNTIF,
+                        clsCondition("colB1", enuConditionOperator::Equal, 123)
+                            .andCond({ "colC1", enuConditionOperator::Like, "test it"})
+                            .xorCond(
+                                clsCondition("colF1", enuConditionOperator::Equal, 105)
+                                .orCond({ "colG1", enuConditionOperator::Equal, 106 })
+                            )
+                        ,
+                        "countif_colB1"
+                        )
+                .addCol(enuConditionalAggregation::SUMIF,
+                        clsCondition({ "colC1", enuConditionOperator::Greater, 123 })
+                            .andCond({ "t2", "colD2", enuConditionOperator::Equal, 456}),
+                        10,
+                        20,
+                        "sumif__t1_colC1__t2_colD2"
+                        )
+
+                .leftJoin(R("test", "t2"))
+                .addCol(enuAggregation::SUM, "colA2", "sum_colA2")
+
+//                .leftJoin(R("test", "t2"), "alias_t2")
+//                .addCol(enuAggregation::SUM, "alias_t2.colA2", "sum_alias_colA2")
+
+//                    clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
+//                        .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
+//                )
+//                .where({ "colA1", enuConditionOperator::Equal, 123 })
+//                .andWhere({ "colB1", enuConditionOperator::GreaterEqual, "abc" })
+//                .groupBy(QStringList({ "colC1", "slbStatus" }))
+            ;
+            QString qry = query.buildQueryString({}, false, false, 16);
+            qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+private:
+    void queryString_autojoin_by_col() {
+        QT_TRY {
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                    "colB1",
+                    "colA2",
+                }))
+            ;
             QString qry = query.buildQueryString();
-            QCOMPARE(qry, "SELECT COUNT(t1.colB=123) AS countif_colB,COUNT(t1.colB=123 AND t1.colC LIKE 'test it' XOR (t1.colF=105 OR t1.colG=106)) AS countif_colB,SUM(IF(t1.colC>123,10,20)) AS sumif_colC FROM test.t1");
+            QCOMPARE(qry, "QQQQQQQQQQQQ");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
     void queryString_join() {
-        SelectQuery query = SelectQuery(t1, "alias_t1")
-            .addCols(QStringList({
-                "colA",
-                "colB",
-                "colC",
-            }))
-            .leftJoinWith("rel_a", "alias_t2")
-            .leftJoin("t2", "alias_1_t2")
-            .leftJoin("t2", "alias_2_t2",
-                clsCondition({ "alias_2_t2", "tcolA", enuConditionOperator::Equal, "t1", "colB" })
-                    .andCond({ "alias_2_t2", "tB", enuConditionOperator::Equal, "test string" })
-//                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, "456"})
-            )
-            .where({ "colA", enuConditionOperator::Equal, 123 })
-            .andWhere({ "t2", "tA", enuConditionOperator::GreaterEqual, "abc" })
-//            .groupBy(QStringList({ "colC", "slbStatus" }))
-        ;
         QT_TRY {
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                    "colB1",
+                    "colC1",
+                    "colA2",
+                }))
+                .leftJoinWith("rel_a", "alias_t2")
+                .leftJoin("t2")
+                .leftJoin("t2", "alias_1_t2")
+                .leftJoin("t2", "alias_2_t2",
+                    clsCondition({ "alias_2_t2", "colA2", enuConditionOperator::Equal, "t1", "colB" })
+                        .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
+//                        .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, "456"})
+                )
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
+//                .groupBy(QStringList({ "colC1", "slbStatus" }))
+            ;
             QString qry = query.buildQueryString();
             QCOMPARE(qry, "QQQQQQQQQQQQ");
         } QT_CATCH (const std::exception &e) {

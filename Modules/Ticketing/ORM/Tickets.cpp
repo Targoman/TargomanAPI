@@ -83,8 +83,8 @@ Tickets::Tickets() :
                 {tblTickets::tktInReply_tktID,    R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true},
                 {tblTickets::tktTarget_usrID,     R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true},
                 {tblTickets::tktID,               R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_", true},
-                {tblTickets::tktCreatedBy_usrID,  ORM_JOIN_CREATOR},
-                {tblTickets::tktUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
               })
 {
 }

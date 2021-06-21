@@ -170,8 +170,8 @@ intfAccountProducts::intfAccountProducts(
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
         ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
-            { tblAccountProductsBase::prdCreatedBy_usrID, ORM_JOIN_CREATOR },
-            { tblAccountProductsBase::prdUpdatedBy_usrID, ORM_JOIN_UPDATER },
+            ORM_RELATION_OF_CREATOR(tblAccountProductsBase::prdCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
         }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
             { { tblAccountProductsBase::prdCode, tblAccountProductsBase::prdStatus }, enuDBIndex::Unique },
@@ -256,8 +256,8 @@ intfAccountSaleables::intfAccountSaleables(const QString& _schema)
         },
         {///< Col                                          Reference Table                           ForeignCol                    Rename LeftJoin
             { tblAccountSaleablesBase::slb_prdID,          R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID, ORM_JOIN_CREATOR },
-            { tblAccountSaleablesBase::slbUpdatedBy_usrID, ORM_JOIN_UPDATER },
+            ORM_RELATION_OF_CREATOR(tblAccountSaleablesBase::slbCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblAccountSaleablesBase::slbUpdatedBy_usrID),
         },
         {
             { { tblAccountSaleablesBase::slbCode, tblAccountSaleablesBase::slbStatus }, enuDBIndex::Unique },
@@ -447,8 +447,8 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnUpdatedBy_usrID,     ORM_UPDATED_BY},
         },
         {///< Col                                       Reference Table                         ForeignCol          Rename     LeftJoin
-            {tblAccountCouponsBase::cpnCreatedBy_usrID, ORM_JOIN_CREATOR},
-            {tblAccountCouponsBase::cpnUpdatedBy_usrID, ORM_JOIN_UPDATER},
+            ORM_RELATION_OF_CREATOR(tblAccountCouponsBase::cpnCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblAccountCouponsBase::cpnUpdatedBy_usrID),
         },
         {
             { { tblAccountCouponsBase::cpnCode, tblAccountCouponsBase::cpnStatus }, enuDBIndex::Unique },

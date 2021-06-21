@@ -78,8 +78,8 @@ Roles::Roles() :
               },
               { ///< Col                       Reference Table                ForeignCol        Rename      LeftJoin
                 {tblRoles::rolParent_rolID,    R(AAASchema,tblRoles::Name),   tblRoles::rolID,  "Parent_",  true},
-                {tblRoles::rolCreatedBy_usrID, ORM_JOIN_CREATOR},
-                {tblRoles::rolUpdatedBy_usrID, ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblRoles::rolCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblRoles::rolUpdatedBy_usrID),
               })
 {
 }

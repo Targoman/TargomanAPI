@@ -64,15 +64,15 @@ public:
             enuConditionOperator::Type _operator,
             QVariant _value = {});
     clsCondition(
-            QString _tableName,
+            QString _tableNameOrAlias,
             QString _col,
             enuConditionOperator::Type _operator,
             QVariant _value = {});
     clsCondition(
-            QString _leftHandTableName,
+            QString _leftHandTableNameOrAlias,
             QString _leftHandCol,
             enuConditionOperator::Type _operator,
-            QString _rightHandTableName,
+            QString _rightHandTableNameOrAlias,
             QString _rightHandCol);
     ~clsCondition();
 
@@ -82,7 +82,12 @@ public:
 
     bool isEmpty() const;
     bool hasMany() const;
-    QString buildConditionString(QString _tableName, const QMap<QString, stuFilteredCol>& _filterables) const;
+
+    QString buildConditionString(
+            const QString &_tableNameOrAlias,
+            const QMap<QString, stuFilteredCol>& _filterables,
+            bool _allowUseColumnAlias = false,
+            quint8 _prettifierJustifyLen = 0) const;
 
 protected:
     QSharedDataPointer<clsConditionData> Data;
@@ -151,7 +156,7 @@ public:
     SelectQuery(const clsTable& _table, const QString& _alias = {});
     ~SelectQuery();
 
-    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
@@ -213,7 +218,7 @@ public:
 
 private:
     QSharedDataPointer<clsSelectQueryData> Data;
-    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false);
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 

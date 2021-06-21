@@ -156,8 +156,8 @@ User::User() : clsTable(AAASchema,
                          { ///< Col                      Reference Table                        ForeignCol    Rename     LeftJoin
                            {tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},
                            {tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  "uei_usrID",  "",          true},
-                           {tblUser::usrCreatedBy_usrID, ORM_JOIN_CREATOR},
-                           {tblUser::usrUpdatedBy_usrID, ORM_JOIN_UPDATER},
+                           ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
+                           ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
                          })
 {;}
 

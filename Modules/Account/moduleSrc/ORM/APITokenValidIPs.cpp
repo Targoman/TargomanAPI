@@ -83,8 +83,8 @@ APITokenValidIPs::APITokenValidIPs() :
               },
               { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin
                 {tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID},
-                {tblAPITokenValidIPs::tviCreatedBy_usrID, ORM_JOIN_CREATOR},
-                {tblAPITokenValidIPs::tviUpdatedBy_usrID, ORM_JOIN_UPDATER}
+                ORM_RELATION_OF_CREATOR(tblAPITokenValidIPs::tviCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblAPITokenValidIPs::tviUpdatedBy_usrID),
               })
 {
 }

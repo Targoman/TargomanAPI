@@ -60,8 +60,8 @@ Bin::Bin() :
               },
               { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
                 {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},
-                {tblBin::binCreatedBy_usrID,    ORM_JOIN_CREATOR},
-                {tblBin::binUpdatedBy_usrID,    ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblBin::binCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblBin::binUpdatedBy_usrID),
               })
 {
 }
@@ -75,7 +75,7 @@ Banners::Banners() :
                 {tblBanners::bnrUpdatedBy_usrID,  ORM_UPDATED_BY},
               },
               {///< Col                           Reference Table             ForeignCol      Rename      LeftJoin
-                {tblBanners::bnrUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_UPDATER(tblBanners::bnrUpdatedBy_usrID),
               }
               )
 {

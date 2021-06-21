@@ -102,9 +102,9 @@ OfflinePayments::OfflinePayments() :
                 {tblOfflinePayments::ofpStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPStatus},
               },
               { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                {tblOfflinePayments::ofpCreatedBy_usrID, ORM_JOIN_CREATOR},
-                {tblOfflinePayments::ofpUpdatedBy_usrID, ORM_JOIN_UPDATER},
-                {tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+                { tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+                ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
               })
 {
 }

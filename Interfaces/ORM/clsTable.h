@@ -142,9 +142,9 @@ protected:
     QString Schema;
     QString Name;
     QString Domain;
-    QMap<QString, clsORMField> SelectableColsMap;
+    QMap<QString, stuFilteredCol /*clsORMField*/> SelectableColsMap;
     QMap<QString, stuFilteredCol> FilterableColsMap;
-    QMap<QString, clsORMField> SortableColsMap;
+    QMap<QString, stuFilteredCol /*clsORMField*/> SortableColsMap;
     QList<clsORMField> AllCols;
     QList<clsORMField> BaseCols;
     QList<stuRelation> Relations;

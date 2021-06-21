@@ -180,11 +180,14 @@ void clsTable::prepareFiltersList()
         QString FinalColName = this->finalColName(Col);
         clsORMField NewCol = clsORMField(Col, FinalColName);
         this->AllCols.append(NewCol);
-        this->SelectableColsMap.insert(FinalColName, NewCol);
+
+        stuFilteredCol filteredCol = stuFilteredCol(NewCol);
+
+        this->SelectableColsMap.insert(FinalColName, filteredCol);
         if (Col.isFilterable())
-            this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol));
+            this->FilterableColsMap.insert(FinalColName, filteredCol);
         if (Col.isSortable())
-            this->SortableColsMap.insert(FinalColName, NewCol);
+            this->SortableColsMap.insert(FinalColName, filteredCol);
     }
 
     foreach (auto Relation, this->Relations) {
@@ -196,11 +199,14 @@ void clsTable::prepareFiltersList()
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
             clsORMField NewCol = clsORMField(Col, FinalColName);
             this->AllCols.append(NewCol);
-            this->SelectableColsMap.insert(FinalColName, NewCol);
+
+            stuFilteredCol filteredCol = stuFilteredCol(NewCol, Relation);
+
+            this->SelectableColsMap.insert(FinalColName, filteredCol);
             if (Col.isFilterable())
-                this->FilterableColsMap.insert(FinalColName, stuFilteredCol(NewCol, Relation));
+                this->FilterableColsMap.insert(FinalColName, filteredCol);
             if (Col.isSortable())
-                this->SortableColsMap.insert(FinalColName, NewCol);
+                this->SortableColsMap.insert(FinalColName, filteredCol);
         }
     }
 
@@ -337,13 +343,13 @@ bool clsTable::update(quint64 _actorUserID,
     for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter) {
         if(InfoIter->isValid() == false)
             continue;
-        clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
-        if(Col.isReadOnly())
+        stuFilteredCol& filteredCol = this->SelectableColsMap[InfoIter.key()];
+        if (filteredCol.Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        Col.validate(InfoIter.value());
-        UpdateCommands.append(makeColName(this->Name, Col) + "=?");
-        Values.append(Col.toDB(InfoIter.value()));
+        filteredCol.Col.validate(InfoIter.value());
+        UpdateCommands.append(makeColName(this->Name, filteredCol.Col) + "=?");
+        Values.append(filteredCol.Col.toDB(InfoIter.value()));
     }
 
     foreach(auto FCol, this->FilterableColsMap)
@@ -357,10 +363,10 @@ bool clsTable::update(quint64 _actorUserID,
     for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
         if(FilterIter->isValid() == false)
             continue;
-        clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
-        if(Column.isFilterable() == false)
+        const stuFilteredCol& filteredCol = this->SelectableColsMap[FilterIter.key()];
+        if (filteredCol.Col.isFilterable() == false)
             throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-        Filters.append(makeColName(this->Name, Column) + "=?");
+        Filters.append(makeColName(this->Name, filteredCol.Col) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -419,8 +425,8 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
     for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); ++FilterIter){
         if(FilterIter->isValid() == false)
             continue;
-        const clsORMField& Column = this->SelectableColsMap[FilterIter.key()];
-        Filters.append(makeColName(this->Name, Column) + "=?");
+        const stuFilteredCol& filteredCol = this->SelectableColsMap[FilterIter.key()];
+        Filters.append(makeColName(this->Name, filteredCol.Col) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -492,15 +498,15 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
     for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
         if(InfoIter->isValid() == false)
             continue;
-        if(this->SelectableColsMap.contains(InfoIter.key()) == false)
+        if (this->SelectableColsMap.contains(InfoIter.key()) == false)
             throw exHTTPInternalServerError("Invalid create option: " + InfoIter.key());
-        clsORMField& Col = this->SelectableColsMap[InfoIter.key()];
-        if(Col.defaultValue() == QInvalid || Col.defaultValue() == QAuto)
+        stuFilteredCol& filteredCol = this->SelectableColsMap[InfoIter.key()];
+        if (filteredCol.Col.defaultValue() == QInvalid || filteredCol.Col.defaultValue() == QAuto)
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        Col.validate(InfoIter.value());
-        CreateCommands.append(makeColName(this->Name, Col) + "=?");
-        Values.append(Col.toDB(InfoIter.value()));
+        filteredCol.Col.validate(InfoIter.value());
+        CreateCommands.append(makeColName(this->Name, filteredCol.Col) + "=?");
+        Values.append(filteredCol.Col.toDB(InfoIter.value()));
     }
 
     foreach(auto Col, this->BaseCols)
@@ -601,20 +607,20 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                    && Function != "MIN"
                    )
                     throw exHTTPBadRequest("Invalid agroupation rule: " + RequiredCol);
-            }else{
-                if(_groupBy.size())
+            } else {
+                if (_groupBy.size())
                     Function = "ANY_VALUE";
                 ColName = RequiredCol;
             }
 
-            if(ColName == _relation.RenamingPrefix + _col.name () || ColName == _relation.RenamingPrefix + _col.renameAs()){
-                if(Function.size()){
+            if (ColName == _relation.RenamingPrefix + _col.name () || ColName == _relation.RenamingPrefix + _col.renameAs()) {
+                if (Function.size()){
                     QString ColFinalName = makeColName(this->Name, _col, true, _relation);
-                    if(Function == "COUNT_DISTINCT")
+                    if (Function == "COUNT_DISTINCT")
                         _selectItems.Cols.append("COUNT(DISTINCT " + ColFinalName.split(' ').first()+ ") AS COUNT_" + ColFinalName.split(' ').last());
                     else
                         _selectItems.Cols.append(Function + "(" + ColFinalName.split(' ').first()+ ") AS " + Function + "_" + ColFinalName.split(' ').first().split('.').last());
-                }else
+                } else
                     _selectItems.Cols.append(makeColName(this->Name, _col, true, _relation));
                 return true;
             }

@@ -89,8 +89,8 @@ Props::Props() :
               { ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
                 {tblProps::prp_binID,           R(AdvertSchema,tblBin::Name),       tblBin::binID },
                 {tblProps::prp_locID,           R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-                {tblProps::prpCreatedBy_usrID,  ORM_JOIN_CREATOR},
-                {tblProps::prpUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblProps::prpCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblProps::prpUpdatedBy_usrID),
               })
 {
 }

@@ -88,8 +88,8 @@ APITokens::APITokens() :
               { ///< Col                           Reference Table                 ForeignCol             Rename      LeftJoin
                 {tblAPITokens::apt_svcID,          R(AAASchema,tblService::Name),  tblService::svcID,    {},         true},
                 {tblAPITokens::apt_usrID,          R(AAASchema,tblUser::Name),     tblUser::usrID,        "Owner_",   true},
-                {tblAPITokens::aptCreatedBy_usrID, ORM_JOIN_CREATOR},
-                {tblAPITokens::aptUpdatedBy_usrID, ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblAPITokens::aptCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblAPITokens::aptUpdatedBy_usrID),
               })
 {
 }

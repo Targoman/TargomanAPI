@@ -76,8 +76,8 @@ Service::Service() :
               },
               { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
                 {tblService::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
-                {tblService::svcCreatedBy_usrID,  ORM_JOIN_CREATOR},
-                {tblService::svcUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblService::svcCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblService::svcUpdatedBy_usrID),
               })
 {
 }

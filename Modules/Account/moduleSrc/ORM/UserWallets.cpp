@@ -137,8 +137,8 @@ UserWallets::UserWallets() :
               },
               { ///< Col                              Reference Table               ForeignCol          Rename   LeftJoin
                 {tblUserWallets::wal_usrID,           R(AAASchema,tblUser::Name),   tblUser::usrID},
-                {tblUserWallets::walCreatedBy_usrID,  ORM_JOIN_CREATOR},
-                {tblUserWallets::walUpdatedBy_usrID,  ORM_JOIN_UPDATER},
+                ORM_RELATION_OF_CREATOR(tblUserWallets::walCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(tblUserWallets::walUpdatedBy_usrID),
               })
 {
 }
