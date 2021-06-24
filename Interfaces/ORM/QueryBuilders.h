@@ -30,6 +30,8 @@ class TestQueryBuilders;
 #include "libTargomanCommon/exTargomanBase.h"
 #include "Interfaces/Common/GenericTypes.h"
 
+#define DBNULLVALUE "NULL"
+
 namespace Targoman {
 namespace API {
 namespace ORM {
@@ -53,7 +55,6 @@ TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      NotNull,
                      Like)
 
-class clsSelectQueryData;
 class clsConditionData;
 class clsCondition {
 public:
@@ -84,8 +85,8 @@ public:
     bool hasMany() const;
 
     QString buildConditionString(
-            const QString &_tableNameOrAlias,
-            const QMap<QString, stuFilteredCol>& _filterables,
+            const QString &_mainTableNameOrAlias,
+            const QMap<QString, stuRelatedORMField>& _filterables,
             bool _allowUseColumnAlias = false,
             quint8 _prettifierJustifyLen = 0) const;
 
@@ -93,7 +94,7 @@ protected:
     QSharedDataPointer<clsConditionData> Data;
     void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
 
-    friend clsSelectQueryData;
+//    friend clsSelectQueryData;
     friend TestQueryBuilders;
 };
 /*
@@ -149,7 +150,60 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
     Ascending,
     Descending)
 
-class SelectQuery
+class clsBaseQueryData;
+
+template <class TDerrived, class TData>
+class BaseQuery
+{
+public:
+    BaseQuery(const BaseQuery<TDerrived, TData>& _other);
+    BaseQuery(const clsTable& _table, const QString& _alias = {});
+    ~BaseQuery();
+
+    TDerrived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
+
+    TDerrived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    TDerrived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    TDerrived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    TDerrived& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    TDerrived& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    TDerrived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    TDerrived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
+
+//    TDerrived& leftJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    TDerrived& rightJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    TDerrived& innerJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    TDerrived& crossJoin(const BaseQuery& _nestedQuery, const QString _alias);
+//    TDerrived& join(enuJoinType::Type _joinType, const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+
+    TDerrived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
+    TDerrived& leftJoinWith(const QString& _relationName, const QString& _alias = {});
+    TDerrived& rightJoinWith(const QString& _relationName, const QString& _alias = {});
+    TDerrived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
+
+    TDerrived& where(const clsCondition& _condition);
+    TDerrived& andWhere(const clsCondition& _condition);
+    TDerrived& orWhere(const clsCondition& _condition);
+    TDerrived& xorWhere(const clsCondition& _condition);
+
+//    TDerrived& groupBy(const clsCondition& _condition);
+    TDerrived& groupBy(const QString& _col);
+    TDerrived& groupBy(const QStringList& _cols);
+
+    TDerrived& having(const clsCondition& _condition);
+    TDerrived& andHaving(const clsCondition& _condition);
+    TDerrived& orHaving(const clsCondition& _condition);
+    TDerrived& xorHaving(const clsCondition& _condition);
+
+protected:
+    QSharedDataPointer<TData> Data;
+    virtual QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0) = 0;
+    friend TestQueryBuilders;
+};
+
+class clsSelectQueryData;
+
+class SelectQuery : public BaseQuery<SelectQuery, clsSelectQueryData>
 {
 public:
     SelectQuery(const SelectQuery& _other);
@@ -171,42 +225,7 @@ public:
 //    SelectQuery& from(const QString _table, const QString& _renameAs = {});
 //    SelectQuery& from(const SelectQuery& _nestedQuery, const QString _alias);
 
-    SelectQuery& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
-
-    SelectQuery& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    SelectQuery& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    SelectQuery& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    SelectQuery& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    SelectQuery& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    SelectQuery& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    SelectQuery& crossJoin(const QString& _foreignTable, const QString& _alias = {});
-
-//    SelectQuery& leftJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& rightJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& innerJoin(const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    SelectQuery& crossJoin(const SelectQuery& _nestedQuery, const QString _alias);
-//    SelectQuery& join(enuJoinType::Type _joinType, const SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-
-    SelectQuery& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
-    SelectQuery& leftJoinWith(const QString& _relationName, const QString& _alias = {});
-    SelectQuery& rightJoinWith(const QString& _relationName, const QString& _alias = {});
-    SelectQuery& innerJoinWith(const QString& _relationName, const QString& _alias = {});
-
-    SelectQuery& where(const clsCondition& _condition);
-    SelectQuery& andWhere(const clsCondition& _condition);
-    SelectQuery& orWhere(const clsCondition& _condition);
-    SelectQuery& xorWhere(const clsCondition& _condition);
-
     SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
-
-//    SelectQuery& groupBy(const clsCondition& _condition);
-    SelectQuery& groupBy(const QString& _col);
-    SelectQuery& groupBy(const QStringList& _cols);
-
-    SelectQuery& having(const clsCondition& _condition);
-    SelectQuery& andHaving(const clsCondition& _condition);
-    SelectQuery& orHaving(const clsCondition& _condition);
-    SelectQuery& xorHaving(const clsCondition& _condition);
 
     SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
@@ -217,7 +236,7 @@ public:
     quint64 count(QVariantMap _args = {});
 
 private:
-    QSharedDataPointer<clsSelectQueryData> Data;
+//    QSharedDataPointer<clsSelectQueryData> Data;
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
@@ -239,6 +258,30 @@ public:
         Q_UNUSED(_reportCount);
     }
 };
+
+class clsUpdateQueryData;
+
+class UpdateQuery : public BaseQuery<UpdateQuery, clsUpdateQueryData>
+{
+public:
+    UpdateQuery(const UpdateQuery& _other);
+    UpdateQuery(const clsTable& _table, const QString& _alias = {});
+    ~UpdateQuery();
+
+public:
+//    UpdateQuery& Select(const SelectQuery& _selectClause);
+    UpdateQuery& setNull(const QString& _col);
+    UpdateQuery& set(const QString& _col, const QVariant& _value);
+    UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
+
+    quint32 execute(QVariantMap _args = {});
+
+private:
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
+    friend TestQueryBuilders;
+};
+
+//typedef BaseQuery<SelectQuery, clsSelectQueryData> SelectQuery;
 
 }
 }

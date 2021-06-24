@@ -119,15 +119,15 @@ struct stuDBIndex {
 extern stuRelation InvalidRelation;
 extern QString COLS_KEY;
 
-struct stuFilteredCol{
+struct stuRelatedORMField{
     clsORMField Col;
     stuRelation Relation;
 
-    stuFilteredCol(clsORMField _col, const stuRelation& _relation = InvalidRelation) :
+    stuRelatedORMField(clsORMField _col, const stuRelation& _relation = InvalidRelation) :
         Col(_col), Relation(_relation)
     {}
 
-    stuFilteredCol() : Relation(InvalidRelation)
+    stuRelatedORMField() : Relation(InvalidRelation)
     {}
 
     inline bool isValid(){ return this->Col.name().size();}

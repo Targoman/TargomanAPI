@@ -181,32 +181,32 @@ void clsTable::prepareFiltersList()
         clsORMField NewCol = clsORMField(Col, FinalColName);
         this->AllCols.append(NewCol);
 
-        stuFilteredCol filteredCol = stuFilteredCol(NewCol);
+        stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol);
 
-        this->SelectableColsMap.insert(FinalColName, filteredCol);
+        this->SelectableColsMap.insert(FinalColName, relatedORMField);
         if (Col.isFilterable())
-            this->FilterableColsMap.insert(FinalColName, filteredCol);
+            this->FilterableColsMap.insert(FinalColName, relatedORMField);
         if (Col.isSortable())
-            this->SortableColsMap.insert(FinalColName, filteredCol);
+            this->SortableColsMap.insert(FinalColName, relatedORMField);
     }
 
-    foreach (auto Relation, this->Relations) {
+    foreach (stuRelation Relation, this->Relations) {
         clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
         if (ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: "+this->Name+")");
 
-        foreach (auto Col, ForeignTable->BaseCols) {
+        foreach (clsORMField Col, ForeignTable->BaseCols) {
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
             clsORMField NewCol = clsORMField(Col, FinalColName);
             this->AllCols.append(NewCol);
 
-            stuFilteredCol filteredCol = stuFilteredCol(NewCol, Relation);
+            stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol, Relation);
 
-            this->SelectableColsMap.insert(FinalColName, filteredCol);
+            this->SelectableColsMap.insert(FinalColName, relatedORMField);
             if (Col.isFilterable())
-                this->FilterableColsMap.insert(FinalColName, filteredCol);
+                this->FilterableColsMap.insert(FinalColName, relatedORMField);
             if (Col.isSortable())
-                this->SortableColsMap.insert(FinalColName, filteredCol);
+                this->SortableColsMap.insert(FinalColName, relatedORMField);
         }
     }
 
@@ -343,13 +343,13 @@ bool clsTable::update(quint64 _actorUserID,
     for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter) {
         if(InfoIter->isValid() == false)
             continue;
-        stuFilteredCol& filteredCol = this->SelectableColsMap[InfoIter.key()];
-        if (filteredCol.Col.isReadOnly())
+        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
+        if (relatedORMField.Col.isReadOnly())
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        filteredCol.Col.validate(InfoIter.value());
-        UpdateCommands.append(makeColName(this->Name, filteredCol.Col) + "=?");
-        Values.append(filteredCol.Col.toDB(InfoIter.value()));
+        relatedORMField.Col.validate(InfoIter.value());
+        UpdateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
     }
 
     foreach(auto FCol, this->FilterableColsMap)
@@ -363,10 +363,10 @@ bool clsTable::update(quint64 _actorUserID,
     for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
         if(FilterIter->isValid() == false)
             continue;
-        const stuFilteredCol& filteredCol = this->SelectableColsMap[FilterIter.key()];
-        if (filteredCol.Col.isFilterable() == false)
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
+        if (relatedORMField.Col.isFilterable() == false)
             throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-        Filters.append(makeColName(this->Name, filteredCol.Col) + "=?");
+        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -425,8 +425,8 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
     for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); ++FilterIter){
         if(FilterIter->isValid() == false)
             continue;
-        const stuFilteredCol& filteredCol = this->SelectableColsMap[FilterIter.key()];
-        Filters.append(makeColName(this->Name, filteredCol.Col) + "=?");
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
+        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
         Values.append(FilterIter.value());
     }
 
@@ -500,13 +500,13 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
             continue;
         if (this->SelectableColsMap.contains(InfoIter.key()) == false)
             throw exHTTPInternalServerError("Invalid create option: " + InfoIter.key());
-        stuFilteredCol& filteredCol = this->SelectableColsMap[InfoIter.key()];
-        if (filteredCol.Col.defaultValue() == QInvalid || filteredCol.Col.defaultValue() == QAuto)
+        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
+        if (relatedORMField.Col.defaultValue() == QInvalid || relatedORMField.Col.defaultValue() == QAuto)
             throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
 
-        filteredCol.Col.validate(InfoIter.value());
-        CreateCommands.append(makeColName(this->Name, filteredCol.Col) + "=?");
-        Values.append(filteredCol.Col.toDB(InfoIter.value()));
+        relatedORMField.Col.validate(InfoIter.value());
+        CreateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
     }
 
     foreach(auto Col, this->BaseCols)
@@ -697,17 +697,17 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
             Rule = LastLogical;
 
-            stuFilteredCol FilteredCol = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
-            if(FilteredCol.isValid())
-                Rule+=makeColName(this->Name, FilteredCol.Col, false, FilteredCol.Relation);
+            stuRelatedORMField relatedORMField = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
+            if(relatedORMField.isValid())
+                Rule+=makeColName(this->Name, relatedORMField.Col, false, relatedORMField.Relation);
             else
                 throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
 
-            if(FilteredCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+            if(relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__)
                 StatusColHasCriteria = true;
 
-            if(FilteredCol.Relation.Column.size() && UsedJoins.contains(FilteredCol.Relation) == false)
-                UsedJoins.insert(FilteredCol.Relation);
+            if(relatedORMField.Relation.Column.size() && UsedJoins.contains(relatedORMField.Relation) == false)
+                UsedJoins.insert(relatedORMField.Relation);
 
             if(PatternMatches.captured(3) == "NULL"){
                 if(PatternMatches.captured(2) == "=")
@@ -732,7 +732,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
             else if(PatternMatches.captured(2) == "=") Rule += " = ";
             else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
 
-            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
+            Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
             QString Value = PatternMatches.captured(3);
             if(Value == "NOW()"
                || Value.startsWith("DATE_ADD(")
@@ -740,10 +740,10 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                )
                 Rule += Value.replace("$SPACE$", " ");
             else{
-                FilteredCol.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
-                Rule += FilteredCol.Col.toDB(Value).toString();
+                relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
+                Rule += relatedORMField.Col.toDB(Value).toString();
             }
-            Rule += FilteredCol.Col.argSpecs().isPrimitiveType() ? "" : "'";
+            Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
 
             CanStartWithLogical = true;
             LastLogical.clear();
@@ -802,7 +802,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     /****************************************************************************/
     foreach(auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
-        stuFilteredCol Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
+        stuRelatedORMField Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
         if(Filter.isValid())
             SelectItems.GroupBy.append(makeColName(this->Name, Filter.Col, false, Filter.Relation));
         else

@@ -37,8 +37,12 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
+class clsBaseQueryData;
+template <class TDerrived, class TData> class BaseQuery;
 class clsSelectQueryData;
 class SelectQuery;
+class clsUpdateQueryData;
+class UpdateQuery;
 
 class clsTable : public intfAPIModule {
 protected:
@@ -142,9 +146,9 @@ protected:
     QString Schema;
     QString Name;
     QString Domain;
-    QMap<QString, stuFilteredCol /*clsORMField*/> SelectableColsMap;
-    QMap<QString, stuFilteredCol> FilterableColsMap;
-    QMap<QString, stuFilteredCol /*clsORMField*/> SortableColsMap;
+    QMap<QString, stuRelatedORMField /*clsORMField*/> SelectableColsMap;
+    QMap<QString, stuRelatedORMField>                 FilterableColsMap;
+    QMap<QString, stuRelatedORMField /*clsORMField*/> SortableColsMap;
     QList<clsORMField> AllCols;
     QList<clsORMField> BaseCols;
     QList<stuRelation> Relations;
@@ -154,8 +158,13 @@ protected:
 
     static QHash<QString, clsTable*> Registry;
 
+    friend clsBaseQueryData;
+    template <class TDerrived, class TData> friend class BaseQuery;
     friend clsSelectQueryData;
     friend SelectQuery;
+    friend clsUpdateQueryData;
+    friend UpdateQuery;
+
     friend TestQueryBuilders;
 };
 
