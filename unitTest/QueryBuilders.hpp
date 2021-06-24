@@ -545,8 +545,10 @@ private slots:
                 .set("colC1", "123")
                 .setNull("colD1")
                 .leftJoinWith("rel_a", "alias_t2")
-//                .leftJoin("t2")
+                .leftJoin("test.t2")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
+                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
+                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
             QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
             if (prettyOut)

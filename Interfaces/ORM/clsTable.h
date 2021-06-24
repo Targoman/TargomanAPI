@@ -39,6 +39,8 @@ namespace ORM {
 
 class clsBaseQueryData;
 template <class TDerrived, class TData> class BaseQuery;
+class clsJoinableBaseQueryData;
+template <class TDerrived, class TData> class JoinableBaseQuery;
 class clsSelectQueryData;
 class SelectQuery;
 class clsUpdateQueryData;
@@ -160,6 +162,8 @@ protected:
 
     friend clsBaseQueryData;
     template <class TDerrived, class TData> friend class BaseQuery;
+    friend clsJoinableBaseQueryData;
+    template <class TDerrived, class TData> friend class JoinableBaseQuery;
     friend clsSelectQueryData;
     friend SelectQuery;
     friend clsUpdateQueryData;

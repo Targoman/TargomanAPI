@@ -97,33 +97,6 @@ protected:
 //    friend clsSelectQueryData;
     friend TestQueryBuilders;
 };
-/*
-class clsJoinCondition : public clsCondition {
-public:
-    clsJoinCondition();
-    ~clsJoinCondition();
-    clsJoinCondition(const clsJoinCondition& _other);
-//    clsJoinCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
-    clsJoinCondition(
-            QString _tableName,
-            QString _col,
-            enuConditionOperator::Type _operator,
-            QVariant _value = {});
-    clsJoinCondition(
-            QString _leftHandTableName,
-            QString _leftHandCol,
-            enuConditionOperator::Type _operator,
-            QString _rightHandTableName,
-            QString _rightHandCol);
-
-    clsJoinCondition& andCond(const clsJoinCondition& _cond);
-    clsJoinCondition& orCond(const clsJoinCondition& _cond);
-    clsJoinCondition& xorCond(const clsJoinCondition& _cond);
-
-    friend clsSelectQueryData;
-    friend TestQueryBuilders;
-};
-*/
 
 TARGOMAN_DEFINE_ENUM(enuAggregation,
     COUNT,
@@ -160,6 +133,36 @@ public:
     BaseQuery(const clsTable& _table, const QString& _alias = {});
     ~BaseQuery();
 
+    TDerrived& where(const clsCondition& _condition);
+    TDerrived& andWhere(const clsCondition& _condition);
+    TDerrived& orWhere(const clsCondition& _condition);
+    TDerrived& xorWhere(const clsCondition& _condition);
+
+//    TDerrived& groupBy(const clsCondition& _condition);
+    TDerrived& groupBy(const QString& _col);
+    TDerrived& groupBy(const QStringList& _cols);
+
+    TDerrived& having(const clsCondition& _condition);
+    TDerrived& andHaving(const clsCondition& _condition);
+    TDerrived& orHaving(const clsCondition& _condition);
+    TDerrived& xorHaving(const clsCondition& _condition);
+
+protected:
+    QSharedDataPointer<TData> Data;
+    virtual QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0) = 0;
+    friend TestQueryBuilders;
+};
+
+class clsJoinableBaseQueryData;
+
+template <class TDerrived, class TData>
+class JoinableBaseQuery : public BaseQuery<TDerrived, TData>
+{
+public:
+    JoinableBaseQuery(const JoinableBaseQuery<TDerrived, TData>& _other);
+    JoinableBaseQuery(const clsTable& _table, const QString& _alias = {});
+    ~JoinableBaseQuery();
+
     TDerrived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
     TDerrived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
@@ -181,29 +184,14 @@ public:
     TDerrived& rightJoinWith(const QString& _relationName, const QString& _alias = {});
     TDerrived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
 
-    TDerrived& where(const clsCondition& _condition);
-    TDerrived& andWhere(const clsCondition& _condition);
-    TDerrived& orWhere(const clsCondition& _condition);
-    TDerrived& xorWhere(const clsCondition& _condition);
-
-//    TDerrived& groupBy(const clsCondition& _condition);
-    TDerrived& groupBy(const QString& _col);
-    TDerrived& groupBy(const QStringList& _cols);
-
-    TDerrived& having(const clsCondition& _condition);
-    TDerrived& andHaving(const clsCondition& _condition);
-    TDerrived& orHaving(const clsCondition& _condition);
-    TDerrived& xorHaving(const clsCondition& _condition);
-
 protected:
-    QSharedDataPointer<TData> Data;
     virtual QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0) = 0;
     friend TestQueryBuilders;
 };
 
 class clsSelectQueryData;
 
-class SelectQuery : public BaseQuery<SelectQuery, clsSelectQueryData>
+class SelectQuery : public JoinableBaseQuery<SelectQuery, clsSelectQueryData>
 {
 public:
     SelectQuery(const SelectQuery& _other);
@@ -236,7 +224,6 @@ public:
     quint64 count(QVariantMap _args = {});
 
 private:
-//    QSharedDataPointer<clsSelectQueryData> Data;
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
@@ -261,7 +248,7 @@ public:
 
 class clsUpdateQueryData;
 
-class UpdateQuery : public BaseQuery<UpdateQuery, clsUpdateQueryData>
+class UpdateQuery : public JoinableBaseQuery<UpdateQuery, clsUpdateQueryData>
 {
 public:
     UpdateQuery(const UpdateQuery& _other);
@@ -274,7 +261,7 @@ public:
     UpdateQuery& set(const QString& _col, const QVariant& _value);
     UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
 
-    quint32 execute(QVariantMap _args = {});
+    quint64 execute(QVariantMap _args = {});
 
 private:
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
