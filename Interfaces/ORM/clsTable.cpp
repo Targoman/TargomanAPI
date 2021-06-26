@@ -35,7 +35,6 @@
 using namespace Targoman::API;
 using namespace Targoman::API::ORM;
 
-
 bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second) {
     return _first.ReferenceTable == _second.ReferenceTable && _first.Column == _second.Column && _first.ForeignColumn == _second.ForeignColumn;
 }
@@ -218,10 +217,11 @@ void clsTable::prepareFiltersList()
 }
 
 
-QString clsTable::domain()
+const QString clsTable::domain()
 {
-    return Q_LIKELY(this->Domain.size()) ? this->Domain :
-                                           this->Domain = this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName();
+    return Q_LIKELY(this->Domain.size())
+            ? this->Domain
+            : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
 }
 
 

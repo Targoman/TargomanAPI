@@ -29,12 +29,12 @@ public:
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
                 { "colA1", ORM_PRIMARY_KEY32 },
                 { "colB1", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
-                { "colC1", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
-                { "colD1", S(QString),                      QFV,                       QRequired,  UPOwner },
+                { "colC1", S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
+                { "colD1", S(QString),                      QFV,                       QNull,      UPOwner },
                 { "colE1", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
                 { "colF1", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
-                { "colG1", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
-                { "colH1", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { "colG1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
+                { "colH1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
             },
             {///< Col     Reference Table  ForeignCol  Rename  LeftJoin
 //                           { "colC1", R("test", "t2"), "colA2" },
@@ -509,10 +509,13 @@ private slots:
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
+                .offset(20)
+                .limit(100)
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            QString qry = query.buildQueryString({}, true, false, prettyOut ? 16 : 0);
+            if (prettyOut) {
+                qDebug().nospace().noquote() << endl << endl << qry << endl << endl << query.buildQueryString({}, false, true, prettyOut ? 16 : 0) << endl;
+            }
             else
                 QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
         } QT_CATCH (const std::exception &e) {
@@ -528,7 +531,7 @@ private slots:
                 .set("colC", "123")
                 .setNull("colD")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
             else
@@ -547,10 +550,120 @@ private slots:
                 .leftJoinWith("rel_a", "alias_t2")
                 .leftJoin("test.t2")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
-                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
-                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
+//                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
+//                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+            if (prettyOut)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            else
+                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    /***************************************************************************************/
+    /* CreateQuery *************************************************************************/
+    /***************************************************************************************/
+    void queryString_CREATE_values_unknown_column() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+                .addCol("colB1")
+                .addCol("colX1")
+                .values(QVariantMap({
+                    {"colD1", 111},
+                    {"colZ1", "111"},
+                    {"colB1", DBNULLVALUE},
+                }))
+            ;
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+            if (prettyOut)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            else
+                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_CREATE_values_required_column_not_provided() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+//                .addCol("colB1") -> req
+                .addCol("colX1")
+                .values(QVariantMap({
+                    {"colD1", 111},
+                    {"colZ1", "111"},
+                    {"colA1", DBNULLVALUE},
+                }))
+            ;
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+            if (prettyOut)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            else
+                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_CREATE_values_single() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+                .addCol("colB1")
+                .addCol("colC1")
+                .addCol("colD1")
+                .values(QVariantMap({
+                    {"colD1", 111},
+                    {"colZ1", "111"},
+                    {"colA1", DBNULLVALUE},
+                }))
+            ;
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+            if (prettyOut)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            else
+                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_CREATE_values_multi() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+                .addCol("colB1")
+                .addCol("colC1")
+                .addCol("colD1")
+                .values(QVariantMap({
+                    {"colB1", 111},
+                    {"colZ1", "111"},
+                    {"colA1", DBNULLVALUE},
+                }))
+                .values(QVariantMap({
+                    {"colB1", 222},
+                    {"colZ1", "222"},
+                    {"colA1", DBNULLVALUE},
+                }))
+                .values(QList<QVariantMap>({
+                    {
+                        {"colB1", 333},
+                        {"colZ1", "333"},
+                        {"colA1", DBNULLVALUE},
+                    },
+                    {
+                        {"colB1", 444},
+                        {"colZ1", "444"},
+                        {"colA1", DBNULLVALUE},
+                    },
+                }))
+            ;
+            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
             else

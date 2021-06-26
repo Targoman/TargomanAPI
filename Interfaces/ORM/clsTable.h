@@ -37,12 +37,24 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-class clsBaseQueryData;
+template <class TDerrived> class clsBaseQueryData;
 template <class TDerrived, class TData> class BaseQuery;
-class clsJoinableBaseQueryData;
-template <class TDerrived, class TData> class JoinableBaseQuery;
+
+template <class TDerrived> class clsQueryJoinTraitData;
+template <class TDerrived> class QueryJoinTrait;
+
+template <class TDerrived> class clsQueryWhereTraitData;
+template <class TDerrived> class QueryWhereTrait;
+
+template <class TDerrived> class clsQueryGroupAndHavingTraitData;
+template <class TDerrived> class QueryGroupAndHavingTrait;
+
 class clsSelectQueryData;
 class SelectQuery;
+
+class clsCreateQueryData;
+class CreateQuery;
+
 class clsUpdateQueryData;
 class UpdateQuery;
 
@@ -135,7 +147,7 @@ public:
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
 protected:
-    inline QString domain();
+    inline const QString domain();
 
 private:
     stuSelectItems makeListingQuery(const QString& _requiredCols = {},
@@ -160,12 +172,18 @@ protected:
 
     static QHash<QString, clsTable*> Registry;
 
-    friend clsBaseQueryData;
+    template <class TDerrived>              friend class clsBaseQueryData;
     template <class TDerrived, class TData> friend class BaseQuery;
-    friend clsJoinableBaseQueryData;
-    template <class TDerrived, class TData> friend class JoinableBaseQuery;
+    template <class TDerrived>              friend class clsQueryJoinTraitData;
+    template <class TDerrived>              friend class QueryJoinTrait;
+    template <class TDerrived>              friend class clsQueryWhereTraitData;
+    template <class TDerrived>              friend class QueryWhereTrait;
+    template <class TDerrived>              friend class clsQueryGroupAndHavingTraitData;
+    template <class TDerrived>              friend class QueryGroupAndHavingTrait;
     friend clsSelectQueryData;
     friend SelectQuery;
+    friend clsCreateQueryData;
+    friend CreateQuery;
     friend clsUpdateQueryData;
     friend UpdateQuery;
 
