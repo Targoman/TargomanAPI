@@ -126,114 +126,114 @@ protected:
 };
 
 /***************************************************************************************/
-template <class TDerrived> class clsQueryJoinTraitData;
-template <class TDerrived> class QueryJoinTrait;
+template <class itmplDerived> class clsQueryJoinTraitData;
+template <class itmplDerived> class tmplQueryJoinTrait;
 
-template <class TDerrived> class clsQueryWhereTraitData;
-template <class TDerrived> class QueryWhereTrait;
+template <class itmplDerived> class clsQueryWhereTraitData;
+template <class itmplDerived> class tmplQueryWhereTrait;
 
-template <class TDerrived> class clsQueryGroupAndHavingTraitData;
-template <class TDerrived> class QueryGroupAndHavingTrait;
+template <class itmplDerived> class clsQueryGroupAndHavingTraitData;
+template <class itmplDerived> class QueryGroupAndHavingTrait;
 
-template <class TDerrived> class clsBaseQueryData;
+template <class itmplDerived> class clsBaseQueryData;
 
-template <class TDerrived, class TData>
-class BaseQuery
+template <class itmplDerived, class itmplData>
+class tmplBaseQuery
 {
 public:
-    BaseQuery(const BaseQuery<TDerrived, TData>& _other);
-    BaseQuery(clsTable& _table, const QString& _alias = {});
-    ~BaseQuery();
+    tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other);
+    tmplBaseQuery(clsTable& _table, const QString& _alias = {});
+    ~tmplBaseQuery();
 
 protected:
     virtual void iAmAbstract() = 0;
-    QSharedDataPointer<TData> Data;
+    QSharedDataPointer<itmplData> Data;
     friend TestQueryBuilders;
-    friend clsQueryJoinTraitData<TDerrived>;
-    friend QueryJoinTrait<TDerrived>;
-    friend clsQueryWhereTraitData<TDerrived>;
-    friend QueryWhereTrait<TDerrived>;
-    friend clsQueryGroupAndHavingTraitData<TDerrived>;
-    friend QueryGroupAndHavingTrait<TDerrived>;
+    friend clsQueryJoinTraitData<itmplDerived>;
+    friend tmplQueryJoinTrait<itmplDerived>;
+    friend clsQueryWhereTraitData<itmplDerived>;
+    friend tmplQueryWhereTrait<itmplDerived>;
+    friend clsQueryGroupAndHavingTraitData<itmplDerived>;
+    friend QueryGroupAndHavingTrait<itmplDerived>;
 };
 
 /***************************************************************************************/
-template <class TDerrived>
-class QueryJoinTrait
+template <class itmplDerived>
+class tmplQueryJoinTrait
 {
 public:
-    QueryJoinTrait(const QueryJoinTrait<TDerrived>& _other);
-    QueryJoinTrait(const TDerrived* _owner);
-    ~QueryJoinTrait();
+    tmplQueryJoinTrait(const tmplQueryJoinTrait<itmplDerived>& _other);
+    tmplQueryJoinTrait(const itmplDerived* _owner);
+    ~tmplQueryJoinTrait();
 
-    TDerrived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
+    itmplDerived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
-    TDerrived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    TDerrived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    TDerrived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    TDerrived& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    TDerrived& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    TDerrived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    TDerrived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
+    itmplDerived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
 
-//    TDerrived& leftJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    TDerrived& rightJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    TDerrived& innerJoin(const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    TDerrived& crossJoin(const BaseQuery& _nestedQuery, const QString _alias);
-//    TDerrived& join(enuJoinType::Type _joinType, const BaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    itmplDerived& leftJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    itmplDerived& rightJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    itmplDerived& innerJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+//    itmplDerived& crossJoin(const tmplBaseQuery& _nestedQuery, const QString _alias);
+//    itmplDerived& join(enuJoinType::Type _joinType, const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
 
-    TDerrived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
-    TDerrived& leftJoinWith(const QString& _relationName, const QString& _alias = {});
-    TDerrived& rightJoinWith(const QString& _relationName, const QString& _alias = {});
-    TDerrived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
+    itmplDerived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
+    itmplDerived& leftJoinWith(const QString& _relationName, const QString& _alias = {});
+    itmplDerived& rightJoinWith(const QString& _relationName, const QString& _alias = {});
+    itmplDerived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
 
 protected:
     virtual void iAmAbstract() = 0;
-    QSharedDataPointer<clsQueryJoinTraitData<TDerrived>> JoinTraitData;
-    friend TestQueryBuilders;
-};
-
-/***************************************************************************************/
-template <class TDerrived>
-class QueryWhereTrait
-{
-public:
-    QueryWhereTrait(const QueryWhereTrait<TDerrived>& _other);
-    QueryWhereTrait(const TDerrived* _owner);
-    ~QueryWhereTrait();
-
-    TDerrived& where(const clsCondition& _condition);
-    TDerrived& andWhere(const clsCondition& _condition);
-    TDerrived& orWhere(const clsCondition& _condition);
-    TDerrived& xorWhere(const clsCondition& _condition);
-
-protected:
-    virtual void iAmAbstract() = 0;
-    QSharedDataPointer<clsQueryWhereTraitData<TDerrived>> WhereTraitData;
+    QSharedDataPointer<clsQueryJoinTraitData<itmplDerived>> JoinTraitData;
     friend TestQueryBuilders;
 };
 
 /***************************************************************************************/
-template <class TDerrived>
+template <class itmplDerived>
+class tmplQueryWhereTrait
+{
+public:
+    tmplQueryWhereTrait(const tmplQueryWhereTrait<itmplDerived>& _other);
+    tmplQueryWhereTrait(const itmplDerived* _owner);
+    ~tmplQueryWhereTrait();
+
+    itmplDerived& where(const clsCondition& _condition);
+    itmplDerived& andWhere(const clsCondition& _condition);
+    itmplDerived& orWhere(const clsCondition& _condition);
+    itmplDerived& xorWhere(const clsCondition& _condition);
+
+protected:
+    virtual void iAmAbstract() = 0;
+    QSharedDataPointer<clsQueryWhereTraitData<itmplDerived>> WhereTraitData;
+    friend TestQueryBuilders;
+};
+
+/***************************************************************************************/
+template <class itmplDerived>
 class QueryGroupAndHavingTrait
 {
 public:
-    QueryGroupAndHavingTrait(const QueryGroupAndHavingTrait<TDerrived>& _other);
-    QueryGroupAndHavingTrait(const TDerrived* _owner);
+    QueryGroupAndHavingTrait(const QueryGroupAndHavingTrait<itmplDerived>& _other);
+    QueryGroupAndHavingTrait(const itmplDerived* _owner);
     ~QueryGroupAndHavingTrait();
 
-//    TDerrived& groupBy(const clsCondition& _condition);
-    TDerrived& groupBy(const QString& _col);
-    TDerrived& groupBy(const QStringList& _cols);
+//    itmplDerived& groupBy(const clsCondition& _condition);
+    itmplDerived& groupBy(const QString& _col);
+    itmplDerived& groupBy(const QStringList& _cols);
 
-    TDerrived& having(const clsCondition& _condition);
-    TDerrived& andHaving(const clsCondition& _condition);
-    TDerrived& orHaving(const clsCondition& _condition);
-    TDerrived& xorHaving(const clsCondition& _condition);
+    itmplDerived& having(const clsCondition& _condition);
+    itmplDerived& andHaving(const clsCondition& _condition);
+    itmplDerived& orHaving(const clsCondition& _condition);
+    itmplDerived& xorHaving(const clsCondition& _condition);
 
 protected:
     virtual void iAmAbstract() = 0;
-    QSharedDataPointer<clsQueryGroupAndHavingTraitData<TDerrived>> GroupAndHavingTraitData;
+    QSharedDataPointer<clsQueryGroupAndHavingTraitData<itmplDerived>> GroupAndHavingTraitData;
     friend TestQueryBuilders;
 };
 
@@ -243,9 +243,9 @@ class clsCreateQueryData;
 class clsSelectQueryData;
 
 class SelectQuery :
-    public BaseQuery<SelectQuery, clsSelectQueryData>,
-    public QueryJoinTrait<SelectQuery>,
-    public QueryWhereTrait<SelectQuery>,
+    public tmplBaseQuery<SelectQuery, clsSelectQueryData>,
+    public tmplQueryJoinTrait<SelectQuery>,
+    public tmplQueryWhereTrait<SelectQuery>,
     public QueryGroupAndHavingTrait<SelectQuery>
 {
 public:
@@ -270,6 +270,10 @@ public:
 
     SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
 
+    SelectQuery& addUnion(SelectQuery& _query);
+    SelectQuery& addUnionAll(SelectQuery& _query);
+    SelectQuery& addUnionDistinct(SelectQuery& _query);
+
     SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
@@ -282,6 +286,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
+    friend clsSelectQueryData;
     friend clsCreateQueryData;
     friend TestQueryBuilders;
 };
@@ -306,7 +311,7 @@ public:
 
 /***************************************************************************************/
 class CreateQuery :
-    public BaseQuery<CreateQuery, clsCreateQueryData>
+    public tmplBaseQuery<CreateQuery, clsCreateQueryData>
 {
 public:
     CreateQuery(const CreateQuery& _other);
@@ -332,16 +337,15 @@ private:
 class clsUpdateQueryData;
 
 class UpdateQuery :
-    public BaseQuery<UpdateQuery, clsUpdateQueryData>,
-    public QueryJoinTrait<UpdateQuery>,
-    public QueryWhereTrait<UpdateQuery>
+    public tmplBaseQuery<UpdateQuery, clsUpdateQueryData>,
+    public tmplQueryJoinTrait<UpdateQuery>,
+    public tmplQueryWhereTrait<UpdateQuery>
 {
 public:
     UpdateQuery(const UpdateQuery& _other);
     UpdateQuery(clsTable& _table, const QString& _alias = {});
     ~UpdateQuery();
 
-public:
 //    UpdateQuery& Select(const SelectQuery& _selectClause);
     UpdateQuery& setNull(const QString& _col);
     UpdateQuery& set(const QString& _col, const QVariant& _value);
@@ -356,8 +360,32 @@ private:
 };
 
 /***************************************************************************************/
+class clsDeleteQueryData;
 
-//typedef BaseQuery<SelectQuery, clsSelectQueryData> SelectQuery;
+class DeleteQuery :
+    public tmplBaseQuery<DeleteQuery, clsDeleteQueryData>,
+    public tmplQueryJoinTrait<DeleteQuery>,
+    public tmplQueryWhereTrait<DeleteQuery>
+{
+public:
+    DeleteQuery(const DeleteQuery& _other);
+    DeleteQuery(clsTable& _table, const QString& _alias = {});
+    ~DeleteQuery();
+
+public:
+    DeleteQuery& addTarget(const QString& _targetTableName);
+
+    quint64 execute(QVariantMap _args = {});
+
+private:
+    virtual void iAmAbstract() {}
+    QString buildQueryString(QVariantMap _args = {}, quint8 _prettifierJustifyLen = 0);
+    friend TestQueryBuilders;
+};
+
+/***************************************************************************************/
+
+//typedef tmplBaseQuery<SelectQuery, clsSelectQueryData> SelectQuery;
 
 }
 }

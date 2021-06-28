@@ -187,7 +187,47 @@ private slots:
                     .isEmpty() == false);
     };
 
-    void condition_buildString()
+    void condition_buildString_simple()
+    {
+        QT_TRY {
+            clsCondition cnd =
+                clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
+            ;
+
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+t1.colA1 = 101
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void condition_buildString_multi()
+    {
+        QT_TRY {
+            clsCondition cnd =
+                clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
+                .andCond({ "colB1", enuConditionOperator::NotNull })
+            ;
+
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+t1.colA1 = 101
+               AND t1.colB1 IS NOT NULL
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void condition_buildString_complex()
     {
         QT_TRY {
             clsCondition cnd =
@@ -205,23 +245,51 @@ private slots:
                 .orCond({ "colH1", enuConditionOperator::Equal, 107 })
             ;
 
-            QCOMPARE(cnd.buildConditionString(t1.Name, t1.FilterableColsMap),
-                     "t1.colA1=101 AND t1.colB1 IS NOT NULL OR t1.colC1=102 AND (t1.colD1=103 OR t1.colE1=104 XOR (t1.colF1=105 OR t1.colG1=106)) OR t1.colH1=107"
-                     );
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+t1.colA1 = 101
+               AND t1.colB1 IS NOT NULL
+                OR t1.colC1 = 102
+               AND (
+                   t1.colD1 = 103
+                OR t1.colE1 = 104
+               XOR (
+                   t1.colF1 = 105
+                OR t1.colG1 = 106
+                   )
+                   )
+                OR t1.colH1 = 107
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
-    //-- SELECT
+    /***************************************************************************************/
+    /* SelectQuery *************************************************************************/
+    /***************************************************************************************/
     void queryString_SELECT_EmptyCol() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1);
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, "SELECT t1.colA1,t1.colB1,t1.colC1,t1.colD1,t1.colE1,t1.colF1,t1.colG1,t1.colH1,t1.CURRENT_DATETIME FROM test.t1");
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1
+                 , t1.colE1
+                 , t1.colF1
+                 , t1.colG1
+                 , t1.colH1
+                 , t1.CURRENT_DATETIME
+              FROM test.t1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -237,11 +305,17 @@ private slots:
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, "SELECT t1.colA1,t1.colB1,t1.colC1,t1.colD1 AS ren_colD1 FROM test.t1");
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1 AS ren_colD1
+              FROM test.t1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -257,11 +331,17 @@ private slots:
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, "SELECT alias_t1.colA1,alias_t1.colB1,alias_t1.colC1,alias_t1.colD1 AS ren_colD1 FROM test.t1 alias_t1");
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+                 , alias_t1.colB1
+                 , alias_t1.colC1
+                 , alias_t1.colD1 AS ren_colD1
+              FROM test.t1 alias_t1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -285,11 +365,17 @@ private slots:
 //                .andWhere({ "colB1", enuConditionOperator::GreaterEqual, "abc" })
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, "SELECT AVG(t1.colA1) AS avg_colA1,SUM(t1.colB1) AS sum_colB1 FROM test.t1");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT AVG(t1.colA1) AS avg_colA1
+                 , SUM(t1.colB1) AS sum_colB1
+              FROM test.t1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -300,19 +386,13 @@ private slots:
             SelectQuery query = SelectQuery(t1)
                 .addCols(QStringList({
                     "colA1",
-//                    "colB1",
                     "colC1",
                 }))
                 .addCol("colB1", "alias_colB1")
-//                .addCol(enuAggregation::AVG, "colA1", "avg_colA1")
                 .addCol(enuConditionalAggregation::COUNTIF,
                         { "colB1", enuConditionOperator::Equal, 123 },
                         "countif_colB"
                         )
-//                .addCol(enuConditionalAggregation::COUNTIF,
-//                        { "alias_colB1", enuConditionOperator::Equal, 456 },
-//                        "countif_colB1"
-//                        )
                 .addCol(enuConditionalAggregation::COUNTIF,
                         clsCondition("colB1", enuConditionOperator::Equal, 123)
                         .andCond({ "colC1", enuConditionOperator::Like, "test it"})
@@ -330,25 +410,35 @@ private slots:
                         20,
                         "sumif__t1_colC1__t2_colD2"
                         )
-
                 .leftJoin(R("test", "t2"))
-//                .addCol(enuAggregation::SUM, "colA2", "sum_colA2")
-
-//                .leftJoin(R("test", "t2"), "alias_t2")
-//                .addCol(enuAggregation::SUM, "alias_t2.colA2", "sum_alias_colA2")
-
-//                    clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
-//                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
-//                )
-//                .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .andWhere({ "colB1", enuConditionOperator::GreaterEqual, "abc" })
-//                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colA1
+                 , t1.colC1
+                 , t1.colB1 AS alias_colB1
+                 , COUNT(IF(t1.colB1 = 123,1,NULL)) AS countif_colB
+                 , COUNT(IF(
+                   t1.colB1 = 123
+               AND t1.colC1 LIKE 'test it'
+               XOR (
+                   t1.colF1 = 105
+                OR t1.colG1 = 106
+                   )
+                   ,1,NULL)) AS countif_colB1
+                 , SUM(IF(
+                   t1.colC1 > 123
+               AND t2.colD2 = 456
+                   ,10,20)) AS sumif__t1_colC1__t2_colD2
+              FROM test.t1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -362,11 +452,18 @@ private slots:
                 }))
                 .leftJoin("test.t2")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(SELECT t1.colA1 FROM test.t1 LEFT JOIN test.t2 ON t2.colA2=t1.colC1)");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colA1
+              FROM test.t1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -393,11 +490,23 @@ private slots:
 //                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+              FROM test.t1 alias_t1
+         LEFT JOIN test.t2 alias_t2
+                ON alias_t2.colA2 = alias_t1.colC1
+         LEFT JOIN test.t2 alias_2_t2
+                ON alias_2_t2.colA2 = t1.colB
+               AND alias_2_t2.colB2 = 'test string'
+               AND t77777777.ffffff7 = 456
+               AND t77777777.ffffff8 = '456'
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -424,11 +533,18 @@ private slots:
 //                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colA1
+              FROM test.t1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -455,11 +571,19 @@ private slots:
 //                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+              FROM test.t1 alias_t1
+         LEFT JOIN test.t2 alias_t2
+                ON alias_t2.colA2 = alias_t1.colC1
+             WHERE alias_t1.colA1 = 123
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -474,11 +598,18 @@ private slots:
                     "colA2",
                 }))
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 16 : 0);
+
+            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QCOMPARE("\n" + qry + "\n", R"(
+                                        CAUTION: NOT COMPLETED
+                                        CAUTION: NOT COMPLETED
+                                        CAUTION: NOT COMPLETED
+                                        CAUTION: NOT COMPLETED
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -512,52 +643,150 @@ private slots:
                 .offset(20)
                 .limit(100)
             ;
-            QString qry = query.buildQueryString({}, true, false, prettyOut ? 16 : 0);
-            if (prettyOut) {
-                qDebug().nospace().noquote() << endl << endl << qry << endl << endl << query.buildQueryString({}, false, true, prettyOut ? 16 : 0) << endl;
-            }
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, true, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+                 , alias_t1.colB1 AS alias_colB1
+                 , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+              FROM test.t1 alias_t1
+          ORDER BY colA1
+                 , colB1 DESC
+          GROUP BY colA1
+                 , slbStatus
+            HAVING alias_t1.colB1 = 123
+               AND alias_t1.colC1 LIKE 'test it'
+               XOR (
+                   alias_t1.colF1 = 105
+                OR alias_colB1 = 106
+                   )
+             LIMIT 20,1
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
-    //-- UPDATE
-    void queryString_UPDATE_error_on_no_where() {
+    void queryString_SELECT_COUNT_order_and_group_and_having() {
         QT_TRY {
-            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
-                .set("colB", 123)
-                .set("colC", "123")
-                .setNull("colD")
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+//                    "colB1",
+//                    "colC1",
+//                    "colA2",
+                }))
+                .addCol("colB1", "alias_colB1")
+                .addCol(enuConditionalAggregation::COUNTIF,
+                        { "colB1", enuConditionOperator::Equal, 123 },
+                        "countif_colB"
+                        )
+                .orderBy("colA1")
+                .orderBy("colB1", enuOrderDir::Descending)
+                .groupBy(QStringList({ "colA1", "slbStatus" }))
+                .having(
+                    clsCondition("colB1", enuConditionOperator::Equal, 123)
+                    .andCond({ "colC1", enuConditionOperator::Like, "test it"})
+                    .xorCond(
+                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
+                    )
+                )
+                .offset(20)
+                .limit(100)
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, false, true, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT COUNT(*) AS cnt
+              FROM (
+            SELECT alias_t1.colA1
+                 , alias_t1.colB1 AS alias_colB1
+                 , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+              FROM test.t1 alias_t1
+          ORDER BY colA1
+                 , colB1 DESC
+          GROUP BY colA1
+                 , slbStatus
+            HAVING alias_t1.colB1 = 123
+               AND alias_t1.colC1 LIKE 'test it'
+               XOR (
+                   alias_t1.colF1 = 105
+                OR alias_colB1 = 106
+                   )
+                   ) qry
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
 
-    void queryString_UPDATE_simple() {
+    void queryString_SELECT_union() {
         QT_TRY {
-            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
-                .set("colB1", 123)
-                .set("colC1", "123")
-                .setNull("colD1")
-                .leftJoinWith("rel_a", "alias_t2")
-                .leftJoin("test.t2")
-                .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
-//                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+//                    "colB1",
+//                    "colC1",
+//                    "colA2",
+                }))
+                .addCol("colB1", "alias_colB1")
+                .addCol(enuConditionalAggregation::COUNTIF,
+                        { "colB1", enuConditionOperator::Equal, 123 },
+                        "countif_colB"
+                        )
+                .orderBy("colA1")
+                .orderBy("colB1", enuOrderDir::Descending)
+                .groupBy(QStringList({ "colA1", "slbStatus" }))
+                .having(
+                    clsCondition("colB1", enuConditionOperator::Equal, 123)
+                    .andCond({ "colC1", enuConditionOperator::Like, "test it"})
+                    .xorCond(
+                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
+                    )
+                )
+                .offset(20)
+                .limit(100)
+                .addUnionAll(
+                    SelectQuery(t2)
+                    .addCol("colA2")
+                )
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, true, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+                 , alias_t1.colB1 AS alias_colB1
+                 , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+              FROM test.t1 alias_t1
+          ORDER BY colA1
+                 , colB1 DESC
+          GROUP BY colA1
+                 , slbStatus
+            HAVING alias_t1.colB1 = 123
+               AND alias_t1.colC1 LIKE 'test it'
+               XOR (
+                   alias_t1.colF1 = 105
+                OR alias_colB1 = 106
+                   )
+             LIMIT 20,1
+         UNION ALL
+            SELECT t2.colA2
+              FROM test.t2
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -578,11 +807,23 @@ private slots:
                     {"colB1", DBNULLVALUE},
                 }))
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            INSERT
+              INTO test.t1 (
+                   t1.colA1
+                 , t1.colB1
+                   )
+            VALUES (
+                   NULL
+                 , NULL
+                   )
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -600,11 +841,15 @@ private slots:
                     {"colA1", DBNULLVALUE},
                 }))
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QCOMPARE("\n" + qry + "\n", R"(
+MUST BE THROWN AN EXCEPTION
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -623,11 +868,15 @@ private slots:
                     {"colA1", DBNULLVALUE},
                 }))
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QCOMPARE("\n" + qry + "\n", R"(
+MUST BE THROWN AN EXCEPTION
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -663,11 +912,199 @@ private slots:
                     },
                 }))
             ;
-            QString qry = query.buildQueryString({}, prettyOut ? 16 : 0);
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            INSERT
+              INTO test.t1 (
+                   t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1
+                   )
+            VALUES (
+                   NULL
+                 , 111
+                 , NULL
+                 , NULL
+                   )
+                 , (
+                   NULL
+                 , 222
+                 , NULL
+                 , NULL
+                   )
+                 , (
+                   NULL
+                 , 333
+                 , NULL
+                 , NULL
+                   )
+                 , (
+                   NULL
+                 , 444
+                 , NULL
+                 , NULL
+                   )
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    /***************************************************************************************/
+    /* UpdateQuery *************************************************************************/
+    /***************************************************************************************/
+    void queryString_UPDATE_error_on_no_where() {
+        QT_TRY {
+            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
+                .set("colB", 123)
+                .set("colC", "123")
+                .setNull("colD")
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
-            else
-                QCOMPARE(qry, R"(QQQQQQQQQQQQQQQ)");
+
+            QCOMPARE("\n" + qry + "\n", R"(
+MUST BE THROWN AN EXCEPTION
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_UPDATE_simple() {
+        QT_TRY {
+            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
+                .set("colB1", 123)
+                .set("colC1", "123")
+                .setNull("colD1")
+                .leftJoinWith("rel_a", "alias_t2")
+                .leftJoin("test.t2")
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+//                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
+//                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            UPDATE test.t1
+         LEFT JOIN test.t2 alias_t2
+                ON alias_t2.colA2 = t1.colC1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+               SET colB1 = 123
+                 , colC1 = '123'
+                 , colD1 = NULL
+             WHERE t1.colA1 = 123
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    /***************************************************************************************/
+    /* DeleteQuery *************************************************************************/
+    /***************************************************************************************/
+    void queryString_DELETE_error_on_no_where() {
+        QT_TRY {
+            DeleteQuery query = DeleteQuery(t1) //, "alias_t1")
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+            if (prettyOut)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+MUST BE THROWN AN EXCEPTION
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_DELETE_simple() {
+        QT_TRY {
+            DeleteQuery query = DeleteQuery(t1) //, "alias_t1")
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            DELETE test.t1
+              FROM test.t1
+             WHERE t1.colA1 = 123
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_DELETE_join() {
+        QT_TRY {
+            DeleteQuery query = DeleteQuery(t1) //, "alias_t1")
+                .leftJoinWith("rel_a")
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            DELETE test.t1
+              FROM test.t1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+             WHERE t1.colA1 = 123
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_DELETE_multi_target() {
+        QT_TRY {
+            DeleteQuery query = DeleteQuery(t1) //, "alias_t1")
+                .addTarget("t2")
+                .addTarget("t3")
+                .addTarget("t4")
+                .leftJoinWith("rel_a")
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+            ;
+
+            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            DELETE test.t1
+                 , t2
+                 , t3
+                 , t4
+              FROM test.t1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+             WHERE t1.colA1 = 123
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }

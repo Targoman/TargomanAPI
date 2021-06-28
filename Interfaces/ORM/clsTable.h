@@ -37,17 +37,17 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-template <class TDerrived> class clsBaseQueryData;
-template <class TDerrived, class TData> class BaseQuery;
+template <class itmplDerived> class clsBaseQueryData;
+template <class itmplDerived, class itmplData> class tmplBaseQuery;
 
-template <class TDerrived> class clsQueryJoinTraitData;
-template <class TDerrived> class QueryJoinTrait;
+template <class itmplDerived> class clsQueryJoinTraitData;
+template <class itmplDerived> class tmplQueryJoinTrait;
 
-template <class TDerrived> class clsQueryWhereTraitData;
-template <class TDerrived> class QueryWhereTrait;
+template <class itmplDerived> class clsQueryWhereTraitData;
+template <class itmplDerived> class tmplQueryWhereTrait;
 
-template <class TDerrived> class clsQueryGroupAndHavingTraitData;
-template <class TDerrived> class QueryGroupAndHavingTrait;
+template <class itmplDerived> class clsQueryGroupAndHavingTraitData;
+template <class itmplDerived> class QueryGroupAndHavingTrait;
 
 class clsSelectQueryData;
 class SelectQuery;
@@ -57,6 +57,9 @@ class CreateQuery;
 
 class clsUpdateQueryData;
 class UpdateQuery;
+
+class clsDeleteQueryData;
+class DeleteQuery;
 
 class clsTable : public intfAPIModule {
 protected:
@@ -172,20 +175,22 @@ protected:
 
     static QHash<QString, clsTable*> Registry;
 
-    template <class TDerrived>              friend class clsBaseQueryData;
-    template <class TDerrived, class TData> friend class BaseQuery;
-    template <class TDerrived>              friend class clsQueryJoinTraitData;
-    template <class TDerrived>              friend class QueryJoinTrait;
-    template <class TDerrived>              friend class clsQueryWhereTraitData;
-    template <class TDerrived>              friend class QueryWhereTrait;
-    template <class TDerrived>              friend class clsQueryGroupAndHavingTraitData;
-    template <class TDerrived>              friend class QueryGroupAndHavingTrait;
+    template <class itmplDerived>              friend class clsBaseQueryData;
+    template <class itmplDerived, class itmplData> friend class tmplBaseQuery;
+    template <class itmplDerived>              friend class clsQueryJoinTraitData;
+    template <class itmplDerived>              friend class tmplQueryJoinTrait;
+    template <class itmplDerived>              friend class clsQueryWhereTraitData;
+    template <class itmplDerived>              friend class tmplQueryWhereTrait;
+    template <class itmplDerived>              friend class clsQueryGroupAndHavingTraitData;
+    template <class itmplDerived>              friend class QueryGroupAndHavingTrait;
     friend clsSelectQueryData;
     friend SelectQuery;
     friend clsCreateQueryData;
     friend CreateQuery;
     friend clsUpdateQueryData;
     friend UpdateQuery;
+    friend clsDeleteQueryData;
+    friend DeleteQuery;
 
     friend TestQueryBuilders;
 };
