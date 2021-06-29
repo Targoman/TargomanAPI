@@ -115,11 +115,11 @@ QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL)
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
-            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, "NOW()" })
-            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression_Now })
+            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
         ;
 
-    return query.one();
+    return query.setCacheTime(CACHE_TIME).one();
 }
 
 bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -190,7 +190,7 @@ intfAccountProducts::intfAccountProducts(
 /******************************************************************/
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 {
-  constexpr quint16 CACHE_TIME  = 15 * 60;
+  constexpr quint16 CACHE_TIME = 15 * 60;
 
 //  QString ExtraFilters;
 //  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
@@ -203,11 +203,11 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
-            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, "NOW()" })
-            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression_Now })
+            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
         ;
 
-    return query.one();
+    return query.setCacheTime(CACHE_TIME).one();
 }
 
 bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL)

@@ -47,7 +47,7 @@ template <class itmplDerived> class clsQueryWhereTraitData;
 template <class itmplDerived> class tmplQueryWhereTrait;
 
 template <class itmplDerived> class clsQueryGroupAndHavingTraitData;
-template <class itmplDerived> class QueryGroupAndHavingTrait;
+template <class itmplDerived> class tmplQueryGroupAndHavingTrait;
 
 class clsSelectQueryData;
 class SelectQuery;
@@ -182,7 +182,7 @@ protected:
     template <class itmplDerived>              friend class clsQueryWhereTraitData;
     template <class itmplDerived>              friend class tmplQueryWhereTrait;
     template <class itmplDerived>              friend class clsQueryGroupAndHavingTraitData;
-    template <class itmplDerived>              friend class QueryGroupAndHavingTrait;
+    template <class itmplDerived>              friend class tmplQueryGroupAndHavingTrait;
     friend clsSelectQueryData;
     friend SelectQuery;
     friend clsCreateQueryData;

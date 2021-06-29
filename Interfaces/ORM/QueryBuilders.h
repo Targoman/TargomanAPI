@@ -24,19 +24,21 @@
 #ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
 #define TARGOMAN_API_ORM_QUERYBUILDERS_H
 
+#include "libTargomanDBM/clsDAC.h"
+using namespace Targoman::DBManager;
+
 class TestQueryBuilders;
 
 #include "Interfaces/ORM/Defs.hpp"
 #include "libTargomanCommon/exTargomanBase.h"
 #include "Interfaces/Common/GenericTypes.h"
 
-#define DBNULLVALUE "NULL"
-
 namespace Targoman {
 namespace API {
 namespace ORM {
 
 class clsTable;
+
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 
 TARGOMAN_DEFINE_ENUM(enuPreConditionOperator,
@@ -81,12 +83,60 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Descending)
 
 /***************************************************************************************/
+TARGOMAN_DEFINE_ENUM(enuDBExpressionType,
+                     Value,
+                     Function)
+
+struct stuDBExpression {
+    QString Name;
+    enuDBExpressionType::Type ExprType = enuDBExpressionType::Value;
+    QStringList Params = {};
+};
+
+struct stuDBExpressionWithValue {
+    const stuDBExpression* Expression;
+    QVariantMap Values;
+
+    stuDBExpressionWithValue() : Expression(nullptr) {}
+    stuDBExpressionWithValue(const stuDBExpression& _expression) : Expression(&_expression) {}
+
+    stuDBExpressionWithValue& setValue(const QString& _key, const QVariant& _val) {
+        this->Values.insert(_key, _val);
+        return *this;
+    }
+};
+
+class DBExpression : public QObject
+{
+public:
+    instanceGetter(DBExpression)
+    DBExpression();
+    virtual ~DBExpression();
+
+    void doRegister(const QString& _name, enuDBExpressionType::Type _type, const QStringList& _params = {});
+
+    const stuDBExpression& operator [] (const QString& _name);
+
+private:
+    QHash<QString, stuDBExpression> Registry;
+};
+
+#define REGISTER_DBEXPRESSION(_name, _type) \
+    Targoman::API::ORM::DBExpression::instance().doRegister(_name, _type);
+
+#define DBExpression_Null                       QVariant::fromValue(DBExpression::instance()["NULL"])
+#define DBExpression_Now                        QVariant::fromValue(DBExpression::instance()["NOW"])
+#define DBExpression_DateAdd(_date, _interval)  QVariant::fromValue(stuDBExpressionWithValue(DBExpression::instance()["DATE_ADD"]).setValue("date", _date).setValue("interval", _interval))
+#define DBExpression_DateSub(_date, _interval)  QVariant::fromValue(stuDBExpressionWithValue(DBExpression::instance()["DATE_SUB"]).setValue("date", _date).setValue("interval", _interval))
+
+/***************************************************************************************/
 class clsConditionData;
 
 class clsCondition {
 public:
     clsCondition();
     clsCondition(const clsCondition& _other);
+
     clsCondition(
             QString _col,
             enuConditionOperator::Type _operator,
@@ -96,13 +146,25 @@ public:
             QString _col,
             enuConditionOperator::Type _operator,
             QVariant _value = {});
+
+//    clsCondition(
+//            QString _col,
+//            enuConditionOperator::Type _operator,
+//            const stuDBExpression& _expression);
+//    clsCondition(
+//            QString _tableNameOrAlias,
+//            QString _col,
+//            enuConditionOperator::Type _operator,
+//            const stuDBExpression& _expression);
+
     clsCondition(
             QString _leftHandTableNameOrAlias,
             QString _leftHandCol,
             enuConditionOperator::Type _operator,
             QString _rightHandTableNameOrAlias,
             QString _rightHandCol);
-    ~clsCondition();
+
+    virtual ~clsCondition();
 
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
@@ -121,7 +183,6 @@ protected:
     QSharedDataPointer<clsConditionData> Data;
     void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
 
-//    friend clsSelectQueryData;
     friend TestQueryBuilders;
 };
 
@@ -133,7 +194,7 @@ template <class itmplDerived> class clsQueryWhereTraitData;
 template <class itmplDerived> class tmplQueryWhereTrait;
 
 template <class itmplDerived> class clsQueryGroupAndHavingTraitData;
-template <class itmplDerived> class QueryGroupAndHavingTrait;
+template <class itmplDerived> class tmplQueryGroupAndHavingTrait;
 
 template <class itmplDerived> class clsBaseQueryData;
 
@@ -143,18 +204,20 @@ class tmplBaseQuery
 public:
     tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other);
     tmplBaseQuery(clsTable& _table, const QString& _alias = {});
-    ~tmplBaseQuery();
+    virtual ~tmplBaseQuery();
 
 protected:
     virtual void iAmAbstract() = 0;
     QSharedDataPointer<itmplData> Data;
+    clsDAC DAC();
+
     friend TestQueryBuilders;
     friend clsQueryJoinTraitData<itmplDerived>;
     friend tmplQueryJoinTrait<itmplDerived>;
     friend clsQueryWhereTraitData<itmplDerived>;
     friend tmplQueryWhereTrait<itmplDerived>;
     friend clsQueryGroupAndHavingTraitData<itmplDerived>;
-    friend QueryGroupAndHavingTrait<itmplDerived>;
+    friend tmplQueryGroupAndHavingTrait<itmplDerived>;
 };
 
 /***************************************************************************************/
@@ -164,7 +227,7 @@ class tmplQueryJoinTrait
 public:
     tmplQueryJoinTrait(const tmplQueryJoinTrait<itmplDerived>& _other);
     tmplQueryJoinTrait(const itmplDerived* _owner);
-    ~tmplQueryJoinTrait();
+    virtual ~tmplQueryJoinTrait();
 
     itmplDerived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
@@ -200,7 +263,7 @@ class tmplQueryWhereTrait
 public:
     tmplQueryWhereTrait(const tmplQueryWhereTrait<itmplDerived>& _other);
     tmplQueryWhereTrait(const itmplDerived* _owner);
-    ~tmplQueryWhereTrait();
+    virtual ~tmplQueryWhereTrait();
 
     itmplDerived& where(const clsCondition& _condition);
     itmplDerived& andWhere(const clsCondition& _condition);
@@ -215,12 +278,12 @@ protected:
 
 /***************************************************************************************/
 template <class itmplDerived>
-class QueryGroupAndHavingTrait
+class tmplQueryGroupAndHavingTrait
 {
 public:
-    QueryGroupAndHavingTrait(const QueryGroupAndHavingTrait<itmplDerived>& _other);
-    QueryGroupAndHavingTrait(const itmplDerived* _owner);
-    ~QueryGroupAndHavingTrait();
+    tmplQueryGroupAndHavingTrait(const tmplQueryGroupAndHavingTrait<itmplDerived>& _other);
+    tmplQueryGroupAndHavingTrait(const itmplDerived* _owner);
+    virtual ~tmplQueryGroupAndHavingTrait();
 
 //    itmplDerived& groupBy(const clsCondition& _condition);
     itmplDerived& groupBy(const QString& _col);
@@ -246,12 +309,12 @@ class SelectQuery :
     public tmplBaseQuery<SelectQuery, clsSelectQueryData>,
     public tmplQueryJoinTrait<SelectQuery>,
     public tmplQueryWhereTrait<SelectQuery>,
-    public QueryGroupAndHavingTrait<SelectQuery>
+    public tmplQueryGroupAndHavingTrait<SelectQuery>
 {
 public:
     SelectQuery(const SelectQuery& _other);
     SelectQuery(clsTable& _table, const QString& _alias = {});
-    ~SelectQuery();
+    virtual ~SelectQuery();
 
     SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
@@ -277,6 +340,7 @@ public:
     SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& setCacheTime(quint16 _cacheTime);
 
     QVariantMap one(QVariantMap _args = {});
     QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
@@ -309,6 +373,11 @@ public:
     }
 };
 
+struct stuBoundQueryString {
+    QString QueryString;
+    QVariantMap BindingValues;
+};
+
 /***************************************************************************************/
 class CreateQuery :
     public tmplBaseQuery<CreateQuery, clsCreateQueryData>
@@ -316,7 +385,7 @@ class CreateQuery :
 public:
     CreateQuery(const CreateQuery& _other);
     CreateQuery(clsTable& _table, const QString& _alias = {});
-    ~CreateQuery();
+    virtual ~CreateQuery();
 
 public:
     CreateQuery& addCols(const QStringList& _cols);
@@ -325,11 +394,11 @@ public:
     CreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
     CreateQuery& select(SelectQuery& _selectQuery);
 
-    quint64 execute(QVariantMap _args = {});
+    quint64 execute(QVariantMap _args = {}, bool _useBinding = false);
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, quint8 _prettifierJustifyLen = 0);
+    QString buildQueryString(QVariantMap _args = {}, bool _useBinding = false, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 
@@ -344,18 +413,18 @@ class UpdateQuery :
 public:
     UpdateQuery(const UpdateQuery& _other);
     UpdateQuery(clsTable& _table, const QString& _alias = {});
-    ~UpdateQuery();
+    virtual ~UpdateQuery();
 
 //    UpdateQuery& Select(const SelectQuery& _selectClause);
     UpdateQuery& setNull(const QString& _col);
     UpdateQuery& set(const QString& _col, const QVariant& _value);
     UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
 
-    quint64 execute(QVariantMap _args = {});
+    quint64 execute(QVariantMap _args = {}, bool _useBinding = false);
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, quint8 _prettifierJustifyLen = 0);
+    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = false, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 
@@ -370,7 +439,7 @@ class DeleteQuery :
 public:
     DeleteQuery(const DeleteQuery& _other);
     DeleteQuery(clsTable& _table, const QString& _alias = {});
-    ~DeleteQuery();
+    virtual ~DeleteQuery();
 
 public:
     DeleteQuery& addTarget(const QString& _targetTableName);
@@ -390,5 +459,8 @@ private:
 }
 }
 }
+
+Q_DECLARE_METATYPE(Targoman::API::ORM::stuDBExpression);
+Q_DECLARE_METATYPE(Targoman::API::ORM::stuDBExpressionWithValue);
 
 #endif // TARGOMAN_API_ORM_QUERYBUILDERS_H

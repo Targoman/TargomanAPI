@@ -268,6 +268,35 @@ t1.colA1 = 101
         }
     }
 
+    void condition_buildString_dbexpression()
+    {
+//        auto v = QVariant::fromValue(
+//                     stuDBExpressionWithValue(
+//                         DBExpression::instance()["DATE_ADD"])
+//                 .setValue("date", "aaa")
+//                 .setValue("interval", "bbbbbbb")
+//        );
+
+        QT_TRY {
+            clsCondition cnd =
+                clsCondition({ "colA1", enuConditionOperator::Equal, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
+                .andCond({ "colB1", enuConditionOperator::Equal, DBExpression_DateAdd("colZZ", "INTERVAL 45 Min") })
+            ;
+
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
+               AND t1.colB1 = DATE_ADD(colZZ,INTERVAL 45 Min)
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
     /***************************************************************************************/
     /* SelectQuery *************************************************************************/
     /***************************************************************************************/
@@ -484,7 +513,7 @@ t1.colA1 = 101
                     .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
                     .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, 456})
                     .andCond({ "t77777777", "ffffff8", enuConditionOperator::Equal, "456"})
-//                    .andCond({ "t77777777", "ffffff9", enuConditionOperator::Equal, DBNULLVALUE})
+//                    .andCond({ "t77777777", "ffffff9", enuConditionOperator::Equal, DBExpression_Null})
                 )
 //                .where({ "colA1", enuConditionOperator::Equal, 123 })
 //                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
@@ -802,13 +831,13 @@ t1.colA1 = 101
                 .addCol("colB1")
                 .addCol("colX1")
                 .values(QVariantMap({
-                    {"colD1", 111},
-                    {"colZ1", "111"},
-                    {"colB1", DBNULLVALUE},
+                    { "colD1", 111 },
+                    { "colZ1", "111" },
+                    { "colB1", DBExpression_Null },
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
 //            if (prettyOut)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -838,11 +867,11 @@ t1.colA1 = 101
                 .values(QVariantMap({
                     {"colD1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBNULLVALUE},
+                    {"colA1", DBExpression_Null},
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -865,11 +894,11 @@ MUST BE THROWN AN EXCEPTION
                 .values(QVariantMap({
                     {"colD1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBNULLVALUE},
+                    {"colA1", DBExpression_Null},
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
             if (prettyOut)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -892,28 +921,28 @@ MUST BE THROWN AN EXCEPTION
                 .values(QVariantMap({
                     {"colB1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBNULLVALUE},
+                    {"colA1", DBExpression_Null},
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "222"},
-                    {"colA1", DBNULLVALUE},
+                    {"colA1", DBExpression_Null},
                 }))
                 .values(QList<QVariantMap>({
                     {
                         {"colB1", 333},
                         {"colZ1", "333"},
-                        {"colA1", DBNULLVALUE},
+                        {"colA1", DBExpression_Null},
                     },
                     {
                         {"colB1", 444},
                         {"colZ1", "444"},
-                        {"colA1", DBNULLVALUE},
+                        {"colA1", DBExpression_Null},
                     },
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
 //            if (prettyOut)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -967,12 +996,12 @@ MUST BE THROWN AN EXCEPTION
                 .setNull("colD")
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
 MUST BE THROWN AN EXCEPTION
 )");
         } QT_CATCH (const std::exception &e) {
@@ -993,12 +1022,12 @@ MUST BE THROWN AN EXCEPTION
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
 //            if (prettyOut)
-//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
             UPDATE test.t1
          LEFT JOIN test.t2 alias_t2
                 ON alias_t2.colA2 = t1.colC1
@@ -1008,6 +1037,45 @@ MUST BE THROWN AN EXCEPTION
                  , colC1 = '123'
                  , colD1 = NULL
              WHERE t1.colA1 = 123
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_UPDATE_simple_use_binding() {
+        QT_TRY {
+            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
+                .set("colB1", 123)
+                .set("colC1", "123")
+                .setNull("colD1")
+                .leftJoinWith("rel_a", "alias_t2")
+                .leftJoin("test.t2")
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+                .andWhere({ "colE1", enuConditionOperator::Equal, DBExpression_Now })
+//                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
+//                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
+            ;
+
+            stuBoundQueryString qry = query.buildQueryString({}, true, prettyOut ? 18 : 0);
+
+            if (prettyOut) {
+                qDebug().nospace().noquote() << endl
+                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+            }
+
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
+            UPDATE test.t1
+         LEFT JOIN test.t2 alias_t2
+                ON alias_t2.colA2 = t1.colC1
+         LEFT JOIN test.t2
+                ON t2.colA2 = t1.colC1
+               SET colB1 = :colB1
+                 , colC1 = :colC1
+                 , colD1 = :colD1
+             WHERE t1.colA1 = 123
+               AND t1.colE1 = NOW()
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);

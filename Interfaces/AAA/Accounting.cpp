@@ -291,8 +291,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             this->AssetUsageLimitsColsName.join(',')
         }))
         .where({ tblAccountSaleablesBase::slbID, enuConditionOperator::Equal, _saleableCode })
-        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, "NOW()" })
-        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, "DATE_ADD(NOW(), INTERVAL 15 Min)" })
+        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression_Now })
+        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
         .one();
 
     /*QVariantMap OLD_SaleableInfo = this->AccountSaleables->selectFromTable(
@@ -437,7 +437,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             }))
         ///TODO: join with userAssets to count user discount usage per voucher
         .where({ tblAccountCouponsBase::cpnID, enuConditionOperator::Equal, _discountCode })
-        .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, "NOW()" })
+        .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression_Now })
         .one();
 
         if (DiscountInfo.size() == 0)
