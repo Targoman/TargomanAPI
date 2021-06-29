@@ -78,12 +78,14 @@ Advert::Advert() :
                                             {"show", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
                                             {"click", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
                                          },
+                                         &Advertisement::AccountProducts::instance(),
                                          &Advertisement::AccountSaleables::instance(),
                                          &Advertisement::AccountUserAssets::instance(),
                                          &Advertisement::AccountAssetUsage::instance(),
                                          &Advertisement::AccountCoupons::instance()
                                          )
 {
+    this->addSubModule(AccountProducts.data());
     this->addSubModule(AccountSaleables.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountAssetUsage.data());

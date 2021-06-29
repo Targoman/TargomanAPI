@@ -618,6 +618,11 @@ public:
 /* tmplBaseQuery ***********************************************************************/
 /***************************************************************************************/
 template <class itmplDerived, class itmplData>
+tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery() :
+    Data(nullptr)
+{}
+
+template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other) :
     Data(_other.Data)
 {}
@@ -634,6 +639,11 @@ tmplBaseQuery<itmplDerived, itmplData>::~tmplBaseQuery() {
 //    if (this->dac != nullptr)
 //        delete this->dac;
 //    this->dac = nullptr;
+}
+
+template <class itmplDerived, class itmplData>
+bool tmplBaseQuery<itmplDerived, itmplData>::isValid() {
+    return (this->Data != nullptr);
 }
 
 template <class itmplDerived, class itmplData>
@@ -1040,7 +1050,7 @@ public:
 };
 
 /***************************************************************************************/
-/* tmplQueryGroupAndHavingTrait ************************************************************/
+/* tmplQueryGroupAndHavingTrait ********************************************************/
 /***************************************************************************************/
 template <class itmplDerived>
 tmplQueryGroupAndHavingTrait<itmplDerived>::tmplQueryGroupAndHavingTrait(const tmplQueryGroupAndHavingTrait<itmplDerived>& _other) :
@@ -1436,6 +1446,17 @@ public:
 /***************************************************************************************/
 /* SelectQuery *************************************************************************/
 /***************************************************************************************/
+SelectQuery::SelectQuery() :
+    tmplBaseQuery<SelectQuery, clsSelectQueryData>(),
+    tmplQueryJoinTrait<SelectQuery>(this),
+    tmplQueryWhereTrait<SelectQuery>(this),
+    tmplQueryGroupAndHavingTrait<SelectQuery>(this)
+
+{
+    tmplQueryJoinTrait<SelectQuery>::JoinTraitData->Owner = this;
+    tmplQueryWhereTrait<SelectQuery>::WhereTraitData->Owner = this;
+    tmplQueryGroupAndHavingTrait<SelectQuery>::GroupAndHavingTraitData->Owner = this;
+}
 SelectQuery::SelectQuery(const SelectQuery& _other) :
     tmplBaseQuery<SelectQuery, clsSelectQueryData>(_other),
     tmplQueryJoinTrait<SelectQuery>(_other),
@@ -1943,8 +1964,8 @@ public:
             if (this->CreateQueryPreparedItems.Values.isEmpty())
                 throw exQueryBuilder("Values is empty");
         }
-        else if (this->Select != nullptr)
-            this->CreateQueryPreparedItems.Select = this->Select->buildQueryString({}, false, false, _prettifierJustifyLen);
+        else if (this->Select.isValid())
+            this->CreateQueryPreparedItems.Select = this->Select.buildQueryString({}, false, false, _prettifierJustifyLen);
         else
             throw exQueryBuilder("Values or Select not provided");
     }
@@ -1952,7 +1973,7 @@ public:
 public:
     QStringList Cols;
     QList<QVariantMap> Values;
-    SelectQuery* Select = nullptr;
+    SelectQuery Select;
 
     stuCreateQueryPreparedItems CreateQueryPreparedItems;
 };
@@ -2005,7 +2026,7 @@ CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues)
     if (this->Data->Cols.isEmpty())
         throw new exQueryBuilder("Columns must be defined before values");
 
-    if (this->Data->Select != nullptr)
+    if (this->Data->Select.isValid())
         throw new exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_oneRecordValues);
@@ -2017,7 +2038,7 @@ CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues
     if (this->Data->Cols.isEmpty())
         throw new exQueryBuilder("Columns must be defined before values");
 
-    if (this->Data->Select != nullptr)
+    if (this->Data->Select.isValid())
         throw new exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_multipleRecordValues);
@@ -2027,15 +2048,15 @@ CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues
 /***********************\
 |* Select              *|
 \***********************/
-CreateQuery& CreateQuery::select(SelectQuery& _selectQuery)
+CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery)
 {
-    if (this->Data->Select != nullptr)
+    if (this->Data->Cols.isEmpty())
         throw new exQueryBuilder("Columns must be defined before select query");
 
     if (this->Data->Values.length())
         throw new exQueryBuilder("Values is not empty");
 
-    this->Data->Select = &_selectQuery;
+    this->Data->Select = _selectQuery;
 
     return *this;
 }
@@ -2113,6 +2134,7 @@ QString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint
         }
     }
     else {
+        QueryParts.append(this->Data->CreateQueryPreparedItems.Select);
     }
 
     //-----------

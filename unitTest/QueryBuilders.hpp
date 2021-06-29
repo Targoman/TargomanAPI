@@ -985,6 +985,49 @@ MUST BE THROWN AN EXCEPTION
         }
     }
 
+    void queryString_CREATE_values_from_select() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+                .addCol("colB1")
+                .addCol("colC1")
+                .addCol("colD1")
+                .select(SelectQuery(t2)
+                    .addCols(QStringList({
+                        "colA2",
+                        "colB2",
+                        "colC2",
+                        "colD2",
+                    }))
+                    .where({ "colE2", enuConditionOperator::Greater, 123 })
+                )
+            ;
+
+            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+
+//            if (prettyOut)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            INSERT
+              INTO test.t1 (
+                   t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1
+                   )
+            SELECT t2.colA2
+                 , t2.colB2
+                 , t2.colC2
+                 , t2.colD2
+              FROM test.t2
+             WHERE t2.colE2 > 123
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
     /***************************************************************************************/
     /* UpdateQuery *************************************************************************/
     /***************************************************************************************/

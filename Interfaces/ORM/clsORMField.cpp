@@ -44,20 +44,53 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
       UpdatableBy(_o.UpdatableBy),
       Privs(_o.Privs)
 {
-    if(this->ParamTypeName.startsWith("NULLABLE_TYPE("))
+    if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
             .replace("(", "<")
             .replace(")", ">")
             .replace("NULLABLE_TYPE", NULLABLE_UNDERLAYER_CLASS_NAME)
         ;
+    }
 }
 
+clsORMFieldData::clsORMFieldData(const QString& _name,
+                const QString& _type,
+                QVariant _defaultValue,
+                const QFieldValidator& _extraValidator,
+                enuUpdatableBy::Type _updatableBy,
+                bool _isSortable,
+                bool _isFilterable,
+                bool _isSelfIdentifier,
+                bool _isVirtual,
+                bool _isPrimaryKey,
+                const QString& _renameAs):
+    ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
+    Name(_name),
+    ParamTypeName(_type),
+    DefaultValue(_defaultValue),
+    ExtraValidator(_extraValidator),
+    RenameAs(_renameAs),
+    UpdatableBy(_updatableBy),
+    Privs((_isSortable ? 0x01 : 0) +
+          (_isFilterable ? 0x02 : 0) +
+          (_isSelfIdentifier ? 0x4 : 0) +
+          (_isPrimaryKey ? 0x8 : 0) +
+          (_isVirtual ? 0x10 : 0))
+{
+    if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
+        this->ParamTypeName
+            .replace("(", "<")
+            .replace(")", ">")
+            .replace("NULLABLE_TYPE", NULLABLE_UNDERLAYER_CLASS_NAME)
+        ;
+    }
+}
 
 void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
 {
-    if(Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)){
+    if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)) {
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toLatin1()));
-        if(this->Data->ParameterType == QMetaType::UnknownType)
+        if (this->Data->ParameterType == QMetaType::UnknownType)
             throw exRESTRegistry("Unregistered type: <"+this->Data->ParamTypeName+">");
         _module->updateFilterParamType(this->Data->ParamTypeName, this->Data->ParameterType);
     }

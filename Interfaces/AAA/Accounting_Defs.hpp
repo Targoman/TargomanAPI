@@ -107,8 +107,8 @@ struct stuAssetItem {
     QString                      prdName;
     TAPI::Date_t                 prdValidFromDate;
     TAPI::Date_t                 prdValidToDate;
-    NULLABLE_TYPE(quint8)             prdValidFromHour;
-    NULLABLE_TYPE(quint8)             prdValidToHour;
+    NULLABLE_TYPE(quint8)        prdValidFromHour;
+    NULLABLE_TYPE(quint8)        prdValidToHour;
     TAPI::PrivObject_t           prdPrivs;
     qreal                        prdVAT;
     quint32                      prdInStockCount;
@@ -124,7 +124,7 @@ struct stuAssetItem {
     qreal                        slbBasePrice;
     TAPI::SaleableAdditive_t     slbAdditives;
     quint32                      slbProductCount;
-    NULLABLE_TYPE(quint32)            slbMaxSaleCountPerUser;
+    NULLABLE_TYPE(quint32)       slbMaxSaleCountPerUser;
     quint32                      slbInStockCount;
     quint32                      slbOrderedCount;
     quint32                      slbReturnedCount;

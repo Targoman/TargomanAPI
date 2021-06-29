@@ -202,9 +202,11 @@ template <class itmplDerived, class itmplData>
 class tmplBaseQuery
 {
 public:
+    tmplBaseQuery();
     tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other);
     tmplBaseQuery(clsTable& _table, const QString& _alias = {});
     virtual ~tmplBaseQuery();
+    bool isValid();
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -312,6 +314,7 @@ class SelectQuery :
     public tmplQueryGroupAndHavingTrait<SelectQuery>
 {
 public:
+    SelectQuery();
     SelectQuery(const SelectQuery& _other);
     SelectQuery(clsTable& _table, const QString& _alias = {});
     virtual ~SelectQuery();
@@ -392,7 +395,7 @@ public:
     CreateQuery& addCol(const QString& _col);
     CreateQuery& values(const QVariantMap& _oneRecordValues);
     CreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
-    CreateQuery& select(SelectQuery& _selectQuery);
+    CreateQuery& select(const SelectQuery& _selectQuery);
 
     quint64 execute(QVariantMap _args = {}, bool _useBinding = false);
 

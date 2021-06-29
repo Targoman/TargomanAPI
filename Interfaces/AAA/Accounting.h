@@ -40,6 +40,7 @@ protected:
     intfRESTAPIWithAccounting(const QString& _schema,
                              const QString& _module,
                              AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+                             intfAccountProducts* _products,
                              intfAccountSaleables* _saleables,
                              intfAccountUserAssets* _userAssets,
                              intfAccountAssetUsage* _assetusage,
@@ -92,6 +93,7 @@ private slots:
     ///TODO updateItemInBasket
 
 protected:
+    QScopedPointer<intfAccountProducts> AccountProducts;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
     QScopedPointer<intfAccountAssetUsage> AccountAssetUsage;

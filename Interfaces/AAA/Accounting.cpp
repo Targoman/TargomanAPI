@@ -80,14 +80,16 @@ stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
 }
 
 intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
-                                                   const QString& _module,
-                                                   AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-                                                   intfAccountSaleables* _saleables,
-                                                   intfAccountUserAssets* _userAssets,
-                                                   intfAccountAssetUsage* _assetusage,
-                                                   intfAccountCoupons* _discounts,
-                                                   intfAccountPrizes* _prizes) :
+                                                     const QString& _module,
+                                                     AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+                                                     intfAccountProducts* _products,
+                                                     intfAccountSaleables* _saleables,
+                                                     intfAccountUserAssets* _userAssets,
+                                                     intfAccountAssetUsage* _assetusage,
+                                                     intfAccountCoupons* _discounts,
+                                                     intfAccountPrizes* _prizes) :
     ORM::clsRESTAPIWithActionLogs(_schema, _module),
+    AccountProducts(_products),
     AccountSaleables(_saleables),
     AccountUserAssets(_userAssets),
     AccountAssetUsage(_assetusage),

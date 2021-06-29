@@ -60,22 +60,9 @@ public:
                     bool _isSelfIdentifier,
                     bool _isVirtual,
                     bool _isPrimaryKey,
-                    const QString& _renameAs):
-        ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
-        Name(_name),
-        ParamTypeName(_type),
-        DefaultValue(_defaultValue),
-        ExtraValidator(_extraValidator),
-        RenameAs(_renameAs),
-        UpdatableBy(_updatableBy),
-        Privs((_isSortable ? 0x01 : 0) +
-              (_isFilterable ? 0x02 : 0) +
-              (_isSelfIdentifier ? 0x4 : 0) +
-              (_isPrimaryKey ? 0x8 : 0) +
-              (_isVirtual ? 0x10 : 0))
-    {}
+                    const QString& _renameAs);
     clsORMFieldData(const clsORMFieldData& _o);
-    ~clsORMFieldData() { }
+    ~clsORMFieldData() {}
 
     inline bool isSortable() {return this->Privs & 0x01;}
     inline bool isFilterable() {return this->Privs & 0x02;}
@@ -131,7 +118,7 @@ public:
                  _isPrimaryKey,
                  _renameAs
                  ))
-    {;}
+    {}
 
     void registerTypeIfNotRegisterd(intfAPIModule* _module);
     void updateTypeID(QMetaType::Type _type);

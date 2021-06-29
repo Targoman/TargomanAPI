@@ -190,9 +190,11 @@ void clsTable::prepareFiltersList()
     }
 
     foreach (stuRelation Relation, this->Relations) {
+        if (clsTable::Registry.contains(Relation.ReferenceTable) == false)
+            throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: " + this->Name + ")");
+
         clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
-        if (ForeignTable == nullptr)
-            throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: "+this->Name+")");
+//        if (ForeignTable == nullptr)
 
         foreach (clsORMField Col, ForeignTable->BaseCols) {
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
