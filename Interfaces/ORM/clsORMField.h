@@ -168,9 +168,12 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_CREATED_ON       S(TAPI::DateTime_t), QFV,                       QAuto,    UPNone
 #define ORM_UPDATED_BY       S(quint64),          QFV.integer().minValue(1), QInvalid, enuUpdatableBy::__UPDATER__
 
+#define ORM_RELATION_OF_CREATOR_NAME "Creator"
+#define ORM_RELATION_OF_UPDATER_NAME "Editor"
+
 ///                                  Relation Name Col Reference Table              ForeignCol      Rename      IsLeftJoin
-#define ORM_RELATION_OF_CREATOR(F) { "Creator",  { F,  R(AAASchema, tblUser::Name), tblUser::usrID, "Creator_", true } }
-#define ORM_RELATION_OF_UPDATER(F) { "Editor",   { F,  R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true } }
+#define ORM_RELATION_OF_CREATOR(F) { ORM_RELATION_OF_CREATOR_NAME, { F,  R(AAASchema, tblUser::Name), tblUser::usrID, "Creator_", true } }
+#define ORM_RELATION_OF_UPDATER(F) { ORM_RELATION_OF_UPDATER_NAME, { F,  R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true } }
 }
 }
 }

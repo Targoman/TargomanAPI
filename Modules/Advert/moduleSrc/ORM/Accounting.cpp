@@ -47,12 +47,20 @@ AccountProducts::AccountProducts()
             { tblAccountProducts::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::locID },
         }
     )
-{;}
+{}
 
 /******************************************************/
 AccountSaleables::AccountSaleables()
-    : intfAccountSaleables(AdvertSchema)
-{;}
+    : intfAccountSaleables(AdvertSchema,
+        {///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+            { tblAccountSaleables::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountSaleables::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountSaleables::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountSaleables::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { tblAccountSaleables::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+        }
+    )
+{}
 
 /******************************************************/
 AccountUserAssets::AccountUserAssets()
@@ -60,7 +68,7 @@ AccountUserAssets::AccountUserAssets()
         {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("uas")
         })
-{;}
+{}
 
 /******************************************************/
 AccountAssetUsage::AccountAssetUsage()
@@ -69,12 +77,12 @@ AccountAssetUsage::AccountAssetUsage()
             ADVERT_DEFINE_ASSET_FIELDS("usg")
         }
     )
-{;}
+{}
 
 /******************************************************/
 AccountCoupons::AccountCoupons()
     : intfAccountCoupons(AdvertSchema)
-{;}
+{}
 
 }
 }

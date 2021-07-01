@@ -107,7 +107,7 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
 }
 
 intfRESTAPIWithAccounting::~intfRESTAPIWithAccounting()
-{;}
+{}
 
 stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
@@ -252,24 +252,6 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
-            //tblAccountProductsBase::prdID,
-            tblAccountProductsBase::prdCode,
-            tblAccountProductsBase::prdName,
-            //tblAccountProductsBase::prdDesc,
-            tblAccountProductsBase::prdValidFromDate,
-            tblAccountProductsBase::prdValidToDate,
-            tblAccountProductsBase::prdValidFromHour,
-            tblAccountProductsBase::prdValidToHour,
-            //tblAccountProductsBase::prdPrivs,
-            tblAccountProductsBase::prdVAT,
-            tblAccountProductsBase::prdInStockCount,
-            tblAccountProductsBase::prdOrderedCount,
-            tblAccountProductsBase::prdReturnedCount,
-            tblAccountProductsBase::prdStatus,
-            //tblAccountProductsBase::prdCreatedBy_usrID,
-            //tblAccountProductsBase::prdCreationDateTime,
-            //tblAccountProductsBase::prdUpdatedBy_usrID,
-
             tblAccountSaleablesBase::slbID,
             tblAccountSaleablesBase::slbCode,
             //tblAccountSaleablesBase::slb_prdID,
@@ -290,11 +272,29 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             //tblAccountSaleablesBase::slbCreationDateTime,
             //tblAccountSaleablesBase::slbUpdatedBy_usrID,
 
-            this->AssetUsageLimitsColsName.join(',')
+            //tblAccountProductsBase::prdID,
+            tblAccountProductsBase::prdCode,
+            tblAccountProductsBase::prdName,
+            //tblAccountProductsBase::prdDesc,
+            tblAccountProductsBase::prdValidFromDate,
+            tblAccountProductsBase::prdValidToDate,
+            tblAccountProductsBase::prdValidFromHour,
+            tblAccountProductsBase::prdValidToHour,
+            //tblAccountProductsBase::prdPrivs,
+            tblAccountProductsBase::prdVAT,
+            tblAccountProductsBase::prdInStockCount,
+            tblAccountProductsBase::prdOrderedCount,
+            tblAccountProductsBase::prdReturnedCount,
+            tblAccountProductsBase::prdStatus,
+            //tblAccountProductsBase::prdCreatedBy_usrID,
+            //tblAccountProductsBase::prdCreationDateTime,
+            //tblAccountProductsBase::prdUpdatedBy_usrID,
         }))
-        .where({ tblAccountSaleablesBase::slbID, enuConditionOperator::Equal, _saleableCode })
+        .addCols(this->AssetUsageLimitsColsName)
+        .leftJoinWith("product")
+        .where({ tblAccountSaleablesBase::slbCode, enuConditionOperator::Equal, _saleableCode })
         .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
-        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min") })
+        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         .one();
 
     /*QVariantMap OLD_SaleableInfo = this->AccountSaleables->selectFromTable(

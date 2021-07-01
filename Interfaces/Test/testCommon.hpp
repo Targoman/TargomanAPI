@@ -96,37 +96,39 @@ protected:
         auto rolID = Result.lastInsertId().toUInt();
 
         if (_createUsers) {
-            DAC.execQuery("",
-                          "INSERT IGNORE"
-                          "  INTO tblUser"
-                          "   SET usrEmail = ?,"
-                          "       usrName = 'unit',"
-                          "       usrFamily = 'test',"
-                          "       usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',"
-                          "       usrRole = ?"
-                          "       usrCreatedBy_usrID = ?",
-                          {
-                              UT_UserEmail,
-                              rolID,
-                              UT_SystemUserID
-                          }
-                        );
+            DAC.execQuery("", R"(
+          INSERT IGNORE
+            INTO tblUser
+             SET usrEmail = ?,
+                 usrName = 'unit',
+                 usrFamily = 'test',
+                 usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',
+                 usr_rolID = ?,
+                 usrCreatedBy_usrID = ?
+                )",
+                {
+                    UT_UserEmail,
+                    rolID,
+                    UT_SystemUserID
+                }
+            );
 
-            clsDACResult res2 = DAC.execQuery("",
-                          "INSERT IGNORE"
-                          "  INTO tblUser"
-                          "   SET usrEmail = ?,"
-                          "       usrName = 'admin unit',"
-                          "       usrFamily = 'test',"
-                          "       usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',"
-                          "       usrRole = ?"
-                          "       usrCreatedBy_usrID = ?",
-                          {
-                              UT_AdminUserEmail,
-                              UT_AdminRoleID,
-                              UT_SystemUserID
-                          }
-                        );
+            clsDACResult res2 = DAC.execQuery("", R"(
+          INSERT IGNORE
+            INTO tblUser
+             SET usrEmail = ?,
+                 usrName = 'admin unit',
+                 usrFamily = 'test',
+                 usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',
+                 usr_rolID = ?,
+                 usrCreatedBy_usrID = ?
+                )",
+                {
+                    UT_AdminUserEmail,
+                    UT_AdminRoleID,
+                    UT_SystemUserID
+                }
+            );
 
             gAdminUserID = res2.lastInsertId().toULongLong();
 

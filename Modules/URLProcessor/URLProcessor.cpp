@@ -43,7 +43,7 @@ QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAl
 }
 
 URLProcessor::URLProcessor()
-{;}
+{}
 
 }
 }

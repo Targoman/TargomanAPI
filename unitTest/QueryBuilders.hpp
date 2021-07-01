@@ -107,8 +107,6 @@ class TestQueryBuilders: public QObject
 {
     Q_OBJECT
 
-    bool prettyOut = true;
-
 //private slots:
     void testOptional()
     {
@@ -194,8 +192,8 @@ private slots:
                 clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -214,8 +212,8 @@ t1.colA1 = 101
                 .andCond({ "colB1", enuConditionOperator::NotNull })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -245,8 +243,8 @@ t1.colA1 = 101
                 .orCond({ "colH1", enuConditionOperator::Equal, 107 })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -277,23 +275,25 @@ t1.colA1 = 101
 //                 .setValue("interval", "bbbbbbb")
 //        );
 
-//        QVariant v1(DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min"));
-//        QVariant v2 = DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min");
+//        QVariant v1(DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE));
+//        QVariant v2 = DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE);
 
         QT_TRY {
             clsCondition cnd =
-                clsCondition({ "colA1", enuConditionOperator::Equal, DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min") })
-                .andCond({ "colB1", enuConditionOperator::Equal, DBExpression::DATE_ADD("colZZ", "45 Min") })
+                clsCondition({ "colA1", enuConditionOperator::Equal, DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+                .andCond({ "colB1", enuConditionOperator::Equal, DBExpression::DATE_ADD("colZZ", 45, enuDBExpressionIntervalUnit::MINUTE) })
+                .andCond({ "colC1", enuConditionOperator::Equal, DBExpression::DATE_ADD("colZZ", "1:2", enuDBExpressionIntervalUnit::MINUTE_SECOND) })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
+            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
-t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
-               AND t1.colB1 = DATE_ADD(colZZ,INTERVAL 45 Min)
+t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
+               AND t1.colB1 = DATE_ADD(colZZ,INTERVAL 45 MINUTE)
+               AND t1.colC1 = DATE_ADD(colZZ,INTERVAL '1:2' MINUTE_SECOND)
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -306,8 +306,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
     void queryString_SELECT_EmptyCol() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1);
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = query.buildQueryString({}, false, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -337,8 +337,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = query.buildQueryString({}, false, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -363,8 +363,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
-//            if (prettyOut)
+            QString qry = query.buildQueryString({}, false, false);
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -398,9 +398,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -445,9 +445,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .leftJoin(R("test", "t2"))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -485,9 +485,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .leftJoin("test.t2")
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -523,9 +523,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -566,9 +566,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -604,9 +604,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
 //                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -631,9 +631,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, false);
 
-            if (prettyOut)
+            if (SQLPrettyLen)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -676,9 +676,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .limit(100)
             ;
 
-            QString qry = query.buildQueryString({}, true, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, true, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -732,9 +732,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .limit(100)
             ;
 
-            QString qry = query.buildQueryString({}, false, true, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, false, true);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -794,9 +794,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 )
             ;
 
-            QString qry = query.buildQueryString({}, true, false, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({}, true, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -840,9 +840,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut) {
+//            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
 //                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -877,9 +877,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut) {
+//            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
 //                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -907,9 +907,9 @@ MUST BE THROWN AN EXCEPTION
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut) {
+//            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
 //                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -926,37 +926,41 @@ MUST BE THROWN AN EXCEPTION
     void queryString_CREATE_values_multi() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
-                .addCol("colA1")
+                .addCol("colF1")
                 .addCol("colB1")
+                .addCol("colA1")
                 .addCol("colC1")
-                .addCol("colD1")
                 .values(QVariantMap({
                     {"colB1", 111},
-                    {"colZ1", "111"},
-                    {"colA1", DBExpression::_NULL()},
+                    {"colZ1", "11Z"},
+                    {"colA1", DBExpression::NOW()},
+                    {"colF1", 112},
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
-                    {"colZ1", "222"},
-                    {"colA1", DBExpression::_NULL()},
+                    {"colZ1", "22Z"},
+                    {"colA1", DBExpression::NOW()},
+                    {"colF1", 212},
                 }))
                 .values(QList<QVariantMap>({
                     {
                         {"colB1", 333},
-                        {"colZ1", "333"},
-                        {"colA1", DBExpression::_NULL()},
+                        {"colZ1", "33Z"},
+                        {"colA1", DBExpression::NOW()},
+                        {"colF1", 312},
                     },
                     {
                         {"colB1", 444},
-                        {"colZ1", "444"},
-                        {"colA1", DBExpression::_NULL()},
+                        {"colZ1", "44Z"},
+                        {"colA1", DBExpression::NOW()},
+                        {"colF1", 412},
                     },
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut) {
+//            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
 //                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -1031,9 +1035,9 @@ MUST BE THROWN AN EXCEPTION
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, true, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, true);
 
-            if (prettyOut) {
+            if (SQLPrettyLen) {
                 qDebug().nospace().noquote() << endl
                                              << endl << "-- Query:" << endl << qry.QueryString << endl
                                              << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -1075,9 +1079,9 @@ MUST BE THROWN AN EXCEPTION
                 )
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut) {
+//            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
 //                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -1114,9 +1118,9 @@ MUST BE THROWN AN EXCEPTION
                 .setNull("colD")
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
@@ -1140,9 +1144,9 @@ MUST BE THROWN AN EXCEPTION
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false);
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
@@ -1175,9 +1179,9 @@ MUST BE THROWN AN EXCEPTION
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, true, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, true);
 
-            if (prettyOut) {
+            if (SQLPrettyLen) {
                 qDebug().nospace().noquote() << endl
                                              << endl << "-- Query:" << endl << qry.QueryString << endl
                                              << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
@@ -1208,9 +1212,9 @@ MUST BE THROWN AN EXCEPTION
             DeleteQuery query = DeleteQuery(t1) //, "alias_t1")
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({});
 
-            if (prettyOut)
+            if (SQLPrettyLen)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -1227,9 +1231,9 @@ MUST BE THROWN AN EXCEPTION
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({});
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -1249,9 +1253,9 @@ MUST BE THROWN AN EXCEPTION
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({});
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
@@ -1276,9 +1280,9 @@ MUST BE THROWN AN EXCEPTION
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({}, prettyOut ? 18 : 0);
+            QString qry = query.buildQueryString({});
 
-//            if (prettyOut)
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(

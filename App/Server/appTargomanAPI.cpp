@@ -52,7 +52,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exAPIModuleInitiailization, exModuleLoader);
 
 
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
-{;}
+{}
 
 void appTargomanAPI::slotExecute()
 {

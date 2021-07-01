@@ -92,7 +92,7 @@ class clsRequestHandler : public QObject
         stuResult(const QVariant& _result = {}, qhttp::TStatusCode _code = qhttp::ESTATUS_OK) :
             StatusCode(_code),
             Result(_result)
-        {;}
+        {}
     };
 
 public:

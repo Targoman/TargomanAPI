@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Advert.h"
@@ -25,6 +26,11 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
+
+#include "Interfaces/ORM/QueryBuilders.h"
+using namespace Targoman::API::ORM;
+
+using namespace Targoman::API::AAA::Accounting;
 
 #include "ORM/Accounting.h"
 #include "ORM/Defs.hpp"
@@ -34,15 +40,17 @@
 #include "ORM/Props.h"
 #include "ORM/Locations.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertType);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAdvertOrder);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuBannerSizes);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAccountOrdersStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAdvertType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAdvertOrder);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuBannerSizes);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAccountOrdersStatus);
 
 TAPI_REGISTER_METATYPE(
-        COMPLEXITY_Complex,
-        TAPI, stuAdvert,
-        [](const TAPI::stuAdvert& _value) -> QVariant{return _value.toVariant();}
+    COMPLEXITY_Complex,
+    TAPI,
+    stuAdvert,
+    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
+//    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
 
 namespace Targoman {
@@ -53,7 +61,76 @@ using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
-TAPI::stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order)
+quint32 Advert::apiCREATENewTestProduct(
+        TAPI::JWT_t _JWT
+    )
+{
+    CreateQuery query = CreateQuery(*this->AccountProducts)
+        .addCol(tblAccountProductsBase::prdCode)
+        .addCol(tblAccountProductsBase::prdName)
+//        .addCol(tblAccountProductsBase::prdDesc)
+        .addCol(tblAccountProductsBase::prdValidFromDate)
+//        .addCol(tblAccountProductsBase::prdValidToDate)
+//        .addCol(tblAccountProductsBase::prdValidFromHour)
+//        .addCol(tblAccountProductsBase::prdValidToHour)
+//        .addCol(tblAccountProductsBase::prdPrivs)
+//        .addCol(tblAccountProductsBase::prdVAT)
+        .addCol(tblAccountProductsBase::prdInStockCount)
+//        .addCol(tblAccountProductsBase::prdOrderedCount)
+//        .addCol(tblAccountProductsBase::prdReturnedCount)
+//        .addCol(tblAccountProductsBase::prdStatus)
+        .addCol(tblAccountProducts::prd_locID)
+//        .addCol(tblAccountProducts::prdShowPerDay)
+//        .addCol(tblAccountProducts::prdShowTotal)
+//        .addCol(tblAccountProducts::prdClicksPerDay)
+//        .addCol(tblAccountProducts::prdClicksPerMonth)
+//        .addCol(tblAccountProducts::prdClicksTotal)
+
+        .values(QVariantMap({
+            { tblAccountProductsBase::prdCode,          111 },
+            { tblAccountProductsBase::prdName,          "222" },
+//            { tblAccountProductsBase::prdDesc,          DBExpression::_NULL() },
+            { tblAccountProductsBase::prdValidFromDate, DBExpression::CURDATE() },
+//            { tblAccountProductsBase::prdValidToDate,   DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdValidFromHour, DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdValidToHour,   DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdPrivs,         DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdVAT,           DBExpression::_NULL() },
+            { tblAccountProductsBase::prdInStockCount,  444 },
+//            { tblAccountProductsBase::prdOrderedCount,  DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdReturnedCount, DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdStatus,        DBExpression::_NULL() },
+            { tblAccountProducts::prd_locID,            555 },
+//            { tblAccountProducts::prdShowPerDay,        DBExpression::_NULL() },
+//            { tblAccountProducts::prdShowTotal,         DBExpression::_NULL() },
+//            { tblAccountProducts::prdClicksPerDay,      DBExpression::_NULL() },
+//            { tblAccountProducts::prdClicksPerMonth,    DBExpression::_NULL() },
+//            { tblAccountProducts::prdClicksTotal,       DBExpression::_NULL() },
+        }))
+    ;
+
+    auto qry = query.buildQueryString();
+    qDebug().nospace().noquote() << endl
+                                 << endl << "-- Query:" << endl << qry.QueryString << endl
+                                 << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+
+    quint64 insertedID = query.execute();
+    return insertedID;
+
+}
+
+quint32 Advert::apiCREATENewTestSaleable(
+        TAPI::JWT_t _JWT
+    )
+{
+    return 456;
+}
+
+TAPI::stuAdvert Advert::apiGETNewBanner(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _location,
+        TAPI::enuAdvertOrder::Type _order
+    )
 {
     /*clsDACResult Result = AdvertDACInstance().execQuery(
                                 "",
@@ -61,12 +138,22 @@ TAPI::stuAdvert Advert::apiGETNewBanner(TAPI::RemoteIP_t _REMOTE_IP, QString _lo
                                 )*/
 }
 
-TAPI::stuAdvert Advert::apiGETNewText(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, const QString _keywords)
+TAPI::stuAdvert Advert::apiGETNewText(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _location,
+        TAPI::enuAdvertOrder::Type _order,
+        const QString _keywords
+    )
 {
 
 }
 
-QString Advert::apiGETRetrieveURL(TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent)
+QString Advert::apiGETRetrieveURL(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        quint64 _id,
+        TAPI::IPv4_t _clientIP,
+        QString _agent
+    )
 {
 
 }
@@ -123,5 +210,3 @@ bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
 
 }
 }
-
-

@@ -53,7 +53,10 @@ class intfAccountSaleables: public ORM::clsTable
 {
     Q_OBJECT
 public:
-    intfAccountSaleables(const QString& _schema);
+    intfAccountSaleables(const QString& _schema,
+                         const QList<ORM::clsORMField>& _exclusiveCols = {},
+                         const QList<ORM::stuRelation>& _exclusiveRelations = {},
+                         const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
     QVariant ORMGET("Get Available Saleables")

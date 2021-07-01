@@ -18,7 +18,9 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #ifndef TEST_ADVERT_ORM_ACTIVELOGS_HPP
 #define TEST_ADVERT_ORM_ACTIVELOGS_HPP
 

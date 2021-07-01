@@ -37,7 +37,7 @@ class intfCacheConnector;
 template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
 class tmplAPIArg : public intfAPIArgManipulator {
 public:
-    virtual ~tmplAPIArg(){;}
+    virtual ~tmplAPIArg(){}
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final{
         *_argStorage = nullptr;

@@ -24,6 +24,16 @@
 #ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
 #define TARGOMAN_API_ORM_QUERYBUILDERS_H
 
+#include <qglobal.h>
+
+#ifndef SQLPrettyLen
+#ifdef QT_DEBUG
+#define SQLPrettyLen 18
+#else
+#define SQLPrettyLen 0
+#endif
+#endif
+
 #include "libTargomanDBM/clsDAC.h"
 using namespace Targoman::DBManager;
 
@@ -87,6 +97,29 @@ TARGOMAN_DEFINE_ENUM(enuDBExpressionType,
                      Value,
                      Function)
 
+TARGOMAN_DEFINE_ENUM(enuDBExpressionIntervalUnit,
+                     MICROSECOND,         // MICROSECONDS
+                     SECOND,              // SECONDS
+                     MINUTE,              // MINUTES
+                     HOUR,                // HOURS
+                     DAY,                 // DAYS
+                     WEEK,                // WEEKS
+                     MONTH,               // MONTHS
+                     QUARTER,             // QUARTERS
+                     YEAR,                // YEARS
+                     SECOND_MICROSECOND,  // 'SECONDS.MICROSECONDS'
+                     MINUTE_MICROSECOND,  // 'MINUTES:SECONDS.MICROSECONDS'
+                     MINUTE_SECOND,       // 'MINUTES:SECONDS'
+                     HOUR_MICROSECOND,    // 'HOURS:MINUTES:SECONDS.MICROSECONDS'
+                     HOUR_SECOND,         // 'HOURS:MINUTES:SECONDS'
+                     HOUR_MINUTE,         // 'HOURS:MINUTES'
+                     DAY_MICROSECOND,     // 'DAYS HOURS:MINUTES:SECONDS.MICROSECONDS'
+                     DAY_SECOND,          // 'DAYS HOURS:MINUTES:SECONDS'
+                     DAY_MINUTE,          // 'DAYS HOURS:MINUTES'
+                     DAY_HOUR,            // 'DAYS HOURS'
+                     YEAR_MONTH           // 'YEARS-MONTHS'
+)
+
 class DBExpression : public QObject {
 public:
     DBExpression();
@@ -104,10 +137,11 @@ public:
 
     static const DBExpression& _NULL();
     static const DBExpression& NOW();
-    static const DBExpression& DATE_ADD(const QString _date, const QString _interval);
-    static const DBExpression& DATE_ADD(const DBExpression& _date, const QString _interval);
-    static const DBExpression& DATE_SUB(const QString _date, const QString _interval);
-    static const DBExpression& DATE_SUB(const DBExpression& _date, const QString _interval);
+    static const DBExpression& CURDATE();
+    static const DBExpression& DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static const DBExpression& DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static const DBExpression& DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static const DBExpression& DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
 
 protected:
     QString Name;
@@ -162,8 +196,8 @@ public:
     QString buildConditionString(
             const QString &_mainTableNameOrAlias,
             const QMap<QString, stuRelatedORMField>& _filterables,
-            bool _allowUseColumnAlias = false,
-            quint8 _prettifierJustifyLen = 0) const;
+            bool _allowUseColumnAlias = false/*,
+            quint8 _prettifierJustifyLen = 0*/) const;
 
 protected:
     QSharedDataPointer<clsConditionData> Data;
@@ -338,7 +372,7 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, quint8 _prettifierJustifyLen = 0);
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false/*, quint8 _prettifierJustifyLen = 0*/);
     friend clsSelectQueryData;
     friend clsCreateQueryData;
     friend TestQueryBuilders;
@@ -386,9 +420,9 @@ public:
 
     quint64 execute(QVariantMap _args = {}, bool _useBinding = true);
 
+    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
 private:
     virtual void iAmAbstract() {}
-    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 
@@ -414,7 +448,7 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true, quint8 _prettifierJustifyLen = 0);
+    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
     friend TestQueryBuilders;
 };
 
@@ -438,7 +472,7 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, quint8 _prettifierJustifyLen = 0);
+    QString buildQueryString(QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
     friend TestQueryBuilders;
 };
 

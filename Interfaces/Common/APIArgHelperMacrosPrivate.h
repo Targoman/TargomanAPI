@@ -278,8 +278,8 @@ namespace Targoman {namespace API { \
 /************************************************************/
 #define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
     class _typeName: public _baseType { \
-        public:_typeName(){;} \
-        _typeName(const _baseType& _other):_baseType(_other){;} \
+        public:_typeName(){} \
+        _typeName(const _baseType& _other):_baseType(_other){} \
         _typeName customFromVariant (const QVariant& _value) { return _fromVariant; } \
     }; \
     inline void setFromVariant(_typeName& _storage, const QVariant& _val) { \

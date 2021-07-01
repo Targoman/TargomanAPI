@@ -278,10 +278,12 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
 
         QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
 
-        if(MethodName.startsWith("GET")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
+        if(MethodName.startsWith("GET")) {
+            if(ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName(sizeof("GET")));
-        }else if(MethodName.startsWith("POST"))
+        }
+        else if(MethodName.startsWith("POST"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", makeMethodName(sizeof("POST")));
         else if(MethodName.startsWith("PUT"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PUT", makeMethodName(sizeof("PUT")));
@@ -289,25 +291,30 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PUT", makeMethodName(sizeof("CREATE")));
         else if(MethodName.startsWith("PATCH"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("PATCH")));
-        else if (MethodName.startsWith("DELETE")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with DELETE method: "+ MethodName);
+        else if (MethodName.startsWith("DELETE")) {
+            if (ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with DELETE method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "DELETE", makeMethodName(sizeof("DELETE")));
-        }else if (MethodName.startsWith("UPDATE"))
+        }
+        else if (MethodName.startsWith("UPDATE"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("UPDATE")));
-        else if (MethodName.startsWith("WS")){
+        else if (MethodName.startsWith("WS")) {
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with WebSockets: "+ MethodName);
+            if(ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with WebSockets: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::WSRegistry, _module, Method, "WS", makeMethodName(sizeof("WS")));
 #else
             throw exRESTRegistry("Websockets are not enabled in this QRestServer please compile with websockets support");
 #endif
-        }else if(ContainsFileInput)
+        }
+        else if(ContainsFileInput)
             throw exRESTRegistry("methods with file input must specifically contain HTTP method: " + MethodName);
-        else{
+        else {
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", MethodName.at(0).toLower() + MethodName.mid(1));
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", MethodName.at(0).toLower() + MethodName.mid(1));
         }
-    }catch(Targoman::Common::exTargomanBase& ex){
+    }
+    catch(Targoman::Common::exTargomanBase& ex) {
         TargomanError("Fatal Error: "<<ex.what());
         throw;
     }
@@ -520,7 +527,7 @@ QHash<QString, clsAPIObject*>  RESTAPIRegistry::WSRegistry;
 
 /****************************************************/
 intfCacheConnector::~intfCacheConnector()
-{;}
+{}
 
 void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl)
 {

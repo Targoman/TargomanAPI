@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ADVERT_ADVERT_H
@@ -29,30 +30,32 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 
-namespace TAPI{
-struct stuAdvert{
-    quint64 ID;
-    QString Title;
-    QString Description;
-    QString PrettyURL;
-    stuAdvert(quint64 _id = 0, QString _title = {}, QString _description = {}, QString _prettyURL = {}):
-        ID(_id),
-        Title(_title),
-        Description(_description),
-        PrettyURL(_prettyURL)
-    {}
+namespace TAPI {
 
-    QVariant toVariant() const{
-      return QVariantMap({
-                           {"id", this->ID},
-                             {"title", this->Title},
-                             {"description", this->Description},
-                             {"prettyURL", this->PrettyURL}
-                         });
-    }
-};
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
+    SF_quint64(ID),
+    SF_QString(Title),
+    SF_QString(Description),
+    SF_QString(PrettyURL)
 
-struct stuAdvertBill{
+//    stuAdvert(quint64 _id = 0, QString _title = {}, QString _description = {}, QString _prettyURL = {}) :
+//        ID(_id),
+//        Title(_title),
+//        Description(_description),
+//        PrettyURL(_prettyURL)
+//    {}
+
+//    QVariant toVariant() const{
+//        return QVariantMap({
+//            {"id", this->ID},
+//            {"title", this->Title},
+//            {"description", this->Description},
+//            {"prettyURL", this->PrettyURL}
+//        });
+//    }
+);
+
+struct stuAdvertBill {
 
 };
 }
@@ -78,12 +81,17 @@ private:
     bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
 
 private slots:
-    TAPI::stuAdvert REST(GET,NewBanner,(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
+    quint32 REST(CREATE, NewTestProduct, (TAPI::JWT_t _JWT),
+                         "Get new product. just for test")
+    quint32 REST(CREATE, NewTestSaleable, (TAPI::JWT_t _JWT),
+                         "Get new saleable. just for test")
+
+    TAPI::stuAdvert REST(GET, NewBanner, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
                          "Get new banner based on location and order info")
-    TAPI::stuAdvert REST(GET,NewText,(TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, QString _keywords),
+    TAPI::stuAdvert REST(GET, NewText, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, QString _keywords),
                          "Get new text advertisement")
-    QString         REST(GET,RetrieveURL, (TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
-                        "Retrieve URL of the specified Advertisement")
+    QString         REST(GET, RetrieveURL, (TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
+                         "Retrieve URL of the specified Advertisement")
 
 };
 

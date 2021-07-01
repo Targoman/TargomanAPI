@@ -71,7 +71,7 @@ QString retrievePhoto(const QString _url){
         if(_url.endsWith(".png"))
             return  "data:image/png;base64," + Photo.toBase64();
     }catch(...)
-    {;}
+    {}
     return QByteArray();
 }
 

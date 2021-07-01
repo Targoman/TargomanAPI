@@ -41,7 +41,7 @@ QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& 
 }
 
 FormalityChecker::FormalityChecker()
-{;}
+{}
 
 }
 }

@@ -109,11 +109,11 @@ struct stuDBIndex {
 
     stuDBIndex(QStringList _cols, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
         Type(_type), Columns(_cols), Name(_name)
-    {;}
+    {}
 
     stuDBIndex(QString _col, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
         stuDBIndex(QStringList()<<_col, _type, _name)
-    {;}
+    {}
 };
 
 extern stuRelation InvalidRelation;

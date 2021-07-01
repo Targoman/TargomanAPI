@@ -63,7 +63,7 @@ clsAPIObject::clsAPIObject(intfAPIModule* _module,
 }
 
 clsAPIObject::~clsAPIObject()
-{;}
+{}
 
 intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
     if(this->BaseMethod.parameterType(_paramIndex) < TAPI_BASE_USER_DEFINED_TYPEID)

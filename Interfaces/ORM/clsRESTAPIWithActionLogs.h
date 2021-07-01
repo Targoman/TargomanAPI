@@ -48,7 +48,7 @@ public:
                     {"atlBy_usrID",        R(AAA::AAASchema,  "tblUser"),      "usrID",     "By_"},
                 }),
         Module(_module)
-    {;}
+    {}
 private slots:
     QVariant ORMGET("Get ActionLogs information")
 

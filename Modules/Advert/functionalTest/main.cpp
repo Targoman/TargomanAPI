@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QtTest>
@@ -44,22 +45,20 @@ int main(int argc, char *argv[])
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
-    try{
+    try {
         FailedTests += QTest::qExec(new testBase, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-    }catch(std::exception &e){
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+    } catch(std::exception &e) {
         qDebug()<<e.what();
     }
-    if(FailedTests > 0){
+    if (FailedTests > 0) {
         qDebug() << "total number of failed tests: " << FailedTests;
-    }else{
+    } else {
         qDebug() << "all tests passed :)";
     }
 
     clsDAC::shutdown();
 
     return FailedTests;
-    /**/
 }
-

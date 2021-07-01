@@ -159,7 +159,7 @@ User::User() : clsTable(AAASchema,
                            ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
                            ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
                          })
-{;}
+{}
 
 bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
     clsDACResult Result = this->execQuery(

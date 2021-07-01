@@ -101,7 +101,7 @@ bool TextProcessor::init()
 }
 
 TextProcessor::TextProcessor()
-{;}
+{}
 
 }
 }

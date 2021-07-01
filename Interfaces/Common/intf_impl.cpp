@@ -26,7 +26,7 @@
 namespace Targoman {
 namespace API {
 
-intfAPIObject::~intfAPIObject() {;}
+intfAPIObject::~intfAPIObject() {}
 
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
     Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer") == false, "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
@@ -40,7 +40,7 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
     this->RealTypeName[RealTypeByteArray.size()] = 0;
 }
 
-intfAPIArgManipulator::~intfAPIArgManipulator() {;}
+intfAPIArgManipulator::~intfAPIArgManipulator() {}
 /******************************************************************************/
 intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
     Host(_host),
@@ -48,7 +48,7 @@ intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _hos
     User(_user),
     Pass(_pass),
     Schema(_schema)
-{;}
+{}
 
 QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema){
     return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
@@ -61,9 +61,9 @@ QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema){
 
 intfAPIModule::intfAPIModule(Common::Configuration::intfModule *_parent) :
     Targoman::Common::Configuration::intfModule(_parent)
-{;}
+{}
 
-intfAPIModule::~intfAPIModule(){;}
+intfAPIModule::~intfAPIModule(){}
 
 }
 }
