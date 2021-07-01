@@ -71,7 +71,6 @@ private slots:
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
-private:
     void ApproveEmail(){
         clsDAC DAC;
         QString Code = DAC.execQuery("",

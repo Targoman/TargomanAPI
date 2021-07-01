@@ -115,8 +115,8 @@ QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL)
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
-            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression_Now })
-            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
+            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min") })
         ;
 
     return query.setCacheTime(CACHE_TIME).one();
@@ -203,8 +203,8 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL)
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         query
-            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression_Now })
-            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
+            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
+            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min") })
         ;
 
     return query.setCacheTime(CACHE_TIME).one();

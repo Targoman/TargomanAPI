@@ -268,7 +268,7 @@ t1.colA1 = 101
         }
     }
 
-    void condition_buildString_dbexpression()
+    void condition_buildString_DBExpression()
     {
 //        auto v = QVariant::fromValue(
 //                     stuDBExpressionWithValue(
@@ -277,10 +277,13 @@ t1.colA1 = 101
 //                 .setValue("interval", "bbbbbbb")
 //        );
 
+//        QVariant v1(DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min"));
+//        QVariant v2 = DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min");
+
         QT_TRY {
             clsCondition cnd =
-                clsCondition({ "colA1", enuConditionOperator::Equal, DBExpression_DateAdd(DBExpression_Now, "INTERVAL 15 Min") })
-                .andCond({ "colB1", enuConditionOperator::Equal, DBExpression_DateAdd("colZZ", "INTERVAL 45 Min") })
+                clsCondition({ "colA1", enuConditionOperator::Equal, DBExpression::DATE_ADD(DBExpression::NOW(), "15 Min") })
+                .andCond({ "colB1", enuConditionOperator::Equal, DBExpression::DATE_ADD("colZZ", "45 Min") })
             ;
 
             QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false, prettyOut ? 18 : 0);
@@ -513,7 +516,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                     .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
                     .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, 456})
                     .andCond({ "t77777777", "ffffff8", enuConditionOperator::Equal, "456"})
-//                    .andCond({ "t77777777", "ffffff9", enuConditionOperator::Equal, DBExpression_Null})
+//                    .andCond({ "t77777777", "ffffff9", enuConditionOperator::Equal, DBExpression::_NULL()})
                 )
 //                .where({ "colA1", enuConditionOperator::Equal, 123 })
 //                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
@@ -833,16 +836,19 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .values(QVariantMap({
                     { "colD1", 111 },
                     { "colZ1", "111" },
-                    { "colB1", DBExpression_Null },
+                    { "colB1", DBExpression::_NULL() },
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-//            if (prettyOut)
-//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+//            }
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
               INTO test.t1 (
                    t1.colA1
@@ -867,16 +873,19 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 Min)
                 .values(QVariantMap({
                     {"colD1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBExpression_Null},
+                    {"colA1", DBExpression::_NULL()},
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+//            }
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
 MUST BE THROWN AN EXCEPTION
 )");
         } QT_CATCH (const std::exception &e) {
@@ -894,16 +903,19 @@ MUST BE THROWN AN EXCEPTION
                 .values(QVariantMap({
                     {"colD1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBExpression_Null},
+                    {"colA1", DBExpression::_NULL()},
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-            if (prettyOut)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+//            }
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
 MUST BE THROWN AN EXCEPTION
 )");
         } QT_CATCH (const std::exception &e) {
@@ -921,33 +933,36 @@ MUST BE THROWN AN EXCEPTION
                 .values(QVariantMap({
                     {"colB1", 111},
                     {"colZ1", "111"},
-                    {"colA1", DBExpression_Null},
+                    {"colA1", DBExpression::_NULL()},
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "222"},
-                    {"colA1", DBExpression_Null},
+                    {"colA1", DBExpression::_NULL()},
                 }))
                 .values(QList<QVariantMap>({
                     {
                         {"colB1", 333},
                         {"colZ1", "333"},
-                        {"colA1", DBExpression_Null},
+                        {"colA1", DBExpression::_NULL()},
                     },
                     {
                         {"colB1", 444},
                         {"colZ1", "444"},
-                        {"colA1", DBExpression_Null},
+                        {"colA1", DBExpression::_NULL()},
                     },
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-//            if (prettyOut)
-//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+//            }
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
               INTO test.t1 (
                    t1.colA1
@@ -985,6 +1000,63 @@ MUST BE THROWN AN EXCEPTION
         }
     }
 
+    void queryString_CREATE_values_multi_use_binding() {
+        QT_TRY {
+            CreateQuery query = CreateQuery(t1) //, "alias_t1")
+                .addCol("colA1")
+                .addCol("colB1")
+                .addCol("colC1")
+                .addCol("colD1")
+                .values(QVariantMap({
+                    {"colB1", 111},
+                    {"colZ1", "111"},
+                    {"colA1", DBExpression::_NULL()},
+                }))
+                .values(QVariantMap({
+                    {"colB1", 222},
+                    {"colZ1", "222"},
+                    {"colA1", DBExpression::_NULL()},
+                }))
+                .values(QList<QVariantMap>({
+                    {
+                        {"colB1", 333},
+                        {"colZ1", "333"},
+                        {"colA1", DBExpression::_NULL()},
+                    },
+                    {
+                        {"colB1", 444},
+                        {"colZ1", "444"},
+                        {"colA1", DBExpression::_NULL()},
+                    },
+                }))
+            ;
+
+            stuBoundQueryString qry = query.buildQueryString({}, true, prettyOut ? 18 : 0);
+
+            if (prettyOut) {
+                qDebug().nospace().noquote() << endl
+                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+            }
+
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
+            INSERT
+              INTO test.t1 (
+                   t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1
+                   )
+            VALUES (?, ?, ?, ?)
+                 , (?, ?, ?, ?)
+                 , (?, ?, ?, ?)
+                 , (?, ?, ?, ?)
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
     void queryString_CREATE_values_from_select() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
@@ -1003,12 +1075,15 @@ MUST BE THROWN AN EXCEPTION
                 )
             ;
 
-            QString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
+            stuBoundQueryString qry = query.buildQueryString({}, false, prettyOut ? 18 : 0);
 
-//            if (prettyOut)
-//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (prettyOut) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
+//            }
 
-            QCOMPARE("\n" + qry + "\n", R"(
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
               INTO test.t1 (
                    t1.colA1
@@ -1086,7 +1161,7 @@ MUST BE THROWN AN EXCEPTION
         }
     }
 
-    void queryString_UPDATE_simple_use_binding() {
+   void queryString_UPDATE_simple_use_binding() {
         QT_TRY {
             UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
                 .set("colB1", 123)
@@ -1095,7 +1170,7 @@ MUST BE THROWN AN EXCEPTION
                 .leftJoinWith("rel_a", "alias_t2")
                 .leftJoin("test.t2")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
-                .andWhere({ "colE1", enuConditionOperator::Equal, DBExpression_Now })
+                .andWhere({ "colE1", enuConditionOperator::Equal, DBExpression::NOW() })
 //                .having({ "aaaaaaa", enuConditionOperator::Greater, 456 })
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
@@ -1114,9 +1189,9 @@ MUST BE THROWN AN EXCEPTION
                 ON alias_t2.colA2 = t1.colC1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-               SET colB1 = :colB1
-                 , colC1 = :colC1
-                 , colD1 = :colD1
+               SET colB1 = ?
+                 , colC1 = ?
+                 , colD1 = ?
              WHERE t1.colA1 = 123
                AND t1.colE1 = NOW()
 )");

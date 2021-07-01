@@ -65,31 +65,33 @@ QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true) {
     if (_value.isValid() == false)
         return QString(""); ///TODO: ? throw ?
 
-    if (_value.userType() == QMetaTypeId<stuDBExpression>::qt_metatype_id())
+    if (_value.userType() == QMetaTypeId<DBExpression>::qt_metatype_id())
     {
-        stuDBExpression v = _value.value<stuDBExpression>();
-        if (v.ExprType == enuDBExpressionType::Value)
-            return v.Name;
+        DBExpression v = _value.value<DBExpression>();
+        return v.toString();
 
-        return QString("%1()").arg(v.Name);
+//        if (v.ExprType == enuDBExpressionType::Value)
+//            return v.Name;
+
+//        return QString("%1()").arg(v.Name);
     }
-    else if (_value.userType() == QMetaTypeId<stuDBExpressionWithValue>::qt_metatype_id())
-    {
-        stuDBExpressionWithValue v = _value.value<stuDBExpressionWithValue>();
-        if (v.Expression->ExprType == enuDBExpressionType::Value)
-            return v.Expression->Name;
+//    else if (_value.userType() == QMetaTypeId<DBExpressionWithValue>::qt_metatype_id())
+//    {
+//        DBExpressionWithValue v = _value.value<DBExpressionWithValue>();
+//        if (v.Expression->ExprType == enuDBExpressionType::Value)
+//            return v.Expression->Name;
 
-        QStringList Params;
+//        QStringList Params;
 
-        foreach (auto _param, v.Expression->Params) {
-            if (v.Values.contains(_param) == false)
-                throw exQueryBuilder(QString("DBExpression %1 param %2 not provided.").arg(v.Expression->Name).arg(_param));
+//        foreach (auto _param, v.Expression->Params) {
+//            if (v.Values.contains(_param) == false)
+//                throw exQueryBuilder(QString("DBExpression %1 param %2 not provided.").arg(v.Expression->Name).arg(_param));
 
-            Params.append(makeValueAsSQL(v.Values.value(_param), false));
-        }
+//            Params.append(makeValueAsSQL(v.Values.value(_param), false));
+//        }
 
-        return v.Expression->Name + "(" + Params.join(",") + ")";
-    }
+//        return v.Expression->Name + "(" + Params.join(",") + ")";
+//    }
     else
     {
         QString v = _value.value<QString>();
@@ -106,26 +108,91 @@ QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true) {
         .arg(msg));
 
 /***************************************************************************************/
-//QHash<QString, stuDBExpression> DBExpression::Registry;
+/* DBExpression ************************************************************************/
+/***************************************************************************************/
+DBExpression::DBExpression()
+{}
+DBExpression::DBExpression(const DBExpression& _other) :
+    Name(_other.Name), ExprType(_other.ExprType), Values(_other.Values)
+{}
+DBExpression::DBExpression(const QString& _name, enuDBExpressionType::Type _exprType) :
+    Name(_name), ExprType(_exprType), Values({})
+{}
+DBExpression::DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values) :
+    Name(_name), ExprType(_exprType), Values(_values)
+{}
+DBExpression::~DBExpression()
+{}
 
-DBExpression::DBExpression() {
-    this->doRegister("NULL",        enuDBExpressionType::Value);
-    this->doRegister("NOW",         enuDBExpressionType::Function);
-    this->doRegister("DATE_ADD",    enuDBExpressionType::Function, { "date", "interval" });
-    this->doRegister("DATE_SUB",    enuDBExpressionType::Function, { "date", "interval" });
+DBExpression::operator QVariant() const {
+    return QVariant::fromValue(*this);
 }
-DBExpression::~DBExpression() {}
 
-void DBExpression::doRegister(const QString& _name, enuDBExpressionType::Type _type, const QStringList& _params) {
-    Q_ASSERT(this->Registry.contains(_name) == false);
-
-    this->Registry.insert(_name, { _name, _type, _params });
+QVariant DBExpression::operator =(DBExpression& _other) const {
+    return QVariant::fromValue(_other);
 }
 
-const stuDBExpression &DBExpression::operator [](const QString& _name) {
-    Q_ASSERT(DBExpression::Registry.contains(_name));
+//QVariant DBExpression::toVariant() const {
+//    return QVariantMap({
+//        { "name", this->Name },
+//        { "type", this->ExprType },
+//        { "values", this->Values }
+//    });
+//}
 
-    return this->Registry[_name];
+//DBExpression DBExpression::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
+//    QVariantMap Value = _value.toMap();
+//    if (Value.isEmpty()) // || !Value.contains("name") || !Value.contains("tmpname") || !Value.contains("size") || !Value.contains("mime"))
+//        throw exHTTPBadRequest(_paramName + " is not valid");
+
+//    return DBExpression(
+//        Value["name"].toString(),
+//        static_cast<enuDBExpressionType::Type>(Value["type"].toInt()),
+//        Value["values"].toStringList()
+//    );
+//}
+
+QString DBExpression::toString() const {
+    QString ret = this->Name;
+
+    if (this->ExprType == enuDBExpressionType::Function)
+        ret += "(";
+
+    if (this->Values.length())
+        ret += this->Values.join(",");
+
+    if (this->ExprType == enuDBExpressionType::Function)
+        ret += ")";
+
+    return ret;
+}
+
+const DBExpression& DBExpression::_NULL() {
+    static DBExpression* DBEX_NULL;
+    if (DBEX_NULL)
+        return *DBEX_NULL;
+    return *(DBEX_NULL = new DBExpression("NULL", enuDBExpressionType::Value));
+}
+
+const DBExpression& DBExpression::NOW() {
+    static DBExpression* DBEX_NOW;
+    if (DBEX_NOW)
+        return *DBEX_NOW;
+    return *(DBEX_NOW = new DBExpression("NOW", enuDBExpressionType::Function));
+}
+
+const DBExpression& DBExpression::DATE_ADD(const QString _date, const QString _interval) {
+    return *(new DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + _interval })));
+}
+const DBExpression& DBExpression::DATE_ADD(const DBExpression& _date, const QString _interval) {
+    return *(new DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + _interval })));
+}
+
+const DBExpression& DBExpression::DATE_SUB(const QString _date, const QString _interval) {
+    return *(new DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + _interval })));
+}
+const DBExpression& DBExpression::DATE_SUB(const DBExpression& _date, const QString _interval) {
+    return *(new DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + _interval })));
 }
 
 /***************************************************************************************/
@@ -156,12 +223,12 @@ struct stuConditionData
     stuConditionData(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, QVariant _value = {}) :
         IsAggregator(false), TableNameOrAlias(_tableNameOrAlias), Col(_col), Operator(_operator), Value(_value)
     {}
-//    stuConditionData(QString _col, enuConditionOperator::Type _operator, const stuDBExpression& _expression) :
+//    stuConditionData(QString _col, enuConditionOperator::Type _operator, const DBExpression& _expression) :
 //        IsAggregator(false), Col(_col), Operator(_operator)//, Value(_expression)
 //    {
 //        this->Value.setValue(_expression);
 //    }
-//    stuConditionData(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, const stuDBExpression& _expression) :
+//    stuConditionData(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, const DBExpression& _expression) :
 //        IsAggregator(false), TableNameOrAlias(_tableNameOrAlias), Col(_col), Operator(_operator)//, Value(_expression)
 //    {
 //        this->Value.setValue(_expression);
@@ -233,7 +300,7 @@ clsCondition::clsCondition(
 //clsCondition::clsCondition(
 //        QString _col,
 //        enuConditionOperator::Type _operator,
-//        const stuDBExpression& _expression) :
+//        const DBExpression& _expression) :
 //    Data(new clsConditionData) {
 //    this->Data->Conditions.append({ _col, _operator, QVariant::fromValue(_expression) });
 //}
@@ -242,7 +309,7 @@ clsCondition::clsCondition(
 //        QString _tableNameOrAlias,
 //        QString _col,
 //        enuConditionOperator::Type _operator,
-//        const stuDBExpression& _expression) :
+//        const DBExpression& _expression) :
 //    Data(new clsConditionData) {
 //    this->Data->Conditions.append({ _tableNameOrAlias, _col, _operator, QVariant::fromValue(_expression) });
 //}
@@ -1506,7 +1573,7 @@ SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _
 SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs)
 {
     if (_aggFunc == enuConditionalAggregation::COUNTIF)
-        this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, 1, DBExpression_Null });
+        this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, 1, DBExpression::_NULL() });
     else
         this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition });
     return *this;
@@ -1896,6 +1963,7 @@ struct stuCreateQueryPreparedItems {
     QList<QStringList>  Values;
     QString             Select;
 
+    QVariantList        BindingValues;
     bool                IsPrepared = false;
 };
 
@@ -1946,7 +2014,13 @@ public:
 
                             QVariant val = itr.value();
                             QString v = makeValueAsSQL(val);
-                            oneRecordToString.append(v);
+
+                            if (_useBinding) {
+                                oneRecordToString.append("?");
+                                this->CreateQueryPreparedItems.BindingValues.append(v);
+                            }
+                            else
+                                oneRecordToString.append(v);
 
                             break;
                         }
@@ -1956,7 +2030,12 @@ public:
                         if (baseCol.defaultValue() == QRequired)
                             throw exQueryBuilder("Value for required field <" + baseCol.name() + "> not provided");
 
-                        oneRecordToString.append(makeValueAsSQL(DBExpression_Null));
+                        if (_useBinding) {
+                            oneRecordToString.append("?");
+                            this->CreateQueryPreparedItems.BindingValues.append(makeValueAsSQL(DBExpression::_NULL()));
+                        }
+                        else
+                            oneRecordToString.append(makeValueAsSQL(DBExpression::_NULL()));
                     }
                 }
                 this->CreateQueryPreparedItems.Values.append(oneRecordToString);
@@ -2064,9 +2143,14 @@ CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery)
 /***********************\
 |* Execute             *|
 \***********************/
-QString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint8 _prettifierJustifyLen)
+stuBoundQueryString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint8 _prettifierJustifyLen)
 {
+    stuBoundQueryString BoundQueryString;
+
     this->Data->prepare(_useBinding, _prettifierJustifyLen);
+
+    if (_useBinding)
+        BoundQueryString.BindingValues = this->Data->CreateQueryPreparedItems.BindingValues;
 
     QStringList QueryParts;
 
@@ -2103,9 +2187,12 @@ QString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint
         QStringList rows;
         foreach (QStringList row, this->Data->CreateQueryPreparedItems.Values) {
             if (_prettifierJustifyLen) {
-                rows.append(QString(_prettifierJustifyLen, ' ')
-                            + " "
-                            + row.join("\n" + QString(_prettifierJustifyLen - 1, ' ') + "," + " "));
+                if (_useBinding)
+                    rows.append(row.join(", "));
+                else
+                    rows.append(QString(_prettifierJustifyLen, ' ')
+                                + " "
+                                + row.join("\n" + QString(_prettifierJustifyLen - 1, ' ') + "," + " "));
             }
             else {
                 rows.append(row.join(","));
@@ -2115,16 +2202,20 @@ QString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint
         if (_prettifierJustifyLen) {
             QueryParts.append(QString("VALUES").rightJustified(_prettifierJustifyLen)
                               + " "
-                              + "(\n"
-                              + rows.join("\n"
-                                          + QString(_prettifierJustifyLen, ' ')
-                                          + " )\n"
+                              + "("
+                              + (_useBinding ? "" : "\n")
+                              + rows.join((_useBinding ? "" : "\n")
+                                          + (_useBinding ? "" : QString(_prettifierJustifyLen, ' '))
+                                          + (_useBinding ? "" : " ")
+                                          + ")"
+                                          + "\n"
                                           + QString(_prettifierJustifyLen - 1, ' ')
                                           + ","
-                                          + " (\n")
-                              );
-            QueryParts.append(QString(_prettifierJustifyLen, ' ')
-                              + " "
+                                          + " ("
+                                          + (_useBinding ? "" : "\n"))
+                              + (_useBinding ? "" : "\n")
+                              + (_useBinding ? "" : QString(_prettifierJustifyLen, ' '))
+                              + (_useBinding ? "" : " ")
                               + ")");
         }
         else {
@@ -2138,26 +2229,29 @@ QString CreateQuery::buildQueryString(QVariantMap _args, bool _useBinding, quint
     }
 
     //-----------
-    QString QueryString = QueryParts.join(_prettifierJustifyLen ? "\n" : " ");
+    BoundQueryString.QueryString = QueryParts.join(_prettifierJustifyLen ? "\n" : " ");
 
     if (_args.size())
     {
         for (QVariantMap::const_iterator arg = _args.begin(); arg != _args.end(); ++arg)
         {
-            QueryString.replace(arg.key(), arg.value().toString());
+            BoundQueryString.QueryString.replace(arg.key(), arg.value().toString());
         }
     }
 
     //-----------
-
-    return QueryString;
+    return BoundQueryString;
 }
 
 quint64 CreateQuery::execute(QVariantMap _args, bool _useBinding)
 {
-    QString QueryString = this->buildQueryString(_args, _useBinding);
+    stuBoundQueryString BoundQueryString = this->buildQueryString(_args, _useBinding);
 
-    clsDACResult Result = this->DAC().execQuery("", QueryString);
+    clsDACResult Result = this->DAC().execQuery(
+                              "",
+                              BoundQueryString.QueryString,
+                              BoundQueryString.BindingValues
+                              );
 
     return Result.lastInsertId().toULongLong();
 }
@@ -2166,9 +2260,10 @@ quint64 CreateQuery::execute(QVariantMap _args, bool _useBinding)
 /* clsUpdateQueryData ******************************************************************/
 /***************************************************************************************/
 struct stuUpdateQueryPreparedItems {
-    bool        IsPrepared = false;
-    QVariantMap BindingValues;
-    QStringList SetCols;
+    QStringList     SetCols;
+
+    QVariantList    BindingValues;
+    bool            IsPrepared = false;
 };
 
 class clsUpdateQueryData : public clsBaseQueryData<UpdateQuery>
@@ -2216,8 +2311,8 @@ public:
                 QString v = makeValueAsSQL(val);
 
                 if (_useBinding) {
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2:%3").arg(key).arg(equalSign).arg(key));
-                    this->UpdateQueryPreparedItems.BindingValues.insert(":" + key, v);
+                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(key).arg(equalSign));
+                    this->UpdateQueryPreparedItems.BindingValues.append(v);
                 }
                 else
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(key).arg(equalSign).arg(v));
@@ -2254,7 +2349,7 @@ UpdateQuery::~UpdateQuery() {}
 \***********************/
 UpdateQuery& UpdateQuery::setNull(const QString& _col)
 {
-    return this->set(_col, DBExpression_Null);
+    return this->set(_col, DBExpression::_NULL());
 }
 UpdateQuery& UpdateQuery::set(const QString& _col, const QVariant& _value)
 {
@@ -2352,12 +2447,12 @@ stuBoundQueryString UpdateQuery::buildQueryString(QVariantMap _args, bool _useBi
 
 quint64 UpdateQuery::execute(QVariantMap _args, bool _useBinding)
 {
-    stuBoundQueryString QueryString = this->buildQueryString(_args, _useBinding);
+    stuBoundQueryString BoundQueryString = this->buildQueryString(_args, _useBinding);
 
     clsDACResult Result = this->DAC().execQuery(
                               "",
-                              QueryString.QueryString,
-                              QueryString.BindingValues
+                              BoundQueryString.QueryString,
+                              BoundQueryString.BindingValues
                               );
 
     return Result.numRowsAffected();

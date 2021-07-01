@@ -87,47 +87,33 @@ TARGOMAN_DEFINE_ENUM(enuDBExpressionType,
                      Value,
                      Function)
 
-struct stuDBExpression {
-    QString Name;
-    enuDBExpressionType::Type ExprType = enuDBExpressionType::Value;
-    QStringList Params = {};
-};
-
-struct stuDBExpressionWithValue {
-    const stuDBExpression* Expression;
-    QVariantMap Values;
-
-    stuDBExpressionWithValue() : Expression(nullptr) {}
-    stuDBExpressionWithValue(const stuDBExpression& _expression) : Expression(&_expression) {}
-
-    stuDBExpressionWithValue& setValue(const QString& _key, const QVariant& _val) {
-        this->Values.insert(_key, _val);
-        return *this;
-    }
-};
-
-class DBExpression : public QObject
-{
+class DBExpression : public QObject {
 public:
-    instanceGetter(DBExpression)
     DBExpression();
+    DBExpression(const DBExpression& _other);
+    DBExpression(const QString& _name, enuDBExpressionType::Type _exprType);
+    DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values);
     virtual ~DBExpression();
 
-    void doRegister(const QString& _name, enuDBExpressionType::Type _type, const QStringList& _params = {});
+//    QVariant toVariant() const;
+//    static DBExpression fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
+    operator QVariant() const;
+    QVariant operator =(DBExpression& _other) const;
 
-    const stuDBExpression& operator [] (const QString& _name);
+    QString toString() const;
 
-private:
-    QHash<QString, stuDBExpression> Registry;
+    static const DBExpression& _NULL();
+    static const DBExpression& NOW();
+    static const DBExpression& DATE_ADD(const QString _date, const QString _interval);
+    static const DBExpression& DATE_ADD(const DBExpression& _date, const QString _interval);
+    static const DBExpression& DATE_SUB(const QString _date, const QString _interval);
+    static const DBExpression& DATE_SUB(const DBExpression& _date, const QString _interval);
+
+protected:
+    QString Name;
+    enuDBExpressionType::Type ExprType;
+    QStringList Values;
 };
-
-#define REGISTER_DBEXPRESSION(_name, _type) \
-    Targoman::API::ORM::DBExpression::instance().doRegister(_name, _type);
-
-#define DBExpression_Null                       QVariant::fromValue(DBExpression::instance()["NULL"])
-#define DBExpression_Now                        QVariant::fromValue(DBExpression::instance()["NOW"])
-#define DBExpression_DateAdd(_date, _interval)  QVariant::fromValue(stuDBExpressionWithValue(DBExpression::instance()["DATE_ADD"]).setValue("date", _date).setValue("interval", _interval))
-#define DBExpression_DateSub(_date, _interval)  QVariant::fromValue(stuDBExpressionWithValue(DBExpression::instance()["DATE_SUB"]).setValue("date", _date).setValue("interval", _interval))
 
 /***************************************************************************************/
 class clsConditionData;
@@ -150,12 +136,12 @@ public:
 //    clsCondition(
 //            QString _col,
 //            enuConditionOperator::Type _operator,
-//            const stuDBExpression& _expression);
+//            const DBExpression& _expression);
 //    clsCondition(
 //            QString _tableNameOrAlias,
 //            QString _col,
 //            enuConditionOperator::Type _operator,
-//            const stuDBExpression& _expression);
+//            const DBExpression& _expression);
 
     clsCondition(
             QString _leftHandTableNameOrAlias,
@@ -378,7 +364,8 @@ public:
 
 struct stuBoundQueryString {
     QString QueryString;
-    QVariantMap BindingValues;
+//    QVariantMap BindingValues;
+    QVariantList BindingValues;
 };
 
 /***************************************************************************************/
@@ -397,11 +384,11 @@ public:
     CreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
     CreateQuery& select(const SelectQuery& _selectQuery);
 
-    quint64 execute(QVariantMap _args = {}, bool _useBinding = false);
+    quint64 execute(QVariantMap _args = {}, bool _useBinding = true);
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, bool _useBinding = false, quint8 _prettifierJustifyLen = 0);
+    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 
@@ -423,11 +410,11 @@ public:
     UpdateQuery& set(const QString& _col, const QVariant& _value);
     UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
 
-    quint64 execute(QVariantMap _args = {}, bool _useBinding = false);
+    quint64 execute(QVariantMap _args = {}, bool _useBinding = true);
 
 private:
     virtual void iAmAbstract() {}
-    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = false, quint8 _prettifierJustifyLen = 0);
+    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true, quint8 _prettifierJustifyLen = 0);
     friend TestQueryBuilders;
 };
 
@@ -463,7 +450,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(Targoman::API::ORM::stuDBExpression);
-Q_DECLARE_METATYPE(Targoman::API::ORM::stuDBExpressionWithValue);
+Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpression);
+//Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpressionWithValue);
 
 #endif // TARGOMAN_API_ORM_QUERYBUILDERS_H
