@@ -132,26 +132,6 @@ QVariant DBExpression::operator =(DBExpression& _other) const {
     return QVariant::fromValue(_other);
 }
 
-//QVariant DBExpression::toVariant() const {
-//    return QVariantMap({
-//        { "name", this->Name },
-//        { "type", this->ExprType },
-//        { "values", this->Values }
-//    });
-//}
-
-//DBExpression DBExpression::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
-//    QVariantMap Value = _value.toMap();
-//    if (Value.isEmpty()) // || !Value.contains("name") || !Value.contains("tmpname") || !Value.contains("size") || !Value.contains("mime"))
-//        throw exHTTPBadRequest(_paramName + " is not valid");
-
-//    return DBExpression(
-//        Value["name"].toString(),
-//        static_cast<enuDBExpressionType::Type>(Value["type"].toInt()),
-//        Value["values"].toStringList()
-//    );
-//}
-
 QString DBExpression::toString() const {
     QString ret = this->Name;
 
@@ -167,7 +147,7 @@ QString DBExpression::toString() const {
     return ret;
 }
 
-const DBExpression& DBExpression::_NULL() {
+const DBExpression& DBExpression::NIL() {
     static DBExpression* DBEX_NULL;
     if (DBEX_NULL)
         return *DBEX_NULL;
@@ -1611,7 +1591,7 @@ SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _
 SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs)
 {
     if (_aggFunc == enuConditionalAggregation::COUNTIF)
-        this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, 1, DBExpression::_NULL() });
+        this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, 1, DBExpression::NIL() });
     else
         this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition });
     return *this;
@@ -1921,6 +1901,11 @@ QVariantMap SelectQuery::one(QVariantMap _args)
 {
     QString QueryString = this->buildQueryString(_args, true, false);
 
+#ifdef QT_DEBUG
+    qDebug().nospace().noquote() << endl
+                                 << endl << "-- Query:" << endl << QueryString << endl;
+#endif
+
     QJsonDocument Result;
 
     if (this->Data->CahceTime > 0)
@@ -1942,6 +1927,11 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
     this->Data->Limit = _maxCount;
 
     QString QueryString = this->buildQueryString(_args, false, false);
+
+#ifdef QT_DEBUG
+    qDebug().nospace().noquote() << endl
+                                 << endl << "-- Query:" << endl << QueryString << endl;
+#endif
 
     QVariantList Result;
 
@@ -1966,6 +1956,12 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
 
     QString QueryString = this->buildQueryString(_args, false, false);
     QString CountingQueryString = this->buildQueryString(_args, false, true);
+
+#ifdef QT_DEBUG
+    qDebug().nospace().noquote() << endl
+                                 << endl << "-- Query:" << endl << QueryString << endl
+                                 << endl << "-- Counting Query:" << endl << CountingQueryString << endl;
+#endif
 
     TAPI::stuTable Result;
 
@@ -2028,14 +2024,25 @@ public:
 
         QList<clsORMField> providedBaseCols;
 
-        foreach (clsORMField baseCol, this->Table.BaseCols) {
-            if (this->Cols.contains(baseCol.name())) {
-//qDebug() << "adding col: " << baseCol.name();
-                providedBaseCols.append(baseCol);
-                this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+        //1- check Cols by BaseCols
+        foreach (auto col, this->Cols) {
+            bool found = false;
+            foreach (clsORMField baseCol, this->Table.BaseCols) {
+                if (col == baseCol.name()) {
+                    providedBaseCols.append(baseCol);
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+                    found = true;
+                    break;
+                }
             }
-            else if (baseCol.defaultValue() == QRequired)
-                throw exQueryBuilder("Required field <" + baseCol.name() + "> not provided");
+            if (found == false)
+                throw exQueryBuilderColumnNotFound("Column <" + col + "> not found in Table base columns");
+        }
+
+        //2- check BaseCols (required, ...)
+        foreach (clsORMField baseCol, this->Table.BaseCols) {
+            if (this->Cols.contains(baseCol.name()) == false && baseCol.defaultValue() == QRequired)
+                throw exQueryBuilderColumnNotProvided("Required field <" + baseCol.name() + "> not provided");
         }
 
         if (this->CreateQueryPreparedItems.Cols.isEmpty())
@@ -2048,7 +2055,7 @@ public:
 //qDebug() << "checking: " << baseCol.name();
                     bool dataProvided = false;
 
-                    for (QVariantMap::const_iterator itr = oneRecord.begin(); itr != oneRecord.end(); itr++) {
+                    for (QVariantMap::const_iterator itr = oneRecord.constBegin(); itr != oneRecord.constEnd(); itr++) {
                         if (itr.key() == baseCol.name()) {
                             dataProvided = true;
 
@@ -2069,15 +2076,17 @@ public:
                     }
 
                     if (!dataProvided) {
-                        if (baseCol.defaultValue() == QRequired)
-                            throw exQueryBuilder("Value for required field <" + baseCol.name() + "> not provided");
+                        throw exQueryBuilderValueNotProvided("Value for declared field <" + baseCol.name() + "> not provided");
 
-                        if (_useBinding) {
-                            oneRecordToString.append("?");
-                            this->CreateQueryPreparedItems.BindingValues.append(makeValueAsSQL(DBExpression::_NULL()));
-                        }
-                        else
-                            oneRecordToString.append(makeValueAsSQL(DBExpression::_NULL()));
+//                        if (baseCol.defaultValue() == QRequired)
+//                            throw exQueryBuilderValueNotProvided("Value for required field <" + baseCol.name() + "> not provided");
+
+//                        if (_useBinding) {
+//                            oneRecordToString.append("?");
+//                            this->CreateQueryPreparedItems.BindingValues.append(makeValueAsSQL(DBExpression::NIL()));
+//                        }
+//                        else
+//                            oneRecordToString.append(makeValueAsSQL(DBExpression::NIL()));
                     }
                 }
                 this->CreateQueryPreparedItems.Values.append(oneRecordToString);
@@ -2092,6 +2101,7 @@ public:
     }
 
 public:
+    bool Options_Ignore = false;
     QStringList Cols;
     QList<QVariantMap> Values;
     SelectQuery Select;
@@ -2111,6 +2121,15 @@ CreateQuery::CreateQuery(clsTable& _table, const QString& _alias) :
 {}
 
 CreateQuery::~CreateQuery() {}
+
+/***********************\
+|* Options             *|
+\***********************/
+CreateQuery& CreateQuery::options_ignore()
+{
+    this->Data->Options_Ignore = true;
+    return *this;
+}
 
 /***********************\
 |* Columns             *|
@@ -2197,17 +2216,24 @@ stuBoundQueryString CreateQuery::buildQueryString(QVariantMap _args, bool _useBi
     QStringList QueryParts;
 
     //-----------
+    QStringList options;
+    if (this->Data->Options_Ignore)
+        options.append("IGNORE");
+
     if (SQLPrettyLen) {
-        QueryParts.append(QString("INSERT").rightJustified(SQLPrettyLen));
-//        if (OPTIONS)
-//        QueryParts.append(QString("INSERT").rightJustified(SQLPrettyLen)
-//                          + " "
-//                          //+ OPTIONS (IGNORE, ...)
-//                          );
+        if (options.isEmpty())
+            QueryParts.append(QString("INSERT").rightJustified(SQLPrettyLen));
+        else
+            QueryParts.append(QString("INSERT").rightJustified(SQLPrettyLen)
+                              + " "
+                              + options.join(" "));
+
         QueryParts.append(QString("INTO").rightJustified(SQLPrettyLen)
                           + " "
-                          + this->Data->BaseQueryPreparedItems.From
-                          + " (");
+                          + this->Data->BaseQueryPreparedItems.From);
+        QueryParts.append(QString(SQLPrettyLen, ' ')
+                          + " "
+                          + "(");
         QueryParts.append(QString(SQLPrettyLen, ' ')
                           + " "
                           + this->Data->CreateQueryPreparedItems.Cols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
@@ -2217,11 +2243,11 @@ stuBoundQueryString CreateQuery::buildQueryString(QVariantMap _args, bool _useBi
     }
     else {
         QueryParts.append("INSERT");
+        if (options.length())
+            QueryParts.append(options.join(" "));
         QueryParts.append("INTO");
         QueryParts.append(this->Data->BaseQueryPreparedItems.From);
-        QueryParts.append("(");
-        QueryParts.append(this->Data->CreateQueryPreparedItems.Cols.join(","));
-        QueryParts.append(")");
+        QueryParts.append("(" + this->Data->CreateQueryPreparedItems.Cols.join(",") + ")");
     }
 
     //-----------
@@ -2289,6 +2315,24 @@ quint64 CreateQuery::execute(QVariantMap _args, bool _useBinding)
 {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_args, _useBinding);
 
+#ifdef QT_DEBUG
+    if (_useBinding) {
+        QStringList BindingValuesList;
+        foreach (auto b, BoundQueryString.BindingValues) {
+            BindingValuesList.append(b.toString());
+        }
+
+        qDebug().nospace().noquote() << endl
+                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
+                                     << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
+                                     << "[" << BindingValuesList.join(", ") << "]" << endl;
+    }
+    else {
+        qDebug().nospace().noquote() << endl
+                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl;
+    }
+#endif
+
     clsDACResult Result = this->DAC().execQuery(
                               "",
                               BoundQueryString.QueryString,
@@ -2332,12 +2376,9 @@ public:
 
         QString equalSign = (SQLPrettyLen ? " = " : "=");
 
-        for (QVariantMap::const_iterator itr = this->SetMaps.constBegin();
-             itr != this->SetMaps.constEnd();
-             itr++)
-        {
-            QString key = itr.key();
-            QVariant val = itr.value();
+        foreach (auto Col, this->SetMaps) {
+            QString key = Col.first;
+            QVariant val = Col.second;
 
             if (val.userType() == QMetaType::QStringList) {
                 QStringList l = val.value<QStringList>();
@@ -2363,7 +2404,9 @@ public:
     }
 
 public:
-    QVariantMap SetMaps;
+//    QVariantMap SetMaps; error in key order: sorted by QMap
+//    QVariantHash SetMaps; error in key order: sorted by Qhash iterator
+    QList<QPair<QString, QVariant>> SetMaps;
 
     stuUpdateQueryPreparedItems UpdateQueryPreparedItems;
 };
@@ -2391,16 +2434,16 @@ UpdateQuery::~UpdateQuery() {}
 \***********************/
 UpdateQuery& UpdateQuery::setNull(const QString& _col)
 {
-    return this->set(_col, DBExpression::_NULL());
+    return this->set(_col, DBExpression::NIL());
 }
 UpdateQuery& UpdateQuery::set(const QString& _col, const QVariant& _value)
 {
-    this->Data->SetMaps.insert(_col, _value);
+    this->Data->SetMaps.append({ _col, _value });
     return *this;
 }
 UpdateQuery& UpdateQuery::set(const QString& _col, const QString& _otherTable, const QString& _otherCol)
 {
-    this->Data->SetMaps.insert(_col, QStringList({ _otherTable, _otherCol }));
+    this->Data->SetMaps.append({ _col, QStringList({ _otherTable, _otherCol }) });
     return *this;
 }
 
@@ -2416,7 +2459,7 @@ stuBoundQueryString UpdateQuery::buildQueryString(QVariantMap _args, bool _useBi
     this->JoinTraitData->prepare(/*_prettifierJustifyLen*/);
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
-        throw exQueryBuilder("Where cluase of query is empty. This is very dangerous.");
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
 
     if (_useBinding)
         BoundQueryString.BindingValues = this->Data->UpdateQueryPreparedItems.BindingValues;
@@ -2490,6 +2533,24 @@ stuBoundQueryString UpdateQuery::buildQueryString(QVariantMap _args, bool _useBi
 quint64 UpdateQuery::execute(QVariantMap _args, bool _useBinding)
 {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_args, _useBinding);
+
+#ifdef QT_DEBUG
+    if (_useBinding) {
+        QStringList BindingValuesList;
+        foreach (auto b, BoundQueryString.BindingValues) {
+            BindingValuesList.append(b.toString());
+        }
+
+        qDebug().nospace().noquote() << endl
+                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
+                                     << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
+                                     << "[" << BindingValuesList.join(", ") << "]" << endl;
+    }
+    else {
+        qDebug().nospace().noquote() << endl
+                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl;
+    }
+#endif
 
     clsDACResult Result = this->DAC().execQuery(
                               "",
@@ -2573,7 +2634,7 @@ QString DeleteQuery::buildQueryString(QVariantMap _args/*, quint8 _prettifierJus
     this->JoinTraitData->prepare(/*_prettifierJustifyLen*/);
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
-        throw exQueryBuilder("Where cluase of query is empty. This is very dangerous.");
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
 
     //push
     QStringList QueryParts;
@@ -2651,6 +2712,11 @@ QString DeleteQuery::buildQueryString(QVariantMap _args/*, quint8 _prettifierJus
 quint64 DeleteQuery::execute(QVariantMap _args)
 {
     QString QueryString = this->buildQueryString(_args);
+
+#ifdef QT_DEBUG
+    qDebug().nospace().noquote() << endl
+                                 << endl << "-- Query:" << endl << QueryString << endl;
+#endif
 
     clsDACResult Result = this->DAC().execQuery("", QueryString);
 

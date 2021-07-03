@@ -62,7 +62,9 @@ using namespace Advertisement;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
 quint32 Advert::apiCREATENewTestProduct(
-        TAPI::JWT_t _JWT
+        TAPI::JWT_t _JWT,
+        QString _productCode,
+        QString _productName
     )
 {
     CreateQuery query = CreateQuery(*this->AccountProducts)
@@ -87,36 +89,33 @@ quint32 Advert::apiCREATENewTestProduct(
 //        .addCol(tblAccountProducts::prdClicksTotal)
 
         .values(QVariantMap({
-            { tblAccountProductsBase::prdCode,          111 },
-            { tblAccountProductsBase::prdName,          "222" },
-//            { tblAccountProductsBase::prdDesc,          DBExpression::_NULL() },
+            { tblAccountProductsBase::prdCode,          _productCode },
+            { tblAccountProductsBase::prdName,          _productName },
+//            { tblAccountProductsBase::prdDesc,          DBExpression::NIL() },
             { tblAccountProductsBase::prdValidFromDate, DBExpression::CURDATE() },
-//            { tblAccountProductsBase::prdValidToDate,   DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdValidFromHour, DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdValidToHour,   DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdPrivs,         DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdVAT,           DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdValidToDate,   DBExpression::NIL() },
+//            { tblAccountProductsBase::prdValidFromHour, DBExpression::NIL() },
+//            { tblAccountProductsBase::prdValidToHour,   DBExpression::NIL() },
+//            { tblAccountProductsBase::prdPrivs,         DBExpression::NIL() },
+//            { tblAccountProductsBase::prdVAT,           DBExpression::NIL() },
             { tblAccountProductsBase::prdInStockCount,  444 },
-//            { tblAccountProductsBase::prdOrderedCount,  DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdReturnedCount, DBExpression::_NULL() },
-//            { tblAccountProductsBase::prdStatus,        DBExpression::_NULL() },
+//            { tblAccountProductsBase::prdOrderedCount,  DBExpression::NIL() },
+//            { tblAccountProductsBase::prdReturnedCount, DBExpression::NIL() },
+//            { tblAccountProductsBase::prdStatus,        DBExpression::NIL() },
             { tblAccountProducts::prd_locID,            555 },
-//            { tblAccountProducts::prdShowPerDay,        DBExpression::_NULL() },
-//            { tblAccountProducts::prdShowTotal,         DBExpression::_NULL() },
-//            { tblAccountProducts::prdClicksPerDay,      DBExpression::_NULL() },
-//            { tblAccountProducts::prdClicksPerMonth,    DBExpression::_NULL() },
-//            { tblAccountProducts::prdClicksTotal,       DBExpression::_NULL() },
+//            { tblAccountProducts::prdShowPerDay,        DBExpression::NIL() },
+//            { tblAccountProducts::prdShowTotal,         DBExpression::NIL() },
+//            { tblAccountProducts::prdClicksPerDay,      DBExpression::NIL() },
+//            { tblAccountProducts::prdClicksPerMonth,    DBExpression::NIL() },
+//            { tblAccountProducts::prdClicksTotal,       DBExpression::NIL() },
         }))
     ;
 
     auto qry = query.buildQueryString();
-    qDebug().nospace().noquote() << endl
-                                 << endl << "-- Query:" << endl << qry.QueryString << endl
-                                 << endl << "-- Binding Values:" << endl << qry.BindingValues << endl;
 
     quint64 insertedID = query.execute();
-    return insertedID;
 
+    return insertedID;
 }
 
 quint32 Advert::apiCREATENewTestSaleable(

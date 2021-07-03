@@ -81,8 +81,12 @@ private:
     bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
 
 private slots:
-    quint32 REST(CREATE, NewTestProduct, (TAPI::JWT_t _JWT),
-                         "Get new product. just for test")
+    quint32 REST(CREATE, NewTestProduct, (
+                     TAPI::JWT_t _JWT,
+                     QString _productCode,
+                     QString _productName
+                 ),
+                 "Get new product. just for test")
     quint32 REST(CREATE, NewTestSaleable, (TAPI::JWT_t _JWT),
                          "Get new saleable. just for test")
 

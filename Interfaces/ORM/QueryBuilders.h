@@ -50,6 +50,10 @@ namespace ORM {
 class clsTable;
 
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotFound, Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotProvided, Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderValueNotProvided, Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderWhereClauseNotProvided, Common::exTargomanBase);
 
 TARGOMAN_DEFINE_ENUM(enuPreConditionOperator,
                      AND,
@@ -135,7 +139,7 @@ public:
 
     QString toString() const;
 
-    static const DBExpression& _NULL();
+    static const DBExpression& NIL();
     static const DBExpression& NOW();
     static const DBExpression& CURDATE();
     static const DBExpression& DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
@@ -412,6 +416,7 @@ public:
     virtual ~CreateQuery();
 
 public:
+    CreateQuery& options_ignore();
     CreateQuery& addCols(const QStringList& _cols);
     CreateQuery& addCol(const QString& _col);
     CreateQuery& values(const QVariantMap& _oneRecordValues);

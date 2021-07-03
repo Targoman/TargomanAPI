@@ -123,6 +123,8 @@ private slots:
             {},
             {
                 { "JWT", gJWT },
+                { "productCode", "prd code for test" },
+                { "productName", "test product name" },
             }
         );
 
