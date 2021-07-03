@@ -47,7 +47,7 @@ TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
                      __STATUS__
                      );
 
-class clsORMFieldData : public QSharedData{
+class clsORMFieldData : public QSharedData {
 public:
     clsORMFieldData();
     clsORMFieldData(const QString& _name,
@@ -82,14 +82,14 @@ private:
     quint32         Privs;
 };
 
-class clsORMField{
+class clsORMField {
 public:
     inline clsORMField():
         Data(new clsORMFieldData)
     {}
     inline clsORMField(const clsORMField& _other, const QString& _newName = QString()):
         Data(_other.Data) {
-        if(_newName.size()){
+        if (_newName.size()) {
             this->Data.detach();
             this->Data->Name = _newName;
         }

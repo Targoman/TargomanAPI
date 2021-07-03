@@ -47,8 +47,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAccountOrdersStatus);
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI,
-    stuAdvert,
+    TAPI, stuAdvert,
     [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
 //    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
@@ -61,10 +60,31 @@ using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
+quint32 Advert::apiCREATENewTestLocation(
+        TAPI::JWT_t _JWT,
+        TAPI::URL_t _url,
+        QString _placeCode
+    )
+{
+    CreateQuery query = CreateQuery(Locations::instance())
+        .addCol(tblLocations::locURL)
+        .addCol(tblLocations::locPlaceCode)
+        .values(QVariantMap({
+            { tblLocations::locURL,       _url },
+            { tblLocations::locPlaceCode, _placeCode },
+        }))
+    ;
+
+    clsJWT JWT(_JWT);
+    quint64 insertedID = query.execute(JWT.usrID());
+    return insertedID;
+}
+
 quint32 Advert::apiCREATENewTestProduct(
         TAPI::JWT_t _JWT,
         QString _productCode,
-        QString _productName
+        QString _productName,
+        quint32 _locationID
     )
 {
     CreateQuery query = CreateQuery(*this->AccountProducts)
@@ -102,7 +122,7 @@ quint32 Advert::apiCREATENewTestProduct(
 //            { tblAccountProductsBase::prdOrderedCount,  DBExpression::NIL() },
 //            { tblAccountProductsBase::prdReturnedCount, DBExpression::NIL() },
 //            { tblAccountProductsBase::prdStatus,        DBExpression::NIL() },
-            { tblAccountProducts::prd_locID,            555 },
+            { tblAccountProducts::prd_locID,            _locationID },
 //            { tblAccountProducts::prdShowPerDay,        DBExpression::NIL() },
 //            { tblAccountProducts::prdShowTotal,         DBExpression::NIL() },
 //            { tblAccountProducts::prdClicksPerDay,      DBExpression::NIL() },
@@ -111,9 +131,8 @@ quint32 Advert::apiCREATENewTestProduct(
         }))
     ;
 
-    auto qry = query.buildQueryString();
-
-    quint64 insertedID = query.execute();
+    clsJWT JWT(_JWT);
+    quint64 insertedID = query.execute(JWT.usrID());
 
     return insertedID;
 }

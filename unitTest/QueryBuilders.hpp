@@ -27,7 +27,8 @@ public:
             "test",
             "t1",
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "colA1", ORM_PRIMARY_KEY32 },
+                { "colID1", ORM_PRIMARY_KEY32 },
+                { "colA1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colB1", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
                 { "colC1", S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
                 { "colD1", S(QString),                      QFV,                       QNull,      UPOwner },
@@ -35,6 +36,10 @@ public:
                 { "colF1", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
                 { "colG1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colH1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
+                { "colI1", S(QChar),                        QFV,                       QNull,      UPOwner },
+                { "CreatedBy_usrID",  ORM_CREATED_BY },
+                { "CreationDateTime", ORM_CREATED_ON },
+                { "UpdatedBy_usrID",  ORM_UPDATED_BY },
             },
             {///< Col     Reference Table  ForeignCol  Rename  LeftJoin
 //                           { "colC1", R("test", "t2"), "colA2" },
@@ -142,10 +147,13 @@ class TestQueryBuilders: public QObject
 
     TestTable1 t1;
     TestTable2 t2;
+//    TAPI::JWT_t JWT;
+    quint64 currentUserID;
 
 private slots:
     void initTestCase() {
         QT_TRY {
+            this->currentUserID = 9090;
             t1.prepareFiltersList();
             t2.prepareFiltersList();
         } QT_CATCH (const std::exception &e) {
@@ -311,7 +319,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
-            SELECT t1.colA1
+            SELECT t1.colID1
+                 , t1.colA1
                  , t1.colB1
                  , t1.colC1
                  , t1.colD1
@@ -319,6 +328,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colF1
                  , t1.colG1
                  , t1.colH1
+                 , t1.colI1
                  , t1.CURRENT_DATETIME
               FROM test.t1
 )");
@@ -841,7 +851,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             ;
 
             QVERIFY_EXCEPTION_THROWN(
-                        query.buildQueryString({}, false),
+                        query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderColumnNotFound);
 
         } QT_CATCH (const std::exception &e) {
@@ -863,7 +873,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             ;
 
             QVERIFY_EXCEPTION_THROWN(
-                        query.buildQueryString({}, false),
+                        query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderColumnNotProvided);
 
         } QT_CATCH (const std::exception &e) {
@@ -887,7 +897,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
 //            QStringList BindingValuesList;
 //            foreach (auto b, qry.BindingValues) {
@@ -908,12 +918,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colB1
                  , t1.colD1
                  , t1.colA1
+                 , t1.CreatedBy_usrID
                    )
             VALUES (
                    CURDATE()
                  , NOW()
                  , 111
                  , NULL
+                 , 9090
                    )
 )");
         } QT_CATCH (const std::exception &e) {
@@ -933,7 +945,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, true);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, true);
 
             QStringList BindingValuesList;
             foreach (auto b, qry.BindingValues) {
@@ -952,9 +964,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    (
                    t1.colA1
                  , t1.colB1
+                 , t1.CreatedBy_usrID
                    )
-            VALUES (?, ?)
+            VALUES (NULL, ?, ?)
 )");
+
+            QCOMPARE(BindingValuesList.join(", "), "111, 9090");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -999,7 +1014,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
 //            QStringList BindingValuesList;
 //            foreach (auto b, qry.BindingValues) {
@@ -1020,30 +1035,35 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colB1
                  , t1.colA1
                  , t1.colC1
+                 , t1.CreatedBy_usrID
                    )
             VALUES (
                    112
                  , 111
                  , NOW()
                  , CURDATE()
+                 , 9090
                    )
                  , (
                    212
                  , 222
                  , NOW()
                  , CURDATE()
+                 , 9090
                    )
                  , (
                    312
                  , 333
                  , NOW()
                  , CURDATE()
+                 , 9090
                    )
                  , (
                    412
                  , 444
                  , NOW()
                  , CURDATE()
+                 , 9090
                    )
 )");
         } QT_CATCH (const std::exception &e) {
@@ -1054,7 +1074,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     void queryString_CREATE_values_multi_use_binding() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
-                .addCol("colF1")
+                .addCol("colG1")
                 .addCol("colB1")
                 .addCol("colA1")
                 .addCol("colC1")
@@ -1063,14 +1083,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
-                    {"colF1", 112},
+                    {"colG1", 112},
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "22Z"},
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
-                    {"colF1", 212},
+                    {"colG1", 212},
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1078,19 +1098,19 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colC1", DBExpression::CURDATE()},
                         {"colZ1", "33Z"},
                         {"colA1", DBExpression::NOW()},
-                        {"colF1", 312},
+                        {"colG1", 312},
                     },
                     {
                         {"colB1", 444},
                         {"colZ1", "44Z"},
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
-                        {"colF1", 412},
+                        {"colG1", 412},
                     },
                 }))
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, true);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, true);
 
             QStringList BindingValuesList;
             foreach (auto b, qry.BindingValues) {
@@ -1107,18 +1127,19 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             INSERT
               INTO test.t1
                    (
-                   t1.colF1
+                   t1.colG1
                  , t1.colB1
                  , t1.colA1
                  , t1.colC1
+                 , t1.CreatedBy_usrID
                    )
-            VALUES (?, ?, ?, ?)
-                 , (?, ?, ?, ?)
-                 , (?, ?, ?, ?)
-                 , (?, ?, ?, ?)
+            VALUES (?, ?, NOW(), CURDATE(), ?)
+                 , (?, ?, NOW(), CURDATE(), ?)
+                 , (?, ?, NOW(), CURDATE(), ?)
+                 , (?, ?, NOW(), CURDATE(), ?)
 )");
 
-            QCOMPARE(BindingValuesList.join(", "), "112, 111, NOW(), CURDATE(), 212, 222, NOW(), CURDATE(), 312, 333, NOW(), CURDATE(), 412, 444, NOW(), CURDATE()");
+            QCOMPARE(BindingValuesList.join(", "), "112, 111, 9090, 212, 222, 9090, 312, 333, 9090, 412, 444, 9090");
 
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -1143,18 +1164,18 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 )
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
             QStringList BindingValuesList;
             foreach (auto b, qry.BindingValues) {
                 BindingValuesList.append(b.toString());
             }
 
-//            if (SQLPrettyLen) {
-//                qDebug().nospace().noquote() << endl
-//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-//            }
+            if (SQLPrettyLen) {
+                qDebug().nospace().noquote() << endl
+                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1164,11 +1185,13 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colB1
                  , t1.colC1
                  , t1.colD1
+                 , t1.CreatedBy_usrID
                    )
             SELECT t2.colA2
                  , t2.colB2
                  , t2.colC2
                  , t2.colD2
+                 , 9090
               FROM test.t2
              WHERE t2.colE2 > 123
 )");
@@ -1183,13 +1206,13 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     void queryString_UPDATE_throw_on_no_where() {
         QT_TRY {
             UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
-                .set("colB", 123)
-                .set("colC", "123")
-                .setNull("colD")
+                .set("colB1", 123)
+                .set("colC1", "123")
+                .setNull("colD1")
             ;
 
             QVERIFY_EXCEPTION_THROWN(
-                        query.buildQueryString({}, false),
+                        query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderWhereClauseNotProvided);
 
         } QT_CATCH (const std::exception &e) {
@@ -1210,7 +1233,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, false);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
@@ -1221,9 +1244,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 ON alias_t2.colA2 = t1.colC1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-               SET colD1 = NULL
-                 , colC1 = 'v c1'
-                 , colB1 = 123
+               SET t1.colD1 = NULL
+                 , t1.colC1 = 'v c1'
+                 , t1.colB1 = 123
              WHERE t1.colA1 = 123
 )");
         } QT_CATCH (const std::exception &e) {
@@ -1237,6 +1260,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .setNull("colD1")
                 .set("colC1", "v c1")
                 .set("colB1", 123)
+                .set("colI1", 'T')
                 .leftJoinWith("rel_a", "alias_t2")
                 .leftJoin("test.t2")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
@@ -1245,7 +1269,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //                .andHaving({ "bbbbbbb", enuConditionOperator::NotNull })
             ;
 
-            stuBoundQueryString qry = query.buildQueryString({}, true);
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, true);
 
             QStringList BindingValuesList;
             foreach (auto b, qry.BindingValues) {
@@ -1264,14 +1288,15 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 ON alias_t2.colA2 = t1.colC1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-               SET colD1 = ?
-                 , colC1 = ?
-                 , colB1 = ?
+               SET t1.colD1 = NULL
+                 , t1.colC1 = ?
+                 , t1.colB1 = ?
+                 , t1.colI1 = ?
              WHERE t1.colA1 = 123
                AND t1.colE1 = NOW()
 )");
 
-            QCOMPARE(BindingValuesList.join(", "), "NULL, 'v c1', 123");
+            QCOMPARE(BindingValuesList.join(", "), "'v c1', 123, 'T'");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
@@ -1286,7 +1311,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             ;
 
             QVERIFY_EXCEPTION_THROWN(
-                        query.buildQueryString({}),
+                        query.buildQueryString(this->currentUserID, {}),
                         exQueryBuilderWhereClauseNotProvided);
 
         } QT_CATCH (const std::exception &e) {
@@ -1300,7 +1325,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({});
+            QString qry = query.buildQueryString(this->currentUserID, {});
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -1322,7 +1347,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({});
+            QString qry = query.buildQueryString(this->currentUserID, {});
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -1349,7 +1374,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
-            QString qry = query.buildQueryString({});
+            QString qry = query.buildQueryString(this->currentUserID, {});
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;

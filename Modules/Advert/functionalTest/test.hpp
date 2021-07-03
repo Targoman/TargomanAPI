@@ -104,38 +104,49 @@ private slots:
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
-                                    {"login", UT_UserEmail},
+                                    {"login", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
 
-        gEncodedJWT = MultiJWT.value("ssn").toString();
-        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
+        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
+        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
+    //test non privileged user for creating location: fail
+
     void createNewBanner_ProductAndSaleables() {
-        QVariant product = callAPI(
+        QVariant location = callAdminAPI(
             PUT,
-            "Advert/newTestProduct",
+            "Advert/newTestLocation",
             {},
             {
-                { "JWT", gJWT },
-                { "productCode", "prd code for test" },
-                { "productName", "test product name" },
+                { "url",        "http://www.abbasgholi.com" },
+                { "placeCode",  "ABC" },
             }
         );
 
-        QVariant saleable = callAPI(
-            PUT,
-            "Advert/newTestSaleable",
-            {},
-            {
-                { "JWT", gJWT },
-            }
-        );
+//        QVariant product = callAdminAPI(
+//            PUT,
+//            "Advert/newTestProduct",
+//            {},
+//            {
+//                { "productCode",    "prd code for test" },
+//                { "productName",    "test product name" },
+//                { "locationID",     location }
+//            }
+//        );
+
+//        QVariant saleable = callAdminAPI(
+//            PUT,
+//            "Advert/newTestSaleable",
+//            {},
+//            {
+//            }
+//        );
     }
 private:
     void addToBasket() {
@@ -146,7 +157,7 @@ private:
             "Advert/addToBasket",
             {},
             {
-                { "JWT", gJWT },
+                { "JWT", gAdminJWT },
                 { "saleableCode", "slb code for test" },
                 { "orderAdditives", {} },
                 { "qty", 12 },

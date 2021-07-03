@@ -108,7 +108,7 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
     return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
-TAPI::RawData_t User::apiGETPhoto(quint64 _usrID) {
+TAPI::RawData_t User::apiGETPhoto(TAPI::JWT_t _JWT, quint64 _usrID) {
 //    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
 
     auto Photo = SelectQuery(*this)

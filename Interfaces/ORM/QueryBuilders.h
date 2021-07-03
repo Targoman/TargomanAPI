@@ -48,6 +48,8 @@ namespace API {
 namespace ORM {
 
 class clsTable;
+class clsCreateQueryData;
+class clsSelectQueryData;
 
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotFound, Common::exTargomanBase);
@@ -132,12 +134,11 @@ public:
     DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values);
     virtual ~DBExpression();
 
-//    QVariant toVariant() const;
-//    static DBExpression fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
     operator QVariant() const;
     QVariant operator =(DBExpression& _other) const;
 
     QString toString() const;
+    bool isValid() const;
 
     static const DBExpression& NIL();
     static const DBExpression& NOW();
@@ -151,6 +152,7 @@ protected:
     QString Name;
     enuDBExpressionType::Type ExprType;
     QStringList Values;
+    friend clsSelectQueryData;
 };
 
 /***************************************************************************************/
@@ -327,10 +329,6 @@ protected:
 };
 
 /***************************************************************************************/
-class clsCreateQueryData;
-
-class clsSelectQueryData;
-
 class SelectQuery :
     public tmplBaseQuery<SelectQuery, clsSelectQueryData>,
     public tmplQueryJoinTrait<SelectQuery>,
@@ -346,6 +344,7 @@ public:
     SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
+//    SelectQuery& addCol(DBExpression& _expr, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
@@ -423,9 +422,9 @@ public:
     CreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
     CreateQuery& select(const SelectQuery& _selectQuery);
 
-    quint64 execute(QVariantMap _args = {}, bool _useBinding = true);
+    quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
-    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
+    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
 private:
     virtual void iAmAbstract() {}
     friend TestQueryBuilders;
@@ -449,11 +448,11 @@ public:
     UpdateQuery& set(const QString& _col, const QVariant& _value);
     UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
 
-    quint64 execute(QVariantMap _args = {}, bool _useBinding = true);
+    quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
 private:
     virtual void iAmAbstract() {}
-    stuBoundQueryString buildQueryString(QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
+    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
     friend TestQueryBuilders;
 };
 
@@ -473,11 +472,11 @@ public:
 public:
     DeleteQuery& addTarget(const QString& _targetTableName);
 
-    quint64 execute(QVariantMap _args = {});
+    quint64 execute(quint64 _currentUserID, QVariantMap _args = {});
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
+    QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
     friend TestQueryBuilders;
 };
 

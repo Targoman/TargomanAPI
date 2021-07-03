@@ -170,7 +170,7 @@ private:
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
-        auto makeURL = [_method, _api, _urlArgs](){
+        auto makeURL = [_method, _api, _urlArgs]() {
             QUrlQuery URLQuery;
             for(auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
                 URLQuery.addQueryItem(ArgIter.key(), ArgIter.value().toString());
@@ -186,26 +186,38 @@ private:
         Opt[CURLOPT_TIMEOUT] = 10;
         Opt[CURLOPT_FAILONERROR] = true;
         QStringList Headers = QStringList({"Content-Type: application/json"});
-        if(_encodedJWT.size())
+
+        if (_encodedJWT.size())
             Headers.append("Authorization: Bearer " + _encodedJWT);
+
         Opt[CURLOPT_HTTPHEADER] = Headers;
 
-        switch(_method){
-        case GET: Opt[CURLOPT_CUSTOMREQUEST] = "GET"; break;
-        case DELETE: Opt[CURLOPT_CUSTOMREQUEST] = "DELETE"; break;
-        case POST: Opt[CURLOPT_POST] = true; break;
-        case PUT: Opt[CURLOPT_CUSTOMREQUEST] = "PUT"; break;
-        case PATCH: Opt[CURLOPT_CUSTOMREQUEST] = "PATCH"; break;
+        switch (_method) {
+            case GET:
+                Opt[CURLOPT_CUSTOMREQUEST] = "GET";
+                break;
+            case DELETE:
+                Opt[CURLOPT_CUSTOMREQUEST] = "DELETE";
+                break;
+            case POST:
+                Opt[CURLOPT_POST] = true;
+                break;
+            case PUT:
+                Opt[CURLOPT_CUSTOMREQUEST] = "PUT";
+                break;
+            case PATCH:
+                Opt[CURLOPT_CUSTOMREQUEST] = "PATCH";
+                break;
         }
 
-        switch(_method){
-        case GET:
-        case DELETE:
-            break;
-        case POST:
-        case PUT:
-        case PATCH:
-            Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(_postFields).toJson(QJsonDocument::Compact);
+        switch (_method) {
+            case GET:
+            case DELETE:
+                break;
+            case POST:
+            case PUT:
+            case PATCH:
+                Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(_postFields).toJson(QJsonDocument::Compact);
         }
 
         QString CUrlResult = CUrl.exec(Opt);

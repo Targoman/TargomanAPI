@@ -34,7 +34,7 @@ namespace ORM {
 
 QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    Authorization::checkPriv(_JWT,{this->Module + ":ActionLogs:CRUD~0100"});
+    Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
     ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);

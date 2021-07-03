@@ -51,6 +51,7 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
             .replace("NULLABLE_TYPE", NULLABLE_UNDERLAYER_CLASS_NAME)
         ;
     }
+    this->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->ParamTypeName.toUtf8()));
 }
 
 clsORMFieldData::clsORMFieldData(const QString& _name,
@@ -84,6 +85,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
             .replace("NULLABLE_TYPE", NULLABLE_UNDERLAYER_CLASS_NAME)
         ;
     }
+    this->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->ParamTypeName.toUtf8()));
 }
 
 void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
@@ -108,8 +110,10 @@ void clsORMField::validate(const QVariant _value)
 
 const intfAPIArgManipulator& clsORMField::argSpecs()
 {
-    if(Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType))
+    if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType))
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));
+
+//    qDebug() << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
 
     Q_ASSERT(this->Data->ParameterType != QMetaType::UnknownType);
     return this->Data->ParameterType < TAPI_BASE_USER_DEFINED_TYPEID ?

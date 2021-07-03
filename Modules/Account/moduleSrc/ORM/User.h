@@ -53,7 +53,7 @@ private slots:
     bool ORMDELETE("Delete a User by priviledged user")
     bool ORMUPDATE("Update User info by priviledged user")
     quint64 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
-    TAPI::RawData_t REST(GET,Photo, (quint64 _usrID),
+    TAPI::RawData_t REST(GET,Photo, (TAPI::JWT_t _JWT, quint64 _usrID),
                              "Get user photo as image")
 
     bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,

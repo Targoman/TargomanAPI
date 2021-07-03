@@ -189,6 +189,7 @@ TAPI_ADD_STRING_TYPE(QString, URL_t);
 TAPI_ADD_STRING_TYPE(QString, ProductCode_t);
 TAPI_ADD_STRING_TYPE(QString, SaleableCode_t);
 TAPI_ADD_STRING_TYPE(QString, CouponCode_t);
+
 }
 
 /**********************************************************************/

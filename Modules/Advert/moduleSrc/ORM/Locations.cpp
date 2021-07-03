@@ -60,21 +60,22 @@ quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 }
 
 Locations::Locations() :
-    clsTable(AdvertSchema,
-              tblLocations::Name,
-              { ///<ColName                         Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblLocations::locID,               ORM_PRIMARY_KEY32},
-                {tblLocations::locURL,              S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
-                {tblLocations::locPlaceCode,        S(TAPI::URL_t),      QFV.integer().minValue(1),      QRequired, UPAdmin},
-                {tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblLocations::locCreationDateTime, ORM_CREATED_ON},
-                {tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus},
-              },
-              { ///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
-                ORM_RELATION_OF_CREATOR(tblLocations::locCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblLocations::locUpdatedBy_usrID),
-              })
+    clsTable(
+        AdvertSchema,
+        tblLocations::Name,
+        {///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblLocations::locID,               ORM_PRIMARY_KEY32 },
+            { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
+            { tblLocations::locPlaceCode,        S(QString),          QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
+            { tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus },
+            { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblLocations::locCreationDateTime, ORM_CREATED_ON },
+            { tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
+            ORM_RELATION_OF_CREATOR(tblLocations::locCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblLocations::locUpdatedBy_usrID),
+        })
 {
 }
 
