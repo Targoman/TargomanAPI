@@ -60,27 +60,7 @@ using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
-quint32 Advert::apiCREATENewTestLocation(
-        TAPI::JWT_t _JWT,
-        TAPI::URL_t _url,
-        QString _placeCode
-    )
-{
-    CreateQuery query = CreateQuery(Locations::instance())
-        .addCol(tblLocations::locURL)
-        .addCol(tblLocations::locPlaceCode)
-        .values(QVariantMap({
-            { tblLocations::locURL,       _url },
-            { tblLocations::locPlaceCode, _placeCode },
-        }))
-    ;
-
-    clsJWT JWT(_JWT);
-    quint64 insertedID = query.execute(JWT.usrID());
-    return insertedID;
-}
-
-quint32 Advert::apiCREATENewTestProduct(
+quint32 Advert::apiCREATEProduct(
         TAPI::JWT_t _JWT,
         QString _productCode,
         QString _productName,
@@ -88,6 +68,7 @@ quint32 Advert::apiCREATENewTestProduct(
     )
 {
     CreateQuery query = CreateQuery(*this->AccountProducts)
+//        .options_ignore()
         .addCol(tblAccountProductsBase::prdCode)
         .addCol(tblAccountProductsBase::prdName)
 //        .addCol(tblAccountProductsBase::prdDesc)
@@ -107,7 +88,6 @@ quint32 Advert::apiCREATENewTestProduct(
 //        .addCol(tblAccountProducts::prdClicksPerDay)
 //        .addCol(tblAccountProducts::prdClicksPerMonth)
 //        .addCol(tblAccountProducts::prdClicksTotal)
-
         .values(QVariantMap({
             { tblAccountProductsBase::prdCode,          _productCode },
             { tblAccountProductsBase::prdName,          _productName },
@@ -133,11 +113,10 @@ quint32 Advert::apiCREATENewTestProduct(
 
     clsJWT JWT(_JWT);
     quint64 insertedID = query.execute(JWT.usrID());
-
     return insertedID;
 }
 
-quint32 Advert::apiCREATENewTestSaleable(
+quint32 Advert::apiCREATESaleable(
         TAPI::JWT_t _JWT
     )
 {

@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_LOCATIONS_H
@@ -32,6 +33,7 @@ namespace Advertisement {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
 namespace tblLocations {
 constexpr char Name[] = "tblLocations";
 TARGOMAN_CREATE_CONSTEXPR(locID);
@@ -42,6 +44,7 @@ TARGOMAN_CREATE_CONSTEXPR(locCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(locUpdatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(locStatus);
 }
+
 #pragma GCC diagnostic pop
 
 class Locations : public ORM::clsTable
@@ -49,9 +52,9 @@ class Locations : public ORM::clsTable
     Q_OBJECT
 private slots:
     QVariant ORMGET("Get Locations information")
-    bool ORMDELETE("Delete a Locations")
-    bool ORMUPDATE("Update Location info by priviledged user")
     quint32 ORMCREATE("Create a new Location by priviledged user")
+    bool ORMUPDATE("Update Location info by priviledged user")
+    bool ORMDELETE("Delete a Locations")
 
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,Locations)

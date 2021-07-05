@@ -360,6 +360,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t, optional(QF
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t, optional(QFV.url()), _value, [](const QList<clsORMField>&){ return "A valid URL"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid ProductCode"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, SaleableCode_t, optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))), _value, [](const QList<clsORMField>&){ return "A valid SaleableCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t, optional(QFV.matches(QRegularExpression("(?s).*"))), _value, [](const QList<clsORMField>&){ return "A valid String"; });
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 

@@ -222,16 +222,17 @@ private:
 
         QString CUrlResult = CUrl.exec(Opt);
 
-        if(CUrl.lastError().isOk() == false){
-            qDebug()<<CUrl.errorBuffer();
+        if (CUrl.lastError().isOk() == false) {
+            qDebug() << CUrl.errorBuffer();
             return gInvalid;
-        }else{
+        }
+        else {
             QJsonParseError JsonError;
             QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
-            if(JsonError.error != QJsonParseError::NoError)
-                qDebug()<< "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+            if (JsonError.error != QJsonParseError::NoError)
+                qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
             QVariant Result = Doc.toVariant().toMap().value("result");
-            qDebug()<<"Result: "<<Result;
+            qDebug() << "Result: " << Result;
             return Result;
         }
     }

@@ -435,7 +435,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 //tblAccountCouponsBase::cpnCreatedBy_usrID,
                 //tblAccountCouponsBase::cpnCreationDateTime,
                 //tblAccountCouponsBase::cpnUpdatedBy_usrID,
-                Targoman::API::CURRENT_DATETIME,
+                Targoman::API::CURRENT_TIMESTAMP,
             }))
         ///TODO: join with userAssets to count user discount usage per voucher
         .where({ tblAccountCouponsBase::cpnID, enuConditionOperator::Equal, _discountCode })
@@ -445,7 +445,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         if (DiscountInfo.size() == 0)
             throw exHTTPBadRequest("Discount code not found.");
 
-        QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_DATETIME).toDateTime();
+        QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
 
         if (DiscountInfo.value(tblAccountCouponsBase::cpnExpiryTime).toDateTime() < Now)
             throw exHTTPBadRequest("Discount code has been expired");

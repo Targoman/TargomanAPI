@@ -36,6 +36,9 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
 
+#include "../moduleSrc/ORM/Locations.h"
+using namespace Targoman::API::Advertisement;
+
 class testAdvert: public clsBaseTest
 {
     Q_OBJECT
@@ -119,19 +122,38 @@ private slots:
     //test non privileged user for creating location: fail
 
     void createNewBanner_ProductAndSaleables() {
-        QVariant location = callAdminAPI(
-            PUT,
-            "Advert/newTestLocation",
+        QVariant locationID;
+
+        QVariantMap locationInfo = callAdminAPI(
+            GET,
+            "Advert/Locations",
             {},
             {
-                { "url",        "http://www.abbasgholi.com" },
-                { "placeCode",  "ABC" },
+                { "locURL",        "http://www.abbasgholi.com" },
+                { "locPlaceCode",  "ABC" },
             }
-        );
+        ).toMap();
+
+        if (locationInfo.isEmpty() == false)
+            locationID = locationInfo[tblLocations::locID];
+        else
+        {
+            locationID = callAdminAPI(
+                PUT,
+                "Advert/Locations",
+                {},
+                {
+                    { "locURL",        "http://www.abbasgholi.com" },
+                    { "locPlaceCode",  "ABC" },
+                }
+            );
+        }
+
+        qDebug() << "--------- locationID: " << locationID;
 
 //        QVariant product = callAdminAPI(
 //            PUT,
-//            "Advert/newTestProduct",
+//            "Advert/Product",
 //            {},
 //            {
 //                { "productCode",    "prd code for test" },
@@ -142,7 +164,7 @@ private slots:
 
 //        QVariant saleable = callAdminAPI(
 //            PUT,
-//            "Advert/newTestSaleable",
+//            "Advert/Saleable",
 //            {},
 //            {
 //            }

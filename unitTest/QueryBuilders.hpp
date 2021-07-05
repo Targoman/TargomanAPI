@@ -313,8 +313,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     /***************************************************************************************/
     void queryString_SELECT_EmptyCol() {
         QT_TRY {
-            SelectQuery query = SelectQuery(t1);
+            SelectQuery query = SelectQuery(t1)
+            ;
+
             QString qry = query.buildQueryString({}, false, false);
+
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -329,8 +332,47 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
-                 , t1.CURRENT_DATETIME
+                 , t1.CreatedBy_usrID
+                 , t1.CreationDateTime
+                 , t1.UpdatedBy_usrID
+                 , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_SELECT_EmptyCol_with_where() {
+        QT_TRY {
+            SelectQuery query = SelectQuery(t1)
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+                .andWhere({ "colB1", enuConditionOperator::Equal, 456 })
+            ;
+
+            QString qry = query.buildQueryString({}, false, false);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT t1.colID1
+                 , t1.colA1
+                 , t1.colB1
+                 , t1.colC1
+                 , t1.colD1
+                 , t1.colE1
+                 , t1.colF1
+                 , t1.colG1
+                 , t1.colH1
+                 , t1.colI1
+                 , t1.CreatedBy_usrID
+                 , t1.CreationDateTime
+                 , t1.UpdatedBy_usrID
+                 , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
+              FROM test.t1
+             WHERE t1.colA1 = 123
+               AND t1.colB1 = 456
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -1298,7 +1340,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND t1.colE1 = NOW()
 )");
 
-            QCOMPARE(BindingValuesList.join(", "), "'v c1', 123, 'T', 9090");
+            QCOMPARE(BindingValuesList.join(", "), "v c1, 123, T, 9090");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }

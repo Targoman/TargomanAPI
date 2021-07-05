@@ -98,6 +98,12 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Ascending,
                      Descending)
 
+struct stuBoundQueryString {
+    QString QueryString;
+//    QVariantMap BindingValues;
+    QVariantList BindingValues;
+};
+
 /***************************************************************************************/
 TARGOMAN_DEFINE_ENUM(enuDBExpressionType,
                      Value,
@@ -384,30 +390,6 @@ private:
     friend TestQueryBuilders;
 };
 
-class ApiSelectQuery : public SelectQuery
-{
-public:
-    ApiSelectQuery(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT) :
-        SelectQuery(_table)
-    {
-        this->pksByPath(_pksByPath);
-        this->offset(_offset);
-        this->limit(_limit);
-        this->addCols(_cols);
-        this->orderBy(_orderBy);
-        this->groupBy(_groupBy);
-
-        Q_UNUSED(_filters);
-        Q_UNUSED(_reportCount);
-    }
-};
-
-struct stuBoundQueryString {
-    QString QueryString;
-//    QVariantMap BindingValues;
-    QVariantList BindingValues;
-};
-
 /***************************************************************************************/
 class CreateQuery :
     public tmplBaseQuery<CreateQuery, clsCreateQueryData>
@@ -484,8 +466,21 @@ private:
 };
 
 /***************************************************************************************/
+/* API *********************************************************************************/
+/***************************************************************************************/
+class ApiSelectQuery : public SelectQuery
+{
+public:
+    ApiSelectQuery(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT);
+};
 
-//typedef tmplBaseQuery<SelectQuery, clsSelectQueryData> SelectQuery;
+class ApiCreateQuery : public CreateQuery
+{
+public:
+    ApiCreateQuery(clsTable& _table, CREATE_METHOD_ARGS_IMPL_WOJWT);
+};
+
+/***************************************************************************************/
 
 }
 }

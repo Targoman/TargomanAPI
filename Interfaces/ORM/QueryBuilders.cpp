@@ -50,13 +50,13 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
         ColName = ColName.replace(QRegularExpression("^" + _relation.RenamingPrefix), "");
 
     return (_relation.Column.isEmpty()
-            ? _tableName
+            ? (_col.isVirtual() ? "" : _tableName + ".")
             : (_relation.RenamingPrefix.isEmpty()
                 ? _relation.ReferenceTable
                 : _relation.RenamingPrefix
-              )
+              ) + "."
            )
-           + "."
+//           + "."
            + ColName
            + (_appendAs
               ? makeColRenamedAs(_col, _relation.RenamingPrefix)
@@ -1173,15 +1173,20 @@ tmplQueryGroupAndHavingTrait<itmplDerived>::~tmplQueryGroupAndHavingTrait() {}
 template <class itmplDerived>
 itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::groupBy(const QString& _col)
 {
-    this->GroupAndHavingTraitData->GroupByCols.append(_col);
+    if (_col.isEmpty() == false)
+        this->GroupAndHavingTraitData->GroupByCols.append(_col);
+
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::groupBy(const QStringList& _cols)
 {
-    foreach(auto Col, _cols)
-        this->groupBy(Col);
+    if (_cols.length()) {
+        foreach(auto Col, _cols)
+            this->groupBy(Col);
+    }
+
     return (itmplDerived&)*this;
 }
 
@@ -1315,6 +1320,9 @@ public:
                 this->SelectQueryPreparedItems.Cols.append(parts.join(""));
             }
             else {
+                if (_col.Name.isEmpty())
+                    throw exQueryBuilder("Column name is not provided");
+
                 QString AggFunction;
 
                 if (NULLABLE_IS_NULL(_col.SimpleAggregation)) {
@@ -1335,12 +1343,14 @@ public:
                     throw exQueryBuilder("Invalid column for filtering: " + _col.Name);
 //                    return false;
 
-                auto ColFinalName = makeColName(
-                            MainTableNameOrAlias,
-                            relatedORMField.Col,
-                            false /*true*/,
-                            relatedORMField.Relation == InvalidRelation ? _relation : relatedORMField.Relation
-                            );
+                QString ColFinalName = makeColName(
+                                           MainTableNameOrAlias,
+                                           relatedORMField.Col,
+                                           false /*true*/,
+                                           relatedORMField.Relation == InvalidRelation
+                                                ? _relation
+                                                : relatedORMField.Relation
+                                        );
 
                 if (AggFunction.size()) {
                    this->SelectQueryPreparedItems.Cols.append(AggFunction
@@ -1362,9 +1372,14 @@ public:
         if (this->RequiredCols.isEmpty())
             foreach(auto Col, this->Table.BaseCols)
                 this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true));
-        else
-            foreach(stuColSpecs Col, this->RequiredCols)
+        else {
+//            qDebug() << MainTableNameOrAlias << "has RequiredCols";
+//            int i = 0;
+            foreach(stuColSpecs Col, this->RequiredCols) {
+//                qDebug() << i++;
                 addCol(Col);
+            }
+        }
 
 //        QSet<stuRelation> UsedJoins;
 //        foreach (stuRelation Relation, this->Table.Relations) {
@@ -1593,31 +1608,54 @@ SelectQuery::~SelectQuery() {}
 //used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
 SelectQuery& SelectQuery::addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator)
 {
-    return this->addCols(_commaSeperatedCols.split(_seperator));
+    QString sCols = _commaSeperatedCols.trimmed();
+
+    if (sCols.isEmpty())
+        return *this;
+
+    QStringList cols = sCols.split(_seperator);
+
+    if (cols.length() == 0)
+        return *this;
+
+    return this->addCols(cols);
 }
 
 SelectQuery& SelectQuery::addCols(const QStringList& _cols)
 {
-    foreach(auto Col, _cols)
-        this->addCol(Col);
+    if (_cols.length()) {
+        foreach(QString col, _cols) {
+            if (col.isEmpty() == false)
+                this->addCol(col);
+        }
+    }
+
     return *this;
 }
 
 SelectQuery& SelectQuery::addCol(const QString& _col, const QString& _renameAs)
 {
-    this->Data->RequiredCols.append(stuColSpecs(_col, _renameAs));
+//    Q_ASSERT(_col.isEmpty() == false);
+
+    if (_col.isEmpty() == false)
+        this->Data->RequiredCols.append(stuColSpecs(_col, _renameAs));
+
     return *this;
 }
 
 SelectQuery& SelectQuery::addCol(const DBExpression& _expr, const QString& _renameAs)
 {
     this->Data->RequiredCols.append(stuColSpecs(_expr, _renameAs));
+
     return *this;
 }
 
 SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs)
 {
+    Q_ASSERT(_col.isEmpty() == false);
+
     this->Data->RequiredCols.append({ _col, _renameAs, _aggFunc });
+
     return *this;
 }
 
@@ -1627,11 +1665,13 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
         this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, 1, DBExpression::NIL() });
     else
         this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition });
+
     return *this;
 }
 SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs)
 {
     this->Data->RequiredCols.append({ {}, _renameAs, NULLABLE_NULL_VALUE, _aggFunc, _condition, _trueValue, _falseValue });
+
     return *this;
 }
 
@@ -1646,7 +1686,8 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
 \***********************/
 SelectQuery& SelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir)
 {
-    this->Data->OrderByCols.append({ _col, _dir });
+    if (_col.isEmpty() == false)
+        this->Data->OrderByCols.append({ _col, _dir });
     return *this;
 }
 
@@ -1865,8 +1906,14 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
                 }
             }
         }
-        else
-            QueryParts.append("LIMIT 2"); //Limit is set to 2 in order to produce error if multi values are selected instead of one
+        else {
+            if (SQLPrettyLen)
+                QueryParts.append(QString("LIMIT").rightJustified(SQLPrettyLen)
+                                  + " "
+                                  + "2");
+            else
+                QueryParts.append("LIMIT 2"); //Limit is set to 2 in order to produce error if multi values are selected instead of one
+        }
     }
 
     //-----------
@@ -1943,10 +1990,10 @@ QVariantMap SelectQuery::one(QVariantMap _args)
 
     if (this->Data->CahceTime > 0)
         Result = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                 .toJson(true, this->Data->Table.Converters);
+                            .toJson(true, this->Data->Table.Converters);
     else
         Result = this->DAC().execQuery("", QueryString)
-                 .toJson(true, this->Data->Table.Converters);
+                            .toJson(true, this->Data->Table.Converters);
 
     if (Result.object().isEmpty())
         throw exHTTPNotFound("No item could be found");
@@ -1970,14 +2017,14 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
 
     if (this->Data->CahceTime > 0)
         Result = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                 .toJson(false, this->Data->Table.Converters)
-                 .toVariant()
-                 .toList();
+                            .toJson(false, this->Data->Table.Converters)
+                            .toVariant()
+                            .toList();
     else
         Result = this->DAC().execQuery("", QueryString)
-                 .toJson(false, this->Data->Table.Converters)
-                 .toVariant()
-                 .toList();
+                            .toJson(false, this->Data->Table.Converters)
+                            .toVariant()
+                            .toList();
 
     return Result;
 }
@@ -2000,23 +2047,23 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
 
     if (this->Data->CahceTime > 0) {
         Result.TotalRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
-                           .value(0)
-                           .toULongLong();
+                                      .value(0)
+                                      .toULongLong();
 
         Result.Rows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                      .toJson(false, this->Data->Table.Converters)
-                      .toVariant()
-                      .toList();
+                                 .toJson(false, this->Data->Table.Converters)
+                                 .toVariant()
+                                 .toList();
     }
     else {
         Result.TotalRows = this->DAC().execQuery("", CountingQueryString)
-                           .value(0)
-                           .toULongLong();
+                                      .value(0)
+                                      .toULongLong();
 
         Result.Rows = this->DAC().execQuery("", QueryString)
-                      .toJson(false, this->Data->Table.Converters)
-                      .toVariant()
-                      .toList();
+                                 .toJson(false, this->Data->Table.Converters)
+                                 .toVariant()
+                                 .toList();
     }
 
     return Result;
@@ -2063,6 +2110,7 @@ public:
         foreach (auto col, this->Cols) {
             bool found = false;
             foreach (clsORMField baseCol, this->Table.BaseCols) {
+//                qDebug() << "compare" << col << baseCol.name();
                 if (col == baseCol.name()) {
                     if (baseCol.defaultValue() == QInvalid || baseCol.defaultValue() == QAuto)
                         throw exHTTPInternalServerError("Invalid change to read-only column <" + col + ">");
@@ -2077,7 +2125,7 @@ public:
                 }
             }
             if (found == false)
-                throw exQueryBuilderColumnNotFound("Column <" + col + "> not found in Table base columns");
+                throw exQueryBuilderColumnNotFound("Column <" + col + "> not found in table <" + this->Table.Name + "> base columns");
         }
 
         //2- check BaseCols (required, ...)
@@ -2112,7 +2160,7 @@ public:
                             if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                                 baseCol.validate(val);
 
-                            QString v = makeValueAsSQL(val);
+                            QString v = makeValueAsSQL(val, _useBinding == false);
 
                             if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false)
                                 oneRecordToString.append(v);
@@ -2478,7 +2526,7 @@ public:
                 if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                     relatedORMField.Col.validate(val);
 
-                QString v = makeValueAsSQL(val);
+                QString v = makeValueAsSQL(val, _useBinding == false);
 
                 if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false)
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
@@ -2822,6 +2870,32 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args)
     clsDACResult Result = this->DAC().execQuery("", QueryString);
 
     return Result.numRowsAffected();
+}
+
+/***************************************************************************************/
+/* API *********************************************************************************/
+/***************************************************************************************/
+ApiSelectQuery::ApiSelectQuery(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT) :
+    SelectQuery(_table)
+{
+    this->pksByPath(_pksByPath);
+    this->offset(_offset);
+    this->limit(_limit);
+    this->addCols(_cols);
+    this->orderBy(_orderBy);
+    this->groupBy(_groupBy);
+
+    Q_UNUSED(_filters);
+    Q_UNUSED(_reportCount);
+}
+
+ApiCreateQuery::ApiCreateQuery(clsTable& _table, CREATE_METHOD_ARGS_IMPL_WOJWT) :
+    CreateQuery(_table)
+{
+    for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
+        this->addCol(arg.key());
+
+    this->values(_createInfo);
 }
 
 /***************************************************************************************/

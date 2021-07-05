@@ -118,7 +118,8 @@ clsTable::clsTable(const QString& _schema,
     Indexes(_indexes),
     CountOfPKs(0)
 {
-    this->BaseCols.append(clsORMField(CURRENT_DATETIME, S(TAPI::DateTime_t), QFV, QNull, UPNone, false, false, false, true));
+                                   ///name                      type                 extraValidator defaultValue updatableBy isSortable isFilterable isSelfIdentifier isVirtual isPrimaryKey renameAs
+    this->BaseCols.append(clsORMField(CURRENT_TIMESTAMP + "()", S(TAPI::DateTime_t), QFV,           QNull,       UPNone,     false,     false,       false,           true,     false,       CURRENT_TIMESTAMP));
 
     clsTable::Registry.insert(Schema + "." + Name, this);
 }

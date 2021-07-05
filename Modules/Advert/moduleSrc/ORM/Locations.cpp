@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Locations.h"
@@ -31,34 +32,6 @@ namespace API {
 namespace Advertisement {
 using namespace ORM;
 
-QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
-
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
-
-    return query.one();
-}
-
-bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
-}
-
-bool Locations::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(UPDATE_METHOD_CALL_ARGS);
-}
-
-quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
-}
-
 Locations::Locations() :
     clsTable(
         AdvertSchema,
@@ -66,7 +39,7 @@ Locations::Locations() :
         {///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
             { tblLocations::locID,               ORM_PRIMARY_KEY32 },
             { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
-            { tblLocations::locPlaceCode,        S(QString),          QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
+            { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
             { tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus },
             { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
             { tblLocations::locCreationDateTime, ORM_CREATED_ON },
@@ -75,8 +48,62 @@ Locations::Locations() :
         {///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
             ORM_RELATION_OF_CREATOR(tblLocations::locCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblLocations::locUpdatedBy_usrID),
-        })
+        },
+        {
+            { { tblLocations::locURL, tblLocations::locPlaceCode, tblLocations::locStatus }, enuDBIndex::Unique },
+            { tblLocations::locURL },
+            { tblLocations::locPlaceCode },
+            { tblLocations::locStatus },
+            { tblLocations::locCreatedBy_usrID },
+            { tblLocations::locCreationDateTime },
+            { tblLocations::locUpdatedBy_usrID },
+        }
+    )
+{}
+
+QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL)
 {
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
+//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+
+    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+
+//    SelectQuery query = SelectQuery(Locations::instance())
+//        .where({ tblLocations::locURL, enuConditionOperator::Equal, _url })
+//        .andWhere({ tblLocations::locPlaceCode, enuConditionOperator::Equal, _placeCode })
+//    ;
+
+    QT_TRY {
+        return query.one();
+    }
+    QT_CATCH(const std::exception& _exp) {
+        qDebug() << _exp.what();
+        return {};
+    }
+}
+
+quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+//    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+
+    ApiCreateQuery query = ApiCreateQuery(*this, CREATE_METHOD_CALL_ARGS_WOJWT);
+
+    clsJWT JWT(_JWT);
+    quint64 insertedID = query.execute(JWT.usrID());
+    return insertedID;
+}
+
+bool Locations::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    return this->update(UPDATE_METHOD_CALL_ARGS);
+}
+
+bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
 }
 
 }
