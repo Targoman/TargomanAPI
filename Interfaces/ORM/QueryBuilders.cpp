@@ -528,6 +528,7 @@ struct stuColSpecs {
     QVariant TrueValue;
     QVariant FalseValue;
 //    DBExpression Expression;
+    QVariant Expression;
 
     stuColSpecs(const stuColSpecs& _other) :
         Name(_other.Name),
@@ -536,8 +537,8 @@ struct stuColSpecs {
         ConditionalAggregation(_other.ConditionalAggregation),
         Condition(_other.Condition),
         TrueValue(_other.TrueValue),
-        FalseValue(_other.FalseValue)
-//        ,Expression(_other.Expression)
+        FalseValue(_other.FalseValue),
+        Expression(_other.Expression)
     {}
     stuColSpecs(
             const QString& _name,
@@ -555,15 +556,14 @@ struct stuColSpecs {
         Condition(_condition),
         TrueValue(_trueValue),
         FalseValue(_falseValue)
-//        Expression({})
     {}
-//    stuColSpecs(
-//            const DBExpression& _expression,
-//            const QString& _renameAs = {}
-//        ) :
-//        RenameAs(_renameAs),
-//        Expression(_expression)
-//    {}
+    stuColSpecs(
+            const DBExpression& _expression,
+            const QString& _renameAs = {}
+        ) :
+        RenameAs(_renameAs),
+        Expression(_expression)
+    {}
 };
 
 /*
@@ -1265,15 +1265,17 @@ public:
                 return _fieldString + " AS " + _col.RenameAs;
             }; //updateRename
 
-            /*if (_col.Expression.isValid()) {
+            if (_col.Expression.isValid()) {
+                DBExpression exp = _col.Expression.value<DBExpression>();
                 this->SelectQueryPreparedItems.Cols.append(
-                            _col.Expression.Name
-                            + (_col.RenameAs.length()
-                               ? " AS " + _col.RenameAs
-                               : ""
-                            ));
+                    exp.Name
+                    + (_col.RenameAs.length()
+                       ? " AS " + _col.RenameAs
+                       : ""
+                    )
+                );
             }
-            else */if (NULLABLE_HAS_VALUE(_col.ConditionalAggregation)) {
+            else if (NULLABLE_HAS_VALUE(_col.ConditionalAggregation)) {
                 if (_col.Condition.isEmpty())
                     throw exQueryBuilder("Condition is not provided for conditional aggregation");
 
@@ -1607,11 +1609,11 @@ SelectQuery& SelectQuery::addCol(const QString& _col, const QString& _renameAs)
     return *this;
 }
 
-//SelectQuery& SelectQuery::addCol(DBExpression& _expr, const QString& _renameAs)
-//{
-//    this->Data->RequiredCols.append(stuColSpecs(_expr, _renameAs));
-//    return *this;
-//}
+SelectQuery& SelectQuery::addCol(const DBExpression& _expr, const QString& _renameAs)
+{
+    this->Data->RequiredCols.append(stuColSpecs(_expr, _renameAs));
+    return *this;
+}
 
 SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs)
 {
@@ -2157,7 +2159,7 @@ public:
         else if (this->Select.isValid()) {
             if (extraBaseColsValues.length()) {
                 foreach (auto val, extraBaseColsValues) {
-//                    this->Select.addCol(DBExpression(val.toString(), enuDBExpressionType::Value));
+                    this->Select.addCol(DBExpression(val.toString(), enuDBExpressionType::Value));
                 }
             }
 
@@ -2441,6 +2443,8 @@ public:
         if (this->SetMaps.isEmpty())
             throw exHTTPBadRequest("No columns found for updating");
 
+        QList<QString> providedCols;
+
         QString equalSign = (SQLPrettyLen ? " = " : "=");
 
         foreach (auto Col, this->SetMaps) {
@@ -2456,7 +2460,7 @@ public:
             if (relatedORMField.Col.isReadOnly())
                 throw exHTTPInternalServerError("Invalid change to read-only column <" + key + ">");
 
-            QString colName = makeColName(this->Table.Name, relatedORMField.Col);
+            QString colName = makeColName(MainTableNameOrAlias, relatedORMField.Col);
 
             if (val.userType() == QMetaType::QStringList) {
                 QStringList l = val.value<QStringList>();
@@ -2469,6 +2473,8 @@ public:
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3.%4").arg(colName).arg(equalSign).arg(tableName).arg(colName));
             }
             else {
+                providedCols.append(key);
+
                 if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                     relatedORMField.Col.validate(val);
 
@@ -2482,6 +2488,20 @@ public:
                 }
             }
         }
+
+        foreach (clsORMField baseCol, this->Table.BaseCols) {
+            if (providedCols.contains(baseCol.name()) == false && baseCol.updatableBy() == enuUpdatableBy::__UPDATER__ ) {
+                auto colName = makeColName(MainTableNameOrAlias, baseCol);
+
+                if (_useBinding == false)
+                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.toDB(_currentUserID).toString()));
+                else {
+                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
+                    this->UpdateQueryPreparedItems.BindingValues.append(baseCol.toDB(_currentUserID));
+                }
+            }
+        }
+
     }
 
 public:

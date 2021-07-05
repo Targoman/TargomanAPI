@@ -1171,11 +1171,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 BindingValuesList.append(b.toString());
             }
 
-            if (SQLPrettyLen) {
-                qDebug().nospace().noquote() << endl
-                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-            }
+//            if (SQLPrettyLen) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+//            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1247,6 +1247,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                SET t1.colD1 = NULL
                  , t1.colC1 = 'v c1'
                  , t1.colB1 = 123
+                 , t1.UpdatedBy_usrID = 9090
              WHERE t1.colA1 = 123
 )");
         } QT_CATCH (const std::exception &e) {
@@ -1292,11 +1293,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1 = ?
                  , t1.colB1 = ?
                  , t1.colI1 = ?
+                 , t1.UpdatedBy_usrID = ?
              WHERE t1.colA1 = 123
                AND t1.colE1 = NOW()
 )");
 
-            QCOMPARE(BindingValuesList.join(", "), "'v c1', 123, 'T'");
+            QCOMPARE(BindingValuesList.join(", "), "'v c1', 123, 'T', 9090");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }

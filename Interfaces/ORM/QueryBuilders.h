@@ -137,6 +137,9 @@ public:
     operator QVariant() const;
     QVariant operator =(DBExpression& _other) const;
 
+//    QVariant toVariant() const;
+//    void fromVariant(DBExpression& _other) const;
+
     QString toString() const;
     bool isValid() const;
 
@@ -344,7 +347,7 @@ public:
     SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
-//    SelectQuery& addCol(DBExpression& _expr, const QString& _renameAs = {});
+    SelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});
     SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
