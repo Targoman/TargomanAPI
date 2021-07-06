@@ -320,7 +320,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     }
 }
 */
-
+/*
 bool clsTable::update(quint64 _actorUserID,
                       TAPI::PKsByPath_t _pksByPath,
                       const TAPI::ORMFields_t& _updateInfo,
@@ -405,7 +405,8 @@ bool clsTable::update(quint64 _actorUserID,
             throw;
     }
 }
-
+*/
+/*
 bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
 {
     this->prepareFiltersList();
@@ -445,6 +446,16 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
                                         , Values);
 
     return Result.numRowsAffected() > 0;
+}
+*/
+QString clsTable::getStatusColumnNam() const
+{
+    foreach(auto Col, this->BaseCols) {
+        if (Col.updatableBy() == UPStatus )
+            return Col.name();
+    }
+
+    return "";
 }
 
 clsDACResult clsTable::callSP(const QString& _spName, const QVariantMap& _spArgs, const QString& _purpose, quint64* _executionTime)
@@ -566,8 +577,6 @@ void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& 
     for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
         _extraFilters.insert(FilterIter.key(), FilterIter.value());
 }
-
-
 
 QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 {

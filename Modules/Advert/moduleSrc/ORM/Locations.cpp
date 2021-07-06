@@ -62,11 +62,11 @@ Locations::Locations() :
     )
 {}
 
-QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    QT_TRY {
 //        return query.one();
@@ -76,33 +76,28 @@ QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL)
 //        return {};
 //    }
 
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-//    //return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
-
-//    ApiCreateQuery query = ApiCreateQuery(*this, CREATE_METHOD_CALL_ARGS);
-
-//    clsJWT JWT(_JWT);
-//    quint64 insertedID = query.execute(JWT.usrID());
-//    return insertedID;
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Locations::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool Locations::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->update(UPDATE_METHOD_CALL_ARGS);
+
+    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+
+    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 }

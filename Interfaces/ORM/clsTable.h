@@ -36,6 +36,23 @@ class TestQueryBuilders;
 namespace Targoman {
 namespace API {
 namespace ORM {
+class clsTable;
+}
+}
+}
+
+namespace Targoman {
+namespace API {
+namespace Query {
+extern bool Update(Targoman::API::ORM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
+extern bool Delete(Targoman::API::ORM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+}
+}
+}
+
+namespace Targoman {
+namespace API {
+namespace ORM {
 
 class clsCondition;
 
@@ -101,18 +118,19 @@ public:
 //                             bool _reportCount = false,
 //                             quint32 _cacheTime = 0);
 
-    bool update(quint64 _actorUserID,
-                TAPI::PKsByPath_t _pksByPath,
-                const TAPI::ORMFields_t& _updateInfo,
-                const QVariantMap& _extraFilters={});
-
-    bool deleteByPKs(quint64 _actorUserID,
-                     const TAPI::PKsByPath_t& _pksByPath,
-                     QVariantMap _extraFilters={},
-                     bool _realDelete = false);
-
 //    QVariant create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo);
 
+//    bool update(quint64 _actorUserID,
+//                TAPI::PKsByPath_t _pksByPath,
+//                const TAPI::ORMFields_t& _updateInfo,
+//                const QVariantMap& _extraFilters={});
+
+//    bool deleteByPKs(quint64 _actorUserID,
+//                     const TAPI::PKsByPath_t& _pksByPath,
+//                     QVariantMap _extraFilters={},
+//                     bool _realDelete = false);
+
+    QString getStatusColumnNam() const;
 
     DBManager::clsDACResult callSP(const QString& _spName,
                                    const QVariantMap& _spArgs = QVariantMap(),
@@ -196,6 +214,9 @@ protected:
     friend DeleteQuery;
 
     friend TestQueryBuilders;
+
+    friend bool Targoman::API::Query::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
+    friend bool Targoman::API::Query::Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
 }

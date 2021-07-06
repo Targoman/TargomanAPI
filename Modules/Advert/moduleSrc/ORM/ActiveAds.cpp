@@ -34,21 +34,22 @@ namespace API {
 namespace Advertisement {
 using namespace ORM;
 
-QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool ActiveAds::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool ActiveAds::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS);
+
+    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 ActiveAds::ActiveAds() :

@@ -33,45 +33,43 @@ namespace API {
 namespace Advertisement {
 using namespace ORM;
 
-QVariant Props::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _createInfo);
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
-
-    //return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL)
-{
-    QVariantMap ExtraFilters;
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
-
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters);
-}
-
-bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
+bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     QVariantMap ExtraFilters;
 
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()))){
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
-    }
-    return this->update(UPDATE_METHOD_CALL_ARGS, ExtraFilters);
+
+    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+}
+
+bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
+{
+    QVariantMap ExtraFilters;
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+
+    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 Props::Props() :

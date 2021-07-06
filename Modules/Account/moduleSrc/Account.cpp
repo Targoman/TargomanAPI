@@ -366,7 +366,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
 
 //    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(),
     Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
-                                              _JWT,
+                                              clsJWT(_JWT).usrID(),
                                               TAPI::ORMFields_t({
                                                   { tblVoucher::vch_usrID,clsJWT(_JWT).usrID() },
                                                   { tblVoucher::vchDesc, _preVoucher.toJson() },
@@ -395,12 +395,15 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
             return processVoucher(Voucher.ID);
         }
     } catch (...) {
-        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
-                                   }), {
-                                       {tblVoucher::vchID, Voucher.ID}
-                                   }
-                                   );
+        Targoman::API::Query::Update(Voucher::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                     }),
+                                     {
+                                        { tblVoucher::vchID, Voucher.ID }
+                                     });
         throw;
     }
 
@@ -424,12 +427,15 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::T
                      });
         return processVoucher(VoucherID);
     } catch(...) {
-        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
-                                   }), {
-                                       {tblVoucher::vchID, VoucherID}
-                                   }
-                                   );
+        Targoman::API::Query::Update(Voucher::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                     }),
+                                     {
+                                        { tblVoucher::vchID, VoucherID }
+                                     });
         throw;
     }
 }
@@ -464,7 +470,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
     Targoman::API::Query::Create(OfflinePayments::instance(),
-                                 _JWT,
+                                 clsJWT(_JWT).usrID(),
                                  TAPI::ORMFields_t({
                                     { "ofp_vchID",_vchID },
                                     { "ofpBank",_bank },
@@ -489,12 +495,15 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                      });
         return processVoucher(_vchID);
     }  catch (...) {
-        Voucher::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                       {tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error}
-                                   }), {
-                                       {tblVoucher::vchID, _vchID}
-                                   }
-                                   );
+        Targoman::API::Query::Update(Voucher::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                     }),
+                                     {
+                                        { tblVoucher::vchID, _vchID }
+                                     });
         throw;
     }
 }

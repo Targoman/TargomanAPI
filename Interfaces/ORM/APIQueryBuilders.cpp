@@ -31,59 +31,67 @@ namespace Targoman {
 namespace API {
 namespace Query {
 
-QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT, QString _extraFilters, quint16 _cacheTime)
+QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
 {
+    _table.prepareFiltersList();
+
     SelectQuery query = SelectQuery(_table)
-        .pksByPath(_pksByPath)
+        .setPksByPath(_pksByPath)
         .offset(_offset)
         .limit(_limit)
         .addCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
-        .filters(_filters)
-        .filters(_extraFilters)
+        .addFilters(_filters)
+        .addFilters(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     return query.one();
 }
 
-QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT, QString _extraFilters, quint16 _cacheTime)
+QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
 {
+    _table.prepareFiltersList();
+
     SelectQuery query = SelectQuery(_table)
-        .pksByPath(_pksByPath)
+        .setPksByPath(_pksByPath)
         .offset(_offset)
         .limit(_limit)
         .addCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
-        .filters(_filters)
-        .filters(_extraFilters)
+        .addFilters(_filters)
+        .addFilters(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     return query.all();
 }
 
-TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT, QString _extraFilters, quint16 _cacheTime)
+TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
 {
+    _table.prepareFiltersList();
+
     SelectQuery query = SelectQuery(_table)
-        .pksByPath(_pksByPath)
+        .setPksByPath(_pksByPath)
         .offset(_offset)
         .limit(_limit)
         .addCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
-        .filters(_filters)
-        .filters(_extraFilters)
+        .addFilters(_filters)
+        .addFilters(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     return query.allWithCount();
 }
 
-quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL)
+quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL)
 {
+    _table.prepareFiltersList();
+
     CreateQuery query = CreateQuery(_table);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
@@ -91,8 +99,75 @@ quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL)
 
     query.values(_createInfo);
 
-    clsJWT JWT(_JWT);
-    return query.execute(JWT.usrID());
+    return query.execute(_userID);
+}
+
+bool Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters)
+{
+    _table.prepareFiltersList();
+
+    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
+        throw exHTTPBadRequest("No key provided to update");
+
+    if (_updateInfo.isEmpty())
+        throw exHTTPBadRequest("No change provided to update");
+
+    UpdateQuery query = UpdateQuery(_table)
+        .setPksByPath(_pksByPath)
+//        .addFilters(_extraFilters)
+    ;
+
+    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
+        if (FilterIter->isValid() == false)
+            continue;
+        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+        if (relatedORMField.Col.isFilterable() == false)
+            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
+    }
+
+    for (QVariantMap::const_iterator arg = _updateInfo.constBegin(); arg != _updateInfo.constEnd(); ++arg) {
+        if (arg->isValid()) {
+            query.set(arg.key(), arg.value());
+        }
+    }
+
+    return query.execute(_userID) > 0;
+}
+
+bool Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete)
+{
+    _table.prepareFiltersList();
+
+    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
+        throw exHTTPBadRequest("No key provided to delete");
+
+    QString statusColumn = _table.getStatusColumnNam();
+    if (statusColumn.isEmpty() == false) {
+        if (Update(_table, _userID, _pksByPath, TAPI::ORMFields_t({
+                { _table.getStatusColumnNam(), "Removed" }
+            }), _extraFilters) == 0)
+            return false;
+    }
+
+    if (_realDelete == false)
+        return true;
+
+    DeleteQuery query = DeleteQuery(_table)
+        .setPksByPath(_pksByPath)
+//        .addFilters(_extraFilters)
+    ;
+
+    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
+        if (FilterIter->isValid() == false)
+            continue;
+        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+        if (relatedORMField.Col.isFilterable() == false)
+            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
+    }
+
+    return query.execute(_userID) > 0;
 }
 
 }

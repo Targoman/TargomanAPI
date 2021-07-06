@@ -317,7 +317,8 @@ public:
     itmplDerived& orWhere(const clsCondition& _condition);
     itmplDerived& xorWhere(const clsCondition& _condition);
 
-    itmplDerived& filters(const QString& _filters);
+    itmplDerived& setPksByPath(TAPI::PKsByPath_t _pksByPath);
+    itmplDerived& addFilters(const QString& _filters);
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -362,7 +363,7 @@ public:
     SelectQuery(clsTable& _table, const QString& _alias = {});
     virtual ~SelectQuery();
 
-    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});
@@ -370,7 +371,7 @@ public:
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
     SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
 
-//    SelectQuery& addCols(const QString& _tableAlias, const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+//    SelectQuery& addCols(const QString& _tableAlias, const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
 //    SelectQuery& addCols(const QString& _tableAlias, const QStringList& _cols);
 //    SelectQuery& addCol(const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
 //    SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
@@ -384,9 +385,8 @@ public:
     SelectQuery& addUnionAll(SelectQuery& _query);
     SelectQuery& addUnionDistinct(SelectQuery& _query);
 
-    SelectQuery& pksByPath(TAPI::PKsByPath_t _pksByPath); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
-    SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
-    SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+    SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& setCacheTime(quint16 _cacheTime);
 
     QVariantMap one(QVariantMap _args = {});

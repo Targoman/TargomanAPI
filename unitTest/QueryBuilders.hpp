@@ -905,7 +905,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     "colA1",
                     "colB1",
                 }))
-                .filters("( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
+                .addFilters("( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
             ;
 
             QString qry = query.buildQueryString({}, true, false);

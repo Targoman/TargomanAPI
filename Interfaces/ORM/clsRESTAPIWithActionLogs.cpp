@@ -31,15 +31,15 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
-QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 }

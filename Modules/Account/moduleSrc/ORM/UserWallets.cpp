@@ -35,45 +35,45 @@ namespace AAA {
 using namespace ORM;
 using namespace DBManager;
 
-QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::walDefault, 0);
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _createInfo);
     }
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
-
-//    //return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL)
+bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+
+    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+}
+
+bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     TAPI::ORMFields_t ExtraFilters;
 
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
         ExtraFilters.insert(tblUserWallets::walDefault, 0);
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
-    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS, ExtraFilters);
-}
 
-bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
-    return this->update(UPDATE_METHOD_CALL_ARGS);
+    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){

@@ -1176,12 +1176,40 @@ public:
             }
         }
 
+        /****************************************************************************/
+        if (this->PksByPath.size())
+        {
+            QStringList PrimaryKeyQueries = this->PksByPath.split(";");
+            QStringList pkFilters;
+            foreach (auto Query, PrimaryKeyQueries) {
+                foreach (auto Col, this->Owner->Data->Table.BaseCols)
+                if (Col.isPrimaryKey())
+                {
+                    if (Query.size())
+                        pkFilters.append(makeColName(MainTableNameOrAlias, Col) + " = \"" + Query + "\"");
+                    break;
+                }
+            }
+            if (pkFilters.isEmpty())
+                throw exQueryBuilder("pksByPath had no results");
+
+            if (this->PreparedItems.Where.isEmpty())
+                this->PreparedItems.Where = pkFilters.join(" AND ");
+            else
+                this->PreparedItems.Where = QString("%1 AND (%2)")
+                                            .arg(pkFilters.join(" AND "))
+                                            .arg(this->PreparedItems.Where);
+        }
+
+        /****************************************************************************/
+
     }
 
 public:
     const itmplDerived*             Owner;
     bool                            IsPrepared = false;
     clsCondition                    WhereClauses;
+    TAPI::PKsByPath_t               PksByPath;
     QStringList                     Filters;
     stuQueryWhereTraitPreparedItems PreparedItems;
 };
@@ -1253,10 +1281,21 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::xorWhere(const clsCondition& _c
 }
 
 /***********************\
+|* PKsByPath           *|
+\***********************/
+template <class itmplDerived>
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(TAPI::PKsByPath_t _pksByPath)
+{
+    this->WhereTraitData->PksByPath = _pksByPath.trimmed();
+
+    return (itmplDerived&)*this;
+}
+
+/***********************\
 |* Filters             *|
 \***********************/
 template <class itmplDerived>
-itmplDerived& tmplQueryWhereTrait<itmplDerived>::filters(const QString& _filters)
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::addFilters(const QString& _filters)
 {
     QString Filters = _filters.trimmed();
 
@@ -1729,7 +1768,6 @@ public:
     QList<stuOrderBy>    OrderByCols;
     QList<stuUnion>      UnionParts;
 
-    TAPI::PKsByPath_t    PksByPath;
     quint64              Offset = 0;
     quint16              Limit = 0;
     quint16              CahceTime = 0;
@@ -1772,7 +1810,7 @@ SelectQuery::~SelectQuery() {}
 /***********************\
 |* Columns             *|
 \***********************/
-//used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+//used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
 SelectQuery& SelectQuery::addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator)
 {
     QString sCols = _commaSeperatedCols.trimmed();
@@ -1880,21 +1918,14 @@ SelectQuery& SelectQuery::addUnionDistinct(SelectQuery& _query)
 /***********************\
 |* Other               *|
 \***********************/
-//used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
-SelectQuery& SelectQuery::pksByPath(TAPI::PKsByPath_t _pksByPath)
-{
-    this->Data->PksByPath = _pksByPath;
-    return *this;
-}
-
-//used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+//used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
 SelectQuery& SelectQuery::offset(quint64 _offset)
 {
     this->Data->Offset = _offset;
     return *this;
 }
 
-//used by APPLY_GET_METHOD_CALL_ARGS_TO_QUERY
+//used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
 SelectQuery& SelectQuery::limit(quint16 _limit)
 {
     this->Data->Limit = _limit;
@@ -1968,27 +1999,6 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     if (this->WhereTraitData->PreparedItems.Where.size())
         WhereParts.append(this->WhereTraitData->PreparedItems.Where);
 
-    if (this->Data->PksByPath.size())
-    {
-        QStringList PrimaryKeyQueries = this->Data->PksByPath.split(";");
-        QStringList Filters;
-        foreach (auto Query, PrimaryKeyQueries)
-            foreach (auto Col, this->Data->Table.BaseCols)
-                if (Col.isPrimaryKey())
-                {
-                    if (Query.size())
-                        Filters.append(makeColName(this->Data->Table.Name, Col) + " = \"" + Query + "\"");
-                    break;
-                }
-
-        if (WhereParts.isEmpty())
-            WhereParts.append(Filters.join(" AND "));
-        else
-            WhereParts.append(QString("%1 AND (%2)")
-                              .arg(Filters.join(" AND "))
-                              .arg(WhereParts.join(" ")));
-    }
-
     if (WhereParts.size())
     {
         if (SQLPrettyLen) {
@@ -2047,7 +2057,7 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     //-----------
     if (_reportCount == false)
     {
-        if (this->Data->PksByPath.isEmpty())
+        if (this->WhereTraitData->PksByPath.isEmpty())
         {
             if ((this->Data->Offset > 0) || (this->Data->Limit > 0))
             {

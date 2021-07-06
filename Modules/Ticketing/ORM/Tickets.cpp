@@ -34,7 +34,7 @@ namespace API {
 
 using namespace ORM;
 
-QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
+QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     QString ExtraFilters;
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
@@ -44,7 +44,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
                        .arg(tblTickets::tktTarget_usrID)
                        .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS, ExtraFilters); //, CACHE_TIME);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters); //, CACHE_TIME);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query
@@ -58,7 +58,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL)
 
 //    return query.one();
 
-    //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS);
+    //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 Tickets::Tickets() :

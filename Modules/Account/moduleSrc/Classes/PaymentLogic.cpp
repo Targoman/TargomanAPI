@@ -76,23 +76,31 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
             throw exHTTPBadRequest("Gateway not suppored yet");
         }
 
-        if(PaymentResponse.ErrorCode){
-            OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                                  {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
-                                                  {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result},
-                                              }), {
-                                                  {{tblOnlinePayments::onpMD5, opyMD5}}
-                                              });
+        if (PaymentResponse.ErrorCode) {
+            Targoman::API::Query::Update(OnlinePayments::instance(),
+                                         SYSTEM_USER_ID,
+                                         {},
+                                         TAPI::ORMFields_t({
+                                            { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                                            { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
+                                         }),
+                                         {
+                                            { tblOnlinePayments::onpMD5, opyMD5 }
+                                         });
             throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
         }
 
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                              {tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID},
-                                              {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Pending},
-                                              {tblOnlinePayments::onpResult, PaymentResponse.Result},
-                                          }), {
-                                              {{tblOnlinePayments::onpMD5, opyMD5}}
-                                          });
+        Targoman::API::Query::Update(OnlinePayments::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
+                                        { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Pending },
+                                        { tblOnlinePayments::onpResult, PaymentResponse.Result },
+                                     }),
+                                     {
+                                        { tblOnlinePayments::onpMD5, opyMD5 }
+                                     });
 
         return PaymentResponse.PaymentLink;
     }catch(exPayment&){
@@ -100,12 +108,16 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
     }catch(exHTTPBadRequest&){
         throw;
     }catch(std::exception &e){
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                              {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
-                                              {tblOnlinePayments::onpResult, e.what()},
-                                          }), {
-                                              {{tblOnlinePayments::onpMD5, opyMD5}}
-                                          });
+        Targoman::API::Query::Update(OnlinePayments::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                                        { tblOnlinePayments::onpResult, e.what() },
+                                     }),
+                                     {
+                                        { tblOnlinePayments::onpMD5, opyMD5 }
+                                     });
         throw;
     }
 
@@ -146,24 +158,30 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
         throw exHTTPBadRequest("Voucher not found");
 
     if (PaymentResponse.ErrorCode) {
-        OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                              {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error},
-                                              {tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ?
-                                               QString(PaymentResponse.ErrorCode) :
-                                               PaymentResponse.Result},
-                                          }), {
-                                              {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}
-                                          });
+        Targoman::API::Query::Update(OnlinePayments::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                                        { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
+                                     }),
+                                     {
+                                        { tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5 }
+                                     });
         throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
     }
 
-    OnlinePayments::instance().update(SYSTEM_USER_ID, {}, TAPI::ORMFields_t({
-                                          {tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID},
-                                          {tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Payed},
-                                          {tblOnlinePayments::onpResult, PaymentResponse.Result},
-                                      }), {
-                                          {{tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5}}
-                                      });
+    Targoman::API::Query::Update(OnlinePayments::instance(),
+                                 SYSTEM_USER_ID,
+                                 {},
+                                 TAPI::ORMFields_t({
+                                    { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
+                                    { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Payed },
+                                    { tblOnlinePayments::onpResult, PaymentResponse.Result },
+                                 }),
+                                 {
+                                    { tblOnlinePayments::onpMD5, PaymentResponse.OrderMD5 }
+                                 });
     return VoucherID.toULongLong();
 }
 
