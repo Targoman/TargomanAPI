@@ -33,19 +33,21 @@ namespace Query {
 
 QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
 {
+    Q_UNUSED(_userID)
+
     _table.prepareFiltersList();
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
     SelectQuery query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
-        .offset(_offset)
-        .limit(_limit)
         .addCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
         .addFilters(_extraFilters)
+        .offset(_offset)
+        .limit(_limit)
         .setCacheTime(_cacheTime)
     ;
 

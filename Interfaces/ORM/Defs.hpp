@@ -55,7 +55,7 @@
 #define UPDATE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
 #define UPDATE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 //#define UPDATE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
-#define ORMUPDATE(_doc) apiUPDATE (UPDATE_METHOD_ARGS_HEADER_APICALL); \
+#define ORMUPDATE(_doc)                   apiUPDATE (UPDATE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfUPDATE() { return _doc; }
 //used by ApiQuery
@@ -67,7 +67,7 @@
 #define DELETE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}
 #define DELETE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath
 //#define DELETE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath
-#define ORMDELETE(_doc) apiDELETE (DELETE_METHOD_ARGS_HEADER_APICALL); \
+#define ORMDELETE(_doc)                   apiDELETE (DELETE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfDELETE() { return _doc; }
 //used by ApiQuery

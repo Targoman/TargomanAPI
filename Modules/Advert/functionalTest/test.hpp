@@ -43,6 +43,10 @@ class testAdvert: public clsBaseTest
 {
     Q_OBJECT
 
+    QVariant locationID;
+    QVariant bannerProductID;
+    QVariant bannerSaleableID;
+
 private slots:
     void initTestCase() {
         initUnitTestData(false);
@@ -121,7 +125,6 @@ private slots:
 
     //test non privileged user for creating location: fail
 
-    QVariant locationID;
     void getOrCreateLocation() {
         QVariantMap locationInfo = callAdminAPI(
             GET,
@@ -151,7 +154,6 @@ private slots:
         qDebug() << "--------- locationID: " << locationID;
     }
 
-    QVariant bannerProductID;
     void getOrCreateProduct_banner() {
         QVariantMap productInfo = callAdminAPI(
             GET,
@@ -182,9 +184,9 @@ private slots:
         qDebug() << "--------- bannerProductID: " << bannerProductID;
     }
 
-    QVariant bannerSaleableID;
     void getOrCreateSaleable_banner() {
     }
+
 private:
     void addToBasket() {
 //        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(

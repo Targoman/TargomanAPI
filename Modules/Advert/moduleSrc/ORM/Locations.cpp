@@ -51,7 +51,11 @@ Locations::Locations() :
             ORM_RELATION_OF_UPDATER(tblLocations::locUpdatedBy_usrID),
         },
         {
-            { { tblLocations::locURL, tblLocations::locPlaceCode, tblLocations::locStatus }, enuDBIndex::Unique },
+            { {
+                tblLocations::locURL,
+                tblLocations::locPlaceCode,
+                tblLocations::locStatus
+              }, enuDBIndex::Unique },
             { tblLocations::locURL },
             { tblLocations::locPlaceCode },
             { tblLocations::locStatus },
