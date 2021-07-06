@@ -17,15 +17,15 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "APITokenValidIPs.h"
 #include "User.h"
 #include "APITokens.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -35,14 +35,23 @@ using namespace ORM;
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+//    return query.one();
 
-    return query.one();
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+}
+
+quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
+
+    //    //return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -60,12 +69,6 @@ bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
     if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     return this->update(UPDATE_METHOD_CALL_ARGS, ExtraFilters);
-}
-
-quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 APITokenValidIPs::APITokenValidIPs() :

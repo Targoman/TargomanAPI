@@ -308,6 +308,28 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
         }
     }
 
+//    void condition_buildString_parse()
+//    {
+//        QT_TRY {
+//            QString filters = "( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )";
+
+//            clsCondition cnd = clsCondition::parse(filters, t1);
+
+//            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- filters:" << endl << filters << endl
+//                                             << endl << "-- tostring:" << endl << qry << endl;
+
+//            QCOMPARE("\n" + qry + "\n", R"(
+//?????????????????????
+//)");
+//        } QT_CATCH (const std::exception &e) {
+//            QTest::qFail(e.what(), __FILE__, __LINE__);
+//        }
+//    }
+
     /***************************************************************************************/
     /* SelectQuery *************************************************************************/
     /***************************************************************************************/
@@ -870,6 +892,33 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
          UNION ALL
             SELECT t2.colA2
               FROM test.t2
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_SELECT_filters() {
+        QT_TRY {
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                    "colB1",
+                }))
+                .filters("( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
+            ;
+
+            QString qry = query.buildQueryString({}, true, false);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+                 , alias_t1.colB1
+              FROM test.t1 alias_t1
+             WHERE ( t1.colA1 >= NOW() OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'  )
+             LIMIT 0,1
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);

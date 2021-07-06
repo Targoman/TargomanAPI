@@ -17,14 +17,14 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "BlockingRules.h"
 #include "User.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -35,11 +35,21 @@ using namespace ORM;
 QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    return query.one();
+//    return query.one();
+
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+}
+
+quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
+
+//    //return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 bool BlockingRules::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -53,12 +63,6 @@ bool BlockingRules::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(UPDATE_METHOD_CALL_ARGS);
-}
-
-quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 BlockingRules::BlockingRules() :

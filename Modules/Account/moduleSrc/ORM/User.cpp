@@ -17,14 +17,14 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "User.h"
 #include "Roles.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -38,11 +38,22 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL)
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-//    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+//    return query.one();
 
-    return query.one();
+    //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS);
+}
+
+quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
+        throw exHTTPBadRequest("Either email or mobile must be provided to create user");
+
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
+
+//    //return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -97,15 +108,6 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     /*if(ToUpdate.size())
         return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );*/
     return true;
-}
-
-quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    if(_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
-        throw exHTTPBadRequest("Either email or mobile must be provided to create user");
-
-    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 TAPI::RawData_t User::apiGETPhoto(TAPI::JWT_t _JWT, quint64 _usrID) {

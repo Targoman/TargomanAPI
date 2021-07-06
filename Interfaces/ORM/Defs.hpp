@@ -37,8 +37,9 @@
 
 #define CREATE_METHOD_ARGS_HEADER     TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo = {}
 #define CREATE_METHOD_ARGS_IMPL       TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_ARGS_IMPL_WOJWT TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_CALL_ARGS       clsJWT(_JWT).usrID(), _createInfo
+//#define CREATE_METHOD_ARGS_IMPL_WOJWT TAPI::ORMFields_t _createInfo
+//#define CREATE_METHOD_CALL_ARGS       clsJWT(_JWT).usrID(), _createInfo
+#define CREATE_METHOD_CALL_ARGS       _JWT, _createInfo
 #define CREATE_METHOD_CALL_ARGS_WOJWT _createInfo
 #define ORMCREATE(_doc)               apiCREATE (CREATE_METHOD_ARGS_HEADER); \
     QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER)); } \

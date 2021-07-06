@@ -17,15 +17,15 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Payments.h"
 #include "Voucher.h"
 #include "Classes/PaymentLogic.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -35,14 +35,14 @@ using namespace ORM;
 
 QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+//    return query.one();
 
-    return query.one();
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 OnlinePayments::OnlinePayments() :
@@ -69,14 +69,14 @@ OnlinePayments::OnlinePayments() :
 /**********************************************************************************************/
 QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+//    return query.one();
 
-    return query.one();
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)

@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Account.h"
@@ -46,6 +47,7 @@
 
 #include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserStatus);
@@ -361,11 +363,15 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     ///TODO recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
     ///TODO reserve saleables before returning voucher
     ///TODO implement overall coupon at the end of checkout steps
-    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-                                                  {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
-                                                  {tblVoucher::vchDesc, _preVoucher.toJson()},
-                                                  {tblVoucher::vchTotalAmount, _preVoucher.ToPay}
-                                              })).toULongLong();
+
+//    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(),
+    Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
+                                              _JWT,
+                                              TAPI::ORMFields_t({
+                                                  { tblVoucher::vch_usrID,clsJWT(_JWT).usrID() },
+                                                  { tblVoucher::vchDesc, _preVoucher.toJson() },
+                                                  { tblVoucher::vchTotalAmount, _preVoucher.ToPay }
+                                              })); //.toULongLong();
     try {
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
         if (_walletID>=0 && RemainingAfterWallet>0) {
@@ -457,14 +463,24 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-                                           {"ofp_vchID",_vchID},
-                                           {"ofpBank",_bank},
-                                           {"ofpReceiptCode",_receiptCode},
-                                           {"ofpReceiptDate",_receiptDate},
-                                           {"ofpAmount",_amount},
-                                           {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
-                                       }));
+    Targoman::API::Query::Create(OfflinePayments::instance(),
+                                 _JWT,
+                                 TAPI::ORMFields_t({
+                                    { "ofp_vchID",_vchID },
+                                    { "ofpBank",_bank },
+                                    { "ofpReceiptCode",_receiptCode },
+                                    { "ofpReceiptDate",_receiptDate },
+                                    { "ofpAmount",_amount },
+                                    { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
+                                 }));
+//    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
+//                                           {"ofp_vchID",_vchID},
+//                                           {"ofpBank",_bank},
+//                                           {"ofpReceiptCode",_receiptCode},
+//                                           {"ofpReceiptDate",_receiptDate},
+//                                           {"ofpAmount",_amount},
+//                                           {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
+//                                       }));
 
     try {
         this->callSP("sp_CREATE_walletTransactionOnPayment", {

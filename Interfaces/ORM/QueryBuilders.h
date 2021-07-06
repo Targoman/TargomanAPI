@@ -201,6 +201,16 @@ public:
 
     virtual ~clsCondition();
 
+//    static clsCondition& parse(
+//        const QString& _filters,
+//        const clsTable& _table
+//    );
+//    static clsCondition& parse(
+//        const QString& _filters,
+//        const QString& _mainTableNameOrAlias,
+//        const QMap<QString, stuRelatedORMField>& _filterables
+//    );
+
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
     clsCondition& xorCond(const clsCondition& _cond);
@@ -306,6 +316,8 @@ public:
     itmplDerived& andWhere(const clsCondition& _condition);
     itmplDerived& orWhere(const clsCondition& _condition);
     itmplDerived& xorWhere(const clsCondition& _condition);
+
+    itmplDerived& filters(const QString& _filters);
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -463,21 +475,6 @@ private:
     virtual void iAmAbstract() {}
     QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
     friend TestQueryBuilders;
-};
-
-/***************************************************************************************/
-/* API *********************************************************************************/
-/***************************************************************************************/
-class ApiSelectQuery : public SelectQuery
-{
-public:
-    ApiSelectQuery(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT);
-};
-
-class ApiCreateQuery : public CreateQuery
-{
-public:
-    ApiCreateQuery(clsTable& _table, CREATE_METHOD_ARGS_IMPL_WOJWT);
 };
 
 /***************************************************************************************/

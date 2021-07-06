@@ -38,6 +38,7 @@ SOURCES += \
     AAA/Authorization.cpp \
     AAA/PrivHelpers.cpp \
     Common/GenericTypes.cpp \
+    ORM/APIQueryBuilders.cpp \
     ORM/QueryBuilders.cpp \
     ORM/clsORMField.cpp \
     ORM/clsRESTAPIWithActionLogs.cpp \
@@ -58,5 +59,6 @@ include($$QBUILD_PATH/templates/libConfigs.pri)
 HEADERS += \
     Common/APIArgHelperMacrosPrivate.h \
     Common/tmplNullable.hpp \
+    ORM/APIQueryBuilders.h \
     ORM/Defs.hpp \
     ORM/QueryBuilders.h

@@ -27,8 +27,7 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 using namespace Targoman::API::AAA::Accounting;
 

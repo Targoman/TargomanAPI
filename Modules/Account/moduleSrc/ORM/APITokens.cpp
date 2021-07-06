@@ -17,15 +17,15 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "APITokens.h"
 #include "User.h"
 #include "Service.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPITokensStatus);
 
@@ -36,13 +36,23 @@ using namespace ORM;
 
 QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    return query.one();
+//    return query.one();
+
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+}
+
+quint64 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
+
+//    //return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -58,12 +68,6 @@ bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
     return this->update(UPDATE_METHOD_CALL_ARGS);
-}
-
-quint64 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
-    return this->create(CREATE_METHOD_CALL_ARGS).toULongLong();
 }
 
 APITokens::APITokens() :

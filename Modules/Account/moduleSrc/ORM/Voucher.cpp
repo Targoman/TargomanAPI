@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Voucher.h"
@@ -27,8 +28,7 @@
 
 #include "Classes/PaymentLogic.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman {
 namespace API {
@@ -38,14 +38,14 @@ using namespace ORM;
 
 QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL)
 {
-    if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+//    return query.one();
 
-    return query.one();
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL)
@@ -74,11 +74,18 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Summary = "Increase wallet";
 
-    Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-                                                {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
-                                                {tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData()},
-                                                {tblVoucher::vchTotalAmount, Voucher.Info.ToPay}
-                                            })).toULongLong();
+    Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
+                                              _JWT,
+                                              TAPI::ORMFields_t({
+                                                { tblVoucher::vch_usrID,clsJWT(_JWT).usrID() },
+                                                { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                                { tblVoucher::vchTotalAmount, Voucher.Info.ToPay }
+                                              }));
+//    Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
+//                                                {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
+//                                                {tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData()},
+//                                                {tblVoucher::vchTotalAmount, Voucher.Info.ToPay}
+//                                            })).toULongLong();
 
     try {
         if(_callBack == "OFFLINE") {

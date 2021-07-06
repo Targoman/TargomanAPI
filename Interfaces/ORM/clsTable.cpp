@@ -227,11 +227,12 @@ const QString clsTable::domain()
             : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
 }
 
-
+/*
 QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
     return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
 }
-
+*/
+/*
 QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    const QString& _extraFilters,
                                    const TAPI::PKsByPath_t& _pksByPath,
@@ -245,8 +246,8 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
                                    quint32 _cacheTime)
 {
     this->prepareFiltersList();
-    /*if(_ormFields.contains(COLS_KEY))
-        _cols = _ormFields.value(COLS_KEY).toString();*/
+//    if(_ormFields.contains(COLS_KEY))
+//        _cols = _ormFields.value(COLS_KEY).toString();
 
     stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
     if(_pksByPath.isEmpty()){
@@ -318,6 +319,7 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
         return Result.toVariant();
     }
 }
+*/
 
 bool clsTable::update(quint64 _actorUserID,
                       TAPI::PKsByPath_t _pksByPath,
@@ -481,6 +483,7 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
+/*
 QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo)
 {
     this->prepareFiltersList();
@@ -543,15 +546,19 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
             throw;
     }
 }
+*/
 
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters)
 {
     QStringList Filters;
-    for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
+
+    for (auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
         Filters.append(QString("%1=%2").arg(FilterIter.key()).arg(FilterIter.value().toString()));
+
     QString Postfix = _providedFilters.size() ? " )" : "";
+
     _providedFilters.insert(0, QString("( %1 )%2").arg(Filters.join(" + ")).arg(_providedFilters.size() ? " + ( " : ""));
-    _providedFilters+=Postfix;
+    _providedFilters += Postfix;
 }
 
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters)

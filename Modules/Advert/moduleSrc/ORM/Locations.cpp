@@ -24,12 +24,13 @@
 #include "Locations.h"
 #include "Defs.hpp"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
+//using namespace Targoman::API::ORM;
 
 namespace Targoman {
 namespace API {
 namespace Advertisement {
+
 using namespace ORM;
 
 Locations::Locations() :
@@ -64,34 +65,32 @@ Locations::Locations() :
 QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
-//    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 
-    ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-//    SelectQuery query = SelectQuery(Locations::instance())
-//        .where({ tblLocations::locURL, enuConditionOperator::Equal, _url })
-//        .andWhere({ tblLocations::locPlaceCode, enuConditionOperator::Equal, _placeCode })
-//    ;
+//    QT_TRY {
+//        return query.one();
+//    }
+//    QT_CATCH(const std::exception& _exp) {
+//        qDebug() << _exp.what();
+//        return {};
+//    }
 
-    QT_TRY {
-        return query.one();
-    }
-    QT_CATCH(const std::exception& _exp) {
-        qDebug() << _exp.what();
-        return {};
-    }
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-//    return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
+//    //return this->create(CREATE_METHOD_CALL_ARGS).toUInt();
 
-    ApiCreateQuery query = ApiCreateQuery(*this, CREATE_METHOD_CALL_ARGS_WOJWT);
+    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS);
 
-    clsJWT JWT(_JWT);
-    quint64 insertedID = query.execute(JWT.usrID());
-    return insertedID;
+//    ApiCreateQuery query = ApiCreateQuery(*this, CREATE_METHOD_CALL_ARGS);
+
+//    clsJWT JWT(_JWT);
+//    quint64 insertedID = query.execute(JWT.usrID());
+//    return insertedID;
 }
 
 bool Locations::apiUPDATE(UPDATE_METHOD_ARGS_IMPL)

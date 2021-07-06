@@ -17,14 +17,14 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "ActiveSessions.h"
 #include "User.h"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSessionStatus);
 
@@ -36,15 +36,16 @@ using namespace ORM;
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL)
 {
-  QVariantMap ExtraFilters;
-  if(Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _filters);
+//  QVariantMap ExtraFilters;
 
-//  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-  ApiSelectQuery query = ApiSelectQuery(*this, GET_METHOD_CALL_ARGS);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS); //, ExtraFilters, CACHE_TIME);
 
-  return query.one();
+//  return query.one();
+
+  //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS);
 }
 
 bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL)

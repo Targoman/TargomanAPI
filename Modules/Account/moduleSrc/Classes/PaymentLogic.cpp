@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "PaymentLogic.h"
@@ -168,7 +169,13 @@ quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gatewa
 
 TAPI::stuVoucher PaymentLogic::processVoucher(quint64 _voucherID)
 {
-    QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
+    QVariant VoucherDesc = SelectQuery(Voucher::instance())
+                           .addCol(tblVoucher::vchDesc)
+                           .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                           .one()
+                           .value(tblVoucher::vchDesc);
+
+    //QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
 
     if (!VoucherDesc.canConvert<QJsonObject>())
         throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));

@@ -365,6 +365,39 @@ void clsCondition::addCondition(enuPreConditionOperator::Type _aggregator, const
 bool clsCondition::isEmpty() const { return this->Data->Conditions.isEmpty(); }
 bool clsCondition::hasMany() const { return (this->Data->Conditions.length() > 1); }
 
+/***********************\
+|* parse and toStr     *|
+\***********************/
+
+//        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
+//            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
+//            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
+/*
+clsCondition& clsCondition::parse(
+        const QString& _filters,
+        const clsTable& _table
+    )
+{
+    return clsCondition::parse(_filters, _table.Name, _table.FilterableColsMap);
+}
+
+clsCondition& clsCondition::parse(
+        const QString& _filters,
+        const QString& _mainTableNameOrAlias,
+        const QMap<QString, stuRelatedORMField>& _filterables
+    )
+{
+    QSharedPointer<clsCondition> condition = QSharedPointer<clsCondition>::create();
+
+    QStringList Filters = _filters
+                          .trimmed()
+                          .replace("\\ ", "$SPACE$")
+                          .split(" ", QString::SkipEmptyParts);
+
+    return *condition;
+}
+*/
+
 QString clsCondition::buildConditionString(
     const QString& _mainTableNameOrAlias,
     const QMap<QString, stuRelatedORMField>& _filterables,
@@ -872,7 +905,7 @@ public:
     }
 
 public:
-    const itmplDerived*                Owner;
+    const itmplDerived*             Owner;
     bool                            IsPrepared = false;
     QList<stuJoin>                  Joins;
     stuQueryJoinTraitPreparedItems  PreparedItems;
@@ -1039,12 +1072,117 @@ public:
             this->Owner->Data->Table.FilterableColsMap,
             false/*,
             _prettifierJustifyLen*/);
+
+        /****************************************************************************/
+        if (this->Filters.length()) {
+            if (this->PreparedItems.Where.length())
+                this->PreparedItems.Where += " AND";
+
+            QString Filters = this->Filters.join(" ");
+
+            quint8 OpenParenthesis = 0;
+            bool StatusColHasCriteria = false;
+            bool CanStartWithLogical = false;
+            QString LastLogical = "";
+            Filters = Filters.replace("\\ ", "$SPACE$");
+            foreach (auto Filter, Filters.split(" ", QString::SkipEmptyParts)) {
+                QString Rule;
+                Filter = Filter.trimmed ();
+                if (Filter == "(") {
+                    Rule = LastLogical + "(";
+                    CanStartWithLogical = false;
+                    LastLogical.clear();
+                    OpenParenthesis++;
+                } else if(Filter == ")") {
+                    if(OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
+                    Rule = " )";
+                    OpenParenthesis--;
+                    CanStartWithLogical = true;
+                } else if(Filter == '+' || Filter == '|' || Filter == '*') {
+                    if(CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
+                    if(Filter == '+') LastLogical = "AND ";
+                    else if(Filter == '|') LastLogical = "OR ";
+                    else if(Filter == '*') LastLogical = "XOR ";
+
+                    CanStartWithLogical = false;
+                    continue;
+                } else {
+                    static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
+                    Filter = Filter.replace("$SPACE$", " ");
+                    QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
+                    if(PatternMatches.lastCapturedIndex() != 3)
+                        throw exHTTPBadRequest("Invalid filter set: " + Filter);
+
+                    Rule = LastLogical;
+
+                    stuRelatedORMField relatedORMField = this->Owner->Data->Table.FilterableColsMap.value(PatternMatches.captured(1).trimmed());
+                    if (relatedORMField.isValid())
+                        Rule += makeColName(this->Owner->Data->Table.Name, relatedORMField.Col, false, relatedORMField.Relation);
+                    else
+                        throw exHTTPBadRequest("Invalid column for filtring: " + PatternMatches.captured(1));
+
+                    if (relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                        StatusColHasCriteria = true;
+
+                    ///TODO: complete UsedJoins
+//                    if (relatedORMField.Relation.Column.size() && UsedJoins.contains(relatedORMField.Relation) == false)
+//                        UsedJoins.insert(relatedORMField.Relation);
+
+                    if (PatternMatches.captured(3) == "NULL") {
+                        if (PatternMatches.captured(2) == "=")
+                            Rule += " IS NULL";
+                        else if (PatternMatches.captured(2) == "!=")
+                            Rule += " IS NOT NULL";
+                        else
+                            throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
+
+                        if (this->PreparedItems.Where.length())
+                            this->PreparedItems.Where += " ";
+                        this->PreparedItems.Where += Rule;
+
+                        CanStartWithLogical = true;
+                        LastLogical.clear();
+                        continue;
+                    }
+
+                    if(PatternMatches.captured(2) == "<") Rule += " < ";
+                    else if(PatternMatches.captured(2) == "<=") Rule += " <= ";
+                    else if(PatternMatches.captured(2) == ">") Rule += " > ";
+                    else if(PatternMatches.captured(2) == ">=") Rule += " >= ";
+                    else if(PatternMatches.captured(2) == "!=") Rule += " != ";
+                    else if(PatternMatches.captured(2) == "~=") Rule += " LIKE ";
+                    else if(PatternMatches.captured(2) == "=") Rule += " = ";
+                    else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
+
+                    Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
+                    QString Value = PatternMatches.captured(3);
+                    if(Value == "NOW()"
+                       || Value.startsWith("DATE_ADD(")
+                       || Value.startsWith("DATE_SUB(")
+                       )
+                        Rule += Value.replace("$SPACE$", " ");
+                    else{
+                        relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
+                        Rule += relatedORMField.Col.toDB(Value).toString();
+                    }
+                    Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
+
+                    CanStartWithLogical = true;
+                    LastLogical.clear();
+                }
+                if (this->PreparedItems.Where.length())
+                    this->PreparedItems.Where += " ";
+                this->PreparedItems.Where += Rule;
+            }
+        }
+
     }
 
 public:
     const itmplDerived*             Owner;
     bool                            IsPrepared = false;
     clsCondition                    WhereClauses;
+    QStringList                     Filters;
     stuQueryWhereTraitPreparedItems PreparedItems;
 };
 
@@ -1069,40 +1207,69 @@ tmplQueryWhereTrait<itmplDerived>::~tmplQueryWhereTrait() {}
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::where(const clsCondition& _condition)
 {
-//    if (this->WhereTraitData->WhereClauses.isEmpty() != false)
-//        throw exQueryBuilder("Where clauses are not empty. Please use andWhere, orWhere or xorWhere");
+    if (_condition.isEmpty() == false)
+        this->WhereTraitData->WhereClauses = _condition;
 
-    this->WhereTraitData->WhereClauses = _condition;
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::andWhere(const clsCondition& _condition)
 {
-    if (this->WhereTraitData->WhereClauses.isEmpty())
-        this->WhereTraitData->WhereClauses = _condition;
-    else
-        this->WhereTraitData->WhereClauses.andCond(_condition);
+    if (_condition.isEmpty() == false) {
+        if (this->WhereTraitData->WhereClauses.isEmpty())
+            this->WhereTraitData->WhereClauses = _condition;
+        else
+            this->WhereTraitData->WhereClauses.andCond(_condition);
+    }
+
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::orWhere(const clsCondition& _condition)
 {
-    if (this->WhereTraitData->WhereClauses.isEmpty())
-        this->WhereTraitData->WhereClauses = _condition;
-    else
-        this->WhereTraitData->WhereClauses.orCond(_condition);
+    if (_condition.isEmpty() == false) {
+        if (this->WhereTraitData->WhereClauses.isEmpty())
+            this->WhereTraitData->WhereClauses = _condition;
+        else
+            this->WhereTraitData->WhereClauses.orCond(_condition);
+    }
+
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::xorWhere(const clsCondition& _condition)
 {
-    if (this->WhereTraitData->WhereClauses.isEmpty())
-        this->WhereTraitData->WhereClauses = _condition;
-    else
-        this->WhereTraitData->WhereClauses.xorCond(_condition);
+    if (_condition.isEmpty() == false) {
+        if (this->WhereTraitData->WhereClauses.isEmpty())
+            this->WhereTraitData->WhereClauses = _condition;
+        else
+            this->WhereTraitData->WhereClauses.xorCond(_condition);
+    }
+
+    return (itmplDerived&)*this;
+}
+
+/***********************\
+|* Filters             *|
+\***********************/
+template <class itmplDerived>
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::filters(const QString& _filters)
+{
+    QString Filters = _filters.trimmed();
+
+    if (Filters.isEmpty() == false) {
+        this->WhereTraitData->Filters.append(Filters);
+
+//        QString MainTableNameOrAlias = this->WhereTraitData->Owner->Data->Alias.length()
+//                                       ? this->WhereTraitData->Owner->Data->Alias
+//                                       : this->WhereTraitData->Owner->Data->Table.Name;
+
+//        this->andWhere(clsCondition::parse(Filters, MainTableNameOrAlias, this->WhereTraitData->Owner->Data->Table.FilterableColsMap));
+    }
+
     return (itmplDerived&)*this;
 }
 
@@ -1745,11 +1912,12 @@ SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime)
 \***********************/
 QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _reportCount/*, quint8 _prettifierJustifyLen*/)
 {
-    //    this->Data->Table.prepareFiltersList();
+    //this->Data->Table.prepareFiltersList();
     this->Data->prepare(false);
     this->WhereTraitData->prepare();
-    this->JoinTraitData->prepare();
     this->GroupAndHavingTraitData->prepare();
+    //it should be the last preparation call, as the previous preparation may cause an automatic join
+    this->JoinTraitData->prepare();
 
     //push
     quint64 offset = this->Data->Offset;
@@ -2605,6 +2773,7 @@ stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVaria
 
     this->Data->prepare(_currentUserID, _useBinding/*, _prettifierJustifyLen*/);
     this->WhereTraitData->prepare();
+    //it should be the last preparation call, as the previous preparation may cause an automatic join
     this->JoinTraitData->prepare();
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
@@ -2780,6 +2949,7 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args/
 {
     this->Data->prepare(_currentUserID, false/*, _prettifierJustifyLen*/);
     this->WhereTraitData->prepare();
+    //it should be the last preparation call, as the previous preparation may cause an automatic join
     this->JoinTraitData->prepare();
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
@@ -2870,32 +3040,6 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args)
     clsDACResult Result = this->DAC().execQuery("", QueryString);
 
     return Result.numRowsAffected();
-}
-
-/***************************************************************************************/
-/* API *********************************************************************************/
-/***************************************************************************************/
-ApiSelectQuery::ApiSelectQuery(clsTable& _table, GET_METHOD_ARGS_IMPL_WOJWT) :
-    SelectQuery(_table)
-{
-    this->pksByPath(_pksByPath);
-    this->offset(_offset);
-    this->limit(_limit);
-    this->addCols(_cols);
-    this->orderBy(_orderBy);
-    this->groupBy(_groupBy);
-
-    Q_UNUSED(_filters);
-    Q_UNUSED(_reportCount);
-}
-
-ApiCreateQuery::ApiCreateQuery(clsTable& _table, CREATE_METHOD_ARGS_IMPL_WOJWT) :
-    CreateQuery(_table)
-{
-    for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
-        this->addCol(arg.key());
-
-    this->values(_createInfo);
 }
 
 /***************************************************************************************/

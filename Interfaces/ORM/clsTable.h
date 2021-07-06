@@ -37,6 +37,8 @@ namespace Targoman {
 namespace API {
 namespace ORM {
 
+class clsCondition;
+
 template <class itmplDerived> class clsBaseQueryData;
 template <class itmplDerived, class itmplData> class tmplBaseQuery;
 
@@ -82,22 +84,22 @@ public:
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
     void prepareFiltersList();
 
-    QVariant selectFromTableByID(quint64 _id,
-                                 QString _cols = {},
-                                 const QStringList& _extraJoins = {},
-                                 const QString& _groupBy = {});
+//    QVariant selectFromTableByID(quint64 _id,
+//                                 QString _cols = {},
+//                                 const QStringList& _extraJoins = {},
+//                                 const QString& _groupBy = {});
 
-    QVariant selectFromTable(const QStringList& _extraJoins,
-                             const QString& _extraFilters,
-                             const TAPI::PKsByPath_t& _pksByPath={},
-                             quint64 _offset = 0,
-                             quint16 _limit = 10,
-                             QString _cols = {},
-                             const QString& _filters = {},
-                             const QString& _orderBy = {},
-                             const QString& _groupBy = {},
-                             bool _reportCount = false,
-                             quint32 _cacheTime = 0);
+//    QVariant selectFromTable(const QStringList& _extraJoins,
+//                             const QString& _extraFilters,
+//                             const TAPI::PKsByPath_t& _pksByPath={},
+//                             quint64 _offset = 0,
+//                             quint16 _limit = 10,
+//                             QString _cols = {},
+//                             const QString& _filters = {},
+//                             const QString& _orderBy = {},
+//                             const QString& _groupBy = {},
+//                             bool _reportCount = false,
+//                             quint32 _cacheTime = 0);
 
     bool update(quint64 _actorUserID,
                 TAPI::PKsByPath_t _pksByPath,
@@ -109,7 +111,7 @@ public:
                      QVariantMap _extraFilters={},
                      bool _realDelete = false);
 
-    QVariant create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo);
+//    QVariant create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo);
 
 
     DBManager::clsDACResult callSP(const QString& _spName,
@@ -175,6 +177,7 @@ protected:
 
     static QHash<QString, clsTable*> Registry;
 
+    friend clsCondition;
     template <class itmplDerived>              friend class clsBaseQueryData;
     template <class itmplDerived, class itmplData> friend class tmplBaseQuery;
     template <class itmplDerived>              friend class clsQueryJoinTraitData;
