@@ -35,6 +35,8 @@ QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QStr
 {
     _table.prepareFiltersList();
 
+//    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
+
     SelectQuery query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
         .offset(_offset)

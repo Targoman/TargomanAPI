@@ -121,18 +121,17 @@ private slots:
 
     //test non privileged user for creating location: fail
 
-    void createNewBanner_ProductAndSaleables() {
-        QVariant locationID;
-
+    QVariant locationID;
+    void getOrCreateLocation() {
         QVariantMap locationInfo = callAdminAPI(
             GET,
             "Advert/Locations",
-            {},
             {
-                { "locURL",        "http://www.abbasgholi.com" },
-                { "locPlaceCode",  "ABC" },
+                { "filters", "locURL=http://www.abbasgholi.com + locPlaceCode=ABC"}
             }
         ).toMap();
+
+        qDebug() << "--------- locationInfo: " << locationInfo;
 
         if (locationInfo.isEmpty() == false)
             locationID = locationInfo[tblLocations::locID];
@@ -150,25 +149,41 @@ private slots:
         }
 
         qDebug() << "--------- locationID: " << locationID;
+    }
 
-//        QVariant product = callAdminAPI(
-//            PUT,
-//            "Advert/Product",
-//            {},
-//            {
-//                { "productCode",    "prd code for test" },
-//                { "productName",    "test product name" },
-//                { "locationID",     location }
-//            }
-//        );
+    QVariant bannerProductID;
+    void getOrCreateProduct_banner() {
+        QVariantMap productInfo = callAdminAPI(
+            GET,
+            "Advert/Products",
+            {
+                { "filters", "prdCode=p123" },
+            }
+        ).toMap();
 
-//        QVariant saleable = callAdminAPI(
-//            PUT,
-//            "Advert/Saleable",
-//            {},
-//            {
-//            }
-//        );
+        qDebug() << "--------- productInfo: " << productInfo;
+
+        if (productInfo.isEmpty() == false)
+            bannerProductID = productInfo[tblLocations::locID];
+        else
+        {
+            bannerProductID = callAdminAPI(
+                PUT,
+                "Advert/Products",
+                {},
+                {
+                    { "productCode",    "p123" },
+                    { "productName",    "test product 123" },
+                    { "locationID",     locationID }
+                }
+            );
+        }
+
+        qDebug() << "--------- bannerProductID: " << bannerProductID;
+    }
+
+    QVariant bannerSaleableID;
+    void getOrCreateSaleable_banner() {
     }
 private:
     void addToBasket() {

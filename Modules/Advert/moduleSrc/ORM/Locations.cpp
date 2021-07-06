@@ -66,17 +66,7 @@ QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
-
-//    QT_TRY {
-//        return query.one();
-//    }
-//    QT_CATCH(const std::exception& _exp) {
-//        qDebug() << _exp.what();
-//        return {};
-//    }
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
+    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)

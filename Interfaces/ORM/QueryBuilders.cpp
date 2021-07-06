@@ -1074,9 +1074,11 @@ public:
             _prettifierJustifyLen*/);
 
         /****************************************************************************/
+//        qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << this->Filters;
+
         if (this->Filters.length()) {
             if (this->PreparedItems.Where.length())
-                this->PreparedItems.Where += " AND";
+                this->PreparedItems.Where += SQLPrettyLen ? "\n" + QString("AND").rightJustified(SQLPrettyLen) + " " : " AND ";
 
             QString Filters = this->Filters.join(" ");
 
@@ -1113,7 +1115,7 @@ public:
                     if(PatternMatches.lastCapturedIndex() != 3)
                         throw exHTTPBadRequest("Invalid filter set: " + Filter);
 
-                    Rule = LastLogical;
+                    Rule = SQLPrettyLen ? "\n" + QString(LastLogical).rightJustified(SQLPrettyLen) + " " : " " + LastLogical + " ";
 
                     stuRelatedORMField relatedORMField = this->Owner->Data->Table.FilterableColsMap.value(PatternMatches.captured(1).trimmed());
                     if (relatedORMField.isValid())

@@ -45,8 +45,6 @@
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.hpp"
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
