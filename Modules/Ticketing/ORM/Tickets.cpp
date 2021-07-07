@@ -36,15 +36,24 @@ using namespace ORM;
 
 QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    QString ExtraFilters;
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
-                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
-                       .arg(tblTickets::tktTarget_usrID)
-                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
+//    QString ExtraFilters;
+//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
+//                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
+//                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
+//                       .arg(tblTickets::tktTarget_usrID)
+//                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters); //, CACHE_TIME);
+    clsCondition ExtraFilters = {};
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        ExtraFilters
+            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
+            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
+            .orCond(clsCondition({ tblTickets::tktTarget_usrID, enuConditionOperator::Null })
+                .andCond({tblTickets::tktType, enuConditionOperator::Equal, TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast) })
+            );
+
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters); //, CACHE_TIME);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query

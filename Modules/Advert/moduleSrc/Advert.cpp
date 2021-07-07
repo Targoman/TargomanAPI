@@ -59,69 +59,6 @@ using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
-quint32 Advert::apiCREATEProduct(
-        TAPI::JWT_t _JWT,
-        QString _productCode,
-        QString _productName,
-        quint32 _locationID
-    )
-{
-    CreateQuery query = CreateQuery(*this->AccountProducts)
-//        .options_ignore()
-        .addCol(tblAccountProductsBase::prdCode)
-        .addCol(tblAccountProductsBase::prdName)
-//        .addCol(tblAccountProductsBase::prdDesc)
-        .addCol(tblAccountProductsBase::prdValidFromDate)
-//        .addCol(tblAccountProductsBase::prdValidToDate)
-//        .addCol(tblAccountProductsBase::prdValidFromHour)
-//        .addCol(tblAccountProductsBase::prdValidToHour)
-//        .addCol(tblAccountProductsBase::prdPrivs)
-//        .addCol(tblAccountProductsBase::prdVAT)
-        .addCol(tblAccountProductsBase::prdInStockCount)
-//        .addCol(tblAccountProductsBase::prdOrderedCount)
-//        .addCol(tblAccountProductsBase::prdReturnedCount)
-//        .addCol(tblAccountProductsBase::prdStatus)
-        .addCol(tblAccountProducts::prd_locID)
-//        .addCol(tblAccountProducts::prdShowPerDay)
-//        .addCol(tblAccountProducts::prdShowTotal)
-//        .addCol(tblAccountProducts::prdClicksPerDay)
-//        .addCol(tblAccountProducts::prdClicksPerMonth)
-//        .addCol(tblAccountProducts::prdClicksTotal)
-        .values(QVariantMap({
-            { tblAccountProductsBase::prdCode,          _productCode },
-            { tblAccountProductsBase::prdName,          _productName },
-//            { tblAccountProductsBase::prdDesc,          DBExpression::NIL() },
-            { tblAccountProductsBase::prdValidFromDate, DBExpression::CURDATE() },
-//            { tblAccountProductsBase::prdValidToDate,   DBExpression::NIL() },
-//            { tblAccountProductsBase::prdValidFromHour, DBExpression::NIL() },
-//            { tblAccountProductsBase::prdValidToHour,   DBExpression::NIL() },
-//            { tblAccountProductsBase::prdPrivs,         DBExpression::NIL() },
-//            { tblAccountProductsBase::prdVAT,           DBExpression::NIL() },
-            { tblAccountProductsBase::prdInStockCount,  444 },
-//            { tblAccountProductsBase::prdOrderedCount,  DBExpression::NIL() },
-//            { tblAccountProductsBase::prdReturnedCount, DBExpression::NIL() },
-//            { tblAccountProductsBase::prdStatus,        DBExpression::NIL() },
-            { tblAccountProducts::prd_locID,            _locationID },
-//            { tblAccountProducts::prdShowPerDay,        DBExpression::NIL() },
-//            { tblAccountProducts::prdShowTotal,         DBExpression::NIL() },
-//            { tblAccountProducts::prdClicksPerDay,      DBExpression::NIL() },
-//            { tblAccountProducts::prdClicksPerMonth,    DBExpression::NIL() },
-//            { tblAccountProducts::prdClicksTotal,       DBExpression::NIL() },
-        }))
-    ;
-
-    clsJWT JWT(_JWT);
-    quint64 insertedID = query.execute(JWT.usrID());
-    return insertedID;
-}
-
-quint32 Advert::apiCREATESaleable(
-        TAPI::JWT_t _JWT
-    )
-{
-    return 456;
-}
-
 TAPI::stuAdvert Advert::apiGETNewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,

@@ -63,4 +63,5 @@ private:
 }
 }
 }
+
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_LOCATIONS_H

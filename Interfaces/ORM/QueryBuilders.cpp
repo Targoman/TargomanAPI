@@ -340,6 +340,11 @@ clsCondition::~clsCondition() {}
 /***********************\
 |* other conditions    *|
 \***********************/
+clsCondition& clsCondition::setCond(const clsCondition& _cond) {
+    this->Data->Conditions.clear();
+    this->Data->Conditions.append(stuConditionData(_cond));
+    return *this;
+}
 clsCondition& clsCondition::andCond(const clsCondition& _cond) {
     this->addCondition(enuPreConditionOperator::AND, _cond);
     return *this;
@@ -368,10 +373,6 @@ bool clsCondition::hasMany() const { return (this->Data->Conditions.length() > 1
 /***********************\
 |* parse and toStr     *|
 \***********************/
-
-//        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-//            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-//            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
 /*
 clsCondition& clsCondition::parse(
         const QString& _filters,
@@ -2157,6 +2158,15 @@ quint64 SelectQuery::count(QVariantMap _args)
 }
 */
 
+QVariant correctExecQueryResult(QJsonDocument& Result)
+{
+    //BUG in .toJson: why this->d->WasSP is true at line 308?
+    if (Result.isObject())
+        return Result[DBM_SPRESULT_ROWS].toVariant();
+
+    return Result.toVariant();
+}
+
 QVariantMap SelectQuery::one(QVariantMap _args)
 {
     QString QueryString = this->buildQueryString(_args, true, false);
@@ -2178,7 +2188,9 @@ QVariantMap SelectQuery::one(QVariantMap _args)
     if (Result.object().isEmpty())
         throw exHTTPNotFound("No item could be found");
 
-    return Result.toVariant().toMap();
+    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
+
+    return correctExecQueryResult(Result).toMap();
 }
 
 QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from)
@@ -2193,20 +2205,18 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
                                  << endl << "-- Query:" << endl << QueryString << endl;
 #endif
 
-    QVariantList Result;
+    QJsonDocument Result;
 
     if (this->Data->CahceTime > 0)
         Result = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                            .toJson(false, this->Data->Table.Converters)
-                            .toVariant()
-                            .toList();
+                            .toJson(false, this->Data->Table.Converters);
     else
         Result = this->DAC().execQuery("", QueryString)
-                            .toJson(false, this->Data->Table.Converters)
-                            .toVariant()
-                            .toList();
+                            .toJson(false, this->Data->Table.Converters);
 
-    return Result;
+//    qDebug() << "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result;
+
+    return correctExecQueryResult(Result).toList();
 }
 
 TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, quint64 _from)
@@ -2223,28 +2233,32 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
                                  << endl << "-- Counting Query:" << endl << CountingQueryString << endl;
 #endif
 
-    TAPI::stuTable Result;
+    QJsonDocument ResultRows;
+    QJsonDocument ResultTotalRows;
 
     if (this->Data->CahceTime > 0) {
-        Result.TotalRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
-                                      .value(0)
-                                      .toULongLong();
+        ResultTotalRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
+                                     .toJson(true);
 
-        Result.Rows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                                 .toJson(false, this->Data->Table.Converters)
-                                 .toVariant()
-                                 .toList();
+        ResultRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
+                                .toJson(false, this->Data->Table.Converters);
     }
     else {
-        Result.TotalRows = this->DAC().execQuery("", CountingQueryString)
-                                      .value(0)
-                                      .toULongLong();
+        ResultTotalRows = this->DAC().execQuery("", CountingQueryString)
+                                     .toJson(true);
 
-        Result.Rows = this->DAC().execQuery("", QueryString)
-                                 .toJson(false, this->Data->Table.Converters)
-                                 .toVariant()
-                                 .toList();
+        ResultRows = this->DAC().execQuery("", QueryString)
+                                .toJson(false, this->Data->Table.Converters);
     }
+
+    TAPI::stuTable Result;
+    Result.TotalRows = correctExecQueryResult(ResultTotalRows)
+                       .toMap()["cnt"]
+                       .toULongLong();
+    Result.Rows = correctExecQueryResult(ResultRows)
+                  .toList();
+
+//    qDebug() << "--- SelectQuery::allWithCount()" << __FILE__ << __LINE__ << "Rows: " << Result.Rows << "Rows Count: " << Result.TotalRows;
 
     return Result;
 }
@@ -2566,22 +2580,22 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
 
         if (SQLPrettyLen) {
             QueryParts.append(QString("VALUES").rightJustified(SQLPrettyLen)
-                              + " "
-                              + "("
-                              + (_useBinding ? "" : "\n")
-                              + rows.join((_useBinding ? "" : "\n")
-                                          + (_useBinding ? "" : QString(SQLPrettyLen, ' '))
-                                          + (_useBinding ? "" : " ")
-                                          + ")"
-                                          + "\n"
-                                          + QString(SQLPrettyLen - 1, ' ')
-                                          + ","
-                                          + " ("
-                                          + (_useBinding ? "" : "\n"))
-                              + (_useBinding ? "" : "\n")
-                              + (_useBinding ? "" : QString(SQLPrettyLen, ' '))
-                              + (_useBinding ? "" : " ")
-                              + ")");
+                + " "
+                + "("
+                + (_useBinding ? "" : "\n")
+                + rows.join((_useBinding ? "" : "\n")
+                    + (_useBinding ? "" : QString(SQLPrettyLen, ' '))
+                    + (_useBinding ? "" : " ")
+                    + ")"
+                    + "\n"
+                    + QString(SQLPrettyLen - 1, ' ')
+                    + ","
+                    + " ("
+                    + (_useBinding ? "" : "\n"))
+                + (_useBinding ? "" : "\n")
+                + (_useBinding ? "" : QString(SQLPrettyLen, ' '))
+                + (_useBinding ? "" : " ")
+                + ")");
         }
         else {
             QueryParts.append("VALUES(");
@@ -2622,7 +2636,7 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
         qDebug().nospace().noquote() << endl
                                      << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
                                      << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
-                                     << "[" << BindingValuesList.join(", ") << "]" << endl;
+                                     << "-- [" << BindingValuesList.join(", ") << "]" << endl;
     }
     else {
         qDebug().nospace().noquote() << endl
@@ -2635,6 +2649,8 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
                               BoundQueryString.QueryString,
                               BoundQueryString.BindingValues
                               );
+
+//    qDebug() << "--- CreateQuery::execute()" << __FILE__ << __LINE__ << Result.toJson(false);
 
     return Result.lastInsertId().toULongLong();
 }
@@ -2874,7 +2890,7 @@ quint64 UpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
         qDebug().nospace().noquote() << endl
                                      << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
                                      << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
-                                     << "[" << BindingValuesList.join(", ") << "]" << endl;
+                                     << "-- [" << BindingValuesList.join(", ") << "]" << endl;
     }
     else {
         qDebug().nospace().noquote() << endl

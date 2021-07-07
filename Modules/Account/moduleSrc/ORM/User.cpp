@@ -38,7 +38,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
@@ -47,7 +47,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -56,14 +56,14 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

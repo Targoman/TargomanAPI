@@ -18,15 +18,19 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Accounting.h"
 #include "Defs.hpp"
 #include "Locations.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAdvertisement, enuProductType);
+
 namespace Targoman {
 namespace API {
 namespace Advertisement {
+
 using namespace ORM;
 using namespace AAA;
 using namespace AAA::Accounting;
@@ -35,13 +39,14 @@ using namespace Targoman::API::AAA::Accounting;
 /******************************************************/
 AccountProducts::AccountProducts()
     : intfAccountProducts(AdvertSchema,
-        {///< ColName                                    Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-            { tblAccountProducts::prd_locID,             S(quint32), QFV.integer().minValue(1),  QRequired, UPOwner },
-            { tblAccountProducts::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountProducts::prdShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountProducts::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountProducts::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountProducts::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+        {///< ColName                                    Type        Validation                        Default    UpBy       Sort  Filter Self  Virt   PK
+            { tblAccountProducts::prdType,               S(TAdvertisement::enuProductType::Type), QFV, QRequired, UPOwner },
+            { tblAccountProducts::prd_locID,             S(quint32), QFV.integer().minValue(1),        QRequired, UPOwner },
+            { tblAccountProducts::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),       -1,        UPOwner },
+            { tblAccountProducts::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),       -1,        UPOwner },
+            { tblAccountProducts::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),       -1,        UPOwner },
+            { tblAccountProducts::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),       -1,        UPOwner },
+            { tblAccountProducts::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),       -1,        UPOwner },
         },
         {///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
             { tblAccountProducts::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::locID },

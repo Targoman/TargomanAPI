@@ -36,9 +36,9 @@ using namespace ORM;
 
 QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
@@ -47,21 +47,21 @@ QVariant Roles::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint32 Roles::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool Roles::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool Roles::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

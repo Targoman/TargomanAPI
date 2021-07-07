@@ -81,17 +81,6 @@ private:
     bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
 
 private slots:
-    quint32 REST(CREATE, Product, (
-                     TAPI::JWT_t _JWT,
-                     QString _productCode,
-                     QString _productName,
-                     quint32 _locationID
-                 ),
-                 "Create new product")
-
-    quint32 REST(CREATE, Saleable, (TAPI::JWT_t _JWT),
-                         "Create new saleable")
-
     TAPI::stuAdvert REST(GET, NewBanner, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
                          "Get new banner based on location and order info")
     TAPI::stuAdvert REST(GET, NewText, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, QString _keywords),

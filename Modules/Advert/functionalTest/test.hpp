@@ -36,6 +36,10 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
 
+#include "Interfaces/AAA/Accounting_Defs.hpp"
+using namespace Targoman::API::AAA::Accounting;
+
+#include "../moduleSrc/ORM/Accounting.h"
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::Advertisement;
 
@@ -126,18 +130,25 @@ private slots:
     //test non privileged user for creating location: fail
 
     void getOrCreateLocation() {
-        QVariantMap locationInfo = callAdminAPI(
+        QVariantList locationInfo = callAdminAPI(
             GET,
             "Advert/Locations",
             {
-                { "filters", "locURL=http://www.abbasgholi.com + locPlaceCode=ABC"}
+                {
+                    "filters", QString("%1=%2 + %3=%4")
+                        .arg(tblLocations::locURL).arg("http://www.abbasgholi.com")
+                        .arg(tblLocations::locPlaceCode).arg("ABC"),
+                },
+                { "reportCount", false },
+                { "cols", tblLocations::locID },
             }
-        ).toMap();
+        ).toList();
 
         qDebug() << "--------- locationInfo: " << locationInfo;
 
-        if (locationInfo.isEmpty() == false)
-            locationID = locationInfo[tblLocations::locID];
+        if (locationInfo.isEmpty() == false) {
+            locationID = locationInfo.at(0).toMap()[tblLocations::locID];
+        }
         else
         {
             locationID = callAdminAPI(
@@ -145,8 +156,8 @@ private slots:
                 "Advert/Locations",
                 {},
                 {
-                    { "locURL",        "http://www.abbasgholi.com" },
-                    { "locPlaceCode",  "ABC" },
+                    { tblLocations::locURL,        "http://www.abbasgholi.com" },
+                    { tblLocations::locPlaceCode,  "ABC" },
                 }
             );
         }
@@ -155,28 +166,36 @@ private slots:
     }
 
     void getOrCreateProduct_banner() {
-        QVariantMap productInfo = callAdminAPI(
+        QVariantList productInfo = callAdminAPI(
             GET,
-            "Advert/Products",
+            "Advert/AccountProducts",
             {
-                { "filters", "prdCode=p123" },
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountProductsBase::prdCode)
+                        .arg("p123")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountProductsBase::prdID },
             }
-        ).toMap();
+        ).toList();
 
         qDebug() << "--------- productInfo: " << productInfo;
 
         if (productInfo.isEmpty() == false)
-            bannerProductID = productInfo[tblLocations::locID];
+            bannerProductID = productInfo.at(0).toMap()[tblAccountProductsBase::prdID];
         else
         {
             bannerProductID = callAdminAPI(
                 PUT,
-                "Advert/Products",
+                "Advert/AccountProducts",
                 {},
                 {
-                    { "productCode",    "p123" },
-                    { "productName",    "test product 123" },
-                    { "locationID",     locationID }
+                    { tblAccountProductsBase::prdCode,          "p123" },
+                    { tblAccountProductsBase::prdName,          "test product 123" },
+                    { tblAccountProductsBase::prdInStockCount,  1 },
+                    { tblAccountProducts::prdType,              TAdvertisement::enuProductType::toStr(TAdvertisement::enuProductType::Advertise) },
+                    { tblAccountProducts::prd_locID,            locationID },
                 }
             );
         }
@@ -185,22 +204,77 @@ private slots:
     }
 
     void getOrCreateSaleable_banner() {
+        QVariantList saleableInfo = callAdminAPI(
+            GET,
+            "Advert/AccountSaleables",
+            {
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountSaleablesBase::slbCode)
+                        .arg("p123-s456")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountSaleablesBase::slbID },
+            }
+        ).toList();
+
+        qDebug() << "--------- saleableInfo: " << saleableInfo;
+
+        if (saleableInfo.isEmpty() == false)
+            bannerSaleableID = saleableInfo.at(0).toMap()[tblAccountSaleablesBase::slbID];
+        else
+        {
+            bannerSaleableID = callAdminAPI(
+                PUT,
+                "Advert/AccountSaleables",
+                {},
+                {
+                    { tblAccountSaleablesBase::slbCode,             "p123-s456" },
+                    { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
+                    { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
+                    { tblAccountSaleablesBase::slb_prdID,           bannerProductID },
+                    { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+                    { tblAccountSaleablesBase::slbBasePrice,        12000 },
+                    { tblAccountSaleablesBase::slbProductCount,     900 },
+                    { tblAccountSaleablesBase::slbInStockCount,     1 },
+                    { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
+                }
+            );
+        }
+
+        qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
     }
 
-private:
-    void addToBasket() {
-//        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
-//        TAPI::stuPreVoucher voucher
-        QVariant result = callAPI(
+    void addToBasket_invalid_saleable_code() {
+        QVariant result = callAdminAPI(
             POST,
             "Advert/addToBasket",
             {},
             {
-                { "JWT", gAdminJWT },
-                { "saleableCode", "slb code for test" },
+                { "saleableCode", "p123-s456 zzzzzzzzz" },
+//                { "orderAdditives", {} },
+//                { "qty", 12 },
+//                { "discountCode", "abcd11" },
+//                { "referrer", "" },
+//                { "extraRefererParams", {} },
+//                { "lastPreVoucher", {} },
+            }
+        );
+        //exHTTPNotFound("No item could be found");
+    }
+
+    void addToBasket_invalid_coupon_code() {
+//        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
+//        TAPI::stuPreVoucher voucher
+        QVariant result = callAdminAPI(
+            POST,
+            "Advert/addToBasket",
+            {},
+            {
+                { "saleableCode", "p123-s456" },
                 { "orderAdditives", {} },
                 { "qty", 12 },
-                { "discountCode", "abcd11" },
+                { "discountCode", "zzzzzzzzzzzzzzzzzz" },
                 { "referrer", "" },
                 { "extraRefererParams", {} },
                 { "lastPreVoucher", {} },

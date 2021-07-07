@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
@@ -26,6 +27,14 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
+//must use single level namespace for enums: error in dangling
+namespace TAdvertisement {
+TARGOMAN_DEFINE_ENUM (enuProductType,
+                      Advertise = 'A',
+                      Reportage = 'R',
+                      );
+}
+
 namespace Targoman {
 namespace API {
 namespace Advertisement {
@@ -33,7 +42,9 @@ namespace Advertisement {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+
 namespace tblAccountProducts {
+TARGOMAN_CREATE_CONSTEXPR(prdType);
 TARGOMAN_CREATE_CONSTEXPR(prd_locID);
 TARGOMAN_CREATE_CONSTEXPR(prdShowPerDay);
 TARGOMAN_CREATE_CONSTEXPR(prdShowTotal);
@@ -75,44 +86,46 @@ namespace tblAccountUserAsset {
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class AccountProducts: public Accounting::intfAccountProducts
+class AccountProducts : public Accounting::intfAccountProducts
 {
     Q_OBJECT
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
 };
 
 /******************************************************/
-class AccountSaleables: public Accounting::intfAccountSaleables
+class AccountSaleables : public Accounting::intfAccountSaleables
 {
     Q_OBJECT
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
 };
 
 /******************************************************/
-class AccountUserAssets: public Accounting::intfAccountUserAssets
+class AccountUserAssets : public Accounting::intfAccountUserAssets
 {
     Q_OBJECT
-private slots:
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssets)
 };
 
 /******************************************************/
-class AccountAssetUsage: public Accounting::intfAccountAssetUsage
+class AccountAssetUsage : public Accounting::intfAccountAssetUsage
 {
     Q_OBJECT
-private slots:
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountAssetUsage)
 };
 
 /******************************************************/
-class AccountCoupons: public Accounting::intfAccountCoupons
+class AccountCoupons : public Accounting::intfAccountCoupons
 {
     Q_OBJECT
-private slots:
+
 public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountCoupons)
 };
@@ -127,7 +140,11 @@ public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPrizes)
 };
 */
+
 }
 }
 }
+
+TAPI_DECLARE_METATYPE_ENUM(TAdvertisement::enuProductType);
+
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

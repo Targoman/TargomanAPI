@@ -258,8 +258,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             tblAccountSaleablesBase::slbName,
             //tblAccountSaleablesBase::slbDesc,
             //tblAccountSaleablesBase::slbType,
-            //tblAccountSaleablesBase::slbCanBePurchasedSince,
-            //tblAccountSaleablesBase::slbNotAvailableSince,
+            tblAccountSaleablesBase::slbAvailableFromDate,
+            tblAccountSaleablesBase::slbAvailableToDate,
             //tblAccountSaleablesBase::slbPrivs,
             tblAccountSaleablesBase::slbBasePrice,
             tblAccountSaleablesBase::slbAdditives,
@@ -293,60 +293,14 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         .addCols(this->AssetUsageLimitsColsName)
         .leftJoinWith("product")
         .where({ tblAccountSaleablesBase::slbCode, enuConditionOperator::Equal, _saleableCode })
-        .andWhere({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
-        .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+        .andWhere({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+        .andWhere(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+                      DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+        )
         .one();
 
-    /*QVariantMap OLD_SaleableInfo = this->AccountSaleables->selectFromTable(
-        {},
-        QString ("( %1>=NOW() + %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )").arg(
-            tblAccountSaleablesBase::slbCanBePurchasedSince).arg(
-            tblAccountSaleablesBase::slbNotAvailableSince),
-        _saleableCode,
-        0,
-        1,
-        QStringList({
-            //tblAccountProductsBase::prdID,
-            tblAccountProductsBase::prdCode,
-            tblAccountProductsBase::prdName,
-            //tblAccountProductsBase::prdDesc,
-            tblAccountProductsBase::prdValidFromDate,
-            tblAccountProductsBase::prdValidToDate,
-            tblAccountProductsBase::prdValidFromHour,
-            tblAccountProductsBase::prdValidToHour,
-            //tblAccountProductsBase::prdPrivs,
-            tblAccountProductsBase::prdVAT,
-            tblAccountProductsBase::prdInStockCount,
-            tblAccountProductsBase::prdOrderedCount,
-            tblAccountProductsBase::prdReturnedCount,
-            tblAccountProductsBase::prdStatus,
-            //tblAccountProductsBase::prdCreatedBy_usrID,
-            //tblAccountProductsBase::prdCreationDateTime,
-            //tblAccountProductsBase::prdUpdatedBy_usrID,
-
-            tblAccountSaleablesBase::slbID,
-            tblAccountSaleablesBase::slbCode,
-            //tblAccountSaleablesBase::slb_prdID,
-            tblAccountSaleablesBase::slbName,
-            //tblAccountSaleablesBase::slbDesc,
-            //tblAccountSaleablesBase::slbType,
-            //tblAccountSaleablesBase::slbCanBePurchasedSince,
-            //tblAccountSaleablesBase::slbNotAvailableSince,
-            //tblAccountSaleablesBase::slbPrivs,
-            tblAccountSaleablesBase::slbBasePrice,
-            tblAccountSaleablesBase::slbAdditives,
-            tblAccountSaleablesBase::slbInStockCount,
-            tblAccountSaleablesBase::slbOrderedCount,
-            tblAccountSaleablesBase::slbReturnedCount,
-            tblAccountSaleablesBase::slbVoucherTemplate,
-            tblAccountSaleablesBase::slbStatus,
-            //tblAccountSaleablesBase::slbCreatedBy_usrID,
-            //tblAccountSaleablesBase::slbCreationDateTime,
-            //tblAccountSaleablesBase::slbUpdatedBy_usrID,
-
-            this->AssetUsageLimitsColsName.join(',')
-        }).join(',')
-    ).toMap();*/
+    qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
 #define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
     TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName))
@@ -360,6 +314,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     SET_FIELD_FROM_VARIANMAP(prdValidToHour,         tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdPrivs,               tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdVAT,                 tblAccountProductsBase);
+    return {};
     SET_FIELD_FROM_VARIANMAP(prdInStockCount,        tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdOrderedCount,        tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdReturnedCount,       tblAccountProductsBase);

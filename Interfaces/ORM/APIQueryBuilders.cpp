@@ -31,7 +31,7 @@ namespace Targoman {
 namespace API {
 namespace Query {
 
-QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
+QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
     Q_UNUSED(_userID)
 
@@ -45,7 +45,7 @@ QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QStr
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .addFilters(_extraFilters)
+        .andWhere(_extraFilters)
         .offset(_offset)
         .limit(_limit)
         .setCacheTime(_cacheTime)
@@ -54,7 +54,7 @@ QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QStr
     return query.one();
 }
 
-QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
+QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
     _table.prepareFiltersList();
 
@@ -66,14 +66,14 @@ QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QSt
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .addFilters(_extraFilters)
+        .andWhere(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     return query.all();
 }
 
-TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, QString _extraFilters, quint16 _cacheTime)
+TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
     _table.prepareFiltersList();
 
@@ -85,11 +85,23 @@ TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNA
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .addFilters(_extraFilters)
+        .andWhere(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     return query.allWithCount();
+}
+
+QVariant Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
+{
+    if (_pksByPath.isEmpty()) {
+        if (_reportCount)
+            return SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime).toVariant();
+
+        return SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime);
+    }
+
+    return SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime);
 }
 
 quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL)

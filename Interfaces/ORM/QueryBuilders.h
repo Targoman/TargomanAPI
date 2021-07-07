@@ -211,6 +211,7 @@ public:
 //        const QMap<QString, stuRelatedORMField>& _filterables
 //    );
 
+    clsCondition& setCond(const clsCondition& _cond);
     clsCondition& andCond(const clsCondition& _cond);
     clsCondition& orCond(const clsCondition& _cond);
     clsCondition& xorCond(const clsCondition& _cond);
@@ -393,6 +394,8 @@ public:
     QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
     TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});
+
+//    QVariant execute(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
 
 private:
     virtual void iAmAbstract() {}

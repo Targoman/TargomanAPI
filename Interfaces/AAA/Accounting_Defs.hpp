@@ -212,7 +212,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
 namespace Targoman {
 namespace API {
 namespace AAA {
-namespace Accounting{
+namespace Accounting {
 
 typedef QMap<QString, qint32> ServiceUsage_t;
 extern void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher);
@@ -254,8 +254,8 @@ TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
 TARGOMAN_CREATE_CONSTEXPR(slbName);
 TARGOMAN_CREATE_CONSTEXPR(slbDesc);
 TARGOMAN_CREATE_CONSTEXPR(slbType);
-TARGOMAN_CREATE_CONSTEXPR(slbCanBePurchasedSince);
-TARGOMAN_CREATE_CONSTEXPR(slbNotAvailableSince);
+TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
+TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
 TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
 TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
 TARGOMAN_CREATE_CONSTEXPR(slbAdditives);

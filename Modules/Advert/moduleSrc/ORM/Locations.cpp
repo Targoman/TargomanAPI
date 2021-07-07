@@ -68,9 +68,9 @@ Locations::Locations() :
 
 QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 quint32 Locations::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)

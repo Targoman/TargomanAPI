@@ -31,9 +31,10 @@ namespace Targoman {
 namespace API {
 namespace Query {
 
-extern QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
-extern QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
-extern TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
+//extern QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
+//extern QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
+//extern TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
+extern QVariant Select(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, const clsCondition& _extraFilters = {}, quint16 _cacheTime = 0);
 
 extern quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL);
 

@@ -36,9 +36,9 @@ using namespace ORM;
 
 QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
@@ -47,7 +47,7 @@ QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 bool ActiveAds::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

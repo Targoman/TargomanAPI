@@ -30,6 +30,8 @@
 
 using namespace Targoman::API;
 
+//#include "Interfaces/ORM/QueryBuilders.h"
+//using namespace Targoman::API::ORM;
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_METATYPE(
@@ -148,25 +150,11 @@ intfAccountProducts::intfAccountProducts(
 QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     ///TODO: get just by priv. users
+
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+
     constexpr quint16 CACHE_TIME = 15 * 60;
-
-    QString ExtraFilters;
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-        ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-            .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-            .arg(tblAccountSaleablesBase::slbNotAvailableSince);
-
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
-
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        query
-//            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
-//            .orWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-//        ;
-
-//    return query.setCacheTime(CACHE_TIME).one();
-
-    //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS_APICALL, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
 }
 
 quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
@@ -178,14 +166,14 @@ quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 
 bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -205,14 +193,14 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbCode,                S(TAPI::SaleableCode_t), QFV,                                    QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbName,                S(QString),              QFV,                                    QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbDesc,                S(QString),              QFV,                                    QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbType,                S(TAPI::enuSaleableType::Type),  QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-            { tblAccountSaleablesBase::slbCanBePurchasedSince, S(TAPI::DateTime_t),     QFV,                                    QNow,       UPOwner },
-            { tblAccountSaleablesBase::slbNotAvailableSince,   S(TAPI::DateTime_t),     QFV,                                    QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbType,                S(TAPI::enuSaleableType::Type), QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
+            { tblAccountSaleablesBase::slbAvailableFromDate,   S(TAPI::DateTime_t),     QFV,                                    QNow,       UPOwner },
+            { tblAccountSaleablesBase::slbAvailableToDate,     S(TAPI::DateTime_t),     QFV,                                    QNull,      UPOwner },
             { tblAccountSaleablesBase::slbPrivs,               S(TAPI::JSON_t),         QFV,                                    QNull,      UPOwner },
             { tblAccountSaleablesBase::slbBasePrice,           S(qreal),                QFV.real().minValue(0),                 QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbAdditives,           S(TAPI::SaleableAdditive_t),     QFV,                                QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbAdditives,           S(TAPI::SaleableAdditive_t), QFV,                                QNull,      UPOwner },
             { tblAccountSaleablesBase::slbProductCount,        S(quint32),              QFV.integer().minValue(1),              QRequired,  UPOwner},
-            { tblAccountSaleablesBase::slbMaxSaleCountPerUser, S(NULLABLE_TYPE(quint32)),       QFV,                                    QNull,      UPOwner},
+            { tblAccountSaleablesBase::slbMaxSaleCountPerUser, S(NULLABLE_TYPE(quint32)), QFV,                                  QNull,      UPOwner},
             { tblAccountSaleablesBase::slbInStockCount,        S(quint32),              QFV.integer().minValue(0),              QRequired,  UPAdmin },
             { tblAccountSaleablesBase::slbOrderedCount,        S(quint32),              QFV,                                    QInvalid,   UPNone },
             { tblAccountSaleablesBase::slbReturnedCount,       S(quint32),              QFV,                                    QInvalid,   UPNone },
@@ -231,8 +219,8 @@ intfAccountSaleables::intfAccountSaleables(
         QList<ORM::stuDBIndex>({
             { { tblAccountSaleablesBase::slbCode, tblAccountSaleablesBase::slbStatus }, enuDBIndex::Unique },
             { tblAccountSaleablesBase::slbType },
-            { tblAccountSaleablesBase::slbCanBePurchasedSince },
-            { tblAccountSaleablesBase::slbNotAvailableSince },
+            { tblAccountSaleablesBase::slbAvailableFromDate },
+            { tblAccountSaleablesBase::slbAvailableToDate },
             { tblAccountSaleablesBase::slbStatus },
             { tblAccountSaleablesBase::slbCreatedBy_usrID },
             { tblAccountSaleablesBase::slbCreationDateTime },
@@ -243,43 +231,43 @@ intfAccountSaleables::intfAccountSaleables(
 
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-  constexpr quint16 CACHE_TIME = 15 * 60;
-
-  QString ExtraFilters;
-  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
-    ExtraFilters = QString ("( %1>=NOW() | %2<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min)")
-                   .arg(tblAccountSaleablesBase::slbCanBePurchasedSince)
-                   .arg(tblAccountSaleablesBase::slbNotAvailableSince);
-//  return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS_APICALL, CACHE_TIME);
-
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
+//    QString ExtraFilters;
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        query
-//            .where({ tblAccountSaleablesBase::slbCanBePurchasedSince, enuConditionOperator::GreaterEqual, DBExpression::NOW() })
-//            .andWhere({ tblAccountSaleablesBase::slbNotAvailableSince, enuConditionOperator::Less, DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-//        ;
+//        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
+//                       .arg(tblAccountSaleablesBase::slbAvailableFromDate)
+//                       .arg(tblAccountSaleablesBase::slbAvailableToDate);
 
-//    return query.setCacheTime(CACHE_TIME).one();
+    clsCondition ExtraFilters = {};
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        ExtraFilters
+            .setCond({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+            .andCond(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+                          DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+            );
+
+    constexpr quint16 CACHE_TIME = 15 * 60;
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
 }
 
 quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -330,7 +318,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-  return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
@@ -353,7 +341,7 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
   /*return this->update(clsJWT(_JWT).usrID(), {
                             {tblAccountUserAssets::uasID, UserPackageID}
                         }, {
@@ -388,7 +376,7 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query
@@ -443,9 +431,9 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
 
 QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //  return query.one();
 
@@ -454,21 +442,21 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -485,7 +473,7 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //  return query.one();
 
@@ -494,21 +482,21 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName()));
+  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

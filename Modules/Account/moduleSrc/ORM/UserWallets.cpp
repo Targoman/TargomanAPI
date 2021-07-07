@@ -40,7 +40,7 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::SelectOne(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
 
 //    return query.one();
 
@@ -59,7 +59,7 @@ quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 
 bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -77,7 +77,7 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 }
 
 bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
-    bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName()));
+    bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR

@@ -85,13 +85,14 @@ template<> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPL
 namespace TAPI { \
 inline void setFromVariant(_numericType& _storage, const QVariant& _val){ \
     bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \
-    if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
+    if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: %2").arg(_val.toString()).arg(#_numericType)); \
 } \
 inline void setFromVariant(NULLABLE_TYPE(_numericType)& _storage, const QVariant& _val){ \
     bool Result = true; if(_val.isValid() && _val.isNull() == false) *_storage = static_cast<_numericType>(_val._convertor(&Result)); \
-    if(!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value specifiedfor base type: %1").arg(#_numericType)); \
+    if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: NULLABLE<%1>").arg(_val.toString()).arg(#_numericType)); \
 } \
-inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val){ QJsonValue JsonVal; JsonVal = NULLABLE_IS_NULL(_val) ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
+inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val){ \
+    QJsonValue JsonVal; JsonVal = NULLABLE_IS_NULL(_val) ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
 }
 
 TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(quint8,  toUInt)
