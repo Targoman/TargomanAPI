@@ -979,27 +979,29 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addCol("colB1")
                 .addCol("colD1")
                 .addCol("colA1")
+                .addCol("colF1")
                 .values(QVariantMap({
                     { "colD1", 111 },
                     { "colZ1", "111" },
                     { "colA1", DBExpression::NIL() },
                     { "colB1", DBExpression::NOW() },
                     { "colC1", DBExpression::CURDATE() },
+                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                 }))
             ;
 
             stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
-//            QStringList BindingValuesList;
-//            foreach (auto b, qry.BindingValues) {
-//                BindingValuesList.append(b.toString());
-//            }
+            QStringList BindingValuesList;
+            foreach (auto b, qry.BindingValues) {
+                BindingValuesList.append(b.toString());
+            }
 
-//            if (SQLPrettyLen) {
-//                qDebug().nospace().noquote() << endl
-//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-//            }
+            if (SQLPrettyLen) {
+                qDebug().nospace().noquote() << endl
+                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1023,7 +1025,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-
+private:
     void queryString_CREATE_with_options() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
@@ -1078,14 +1080,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
-                    {"colF1", 112},
+                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "22Z"},
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
-                    {"colF1", 212},
+                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1093,14 +1095,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colC1", DBExpression::CURDATE()},
                         {"colZ1", "33Z"},
                         {"colA1", DBExpression::NOW()},
-                        {"colF1", 312},
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                     },
                     {
                         {"colB1", 444},
                         {"colZ1", "44Z"},
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
-                        {"colF1", 412},
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                     },
                 }))
             ;
@@ -1169,12 +1171,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addCol("colB1")
                 .addCol("colA1")
                 .addCol("colC1")
+                .addCol("colF1")
                 .values(QVariantMap({
                     {"colC1", DBExpression::CURDATE()},
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 112},
+                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
@@ -1182,6 +1186,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 212},
+                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1190,6 +1195,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colZ1", "33Z"},
                         {"colA1", DBExpression::NOW()},
                         {"colG1", 312},
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                     },
                     {
                         {"colB1", 444},
@@ -1197,6 +1203,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
                         {"colG1", 412},
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                     },
                 }))
             ;
@@ -1208,11 +1215,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 BindingValuesList.append(b.toString());
             }
 
-//            if (SQLPrettyLen) {
-//                qDebug().nospace().noquote() << endl
-//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-//            }
+            if (SQLPrettyLen) {
+                qDebug().nospace().noquote() << endl
+                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1236,7 +1243,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-
+private:
     void queryString_CREATE_values_from_select() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")

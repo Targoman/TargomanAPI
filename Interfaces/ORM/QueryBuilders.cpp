@@ -2407,13 +2407,15 @@ public:
                             if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                                 baseCol.validate(val);
 
+                            qDebug() << itr.key() << val << baseCol.toDB(val);
+
                             QString v = makeValueAsSQL(val, _useBinding == false);
 
                             if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false)
                                 oneRecordToString.append(v);
                             else {
                                 oneRecordToString.append("?");
-                                this->CreateQueryPreparedItems.BindingValues.append(baseCol.toDB(v));
+                                this->CreateQueryPreparedItems.BindingValues.append(baseCol.toDB(val));
                             }
 
                             break;

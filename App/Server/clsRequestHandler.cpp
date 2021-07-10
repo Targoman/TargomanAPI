@@ -107,11 +107,11 @@ void clsRequestHandler::process(const QString& _api) {
                     this->RemainingData = this->RemainingData.trimmed();
 
                     if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('[')) {
-                        if(this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
+                        if (this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
                             throw exHTTPBadRequest("Invalid JSON Object");
                         QJsonParseError Error;
                         QJsonDocument JSON = QJsonDocument::fromJson(this->RemainingData, &Error);
-                        if(JSON.isNull() || JSON.isObject() == false)
+                        if (JSON.isNull() || JSON.isObject() == false)
                             throw exHTTPBadRequest(QString("Invalid JSON Object: %1").arg(Error.errorString()));
                         QJsonObject JSONObject = JSON.object();
                         for (auto JSONObjectIter = JSONObject.begin();
@@ -152,8 +152,8 @@ void clsRequestHandler::process(const QString& _api) {
                     break;
                 }
                 case 'm': {
-                    if(this->MultipartFormDataHandler.isNull()){
-                        if(ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
+                    if (this->MultipartFormDataHandler.isNull()) {
+                        if (ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
                             throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
 
                         this->MultipartFormDataHandler.reset(
@@ -164,45 +164,59 @@ void clsRequestHandler::process(const QString& _api) {
                     }
 
                     qlonglong Fed = 0;
-                    while(!this->MultipartFormDataHandler->stopped() && _data.size() > Fed){
+                    while (!this->MultipartFormDataHandler->stopped() && _data.size() > Fed) {
                         do {
                             qulonglong Ret = this->MultipartFormDataHandler->feed(_data.mid(static_cast<int>(Fed)).constData(), _data.size() - Fed);
                             Fed += Ret;
                         } while (Fed < _data.size() && !this->MultipartFormDataHandler->stopped());
                     }
-                    if(this->MultipartFormDataHandler->hasError())
+                    if (this->MultipartFormDataHandler->hasError())
                         throw exHTTPBadRequest(this->MultipartFormDataHandler->getErrorMessage());
                     break;
                 }
                 default:
                     throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
             }
-        }catch(exTargomanBase& ex){
+
+            TargomanLogInfo(7, "request user defined values: ");
+            foreach (auto val, this->Request->userDefinedValues()) {
+                TargomanLogInfo(7, val.first << " : " << val.second);
+            }
+        }
+        catch(exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
-        }catch(QFieldValidator::exRequiredParam &ex){
+        }
+        catch(QFieldValidator::exRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
-        }catch(QFieldValidator::exInvalidValue &ex){
+        }
+        catch(QFieldValidator::exInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
-        }catch(std::exception &ex){
+        }
+        catch(std::exception &ex) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
         }
     });
-    this->Request->onEnd([this, _api](){
-        try{
-            if(this->Request->method() == qhttp::EHTTP_OPTIONS)
+
+    this->Request->onEnd([this, _api]() {
+        try {
+            if (this->Request->method() == qhttp::EHTTP_OPTIONS)
                 this->sendCORSOptions();
-            else{
+            else
                 this->findAndCallAPI (_api);
-            }
-        }catch(exTargomanBase& ex){
+        }
+        catch(exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
-        }catch(QFieldValidator::exRequiredParam &ex){
+        }
+        catch(QFieldValidator::exRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
-        }catch(QFieldValidator::exInvalidValue &ex){
+        }
+        catch(QFieldValidator::exInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
-        }catch(std::exception &ex){
+        }
+        catch(std::exception &ex) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
-        }catch(...){
+        }
+        catch(...) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", true);
         }
     });
