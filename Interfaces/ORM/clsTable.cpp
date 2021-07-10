@@ -309,9 +309,11 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
         clsDAC DAC(this->domain(), this->Schema);
         QJsonDocument Result;
         if(_cacheTime)
-            Result = DAC.execQueryCacheable(_cacheTime, "", QueryString).toJson(true, this->Converters);
+            Result = DAC.execQueryCacheable(_cacheTime, "", QueryString)
+                        .toJson(true, this->Converters);
         else
-            Result = DAC.execQuery("", QueryString).toJson(true, this->Converters);
+            Result = DAC.execQuery("", QueryString)
+                        .toJson(true, this->Converters);
 
         if(Result.object().isEmpty())
             throw exHTTPNotFound("No item could be found");

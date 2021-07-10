@@ -183,7 +183,7 @@ private:
 
         QtCUrl::Options Opt;
         Opt[CURLOPT_URL] = makeURL();
-        Opt[CURLOPT_TIMEOUT] = 10;
+        Opt[CURLOPT_TIMEOUT] = 10000;
         Opt[CURLOPT_FAILONERROR] = true;
         QStringList Headers = QStringList({"Content-Type: application/json"});
 

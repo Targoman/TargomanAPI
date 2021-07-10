@@ -113,16 +113,31 @@ QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true) {
 /***************************************************************************************/
 /* DBExpression ************************************************************************/
 /***************************************************************************************/
-DBExpression::DBExpression()
+class DBExpressionData : public QSharedData
+{
+public:
+    DBExpressionData(const DBExpressionData& _other) :
+        QSharedData(_other), Name(_other.Name), ExprType(_other.ExprType), Values(_other.Values)
+    {}
+    DBExpressionData(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values) :
+        Name(_name), ExprType(_exprType), Values(_values)
+    {}
+
+public:
+    QString Name;
+    enuDBExpressionType::Type ExprType;
+    QStringList Values;
+};
+
+/***************************************************************************************/
+DBExpression::DBExpression() :
+    Data(nullptr)
 {}
 DBExpression::DBExpression(const DBExpression& _other) :
-    Name(_other.Name), ExprType(_other.ExprType), Values(_other.Values)
-{}
-DBExpression::DBExpression(const QString& _name, enuDBExpressionType::Type _exprType) :
-    Name(_name), ExprType(_exprType), Values({})
+    Data(_other.Data)
 {}
 DBExpression::DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values) :
-    Name(_name), ExprType(_exprType), Values(_values)
+    Data(new DBExpressionData(_name, _exprType, _values))
 {}
 DBExpression::~DBExpression()
 {}
@@ -135,27 +150,37 @@ QVariant DBExpression::operator =(DBExpression& _other) const {
     return QVariant::fromValue(_other);
 }
 
-QString DBExpression::toString() const {
-    QString ret = this->Name;
+QString DBExpression::name() {
+    if (this->Data == nullptr)
+        return "";
 
-    if (this->ExprType == enuDBExpressionType::Function)
+    return this->Data->Name;
+}
+
+QString DBExpression::toString() const {
+    if (this->Data == nullptr)
+        return "";
+
+    QString ret = this->Data->Name;
+
+    if (this->Data->ExprType == enuDBExpressionType::Function)
         ret += "(";
 
-    if (this->Values.length())
-        ret += this->Values.join(",");
+    if (this->Data->Values.length())
+        ret += this->Data->Values.join(",");
 
-    if (this->ExprType == enuDBExpressionType::Function)
+    if (this->Data->ExprType == enuDBExpressionType::Function)
         ret += ")";
 
     return ret;
 }
 
 bool DBExpression::isValid() const {
-    return this->Name.length();
+    return (this->Data && this->Data->Name.length());
 }
 
-const DBExpression& DBExpression::NIL() {
-    static DBExpression* DBEX_NULL;
+DBExpression DBExpression::NIL() {
+    static DBExpression* DBEX_NULL = nullptr;
     if (DBEX_NULL)
         return *DBEX_NULL;
 
@@ -164,8 +189,8 @@ const DBExpression& DBExpression::NIL() {
     return *(DBEX_NULL = new DBExpression("NULL", enuDBExpressionType::Value));
 }
 
-const DBExpression& DBExpression::NOW() {
-    static DBExpression* DBEX_NOW;
+DBExpression DBExpression::NOW() {
+    static DBExpression* DBEX_NOW = nullptr;
     if (DBEX_NOW)
         return *DBEX_NOW;
 
@@ -174,8 +199,8 @@ const DBExpression& DBExpression::NOW() {
     return *(DBEX_NOW = new DBExpression("NOW", enuDBExpressionType::Function));
 }
 
-const DBExpression& DBExpression::CURDATE() {
-    static DBExpression* DBEX_CURDATE;
+DBExpression DBExpression::CURDATE() {
+    static DBExpression* DBEX_CURDATE = nullptr;
     if (DBEX_CURDATE)
         return *DBEX_CURDATE;
 
@@ -192,18 +217,18 @@ QString makeExpressionIntervalValue(const QVariant _interval, enuDBExpressionInt
 
     return QString("%1 %2").arg(v).arg(enuDBExpressionIntervalUnit::toStr(_unit));
 }
-const DBExpression& DBExpression::DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
-    return *(new DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) })));
+DBExpression DBExpression::DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
+    return DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) }));
 }
-const DBExpression& DBExpression::DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
-    return *(new DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) })));
+DBExpression DBExpression::DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
+    return DBExpression("DATE_ADD", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) }));
 }
 
-const DBExpression& DBExpression::DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
-    return *(new DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) })));
+DBExpression DBExpression::DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
+    return DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date, "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) }));
 }
-const DBExpression& DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
-    return *(new DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) })));
+DBExpression DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit) {
+    return DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) }));
 }
 
 /***************************************************************************************/
@@ -286,10 +311,12 @@ public:
 /* clsCondition ************************************************************************/
 /***************************************************************************************/
 clsCondition::clsCondition() :
-    Data(new clsConditionData) {}
+    Data(new clsConditionData)
+{}
 
 clsCondition::clsCondition(const clsCondition& _other) :
-    Data(_other.Data) {}
+    Data(_other.Data)
+{}
 
 clsCondition::clsCondition(
         QString _col,
@@ -704,9 +731,9 @@ template <class itmplDerived>
 class clsBaseQueryData : public QSharedData
 {
 public:
-    clsBaseQueryData(clsTable& _table, const QString& _alias = {}) : Table(_table), Alias(_alias) {}
-//    clsSelectQueryData(const clsSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) {}
-//    ~clsSelectQueryData() {}
+    clsBaseQueryData(clsTable& _table, const QString& _alias = {}) :
+        Table(_table), Alias(_alias)
+    {}
 
     virtual void prepare(bool _useBinding/*, quint8 _prettifierJustifyLen*/) {
         Q_UNUSED(_useBinding);
@@ -768,10 +795,10 @@ bool tmplBaseQuery<itmplDerived, itmplData>::isValid() {
     return (this->Data != nullptr);
 }
 
-template <class itmplDerived, class itmplData>
-clsDAC tmplBaseQuery<itmplDerived, itmplData>::DAC() {
-    return clsDAC(this->Data->Table.domain(), this->Data->Table.Schema);
-}
+//template <class itmplDerived, class itmplData>
+//clsDAC tmplBaseQuery<itmplDerived, itmplData>::DAC() {
+//    return clsDAC(this->Data->Table.domain(), this->Data->Table.Schema);
+//}
 
 /***************************************************************************************/
 /* clsQueryJoinTraitData ***************************************************************/
@@ -784,7 +811,9 @@ template <class itmplDerived>
 class clsQueryJoinTraitData : public QSharedData
 {
 public:
-    clsQueryJoinTraitData<itmplDerived>(const itmplDerived* _owner) : Owner(_owner), IsPrepared(false) {}
+    clsQueryJoinTraitData<itmplDerived>(const itmplDerived* _owner) :
+        Owner(_owner), IsPrepared(false)
+    {}
 
     virtual void prepare() {
         if (this->IsPrepared)
@@ -1057,7 +1086,9 @@ template <class itmplDerived>
 class clsQueryWhereTraitData : public QSharedData
 {
 public:
-    clsQueryWhereTraitData<itmplDerived>(const itmplDerived* _owner) : Owner(_owner), IsPrepared(false) {}
+    clsQueryWhereTraitData<itmplDerived>(const itmplDerived* _owner) :
+        Owner(_owner), IsPrepared(false)
+    {}
 
     virtual void prepare() {
         if (this->IsPrepared)
@@ -1327,7 +1358,9 @@ template <class itmplDerived>
 class clsQueryGroupAndHavingTraitData : public QSharedData
 {
 public:
-    clsQueryGroupAndHavingTraitData<itmplDerived>(const itmplDerived* _owner) : Owner(_owner), IsPrepared(false) {}
+    clsQueryGroupAndHavingTraitData<itmplDerived>(const itmplDerived* _owner) :
+        Owner(_owner), IsPrepared(false)
+    {}
 
     virtual void prepare() {
         if (this->IsPrepared)
@@ -1482,7 +1515,7 @@ public:
             if (_col.Expression.isValid()) {
                 DBExpression exp = _col.Expression.value<DBExpression>();
                 this->SelectQueryPreparedItems.Cols.append(
-                    exp.Name
+                    exp.name() //Data->Name
                     + (_col.RenameAs.length()
                        ? " AS " + _col.RenameAs
                        : ""
@@ -2158,15 +2191,6 @@ quint64 SelectQuery::count(QVariantMap _args)
 }
 */
 
-QVariant correctExecQueryResult(QJsonDocument& Result)
-{
-    //BUG in .toJson: why this->d->WasSP is true at line 308?
-    if (Result.isObject())
-        return Result[DBM_SPRESULT_ROWS].toVariant();
-
-    return Result.toVariant();
-}
-
 QVariantMap SelectQuery::one(QVariantMap _args)
 {
     QString QueryString = this->buildQueryString(_args, true, false);
@@ -2178,19 +2202,29 @@ QVariantMap SelectQuery::one(QVariantMap _args)
 
     QJsonDocument Result;
 
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
     if (this->Data->CahceTime > 0)
-        Result = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
+        Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
                             .toJson(true, this->Data->Table.Converters);
     else
-        Result = this->DAC().execQuery("", QueryString)
+        Result = DAC.execQuery("", QueryString)
                             .toJson(true, this->Data->Table.Converters);
 
     if (Result.object().isEmpty())
         throw exHTTPNotFound("No item could be found");
 
-    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
+//    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
+//    qDebug() << "--- SelectQuery::one(){tovariant}" << __FILE__ << __LINE__ << Result.toVariant();
+//    qDebug() << "--- SelectQuery::one(){tovariant.tomap}" << __FILE__ << __LINE__ << Result.toVariant().toMap();
+//    QVariant cc = correctExecQueryResult(Result);
 
-    return correctExecQueryResult(Result).toMap();
+
+//    qDebug() << "--- SelectQuery::one(){CORRECT}" << __FILE__ << __LINE__ << cc;
+
+    return Result.toVariant().toMap();
+
+//    return correctExecQueryResult(Result).toMap();
 }
 
 QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from)
@@ -2205,18 +2239,22 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
                                  << endl << "-- Query:" << endl << QueryString << endl;
 #endif
 
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
     QJsonDocument Result;
 
     if (this->Data->CahceTime > 0)
-        Result = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
+        Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
                             .toJson(false, this->Data->Table.Converters);
     else
-        Result = this->DAC().execQuery("", QueryString)
+        Result = DAC.execQuery("", QueryString)
                             .toJson(false, this->Data->Table.Converters);
 
-//    qDebug() << "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result;
+//    TargomanDebug(5, "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result.toJson());
 
-    return correctExecQueryResult(Result).toList();
+    qDebug() << "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result;
+
+    return Result.toVariant().toList();
 }
 
 TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, quint64 _from)
@@ -2236,29 +2274,33 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
     QJsonDocument ResultRows;
     QJsonDocument ResultTotalRows;
 
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
     if (this->Data->CahceTime > 0) {
-        ResultTotalRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
+        ResultTotalRows = DAC.execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
                                      .toJson(true);
 
-        ResultRows = this->DAC().execQueryCacheable(this->Data->CahceTime, "", QueryString)
+        ResultRows = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
                                 .toJson(false, this->Data->Table.Converters);
     }
     else {
-        ResultTotalRows = this->DAC().execQuery("", CountingQueryString)
+        ResultTotalRows = DAC.execQuery("", CountingQueryString)
                                      .toJson(true);
 
-        ResultRows = this->DAC().execQuery("", QueryString)
+        ResultRows = DAC.execQuery("", QueryString)
                                 .toJson(false, this->Data->Table.Converters);
     }
 
     TAPI::stuTable Result;
-    Result.TotalRows = correctExecQueryResult(ResultTotalRows)
+    Result.TotalRows = ResultTotalRows
+                       .toVariant()
                        .toMap()["cnt"]
                        .toULongLong();
-    Result.Rows = correctExecQueryResult(ResultRows)
+    Result.Rows = ResultRows
+                  .toVariant()
                   .toList();
 
-//    qDebug() << "--- SelectQuery::allWithCount()" << __FILE__ << __LINE__ << "Rows: " << Result.Rows << "Rows Count: " << Result.TotalRows;
+    qDebug() << "--- SelectQuery::allWithCount()" << __FILE__ << __LINE__ << "Rows: " << Result.Rows << "Rows Count: " << Result.TotalRows;
 
     return Result;
 }
@@ -2644,7 +2686,9 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
     }
 #endif
 
-    clsDACResult Result = this->DAC().execQuery(
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
+    clsDACResult Result = DAC.execQuery(
                               "",
                               BoundQueryString.QueryString,
                               BoundQueryString.BindingValues
@@ -2898,7 +2942,9 @@ quint64 UpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
     }
 #endif
 
-    clsDACResult Result = this->DAC().execQuery(
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
+    clsDACResult Result = DAC.execQuery(
                               "",
                               BoundQueryString.QueryString,
                               BoundQueryString.BindingValues
@@ -3065,7 +3111,9 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args)
                                  << endl << "-- Query:" << endl << QueryString << endl;
 #endif
 
-    clsDACResult Result = this->DAC().execQuery("", QueryString);
+    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+
+    clsDACResult Result = DAC.execQuery("", QueryString);
 
     return Result.numRowsAffected();
 }

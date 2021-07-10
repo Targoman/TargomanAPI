@@ -132,12 +132,13 @@ TARGOMAN_DEFINE_ENUM(enuDBExpressionIntervalUnit,
                      YEAR_MONTH           // 'YEARS-MONTHS'
 )
 
-class DBExpression : public QObject {
+class DBExpressionData;
+
+class DBExpression {
 public:
     DBExpression();
     DBExpression(const DBExpression& _other);
-    DBExpression(const QString& _name, enuDBExpressionType::Type _exprType);
-    DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values);
+    DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values = {});
     virtual ~DBExpression();
 
     operator QVariant() const;
@@ -149,18 +150,19 @@ public:
     QString toString() const;
     bool isValid() const;
 
-    static const DBExpression& NIL();
-    static const DBExpression& NOW();
-    static const DBExpression& CURDATE();
-    static const DBExpression& DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
-    static const DBExpression& DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
-    static const DBExpression& DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
-    static const DBExpression& DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    QString name();
+
+    static DBExpression NIL();
+    static DBExpression NOW();
+    static DBExpression CURDATE();
+    static DBExpression DATE_ADD(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static DBExpression DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static DBExpression DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static DBExpression DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
 
 protected:
-    QString Name;
-    enuDBExpressionType::Type ExprType;
-    QStringList Values;
+    QSharedDataPointer<DBExpressionData> Data;
+
     friend clsSelectQueryData;
 };
 
@@ -257,7 +259,7 @@ public:
 protected:
     virtual void iAmAbstract() = 0;
     QSharedDataPointer<itmplData> Data;
-    clsDAC DAC();
+//    clsDAC DAC();
 
     friend TestQueryBuilders;
     friend clsQueryJoinTraitData<itmplDerived>;

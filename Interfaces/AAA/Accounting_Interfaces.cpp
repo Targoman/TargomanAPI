@@ -119,7 +119,7 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdValidFromHour,    S(NULLABLE_TYPE(quint8)), QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
             { tblAccountProductsBase::prdValidToHour,      S(NULLABLE_TYPE(quint8)), QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
             { tblAccountProductsBase::prdPrivs,            S(TAPI::PrivObject_t),    QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdVAT,              S(qreal),                 QFV.real().minValue(0).maxValue(100),    0,          UPOwner },
+            { tblAccountProductsBase::prdVAT,              S(NULLABLE_TYPE(double)), QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
             { tblAccountProductsBase::prdInStockCount,     S(quint32),               QFV.integer().minValue(0),               QRequired,  UPAdmin },
             { tblAccountProductsBase::prdOrderedCount,     S(quint32),               QFV,                                     QInvalid,   UPNone },
             { tblAccountProductsBase::prdReturnedCount,    S(quint32),               QFV,                                     QInvalid,   UPNone },

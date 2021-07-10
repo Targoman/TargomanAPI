@@ -126,8 +126,79 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
+/*
+    void t1() {
+        QVariantList productInfo1 = callAdminAPI(
+            GET,
+            "Advert/AccountProducts",
+            {
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountProductsBase::prdCode)
+                        .arg("p111")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountProductsBase::prdID },
+            }
+        ).toList();
 
-    //test non privileged user for creating location: fail
+        qDebug() << "--------- productInfo1: " << productInfo1;
+    }
+
+    void t2() {
+        QVariantList productInfo1 = callAdminAPI(
+            GET,
+            "Advert/AccountProducts",
+            {
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountProductsBase::prdCode)
+                        .arg("p222")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountProductsBase::prdID },
+            }
+        ).toList();
+
+        qDebug() << "--------- productInfo1: " << productInfo1;
+    }
+
+    void t3() {
+        QVariantList productInfo1 = callAdminAPI(
+            GET,
+            "Advert/AccountProducts",
+            {
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountProductsBase::prdCode)
+                        .arg("p333")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountProductsBase::prdID },
+            }
+        ).toList();
+
+        qDebug() << "--------- productInfo1: " << productInfo1;
+    }
+
+    void t4() {
+        QVariantList productInfo1 = callAdminAPI(
+            GET,
+            "Advert/AccountProducts",
+            {
+                {
+                    "filters", QString("%1=%2")
+                        .arg(tblAccountProductsBase::prdCode)
+                        .arg("p444")
+                },
+                { "reportCount", false },
+                { "cols", tblAccountProductsBase::prdID },
+            }
+        ).toList();
+
+        qDebug() << "--------- productInfo1: " << productInfo1;
+    }
+*/
 
     void getOrCreateLocation() {
         QVariantList locationInfo = callAdminAPI(
