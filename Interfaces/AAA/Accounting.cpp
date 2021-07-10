@@ -263,6 +263,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
             //tblAccountSaleablesBase::slbPrivs,
             tblAccountSaleablesBase::slbBasePrice,
             tblAccountSaleablesBase::slbAdditives,
+            tblAccountSaleablesBase::slbProductCount,
             tblAccountSaleablesBase::slbInStockCount,
             tblAccountSaleablesBase::slbOrderedCount,
             tblAccountSaleablesBase::slbReturnedCount,
@@ -303,7 +304,12 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
 #define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
-    TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName))
+    QT_TRY { \
+        TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName)); \
+    } QT_CATCH (const std::exception &e) { \
+        qDebug() << "fieldName:" << #_fieldName << e.what(); \
+        throw e; \
+    }
 
     stuAssetItem AssetItem;
     SET_FIELD_FROM_VARIANMAP(prdCode,                tblAccountProductsBase);
@@ -314,7 +320,6 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     SET_FIELD_FROM_VARIANMAP(prdValidToHour,         tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdPrivs,               tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdVAT,                 tblAccountProductsBase);
-    return {};
     SET_FIELD_FROM_VARIANMAP(prdInStockCount,        tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdOrderedCount,        tblAccountProductsBase);
     SET_FIELD_FROM_VARIANMAP(prdReturnedCount,       tblAccountProductsBase);
@@ -334,14 +339,17 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     SET_FIELD_FROM_VARIANMAP(slbStatus,              tblAccountSaleablesBase);
 
     //check available count
-    qint64 AvailableProductCount = AssetItem.prdInStockCount - (AssetItem.prdOrderedCount - AssetItem.prdReturnedCount);
-    qint64 AvailableSaleableCount = AssetItem.slbInStockCount - (AssetItem.slbOrderedCount - AssetItem.slbReturnedCount);
+    qint64 AvailableProductCount = AssetItem.prdInStockCount - (NULLABLE_VALUE_OR_DEFAULT(AssetItem.prdOrderedCount, 0) - NULLABLE_VALUE_OR_DEFAULT(AssetItem.prdReturnedCount, 0));
+    qint64 AvailableSaleableCount = AssetItem.slbInStockCount - (NULLABLE_VALUE_OR_DEFAULT(AssetItem.slbOrderedCount, 0) - NULLABLE_VALUE_OR_DEFAULT(AssetItem.slbReturnedCount, 0));
+
     if ((AvailableSaleableCount < 0) || (AvailableProductCount < 0))
-        throw exHTTPInternalServerError("AvailableSaleableCount or AvailableProductCount < 0");
+        throw exHTTPInternalServerError(QString("AvailableSaleableCount(%1) or AvailableProductCount(%2) < 0").arg(AvailableSaleableCount).arg(AvailableProductCount));
+
     if (AvailableSaleableCount > AvailableProductCount)
-        throw exHTTPInternalServerError("AvailableSaleableCount > AvailableProductCount");
+        throw exHTTPInternalServerError(QString("AvailableSaleableCount(%1) > AvailableProductCount(%2)").arg(AvailableSaleableCount).arg(AvailableProductCount));
+
     if (AvailableSaleableCount < _qty)
-        throw exHTTPBadRequest(QString("Not enough %1 available in store.").arg(_saleableCode));
+        throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableCount).arg(_qty));
 
     //---------
     UsageLimits_t SaleableUsageLimits;
@@ -395,6 +403,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         ///TODO: join with userAssets to count user discount usage per voucher
         .where({ tblAccountCouponsBase::cpnID, enuConditionOperator::Equal, _discountCode })
         .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
+        .andWhere(clsCondition({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::Null })
+           .orCond({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::GreaterEqual,
+                     DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+       )
         .one();
 
         if (DiscountInfo.size() == 0)
@@ -411,6 +423,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         qint64 Amount = DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier).toJsonObject().value(_saleableCode).toInt(-1);
         if (Amount < 0)
             throw exHTTPBadRequest("Discount code is not valid on selected package");
+
         Discount.Amount = static_cast<quint32>(Amount);
         Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;

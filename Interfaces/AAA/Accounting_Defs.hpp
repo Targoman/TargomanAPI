@@ -110,10 +110,10 @@ struct stuAssetItem {
     NULLABLE_TYPE(quint8)        prdValidFromHour;
     NULLABLE_TYPE(quint8)        prdValidToHour;
     TAPI::PrivObject_t           prdPrivs;
-    qreal                        prdVAT;
+    NULLABLE_TYPE(double)        prdVAT;
     quint32                      prdInStockCount;
-    quint32                      prdOrderedCount;
-    quint32                      prdReturnedCount;
+    NULLABLE_TYPE(quint32)       prdOrderedCount;
+    NULLABLE_TYPE(quint32)       prdReturnedCount;
     TAPI::enuGenericStatus::Type prdStatus;
 
     //saleable
@@ -126,8 +126,8 @@ struct stuAssetItem {
     quint32                      slbProductCount;
     NULLABLE_TYPE(quint32)       slbMaxSaleCountPerUser;
     quint32                      slbInStockCount;
-    quint32                      slbOrderedCount;
-    quint32                      slbReturnedCount;
+    NULLABLE_TYPE(quint32)       slbOrderedCount;
+    NULLABLE_TYPE(quint32)       slbReturnedCount;
     QString                      slbVoucherTemplate;
     TAPI::enuGenericStatus::Type slbStatus;
 

@@ -114,7 +114,8 @@
 #define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
 #define NULLABLE_TYPE(_type) std::optional<_type>
 #define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value) _value ? *_value : QVariant()
+#define NULLABLE_VALUE(_value) (_value ? *_value : QVariant())
+#define NULLABLE_VALUE_OR_DEFAULT(_value, _def) (_value ? *_value : _def)
 #define NULLABLE_NULL_VALUE std::nullopt
 #define NULLABLE_IS_NULL(_nullable) (bool)_nullable == false
 #define NULLABLE_HAS_VALUE(_nullable) (bool)_nullable

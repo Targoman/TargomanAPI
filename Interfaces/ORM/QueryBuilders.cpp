@@ -179,6 +179,13 @@ bool DBExpression::isValid() const {
     return (this->Data && this->Data->Name.length());
 }
 
+DBExpression DBExpression::VALUE(const QString _value) {
+    return DBExpression(_value, enuDBExpressionType::Value);
+}
+DBExpression DBExpression::FUNCTION(const QString _func) {
+    return DBExpression(_func, enuDBExpressionType::Function);
+}
+
 DBExpression DBExpression::NIL() {
     static DBExpression* DBEX_NULL = nullptr;
     if (DBEX_NULL)
@@ -1127,24 +1134,28 @@ public:
                     CanStartWithLogical = false;
                     LastLogical.clear();
                     OpenParenthesis++;
-                } else if(Filter == ")") {
+                }
+                else if(Filter == ")") {
                     if(OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
                     Rule = " )";
                     OpenParenthesis--;
                     CanStartWithLogical = true;
-                } else if(Filter == '+' || Filter == '|' || Filter == '*') {
-                    if(CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
-                    if(Filter == '+') LastLogical = "AND ";
-                    else if(Filter == '|') LastLogical = "OR ";
-                    else if(Filter == '*') LastLogical = "XOR ";
+                }
+                else if (Filter == '+' || Filter == '|' || Filter == '*') {
+                    if (CanStartWithLogical == false)
+                        throw exHTTPBadRequest("Invalid logical expression prior to any rule");
+                    if (Filter == '+') LastLogical = "AND ";
+                    else if (Filter == '|') LastLogical = "OR ";
+                    else if (Filter == '*') LastLogical = "XOR ";
 
                     CanStartWithLogical = false;
                     continue;
-                } else {
+                }
+                else {
                     static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
                     Filter = Filter.replace("$SPACE$", " ");
                     QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
-                    if(PatternMatches.lastCapturedIndex() != 3)
+                    if (PatternMatches.lastCapturedIndex() != 3)
                         throw exHTTPBadRequest("Invalid filter set: " + Filter);
 
                     Rule = SQLPrettyLen ? "\n" + QString(LastLogical).rightJustified(SQLPrettyLen) + " " : " " + LastLogical + " ";

@@ -50,118 +50,132 @@ clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QO
 
 void clsRequestHandler::process(const QString& _api) {
     this->Request->onData([this](QByteArray _data){
-        try{
+        try {
+            TargomanLogInfo(7,
+                            "posted data: " <<
+                            _data);
+
             QByteArray ContentType= this->Request->headers().value("content-type");
-            if(ContentType.isEmpty())
+
+            if (ContentType.isEmpty())
                 throw exHTTPBadRequest("No content-type header present");
+
             QByteArray ContentLengthStr = this->Request->headers().value("content-length");
-            if(ContentLengthStr.isEmpty())
+
+            if (ContentLengthStr.isEmpty())
                 throw exHTTPBadRequest("No content-length header present");
 
             qlonglong ContentLength = ContentLengthStr.toLongLong ();
-            if(!ContentLength)
+
+            if (!ContentLength)
                 throw exHTTPLengthRequired("content-length seems to be zero");
-            if(ContentLength > ServerConfigs::MaxUploadSize.value())
+
+            if (ContentLength > ServerConfigs::MaxUploadSize.value())
                 throw exHTTPPayloadTooLarge(QString("Content-Size is too large: %d").arg(ContentLength));
 
-            switch(this->Request->method()){
-            case qhttp::EHTTP_POST:
-            case qhttp::EHTTP_PUT:
-            case qhttp::EHTTP_PATCH:
-                break;
-            default:
-                throw exHTTPBadRequest("Method: "+this->Request->methodString()+" is not supported or does not accept request body");
+            switch(this->Request->method()) {
+                case qhttp::EHTTP_POST:
+                case qhttp::EHTTP_PUT:
+                case qhttp::EHTTP_PATCH:
+                    break;
+                default:
+                    throw exHTTPBadRequest("Method: "+this->Request->methodString()+" is not supported or does not accept request body");
             }
+
             static constexpr char APPLICATION_JSON_HEADER[] = "application/json";
             static constexpr char APPLICATION_FORM_HEADER[] = "application/x-www-form-urlencoded";
             static constexpr char MULTIPART_BOUNDARY_HEADER[] = "multipart/form-data; boundary=";
 
-            switch(ContentType.at(0)){
-            case 'a':{
-                if(ContentType != APPLICATION_JSON_HEADER && ContentType != APPLICATION_FORM_HEADER)
-                    throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
+            switch (ContentType.at(0)) {
+                case 'a': {
+                    if (ContentType != APPLICATION_JSON_HEADER && ContentType != APPLICATION_FORM_HEADER)
+                        throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
 
-                if(_data.size() == ContentLength){
-                    this->RemainingData = _data;
-                }else if (this->RemainingData.size()){
-                    this->RemainingData += _data;
-                    if(this->RemainingData.size() < ContentLength)
+                    if (_data.size() == ContentLength) {
+                        this->RemainingData = _data;
+                    }
+                    else if (this->RemainingData.size()) {
+                        this->RemainingData += _data;
+                        if(this->RemainingData.size() < ContentLength)
+                            return;
+                    }
+                    else {
+                        this->RemainingData = _data;
                         return;
-                }else{
-                    this->RemainingData = _data;
-                    return;
-                }
-
-                this->RemainingData = this->RemainingData.trimmed();
-
-                if(this->RemainingData.startsWith('{') || this->RemainingData.startsWith('[')){
-                    if(this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
-                        throw exHTTPBadRequest("Invalid JSON Object");
-                    QJsonParseError Error;
-                    QJsonDocument JSON = QJsonDocument::fromJson(this->RemainingData, &Error);
-                    if(JSON.isNull() || JSON.isObject() == false)
-                        throw exHTTPBadRequest(QString("Invalid JSON Object: %1").arg(Error.errorString()));
-                    QJsonObject JSONObject = JSON.object();
-                    for(auto JSONObjectIter = JSONObject.begin();
-                        JSONObjectIter != JSONObject.end();
-                        ++JSONObjectIter){
-                        if(JSONObjectIter.value().isBool())
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toBool() ? "1" : "0");
-                        else if(JSONObjectIter.value().isNull())
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), QString());
-                        else if(JSONObjectIter.value().isArray())
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson());
-                        else if(JSONObjectIter.value().isObject())
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
-                        else if(JSONObjectIter.value().isDouble())
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), QString("%1").arg(JSONObjectIter.value().toDouble()));
-                        else
-                            this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
                     }
-                }else{
-                    QList<QByteArray> Params = this->RemainingData.split('&');
-                    static auto decodePercentEncoding = [](QByteArray& _value){
-                        _value = _value.replace("+"," ");
-                        QUrl URL = QUrl::fromPercentEncoding("http://127.0.0.1/?key=" + _value);
-                        _value=URL.query(QUrl::FullyDecoded).toUtf8();
-                        _value=_value.mid(_value.indexOf('=') + 1);
-                        return _value;
-                    };
 
-                    foreach(auto Param, Params){
-                        QList<QByteArray> ParamParts = Param.split('=');
-                        if(ParamParts.size() != 2)
-                            throw exHTTPBadRequest("Invalid Param: " + Param);
-                        this->Request->addUserDefinedData(ParamParts.first(), decodePercentEncoding(ParamParts.last()));
+                    this->RemainingData = this->RemainingData.trimmed();
+
+                    if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('[')) {
+                        if(this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
+                            throw exHTTPBadRequest("Invalid JSON Object");
+                        QJsonParseError Error;
+                        QJsonDocument JSON = QJsonDocument::fromJson(this->RemainingData, &Error);
+                        if(JSON.isNull() || JSON.isObject() == false)
+                            throw exHTTPBadRequest(QString("Invalid JSON Object: %1").arg(Error.errorString()));
+                        QJsonObject JSONObject = JSON.object();
+                        for (auto JSONObjectIter = JSONObject.begin();
+                                JSONObjectIter != JSONObject.end();
+                                ++JSONObjectIter) {
+                            if (JSONObjectIter.value().isBool())
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toBool() ? "1" : "0");
+                            else if (JSONObjectIter.value().isNull())
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString());
+                            else if (JSONObjectIter.value().isArray())
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson());
+                            else if (JSONObjectIter.value().isObject())
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
+                            else if (JSONObjectIter.value().isDouble())
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString("%1").arg(JSONObjectIter.value().toDouble()));
+                            else
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
+                        }
                     }
-                }
-                break;
-            }
-            case 'm':{
-                if(this->MultipartFormDataHandler.isNull()){
-                    if(ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
-                        throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
+                    else {
+                        QList<QByteArray> Params = this->RemainingData.split('&');
 
-                    this->MultipartFormDataHandler.reset(
-                                new clsMultipartFormDataRequestHandler(
-                                    this,
-                                    ContentType.mid(sizeof(MULTIPART_BOUNDARY_HEADER) - 1)
-                                    ));
-                }
+                        static auto decodePercentEncoding = [](QByteArray& _value) {
+                            _value = _value.replace("+"," ");
+                            QUrl URL = QUrl::fromPercentEncoding("http://127.0.0.1/?key=" + _value);
+                            _value=URL.query(QUrl::FullyDecoded).toUtf8();
+                            _value=_value.mid(_value.indexOf('=') + 1);
+                            return _value;
+                        };
 
-                qlonglong Fed = 0;
-                while(!this->MultipartFormDataHandler->stopped() && _data.size() > Fed){
-                    do {
-                        qulonglong Ret = this->MultipartFormDataHandler->feed(_data.mid(static_cast<int>(Fed)).constData(), _data.size() - Fed);
-                        Fed += Ret;
-                    } while (Fed < _data.size() && !this->MultipartFormDataHandler->stopped());
+                        foreach (auto Param, Params) {
+                            QList<QByteArray> ParamParts = Param.split('=');
+                            if(ParamParts.size() != 2)
+                                throw exHTTPBadRequest("Invalid Param: " + Param);
+                            this->Request->addUserDefinedData(ParamParts.first(), decodePercentEncoding(ParamParts.last()));
+                        }
+                    }
+                    break;
                 }
-                if(this->MultipartFormDataHandler->hasError())
-                    throw exHTTPBadRequest(this->MultipartFormDataHandler->getErrorMessage());
-                break;
-            }
-            default:
-                throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
+                case 'm': {
+                    if(this->MultipartFormDataHandler.isNull()){
+                        if(ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
+                            throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
+
+                        this->MultipartFormDataHandler.reset(
+                                    new clsMultipartFormDataRequestHandler(
+                                        this,
+                                        ContentType.mid(sizeof(MULTIPART_BOUNDARY_HEADER) - 1)
+                                        ));
+                    }
+
+                    qlonglong Fed = 0;
+                    while(!this->MultipartFormDataHandler->stopped() && _data.size() > Fed){
+                        do {
+                            qulonglong Ret = this->MultipartFormDataHandler->feed(_data.mid(static_cast<int>(Fed)).constData(), _data.size() - Fed);
+                            Fed += Ret;
+                        } while (Fed < _data.size() && !this->MultipartFormDataHandler->stopped());
+                    }
+                    if(this->MultipartFormDataHandler->hasError())
+                        throw exHTTPBadRequest(this->MultipartFormDataHandler->getErrorMessage());
+                    break;
+                }
+                default:
+                    throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
             }
         }catch(exTargomanBase& ex){
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);

@@ -152,6 +152,9 @@ public:
 
     QString name();
 
+    static DBExpression VALUE(const QString _value);
+    static DBExpression FUNCTION(const QString _func);
+
     static DBExpression NIL();
     static DBExpression NOW();
     static DBExpression CURDATE();
