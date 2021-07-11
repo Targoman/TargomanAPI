@@ -171,7 +171,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
 TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
 TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
 TAPI_ADD_TYPE(QJsonDocument, PrivObject_t);
-TAPI_ADD_TYPE(QJsonDocument, JSON_t);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t, *this = QJsonDocument::fromVariant(_value));
 TAPI_ADD_TYPE(QJsonDocument, SaleableAdditive_t);
 TAPI_ADD_STRING_TYPE(QString, EncodedJWT_t);
 TAPI_ADD_STRING_TYPE(QString, CommaSeparatedStringList_t);

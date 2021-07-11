@@ -23,6 +23,8 @@
 #ifndef TARGOMAN_API_NLP_TEXTPROCESSOR_H
 #define TARGOMAN_API_NLP_TEXTPROCESSOR_H
 
+#include "Interfaces/Common/base.h"
+
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 #include "libTargomanCommon/Macros.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
@@ -73,7 +75,7 @@ public:
 
 private:
     TextProcessor(){}
-    Q_DISABLE_COPY(TextProcessor)
+    TAPI_DISABLE_COPY(TextProcessor)
 };
 
 }

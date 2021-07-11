@@ -98,54 +98,77 @@ TAPI_REGISTER_METATYPE(
             [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
 );
 
+//TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda)
+
 TAPI_REGISTER_METATYPE(
-            COMPLEXITY_Object,
-            TAPI, JSON_t,
-            [](const JSON_t& _value) -> QVariant {return _value;},
-            [](const QVariant& _value, const QByteArray& _paramName) -> JSON_t {
-                if(_value.isValid() == false)
-                    return QJsonDocument();
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ JSON_t,
+    /* toVariantLambda    */ [](const JSON_t& _value) -> QVariant {
+//        qDebug() << "1 =================================" << _value;
+        return _value;
+    },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JSON_t {
+//    throw exHTTPBadRequest("ZZZZZZZZZZZZZZ 1");
+//        qDebug() << "2 =================================" << _paramName << ":" << _value;
 
-                if(_value.canConvert<QVariantMap>() ||
-                   _value.canConvert<QVariantList>() ||
-                   _value.canConvert<double>())
-                    return QJsonDocument::fromVariant(_value);
+        if (_value.isValid() == false)
+            return QJsonDocument();
 
-                if(_value.toString().isEmpty())
-                    return QJsonDocument();
+        if (_value.canConvert<QVariantMap>() ||
+               _value.canConvert<QVariantList>() ||
+               _value.canConvert<double>())
+        {
+//            auto ret = _value.value<QJsonDocument>();
+            auto ret = QJsonDocument::fromVariant(_value);
+            qDebug() << "2.1 =================================" << ret;
+            return ret;
+        }
 
-                QJsonParseError Error;
-                QJsonDocument Doc;
-                Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+        if (_value.toString().isEmpty())
+            return QJsonDocument();
 
-                if(Error.error != QJsonParseError::NoError)
-                    throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString());
-                return  Doc;
-            },
-            [](const QList<ORM::clsORMField>&){ return "A valid JSON object"; },
-            [](const QVariant& _value) {
-    return QJsonDocument::fromVariant(5).toVariant();
-               /* if(_value.isNull())
-                    return QJsonDocument();
-                if(_value.canConvert<QVariantMap>() ||
-                   _value.canConvert<QVariantList>() ||
-                   _value.canConvert<double>())
-                    return QJsonDocument::fromVariant(_value);
-                else if(_value.toString().isNull() || _value.toString().isEmpty())
-                    return  QJsonDocument();
-                else {
-                    QJsonParseError Error;
-                    QJsonDocument Doc = QJsonDocument::fromJson(_value.toString().toUtf8(), &Error);
+        QJsonParseError Error;
+        QJsonDocument Doc;
+        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString());
+        return Doc;
+    },
+    /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) { return "A valid JSON object"; },
+    /* toORMValueLambda   */ [](const QVariant& _value) {
+//        qDebug() << "3 =================================" << _value;
 
-                    if(Error.error != QJsonParseError::NoError)
-                        throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + QString("%1:%2").arg(Error.error).arg(Error.errorString()));
-                    return Doc;
-                }*/
-            },
-            [](const QVariant& _val) {
-                return QString::fromUtf8(QJsonDocument::fromVariant(_val).toJson(QJsonDocument::Compact));
-            }
+        //return QJsonDocument::fromVariant(5).toVariant();
+        if (_value.isNull())
+            return QJsonDocument();
 
+        if (_value.canConvert<QVariantMap>() ||
+               _value.canConvert<QVariantList>() ||
+               _value.canConvert<double>())
+        {
+//            auto ret = _value.value<QJsonDocument>();
+            auto ret = QJsonDocument::fromVariant(_value);
+//            qDebug() << "3.1 =================================" << ret;
+            return ret;
+        }
+
+        if (_value.toString().isNull() || _value.toString().isEmpty())
+            return QJsonDocument();
+
+        QJsonParseError Error;
+        QJsonDocument Doc = QJsonDocument::fromJson(_value.toString().toUtf8(), &Error);
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + QString("%1:%2").arg(Error.error).arg(Error.errorString()));
+        return Doc;
+    },
+    /* fromORMValueLambda */ [](const QVariant& _value) {
+//        QString ret = QString("%1").arg(_value.value<QJsonDocument>().toJson(QJsonDocument::Compact).constData());
+        QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData());
+//        QString ret = QString::fromUtf8(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact));
+//        qDebug() << "4 =================================" << _value << " -> " << ret;
+        return ret;
+    }
 );
 
 TAPI_REGISTER_METATYPE(

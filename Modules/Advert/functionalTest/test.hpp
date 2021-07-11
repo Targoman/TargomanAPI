@@ -414,7 +414,8 @@ private slots:
                     { tblAccountCouponsBase::cpnAmount,                   15 },
                     { tblAccountCouponsBase::cpnAmountType,               TAPI::enuDiscountType::toStr(TAPI::enuDiscountType::Percent) },
 //                    { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
-                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  "{ \"a\":\"b\", \"c\":\"d\" }" },
+                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
 //                    { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
 //                    { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
 //                    { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
@@ -426,6 +427,25 @@ private slots:
         }
 
         qDebug() << "--------- couponID: " << couponID;
+    }
+
+    void addToBasket_valid_coupon_code() {
+//        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
+//        TAPI::stuPreVoucher voucher
+        QVariant result = callAdminAPI(
+            POST,
+            "Advert/addToBasket",
+            {},
+            {
+                { "saleableCode", "p123-s456" },
+                { "orderAdditives", {} },
+                { "qty", 1 },
+                { "discountCode", "cpn-code-aaa" },
+                { "referrer", "" },
+                { "extraRefererParams", {} },
+                { "lastPreVoucher", {} },
+            }
+        );
     }
 
     void cleanupSaleableData() {

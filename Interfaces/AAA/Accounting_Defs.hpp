@@ -62,7 +62,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
     SF_QString(Name),
     SF_quint32(Amount),
     SF_quint32(MaxAmount),
-    SF_Enum(TAPI::enuDiscountType, Type, TAPI::enuDiscountType::Percent)
+    SF_Enum(TAPI::enuDiscountType, AmountType, TAPI::enuDiscountType::Percent)
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,

@@ -33,6 +33,7 @@
 
 #include "QHttp/qhttpfwd.hpp"
 
+#include "Interfaces/Common/base.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/ORM/clsORMField.h"
@@ -165,7 +166,7 @@ public: \
         _submodule->init(); \
     } \
 private: \
-    Q_DISABLE_COPY(_name); \
+    TAPI_DISABLE_COPY(_name); \
 public: _name();
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
@@ -179,7 +180,7 @@ public: \
     static _name& instance(){static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name));} \
 private: \
     _name(); \
-    Q_DISABLE_COPY(_name) \
+    TAPI_DISABLE_COPY(_name) \
 
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
     struct DB{ \

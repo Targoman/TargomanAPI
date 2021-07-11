@@ -917,7 +917,10 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT alias_t1.colA1
                  , alias_t1.colB1
               FROM test.t1 alias_t1
-             WHERE ( t1.colA1 >= NOW() OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'  )
+             WHERE (
+                   t1.colA1 >= NOW()
+                OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'
+                   )
              LIMIT 0,1
 )");
         } QT_CATCH (const std::exception &e) {
@@ -981,8 +984,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addCol("colA1")
                 .addCol("colF1")
                 .values(QVariantMap({
-                    { "colD1", 111 },
-                    { "colZ1", "111" },
+                    { "colD1", "hasan" },
+                    { "colZ1", "222" },
                     { "colA1", DBExpression::NIL() },
                     { "colB1", DBExpression::NOW() },
                     { "colC1", DBExpression::CURDATE() },
@@ -992,16 +995,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
             stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
-            QStringList BindingValuesList;
-            foreach (auto b, qry.BindingValues) {
-                BindingValuesList.append(b.toString());
-            }
-
-            if (SQLPrettyLen) {
-                qDebug().nospace().noquote() << endl
-                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-            }
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl;
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1011,13 +1007,15 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colB1
                  , t1.colD1
                  , t1.colA1
+                 , t1.colF1
                  , t1.CreatedBy_usrID
                    )
             VALUES (
                    CURDATE()
                  , NOW()
-                 , 111
+                 , 'hasan'
                  , NULL
+                 , '{"a":"b","c":"d"}'
                  , 9090
                    )
 )");
@@ -1025,7 +1023,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     void queryString_CREATE_with_options() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
@@ -1048,7 +1046,8 @@ private:
 //            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl
+//                                             << "-- [" << BindingValuesList.join(", ") << "]" << endl;
 //            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
@@ -1091,34 +1090,27 @@ private:
                 }))
                 .values(QList<QVariantMap>({
                     {
-                        {"colB1", 333},
-                        {"colC1", DBExpression::CURDATE()},
-                        {"colZ1", "33Z"},
-                        {"colA1", DBExpression::NOW()},
+                        { "colB1", 333 },
+                        { "colC1", DBExpression::CURDATE() },
+                        { "colZ1", "33Z" },
+                        { "colA1", DBExpression::NOW() },
                         { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
                     },
                     {
-                        {"colB1", 444},
-                        {"colZ1", "44Z"},
-                        {"colA1", DBExpression::NOW()},
-                        {"colC1", DBExpression::CURDATE()},
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                        { "colB1", 444 },
+                        { "colZ1", "44Z" },
+                        { "colA1", DBExpression::NOW() },
+                        { "colC1", DBExpression::CURDATE() },
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b'b" }, { "c", "d" } })) },
                     },
                 }))
             ;
 
             stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
-//            QStringList BindingValuesList;
-//            foreach (auto b, qry.BindingValues) {
-//                BindingValuesList.append(b.toString());
-//            }
-
-//            if (SQLPrettyLen) {
+//            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl
-//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-//            }
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl;
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1131,28 +1123,28 @@ private:
                  , t1.CreatedBy_usrID
                    )
             VALUES (
-                   112
+                   '{"a":"b","c":"d"}'
                  , 111
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   212
+                   '{"a":"b","c":"d"}'
                  , 222
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   312
+                   '{"a":"b","c":"d"}'
                  , 333
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   412
+                   '{"a":"b''b","c":"d"}'
                  , 444
                  , NOW()
                  , CURDATE()
@@ -1203,7 +1195,7 @@ private:
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
                         {"colG1", 412},
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b'b" }, { "c", "d" } })) },
                     },
                 }))
             ;
@@ -1215,11 +1207,12 @@ private:
                 BindingValuesList.append(b.toString());
             }
 
-            if (SQLPrettyLen) {
-                qDebug().nospace().noquote() << endl
-                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
-            }
+//            if (SQLPrettyLen) {
+//                qDebug().nospace().noquote() << endl
+//                                             << endl << "-- Query:" << endl << qry.QueryString << endl
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl
+//                                             << "-- [" << BindingValuesList.join(", ") << "]" << endl;
+//            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
             INSERT
@@ -1229,21 +1222,22 @@ private:
                  , t1.colB1
                  , t1.colA1
                  , t1.colC1
+                 , t1.colF1
                  , t1.CreatedBy_usrID
                    )
-            VALUES (?, ?, NOW(), CURDATE(), ?)
-                 , (?, ?, NOW(), CURDATE(), ?)
-                 , (?, ?, NOW(), CURDATE(), ?)
-                 , (?, ?, NOW(), CURDATE(), ?)
+            VALUES (?, ?, NOW(), CURDATE(), ?, ?)
+                 , (?, ?, NOW(), CURDATE(), ?, ?)
+                 , (?, ?, NOW(), CURDATE(), ?, ?)
+                 , (?, ?, NOW(), CURDATE(), ?, ?)
 )");
 
-            QCOMPARE(BindingValuesList.join(", "), "112, 111, 9090, 212, 222, 9090, 312, 333, 9090, 412, 444, 9090");
+//            QCOMPARE(BindingValuesList.join(", "), R"(112, 111, {"a":"b","c":"d"}, 9090, 212, 222, {"a":"b","c":"d"}, 9090, 312, 333, {"a":"b","c":"d"}, 9090, 412, 444, {"a":"b\'b","c":"d"}, 9090)");
 
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     void queryString_CREATE_values_from_select() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
@@ -1264,15 +1258,16 @@ private:
 
             stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
 
-            QStringList BindingValuesList;
-            foreach (auto b, qry.BindingValues) {
-                BindingValuesList.append(b.toString());
-            }
+//            QStringList BindingValuesList;
+//            foreach (auto b, qry.BindingValues) {
+//                BindingValuesList.append(b.toString());
+//            }
 
 //            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl
+//                                             << "-- [" << BindingValuesList.join(", ") << "]" << endl;
 //            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(
@@ -1378,7 +1373,8 @@ private:
 //            if (SQLPrettyLen) {
 //                qDebug().nospace().noquote() << endl
 //                                             << endl << "-- Query:" << endl << qry.QueryString << endl
-//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl << BindingValuesList.join(", ") << endl;
+//                                             << endl << "-- Binding Values:" << endl << qry.BindingValues << endl
+//                                             << "-- [" << BindingValuesList.join(", ") << "]" << endl;
 //            }
 
             QCOMPARE("\n" + qry.QueryString + "\n", R"(

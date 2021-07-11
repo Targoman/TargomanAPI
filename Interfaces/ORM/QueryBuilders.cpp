@@ -64,51 +64,56 @@ QString makeColName(const QString& _tableName, const clsORMField& _col, bool _ap
              );
 };
 
-QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true) {
+QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, clsORMField* baseCol = nullptr)
+{
     if (_value.isValid() == false)
         return QString(""); ///TODO: ? throw ?
 
+    //--
     if (_value.userType() == QMetaTypeId<DBExpression>::qt_metatype_id())
-    {
-        DBExpression v = _value.value<DBExpression>();
-        return v.toString();
+        return _value.value<DBExpression>().toString();
 
-//        if (v.ExprType == enuDBExpressionType::Value)
-//            return v.Name;
+    //--
+//    if (_value.userType() == QMetaType::QJsonDocument)
+//        return QString("'%1'").arg(_value.value<QJsonDocument>().toJson(QJsonDocument::Compact).constData());
 
-//        return QString("%1()").arg(v.Name);
-    }
-//    else if (_value.userType() == QMetaTypeId<DBExpressionWithValue>::qt_metatype_id())
-//    {
-//        DBExpressionWithValue v = _value.value<DBExpressionWithValue>();
-//        if (v.Expression->ExprType == enuDBExpressionType::Value)
-//            return v.Expression->Name;
+    //--
+    QVariant _v2 = _value;
+    if (baseCol != nullptr)
+        _v2 = baseCol->toDB(_value);
 
-//        QStringList Params;
+    QString v = _v2.value<QString>();
 
-//        foreach (auto _param, v.Expression->Params) {
-//            if (v.Values.contains(_param) == false)
-//                throw exQueryBuilder(QString("DBExpression %1 param %2 not provided.").arg(v.Expression->Name).arg(_param));
+    if (_qouteIfIsString
+            && (_value.userType() == QMetaType::QString
+                || _value.userType() == QMetaType::QChar
+                || _value.userType() == QMetaType::QJsonDocument
+            )
+        )
+        return QString("'%1'").arg(v.replace("'", "''"));
 
-//            Params.append(makeValueAsSQL(v.Values.value(_param)));
-//        }
+    return v;
+};
+QVariant makeValueAsVariant(const QVariant& _value)
+{
+    if (_value.isValid() == false)
+        return QVariant(); ///TODO: ? throw ?
 
-//        return v.Expression->Name + "(" + Params.join(",") + ")";
-//    }
-    else
-    {
-        QString v = _value.value<QString>();
+    //--
+    if (_value.userType() == QMetaTypeId<DBExpression>::qt_metatype_id())
+        return _value.value<DBExpression>().toString();
 
-        if (_qouteIfIsString && (_value.userType() == QMetaType::QString || _value.userType() == QMetaType::QChar))
-            return QString("'%1'").arg(v);
+    //--
+//    if (_value.userType() == QMetaType::QJsonDocument)
+//        return QString("'%1'").arg(_value.value<QJsonDocument>().toJson(QJsonDocument::Compact).constData());
 
-        return v;
-    }
+    //--
+    return _value;
 };
 
-#define KZ_TRACE(msg) \
-    throw exQueryBuilder(QString(">>>>>>>>>>>>>>>> [%1:%2] %3").arg(__FUNCTION__).arg(__LINE__) \
-        .arg(msg));
+//#define KZ_TRACE(msg) \
+//    throw exQueryBuilder(QString(">>>>>>>>>>>>>>>> [%1:%2] %3").arg(__FUNCTION__).arg(__LINE__) \
+//        .arg(msg));
 
 /***************************************************************************************/
 /* DBExpression ************************************************************************/
@@ -1201,12 +1206,12 @@ public:
 
                     Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
                     QString Value = PatternMatches.captured(3);
-                    if(Value == "NOW()"
-                       || Value.startsWith("DATE_ADD(")
-                       || Value.startsWith("DATE_SUB(")
-                       )
+                    if (Value == "NOW()"
+                            || Value.startsWith("DATE_ADD(")
+                            || Value.startsWith("DATE_SUB(")
+                        )
                         Rule += Value.replace("$SPACE$", " ");
-                    else{
+                    else {
                         relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
                         Rule += relatedORMField.Col.toDB(Value).toString();
                     }
@@ -1981,7 +1986,9 @@ SelectQuery& SelectQuery::limit(quint16 _limit)
 
 SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime)
 {
-    this->Data->CahceTime = _cacheTime;
+    ///BUG: enabling cache affectes on WasSP and rows count (damages dac result data)
+//    this->Data->CahceTime = _cacheTime;
+
     return *this;
 }
 
@@ -2407,14 +2414,17 @@ public:
                             if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                                 baseCol.validate(val);
 
-                            qDebug() << itr.key() << val << baseCol.toDB(val);
+//                            qDebug() << itr.key() << ": val(" << val << ") makeAsSQL(" << v << ") toDB(" << baseCol.toDB(val) << ")";
 
-                            QString v = makeValueAsSQL(val, _useBinding == false);
-
-                            if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false)
+                            if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
+                                QString v = makeValueAsSQL(val, _useBinding == false, &baseCol);
                                 oneRecordToString.append(v);
+                            }
                             else {
                                 oneRecordToString.append("?");
+//                                QVariant v = makeValueAsVariant(val);
+//                                QString l = QString::fromUtf8(v.value<QJsonDocument>().toJson(QJsonDocument::Compact));
+qDebug() << itr.key() << ": val(" << val << ") toDB(" << baseCol.toDB(val) << ")"; // << " lambda(" << l << ")";
                                 this->CreateQueryPreparedItems.BindingValues.append(baseCol.toDB(val));
                             }
 
@@ -2439,12 +2449,17 @@ public:
 
                 if (extraBaseColsValues.length()) {
                     foreach (auto val, extraBaseColsValues) {
+                        ///TODO: baseCol.toDB()
+
                         if (_useBinding) {
                             oneRecordToString.append("?");
-                            this->CreateQueryPreparedItems.BindingValues.append(val);
+                            QVariant v = makeValueAsVariant(val);
+                            this->CreateQueryPreparedItems.BindingValues.append(v);
                         }
-                        else
-                            oneRecordToString.append(val.value<QString>());
+                        else {
+                            QString v = makeValueAsSQL(val, _useBinding == false);
+                            oneRecordToString.append(v);
+                        }
                     }
                 }
 
@@ -2529,6 +2544,7 @@ CreateQuery& CreateQuery::addCol(const QString& _col)
 \***********************/
 CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues)
 {
+
     if (this->Data->Cols.isEmpty())
         throw new exQueryBuilder("Columns must be defined before values");
 
@@ -2536,6 +2552,8 @@ CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues)
         throw new exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_oneRecordValues);
+//    qDebug() << "----------------1:" << _oneRecordValues;
+//    qDebug() << "----------------2:" << this->Data->Values;
 
     return *this;
 }
@@ -2779,13 +2797,14 @@ public:
                 if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                     relatedORMField.Col.validate(val);
 
-                QString v = makeValueAsSQL(val, _useBinding == false);
 
-                if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false)
+                if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
+                    QString v = makeValueAsSQL(val, _useBinding == false, &relatedORMField.Col);
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
+                }
                 else {
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
-                    this->UpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(v));
+                    this->UpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(val));
                 }
             }
         }

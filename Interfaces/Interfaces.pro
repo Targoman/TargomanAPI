@@ -58,6 +58,7 @@ include($$QBUILD_PATH/templates/libConfigs.pri)
 
 HEADERS += \
     Common/APIArgHelperMacrosPrivate.h \
+    Common/base.h \
     Common/tmplNullable.hpp \
     ORM/APIQueryBuilders.h \
     ORM/Defs.hpp \

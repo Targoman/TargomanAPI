@@ -26,6 +26,8 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "3rdParty/E4MT/src/clsFormalityChecker.h"
 
+#include "Interfaces/Common/base.h"
+
 namespace Targoman {
 namespace Apps {
 struct gConfigs{
@@ -53,7 +55,7 @@ public:
 private:
     FormalityChecker() : FCInstance(new Targoman::Apps::clsFormalityChecker) {}
 
-    Q_DISABLE_COPY(FormalityChecker)
+    TAPI_DISABLE_COPY(FormalityChecker)
 private:
     QScopedPointer<Targoman::Apps::clsFormalityChecker> FCInstance;
 };

@@ -297,46 +297,46 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         .andWhere({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
         .andWhere(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
             .orCond({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::GreaterEqual,
-                      DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+                DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
         .one();
 
     qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
-#define SET_FIELD_FROM_VARIANMAP(_fieldName, _table) \
+#define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
     QT_TRY { \
-        TAPI::setFromVariant(AssetItem._fieldName, SaleableInfo.value(_table::_fieldName)); \
+        TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
     } QT_CATCH (const std::exception &e) { \
-        qDebug() << "fieldName:" << #_fieldName << e.what(); \
+        qDebug() << "fieldName:" << #_tableFieldName << e.what(); \
         throw e; \
     }
 
     stuAssetItem AssetItem;
-    SET_FIELD_FROM_VARIANMAP(prdCode,                tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdName,                tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidFromDate,       tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidToDate,         tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidFromHour,       tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdValidToHour,         tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdPrivs,               tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdVAT,                 tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdInStockCount,        tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdOrderedCount,        tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdReturnedCount,       tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(prdStatus,              tblAccountProductsBase);
-    SET_FIELD_FROM_VARIANMAP(slbID,                  tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbCode,                tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbName,                tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbPrivs,               tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbBasePrice,           tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbAdditives,           tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbProductCount,        tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbMaxSaleCountPerUser, tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbInStockCount,        tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbOrderedCount,        tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbReturnedCount,       tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbVoucherTemplate,     tblAccountSaleablesBase);
-    SET_FIELD_FROM_VARIANMAP(slbStatus,              tblAccountSaleablesBase);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdCode,                SaleableInfo, tblAccountProductsBase,  prdCode);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdName,                SaleableInfo, tblAccountProductsBase,  prdName);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidFromDate,       SaleableInfo, tblAccountProductsBase,  prdValidFromDate);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidToDate,         SaleableInfo, tblAccountProductsBase,  prdValidToDate);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidFromHour,       SaleableInfo, tblAccountProductsBase,  prdValidFromHour);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidToHour,         SaleableInfo, tblAccountProductsBase,  prdValidToHour);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdPrivs,               SaleableInfo, tblAccountProductsBase,  prdPrivs);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdVAT,                 SaleableInfo, tblAccountProductsBase,  prdVAT);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdInStockCount,        SaleableInfo, tblAccountProductsBase,  prdInStockCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdOrderedCount,        SaleableInfo, tblAccountProductsBase,  prdOrderedCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdReturnedCount,       SaleableInfo, tblAccountProductsBase,  prdReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdStatus,              SaleableInfo, tblAccountProductsBase,  prdStatus);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbID,                  SaleableInfo, tblAccountSaleablesBase, slbID);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbCode,                SaleableInfo, tblAccountSaleablesBase, slbCode);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbName,                SaleableInfo, tblAccountSaleablesBase, slbName);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbPrivs,               SaleableInfo, tblAccountSaleablesBase, slbPrivs);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbBasePrice,           SaleableInfo, tblAccountSaleablesBase, slbBasePrice);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbAdditives,           SaleableInfo, tblAccountSaleablesBase, slbAdditives);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbProductCount,        SaleableInfo, tblAccountSaleablesBase, slbProductCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbMaxSaleCountPerUser, SaleableInfo, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbInStockCount,        SaleableInfo, tblAccountSaleablesBase, slbInStockCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbOrderedCount,        SaleableInfo, tblAccountSaleablesBase, slbOrderedCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbReturnedCount,       SaleableInfo, tblAccountSaleablesBase, slbReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbVoucherTemplate,     SaleableInfo, tblAccountSaleablesBase, slbVoucherTemplate);
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbStatus,              SaleableInfo, tblAccountSaleablesBase, slbStatus);
 
     //check available count
     qint64 AvailableProductCount = AssetItem.prdInStockCount - (NULLABLE_VALUE_OR_DEFAULT(AssetItem.prdOrderedCount, 0) - NULLABLE_VALUE_OR_DEFAULT(AssetItem.prdReturnedCount, 0));
@@ -400,35 +400,69 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 //tblAccountCouponsBase::cpnUpdatedBy_usrID,
                 Targoman::API::CURRENT_TIMESTAMP,
             }))
-        ///TODO: join with userAssets to count user discount usage per voucher
-        .where({ tblAccountCouponsBase::cpnID, enuConditionOperator::Equal, _discountCode })
-        .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
-        .andWhere(clsCondition({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::Null })
-           .orCond({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::GreaterEqual,
-                     DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-       )
-        .one();
+            ///TODO: join with userAssets to count user discount usage per voucher
+            .where({ tblAccountCouponsBase::cpnCode, enuConditionOperator::Equal, _discountCode })
+            .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
+            .andWhere(clsCondition({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::Null })
+                .orCond({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::GreaterEqual,
+                    DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+            )
+            .one();
 
         if (DiscountInfo.size() == 0)
             throw exHTTPBadRequest("Discount code not found.");
 
         QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
 
-        if (DiscountInfo.value(tblAccountCouponsBase::cpnExpiryTime).toDateTime() < Now)
+        SET_FIELD_FROM_VARIANT_MAP(Discount.ID,                      DiscountInfo, tblAccountCouponsBase, cpnID);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.Code,                    DiscountInfo, tblAccountCouponsBase, cpnCode);
+        quint32 cpnPrimaryCount;
+        SET_FIELD_FROM_VARIANT_MAP(cpnPrimaryCount,                  DiscountInfo, tblAccountCouponsBase, cpnPrimaryCount);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.TotalMaxAmount,          DiscountInfo, tblAccountCouponsBase, cpnTotalMaxAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.PerUserMaxCount,         DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxCount
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.PerUserMaxAmount,        DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.ValidFrom,               DiscountInfo, tblAccountCouponsBase, cpnValidFrom);
+        NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
+        SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                    DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
+        SET_FIELD_FROM_VARIANT_MAP(Discount.Amount,                  DiscountInfo, tblAccountCouponsBase, cpnAmount);
+        SET_FIELD_FROM_VARIANT_MAP(Discount.AmountType,              DiscountInfo, tblAccountCouponsBase, cpnAmountType);
+        SET_FIELD_FROM_VARIANT_MAP(Discount.MaxAmount,               DiscountInfo, tblAccountCouponsBase, cpnMaxAmount);
+        TAPI::JSON_t cpnSaleableBasedMultiplier;
+        SET_FIELD_FROM_VARIANT_MAP(cpnSaleableBasedMultiplier,       DiscountInfo, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
+        quint32 cpnTotalUsedCount;
+        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedCount,                DiscountInfo, tblAccountCouponsBase, cpnTotalUsedCount);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.TotalUsedAmount,         DiscountInfo, tblAccountCouponsBase, cpnTotalUsedAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.Status,                  DiscountInfo, tblAccountCouponsBase, cpnStatus);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.CreatedBy_usrID,         DiscountInfo, tblAccountCouponsBase, cpnCreatedBy_usrID);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.CreationDateTime,        DiscountInfo, tblAccountCouponsBase, cpnCreationDateTime);
+//        SET_FIELD_FROM_VARIANT_MAP(Discount.UpdatedBy_usrID,         DiscountInfo, tblAccountCouponsBase, cpnUpdatedBy_usrID);
+
+        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_VALUE(cpnExpiryTime).toDateTime() < Now)
             throw exHTTPBadRequest("Discount code has been expired");
 
-        if (DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toInt() <= DiscountInfo.value(tblAccountCouponsBase::cpnTotalUsedCount).toInt())
+        if (cpnPrimaryCount <= cpnTotalUsedCount)
             throw exHTTPBadRequest("Discount code has been finished");
 
-        qint64 Amount = DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier).toJsonObject().value(_saleableCode).toInt(-1);
+//        qDebug() << "--" << DiscountInfo;
+//        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier);
+//        qDebug() << "--" << cpnSaleableBasedMultiplier;
+//        qDebug() << "--" << cpnSaleableBasedMultiplier.object();
+//        qDebug() << "--" << _saleableCode;
+//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode);
+//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
+//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toInt(-1);
+
+        qint64 Amount = -1;
+        if (cpnSaleableBasedMultiplier.object().contains(_saleableCode))
+            Amount = cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
         if (Amount < 0)
             throw exHTTPBadRequest("Discount code is not valid on selected package");
 
-        Discount.Amount = static_cast<quint32>(Amount);
-        Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
+//        Discount.Amount = static_cast<quint32>(Amount);
+//        Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
-        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnAmountType).toInt());
-        Discount.MaxAmount = DiscountInfo.value(tblAccountCouponsBase::cpnMaxAmount).toUInt();
+//        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnAmountType).toInt());
+//        Discount.MaxAmount = DiscountInfo.value(tblAccountCouponsBase::cpnMaxAmount).toUInt();
     }
 
     stuVoucherItem PreVoucherItem;

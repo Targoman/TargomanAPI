@@ -8,3 +8,33 @@ QString TestSelectQuery::queryString()
     return this->buildQueryString();
 }
 */
+/*
+class aaa
+{
+public:
+    aaa() {
+    }
+    aaa(int a) {
+    }
+
+private:
+//    Q_DISABLE_COPY(aaa);
+    aaa(const aaa&) Q_DECL_EQ_DELETE;
+    aaa &operator=(const aaa&) Q_DECL_EQ_DELETE;
+    aaa &operator=(aaa&) Q_DECL_EQ_DELETE;
+    aaa &operator=(const aaa) Q_DECL_EQ_DELETE;
+//    aaa &operator=(aaa) Q_DECL_EQ_DELETE;
+
+//    TAPI_DISABLE_COPY(aaa)
+};
+aaa aaa1()
+{
+    return aaa();
+}
+aaa aaa2()
+{
+    return aaa(2);
+}
+aaa a1 = aaa1();
+aaa a2 = aaa2();
+*/
