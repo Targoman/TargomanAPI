@@ -105,39 +105,46 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ TAPI,
     /* type               */ JSON_t,
     /* toVariantLambda    */ [](const JSON_t& _value) -> QVariant {
-//        qDebug() << "1 =================================" << _value;
+//        qDebug() << "JSON_t(1) =================================" << _value;
         return _value;
     },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JSON_t {
 //    throw exHTTPBadRequest("ZZZZZZZZZZZZZZ 1");
-//        qDebug() << "2 =================================" << _paramName << ":" << _value;
+        qDebug() << "JSON_t(2) =================================" << _paramName << ":" << _value;
 
         if (_value.isValid() == false)
+        {
+            qDebug() << "JSON_t(2.1) =================================" << _paramName << ":" << _value;
             return QJsonDocument();
+        }
 
         if (_value.canConvert<QVariantMap>() ||
                _value.canConvert<QVariantList>() ||
                _value.canConvert<double>())
         {
-//            auto ret = _value.value<QJsonDocument>();
             auto ret = QJsonDocument::fromVariant(_value);
-            qDebug() << "2.1 =================================" << ret;
+            qDebug() << "JSON_t(2.2) =================================" << _paramName << ":" << _value << "=" << ret;
             return ret;
         }
 
         if (_value.toString().isEmpty())
+        {
+            qDebug() << "JSON_t(2.3) =================================" << _paramName << ":" << _value;
             return QJsonDocument();
+        }
 
         QJsonParseError Error;
         QJsonDocument Doc;
         Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+        qDebug() << "JSON_t(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
+
         if (Error.error != QJsonParseError::NoError)
             throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString());
         return Doc;
     },
     /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) { return "A valid JSON object"; },
     /* toORMValueLambda   */ [](const QVariant& _value) {
-//        qDebug() << "3 =================================" << _value;
+//        qDebug() << "JSON_t(3) =================================" << _value;
 
         //return QJsonDocument::fromVariant(5).toVariant();
         if (_value.isNull())
@@ -149,7 +156,7 @@ TAPI_REGISTER_METATYPE(
         {
 //            auto ret = _value.value<QJsonDocument>();
             auto ret = QJsonDocument::fromVariant(_value);
-//            qDebug() << "3.1 =================================" << ret;
+//            qDebug() << "JSON_t(3.1) =================================" << ret;
             return ret;
         }
 
@@ -166,7 +173,7 @@ TAPI_REGISTER_METATYPE(
 //        QString ret = QString("%1").arg(_value.value<QJsonDocument>().toJson(QJsonDocument::Compact).constData());
         QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData());
 //        QString ret = QString::fromUtf8(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact));
-//        qDebug() << "4 =================================" << _value << " -> " << ret;
+//        qDebug() << "JSON_t(4) =================================" << _value << " -> " << ret;
         return ret;
     }
 );

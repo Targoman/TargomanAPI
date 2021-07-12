@@ -38,7 +38,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 

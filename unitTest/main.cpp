@@ -23,7 +23,7 @@
 #include <QtTest>
 //#include "Interfaces/Test/testCommon.hpp"
 //#include "Interfaces/Common/GenericTypes.h"
-#include "QueryBuilders.hpp"
+#include "testQueryBuilders.hpp"
 
 #include "App/Server/RESTAPIRegistry.h"
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try{
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new TestQueryBuilders, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }

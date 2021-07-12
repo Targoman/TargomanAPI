@@ -39,28 +39,52 @@ TAPI_REGISTER_METATYPE(
     TAPI, stuVoucher,
     [](const TAPI::stuVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();}
 );
+
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI, stuPreVoucher,
-    [](const TAPI::stuPreVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();},
-    [](const QVariant& _value, const QByteArray& _param) -> TAPI::stuPreVoucher {
-          if(_value.isValid() == false)
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ stuPreVoucher,
+    /* toVariantLambda    */ [](const TAPI::stuPreVoucher& _value) -> QVariant {
+//        qDebug() << "stuPreVoucher(1) ================================= round:" << _value.Round;
+        return _value.toJson().toVariantMap();
+    },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::stuPreVoucher {
+//        qDebug() << "stuPreVoucher(2) =================================" << _paramName << ":" << _value;
+        if (_value.isValid() == false)
+        {
+//            qDebug() << "stuPreVoucher(2.1) =================================" << _paramName << ":" << _value;
             return TAPI::stuPreVoucher();
-
-          if(_value.toString().isEmpty())
-            return TAPI::stuPreVoucher();
-
-          QJsonParseError Error;
-          QJsonDocument Doc;
-          Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-
-          if(Error.error != QJsonParseError::NoError)
-            throw exHTTPBadRequest(_param + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
-          if(Doc.isObject() == false)
-            throw exHTTPBadRequest(_param + " is not a valid Prevoucher object: <"+_value.toString()+">");
-          return  TAPI::stuPreVoucher().fromJson(Doc.object());
         }
+
+        if (_value.canConvert<QVariantMap>()
+//                || _value.canConvert<QVariantList>()
+//                || _value.canConvert<double>()
+            )
+        {
+            auto ret = QJsonDocument::fromVariant(_value);
+//            qDebug() << "stuPreVoucher(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
+            return TAPI::stuPreVoucher().fromJson(ret.object());
+        }
+
+        if (_value.toString().isEmpty())
+        {
+//            qDebug() << "stuPreVoucher(2.3) =================================" << _paramName << ":" << _value;
+            return TAPI::stuPreVoucher();
+        }
+
+        QJsonParseError Error;
+        QJsonDocument Doc;
+        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+//        qDebug() << "stuPreVoucher(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
+
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
+        if (Doc.isObject() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
+        return TAPI::stuPreVoucher().fromJson(Doc.object());
+    }
 );
+
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
     TAPI, OrderAdditives_t,
@@ -83,16 +107,16 @@ namespace API {
 namespace AAA {
 namespace Accounting {
 
-constexpr char PKG_ID[] = "ID";
-constexpr char PKG_CODE[] = "CD";
-constexpr char PKG_REMAININGDAYS[] = "RD";
-constexpr char PKG_REMAININGHOURS[] = "RH";
-constexpr char PKG_STARTDATE[] = "SD";
-constexpr char PKG_ENDDATE[] = "ED";
-constexpr char PKG_STARTTIME[] = "ST";
-constexpr char PKG_ENDTIME[] = "ET";
-constexpr char PKG_LIMITS[] = "LM";
-constexpr char PKG_PROPS[] = "PP";
+//constexpr char PKG_ID[] = "ID";
+//constexpr char PKG_CODE[] = "CD";
+//constexpr char PKG_REMAININGDAYS[] = "RD";
+//constexpr char PKG_REMAININGHOURS[] = "RH";
+//constexpr char PKG_STARTDATE[] = "SD";
+//constexpr char PKG_ENDDATE[] = "ED";
+//constexpr char PKG_STARTTIME[] = "ST";
+//constexpr char PKG_ENDTIME[] = "ET";
+//constexpr char PKG_LIMITS[] = "LM";
+//constexpr char PKG_PROPS[] = "PP";
 
 constexpr char ASA_PACKAGE[] = "PK";
 constexpr char ASA_ISFROMPARENT[] = "IP";
@@ -232,7 +256,6 @@ intfAccountSaleables::intfAccountSaleables(
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
 //    QString ExtraFilters;
-
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
 //                       .arg(tblAccountSaleablesBase::slbAvailableFromDate)
@@ -318,9 +341,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
-
-//  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
@@ -376,7 +397,7 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query
@@ -405,6 +426,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnAmountType,             S(TAPI::enuDiscountType::Type),    QFV,                                     TAPI::enuDiscountType::Percent, UPAdmin},
             { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
             { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin, false, false},
+//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false},
             { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
             { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
             { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
@@ -436,7 +458,7 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 
@@ -476,7 +498,7 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 

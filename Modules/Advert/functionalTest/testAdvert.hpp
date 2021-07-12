@@ -128,76 +128,43 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 /*
-    void t1() {
-        QVariantList productInfo1 = callAdminAPI(
-            GET,
-            "Advert/AccountProducts",
+    void createDiscount() {
+        callAdminAPI(
+            PUT,
+            "Advert/AccountCoupons",
+            {},
             {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountProductsBase::prdCode)
-                        .arg("p111")
+                { tblAccountCouponsBase::cpnCode, "cpn-code-aaa" },
+//                    { tblAccountCouponsBase::cpnPrimaryCount,           S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
+//                    { tblAccountCouponsBase::cpnTotalMaxAmount,         S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
+//                    { tblAccountCouponsBase::cpnPerUserMaxCount,        S(NULLABLE_TYPE(quint32)),         QFV.optional(QFV.integer().minValue(1)), QNull,     UPAdmin},
+//                    { tblAccountCouponsBase::cpnPerUserMaxAmount,       S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin},
+                { tblAccountCouponsBase::cpnValidFrom,                "2020/1/1 1:2:3" },
+//                    { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
+                { tblAccountCouponsBase::cpnAmount,                   15 },
+                { tblAccountCouponsBase::cpnAmountType,               TAPI::enuDiscountType::toStr(TAPI::enuDiscountType::Percent) },
+//                    { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
+                { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+//                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
+//                            { "p123-s456", 1.5, 0 },
+//                            { "p123-s456", 1.8, 5 },
+//                            { "other",     2.0 },
+//                        })
+                    QVariantList({
+                        QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.5 }, { "minCount", 0 } }),
+                        QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.8 }, { "minCount", 5 } }),
+                        QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
+                    })
                 },
-                { "reportCount", false },
-                { "cols", tblAccountProductsBase::prdID },
+//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
+//                    { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
+//                    { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
+//                    { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
+//                    { tblAccountCouponsBase::cpnCreatedBy_usrID,        ORM_CREATED_BY},
+//                    { tblAccountCouponsBase::cpnCreationDateTime,       ORM_CREATED_ON},
+//                    { tblAccountCouponsBase::cpnUpdatedBy_usrID,        ORM_UPDATED_BY},
             }
-        ).toList();
-
-        qDebug() << "--------- productInfo1: " << productInfo1;
-    }
-
-    void t2() {
-        QVariantList productInfo1 = callAdminAPI(
-            GET,
-            "Advert/AccountProducts",
-            {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountProductsBase::prdCode)
-                        .arg("p222")
-                },
-                { "reportCount", false },
-                { "cols", tblAccountProductsBase::prdID },
-            }
-        ).toList();
-
-        qDebug() << "--------- productInfo1: " << productInfo1;
-    }
-
-    void t3() {
-        QVariantList productInfo1 = callAdminAPI(
-            GET,
-            "Advert/AccountProducts",
-            {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountProductsBase::prdCode)
-                        .arg("p333")
-                },
-                { "reportCount", false },
-                { "cols", tblAccountProductsBase::prdID },
-            }
-        ).toList();
-
-        qDebug() << "--------- productInfo1: " << productInfo1;
-    }
-
-    void t4() {
-        QVariantList productInfo1 = callAdminAPI(
-            GET,
-            "Advert/AccountProducts",
-            {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountProductsBase::prdCode)
-                        .arg("p444")
-                },
-                { "reportCount", false },
-                { "cols", tblAccountProductsBase::prdID },
-            }
-        ).toList();
-
-        qDebug() << "--------- productInfo1: " << productInfo1;
+        );
     }
 */
 
@@ -411,11 +378,22 @@ private slots:
 //                    { tblAccountCouponsBase::cpnPerUserMaxAmount,       S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin},
                     { tblAccountCouponsBase::cpnValidFrom,                "2020/1/1 1:2:3" },
 //                    { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-                    { tblAccountCouponsBase::cpnAmount,                   15 },
+                    { tblAccountCouponsBase::cpnAmount,                   10 },
                     { tblAccountCouponsBase::cpnAmountType,               TAPI::enuDiscountType::toStr(TAPI::enuDiscountType::Percent) },
 //                    { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
-//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  "{ \"a\":\"b\", \"c\":\"d\" }" },
-                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
+                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+//                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
+//                            { "p123-s456", 1.5, 0 },
+//                            { "p123-s456", 1.8, 5 },
+//                            { "other",     2.0 },
+//                        })
+                        QVariantList({
+                            QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.5 }, { "minCount", 0 } }),
+                            QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.8 }, { "minCount", 5 } }),
+                            QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
+                        })
+                    },
+//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
 //                    { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
 //                    { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
 //                    { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
@@ -437,13 +415,13 @@ private slots:
             "Advert/addToBasket",
             {},
             {
-                { "saleableCode", "p123-s456" },
-                { "orderAdditives", {} },
-                { "qty", 1 },
-                { "discountCode", "cpn-code-aaa" },
-                { "referrer", "" },
+                { "saleableCode",       "p123-s456" },
+                { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                { "qty",                1 },
+                { "discountCode",       "cpn-code-aaa" },
+                { "referrer",           "" },
                 { "extraRefererParams", {} },
-                { "lastPreVoucher", {} },
+                { "lastPreVoucher",     QVariantMap({ { "summary", "hello from test" }, { "round", 789 } }) },
             }
         );
     }

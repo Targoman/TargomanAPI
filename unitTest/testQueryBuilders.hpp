@@ -108,7 +108,7 @@ public:
         } \
     } while (false)
 
-class TestQueryBuilders: public QObject
+class testQueryBuilders: public QObject
 {
     Q_OBJECT
 

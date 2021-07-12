@@ -31,7 +31,7 @@
 #include "Interfaces/Common/intfAPIModule.h"
 #include "Interfaces/ORM/Defs.hpp"
 
-class TestQueryBuilders;
+class testQueryBuilders;
 
 namespace Targoman {
 namespace API {
@@ -213,7 +213,7 @@ protected:
     friend clsDeleteQueryData;
     friend DeleteQuery;
 
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 
     friend bool Targoman::API::Query::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
     friend bool Targoman::API::Query::Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);

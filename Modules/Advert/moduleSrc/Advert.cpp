@@ -65,10 +65,6 @@ TAPI::stuAdvert Advert::apiGETNewBanner(
         TAPI::enuAdvertOrder::Type _order
     )
 {
-    /*clsDACResult Result = AdvertDACInstance().execQuery(
-                                "",
-                                "SELECT "
-                                )*/
 }
 
 TAPI::stuAdvert Advert::apiGETNewText(
@@ -78,7 +74,6 @@ TAPI::stuAdvert Advert::apiGETNewText(
         const QString _keywords
     )
 {
-
 }
 
 QString Advert::apiGETRetrieveURL(
@@ -88,7 +83,6 @@ QString Advert::apiGETRetrieveURL(
         QString _agent
     )
 {
-
 }
 
 Advert::Advert() :
@@ -123,23 +117,29 @@ Advert::Advert() :
 /*******************************************************************************************************************/
 Accounting::stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
 {
-
 }
 
 void Advert::breakCredit(quint64 _slbID)
 {
-
 }
 
 bool Advert::isUnlimited(const Accounting::UsageLimits_t& _limits) const
 {
-
 }
 
 bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
 {
-
 }
+
+void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
+                                 INOUT stuAssetItem& _assetItem,
+                                 const OrderAdditives_t& _orderAdditives)
+{
+    Q_UNUSED(_JWT);
+    Q_UNUSED(_assetItem)
+
+    qDebug() << "---------- _orderAdditives ----------" << _orderAdditives;
+};
 
 }
 }

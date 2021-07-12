@@ -85,7 +85,7 @@ extern quint64 gUserID;
 extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
-class clsBaseTest: public QObject{
+class clsBaseTest: public QObject {
 protected:
     void initUnitTestData(bool _createUsers=true) {
         deleteOldTestData();

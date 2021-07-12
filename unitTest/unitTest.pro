@@ -24,8 +24,8 @@ HEADERS +=  \
     $$BASE_PROJECT_PATH/App/Server/ServerConfigs.h \
     $$BASE_PROJECT_PATH/App/Server/clsAPIObject.h \
     $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.h \
-    QueryBuilders.hpp \
-    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.h \
+ \    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.h \
+    testQueryBuilders.hpp
 
 SOURCES += main.cpp \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \

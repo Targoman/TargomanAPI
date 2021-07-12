@@ -248,8 +248,6 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                                                                   TAPI::JSON_t _extraRefererParams,
                                                                   TAPI::stuPreVoucher _lastPreVoucher)
 {
-    Accounting::checkPreVoucherSanity(_lastPreVoucher);
-
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
             tblAccountSaleablesBase::slbID,
@@ -445,25 +443,51 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
 //        qDebug() << "--" << DiscountInfo;
 //        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier);
-//        qDebug() << "--" << cpnSaleableBasedMultiplier;
+        qDebug() << "--" << cpnSaleableBasedMultiplier;
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object();
 //        qDebug() << "--" << _saleableCode;
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode);
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toInt(-1);
 
-        qint64 Amount = -1;
-        if (cpnSaleableBasedMultiplier.object().contains(_saleableCode))
-            Amount = cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
-        if (Amount < 0)
-            throw exHTTPBadRequest("Discount code is not valid on selected package");
+        if (cpnSaleableBasedMultiplier.isEmpty() != false)
+        {
+            TAPI::stuDiscountSaleableBasedMultiplier multiplier;
+
+            QJsonArray arr = cpnSaleableBasedMultiplier.array();
+            qDebug() << "arr" << arr;
+
+            foreach (auto elm, arr)
+            {
+                TAPI::stuDiscountSaleableBasedMultiplier cur;
+                cur.fromJson(elm.toObject());
+
+                qDebug() << cur.SaleableCode << NULLABLE_VALUE_OR_DEFAULT(cur.MinCount,-1) << cur.Multiplier;
+
+                if ((cur.SaleableCode == _saleableCode)
+                        && (NULLABLE_VALUE_OR_DEFAULT(cur.MinCount, 0) <= _qty)
+                    )
+                {
+                    if ((multiplier.Multiplier == 0)
+                            || (NULLABLE_VALUE_OR_DEFAULT(multiplier.MinCount, 0) < NULLABLE_VALUE_OR_DEFAULT(cur.MinCount, 0)))
+                        multiplier = cur;
+                }
+            }
+
+            if (multiplier.Multiplier == 0) //not found
+                throw exHTTPBadRequest("Discount code is not valid on selected package");
+
+            Discount.Amount = Discount.Amount * multiplier.Multiplier;
+        }
+
+        qDebug() << "------ discount: amount:" << Discount.Amount;
 
 //        Discount.Amount = static_cast<quint32>(Amount);
 //        Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
 //        Discount.Type = static_cast<TAPI::enuDiscountType::Type>(DiscountInfo.value(tblAccountCouponsBase::cpnAmountType).toInt());
 //        Discount.MaxAmount = DiscountInfo.value(tblAccountCouponsBase::cpnMaxAmount).toUInt();
-    }
+    } //if discount
 
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;

@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_ACCOUNTING_DEFS_H
@@ -60,7 +61,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
     SF_quint64(ID),
     SF_QString(Name),
-    SF_quint32(Amount),
+    SF_qreal(Amount),
     SF_quint32(MaxAmount),
     SF_Enum(TAPI::enuDiscountType, AmountType, TAPI::enuDiscountType::Percent)
 );
@@ -86,6 +87,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
     SF_NULLABLE_quint32(PerMonth),
     SF_NULLABLE_quint64(Total)
 );
+
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
 struct stuUsageColDefinition{
@@ -97,6 +99,7 @@ struct stuUsageColDefinition{
         PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
     {}
 };
+
 typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
 
 typedef QMap<QString, QString> OrderAdditives_t;
@@ -178,6 +181,7 @@ namespace TAPI {
 
 //using namespace Targoman::API;
 using namespace Targoman::API::AAA::Accounting;
+
 typedef QList<stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
@@ -203,11 +207,13 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_QString(SaleableCode),
-    SF_quint32(Multiplier),
+    SF_qreal(Multiplier),
     SF_NULLABLE_quint32(MinCount)
 );
 
 } //namespace TAPI
+
+//TAPI_DECLARE_METATYPE(TAPI::stuDiscountSaleableBasedMultiplier)
 
 namespace Targoman {
 namespace API {
@@ -215,6 +221,7 @@ namespace AAA {
 namespace Accounting {
 
 typedef QMap<QString, qint32> ServiceUsage_t;
+
 extern void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher);
 
 /***************************************************************************************************/

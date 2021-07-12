@@ -30,6 +30,9 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 
+#include "Interfaces/AAA/Accounting_Defs.hpp"
+using namespace Targoman::API::AAA::Accounting;
+
 namespace TAPI {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
@@ -56,8 +59,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 );
 
 struct stuAdvertBill {
-
 };
+
 }
 
 namespace Targoman {
@@ -80,6 +83,10 @@ private:
     bool isUnlimited(const Accounting::UsageLimits_t& _limits) const;
     bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
 
+protected:
+    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
+                                     INOUT stuAssetItem& _assetItem,
+                                     const OrderAdditives_t& _orderAdditives);
 private slots:
     TAPI::stuAdvert REST(GET, NewBanner, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
                          "Get new banner based on location and order info")

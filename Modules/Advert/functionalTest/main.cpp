@@ -23,7 +23,7 @@
 
 #include <QtTest>
 #include "testBase.hpp"
-#include "test.hpp"
+#include "testAdvert.hpp"
 
 TAPI_MARSHAL_TEST_VARIABLES
 

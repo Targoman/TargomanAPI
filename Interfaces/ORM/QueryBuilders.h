@@ -37,7 +37,7 @@
 #include "libTargomanDBM/clsDAC.h"
 using namespace Targoman::DBManager;
 
-class TestQueryBuilders;
+class testQueryBuilders;
 
 #include "Interfaces/ORM/Defs.hpp"
 #include "libTargomanCommon/exTargomanBase.h"
@@ -234,7 +234,7 @@ protected:
     QSharedDataPointer<clsConditionData> Data;
     void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
 
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -264,7 +264,7 @@ protected:
     QSharedDataPointer<itmplData> Data;
 //    clsDAC DAC();
 
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
     friend clsQueryJoinTraitData<itmplDerived>;
     friend tmplQueryJoinTrait<itmplDerived>;
     friend clsQueryWhereTraitData<itmplDerived>;
@@ -306,7 +306,7 @@ public:
 protected:
     virtual void iAmAbstract() = 0;
     QSharedDataPointer<clsQueryJoinTraitData<itmplDerived>> JoinTraitData;
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -329,7 +329,7 @@ public:
 protected:
     virtual void iAmAbstract() = 0;
     QSharedDataPointer<clsQueryWhereTraitData<itmplDerived>> WhereTraitData;
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -353,7 +353,7 @@ public:
 protected:
     virtual void iAmAbstract() = 0;
     QSharedDataPointer<clsQueryGroupAndHavingTraitData<itmplDerived>> GroupAndHavingTraitData;
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -407,7 +407,7 @@ private:
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false/*, quint8 _prettifierJustifyLen = 0*/);
     friend clsSelectQueryData;
     friend clsCreateQueryData;
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -432,7 +432,7 @@ public:
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
 private:
     virtual void iAmAbstract() {}
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -458,7 +458,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/
@@ -482,7 +482,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
-    friend TestQueryBuilders;
+    friend testQueryBuilders;
 };
 
 /***************************************************************************************/

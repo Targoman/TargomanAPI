@@ -31,6 +31,9 @@
 #define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
     INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant)
 
+//#define TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant) \
+//    INTERNAL_TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant)
+
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, this->fromVariant(_value) )
 
@@ -70,23 +73,34 @@
 #define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
 #define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
-#define SF_QString(_name, ...)          INTERNAL_SF(QString,           _name, STRING,   v,                 v.toString(),         __VA_ARGS__)
 
-#define SF_quint8(_name, ...)           INTERNAL_SF(quint8,            _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
+#define SF_QString(_name, ...)          INTERNAL_SF(QString,                _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
+#define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
 #define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
-#define SF_quint16(_name, ...)          INTERNAL_SF(quint16,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
+#define SF_quint16(_name, ...)          INTERNAL_SF(quint16,                _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
 #define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint16), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint16(v), __VA_ARGS__)
-#define SF_quint32(_name, ...)          INTERNAL_SF(quint32,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint32(v), __VA_ARGS__)
+#define SF_quint32(_name, ...)          INTERNAL_SF(quint32,                _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint32(v), __VA_ARGS__)
 #define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint32(v), __VA_ARGS__)
-#define SF_quint64(_name, ...)          INTERNAL_SF(quint64,           _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint64(v), __VA_ARGS__)
+#define SF_quint64(_name, ...)          INTERNAL_SF(quint64,                _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint64(v), __VA_ARGS__)
 #define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint64(v), __VA_ARGS__)
+#define SF_qreal(_name, ...)            INTERNAL_SF(qreal,                  _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2double(v), __VA_ARGS__)
+#define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qreal),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2double(v), __VA_ARGS__)
 
 /************************************************************/
 #define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) struct _name { \
     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
-    _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) {} \
-    QJsonObject toJson() const { QJsonObject Obj; TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); return Obj;} \
-    _name& fromJson(const QJsonObject& _obj){ TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__) return *this;} \
+    _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
+        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
+    {} \
+    QJsonObject toJson() const { \
+        QJsonObject Obj; \
+        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
+        return Obj; \
+    } \
+    _name& fromJson(const QJsonObject& _obj) { \
+        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__); \
+        return *this; \
+    } \
 };
 
 #define C2DBL(v) INTERNAL_C2DBL(v)

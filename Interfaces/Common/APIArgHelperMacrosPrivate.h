@@ -277,17 +277,37 @@ namespace Targoman {namespace API { \
 
 /************************************************************/
 #define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
-    class _typeName: public _baseType { \
-        public:_typeName(){} \
-        _typeName(const _baseType& _other):_baseType(_other){} \
-        _typeName customFromVariant (const QVariant& _value) { return _fromVariant; } \
+    class _typeName : public _baseType { \
+    public: \
+        _typeName() {} \
+        _typeName(const _baseType& _other):_baseType(_other) {} \
+        void customFromVariant (const QVariant& _value) { _fromVariant; } \
     }; \
     inline void setFromVariant(_typeName& _storage, const QVariant& _val) { \
-        _storage.customFromVariant (_val); \
+        _storage.customFromVariant(_val); \
     } \
-    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val){ \
-        if (_val.isValid() && _val.isNull() == false) _storage->customFromVariant (_val); \
+    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val) { \
+        if (_val.isValid() && _val.isNull() == false) \
+            _storage->customFromVariant(_val); \
     }
+
+//#define INTERNAL_TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant) \
+//    template <typename _templateType> \
+//    class _typeName : public _baseType<_templateType> { \
+//    public: \
+//        _typeName() {} \
+//        _typeName(const _baseType<_templateType>& _other) : _baseType<_templateType>(_other) {} \
+//        template <_templateType> _typeName customFromVariant (const QVariant& _value) { return _fromVariant; } \
+//    }; \
+//    template <typename _templateType> \
+//    inline void setFromVariant(_typeName<_templateType>& _storage, const QVariant& _val) { \
+//        _storage.customFromVariant (_val); \
+//    } \
+//    template <typename _templateType> \
+//    inline void setFromVariant(NULLABLE_TYPE(_typeName<_templateType>)& _storage, const QVariant& _val) { \
+//        if (_val.isValid() && _val.isNull() == false) \
+//            _storage->customFromVariant (_val); \
+//    }
 
 /************************************************************/
 #define INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum) \

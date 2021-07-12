@@ -35,7 +35,7 @@ QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL); //, ExtraFilters, CACHE_TIME);
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
