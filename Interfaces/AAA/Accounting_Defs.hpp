@@ -95,6 +95,7 @@ struct stuUsageColDefinition{
     QString PerWeek;
     QString PerMonth;
     QString Total;
+
     stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
         PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
     {}
@@ -147,11 +148,11 @@ struct stuAssetItem {
 typedef QMap<QString, stuAssetItem> ActiveCredits_t;
 
 struct stuServiceCreditsInfo {
-    ActiveCredits_t        ActiveCredits;
+    ActiveCredits_t             ActiveCredits;
     NULLABLE_TYPE(stuAssetItem) PreferedCredit;
     NULLABLE_TYPE(quint32)      ParentID;
-    UsageLimits_t          MyLimitsOnParent;
-    QDateTime              DBCurrentDateTime;
+    UsageLimits_t               MyLimitsOnParent;
+    QDateTime                   DBCurrentDateTime;
 
     stuServiceCreditsInfo(ActiveCredits_t         _activeCredits,
                           NULLABLE_TYPE(stuAssetItem) _preferedCredit,
@@ -185,9 +186,13 @@ using namespace Targoman::API::AAA::Accounting;
 typedef QList<stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
-    SF_Generic(InvItems_t, Items, InvItems_t(), v.size(),
-        [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
-        [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+    SF_Generic(
+        /* type        */ InvItems_t,
+        /* name        */ Items,
+        /* def         */ InvItems_t(),
+        /* validator   */ v.size(),
+        /* fromVariant */ [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
+        /* toVariant   */ [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuVoucherItem().fromJson(I.toObject())); return L;}(v)
     ),
     SF_Struct(stuPrize, Prize, v.Desc.size()),
     SF_QString(Summary),

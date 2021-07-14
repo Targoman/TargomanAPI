@@ -89,8 +89,9 @@ Advert::Advert() :
     Accounting::intfRESTAPIWithAccounting(AdvertSchema,
                                          AdvertDomain,
                                          {
-                                            {"show", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
-                                            {"click", {"slbShowPerDay", {}, {}, "slbShowTotal"}},
+                                            //        day                 week   month                total
+                                            {"show",  {"slbShowPerDay",   {},    {},                  "slbShowTotal"}},
+                                            {"click", {"slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal"}},
                                          },
                                          &Advertisement::AccountProducts::instance(),
                                          &Advertisement::AccountSaleables::instance(),

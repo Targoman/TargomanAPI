@@ -140,7 +140,7 @@
 extern QString toCammel(const QString& n);
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to) \
     if([](auto v)->bool{return i;}(n)) Obj[toCammel(#n)]=[](auto v)->QJsonValue{return to;}(n);
-#define TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(t, n,d,i,to,fr) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to);
+#define TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(t, n,d,i,to,fr)     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to);
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON2(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON3(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELEPER_VARIANTSTRUCT_TOJSON2(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON4(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELEPER_VARIANTSTRUCT_TOJSON3(__VA_ARGS__)
@@ -163,7 +163,7 @@ extern QString toCammel(const QString& n);
 
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr) \
     n=_obj.contains(toCammel(#n))?[](auto v)->t{return fr;}(_obj.value(toCammel(#n))):d
-#define TAPI_HELEPER_VARIANTSTRUCT_FROMJSON1(t, n,d,i,to,fr) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr);
+#define TAPI_HELEPER_VARIANTSTRUCT_FROMJSON1(t, n,d,i,to,fr)     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr);
 #define TAPI_HELEPER_VARIANTSTRUCT_FROMJSON2(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr); TAPI_HELEPER_VARIANTSTRUCT_FROMJSON1(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_FROMJSON3(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr); TAPI_HELEPER_VARIANTSTRUCT_FROMJSON2(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_FROMJSON4(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON_METHOD(t, n, d, fr); TAPI_HELEPER_VARIANTSTRUCT_FROMJSON3(__VA_ARGS__)
@@ -291,24 +291,6 @@ namespace Targoman {namespace API { \
             _storage->customFromVariant(_val); \
     }
 
-//#define INTERNAL_TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant) \
-//    template <typename _templateType> \
-//    class _typeName : public _baseType<_templateType> { \
-//    public: \
-//        _typeName() {} \
-//        _typeName(const _baseType<_templateType>& _other) : _baseType<_templateType>(_other) {} \
-//        template <_templateType> _typeName customFromVariant (const QVariant& _value) { return _fromVariant; } \
-//    }; \
-//    template <typename _templateType> \
-//    inline void setFromVariant(_typeName<_templateType>& _storage, const QVariant& _val) { \
-//        _storage.customFromVariant (_val); \
-//    } \
-//    template <typename _templateType> \
-//    inline void setFromVariant(NULLABLE_TYPE(_typeName<_templateType>)& _storage, const QVariant& _val) { \
-//        if (_val.isValid() && _val.isNull() == false) \
-//            _storage->customFromVariant (_val); \
-//    }
-
 /************************************************************/
 #define INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum) \
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
@@ -413,9 +395,12 @@ namespace Targoman {namespace API { \
         if (v.isNull()) \
             return NULLABLE_NULL_VALUE; \
         auto Storage = NULLABLE_TYPE(_type)(); \
-        *Storage = v.toDouble(); \
+        Storage = v.toDouble(); \
         return Storage; \
     } (_value)
+//return v.toDouble();
+//        qDebug() << "INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE" << #_type << v;
+//        qDebug() << "INTERNAL_ (1)" << v.toDouble();
 
 /************************************************************/
 #define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_enum) \

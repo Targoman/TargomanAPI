@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TAPI_GENERICTYPES_H
@@ -168,13 +169,13 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDate,       Date_t,      _value.toDate());
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(QTime,       Time_t,      _value.toTime());
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
 
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t, qDebug()<<"_fromVariant"<<_value; *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t, *this = QJsonDocument::fromVariant(_value));
 //TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(QList, T, JSONLIST_t, *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, PrivObject_t, *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, SaleableAdditive_t, *this = QJsonDocument::fromVariant(_value));
 
 TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
 TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
-TAPI_ADD_TYPE(QJsonDocument, PrivObject_t);
-TAPI_ADD_TYPE(QJsonDocument, SaleableAdditive_t);
 TAPI_ADD_STRING_TYPE(QString, EncodedJWT_t);
 TAPI_ADD_STRING_TYPE(QString, CommaSeparatedStringList_t);
 TAPI_ADD_STRING_TYPE(QString, PKsByPath_t);

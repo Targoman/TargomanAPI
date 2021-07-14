@@ -98,11 +98,19 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
     ServiceRegistry.insert(_schema, this);
-    foreach(auto Col, this->AssetUsageLimitsCols){
-        if(Col.PerDay.size()) this->AssetUsageLimitsColsName.append(Col.PerDay);
-        if(Col.PerWeek.size()) this->AssetUsageLimitsColsName.append(Col.PerWeek);
-        if(Col.PerMonth.size()) this->AssetUsageLimitsColsName.append(Col.PerMonth);
-        if(Col.Total.size()) this->AssetUsageLimitsColsName.append(Col.Total);
+
+    foreach(auto Col, this->AssetUsageLimitsCols) {
+        if (Col.PerDay.size())
+            this->AssetUsageLimitsColsName.append(Col.PerDay);
+
+        if (Col.PerWeek.size())
+            this->AssetUsageLimitsColsName.append(Col.PerWeek);
+
+        if (Col.PerMonth.size())
+            this->AssetUsageLimitsColsName.append(Col.PerMonth);
+
+        if (Col.Total.size())
+            this->AssetUsageLimitsColsName.append(Col.Total);
     }
 }
 
@@ -352,8 +360,9 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     //---------
     UsageLimits_t SaleableUsageLimits;
     for (auto Iter = this->AssetUsageLimitsCols.begin();
-        Iter != this->AssetUsageLimitsCols.end();
-        Iter++)
+            Iter != this->AssetUsageLimitsCols.end();
+            Iter++)
+    {
         SaleableUsageLimits.insert(
             Iter.key(),
             {
@@ -363,6 +372,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
             }
         );
+    }
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //---------
@@ -399,6 +409,15 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                 Targoman::API::CURRENT_TIMESTAMP,
             }))
             ///TODO: join with userAssets to count user discount usage per voucher
+            .addCol("tmp_cpn_count._uasCount")
+            .leftJoin(SelectQuery(*this->AccountUserAssets)
+                      .addCol(tblAccountUserAssetsBase::uas_cpnID)
+                      .addCol(tblAccountUserAssetsBase::uas_vchID)
+                      .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::uasID, "_uasCount")
+                      .groupBy(tblAccountUserAssetsBase::uas_cpnID)
+                      .groupBy(tblAccountUserAssetsBase::uas_vchID)
+                      , "tmp_cpn_count"
+                      , { "tmp_cpn_count", tblAccountUserAssetsBase::uas_cpnID, enuConditionOperator::Equal, tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID })
             .where({ tblAccountCouponsBase::cpnCode, enuConditionOperator::Equal, _discountCode })
             .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
             .andWhere(clsCondition({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::Null })
@@ -406,6 +425,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
                     DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
             )
             .one();
+//        qDebug() << "--------- DiscountInfo:" << DiscountInfo;
 
         if (DiscountInfo.size() == 0)
             throw exHTTPBadRequest("Discount code not found.");
@@ -441,35 +461,42 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         if (cpnPrimaryCount <= cpnTotalUsedCount)
             throw exHTTPBadRequest("Discount code has been finished");
 
-//        qDebug() << "--" << DiscountInfo;
+//        qDebug() << "-- DiscountInfo" << DiscountInfo;
 //        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier);
-        qDebug() << "--" << cpnSaleableBasedMultiplier;
+//        qDebug() << "-- cpnSaleableBasedMultiplier" << cpnSaleableBasedMultiplier;
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object();
-//        qDebug() << "--" << _saleableCode;
+//        qDebug() << "-- _saleableCode" << _saleableCode;
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode);
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toInt(-1);
 
-        if (cpnSaleableBasedMultiplier.isEmpty() != false)
+        QJsonArray arr = cpnSaleableBasedMultiplier.array();
+//        qDebug() << "arr" << arr;
+        if (arr.size())
         {
+//            qDebug() << "AAAAAAAAAAAAAAA 2" << arr;
             TAPI::stuDiscountSaleableBasedMultiplier multiplier;
 
-            QJsonArray arr = cpnSaleableBasedMultiplier.array();
-            qDebug() << "arr" << arr;
-
-            foreach (auto elm, arr)
+            for (QJsonArray::const_iterator itr = arr.constBegin();
+                itr != arr.constEnd();
+                itr++)
             {
+                auto elm = *itr;
+
+//                qDebug() << "elm" << elm << "elm.toObject()=" << elm.toObject();
+
                 TAPI::stuDiscountSaleableBasedMultiplier cur;
                 cur.fromJson(elm.toObject());
 
-                qDebug() << cur.SaleableCode << NULLABLE_VALUE_OR_DEFAULT(cur.MinCount,-1) << cur.Multiplier;
+                qint32 MinCount = NULLABLE_VALUE_OR_DEFAULT(cur.MinCount, -1);
+//                qDebug() << "********" << cur.SaleableCode << MinCount << cur.Multiplier;
 
                 if ((cur.SaleableCode == _saleableCode)
                         && (NULLABLE_VALUE_OR_DEFAULT(cur.MinCount, 0) <= _qty)
                     )
                 {
                     if ((multiplier.Multiplier == 0)
-                            || (NULLABLE_VALUE_OR_DEFAULT(multiplier.MinCount, 0) < NULLABLE_VALUE_OR_DEFAULT(cur.MinCount, 0)))
+                            || (NULLABLE_VALUE_OR_DEFAULT(multiplier.MinCount, 0) < MinCount))
                         multiplier = cur;
                 }
             }
@@ -482,6 +509,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
         qDebug() << "------ discount: amount:" << Discount.Amount;
 
+        if (Discount.AmountType == TAPI::enuDiscountType::Percent) {
+
+        }
+
 //        Discount.Amount = static_cast<quint32>(Amount);
 //        Discount.ID = DiscountInfo.value(tblAccountCouponsBase::cpnPrimaryCount).toULongLong();
         Discount.Name = _discountCode;
@@ -493,11 +524,13 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     PreVoucherItem.Service = this->ServiceName;
     ///TODO add ttl for order item
     /** TODO COMPLETE
-     * PreVoucherItem.OrderID = this->AccountUserAssets->create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-                                                                {tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()},
-                                                                {tblAccountUserAssetsBase::uas_slbID, Package.PackageID},
-                                                            })).toULongLong();
-                                                            */
+     * PreVoucherItem.OrderID = this->AccountUserAssets->create(
+        clsJWT(_JWT).usrID(),
+        TAPI::ORMFields_t({
+            {tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()},
+            {tblAccountUserAssetsBase::uas_slbID, Package.PackageID},
+        })).toULongLong();
+    */
     PreVoucherItem.Desc  = SaleableInfo.value(tblAccountSaleablesBase::Name).toString();
 
     ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}

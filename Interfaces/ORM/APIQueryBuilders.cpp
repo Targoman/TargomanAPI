@@ -34,6 +34,7 @@ namespace Query {
 QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
     Q_UNUSED(_userID)
+    Q_UNUSED(_reportCount)
 
     _table.prepareFiltersList();
 
@@ -56,6 +57,9 @@ QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, cons
 
 QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
+    Q_UNUSED(_userID)
+    Q_UNUSED(_reportCount)
+
     _table.prepareFiltersList();
 
     SelectQuery query = SelectQuery(_table)
@@ -75,6 +79,9 @@ QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, con
 
 TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
+    Q_UNUSED(_userID)
+    Q_UNUSED(_reportCount)
+
     _table.prepareFiltersList();
 
     SelectQuery query = SelectQuery(_table)

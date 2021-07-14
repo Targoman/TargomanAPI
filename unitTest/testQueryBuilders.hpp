@@ -26,17 +26,18 @@ public:
         : clsTable(
             "test",
             "t1",
-            {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "colID1", ORM_PRIMARY_KEY32 },
-                { "colA1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
-                { "colB1", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
-                { "colC1", S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
-                { "colD1", S(QString),                      QFV,                       QNull,      UPOwner },
-                { "colE1", S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
-                { "colF1", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
-                { "colG1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
-                { "colH1", S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
-                { "colI1", S(QChar),                        QFV,                       QNull,      UPOwner },
+            {///< ColName    Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
+                { "colID1",  ORM_PRIMARY_KEY32 },
+                { "colA1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
+                { "colB1",   S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
+                { "colC1",   S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
+                { "colD1",   S(QString),                      QFV,                       QNull,      UPOwner },
+                { "colE1",   S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
+                { "colF1",   S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
+                { "colG1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
+                { "colH1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
+                { "colI1",   S(QChar),                        QFV,                       QNull,      UPOwner },
+                { "status1", S(TAPI::enuGenericStatus::Type), QFV,                       TAPI::enuGenericStatus::Active, UPStatus},
                 { "CreatedBy_usrID",  ORM_CREATED_BY },
                 { "CreationDateTime", ORM_CREATED_ON },
                 { "UpdatedBy_usrID",  ORM_UPDATED_BY },
@@ -338,7 +339,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1)
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -354,11 +355,13 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
+                 , t1.status1
                  , t1.CreatedBy_usrID
                  , t1.CreationDateTime
                  , t1.UpdatedBy_usrID
                  , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -372,7 +375,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .andWhere({ "colB1", enuConditionOperator::Equal, 456 })
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -388,13 +391,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
+                 , t1.status1
                  , t1.CreatedBy_usrID
                  , t1.CreationDateTime
                  , t1.UpdatedBy_usrID
                  , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1
-             WHERE t1.colA1 = 123
-               AND t1.colB1 = 456
+             WHERE t1.status1 != 'R' AND (t1.colA1 = 123
+               AND t1.colB1 = 456)
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -411,7 +415,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false);
+
+            QString qry = query.buildQueryString({}, false, false, true);
+
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -421,6 +427,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1 AS ren_colD1
               FROM test.t1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -437,7 +444,9 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
                 .addCol("colD1", "ren_colD1")
             ;
-            QString qry = query.buildQueryString({}, false, false);
+
+            QString qry = query.buildQueryString({}, false, false, true);
+
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -447,6 +456,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colC1
                  , alias_t1.colD1 AS ren_colD1
               FROM test.t1 alias_t1
+             WHERE alias_t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -456,23 +466,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     void queryString_SELECT_aggregateCols() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1)
-//                .addCols(QStringList({
-//                    "colA1",
-//                    "colB1",
-//                    "colC1",
-//                }))
                 .addCol(enuAggregation::AVG, "colA1", "avg_colA1")
                 .addCol(enuAggregation::SUM, "colB1", "sum_colB1")
-//                .leftJoin("t2",
-//                    clsCondition({ "t2.pk", enuConditionOperator::Equal, "t1.fk" })
-//                    .andCond({ "t2.col2", enuConditionOperator::Equal, "123"})
-//                )
-//                .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .andWhere({ "colB1", enuConditionOperator::GreaterEqual, "abc" })
-//                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -481,6 +479,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT AVG(t1.colA1) AS avg_colA1
                  , SUM(t1.colB1) AS sum_colB1
               FROM test.t1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -519,7 +518,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .leftJoin(R("test", "t2"))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -544,6 +543,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -559,7 +559,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .leftJoin("test.t2")
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -569,6 +569,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -580,9 +581,6 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
-//                    "colB1",
-//                    "colC1",
-//                    "colA2",
                 }))
                 .leftJoin("test.t2", "alias_t2")
                 .leftJoin("test.t2", "alias_2_t2",
@@ -590,14 +588,10 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
                     .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, 456})
                     .andCond({ "t77777777", "ffffff8", enuConditionOperator::Equal, "456"})
-//                    .andCond({ "t77777777", "ffffff9", enuConditionOperator::Equal, DBExpression::NIL()})
                 )
-//                .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
-//                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -612,6 +606,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND alias_2_t2.colB2 = 'test string'
                AND t77777777.ffffff7 = 456
                AND t77777777.ffffff8 = '456'
+             WHERE alias_t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -623,24 +618,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1)
                 .addCols(QStringList({
                     "colA1",
-//                    "colB1",
-//                    "colC1",
-//                    "colA2",
                 }))
                 .leftJoinWith("rel_a")
-//                .leftJoin("t2")
-//                .leftJoin("t2", "alias_1_t2")
-//                .leftJoin("t2", "alias_2_t2",
-//                    clsCondition({ "alias_2_t2", "colA2", enuConditionOperator::Equal, "t1", "colB" })
-//                    .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
-//                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, "456"})
-//                )
-//                .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
-//                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -650,6 +632,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
+             WHERE t1.status1 != 'R'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -661,24 +644,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
-//                    "colB1",
-//                    "colC1",
-//                    "colA2",
                 }))
                 .leftJoinWith("rel_a", "alias_t2")
-//                .leftJoin("t2")
-//                .leftJoin("t2", "alias_1_t2")
-//                .leftJoin("t2", "alias_2_t2",
-//                    clsCondition({ "alias_2_t2", "colA2", enuConditionOperator::Equal, "t1", "colB" })
-//                    .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
-//                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, "456"})
-//                )
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
-//                .andWhere({ "t2", "colA2", enuConditionOperator::GreaterEqual, "abc" })
-//                .groupBy(QStringList({ "colC1", "slbStatus" }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -688,7 +659,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1 alias_t1
          LEFT JOIN test.t2 alias_t2
                 ON alias_t2.colA2 = alias_t1.colC1
-             WHERE alias_t1.colA1 = 123
+             WHERE alias_t1.status1 != 'R' AND (alias_t1.colA1 = 123)
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -705,7 +676,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
             ;
 
-            QString qry = query.buildQueryString({}, false, false);
+            QString qry = query.buildQueryString({}, false, false, true);
 
             if (SQLPrettyLen)
                 qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -726,9 +697,6 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
-//                    "colB1",
-//                    "colC1",
-//                    "colA2",
                 }))
                 .addCol("colB1", "alias_colB1")
                 .addCol(enuConditionalAggregation::COUNTIF,
@@ -750,7 +718,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .limit(100)
             ;
 
-            QString qry = query.buildQueryString({}, true, false);
+            QString qry = query.buildQueryString({}, true, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -760,6 +728,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
+             WHERE alias_t1.status1 != 'R'
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -806,7 +775,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .limit(100)
             ;
 
-            QString qry = query.buildQueryString({}, false, true);
+            QString qry = query.buildQueryString({}, false, true, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -818,6 +787,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
+             WHERE alias_t1.status1 != 'R'
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -868,7 +838,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 )
             ;
 
-            QString qry = query.buildQueryString({}, true, false);
+            QString qry = query.buildQueryString({}, true, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -878,6 +848,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
+             WHERE alias_t1.status1 != 'R'
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -908,7 +879,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addFilters("( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
             ;
 
-            QString qry = query.buildQueryString({}, true, false);
+            QString qry = query.buildQueryString({}, true, false, true);
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -917,10 +888,10 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT alias_t1.colA1
                  , alias_t1.colB1
               FROM test.t1 alias_t1
-             WHERE (
+             WHERE alias_t1.status1 != 'R' AND ((
                    t1.colA1 >= NOW()
                 OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'
-                   )
+                   ))
              LIMIT 0,1
 )");
         } QT_CATCH (const std::exception &e) {
@@ -989,7 +960,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     { "colA1", DBExpression::NIL() },
                     { "colB1", DBExpression::NOW() },
                     { "colC1", DBExpression::CURDATE() },
-                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
                 }))
             ;
 
@@ -1079,14 +1050,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
-                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d1" } }) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "22Z"},
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
-                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d2" } }) },
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1094,14 +1065,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         { "colC1", DBExpression::CURDATE() },
                         { "colZ1", "33Z" },
                         { "colA1", DBExpression::NOW() },
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                        { "colF1", QVariantMap({ { "a", "b" }, { "c", "d3" } }) },
                     },
                     {
                         { "colB1", 444 },
                         { "colZ1", "44Z" },
                         { "colA1", DBExpression::NOW() },
                         { "colC1", DBExpression::CURDATE() },
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b'b" }, { "c", "d" } })) },
+                        { "colF1", QVariantMap({ { "a", "b'b" }, { "c", "d4" } }) },
                     },
                 }))
             ;
@@ -1123,28 +1094,28 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.CreatedBy_usrID
                    )
             VALUES (
-                   '{"a":"b","c":"d"}'
+                   '{"a":"b","c":"d1"}'
                  , 111
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   '{"a":"b","c":"d"}'
+                   '{"a":"b","c":"d2"}'
                  , 222
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   '{"a":"b","c":"d"}'
+                   '{"a":"b","c":"d3"}'
                  , 333
                  , NOW()
                  , CURDATE()
                  , 9090
                    )
                  , (
-                   '{"a":"b''b","c":"d"}'
+                   '{"a":"b''b","c":"d4"}'
                  , 444
                  , NOW()
                  , CURDATE()
@@ -1170,7 +1141,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 112},
-                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
@@ -1178,7 +1149,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 212},
-                    { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1187,7 +1158,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colZ1", "33Z"},
                         {"colA1", DBExpression::NOW()},
                         {"colG1", 312},
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b" }, { "c", "d" } })) },
+                        { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
                     },
                     {
                         {"colB1", 444},
@@ -1195,7 +1166,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
                         {"colG1", 412},
-                        { "colF1", QJsonDocument(QJsonObject({ { "a", "b'b" }, { "c", "d" } })) },
+                        { "colF1", QVariantMap({ { "a", "b'b" }, { "c", "d" } }) }
                     },
                 }))
             ;

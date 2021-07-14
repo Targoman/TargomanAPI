@@ -173,11 +173,11 @@ protected:
     inline const QString domain();
 
 private:
-    stuSelectItems makeListingQuery(const QString& _requiredCols = {},
-                                    const QStringList& _extraJoins = {},
-                                    QString _filters = {},
-                                    const QString& _orderBy = {},
-                                    const QString _groupBy = {}) const;
+//    stuSelectItems makeListingQuery(const QString& _requiredCols = {},
+//                                    const QStringList& _extraJoins = {},
+//                                    QString _filters = {},
+//                                    const QString& _orderBy = {},
+//                                    const QString _groupBy = {}) const;
 
 protected:
     QString Schema;
@@ -196,14 +196,14 @@ protected:
     static QHash<QString, clsTable*> Registry;
 
     friend clsCondition;
-    template <class itmplDerived>              friend class clsBaseQueryData;
+    template <class itmplDerived>                  friend class clsBaseQueryData;
     template <class itmplDerived, class itmplData> friend class tmplBaseQuery;
-    template <class itmplDerived>              friend class clsQueryJoinTraitData;
-    template <class itmplDerived>              friend class tmplQueryJoinTrait;
-    template <class itmplDerived>              friend class clsQueryWhereTraitData;
-    template <class itmplDerived>              friend class tmplQueryWhereTrait;
-    template <class itmplDerived>              friend class clsQueryGroupAndHavingTraitData;
-    template <class itmplDerived>              friend class tmplQueryGroupAndHavingTrait;
+    template <class itmplDerived>                  friend class clsQueryJoinTraitData;
+    template <class itmplDerived>                  friend class tmplQueryJoinTrait;
+    template <class itmplDerived>                  friend class clsQueryWhereTraitData;
+    template <class itmplDerived>                  friend class tmplQueryWhereTrait;
+    template <class itmplDerived>                  friend class clsQueryGroupAndHavingTraitData;
+    template <class itmplDerived>                  friend class tmplQueryGroupAndHavingTrait;
     friend clsSelectQueryData;
     friend SelectQuery;
     friend clsCreateQueryData;

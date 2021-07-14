@@ -92,6 +92,7 @@ inline void setFromVariant(NULLABLE_TYPE(_numericType)& _storage, const QVariant
     if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: NULLABLE<%1>").arg(_val.toString()).arg(#_numericType)); \
 } \
 inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val){ \
+    qDebug() << "toJsonValue(?)" << NULLABLE_VALUE_OR_DEFAULT(_val, 99999999); \
     QJsonValue JsonVal; JsonVal = NULLABLE_IS_NULL(_val) ? QJsonValue() : static_cast<double>(*_val); return JsonVal; } \
 }
 

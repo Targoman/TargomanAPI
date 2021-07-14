@@ -31,9 +31,6 @@
 #define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
     INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant)
 
-//#define TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant) \
-//    INTERNAL_TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(_baseType, _templateType, _typeName, _fromVariant)
-
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, this->fromVariant(_value) )
 
@@ -52,6 +49,101 @@
 /************************************************************/
 #define TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, ...) \
     TAPI_REGISTER_METATYPE_MACRO_SELECTOR(TAPI_REGISTER_METATYPE_, __VA_ARGS__)(_complexity, _namespace, _type, __VA_ARGS__)
+
+#define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
+    TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, \
+        /* toVariantLambda    */ [](const _type& _value) -> QVariant { \
+            /*qDebug() << "JSON_t(1) =================================" << _value; */ \
+            return _value; \
+        }, \
+        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JSON_t { \
+            /*qDebug() << "JSON_t(2) =================================" << _paramName << ":" << _value; */ \
+            if (_value.isValid() == false) \
+            { \
+                /*qDebug() << "JSON_t(2.1) =================================" << _paramName << ":" << _value;*/ \
+                return QJsonDocument(); \
+            } \
+            if (_value.userType() == QMetaType::QJsonObject) { \
+                auto Doc = QJsonDocument(); \
+                auto _val = _value.value<QJsonObject>(); \
+                Doc.setObject(_val); \
+                /*qDebug() << "JSON_t(2.2) =================================" << _paramName << ":" << _val << endl << "  =" << Doc;*/ \
+                return Doc; \
+            } \
+            if (_value.userType() == QMetaType::QJsonArray) { \
+                auto Doc = QJsonDocument(); \
+                auto _val = _value.value<QJsonArray>(); \
+                Doc.setArray(_val); \
+                /*qDebug() << "JSON_t(2.3) =================================" << _paramName << ":" << _val << endl << "  =" << Doc;*/ \
+                return Doc; \
+            } \
+            if (_value.canConvert<QVariantMap>() || \
+                   _value.canConvert<QVariantList>() || \
+                   _value.canConvert<double>()) \
+            { \
+                auto Doc = QJsonDocument::fromVariant(_value); \
+                /*qDebug() << "JSON_t(2.4) =================================" << _paramName << ":" << _value << endl << "  =" << Doc;*/  \
+                return Doc; \
+            } \
+            if (_value.toString().isEmpty()) \
+            { \
+                /*qDebug() << "JSON_t(2.5) =================================" << _paramName << ":" << _value;*/  \
+                return QJsonDocument(); \
+            } \
+            QJsonParseError Error; \
+            QJsonDocument Doc; \
+            Doc = Doc.fromJson(_value.toString().toUtf8(), &Error); \
+            /*qDebug() << "JSON_t(2.6) =================================" << _paramName << ":" << _value << endl << "  =" << Doc;*/  \
+            if (Error.error != QJsonParseError::NoError) \
+                throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString()); \
+            return Doc; \
+        }, \
+        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) { return "A valid JSON object"; }, \
+        /* toORMValueLambda   */ [](const QVariant& _value) { \
+            /*qDebug() << "JSON_t(3) =================================" << _value;*/  \
+            if (_value.isValid() == false) { \
+                /*qDebug() << "JSON_t(3.1) =================================" << _value;*/ \
+                return QJsonDocument(); \
+            } \
+            if (_value.userType() == QMetaType::QJsonObject) { \
+                auto Doc = QJsonDocument(); \
+                auto _val = _value.value<QJsonObject>(); \
+                Doc.setObject(_val); \
+                /*qDebug() << "JSON_t(3.2) =================================" << _val << endl << "  =" << Doc;*/ \
+                return Doc; \
+            } \
+            if (_value.userType() == QMetaType::QJsonArray) { \
+                auto Doc = QJsonDocument(); \
+                auto _val = _value.value<QJsonArray>(); \
+                Doc.setArray(_val); \
+                /*qDebug() << "JSON_t(3.3) =================================" << _val << endl << "  =" << Doc;*/ \
+                return Doc; \
+            } \
+            if (_value.canConvert<QVariantMap>() || \
+                   _value.canConvert<QVariantList>() || \
+                   _value.canConvert<double>()) { \
+                auto Doc = QJsonDocument::fromVariant(_value); \
+                /*qDebug() << "JSON_t(3.4) =================================" << _value << endl << "  =" << Doc;*/ \
+                return Doc; \
+            } \
+            if (_value.toString().isNull() || _value.toString().isEmpty()) { \
+                /*qDebug() << "JSON_t(3.5) =================================" << _value;*/  \
+                return QJsonDocument(); \
+            } \
+            QJsonParseError Error; \
+            QJsonDocument Doc = QJsonDocument::fromJson(_value.toString().toUtf8(), &Error); \
+            /*qDebug() << "JSON_t(3.6) =================================" << _value << endl << "  =" << Doc;*/ \
+            if (Error.error != QJsonParseError::NoError) \
+                throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + QString("%1:%2").arg(Error.error).arg(Error.errorString())); \
+            return Doc; \
+        }, \
+        /* fromORMValueLambda */ [](const QVariant& _value) { \
+            QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData()); \
+            /*qDebug() << "JSON_t(4) =================================" << _value << " -> " << ret;*/  \
+            return ret; \
+        } \
+    )
+//        QString ret = QString::fromUtf8(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact));
 
 /************************************************************/
 #define TAPI_VALIDATION_REQUIRED_TYPE_IMPL(_complexity, _namespace, _type, _validationRule, _toVariant, ...) \
@@ -74,6 +166,7 @@
 #define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
+//                                                  _type,                  _name, _typeGroup,        _fromVariant,      _toVariant,           _def, _validator
 #define SF_QString(_name, ...)          INTERNAL_SF(QString,                _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
 #define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
 #define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
@@ -128,11 +221,11 @@
 #define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
 #define NULLABLE_TYPE(_type) std::optional<_type>
 #define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value) (_value ? *_value : QVariant())
-#define NULLABLE_VALUE_OR_DEFAULT(_value, _def) (_value ? *_value : _def)
+#define NULLABLE_VALUE(_value) (_value.has_value() ? *_value : QVariant())
+#define NULLABLE_VALUE_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
 #define NULLABLE_NULL_VALUE std::nullopt
-#define NULLABLE_IS_NULL(_nullable) (bool)_nullable == false
-#define NULLABLE_HAS_VALUE(_nullable) (bool)_nullable
+#define NULLABLE_IS_NULL(_nullable) _nullable.has_value() == false
+#define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
 
 /************************************************************/

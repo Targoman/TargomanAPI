@@ -227,8 +227,8 @@ public:
     QString buildConditionString(
             const QString &_mainTableNameOrAlias,
             const QMap<QString, stuRelatedORMField>& _filterables,
-            bool _allowUseColumnAlias = false/*,
-            quint8 _prettifierJustifyLen = 0*/) const;
+            bool _allowUseColumnAlias = false,
+            bool *_statusColHasCriteria = nullptr) const;
 
 protected:
     QSharedDataPointer<clsConditionData> Data;
@@ -274,6 +274,8 @@ protected:
 };
 
 /***************************************************************************************/
+class SelectQuery;
+
 template <class itmplDerived>
 class tmplQueryJoinTrait
 {
@@ -283,7 +285,6 @@ public:
     virtual ~tmplQueryJoinTrait();
 
     itmplDerived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
-
     itmplDerived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
     itmplDerived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
@@ -292,11 +293,11 @@ public:
     itmplDerived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
 
-//    itmplDerived& leftJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    itmplDerived& rightJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    itmplDerived& innerJoin(const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-//    itmplDerived& crossJoin(const tmplBaseQuery& _nestedQuery, const QString _alias);
-//    itmplDerived& join(enuJoinType::Type _joinType, const tmplBaseQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on = {});
+    itmplDerived& leftJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& rightJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& innerJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& crossJoin(SelectQuery& _nestedQuery, const QString _alias);
 
     itmplDerived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
     itmplDerived& leftJoinWith(const QString& _relationName, const QString& _alias = {});
@@ -357,6 +358,11 @@ protected:
 };
 
 /***************************************************************************************/
+class UpdateQuery;
+class DeleteQuery;
+//class clsUpdateQueryData;
+//class clsDeleteQueryData;
+
 class SelectQuery :
     public tmplBaseQuery<SelectQuery, clsSelectQueryData>,
     public tmplQueryJoinTrait<SelectQuery>,
@@ -404,9 +410,16 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false/*, quint8 _prettifierJustifyLen = 0*/);
+    QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, bool _checkStatusCol = false);
     friend clsSelectQueryData;
     friend clsCreateQueryData;
+    friend tmplQueryJoinTrait<SelectQuery>;
+    friend tmplQueryJoinTrait<UpdateQuery>;
+    friend tmplQueryJoinTrait<DeleteQuery>;
+//    friend clsUpdateQueryData;
+//    friend UpdateQuery;
+//    friend clsDeleteQueryData;
+//    friend DeleteQuery;
     friend testQueryBuilders;
 };
 
@@ -458,6 +471,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
+    friend tmplQueryJoinTrait<UpdateQuery>;
     friend testQueryBuilders;
 };
 
@@ -482,6 +496,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
+    friend tmplQueryJoinTrait<DeleteQuery>;
     friend testQueryBuilders;
 };
 

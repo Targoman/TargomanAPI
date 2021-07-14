@@ -219,8 +219,7 @@ void clsTable::prepareFiltersList()
     }
 }
 
-
-const QString clsTable::domain()
+inline const QString clsTable::domain()
 {
     return Q_LIKELY(this->Domain.size())
             ? this->Domain
@@ -597,7 +596,7 @@ QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 QString clsTable::finalColName(const clsORMField &_col, const QString &_prefix) {
     return Targoman::API::ORM::finalColName(_col, _prefix);
 }
-
+/*
 clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, QString _filters, const QString& _orderBy, const QString _groupBy) const
 {
     if(_requiredCols.size())
@@ -608,7 +607,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     clsTable::stuSelectItems SelectItems;
 
-    /****************************************************************************/
+    //-----------------------------------------------------
     QStringList RequiredCols = _requiredCols.size() ? _requiredCols.split(",", QString::SkipEmptyParts) : QStringList("*");
 
     auto addCol = [this, _groupBy, RequiredCols](clsTable::stuSelectItems& _selectItems, auto _col, const stuRelation& _relation = InvalidRelation){
@@ -682,7 +681,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     if(RequiredCols.size() && RequiredCols.size() > SelectItems.Cols.size())
         throw exHTTPBadRequest("Seems that some columns could not be resolved: Actives are: [" +SelectItems.Cols.join(", ")+ "]");
 
-    /****************************************************************************/
+    //-----------------------------------------------------
     quint8 OpenParenthesis = 0;
     bool StatusColHasCriteria = false;
     bool CanStartWithLogical = false;
@@ -789,8 +788,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
                     UsedJoins.insert(FCol.Relation);
             }
 
-    /****************************************************************************/
-
+    //-----------------------------------------------------
     SelectItems.From.append(this->Schema + "." + this->Name);
     foreach(auto Join, UsedJoins){
         SelectItems.From.append((Join.IsLeftJoin ? "LEFT JOIN " : "JOIN ")
@@ -806,7 +804,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     if(_extraJoins.size())
         SelectItems.From.append(_extraJoins);
 
-    /****************************************************************************/
+    //-----------------------------------------------------
     foreach(auto OrderByCriteria, _orderBy.split(",", QString::SkipEmptyParts)) {
         QString Direction = "ASC";
         if(OrderByCriteria.startsWith("-")){
@@ -821,7 +819,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         SelectItems.OrderBy.append(OrderByCriteria + " " + Direction);
     }
 
-    /****************************************************************************/
+    //-----------------------------------------------------
     foreach(auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
         stuRelatedORMField Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
         if(Filter.isValid())
@@ -832,7 +830,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     return SelectItems;
 }
-
+*/
 
 }
 }
