@@ -34,14 +34,14 @@ namespace AAA {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblVoucher {
-constexpr char Name[] = "tblVoucher";
-TARGOMAN_CREATE_CONSTEXPR(vchID);
-TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
-TARGOMAN_CREATE_CONSTEXPR(vchDesc);
-TARGOMAN_CREATE_CONSTEXPR(vchType);
-TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
-TARGOMAN_CREATE_CONSTEXPR(vchStatus);
+    constexpr char Name[] = "tblVoucher";
+    TARGOMAN_CREATE_CONSTEXPR(vchID);
+    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(vchDesc);
+    TARGOMAN_CREATE_CONSTEXPR(vchType);
+    TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
+    TARGOMAN_CREATE_CONSTEXPR(vchStatus);
 }
 #pragma GCC diagnostic pop
 
@@ -82,6 +82,5 @@ private slots:
 }
 }
 }
-
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H

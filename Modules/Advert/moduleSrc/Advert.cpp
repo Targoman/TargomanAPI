@@ -139,7 +139,7 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
     Q_UNUSED(_JWT);
     Q_UNUSED(_assetItem)
 
-    qDebug() << "---------- _orderAdditives ----------" << _orderAdditives;
+    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 };
 
 }

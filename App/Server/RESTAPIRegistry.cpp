@@ -80,7 +80,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
             if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
             NULLABLE_VAR(_baseType, Value); \
-            *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
+            Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \

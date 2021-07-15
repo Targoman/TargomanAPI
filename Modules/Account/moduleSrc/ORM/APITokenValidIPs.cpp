@@ -35,7 +35,7 @@ using namespace ORM;
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -64,7 +64,7 @@ bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     TAPI::ORMFields_t ExtraFilters;
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);

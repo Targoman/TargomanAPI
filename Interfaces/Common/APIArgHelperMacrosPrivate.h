@@ -217,7 +217,7 @@ namespace Targoman {namespace API { \
             if (!_value.isValid() || _value.isNull()) \
                 return NULLABLE_TYPE(_namespace::_type)(); \
             NULLABLE_VAR(_namespace::_type, Value); \
-            *Value = tmplAPIArg<_namespace::_type, _complexity, false>::fromVariant(_value, _paramName); \
+            Value = tmplAPIArg<_namespace::_type, _complexity, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
     template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toORMValueLambda = _toORMValueLambda; \
@@ -264,7 +264,7 @@ namespace Targoman {namespace API { \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
             if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
             NULLABLE_VAR(_namespace::_enum::Type, Value); \
-            *Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
+            Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
     template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
@@ -408,7 +408,7 @@ namespace Targoman {namespace API { \
 namespace TAPI { \
     inline void setFromVariant(_enum::Type& _storage, const QVariant& _val){ _storage = _enum::toEnum(_val.toString()); } \
     inline void setFromVariant(NULLABLE_TYPE(_enum::Type)& _storage, const QVariant& _val){ \
-        if(_val.isValid() && _val.isNull() == false) *_storage = _enum::toEnum(_val.toString()); \
+        if(_val.isValid() && _val.isNull() == false) _storage = _enum::toEnum(_val.toString()); \
     } \
 }
 

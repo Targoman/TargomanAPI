@@ -30,8 +30,6 @@
 
 using namespace Targoman::API;
 
-//#include "Interfaces/ORM/QueryBuilders.h"
-//using namespace Targoman::API::ORM;
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_METATYPE(
@@ -308,24 +306,33 @@ intfAccountUserAssets::intfAccountUserAssets(
         ///<  ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
             { tblAccountUserAssetsBase::uasID,              ORM_PRIMARY_KEY64 },
             { tblAccountUserAssetsBase::uas_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin },
+            { tblAccountUserAssetsBase::uas_slbID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblAccountUserAssetsBase::uas_vchID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),         QFV,                        QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE_TYPE(quint32)),   QFV,                        QNull,      UPNone },
+            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE_TYPE(quint32)), QFV,                     QNull,      UPNone },
+            { tblAccountUserAssetsBase::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)), QFV,                     QNull,      UPNone },
             { tblAccountUserAssetsBase::uasPrefered,        S(bool),                QFV,                        false,      UPOwner },
             { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),    QFV,                        QNow,       UPNone },
             { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
-        ///<  Col                                  Reference Table                          ForeignCol                    Rename     LeftJoin
-            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name),             tblUser::usrID,               "Owner_" },
-            { tblAccountUserAssetsBase::uas_cpnID, R(_schema, tblAccountCouponsBase::Name), tblAccountCouponsBase::cpnID, "",       true },
+        ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
+            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::usrID,                 "Owner_" },
+            { tblAccountUserAssetsBase::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slbID, "",       true },
+            { tblAccountUserAssetsBase::uas_cpnID, R(_schema, tblAccountCouponsBase::Name),   tblAccountCouponsBase::cpnID,   "",       true },
             //Voucher is not accessible as it is in another schema
             //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
         }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
-            { { tblAccountUserAssetsBase::uas_usrID, tblAccountUserAssetsBase::uasVoucherItemUUID, tblAccountUserAssetsBase::uasStatus }, enuDBIndex::Unique },
+            { {
+                  tblAccountUserAssetsBase::uas_usrID,
+//                  tblAccountUserAssetsBase::uas_slbID,
+                  tblAccountUserAssetsBase::uasVoucherItemUUID,
+                  tblAccountUserAssetsBase::uasStatus
+              }, enuDBIndex::Unique },
             { tblAccountUserAssetsBase::uas_usrID },
+            { tblAccountUserAssetsBase::uas_slbID },
             { tblAccountUserAssetsBase::uas_vchID },
             { tblAccountUserAssetsBase::uasVoucherItemUUID },
             { tblAccountUserAssetsBase::uas_cpnID },
@@ -338,7 +345,7 @@ intfAccountUserAssets::intfAccountUserAssets(
 
 QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
   return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -362,6 +369,7 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
+
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
   /*return this->update(clsJWT(_JWT).usrID(), {
                             {tblAccountUserAssets::uasID, UserPackageID}
@@ -394,19 +402,10 @@ intfAccountAssetUsage::intfAccountAssetUsage(
 
 QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        query
-            //      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
-//        ;
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 /******************************************************************/
@@ -422,10 +421,10 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnPerUserMaxAmount,       S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin},
             { tblAccountCouponsBase::cpnValidFrom,              S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin},
             { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-            { tblAccountCouponsBase::cpnAmount,                 S(quint32),                        QFV,                                     QRequired, UPAdmin, false, false},
+            { tblAccountCouponsBase::cpnAmount,                 S(quint32),                        QFV,                                     QRequired, UPAdmin}, //, false, false},
             { tblAccountCouponsBase::cpnAmountType,             S(TAPI::enuDiscountType::Type),    QFV,                                     TAPI::enuDiscountType::Percent, UPAdmin},
-            { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
-            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin, false, false},
+            { tblAccountCouponsBase::cpnMaxAmount,              S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin}, //, false, false},
+            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin}, //, false, false},
 //            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false},
             { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
             { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},

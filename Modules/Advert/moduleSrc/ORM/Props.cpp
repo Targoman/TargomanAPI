@@ -35,7 +35,7 @@ using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -47,7 +47,7 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _createInfo);
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -66,7 +66,7 @@ bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     QVariantMap ExtraFilters;
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);

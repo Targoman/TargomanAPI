@@ -264,6 +264,9 @@ protected:
     QSharedDataPointer<itmplData> Data;
 //    clsDAC DAC();
 
+    const QStringList& getRenamedCols();
+    void addRenamedCols(const QStringList& _cols, const QString& _alias = {});
+
     friend testQueryBuilders;
     friend clsQueryJoinTraitData<itmplDerived>;
     friend tmplQueryJoinTrait<itmplDerived>;
@@ -281,7 +284,7 @@ class tmplQueryJoinTrait
 {
 public:
     tmplQueryJoinTrait(const tmplQueryJoinTrait<itmplDerived>& _other);
-    tmplQueryJoinTrait(const itmplDerived* _owner);
+    tmplQueryJoinTrait(itmplDerived* _owner);
     virtual ~tmplQueryJoinTrait();
 
     itmplDerived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
@@ -402,6 +405,7 @@ public:
     SelectQuery& setCacheTime(quint16 _cacheTime);
 
     QVariantMap one(QVariantMap _args = {});
+    QVariantMap tryOne(QVariantMap _args = {});
     QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
     TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});
@@ -411,6 +415,7 @@ public:
 private:
     virtual void iAmAbstract() {}
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, bool _checkStatusCol = false);
+
     friend clsSelectQueryData;
     friend clsCreateQueryData;
     friend tmplQueryJoinTrait<SelectQuery>;
@@ -461,10 +466,13 @@ public:
     UpdateQuery(clsTable& _table, const QString& _alias = {});
     virtual ~UpdateQuery();
 
-//    UpdateQuery& Select(const SelectQuery& _selectClause);
     UpdateQuery& setNull(const QString& _col);
     UpdateQuery& set(const QString& _col, const QVariant& _value);
     UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
+//    UpdateQuery& increament(const QString& _col, quint64 _value);
+    UpdateQuery& increament(const QString& _col, qreal _value);
+//    UpdateQuery& decreament(const QString& _col, quint64 _value);
+    UpdateQuery& decreament(const QString& _col, qreal _value);
 
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 

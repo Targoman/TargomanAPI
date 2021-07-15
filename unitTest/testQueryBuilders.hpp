@@ -117,7 +117,7 @@ class testQueryBuilders: public QObject
     void testOptional()
     {
         optional<quint32> a;
-        *a = 1234;
+        a = 1234;
 
 //            std::optional<enuAggregation::Type> z1;
 //            z1 = enuAggregation::MAX;
@@ -141,7 +141,7 @@ class testQueryBuilders: public QObject
     void testNullable()
     {
         NULLABLE_TYPE(quint32) a;
-        *a = 1234;
+        a = 1234;
 
         TAPI::setFromVariant(a, QVariant());
     }
@@ -899,6 +899,49 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
         }
     }
 
+    void queryString_SELECT_nested_join() {
+        QT_TRY {
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                }))
+                .leftJoin(SelectQuery(t2)
+                    .addCol("colB2")
+                    .addCol("colC2")
+                    .addCol(enuAggregation::COUNT, "colA2", "cnt")
+                    .groupBy("colB2")
+                    .groupBy("colC2")
+                    , "tmp_t2_count"
+                    , { "tmp_t2_count", "colB2", enuConditionOperator::Equal, "alias_t1", "colB1" })
+                .addCol("tmp_t2_count.cnt")
+            ;
+
+            QString qry = query.buildQueryString({}, true, false, true);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+                 , tmp_t2_count.cnt
+              FROM test.t1 alias_t1
+         LEFT JOIN (
+            SELECT t2.colB2
+                 , t2.colC2
+                 , COUNT(t2.colA2) AS cnt
+              FROM test.t2
+          GROUP BY colB2
+                 , colC2
+                   ) tmp_t2_count
+                ON tmp_t2_count.colB2 = alias_t1.colB1
+             WHERE alias_t1.status1 != 'R'
+             LIMIT 0,1
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
     /***************************************************************************************/
     /* CreateQuery *************************************************************************/
     /***************************************************************************************/
@@ -1364,6 +1407,29 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 )");
 
             QCOMPARE(BindingValuesList.join(", "), "v c1, 123, T, 9090");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_UPDATE_increase() {
+        QT_TRY {
+            UpdateQuery query = UpdateQuery(t1) //, "alias_t1")
+                .set("colB1", DBExpression::VALUE("colB1 + 10"))
+                .where({ "colA1", enuConditionOperator::Equal, 123 })
+            ;
+
+            stuBoundQueryString qry = query.buildQueryString(this->currentUserID, {}, false);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry.QueryString << endl;
+
+            QCOMPARE("\n" + qry.QueryString + "\n", R"(
+            UPDATE test.t1
+               SET t1.colB1 = colB1 + 10
+                 , t1.UpdatedBy_usrID = 9090
+             WHERE t1.colA1 = 123
+)");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }

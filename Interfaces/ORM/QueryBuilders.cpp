@@ -693,6 +693,7 @@ struct stuUnion {
 struct stuBaseQueryPreparedItems {
     QString     From;
     bool        IsPrepared = false;
+    QStringList RenamedCols;
 };
 
 template <class itmplDerived>
@@ -769,6 +770,25 @@ bool tmplBaseQuery<itmplDerived, itmplData>::isValid() {
 //    return clsDAC(this->Data->Table.domain(), this->Data->Table.Schema);
 //}
 
+template <class itmplDerived, class itmplData>
+const QStringList& tmplBaseQuery<itmplDerived, itmplData>::getRenamedCols()
+{
+    return this->Data->BaseQueryPreparedItems.RenamedCols;
+}
+template <class itmplDerived, class itmplData>
+void tmplBaseQuery<itmplDerived, itmplData>::addRenamedCols(const QStringList& _cols, const QString& _alias)
+{
+    if (_cols.isEmpty())
+        return;
+
+    if (_alias.isEmpty())
+        this->Data->BaseQueryPreparedItems.RenamedCols.append(_cols);
+    else {
+        foreach (auto _col, _cols)
+            this->Data->BaseQueryPreparedItems.RenamedCols.append(QString("%1.%2").arg(_alias).arg(_col));
+    }
+}
+
 /***************************************************************************************/
 /* clsQueryJoinTraitData ***************************************************************/
 /***************************************************************************************/
@@ -780,7 +800,7 @@ template <class itmplDerived>
 class clsQueryJoinTraitData : public QSharedData
 {
 public:
-    clsQueryJoinTraitData<itmplDerived>(const itmplDerived* _owner) :
+    clsQueryJoinTraitData<itmplDerived>(itmplDerived* _owner) :
         Owner(_owner), IsPrepared(false)
     {}
 
@@ -830,27 +850,36 @@ public:
                     AppliedJoins.insert(Join.ForeignTable);
                 }
 
-                //2: find relation definition
-                stuRelation* Relation = nullptr;
-                foreach (stuRelation Rel, this->Owner->Data->Table.Relations)
+                QString ReferenceTable;
+                if (Join.ForeignTable.startsWith("(")) //nested join
                 {
-                    if (Rel.ReferenceTable == Join.ForeignTable) {
-                        Relation = &Rel;
-                        break;
+                    ReferenceTable = Join.ForeignTable;
+                }
+                else
+                {
+                    //2: find relation definition
+                    stuRelation* Relation = nullptr;
+                    foreach (stuRelation Rel, this->Owner->Data->Table.Relations)
+                    {
+                        if (Rel.ReferenceTable == Join.ForeignTable) {
+                            Relation = &Rel;
+                            break;
+                        }
                     }
-                }
-                if (Relation == nullptr) {
-                    throw exHTTPInternalServerError(QString("Relation to table (%1) has not been defined.").arg(Join.ForeignTable));
-                }
+                    if (Relation == nullptr) {
+                        throw exHTTPInternalServerError(QString("Relation to table (%1) has not been defined.").arg(Join.ForeignTable));
+                    }
 
-                clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
-                if (ForeignTable == nullptr)
-                    throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+                    clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+                    if (ForeignTable == nullptr)
+                        throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
 
-//                Join.JoinType;
-//                Join.ForeignTable;
-//                Join.Alias;
-//                Join.On;
+                    ReferenceTable = Relation->ReferenceTable;
+    //                Join.JoinType;
+    //                Join.ForeignTable;
+    //                Join.Alias;
+    //                Join.On;
+                }
 
                 //3: create join clause
                 QString j = enuJoinType::toStr(Join.JoinType);
@@ -858,7 +887,7 @@ public:
                 if (SQLPrettyLen)
                     j = j.rightJustified(SQLPrettyLen);
                 j += " ";
-                j += Relation->ReferenceTable;
+                j += ReferenceTable;
                 if (Join.Alias.size())
                     j += " " + Join.Alias;
                 if (Join.JoinType != enuJoinType::CROSS)
@@ -903,7 +932,7 @@ public:
     }
 
 public:
-    const itmplDerived*             Owner;
+    itmplDerived*                   Owner;
     bool                            IsPrepared = false;
     QList<stuJoin>                  Joins;
     stuQueryJoinTraitPreparedItems  PreparedItems;
@@ -917,7 +946,7 @@ tmplQueryJoinTrait<itmplDerived>::tmplQueryJoinTrait(const tmplQueryJoinTrait<it
     JoinTraitData(_other.JoinTraitData) {}
 
 template <class itmplDerived>
-tmplQueryJoinTrait<itmplDerived>::tmplQueryJoinTrait(const itmplDerived* _owner) :
+tmplQueryJoinTrait<itmplDerived>::tmplQueryJoinTrait(itmplDerived* _owner) :
     JoinTraitData(new clsQueryJoinTraitData<itmplDerived>(_owner)) {
 }
 
@@ -983,7 +1012,22 @@ template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::cr
 //-- nested -------------------------
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on)
 {
-    this->JoinTraitData->Joins.append({ _joinType, "(" + _nestedQuery.buildQueryString({}, false, false, true) + ")", _alias, _on });
+    QString joinBody = _nestedQuery.buildQueryString({}, false, false, true);
+
+    if (SQLPrettyLen)
+        joinBody = "(\n"
+                   + joinBody
+                   + "\n"
+                   + QString(SQLPrettyLen, ' ')
+                   + " )";
+    else
+        joinBody = "(" + joinBody + ")";
+
+    this->JoinTraitData->Joins.append({ _joinType, joinBody, _alias, _on });
+
+    QStringList renCols = _nestedQuery.getRenamedCols();
+//    qDebug() << "renCols" << renCols;
+    this->JoinTraitData->Owner->addRenamedCols(renCols, _alias);
 
     return (itmplDerived&)*this;
 }
@@ -1518,9 +1562,12 @@ public:
 
         /****************************************************************************/
         auto addCol = [this, &MainTableNameOrAlias/*, _prettifierJustifyLen*/](const stuColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
-            auto updateRename = [_col](QString _fieldString) {
+            auto updateRename = [this, _col](QString _fieldString) {
                 if (_col.RenameAs.isEmpty())
                     return _fieldString;
+
+                this->BaseQueryPreparedItems.RenamedCols.append(_col.RenameAs);
+
                 if (_fieldString.contains(" AS "))
                     _fieldString.replace(QRegularExpression(" AS .*"), "");
                 return _fieldString + " AS " + _col.RenameAs;
@@ -1535,6 +1582,8 @@ public:
                        : ""
                     )
                 );
+                if (_col.RenameAs.size())
+                    this->BaseQueryPreparedItems.RenamedCols.append(_col.RenameAs);
             }
             else if (NULLABLE_HAS_VALUE(_col.ConditionalAggregation)) {
                 if (_col.Condition.isEmpty())
@@ -1574,6 +1623,7 @@ public:
                 parts.append(_col.RenameAs);
 
                 this->SelectQueryPreparedItems.Cols.append(parts.join(""));
+                this->BaseQueryPreparedItems.RenamedCols.append(_col.RenameAs);
             }
             else {
                 if (_col.Name.isEmpty())
@@ -1594,12 +1644,20 @@ public:
                     AggFunction += "(";
                 }
 
+                QString ColFinalName;
+
                 const stuRelatedORMField& relatedORMField = this->Table.SelectableColsMap[_col.Name];
                 if (relatedORMField.Col.name().isNull())
-                    throw exQueryBuilder("Invalid column for filtering: " + _col.Name);
-//                    return false;
-
-                QString ColFinalName = makeColName(
+                {
+                    if (this->BaseQueryPreparedItems.RenamedCols.contains(_col.Name))
+                        ColFinalName = _col.Name;
+                    else
+                        throw exQueryBuilder("Invalid column for filtering: " + _col.Name);
+//                        return false;
+                }
+                else
+                {
+                    ColFinalName = makeColName(
                                            MainTableNameOrAlias,
                                            relatedORMField.Col,
                                            false /*true*/,
@@ -1607,6 +1665,7 @@ public:
                                                 ? _relation
                                                 : relatedORMField.Relation
                                         );
+                }
 
                 if (AggFunction.size()) {
                    this->SelectQueryPreparedItems.Cols.append(AggFunction
@@ -1617,6 +1676,8 @@ public:
                                                    : AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
                                                   )
                                                 );
+                    if (_col.RenameAs.size())
+                        this->BaseQueryPreparedItems.RenamedCols.append(_col.RenameAs);
                 }
                 else
                    this->SelectQueryPreparedItems.Cols.append(updateRename(ColFinalName));
@@ -2237,6 +2298,16 @@ QVariantMap SelectQuery::one(QVariantMap _args)
     return Result.toVariant().toMap();
 }
 
+QVariantMap SelectQuery::tryOne(QVariantMap _args)
+{
+    QT_TRY {
+        return this->one(_args);
+    }
+    QT_CATCH (const exHTTPNotFound &e) {
+        return QVariantMap();
+    }
+}
+
 QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from)
 {
     this->Data->Offset = _from;
@@ -2361,7 +2432,7 @@ public:
 //                qDebug() << "compare" << col << baseCol.name();
                 if (col == baseCol.name()) {
                     if (baseCol.defaultValue() == QInvalid || baseCol.defaultValue() == QAuto)
-                        throw exHTTPInternalServerError("Invalid change to read-only column <" + col + ">");
+                        throw exHTTPInternalServerError("Invalid set read-only column <" + col + ">");
 
                     providedBaseCols.append(baseCol);
 
@@ -2859,6 +2930,26 @@ UpdateQuery& UpdateQuery::set(const QString& _col, const QVariant& _value)
 UpdateQuery& UpdateQuery::set(const QString& _col, const QString& _otherTable, const QString& _otherCol)
 {
     this->Data->SetMaps.append({ _col, QStringList({ _otherTable, _otherCol }) });
+    return *this;
+}
+//UpdateQuery& UpdateQuery::increament(const QString& _col, quint64 _value)
+//{
+//    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 + %2").arg(_col).arg(_value)) });
+//    return *this;
+//}
+UpdateQuery& UpdateQuery::increament(const QString& _col, qreal _value)
+{
+    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 + %2").arg(_col).arg(_value)) });
+    return *this;
+}
+//UpdateQuery& UpdateQuery::decreament(const QString& _col, quint64 _value)
+//{
+//    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 - %2").arg(_col).arg(_value)) });
+//    return *this;
+//}
+UpdateQuery& UpdateQuery::decreament(const QString& _col, qreal _value)
+{
+    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 - %2").arg(_col).arg(_value)) });
     return *this;
 }
 

@@ -60,14 +60,13 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
     SF_quint64(ID),
-    SF_QString(Name),
-    SF_qreal(Amount),
-    SF_quint32(MaxAmount),
-    SF_Enum(TAPI::enuDiscountType, AmountType, TAPI::enuDiscountType::Percent)
+    SF_QString(Code),
+    SF_qreal(Amount)
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     QString     , Service   , QString()    , v.size(), v         , v.toString(),
+    TAPI::MD5_t , UUID      , QString()    , v.size(), v         , v.toString(),
     quint64     , OrderID   , 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
     QString     , Desc      , QString()    , v.size(), v         , v.toString(),
     quint32     , UnitPrice , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
@@ -90,7 +89,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
 
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
-struct stuUsageColDefinition{
+struct stuUsageColDefinition {
     QString PerDay;
     QString PerWeek;
     QString PerMonth;
@@ -107,33 +106,37 @@ typedef QMap<QString, QString> OrderAdditives_t;
 
 struct stuAssetItem {
     //product
-    TAPI::ProductCode_t          prdCode;
-    QString                      prdName;
-    TAPI::Date_t                 prdValidFromDate;
-    TAPI::Date_t                 prdValidToDate;
-    NULLABLE_TYPE(quint8)        prdValidFromHour;
-    NULLABLE_TYPE(quint8)        prdValidToHour;
-    TAPI::PrivObject_t           prdPrivs;
-    NULLABLE_TYPE(double)        prdVAT;
-    quint32                      prdInStockCount;
-    NULLABLE_TYPE(quint32)       prdOrderedCount;
-    NULLABLE_TYPE(quint32)       prdReturnedCount;
-    TAPI::enuGenericStatus::Type prdStatus;
+    TAPI::ProductCode_t             prdCode;
+    QString                         prdName;
+    TAPI::Date_t                    prdValidFromDate;
+    TAPI::Date_t                    prdValidToDate;
+    NULLABLE_TYPE(quint8)           prdValidFromHour;
+    NULLABLE_TYPE(quint8)           prdValidToHour;
+    TAPI::PrivObject_t              prdPrivs;
+    NULLABLE_TYPE(double)           prdVAT;
+    quint32                         prdInStockCount;
+    NULLABLE_TYPE(quint32)          prdOrderedCount;
+    NULLABLE_TYPE(quint32)          prdReturnedCount;
+    TAPI::enuGenericStatus::Type    prdStatus;
 
     //saleable
-    quint32                      slbID;
-    TAPI::SaleableCode_t         slbCode;
-    QString                      slbName;
-    TAPI::JSON_t                 slbPrivs;
-    qreal                        slbBasePrice;
-    TAPI::SaleableAdditive_t     slbAdditives;
-    quint32                      slbProductCount;
-    NULLABLE_TYPE(quint32)       slbMaxSaleCountPerUser;
-    quint32                      slbInStockCount;
-    NULLABLE_TYPE(quint32)       slbOrderedCount;
-    NULLABLE_TYPE(quint32)       slbReturnedCount;
-    QString                      slbVoucherTemplate;
-    TAPI::enuGenericStatus::Type slbStatus;
+    quint32                         slbID;
+    TAPI::SaleableCode_t            slbCode;
+    QString                         slbName;
+    TAPI::JSON_t                    slbPrivs;
+    qreal                           slbBasePrice;
+    TAPI::SaleableAdditive_t        slbAdditives;
+    quint32                         slbProductCount;
+    NULLABLE_TYPE(quint32)          slbMaxSaleCountPerUser;
+    quint32                         slbInStockCount;
+    NULLABLE_TYPE(quint32)          slbOrderedCount;
+    NULLABLE_TYPE(quint32)          slbReturnedCount;
+    QString                         slbVoucherTemplate;
+    TAPI::enuGenericStatus::Type    slbStatus;
+
+    qreal                           SubTotal;
+    NULLABLE_TYPE(stuDiscount)      Discount;
+    qreal                           TotalPrice;
 
     struct {
         QJsonObject   Additives;
@@ -154,11 +157,11 @@ struct stuServiceCreditsInfo {
     UsageLimits_t               MyLimitsOnParent;
     QDateTime                   DBCurrentDateTime;
 
-    stuServiceCreditsInfo(ActiveCredits_t         _activeCredits,
+    stuServiceCreditsInfo(ActiveCredits_t             _activeCredits,
                           NULLABLE_TYPE(stuAssetItem) _preferedCredit,
                           NULLABLE_TYPE(quint32)      _parentID,
-                          UsageLimits_t          _myLimitsOnParent,
-                          QDateTime              _dbCurrentDateTime);
+                          UsageLimits_t               _myLimitsOnParent,
+                          QDateTime                   _dbCurrentDateTime);
 };
 
 struct stuActiveCredit {
@@ -234,121 +237,124 @@ extern void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher);
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblAccountProductsBase {
-constexpr char Name[] = "tblAccountProducts";
-TARGOMAN_CREATE_CONSTEXPR(prdID);
-TARGOMAN_CREATE_CONSTEXPR(prdCode);
-TARGOMAN_CREATE_CONSTEXPR(prdName);
-TARGOMAN_CREATE_CONSTEXPR(prdDesc);
-TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
-TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
-TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
-TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
-TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
-TARGOMAN_CREATE_CONSTEXPR(prdVAT);
+    constexpr char Name[] = "tblAccountProducts";
+    TARGOMAN_CREATE_CONSTEXPR(prdID);
+    TARGOMAN_CREATE_CONSTEXPR(prdCode);
+    TARGOMAN_CREATE_CONSTEXPR(prdName);
+    TARGOMAN_CREATE_CONSTEXPR(prdDesc);
+    TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
+    TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
+    TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
+    TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
+    TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
+    TARGOMAN_CREATE_CONSTEXPR(prdVAT);
 
-///TODO: create trigger for this 3 fields
-TARGOMAN_CREATE_CONSTEXPR(prdInStockCount);
-TARGOMAN_CREATE_CONSTEXPR(prdOrderedCount);
-TARGOMAN_CREATE_CONSTEXPR(prdReturnedCount);
-// prdRemainingCount = prdInStockCount - (prdOrderedCount - prdReturnedCount)
+    ///TODO: create trigger for this 3 fields
+    TARGOMAN_CREATE_CONSTEXPR(prdInStockCount);
+    TARGOMAN_CREATE_CONSTEXPR(prdOrderedCount);
+    TARGOMAN_CREATE_CONSTEXPR(prdReturnedCount);
+    // prdRemainingCount = prdInStockCount - (prdOrderedCount - prdReturnedCount)
 
-TARGOMAN_CREATE_CONSTEXPR(prdStatus);
-TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(prdStatus);
+    TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
 }
 
 namespace tblAccountSaleablesBase {
-constexpr char Name[] = "tblAccountSaleables";
-TARGOMAN_CREATE_CONSTEXPR(slbID);
-TARGOMAN_CREATE_CONSTEXPR(slbCode);
-TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
-TARGOMAN_CREATE_CONSTEXPR(slbName);
-TARGOMAN_CREATE_CONSTEXPR(slbDesc);
-TARGOMAN_CREATE_CONSTEXPR(slbType);
-TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
-TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
-TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
-TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
-TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
-TARGOMAN_CREATE_CONSTEXPR(slbProductCount);
-TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
+    constexpr char Name[] = "tblAccountSaleables";
+    TARGOMAN_CREATE_CONSTEXPR(slbID);
+    TARGOMAN_CREATE_CONSTEXPR(slbCode);
+    TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
+    TARGOMAN_CREATE_CONSTEXPR(slbName);
+    TARGOMAN_CREATE_CONSTEXPR(slbDesc);
+    TARGOMAN_CREATE_CONSTEXPR(slbType);
+    TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
+    TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
+    TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
+    TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
+    TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
+    TARGOMAN_CREATE_CONSTEXPR(slbProductCount);
+    TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
 
-///TODO: create trigger for this 3 fields and make changes to prd Count fields
-TARGOMAN_CREATE_CONSTEXPR(slbInStockCount);
-TARGOMAN_CREATE_CONSTEXPR(slbOrderedCount);
-TARGOMAN_CREATE_CONSTEXPR(slbReturnedCount);
-// slbRemainingCount = slbInStockCount - (slbOrderedCount - slbReturnedCount)
+    ///TODO: create trigger for this 3 fields and make changes to prd Count fields
+    TARGOMAN_CREATE_CONSTEXPR(slbInStockCount);
+    TARGOMAN_CREATE_CONSTEXPR(slbOrderedCount);
+    TARGOMAN_CREATE_CONSTEXPR(slbReturnedCount);
+    // slbRemainingCount = slbInStockCount - (slbOrderedCount - slbReturnedCount)
 
-TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
-TARGOMAN_CREATE_CONSTEXPR(slbStatus);
-TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
+    TARGOMAN_CREATE_CONSTEXPR(slbStatus);
+    TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
 }
 
 namespace tblAccountUserAssetsBase {
-constexpr char Name[] = "tblAccountUserAssets";
-TARGOMAN_CREATE_CONSTEXPR(uasID);
-TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
-TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
-TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemUUID);
-TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
-TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
-TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
-TARGOMAN_CREATE_CONSTEXPR(uasStatus);
-TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
+    constexpr char Name[] = "tblAccountUserAssets";
+    TARGOMAN_CREATE_CONSTEXPR(uasID);
+    TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(uas_slbID);
+    TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
+    TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemUUID);
+    TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
+    TARGOMAN_CREATE_CONSTEXPR(uasDiscountAmount);
+    TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
+    TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(uasStatus);
+    TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
 }
 
 namespace tblAccountAssetUsageBase {
-constexpr char Name[] = "tblAccountAssetUsage";
-TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
+    constexpr char Name[] = "tblAccountAssetUsage";
+    TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
 }
 
 //TODO: max usage count (user, system)
 //TODO: CodeCommentMark
 namespace tblAccountCouponsBase {
-constexpr char Name[] = "tblAccountCoupons";
-TARGOMAN_CREATE_CONSTEXPR(cpnID);
-TARGOMAN_CREATE_CONSTEXPR(cpnCode);
+    constexpr char Name[] = "tblAccountCoupons";
+    TARGOMAN_CREATE_CONSTEXPR(cpnID);
+    TARGOMAN_CREATE_CONSTEXPR(cpnCode);
 
-//rules
-TARGOMAN_CREATE_CONSTEXPR(cpnPrimaryCount);
-TARGOMAN_CREATE_CONSTEXPR(cpnTotalMaxAmount);   //nullable
-TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxCount);  //nullable
-TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxAmount); //nullable
-TARGOMAN_CREATE_CONSTEXPR(cpnValidFrom);
-TARGOMAN_CREATE_CONSTEXPR(cpnExpiryTime);
+    //rules
+    TARGOMAN_CREATE_CONSTEXPR(cpnPrimaryCount);
+    TARGOMAN_CREATE_CONSTEXPR(cpnTotalMaxAmount);   //nullable
+    TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxCount);  //nullable
+    TARGOMAN_CREATE_CONSTEXPR(cpnPerUserMaxAmount); //nullable
+    TARGOMAN_CREATE_CONSTEXPR(cpnValidFrom);
+    TARGOMAN_CREATE_CONSTEXPR(cpnExpiryTime);
 
-//actions
-TARGOMAN_CREATE_CONSTEXPR(cpnAmount);
-TARGOMAN_CREATE_CONSTEXPR(cpnAmountType);
-TARGOMAN_CREATE_CONSTEXPR(cpnMaxAmount);
-TARGOMAN_CREATE_CONSTEXPR(cpnSaleableBasedMultiplier);
+    //actions
+    TARGOMAN_CREATE_CONSTEXPR(cpnAmount);
+    TARGOMAN_CREATE_CONSTEXPR(cpnAmountType);
+    TARGOMAN_CREATE_CONSTEXPR(cpnMaxAmount);
+    TARGOMAN_CREATE_CONSTEXPR(cpnSaleableBasedMultiplier);
 
-//stats
-TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedCount);
-TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedAmount);
+    //stats
+    TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedCount);
+    TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedAmount);
 
-TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
-TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
+    TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
 }
 
 namespace tblAccountReferalsBase {
-constexpr char Name[] = "tblAccountReferals";
-TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
-TARGOMAN_CREATE_CONSTEXPR(refValidFromDateTime);
-TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
-TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
-TARGOMAN_CREATE_CONSTEXPR(refStatus);
-TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
+    constexpr char Name[] = "tblAccountReferals";
+    TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(refValidFromDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
+    TARGOMAN_CREATE_CONSTEXPR(refStatus);
+    TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
 }
 
 #pragma GCC diagnostic pop
+
 }
 }
 }

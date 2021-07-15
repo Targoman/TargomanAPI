@@ -36,9 +36,28 @@ namespace AAA {
 
 using namespace ORM;
 
+Voucher::Voucher() :
+    clsTable(
+        AAASchema,
+        tblVoucher::Name,
+        {///< ColName                          Type                 Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblVoucher::vchID,               ORM_PRIMARY_KEY64 },
+            { tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                        QAuto,     UPNone },
+            { tblVoucher::vch_usrID,           S(quint64),          QFV.integer().minValue(1),  QRequired, UPNone },
+            { tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),         QRequired, UPNone, false, false },
+            { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,              TAPI::enuVoucherType::Expense, UPNone },
+            { tblVoucher::vchTotalAmount,      S(quint64),          QFV,                        0,         UPNone },
+            { tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,            TAPI::enuVoucherStatus::New, UPStatus },
+        },
+        {///< Col                     Reference Table              ForeignCol
+            { tblVoucher::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::usrID },
+        }
+    )
+{}
+
 QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -52,7 +71,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE,this->moduleBaseName())) == false){
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false){
         ExtraFilters.insert(tblVoucher::vchType, TAPI::enuVoucherType::toStr(TAPI::enuVoucherType::Withdrawal));
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
@@ -66,7 +85,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
                                                    quint64 _walletID,
                                                    TAPI::enuPaymentGateway::Type _gateway)
 {
-    if(_callBack.size() && _callBack != "OFFLINE")
+    if (_callBack.size() && _callBack != "OFFLINE")
         QFV.url().validate(_callBack, "callBack");
 
     TAPI::stuVoucher Voucher;
@@ -133,26 +152,6 @@ quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUs
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-Voucher::Voucher() :
-    clsTable(AAASchema,
-             tblVoucher::Name,
-{ ///<ColName                       Type                 Validation                                  Default    UpBy   Sort  Filter Self  Virt   PK
-{tblVoucher::vchID,               ORM_PRIMARY_KEY64},
-{tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                                        QAuto,     UPNone},
-{tblVoucher::vch_usrID,           S(quint64),          QFV.integer().minValue(1),                  QRequired, UPNone},
-{tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),                         QRequired, UPNone,false,false},
-{tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                              TAPI::enuVoucherType::Expense,UPNone},
-{tblVoucher::vchTotalAmount,      S(quint64),          QFV,                                        0,UPNone},
-{tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,                            TAPI::enuVoucherStatus::New,UPStatus},
-},
-{ ///< Col       Reference Table   ForeignCol
-{tblVoucher::vch_usrID,  R(AAASchema,tblUser::Name),     tblUser::usrID},
-})
-{
-}
-
 }
 }
 }
-
-

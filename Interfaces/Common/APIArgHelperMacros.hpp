@@ -209,7 +209,7 @@
 //#define NULLABLE_UNDERLAYER_CLASS_NAME "TAPI::tmplNullable"
 //#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
 //#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name = NULLABLE_TYPE(_type)::create();
-//#define NULLABLE_VALUE(_value) _value.isNull() ? QVariant() : *_value
+//#define NULLABLE_GET(_value) _value.isNull() ? QVariant() : *_value
 //#define NULLABLE_NULL_VALUE nullptr
 //#define NULLABLE_IS_NULL(_nullable) _nullable.isNull()
 //#define NULLABLE_HAS_VALUE(_nullable) _nullable.isNull() == false
@@ -221,10 +221,11 @@
 #define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
 #define NULLABLE_TYPE(_type) std::optional<_type>
 #define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value) (_value.has_value() ? *_value : QVariant())
-#define NULLABLE_VALUE_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
+#define NULLABLE_GET(_value) (_value.has_value() ? *_value : QVariant())
+#define NULLABLE_GET_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
+#define NULLABLE_SET(_var, _value) (_var = _value)
 #define NULLABLE_NULL_VALUE std::nullopt
-#define NULLABLE_IS_NULL(_nullable) _nullable.has_value() == false
+#define NULLABLE_IS_NULL(_nullable) (_nullable.has_value() == false)
 #define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
 

@@ -36,7 +36,7 @@ using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
