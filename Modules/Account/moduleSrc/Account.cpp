@@ -58,6 +58,7 @@ TAPI_REGISTER_METATYPE(
     TAPI, stuMultiJWT,
     [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn",_value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 );
+
 namespace Targoman {
 namespace API {
 
@@ -89,10 +90,10 @@ static QSet<QString> InvalidPasswords = {
     "5ee43561ed4491c7d2b76f28574093fc"
 };
 
-TARGOMAN_DEFINE_ENUM (enuPaymentType,
-                      Online='N',
-                      Offline='F'
-                              )
+TARGOMAN_DEFINE_ENUM(enuPaymentType,
+                     Online = 'N',
+                     Offline = 'F'
+                     )
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
@@ -101,7 +102,6 @@ Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGa
         "Registered payment gateways",
         0
         );
-
 
 Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile(
         AAA::Accounting::makeConfig("TransactionLogFile"),
@@ -347,10 +347,10 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                                                 qint64 _walletID,
                                                 TAPI::enuPaymentGateway::Type _gateway)
 {
-    if(_callBack.size() && _callBack != "OFFLINE")
+    if (_callBack.size() && _callBack != "OFFLINE")
         QFV.url().validate(_callBack, "callBack");
 
-    if(_preVoucher.Items.isEmpty())
+    if (_preVoucher.Items.isEmpty())
         throw exHTTPBadRequest("seems that pre-Voucher is empty");
 
     Accounting::checkPreVoucherSanity(_preVoucher);

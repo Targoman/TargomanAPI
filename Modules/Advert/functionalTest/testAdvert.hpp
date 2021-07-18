@@ -421,7 +421,15 @@ private slots:
                 { "discountCode",       "cpn-code-aaa" },
                 { "referrer",           "" },
                 { "extraRefererParams", {} },
-                { "lastPreVoucher",     QVariantMap({ { "summary", "hello from test" }, { "round", 789 } }) },
+                { "lastPreVoucher",     QVariantMap({
+                      { "voucherID", 0 },
+                      { "items", {} },
+                      { "prize", {} },
+                      { "summary", "hello from test" },
+                      { "round", 123 },
+                      { "toPay", 456 },
+                      { "sign", 789 }
+                }) },
             }
         );
     }

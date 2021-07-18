@@ -28,9 +28,9 @@
 namespace Targoman {
 namespace API {
 namespace AAA {
-namespace Accounting{
+namespace Accounting {
 
-class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs{
+class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs {
     Q_OBJECT
 
 public:

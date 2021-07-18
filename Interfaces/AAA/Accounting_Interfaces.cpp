@@ -303,17 +303,17 @@ intfAccountUserAssets::intfAccountUserAssets(
         _schema,
         tblAccountUserAssetsBase::Name,
         QList<ORM::clsORMField>({
-        ///<  ColName                                       Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+        ///<  ColName                                       Type                       Validation                 Default     UpBy   Sort  Filter Self  Virt   PK
             { tblAccountUserAssetsBase::uasID,              ORM_PRIMARY_KEY64 },
-            { tblAccountUserAssetsBase::uas_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPAdmin },
-            { tblAccountUserAssetsBase::uas_slbID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uas_vchID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),         QFV,                        QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE_TYPE(quint32)), QFV,                     QNull,      UPNone },
-            { tblAccountUserAssetsBase::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)), QFV,                     QNull,      UPNone },
-            { tblAccountUserAssetsBase::uasPrefered,        S(bool),                QFV,                        false,      UPOwner },
-            { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),    QFV,                        QNow,       UPNone },
-            { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,             TAPI::enuAuditableStatus::Pending, UPStatus },
+            { tblAccountUserAssetsBase::uas_usrID,          S(quint64),                QFV.integer().minValue(1), QRequired,  UPAdmin },
+            { tblAccountUserAssetsBase::uas_slbID,          S(quint64),                QFV.integer().minValue(1), QRequired,  UPNone },
+            { tblAccountUserAssetsBase::uas_vchID,          S(NULLABLE_TYPE(quint64)), QFV.integer().minValue(1), QNull,      UPNone },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),            QFV,                       QRequired,  UPNone },
+            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE_TYPE(quint32)), QFV,                       QNull,      UPNone },
+            { tblAccountUserAssetsBase::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)), QFV,                       QNull,      UPNone },
+            { tblAccountUserAssetsBase::uasPrefered,        S(bool),                   QFV,                       false,      UPOwner },
+            { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),       QFV,                       QNow,       UPNone },
+            { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,               TAPI::enuAuditableStatus::Pending, UPStatus },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({

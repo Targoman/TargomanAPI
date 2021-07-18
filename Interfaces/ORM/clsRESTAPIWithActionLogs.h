@@ -33,8 +33,9 @@ namespace ORM {
 
 class clsRESTAPIWithActionLogs : public ORM::clsTable {
     Q_OBJECT
+
 public:
-    inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module)  :
+    inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module) :
         clsTable(_schema,
                 "tblActionLogs",
                 { ///<ColName             Type                  Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
@@ -49,6 +50,7 @@ public:
                 }),
         Module(_module)
     {}
+
 private slots:
     QVariant ORMGET("Get ActionLogs information")
 

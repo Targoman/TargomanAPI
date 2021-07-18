@@ -192,8 +192,10 @@ public:
                     CryptoFlagHash = 0x04
                    };
     Q_DECLARE_FLAGS(CryptoFlags, CryptoFlag)
-private:
 
+    static const QString UUIDtoMD5();
+
+private:
     void splitKey();
 
     quint64 m_key;

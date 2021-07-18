@@ -66,7 +66,6 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     QString     , Service   , QString()    , v.size(), v         , v.toString(),
-    TAPI::MD5_t , UUID      , QString()    , v.size(), v         , v.toString(),
     quint64     , OrderID   , 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
     QString     , Desc      , QString()    , v.size(), v         , v.toString(),
     quint32     , UnitPrice , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
@@ -76,6 +75,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     quint32     , DisAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
     quint8      , VATPercent, 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
     quint32     , VATAmount , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
+    TAPI::MD5_t , UUID      , QString()    , v.size(), v         , v.toString(),
     QString     , Sign      , QString()    , v.size(), v         , v.toString()
 );
 
@@ -139,9 +139,9 @@ struct stuAssetItem {
     qreal                           TotalPrice;
 
     struct {
-        QJsonObject   Additives;
+//        QJsonObject   Additives;
         UsageLimits_t Limits;
-        QJsonObject   Privs;
+//        QJsonObject   Privs;
     } Digested;
 
     QJsonObject toJson(bool _full);

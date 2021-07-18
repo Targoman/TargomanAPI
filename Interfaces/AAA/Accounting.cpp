@@ -381,15 +381,20 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;
-    qDebug() << "SubTotal(" << AssetItem.SubTotal << ")";
+    qDebug() << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
     this->digestPrivs(_JWT, AssetItem);
 
     this->applyAssetAdditives(_JWT, AssetItem, _orderAdditives);
-    qDebug() << "after applyAssetAdditives: SubTotal(" << AssetItem.SubTotal << ")";
+    qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
+
+    //-- --------------------------------
+    AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
+    AssetItem.TotalPrice = AssetItem.SubTotal;
+    qDebug() << "SubTotal(" << AssetItem.SubTotal << ")";
 
     //-- discount --------------------------------
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
@@ -619,28 +624,29 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     } //if discount
 
     //-- voucher --------------------------------
-    //1: find or create voucher
-    QVariantMap voucherInfo = SelectQuery(Voucher::instance())
-                              .where(???)
-                              .tryOne();
-
-    if (voucherInfo.isEmpty()) {
-        //create new voucher
-    }
-
-    //2: create voucher item
-    stuVoucherItem PreVoucherItem;
-    PreVoucherItem.UUID =
-
     ///TODO add ttl for order item
+
+    stuVoucherItem PreVoucherItem;
+    PreVoucherItem.Service = this->ServiceName;
+    //PreVoucherItem.OrderID
+    PreVoucherItem.Desc = AssetItem.slbName;
+    PreVoucherItem.UnitPrice = AssetItem.slbBasePrice;
+    PreVoucherItem.Qty = _qty;
+    PreVoucherItem.SubTotal = AssetItem.SubTotal;
+    PreVoucherItem.Discount = Discount;
+    PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
+    PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
+    PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
+    PreVoucherItem.UUID = clsSimpleCrypt::UUIDtoMD5();
+    //PreVoucherItem.Sign
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
         .addCol(tblAccountUserAssetsBase::uas_usrID)
         .addCol(tblAccountUserAssetsBase::uas_slbID)
-        .addCol(tblAccountUserAssetsBase::uas_vchID)
+//        .addCol(tblAccountUserAssetsBase::uas_vchID)
         .addCol(tblAccountUserAssetsBase::uasVoucherItemUUID)
 //        .addCol(tblAccountUserAssetsBase::uasPrefered)
-        .addCol(tblAccountUserAssetsBase::uasOrderDateTime)
+//        .addCol(tblAccountUserAssetsBase::uasOrderDateTime)
 //        .addCol(tblAccountUserAssetsBase::uasStatus)
     ;
 
@@ -648,10 +654,10 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     values = {
         { tblAccountUserAssetsBase::uas_usrID, currentUserID },
         { tblAccountUserAssetsBase::uas_slbID, AssetItem.slbID },
-        { tblAccountUserAssetsBase::uas_vchID, ??? },
-        { tblAccountUserAssetsBase::uasVoucherItemUUID, ??? },
+//        { tblAccountUserAssetsBase::uas_vchID, ??? },
+        { tblAccountUserAssetsBase::uasVoucherItemUUID, PreVoucherItem.UUID },
 //            { tblAccountUserAssetsBase::uasPrefered, ??? },
-        { tblAccountUserAssetsBase::uasOrderDateTime, DBExpression::NOW() },
+//        { tblAccountUserAssetsBase::uasOrderDateTime, DBExpression::NOW() },
 //            { tblAccountUserAssetsBase::uasStatus, },
     };
 
@@ -668,21 +674,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     qry.values(values);
 
     PreVoucherItem.OrderID = qry.execute(currentUserID);
-
-    PreVoucherItem.Service = this->ServiceName;
-    PreVoucherItem.Desc = AssetItem.slbName;
-    PreVoucherItem.UnitPrice = AssetItem.slbBasePrice;
-    PreVoucherItem.Qty = _qty;
-    PreVoucherItem.SubTotal = AssetItem.SubTotal;
-    PreVoucherItem.Discount = Discount;
-    PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
-    PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0) * 100;
-    PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
-
-
-
-
 
     ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
     /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
