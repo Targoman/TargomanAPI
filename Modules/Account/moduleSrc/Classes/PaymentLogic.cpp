@@ -26,9 +26,10 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
+//these 3 lines moved to Account.cpp for preventing not registered error:
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 
 namespace Targoman {
 namespace API {
@@ -50,7 +51,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
             opyMD5 = Result.spDirectOutputs().value("oMD5").toString();
             break;
         }catch(...){
-            if(++Retries > 3)
+            if (++Retries > 3)
                 throw;
         }
     }

@@ -28,9 +28,9 @@ namespace API {
 namespace Server {
 
 #define USE_ARG_AT(_i) \
-        InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-        gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
-        gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
+    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
+    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
 
 #define CLEAN_ARG_AT(_i) \
     InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
@@ -111,7 +111,7 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
 
         static auto parseArgValue = [ArgumentValue](const QString& _paramName, QString _value) -> QVariant {
             _value = _value.trimmed();
-            if((_value.startsWith('[') && _value.endsWith(']')) ||
+            if ((_value.startsWith('[') && _value.endsWith(']')) ||
                (_value.startsWith('{') && _value.endsWith('}'))){
                 QJsonParseError Error;
                 QJsonDocument JSON = QJsonDocument::fromJson(_value.toUtf8(), &Error);
@@ -168,17 +168,17 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
                 }
             }
 
-        if(ParamNotFound)
+        if (ParamNotFound)
             foreach (auto BodyArg, _bodyArgs) {
                 bool ConversionResult = true;
-                if(BodyArg.first == this->ParamNames.at(i) || (BodyArg.first.toInt(&ConversionResult) == i && ConversionResult)){
+                if (BodyArg.first == this->ParamNames.at(i) || (BodyArg.first.toInt(&ConversionResult) == i && ConversionResult)) {
                     ParamNotFound = false;
                     ArgumentValue = parseArgValue(this->ParamNames.at(i), BodyArg.second);
                     break;
                 }
             }
 
-        if(ParamNotFound){
+        if (ParamNotFound) {
             if(i < this->RequiredParamsCount)
                 throw exHTTPBadRequest(QString("Required parameter <%1> not specified").arg(this->ParamNames.at(i).constData()));
             else if (_isUpdateMethod)
@@ -186,19 +186,21 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
             else
                 Arguments.append(this->defaultValue(i));
             continue;
-        }else if(ArgumentValue.isValid() == false)
+        }
+        else if(ArgumentValue.isValid() == false)
             throw exHTTPBadRequest(QString("Invalid value for %1: no conversion to QVariant defined").arg(this->ParamNames.at(i).constData()));
 
-        if(FirstArgumentWithValue < 0)
+        if (FirstArgumentWithValue < 0)
             FirstArgumentWithValue = static_cast<qint8>(i);
         LastArgumentWithValue = static_cast<qint8>(i);
 
-        if(this->BaseMethod.parameterType(i) >= TAPI_BASE_USER_DEFINED_TYPEID){
-            Q_ASSERT(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID < gOrderedMetaTypeInfo.size());
+        if (this->BaseMethod.parameterType(i) >= TAPI_BASE_USER_DEFINED_TYPEID) {
+            Q_ASSERT(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID < gUserDefinedTypesInfo.size());
             Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
             Arguments.push_back(ArgumentValue);
-        }else{
+        }
+        else {
             Q_ASSERT(this->BaseMethod.parameterType(i) < gOrderedMetaTypeInfo.size());
             Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.parameterType(i)) != nullptr);
 
@@ -206,19 +208,19 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
         }
     }
 
-    if(FirstArgumentWithValue < 0)
+    if (FirstArgumentWithValue < 0)
         Arguments.clear();
     else if (LastArgumentWithValue < Arguments.size() - 1)
         Arguments = Arguments.mid(0, LastArgumentWithValue + 1);
 
     QVariant Result;
     QString  CacheKey;
-    if(this->Cache4Secs != 0 || this->Cache4SecsCentral != 0)
+    if (this->Cache4Secs != 0 || this->Cache4SecsCentral != 0)
         CacheKey = this->makeCacheKey(Arguments);
 
-    if(this->Cache4Secs != 0){
+    if (this->Cache4Secs != 0) {
         QVariant CachedValue =  InternalCache::storedValue(CacheKey);
-        if(CachedValue.isValid()){
+        if (CachedValue.isValid()) {
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
             return CachedValue;
         }
@@ -232,21 +234,22 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
         }
     }
 
-    if(this->BaseMethod.returnType() >= TAPI_BASE_USER_DEFINED_TYPEID){
-        Q_ASSERT(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID < gOrderedMetaTypeInfo.size());
+    if (this->BaseMethod.returnType() >= TAPI_BASE_USER_DEFINED_TYPEID) {
+        Q_ASSERT(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID < gUserDefinedTypesInfo.size());
         Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
         Result = gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID)->invokeMethod(this, Arguments);
-    }else{
+    }
+    else {
         Q_ASSERT(this->BaseMethod.returnType() < gOrderedMetaTypeInfo.size());
         Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.returnType()) != nullptr);
 
         Result = gOrderedMetaTypeInfo.at(this->BaseMethod.returnType())->invokeMethod(this, Arguments);
     }
 
-    if(this->Cache4Secs != 0)
+    if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, Result, this->Cache4Secs);
-    else if(this->Cache4SecsCentral != 0)
+    else if (this->Cache4SecsCentral != 0)
         CentralCache::setValue(CacheKey, Result, this->Cache4SecsCentral);
 
     gServerStats.APICallsStats[this->BaseMethod.name()].inc();

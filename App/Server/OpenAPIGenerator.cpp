@@ -211,7 +211,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         auto addParamSpecs = [APIObject, paramName, HTTPMethod, fillParamTypeSpec, mapTypeToValidOpenAPIType](
                              QJsonArray& _parameters, quint8 _i, QStringList* _pksByPathsStorage) -> void {
             QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(_i));
-            if(   ParamType == PARAM_HEADERS
+            if (   ParamType == PARAM_HEADERS
                   || ParamType == PARAM_REMOTE_IP
                   || ParamType == PARAM_COOKIES
                   || ParamType == PARAM_JWT
@@ -310,7 +310,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                 QJsonObject Properties;
                 for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
                     QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(i));
-                    if(   ParamType == PARAM_HEADERS
+                    if (   ParamType == PARAM_HEADERS
                           || ParamType == PARAM_REMOTE_IP
                           || ParamType == PARAM_COOKIES
                           || ParamType == PARAM_JWT
@@ -332,7 +332,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                             else
                                 ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
 
-                            if(!ArgSpecs){
+                            if (!ArgSpecs){
                                 Item.registerTypeIfNotRegisterd(APIObject->Parent);
                                 if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                                     ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
@@ -502,7 +502,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
             }*/
         }
 
-        if(!APIObject->requiresPrimaryKey() || HTTPMethod == "get")
+        if (!APIObject->requiresPrimaryKey() || HTTPMethod == "get")
             add2Paths(PathsObject, createPathInfo(nullptr), nullptr);
 
         QList<clsORMField> Filters = APIObject->Parent->filterItems();

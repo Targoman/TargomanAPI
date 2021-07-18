@@ -38,6 +38,7 @@ SOURCES += \
     AAA/Authorization.cpp \
     AAA/PrivHelpers.cpp \
     Common/GenericTypes.cpp \
+    Common/base.cpp \
     ORM/APIQueryBuilders.cpp \
     ORM/QueryBuilders.cpp \
     ORM/clsORMField.cpp \

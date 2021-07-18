@@ -47,16 +47,22 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserGender);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserApproval);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAuditableStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
+
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI, stuMultiJWT,
-    [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn",_value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+    TAPI,
+    stuMultiJWT,
+    [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 );
 
 namespace Targoman {
@@ -130,13 +136,13 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
         );
 
 TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
-                                     QString _login,
-                                     TAPI::MD5_t _pass,
-                                     QString _salt,
-                                     TAPI::CommaSeparatedStringList_t _services,
-                                     bool _rememberMe,
-                                     TAPI::JSON_t _sessionInfo,
-                                     TAPI::MD5_t _fingerprint)
+                                    QString _login,
+                                    TAPI::MD5_t _pass,
+                                    QString _salt,
+                                    TAPI::CommaSeparatedStringList_t _services,
+                                    bool _rememberMe,
+                                    TAPI::JSON_t _sessionInfo,
+                                    TAPI::MD5_t _fingerprint)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -365,7 +371,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
                                               clsJWT(_JWT).usrID(),
                                               TAPI::ORMFields_t({
-                                                  { tblVoucher::vch_usrID,clsJWT(_JWT).usrID() },
+                                                  { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
                                                   { tblVoucher::vchDesc, _preVoucher.toJson() },
                                                   { tblVoucher::vchTotalAmount, _preVoucher.ToPay }
                                               })); //.toULongLong();

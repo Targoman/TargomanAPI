@@ -40,14 +40,15 @@ Voucher::Voucher() :
     clsTable(
         AAASchema,
         tblVoucher::Name,
-        {///< ColName                          Type                 Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
+        {///< ColName                          Type                     Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
             { tblVoucher::vchID,               ORM_PRIMARY_KEY64 },
-            { tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t), QFV,                        QAuto,     UPNone },
-            { tblVoucher::vch_usrID,           S(quint64),          QFV.integer().minValue(1),  QRequired, UPNone },
-            { tblVoucher::vchDesc,             S(QString),          QFV.maxLenght(500),         QRequired, UPNone, false, false },
-            { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,              TAPI::enuVoucherType::Expense, UPNone },
-            { tblVoucher::vchTotalAmount,      S(quint64),          QFV,                        0,         UPNone },
-            { tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,            TAPI::enuVoucherStatus::New, UPStatus },
+            { tblVoucher::vchCreationDateTime, S(TAPI::DateTime_t),     QFV,                        QAuto,     UPNone },
+            { tblVoucher::vch_usrID,           S(quint64),              QFV.integer().minValue(1),  QRequired, UPNone },
+            { tblVoucher::vchDesc,             S(TAPI::DBMediumText_t), QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
+//            { tblVoucher::vchDesc,             S(QString), QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
+            { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                  TAPI::enuVoucherType::Expense, UPNone },
+            { tblVoucher::vchTotalAmount,      S(quint64),              QFV,                        0,         UPNone },
+            { tblVoucher::vchStatus,           S(TAPI::enuVoucherStatus::Type), QFV,                TAPI::enuVoucherStatus::New, UPStatus },
         },
         {///< Col                     Reference Table              ForeignCol
             { tblVoucher::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::usrID },

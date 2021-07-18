@@ -1598,7 +1598,7 @@ public:
                 AggFunction.chop(2);
                 AggFunction += "(";
                 if (_col.TrueValue.isValid())
-                    AggFunction += "IF(";
+                    AggFunction += "IF (";
                 if (SQLPrettyLen && _col.Condition.hasMany())
                     AggFunction += "\n" + QString(SQLPrettyLen, ' ') + " ";
                 parts.append(AggFunction);
@@ -2458,6 +2458,18 @@ public:
                     this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
                     extraBaseColsValues.append(baseCol.toDB(_currentUserID));
                 }
+                else if (baseCol.defaultValue() == QNow)
+                {
+//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << "NOW()";
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+                    extraBaseColsValues.append(DBExpression::NOW().toString());
+                }
+                else if (baseCol.defaultValue() != QNull)
+                {
+//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << baseCol.defaultValue();
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+                    extraBaseColsValues.append(baseCol.toDB(baseCol.defaultValue()));
+                }
             }
         }
 
@@ -2476,9 +2488,13 @@ public:
 
                             QVariant val = itr.value();
 
+                            if ((val.userType() == QMetaType::QJsonObject)
+                                    || (val.userType() == QMetaType::QJsonArray)
+                                )
+                                val = QJsonDocument().fromVariant(val).toJson(QJsonDocument::Compact).constData();
+
                             if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                                 baseCol.validate(val);
-
 
                             if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
                                 QString v = makeValueAsSQL(val, _useBinding == false, &baseCol);

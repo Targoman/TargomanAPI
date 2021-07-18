@@ -354,7 +354,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
-  if(!Ok || !UserPackageID )
+  if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
 
   this->callSP("sp_UPDATE_setAsPrefered", {

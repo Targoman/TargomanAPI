@@ -68,7 +68,7 @@ bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _
 
 void checkPriv(const TAPI::JWT_t &_jwt, const QStringList &_requiredAccess, bool _isSelf)
 {
-    if(!hasPriv(_jwt, _requiredAccess, _isSelf))
+    if (!hasPriv(_jwt, _requiredAccess, _isSelf))
         throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
 }
 

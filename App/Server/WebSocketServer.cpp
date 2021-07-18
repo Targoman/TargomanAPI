@@ -143,7 +143,7 @@ void WebSocketServer::processTextMessage(QString _message)
                 return sendError(qhttp::ESTATUS_BAD_REQUEST, "No API path specified");
 
             clsAPIObject* APIObject = RESTAPIRegistry::getWSAPIObject (API);
-            if(!APIObject) {
+            if (!APIObject) {
                 QString Path = API;
                 if(Path.endsWith('/'))
                     Path.truncate(Path.size() - 1);
@@ -152,7 +152,7 @@ void WebSocketServer::processTextMessage(QString _message)
                 APIObject = RESTAPIRegistry::getWSAPIObject(Path);
             }
 
-            if(!APIObject)
+            if (!APIObject)
                 return sendError(qhttp::ESTATUS_NOT_FOUND, "WS API not found ("+API+")");
 
             QVariantMap APIArgs = JSONReqObject.begin().value().toObject().toVariantMap();

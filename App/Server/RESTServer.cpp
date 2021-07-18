@@ -89,7 +89,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 
 
     QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con){
-        if(!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
+        if (!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
             _con->killConnection();
     });
 
@@ -141,7 +141,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
     if(gWSServer.isActive()){
         QObject::connect(&gWSServer, &WebSocketServer::sigNewConnection, [this](QWebSocket* _con){
-            if(!validateConnection (_con->peerAddress(), _con->peerPort()))
+            if (!validateConnection (_con->peerAddress(), _con->peerPort()))
                 _con->close(QWebSocketProtocol::CloseCodePolicyViolated,"IP banned");
         });
 

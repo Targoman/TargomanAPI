@@ -78,7 +78,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
         [](NULLABLE_TYPE(_baseType) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
     template<> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
-            if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
+            if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
             NULLABLE_VAR(_baseType, Value); \
             Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
@@ -182,7 +182,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 break;
             }
 
-        if(!Found)
+        if (!Found)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
         for (int i=0; i<_module->metaObject()->methodCount(); ++i)
@@ -195,7 +195,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 break;
             }
 
-        if(!Found)
+        if (!Found)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
 
@@ -405,13 +405,13 @@ QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showPa
 }
 
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input){
-    if(_typeID == 0 || _typeID == QMetaType::User || _typeID == QMetaType::User)
+    if(_typeID == 0 || _typeID == QMetaType::User) // || _typeID == QMetaType::User)
         return  "is not registered with Qt MetaTypes";
     if(_typeID < TAPI_BASE_USER_DEFINED_TYPEID && (_typeID >= gOrderedMetaTypeInfo.size() || gOrderedMetaTypeInfo.at(_typeID) == nullptr))
         return "is complex type and not supported";
 
     if(_typeID >= TAPI_BASE_USER_DEFINED_TYPEID){
-        if((_typeID - TAPI_BASE_USER_DEFINED_TYPEID >= gUserDefinedTypesInfo.size() ||
+        if ((_typeID - TAPI_BASE_USER_DEFINED_TYPEID >= gUserDefinedTypesInfo.size() ||
             gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID) == nullptr))
             return "is user defined but not registered";
 
@@ -423,10 +423,10 @@ QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input){
                         QMetaType::typeName(_typeID));
 
         if(_validate4Input){
-            if(!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasFromVariantMethod())
+            if (!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasFromVariantMethod())
                 return "has no fromVariant lambda so can not be used as input";
         }else{
-            if(!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasToVariantMethod())
+            if (!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasToVariantMethod())
                 return "has no toVariant lambda so can not be used as output";
         }
     }

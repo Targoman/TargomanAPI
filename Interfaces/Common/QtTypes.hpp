@@ -72,13 +72,13 @@ namespace TAPI { \
 namespace Targoman { namespace API { \
 template<> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral, false, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
     bool Result; *_argStorage = new _numericType; *(reinterpret_cast<_numericType*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
-    if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
+    if (!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
 template<> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
     bool Result = true; *_argStorage = new NULLABLE_TYPE(_numericType); \
     if(_val.isValid() && _val.isNull() == false) **(reinterpret_cast<NULLABLE_TYPE(_numericType)*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
-    if(!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
+    if (!Result) throw exHTTPBadRequest("Invalid value specified for parameter:: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
 }} \

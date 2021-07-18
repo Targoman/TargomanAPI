@@ -31,7 +31,7 @@
 #include "Classes/Defs.hpp"
 
 namespace TAPI {
-    struct stuMultiJWT{
+    struct stuMultiJWT {
         TAPI::EncodedJWT_t Login;
         TAPI::EncodedJWT_t Session;
     };

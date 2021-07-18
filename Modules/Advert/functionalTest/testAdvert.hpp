@@ -135,9 +135,9 @@ private slots:
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
-                                    {"login", UT_AdminUserEmail},
-                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
-                                    {"salt", 1234},
+                                    { "login", UT_AdminUserEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", "1234" },
                                 }).toJsonObject()).size());
 
         gEncodedAdminJWT = MultiJWT.value("ssn").toString();
@@ -484,24 +484,24 @@ private slots:
                 { "preVoucher",     {} },
                 { "callBack",       "http://www.a.com" },
                 { "walletID",       9988 },
-                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+                { "gateway",        "Zibal" }, //TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
             }
         );
     }
 
-//    void finalizeBasket() {
-//        QVariant result = callAdminAPI(
-//            POST,
-//            "Account/finalizeBasket",
-//            {},
-//            {
-//                { "preVoucher",     lastPreVoucher },
-//                { "callBack",       "callback string" },
-//                { "walletID",       9988 },
-//                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
-//            }
-//        );
-//    }
+    void finalizeBasket() {
+        QVariant result = callAdminAPI(
+            POST,
+            "Account/finalizeBasket",
+            {},
+            {
+                { "preVoucher",     lastPreVoucher },
+                { "callBack",       "http://www.a.com" },
+                { "walletID",       9988 },
+                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+            }
+        );
+    }
 
     void cleanupSaleableData() {
     }

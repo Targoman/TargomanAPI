@@ -139,7 +139,7 @@
 
 extern QString toCammel(const QString& n);
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to) \
-    if([](auto v)->bool{return i;}(n)) Obj[toCammel(#n)]=[](auto v)->QJsonValue{return to;}(n);
+    if ([](auto v)->bool{return i;}(n)) Obj[toCammel(#n)]=[](auto v)->QJsonValue{return to;}(n);
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(t, n,d,i,to,fr)     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to);
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON2(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON3(t, n,d,i,to,fr,...) TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELEPER_VARIANTSTRUCT_TOJSON2(__VA_ARGS__)
@@ -262,7 +262,7 @@ namespace Targoman {namespace API { \
         [](NULLABLE_TYPE(_namespace::_enum::Type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
     template<> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
-            if(!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
+            if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
             NULLABLE_VAR(_namespace::_enum::Type, Value); \
             Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
             return Value; \
@@ -294,26 +294,27 @@ namespace Targoman {namespace API { \
 /************************************************************/
 #define INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum) \
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
-        _namespace, _enum, \
-        [](_namespace::_enum::Type _value) -> QVariant{return _namespace::_enum::toStr(_value);}, \
-        [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_enum::Type { \
+        /* namespace          */ _namespace, \
+        /* enum               */ _enum, \
+        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant{return _namespace::_enum::toStr(_value);}, \
+        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_enum::Type { \
             if(_namespace::_enum::options().contains(_value.toString())) return _namespace::_enum::toEnum(_value.toString()); \
             else try { return _namespace::_enum::toEnum(_value.toString(), true); } catch(...) { \
               throw exHTTPBadRequest(QString("%1(%2) is not a valid %3").arg( \
                       _paramName.size() ? _paramName.constData() : _value.toString()).arg(_value.toString()).arg( \
                       QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
         }}, \
-        [](const QList<ORM::clsORMField>&) -> QString {return QString("One of (%1)").arg(_namespace::_enum::options().join('|'));}, \
-        [](const QVariant& _value) -> QVariant { \
+        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString {return QString("One of (%1)").arg(_namespace::_enum::options().join('|'));}, \
+        /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \
             return _namespace::_enum::toStr(static_cast<_namespace::_enum::Type>(_value.toString().toLatin1().at(0))); \
-        },\
-        [](const QVariant& _value) -> QVariant { \
+        }, \
+        /* fromORMValueLambda */ [](const QVariant& _value) -> QVariant { \
             if(_namespace::_enum::options().contains(_value.toString()) == false) \
                 throw exHTTPBadRequest(QString("%1 is not a valid %2.").arg(_value.toString()).arg( \
                         QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
             return QString(_namespace::_enum::toEnum(_value.toString())); \
         }, \
-        []() -> QStringList { return _namespace::_enum::options();} \
+        /* lambdaOptions      */ []() -> QStringList { return _namespace::_enum::options();} \
     )
 
 /************************************************************/

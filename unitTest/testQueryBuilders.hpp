@@ -528,7 +528,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colB1 AS alias_colB1
                  , COUNT(IF(t1.colB1 = 123,1,NULL)) AS countif_colB
-                 , COUNT(IF(
+                 , COUNT(IF (
                    t1.colB1 = 123
                AND t1.colC1 LIKE 'test it'
                XOR (
@@ -536,7 +536,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 OR t1.colG1 = 106
                    )
                    ,1,NULL)) AS countif_colB1
-                 , SUM(IF(
+                 , SUM(IF (
                    t1.colC1 > 123
                AND t2.colD2 = 456
                    ,10,20)) AS sumif__t1_colC1__t2_colD2

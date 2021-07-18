@@ -271,7 +271,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
         for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
 
-        if(!this->Request)
+        if (!this->Request)
           throw exHTTPGone("Seems that client has gone");
 
         qhttp::THeaderHash Headers = this->Request->headers();
@@ -355,7 +355,7 @@ void clsRequestHandler::findAndCallAPI(QString _api)
     QString ExtraAPIPath;
 
     clsAPIObject* APIObject = RESTAPIRegistry::getAPIObject(this->Request->methodString(), _api);
-    if(!APIObject) {
+    if (!APIObject) {
         QString Path = _api;
         if(Path.endsWith('/'))
             Path.truncate(Path.size() - 1);
@@ -364,7 +364,7 @@ void clsRequestHandler::findAndCallAPI(QString _api)
         APIObject = RESTAPIRegistry::getAPIObject(this->Request->methodString(), Path);
     }
 
-    if(!APIObject)
+    if (!APIObject)
         return this->sendError(qhttp::ESTATUS_NOT_FOUND,
                                "API not found("+this->Request->methodString()+": "+_api+")",
                                true);
@@ -489,7 +489,7 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
 
 void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection){
 
-    if(!this->Request->connection()->tcpSocket())
+    if (!this->Request->connection()->tcpSocket())
       return;
     QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()?
                                                             QJsonDocument::Indented : QJsonDocument::Compact);
@@ -541,7 +541,7 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
             std::string Dummy;
 
             while(pContentDisposition && *pContentDisposition != '\0'){
-                if(*pContentDisposition == StopChar)
+                if (*pContentDisposition == StopChar)
                     switch(Looking4){
                     case L4Type:
                         if(strncmp(pBufferStart, "form-data", static_cast<size_t>(pContentDisposition - pBufferStart)))
@@ -578,7 +578,7 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
                         pBufferStart = pContentDisposition+2;
                         break;
                     }
-                else if(*pContentDisposition == '\r')
+                else if (*pContentDisposition == '\r')
                     break;
                 ++pContentDisposition;
             }

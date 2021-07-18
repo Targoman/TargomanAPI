@@ -23,8 +23,15 @@
 #ifndef TAPI_BASE_H
 #define TAPI_BASE_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <execinfo.h>
+#include <cxxabi.h>
+
 #define TAPI_DISABLE_COPY(Class) \
     Q_DISABLE_COPY(Class) \
     Class &operator=(const Class) Q_DECL_EQ_DELETE;
+
+void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63);
 
 #endif // TAPI_BASE_H

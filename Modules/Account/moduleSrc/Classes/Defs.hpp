@@ -64,8 +64,6 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
 
 }
 
-
-
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);

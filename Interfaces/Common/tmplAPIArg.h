@@ -42,7 +42,7 @@ public:
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final{
         *_argStorage = nullptr;
         if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
-                throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName);
+                throw exHTTPBadRequest("Invalid value specified for parameter.: " + _paramName);
         *_argStorage = new _itmplType;
         *(reinterpret_cast<_itmplType*>(*_argStorage)) =
                 this->fromVariantLambda == nullptr ? _val.value<_itmplType>() : this->fromVariantLambda(_val, _paramName);
@@ -57,7 +57,7 @@ public:
 
     inline void validate(const QVariant& _val, const QByteArray& _paramName) const final {
         if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
-                throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName);
+                throw exHTTPBadRequest("Invalid value specified for parameter.:: " + _paramName);
         if(this->fromVariantLambda)
             this->fromVariantLambda(_val, _paramName);
     }
@@ -110,7 +110,7 @@ public:
 private:
     tmplAPIArg(const char* _typeStr) : intfAPIArgManipulator(_typeStr) {
         qRegisterMetaType<_itmplType>();
-        if(!_isQtType)
+        if (!_isQtType)
             registerUserDefinedType(_typeStr, this);
     }
 
