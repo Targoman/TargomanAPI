@@ -43,6 +43,24 @@ using namespace Targoman::API::AAA::Accounting;
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::Advertisement;
 
+
+namespace TAPI {
+TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
+                     Zibal    = 'Z',
+                     ZarrinPal= 'L',
+                     NextPay  = 'N',
+                     Pardano  = 'O',
+                     Parsian  = 'P',
+                     Mellat   = 'M',
+                     Pasargad = 'G',
+                     Saman    = 'S',
+                     AsanPardakht = 'A',
+                     Gap      = 'W',
+                     VISA     = 'V',
+                     MasterCard= 'C',
+                                )
+}
+
 class testAdvert: public clsBaseTest
 {
     Q_OBJECT
@@ -51,6 +69,7 @@ class testAdvert: public clsBaseTest
     QVariant bannerProductID;
     QVariant bannerSaleableID;
     QVariant couponID;
+    QVariant lastPreVoucher;
 
 private slots:
     void initTestCase() {
@@ -284,6 +303,17 @@ private slots:
         qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
     }
 
+    void initializeLastPreVoucher() {
+        lastPreVoucher = QVariantMap({
+//              { "items", {} },
+//              { "prize", {} },
+//              { "summary", "" },
+//              { "round", 0 },
+//              { "toPay", 0 },
+//              { "sign", 0 }
+        });
+    }
+
     void addToBasket_invalid_saleable_code() {
         QVariant result = callAdminAPI(
             POST,
@@ -314,7 +344,7 @@ private slots:
 //                { "discountCode", "zzzzzzzzzzzzzzzzzz" },
                 { "referrer", "" },
                 { "extraRefererParams", {} },
-                { "lastPreVoucher", {} },
+                { "lastPreVoucher", lastPreVoucher },
             }
         );
     }
@@ -333,7 +363,7 @@ private slots:
                 { "discountCode", "zzzzzzzzzzzzzzzzzz" },
                 { "referrer", "" },
                 { "extraRefererParams", {} },
-                { "lastPreVoucher", {} },
+                { "lastPreVoucher", lastPreVoucher },
             }
         );
     }
@@ -407,10 +437,8 @@ private slots:
         qDebug() << "--------- couponID: " << couponID;
     }
 
-    void addToBasket_valid_coupon_code() {
-//        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
-//        TAPI::stuPreVoucher voucher
-        QVariant result = callAdminAPI(
+    void addToBasket_valid_coupon_code_1() {
+        lastPreVoucher = callAdminAPI(
             POST,
             "Advert/addToBasket",
             {},
@@ -421,18 +449,59 @@ private slots:
                 { "discountCode",       "cpn-code-aaa" },
                 { "referrer",           "" },
                 { "extraRefererParams", {} },
-                { "lastPreVoucher",     QVariantMap({
-                      { "voucherID", 0 },
-                      { "items", {} },
-                      { "prize", {} },
-                      { "summary", "hello from test" },
-                      { "round", 123 },
-                      { "toPay", 456 },
-                      { "sign", 789 }
-                }) },
+                { "lastPreVoucher",     lastPreVoucher },
+            }
+        );
+
+//        qDebug() << "--------- lastPreVoucher" << lastPreVoucher;
+    }
+
+    void addToBasket_valid_coupon_code_2() {
+        lastPreVoucher = callAdminAPI(
+            POST,
+            "Advert/addToBasket",
+            {},
+            {
+                { "saleableCode",       "p123-s456" },
+                { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                { "qty",                1 },
+                { "discountCode",       "cpn-code-aaa" },
+                { "referrer",           "" },
+                { "extraRefererParams", {} },
+                { "lastPreVoucher",     lastPreVoucher },
+            }
+        );
+
+//        qDebug() << "--------- lastPreVoucher" << lastPreVoucher;
+    }
+
+    void finalizeBasket_empty_items() {
+        QVariant result = callAdminAPI(
+            POST,
+            "Account/finalizeBasket",
+            {},
+            {
+                { "preVoucher",     {} },
+                { "callBack",       "http://www.a.com" },
+                { "walletID",       9988 },
+                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
             }
         );
     }
+
+//    void finalizeBasket() {
+//        QVariant result = callAdminAPI(
+//            POST,
+//            "Account/finalizeBasket",
+//            {},
+//            {
+//                { "preVoucher",     lastPreVoucher },
+//                { "callBack",       "callback string" },
+//                { "walletID",       9988 },
+//                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+//            }
+//        );
+//    }
 
     void cleanupSaleableData() {
     }

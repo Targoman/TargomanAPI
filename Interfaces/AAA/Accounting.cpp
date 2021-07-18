@@ -623,7 +623,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
         }
     } //if discount
 
-    //-- voucher --------------------------------
+    //-- new pre voucher item --------------------------------
     ///TODO add ttl for order item
 
     stuVoucherItem PreVoucherItem;
@@ -676,37 +676,24 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     PreVoucherItem.OrderID = qry.execute(currentUserID);
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
+    //-- --------------------------------
     ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
     /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
     /// return: amount of using coupon
 
-/*    PreVoucherItem.Qty = _qty;
-    PreVoucherItem.UnitPrice = SaleableInfo.value(tblAccountSaleablesBase::slbPrice).toUInt();
-    PreVoucherItem.SubTotal = PreVoucherItem.UnitPrice * PreVoucherItem.Qty;
-    PreVoucherItem.Discount = Discount;
-    if (Discount.Amount)
-        switch(Discount.Type){
-        case TAPI::enuDiscountType::Free: PreVoucherItem.DisAmount = PreVoucherItem.SubTotal; break;
-        case TAPI::enuDiscountType::Amount: PreVoucherItem.DisAmount = qMin(PreVoucherItem.SubTotal, Discount.Amount); break;
-        case TAPI::enuDiscountType::Percent: PreVoucherItem.DisAmount = qMin(Discount.MaxAmount, static_cast<quint32>(floor(PreVoucherItem.SubTotal * Discount.Amount / 100.)));
-        }
-    //TODO rename Tax to VAT
-    PreVoucherItem.VATPercent = SaleableInfo.value(tblAccountSaleablesBase::slbVAT).toUInt();
-    PreVoucherItem.VATAmount = ((PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100);
-    PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
-    */
-
+    //-- add to the last pre voucher --------------------------------
     _lastPreVoucher.Items.append(PreVoucherItem);
     _lastPreVoucher.Summary = _lastPreVoucher.Items.size() > 1 ?
                                   QString("%1 items").arg(_lastPreVoucher.Items.size()) :
                                   QString("%1 of %2").arg(PreVoucherItem.Qty).arg(PreVoucherItem.Desc);
-    qint64 FinalPrice = PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount;
+    qint64 FinalPrice = _lastPreVoucher.Round + _lastPreVoucher.ToPay
+                        + (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
     if (FinalPrice < 0)
         throw exHTTPInternalServerError("Final amount computed negative!");
     _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign =  QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
     return _lastPreVoucher;
 }

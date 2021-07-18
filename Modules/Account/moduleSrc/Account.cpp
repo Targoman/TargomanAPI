@@ -362,7 +362,6 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
     ///TODO reserve saleables before returning voucher
     ///TODO implement overall coupon at the end of checkout steps
 
-//    Voucher.ID   = Voucher::instance().create(clsJWT(_JWT).usrID(),
     Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
                                               clsJWT(_JWT).usrID(),
                                               TAPI::ORMFields_t({
@@ -378,7 +377,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                                                    {"iVoucherID", Voucher.ID},
                                                });
             RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
-            if(RemainingAfterWallet < 0)
+            if (RemainingAfterWallet < 0)
                 throw exHTTPInternalServerError("Remaining after wallet transaction is negative!");
         }
 
@@ -386,10 +385,12 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
             ///TODO rename OFFLINE to COD (as constant)
             if (_callBack == "OFFLINE") {
                 //Do nothing as it will be created after information upload.
-            } else {
+            }
+            else {
                 Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, _preVoucher.Summary, RemainingAfterWallet, _callBack);
             }
-        } else {
+        }
+        else {
             return processVoucher(Voucher.ID);
         }
     } catch (...) {
