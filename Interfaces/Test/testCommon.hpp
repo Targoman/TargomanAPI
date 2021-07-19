@@ -18,7 +18,9 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #ifndef TESTCOMMON_HPP
 #define TESTCOMMON_HPP
 
@@ -85,10 +87,11 @@ extern quint64 gUserID;
 extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
-class clsBaseTest: public QObject {
+class clsBaseTest : public QObject {
 protected:
-    void initUnitTestData(bool _createUsers=true) {
-        deleteOldTestData();
+    void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true) {
+        if (_deleteOldTestData)
+            deleteOldTestData();
 
         clsDAC DAC;
         clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?",
@@ -156,14 +159,16 @@ private:
     void deleteOldTestData() { //bool _createUsers=false) {
         clsDAC DAC;
 
-        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", {UT_NormalToken, UT_AdminToken});
-        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", {UT_ServiceName});
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail=? OR usrEmail=?", {UT_UserEmail, UT_AdminUserEmail});
+        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", { UT_NormalToken, UT_AdminToken });
+        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", { UT_ServiceName });
 
-        DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_AdminUserEmail});
-        DAC.execQuery("", "DELETE FROM tblUser WHERE usrEmail=?", {UT_UserEmail});
+//        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
 
-        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
+        DAC.execQuery("", "UPDATE AAA.tblRoles SET rolStatus='R' WHERE rolName IN(?,?)", { UT_ServiceRoleName, UT_RoleName });
+
+//        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
+//        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
     }
 
     QVariant callAPIImpl(QString _encodedJWT , HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){

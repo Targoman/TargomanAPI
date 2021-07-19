@@ -77,19 +77,32 @@ private slots:
     }
 
     void cleanupTestCase() {
-//        cleanupUnitTestData();
+        cleanupUnitTestData();
     }
 
-    void Signup(){
+    void Signup_user() {
         QVERIFY((gUserID = callAPI(PUT,
-                                        "Account/signup", {}, {
-                                            {"emailOrMobile", UT_UserEmail},
-                                            {"name", "unit"},
-                                            {"family", "test"},
-                                            {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                            {"role", UT_RoleName}
-                                        }).toMap().value("usrID").toULongLong()) > 0);
+                                   "Account/signup", {}, {
+                                       {"emailOrMobile", UT_UserEmail},
+                                       {"name", "unit"},
+                                       {"family", "test"},
+                                       {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
+                                       {"role", UT_RoleName}
+                                   }).toMap().value("usrID").toULongLong()) > 0);
+    }
 
+    void Signup_user_again() {
+        QVERIFY((gUserID = callAPI(PUT,
+                                   "Account/signup", {}, {
+                                       {"emailOrMobile", UT_UserEmail},
+                                       {"name", "unit"},
+                                       {"family", "test"},
+                                       {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
+                                       {"role", UT_RoleName}
+                                   }).toMap().value("usrID").toULongLong()) > 0);
+    }
+
+    void Signup_admin() {
         QVERIFY((gAdminUserID = callAPI(PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
@@ -100,10 +113,10 @@ private slots:
                                         }).toMap().value("usrID").toULongLong()) > 0);
 
         clsDAC DAC;
-        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
+        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, gAdminUserID });
     }
 
-    void ApproveEmail(){
+    void ApproveEmail_user() {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
@@ -117,7 +130,7 @@ private slots:
                         }).toBool());
     }
 
-    void ApproveAdminEmail() {
+    void ApproveEmail_admin() {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
@@ -131,7 +144,7 @@ private slots:
                         }).toBool());
     }
 
-    void Login() {
+    void Login_admin() {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
@@ -146,7 +159,8 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
-/*
+
+    /*
     void createDiscount() {
         callAdminAPI(
             PUT,
@@ -489,19 +503,19 @@ private slots:
         );
     }
 
-    void finalizeBasket() {
-        QVariant result = callAdminAPI(
-            POST,
-            "Account/finalizeBasket",
-            {},
-            {
-                { "preVoucher",     lastPreVoucher },
-                { "callBack",       "http://www.a.com" },
-                { "walletID",       9988 },
-                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
-            }
-        );
-    }
+//    void finalizeBasket() {
+//        QVariant result = callAdminAPI(
+//            POST,
+//            "Account/finalizeBasket",
+//            {},
+//            {
+//                { "preVoucher",     lastPreVoucher },
+//                { "callBack",       "http://www.a.com" },
+//                { "walletID",       9988 },
+//                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+//            }
+//        );
+//    }
 
     void cleanupSaleableData() {
     }

@@ -32,6 +32,30 @@ namespace AAA {
 
 using namespace ORM;
 
+BlockingRules::BlockingRules() :
+    clsTable(
+        AAASchema,
+        tblBlockingRules::Name,
+        {///< ColName                                Type                 Validation                       Default   UpBy     Sort   Filter Self  Virt   PK
+            { tblBlockingRules::blrID,               ORM_PRIMARY_KEY64} ,
+            { tblBlockingRules::blr_ipbIP,           S(quint32),          QFV.integer().minValue(1),       QNull,    UPAdmin },
+            { tblBlockingRules::blr_ipIPReadable,    S(TAPI::IPv4_t),     QFV,                             QInvalid, UPNone,  false, false },
+            { tblBlockingRules::blrStartingTime,     S(TAPI::DateTime_t), QFV,                             QNull,    UPNone,  true },
+            { tblBlockingRules::blrEndingTime,       S(TAPI::DateTime_t), QFV,                             QNull,    UPAdmin },
+            { tblBlockingRules::blrCause,            S(QString),          QFV,                             QNull,    UPAdmin, false, false },
+            { tblBlockingRules::blrStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { tblBlockingRules::blrCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblBlockingRules::blrCreationDateTime, ORM_CREATED_ON },
+            { tblBlockingRules::blrUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                                    Reference Table              ForeignCol          Rename     LeftJoin
+            ORM_RELATION_OF_CREATOR(tblBlockingRules::blrCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblBlockingRules::blrUpdatedBy_usrID),
+        }
+    )
+{
+}
+
 QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -62,28 +86,6 @@ bool BlockingRules::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-
-BlockingRules::BlockingRules() :
-    clsTable(AAASchema,
-              tblBlockingRules::Name,
-              { ///<ColName                             Type                Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblBlockingRules::blrID,               ORM_PRIMARY_KEY64},
-                {tblBlockingRules::blr_ipbIP,           S(quint32),         QFV.integer().minValue(1),       QNull,    UPAdmin},
-                {tblBlockingRules::blr_ipIPReadable,    S(TAPI::IPv4_t),    QFV,                             QInvalid, UPNone,false,false},
-                {tblBlockingRules::blrStartingTime,     S(TAPI::DateTime_t),QFV,                             QNull,    UPNone, true},
-                {tblBlockingRules::blrEndingTime,       S(TAPI::DateTime_t),QFV,                             QNull,    UPAdmin},
-                {tblBlockingRules::blrCause,            S(QString),         QFV,                             QNull,    UPAdmin,false,false},
-                {tblBlockingRules::blrCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblBlockingRules::blrCreationDateTime, ORM_CREATED_ON},
-                {tblBlockingRules::blrUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblBlockingRules::blrStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active,UPStatus},
-              },
-              { ///< Col                               Reference Table              ForeignCol          Rename     LeftJoin
-                ORM_RELATION_OF_CREATOR(tblBlockingRules::blrCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblBlockingRules::blrUpdatedBy_usrID),
-              })
-{
 }
 
 }

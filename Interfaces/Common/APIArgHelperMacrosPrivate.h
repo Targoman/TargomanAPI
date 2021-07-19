@@ -296,25 +296,35 @@ namespace Targoman {namespace API { \
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
         /* namespace          */ _namespace, \
         /* enum               */ _enum, \
-        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant{return _namespace::_enum::toStr(_value);}, \
+        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant { return _namespace::_enum::toStr(_value); }, \
         /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_enum::Type { \
-            if(_namespace::_enum::options().contains(_value.toString())) return _namespace::_enum::toEnum(_value.toString()); \
-            else try { return _namespace::_enum::toEnum(_value.toString(), true); } catch(...) { \
-              throw exHTTPBadRequest(QString("%1(%2) is not a valid %3").arg( \
-                      _paramName.size() ? _paramName.constData() : _value.toString()).arg(_value.toString()).arg( \
-                      QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
-        }}, \
-        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString {return QString("One of (%1)").arg(_namespace::_enum::options().join('|'));}, \
+            QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
+            if (_namespace::_enum::options().contains(_val.toString())) \
+                return _namespace::_enum::toEnum(_val.toString()); \
+            else \
+                try { return _namespace::_enum::toEnum(_val.toString(), true); } \
+                catch (...) { \
+                    throw exHTTPBadRequest(QString("%1(%2) is not a valid %3") \
+                        .arg(_paramName.size() ? _paramName.constData() : _val.toString()) \
+                        .arg(_val.toString()) \
+                        .arg(QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum))) \
+                    ); \
+                } \
+        }, \
+        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString { return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); }, \
         /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \
             return _namespace::_enum::toStr(static_cast<_namespace::_enum::Type>(_value.toString().toLatin1().at(0))); \
         }, \
         /* fromORMValueLambda */ [](const QVariant& _value) -> QVariant { \
-            if(_namespace::_enum::options().contains(_value.toString()) == false) \
-                throw exHTTPBadRequest(QString("%1 is not a valid %2.").arg(_value.toString()).arg( \
-                        QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum)))); \
-            return QString(_namespace::_enum::toEnum(_value.toString())); \
+            QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
+            if (_namespace::_enum::options().contains(_val.toString()) == false) \
+                throw exHTTPBadRequest(QString("%1 is not a valid %2.") \
+                    .arg(_val.toString()) \
+                    .arg(/*QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) :*/ QString(TARGOMAN_M2STR(_enum))) \
+                ); \
+            return QString(_namespace::_enum::toEnum(_val.toString())); \
         }, \
-        /* lambdaOptions      */ []() -> QStringList { return _namespace::_enum::options();} \
+        /* lambdaOptions      */ []() -> QStringList { return _namespace::_enum::options(); } \
     )
 
 /************************************************************/

@@ -35,6 +35,46 @@ namespace AAA {
 using namespace ORM;
 using namespace DBManager;
 
+UserWallets::UserWallets() :
+    clsTable(
+        AAASchema,
+        tblUserWallets::Name,
+        {///<ColName                                Type                        Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
+            { tblUserWallets::walID,                ORM_PRIMARY_KEY64 },
+            { tblUserWallets::wal_usrID,            S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
+            { tblUserWallets::walName,              S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner },
+            { tblUserWallets::walDefault,           S(bool),                    QFV,                                false,      UPOwner },
+            { tblUserWallets::walMinBalance,        S(qint64),                  QFV,                                0,          UPAdmin, false, false },
+            { tblUserWallets::walNotTransferable,   S(qint64),                  QFV,                                0,          UPAdmin, false, false },
+            { tblUserWallets::walMaxTransferPerDay, S(qint64),                  QFV,                                10000000,   UPAdmin, false, false },
+            { tblUserWallets::walLastBalance,       S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { tblUserWallets::walSumIncome,         S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { tblUserWallets::walSumExpenses,       S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { tblUserWallets::walSumCredit,         S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { tblUserWallets::walSumDebit,          S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { tblUserWallets::walStatus,            ORM_STATUS_FIELD(TAPI::enuUserWalletStatus, TAPI::enuUserWalletStatus::Active) },
+            {  "_walVersion",                       ORM_VERSION_FIELD },
+            { tblUserWallets::walCreationDateTime,  ORM_CREATED_ON },
+            { tblUserWallets::walCreatedBy_usrID,   ORM_CREATED_BY },
+            { tblUserWallets::walUpdatedBy_usrID,   ORM_UPDATED_BY },
+        },
+        {///< Col                        Reference Table             ForeignCol     Rename   LeftJoin
+            { tblUserWallets::wal_usrID, R(AAASchema,tblUser::Name), tblUser::usrID },
+            ORM_RELATION_OF_CREATOR(tblUserWallets::walCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblUserWallets::walUpdatedBy_usrID),
+        },
+        {
+            { {
+                tblUserWallets::wal_usrID,
+                tblUserWallets::walName,
+                tblUserWallets::walStatus,
+                "_walVersion",
+              }, enuDBIndex::Unique },
+        }
+    )
+{
+}
+
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -114,35 +154,6 @@ bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
                      {"iSalt", _salt},
                  });
     return true;
-}
-
-UserWallets::UserWallets() :
-    clsTable(AAASchema,
-              tblUserWallets::Name,
-              { ///<ColName                           Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblUserWallets::walID,               ORM_PRIMARY_KEY64},
-                {tblUserWallets::wal_usrID,           S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone},
-                {tblUserWallets::walName,             S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner},
-                {tblUserWallets::walDefault,          S(bool),                    QFV,                                false,      UPOwner},
-                {tblUserWallets::walMinBalance,       S(qint64),                  QFV,                                0,          UPAdmin,false,false},
-                {tblUserWallets::walNotTransferable,  S(qint64),                  QFV,                                0,          UPAdmin,false,false},
-                {tblUserWallets::walMaxTransferPerDay,S(qint64),                  QFV,                                10000000,   UPAdmin,false,false},
-                {tblUserWallets::walLastBalance,      S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblUserWallets::walSumIncome,        S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblUserWallets::walSumExpenses,      S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblUserWallets::walSumCredit,        S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblUserWallets::walSumDebit,         S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblUserWallets::walCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblUserWallets::walCreationDateTime, ORM_CREATED_ON},
-                {tblUserWallets::walUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblUserWallets::walStatus,           S(TAPI::enuUserWalletStatus::Type), QFV,                        TAPI::enuUserWalletStatus::Active, UPStatus},
-              },
-              { ///< Col                              Reference Table               ForeignCol          Rename   LeftJoin
-                {tblUserWallets::wal_usrID,           R(AAASchema,tblUser::Name),   tblUser::usrID},
-                ORM_RELATION_OF_CREATOR(tblUserWallets::walCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblUserWallets::walUpdatedBy_usrID),
-              })
-{
 }
 
 }

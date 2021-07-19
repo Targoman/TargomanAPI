@@ -26,14 +26,32 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuFPRStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuForgotPassLinkVia);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuFPRStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuForgotPassLinkVia);
 
 namespace Targoman {
 namespace API {
 namespace AAA {
 
 using namespace ORM;
+
+ForgotPassRequest::ForgotPassRequest() :
+    clsTable(
+        AAASchema,
+        tblForgotPassRequest::Name,
+        {///< ColName                                Type                 Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                        ORM_PRIMARY_KEY },
+            { tblForgotPassRequest::fpr_usrID,       S(quint64),          QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type), QFV,        TAPI::enuForgotPassLinkVia::Email, UPNone },
+            { tblForgotPassRequest::fprRequestDate,  ORM_CREATED_ON },
+            { tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                        QNull,     UPNone },
+            { tblForgotPassRequest::fprStatus,       ORM_STATUS_FIELD(TAPI::enuFPRStatus, TAPI::enuFPRStatus::New) },
+        },
+        {///< Col                                Reference Table                 ForeignCol
+            { tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID },
+        }
+    )
+{}
 
 QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -51,23 +69,6 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
-}
-
-ForgotPassRequest::ForgotPassRequest() :
-    clsTable(AAASchema,
-              tblForgotPassRequest::Name,
-              { ///<ColName                             Type                 Validation                         Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                               ORM_PRIMARY_KEY},
-                {tblForgotPassRequest::fpr_usrID,       S(quint64),          QFV.integer().minValue(1),         QRequired,  UPNone},
-                {tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type),QFV,                TAPI::enuForgotPassLinkVia::Email,  UPNone},
-                {tblForgotPassRequest::fprRequestDate,  ORM_CREATED_ON},
-                {tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                               QNull,     UPNone},
-                {tblForgotPassRequest::fprStatus,       S(TAPI::enuFPRStatus::Type), QFV,                       TAPI::enuFPRStatus::New, UPStatus},
-              },
-              { ///< Col                            Reference Table                 ForeignCol
-                {tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID},
-              })
-{
 }
 
 }

@@ -41,9 +41,10 @@ Locations::Locations() :
             { tblLocations::locID,               ORM_PRIMARY_KEY32 },
             { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
             { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
-            { tblLocations::locStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus },
-            { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblLocations::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_locVersion",                     ORM_VERSION_FIELD },
             { tblLocations::locCreationDateTime, ORM_CREATED_ON },
+            { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
             { tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY },
         },
         {///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
@@ -54,7 +55,8 @@ Locations::Locations() :
             { {
                 tblLocations::locURL,
                 tblLocations::locPlaceCode,
-                tblLocations::locStatus
+                tblLocations::locStatus,
+                "_locVersion",
               }, enuDBIndex::Unique },
             { tblLocations::locURL },
             { tblLocations::locPlaceCode },

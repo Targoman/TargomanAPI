@@ -72,25 +72,35 @@ bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 }
 
 APITokenValidIPs::APITokenValidIPs() :
-    clsTable(AAASchema,
-              tblAPITokenValidIPs::Name,
-              { ///<ColName                                Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblAPITokenValidIPs::tviID,               ORM_PRIMARY_KEY64},
-                {tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone},
-                {tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner},
-                {tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone,false, false},
-                {tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON},
-                {tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblAPITokenValidIPs::tviStatus,           S(TAPI::enuGenericStatus::Type), QFV,                TAPI::enuGenericStatus::Active, UPStatus},
-              },
-              { ///< Col                                  Reference Table                   ForeignCol              Rename     LeftJoin
-                {tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID},
-                ORM_RELATION_OF_CREATOR(tblAPITokenValidIPs::tviCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblAPITokenValidIPs::tviUpdatedBy_usrID),
-              })
-{
-}
+    clsTable(
+        AAASchema,
+        tblAPITokenValidIPs::Name,
+        {///< ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblAPITokenValidIPs::tviID,               ORM_PRIMARY_KEY64 },
+            { tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone },
+            { tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner },
+            { tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone, false, false },
+            { tblAPITokenValidIPs::tviStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_tviVersion",                            ORM_VERSION_FIELD },
+            { tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON },
+            { tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        { ///< Col                                     Reference Table                   ForeignCol              Rename     LeftJoin
+            { tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID },
+            ORM_RELATION_OF_CREATOR(tblAPITokenValidIPs::tviCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblAPITokenValidIPs::tviUpdatedBy_usrID),
+        },
+        {
+            { {
+                tblAPITokenValidIPs::tvi_aptID,
+                tblAPITokenValidIPs::tviIP,
+                tblAPITokenValidIPs::tviStatus,
+                "_tviVersion",
+              }, enuDBIndex::Unique },
+        }
+    )
+{}
 
 }
 }

@@ -31,17 +31,6 @@ namespace API {
 namespace Advertisement {
 using namespace ORM;
 
-QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
-
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
-}
-
 Bin::Bin() :
     clsTable(AdvertSchema,
               tblBin::Name,
@@ -54,17 +43,27 @@ Bin::Bin() :
                 {tblBin::binURL,              S(QString),             QFV.url(),                                QRequired, UPOwner},
                 {tblBin::binShown,            S(quint64),             QFV.integer(),                            0,         UPNone},
                 {tblBin::binClicks,           S(quint64),             QFV.integer(),                            0,         UPNone},
-                {tblBin::binCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblBin::binCreationDateTime, ORM_CREATED_ON},
-                {tblBin::binUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblBin::binStatus,           S(TAPI::enuAuditableStatus::Type),QFV,                            TAPI::enuAuditableStatus::Pending, UPStatus},
+                {tblBin::binStatus,           ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
+                {tblBin::binCreationDateTime, ORM_CREATED_ON },
+                {tblBin::binCreatedBy_usrID,  ORM_CREATED_BY },
+                {tblBin::binUpdatedBy_usrID,  ORM_UPDATED_BY },
               },
               { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
                 {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},
                 ORM_RELATION_OF_CREATOR(tblBin::binCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(tblBin::binUpdatedBy_usrID),
               })
+{}
+
+QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+
+//    return query.one();
+
+    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 Banners::Banners() :

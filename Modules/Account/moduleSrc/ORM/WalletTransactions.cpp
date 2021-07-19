@@ -36,6 +36,27 @@ namespace AAA {
 
 using namespace ORM;
 
+WalletTransactions::WalletTransactions() :
+    clsTable(
+        AAASchema,
+        tblWalletsTransactions::Name,
+        {///< ColName                              Type                           Validation                 Default    UpBy    Sort   Filter Self  Virt   PK
+            { tblWalletsTransactions::wltID,       ORM_PRIMARY_KEY64 },
+            { tblWalletsTransactions::wlt_walID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
+            { tblWalletsTransactions::wlt_vchID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
+            { tblWalletsTransactions::wlt_vchType, S(TAPI::enuVoucherType::Type), QFV,                       TAPI::enuVoucherType::Expense, UPNone },
+            { tblWalletsTransactions::wltAmount,   S(qint64),                     QFV,                       QInvalid,  UPNone, false, false },
+            { tblWalletsTransactions::wltStatus,   ORM_STATUS_FIELD(TAPI::enuWalletTransactionStatus, TAPI::enuWalletTransactionStatus::New) },
+            { tblWalletsTransactions::wltDateTime, ORM_CREATED_ON },
+        },
+        {///< Col                                Reference Table                         ForeignCol     Rename   LeftJoin
+            { tblWalletsTransactions::wlt_walID, R(AAASchema,tblUserWallets::Name),      tblUserWallets::walID },
+            { tblWalletsTransactions::wlt_vchID, R(AAASchema,tblVoucher::Name),          tblVoucher::vchID },
+            { tblWalletsTransactions::wltID,     R(AAASchema,tblWalletBalances::Name),   tblWalletBalances::wbl_wltID },
+        }
+    )
+{}
+
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -48,42 +69,20 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-WalletTransactions::WalletTransactions() :
-    clsTable(AAASchema,
-              tblWalletsTransactions::Name,
-              { ///<ColName                             Type                        Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblWalletsTransactions::wltID,         ORM_PRIMARY_KEY64},
-                {tblWalletsTransactions::wlt_walID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
-                {tblWalletsTransactions::wlt_vchID,     S(quint64),                 QFV.integer().minValue(1),          QRequired,   UPNone, true, true},
-                {tblWalletsTransactions::wltDateTime,   ORM_CREATED_ON},
-                {tblWalletsTransactions::wlt_vchType,   S(TAPI::enuVoucherType::Type), QFV,                             TAPI::enuVoucherType::Expense,UPNone},
-                {tblWalletsTransactions::wltAmount,     S(qint64),                  QFV,                                QInvalid,   UPNone,false,false},
-                {tblWalletsTransactions::wltStatus,     S(TAPI::enuWalletTransactionStatus::Type), QFV,                 TAPI::enuWalletTransactionStatus::New, UPStatus},
-              },
-              { ///< Col                            Reference Table                         ForeignCol     Rename   LeftJoin
-                {tblWalletsTransactions::wlt_walID, R(AAASchema,tblUserWallets::Name),      tblUserWallets::walID},
-                {tblWalletsTransactions::wlt_vchID, R(AAASchema,tblVoucher::Name),          tblVoucher::vchID},
-                {tblWalletsTransactions::wltID,     R(AAASchema,tblWalletBalances::Name),   tblWalletBalances::wbl_wltID},
-              })
-{
-}
-
 WalletBalances::WalletBalances() :
-    clsTable(AAASchema,
-              tblWalletBalances::Name,
-              { ///<ColName                         Type         Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-//              {tblWalletBalances::wbl_wltID,      ORM_PRIMARY_KEY64},
-                {tblWalletBalances::wblBalance,     S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-                {tblWalletBalances::wblSumDebit,    S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-                {tblWalletBalances::wblSumCredit,   S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-                {tblWalletBalances::wblSumIncome,   S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-                {tblWalletBalances::wblSumExpense,  S(qint64),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-              },
-              {
-              }
-              )
-{
-}
+    clsTable(
+        AAASchema,
+        tblWalletBalances::Name,
+        {///< ColName                           Type       Validation            Default   UpBy    Sort   Filter Self  Virt   PK
+            //{tblWalletBalances::wbl_wltID,      ORM_PRIMARY_KEY64},
+            { tblWalletBalances::wblBalance,    S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+            { tblWalletBalances::wblSumDebit,   S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+            { tblWalletBalances::wblSumCredit,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+            { tblWalletBalances::wblSumIncome,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+            { tblWalletBalances::wblSumExpense, S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+        }
+    )
+{}
 
 }
 }

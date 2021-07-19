@@ -127,8 +127,9 @@ intfAccountProducts::intfAccountProducts(
         const QList<ORM::clsORMField>& _exclusiveCols,
         const QList<ORM::stuRelation>& _exclusiveRelations,
         const QList<ORM::stuDBIndex>& _exclusiveIndexes
-    )
-    : clsTable(_schema,
+    ) :
+    clsTable(
+        _schema,
         tblAccountProductsBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                                      Type                      Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
@@ -145,9 +146,10 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdInStockCount,     S(quint32),                QFV.integer().minValue(0),               QRequired,  UPAdmin },
             { tblAccountProductsBase::prdOrderedCount,     S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
             { tblAccountProductsBase::prdReturnedCount,    S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
-            { tblAccountProductsBase::prdStatus,           S(TAPI::enuGenericStatus::Type), QFV,                               TAPI::enuGenericStatus::Active, UPStatus },
-            { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblAccountProductsBase::prdStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_prdVersion",                               ORM_VERSION_FIELD },
             { tblAccountProductsBase::prdCreationDateTime, ORM_CREATED_ON },
+            { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
             { tblAccountProductsBase::prdUpdatedBy_usrID,  ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
@@ -156,7 +158,11 @@ intfAccountProducts::intfAccountProducts(
             ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
         }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
-            { { tblAccountProductsBase::prdCode, tblAccountProductsBase::prdStatus }, enuDBIndex::Unique },
+            { {
+                tblAccountProductsBase::prdCode,
+                tblAccountProductsBase::prdStatus,
+                "_prdVersion",
+              }, enuDBIndex::Unique },
             { tblAccountProductsBase::prdValidFromDate },
             { tblAccountProductsBase::prdValidToDate },
             { tblAccountProductsBase::prdValidFromHour },
@@ -227,9 +233,10 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbOrderedCount,        S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPNone },
             { tblAccountSaleablesBase::slbReturnedCount,       S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPNone },
             { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),                      QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbStatus,              S(TAPI::enuGenericStatus::Type), QFV,                             TAPI::enuGenericStatus::Active, UPStatus },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
+            { tblAccountSaleablesBase::slbStatus,              ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_slbVersion",                                   ORM_VERSION_FIELD },
             { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
@@ -239,7 +246,11 @@ intfAccountSaleables::intfAccountSaleables(
             ORM_RELATION_OF_UPDATER(tblAccountSaleablesBase::slbUpdatedBy_usrID),
         }) + _exclusiveRelations,
         QList<ORM::stuDBIndex>({
-            { { tblAccountSaleablesBase::slbCode, tblAccountSaleablesBase::slbStatus }, enuDBIndex::Unique },
+            { {
+                tblAccountSaleablesBase::slbCode,
+                tblAccountSaleablesBase::slbStatus,
+                "_slbVersion",
+              }, enuDBIndex::Unique },
             { tblAccountSaleablesBase::slbType },
             { tblAccountSaleablesBase::slbAvailableFromDate },
             { tblAccountSaleablesBase::slbAvailableToDate },
@@ -313,7 +324,8 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)), QFV,                       QNull,      UPNone },
             { tblAccountUserAssetsBase::uasPrefered,        S(bool),                   QFV,                       false,      UPOwner },
             { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),       QFV,                       QNow,       UPNone },
-            { tblAccountUserAssetsBase::uasStatus,          S(TAPI::enuAuditableStatus::Type), QFV,               TAPI::enuAuditableStatus::Pending, UPStatus },
+            { tblAccountUserAssetsBase::uasStatus,          ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
+            { "_uasVersion",                                ORM_VERSION_FIELD },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
@@ -329,7 +341,8 @@ intfAccountUserAssets::intfAccountUserAssets(
                   tblAccountUserAssetsBase::uas_usrID,
 //                  tblAccountUserAssetsBase::uas_slbID,
                   tblAccountUserAssetsBase::uasVoucherItemUUID,
-                  tblAccountUserAssetsBase::uasStatus
+                  tblAccountUserAssetsBase::uasStatus,
+                  "_uasVersion",
               }, enuDBIndex::Unique },
             { tblAccountUserAssetsBase::uas_usrID },
             { tblAccountUserAssetsBase::uas_slbID },
@@ -410,37 +423,40 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(const QString& _schema)
-    : clsTable(_schema,
+    : clsTable(
+        _schema,
         tblAccountCouponsBase::Name,
-        {///< ColName                                           Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountCouponsBase::cpnID,                     ORM_PRIMARY_KEY32},
-            { tblAccountCouponsBase::cpnCode,                   S(TAPI::CouponCode_t),             QFV,                                     QRequired, UPAdmin},
-            { tblAccountCouponsBase::cpnPrimaryCount,           S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
-            { tblAccountCouponsBase::cpnTotalMaxAmount,         S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
-            { tblAccountCouponsBase::cpnPerUserMaxCount,        S(NULLABLE_TYPE(quint32)),         QFV.optional(QFV.integer().minValue(1)), QNull,     UPAdmin},
-            { tblAccountCouponsBase::cpnPerUserMaxAmount,       S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin},
-            { tblAccountCouponsBase::cpnValidFrom,              S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin},
-            { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-            { tblAccountCouponsBase::cpnAmount,                 S(quint32),                        QFV,                                     QRequired, UPAdmin}, //, false, false},
-            { tblAccountCouponsBase::cpnAmountType,             S(TAPI::enuDiscountType::Type),    QFV,                                     TAPI::enuDiscountType::Percent, UPAdmin},
-            { tblAccountCouponsBase::cpnMaxAmount,              S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin}, //, false, false},
-            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin}, //, false, false},
-//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier,S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false},
-            { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-            { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-            { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
-            { tblAccountCouponsBase::cpnCreatedBy_usrID,        ORM_CREATED_BY},
-            { tblAccountCouponsBase::cpnCreationDateTime,       ORM_CREATED_ON},
-            { tblAccountCouponsBase::cpnUpdatedBy_usrID,        ORM_UPDATED_BY},
+        {///< ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountCouponsBase::cpnID,                      ORM_PRIMARY_KEY32 },
+            { tblAccountCouponsBase::cpnCode,                    S(TAPI::CouponCode_t),             QFV,                                     QRequired, UPAdmin },
+            { tblAccountCouponsBase::cpnPrimaryCount,            S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
+            { tblAccountCouponsBase::cpnTotalMaxAmount,          S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
+            { tblAccountCouponsBase::cpnPerUserMaxCount,         S(NULLABLE_TYPE(quint32)),         QFV.optional(QFV.integer().minValue(1)), QNull,     UPAdmin },
+            { tblAccountCouponsBase::cpnPerUserMaxAmount,        S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin },
+            { tblAccountCouponsBase::cpnValidFrom,               S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin },
+            { tblAccountCouponsBase::cpnExpiryTime,              S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin },
+            { tblAccountCouponsBase::cpnAmount,                  S(quint32),                        QFV,                                     QRequired, UPAdmin }, //, false, false },
+            { tblAccountCouponsBase::cpnAmountType,              S(TAPI::enuDiscountType::Type),    QFV,                                     TAPI::enuDiscountType::Percent, UPAdmin },
+            { tblAccountCouponsBase::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
+            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
+//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
+            { tblAccountCouponsBase::cpnTotalUsedCount,          S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
+            { tblAccountCouponsBase::cpnTotalUsedAmount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
+            { tblAccountCouponsBase::cpnStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_cpnVersion",                                     ORM_VERSION_FIELD },
+            { tblAccountCouponsBase::cpnCreationDateTime,        ORM_CREATED_ON },
+            { tblAccountCouponsBase::cpnCreatedBy_usrID,         ORM_CREATED_BY },
+            { tblAccountCouponsBase::cpnUpdatedBy_usrID,         ORM_UPDATED_BY },
         },
-        {///< Col                                       Reference Table                         ForeignCol          Rename     LeftJoin
+        {///< Col                                                               Reference Table   ForeignCol          Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(tblAccountCouponsBase::cpnCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountCouponsBase::cpnUpdatedBy_usrID),
         },
         {
             { {
                tblAccountCouponsBase::cpnCode,
-               tblAccountCouponsBase::cpnStatus
+               tblAccountCouponsBase::cpnStatus,
+               "_cpnVersion",
               }, enuDBIndex::Unique },
             { tblAccountCouponsBase::cpnAmountType },
             { tblAccountCouponsBase::cpnValidFrom },

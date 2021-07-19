@@ -23,9 +23,9 @@
 #include "base.h"
 #include <qglobal.h>
 
-#ifdef QT_DEBUG
 extern void print_stacktrace(FILE *out, unsigned int max_frames)
 {
+#ifdef QT_DEBUG
     fprintf(out, "stack trace:\n");
 
     // storage array for stack trace address data
@@ -102,8 +102,5 @@ extern void print_stacktrace(FILE *out, unsigned int max_frames)
 
     free(funcname);
     free(symbollist);
-}
-#else
-extern void print_stacktrace(FILE *out, unsigned int max_frames)
-{}
 #endif
+}

@@ -27,12 +27,50 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPITokensStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAPITokensStatus);
 
 namespace Targoman {
 namespace API {
 namespace AAA {
+
 using namespace ORM;
+
+APITokens::APITokens() :
+    clsTable(
+        AAASchema,
+        "tblAPITokens",
+        {///< ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblAPITokens::aptID,               ORM_PRIMARY_KEY64 },
+            { tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false },
+            { tblAPITokens::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone },
+            { tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin },
+            { tblAPITokens::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en",      UPAdmin },
+            { tblAPITokens::aptValidateIP,       S(bool),               QFV,                            false,     UPAdmin },
+            { tblAPITokens::aptExtraPriviledges, S(TAPI::PrivObject_t), QFV,                            QNull,     UPAdmin, false, false },
+            { tblAPITokens::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull,     UPAdmin },
+            { tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QInvalid,  UPNone },
+            { tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone },
+            { tblAPITokens::aptStatus,           ORM_STATUS_FIELD(TAPI::enuAPITokensStatus, TAPI::enuAPITokensStatus::Active) },
+            { "_aptVersion",                     ORM_VERSION_FIELD },
+            { tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblAPITokens::aptCreationDateTime, ORM_CREATED_ON },
+            { tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                                Reference Table                 ForeignCol         Rename    LeftJoin
+            { tblAPITokens::apt_svcID,           R(AAASchema, tblService::Name), tblService::svcID, {},       true},
+            { tblAPITokens::apt_usrID,           R(AAASchema, tblUser::Name),    tblUser::usrID,    "Owner_", true},
+            ORM_RELATION_OF_CREATOR(tblAPITokens::aptCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblAPITokens::aptUpdatedBy_usrID),
+        },
+        {
+            { {
+                tblAPITokens::aptToken,
+                tblAPITokens::aptStatus,
+                "_aptVersion"
+              }, enuDBIndex::Unique },
+        }
+    )
+{}
 
 QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -67,34 +105,6 @@ bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
-}
-
-APITokens::APITokens() :
-    clsTable(AAASchema,
-              "tblAPITokens",
-              { ///<ColName                         Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblAPITokens::aptID,               ORM_PRIMARY_KEY64},
-                {tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false},
-                {tblAPITokens::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone},
-                {tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin},
-                {tblAPITokens::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en",      UPAdmin},
-                {tblAPITokens::aptValidateIP,       S(bool),               QFV,                            false,     UPAdmin},
-                {tblAPITokens::aptExtraPriviledges, S(TAPI::PrivObject_t), QFV,                            QNull,     UPAdmin,false, false},
-                {tblAPITokens::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull,     UPAdmin},
-                {tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QInvalid,  UPNone},
-                {tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone},
-                {tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblAPITokens::aptCreationDateTime, ORM_CREATED_ON},
-                {tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblAPITokens::aptStatus,           S(TAPI::enuAPITokensStatus::Type),QFV,                 TAPI::enuAPITokensStatus::Active, UPStatus},
-              },
-              { ///< Col                           Reference Table                 ForeignCol             Rename      LeftJoin
-                {tblAPITokens::apt_svcID,          R(AAASchema,tblService::Name),  tblService::svcID,    {},         true},
-                {tblAPITokens::apt_usrID,          R(AAASchema,tblUser::Name),     tblUser::usrID,        "Owner_",   true},
-                ORM_RELATION_OF_CREATOR(tblAPITokens::aptCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblAPITokens::aptUpdatedBy_usrID),
-              })
-{
 }
 
 }

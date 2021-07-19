@@ -71,30 +71,32 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 }
 
 Tickets::Tickets() :
-    clsTable(TicketingSchema,
-              tblTickets::Name,
-              { ///<ColName                       Type                    Validation                   Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblTickets::tktID,               ORM_PRIMARY_KEY64},
-                {tblTickets::tktTarget_usrID,     S(quint64),             QFV.integer().minValue(1),   QNull,     UPNone},
-                {tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1),   QNull,     UPNone},
-                {tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1),   QNull,     UPNone},
-                {tblTickets::tktBase_tktID,       S(quint64),             QFV.integer().minValue(1),   QNull,     UPNone},
-                {tblTickets::tktType,             S(TAPI::enuTicketType::Type),   QFV,                 TAPI::enuTicketType::Message, UPNone},
-                {tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                         QRequired, UPNone,false,false},
-                {tblTickets::tktBodyMarkdown,     S(QString),             QFV.allwaysValid(),        QRequired, UPNone,false,false},
-                {tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                         false,     UPNone},
-                {tblTickets::tktCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblTickets::tktCreationDateTime, ORM_CREATED_ON},
-                {tblTickets::tktUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblTickets::tktStatus,           S(TAPI::enuTicketStatus::Type), QFV,                 TAPI::enuTicketStatus::New,   UPStatus},
-              },
-              { ///< Col                          Reference Table                           ForeignCol                 Rename     LeftJoin
-                {tblTickets::tktInReply_tktID,    R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true},
-                {tblTickets::tktTarget_usrID,     R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true},
-                {tblTickets::tktID,               R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_", true},
-                ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
-              })
+    clsTable(
+        TicketingSchema,
+        tblTickets::Name,
+        {///< ColName                          Type                    Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblTickets::tktID,               ORM_PRIMARY_KEY64 },
+            { tblTickets::tktTarget_usrID,     S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
+            { tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1), QNull,     UPNone },
+            { tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
+            { tblTickets::tktBase_tktID,       S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
+            { tblTickets::tktType,             S(TAPI::enuTicketType::Type), QFV,                 TAPI::enuTicketType::Message, UPNone },
+            { tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                       QRequired, UPNone, false, false },
+            { tblTickets::tktBodyMarkdown,     S(QString),             QFV.allwaysValid(),        QRequired, UPNone, false, false },
+            { tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                       false,     UPNone },
+            { tblTickets::tktStatus,           ORM_STATUS_FIELD(TAPI::enuTicketStatus, TAPI::enuTicketStatus::New) },
+            { tblTickets::tktCreationDateTime, ORM_CREATED_ON },
+            { tblTickets::tktCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblTickets::tktUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                           Reference Table                           ForeignCol                 Rename     LeftJoin
+            { tblTickets::tktInReply_tktID, R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true },
+            { tblTickets::tktTarget_usrID,  R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true },
+            { tblTickets::tktID,            R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_", true },
+            ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
+        }
+    )
 {
 }
 

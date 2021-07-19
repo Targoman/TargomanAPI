@@ -2431,7 +2431,10 @@ public:
             foreach (clsORMField baseCol, this->Table.BaseCols) {
 //                qDebug() << "compare" << col << baseCol.name();
                 if (col == baseCol.name()) {
-                    if (baseCol.defaultValue() == QInvalid || baseCol.defaultValue() == QAuto)
+                    if ((baseCol.defaultValue() == QInvalid)
+                            || (baseCol.defaultValue() == QAuto)
+                            || (baseCol.defaultValue() == QDBInternal)
+                        )
                         throw exHTTPInternalServerError("Invalid set read-only column <" + col + ">");
 
                     providedBaseCols.append(baseCol);
@@ -2460,11 +2463,16 @@ public:
                 }
                 else if (baseCol.defaultValue() == QNow)
                 {
-//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << "NOW()";
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
-                    extraBaseColsValues.append(DBExpression::NOW().toString());
+                    //NOW() is defined as default value in db schema
+
+//                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+//                    extraBaseColsValues.append(DBExpression::NOW().toString());
                 }
-                else if (baseCol.defaultValue() != QNull)
+                else if ((baseCol.defaultValue() != QNull)
+                         && (baseCol.defaultValue() != QInvalid)
+                         && (baseCol.defaultValue() != QAuto)
+                         && (baseCol.defaultValue() != QDBInternal)
+                    )
                 {
 //                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << baseCol.defaultValue();
                     this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
@@ -3237,8 +3245,36 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
     return QueryString;
 }
 
-quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args)
+quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _softDelete, bool _hardDelete)
 {
+    if (_softDelete)
+    {
+        foreach (auto Col, this->Data->Table.BaseCols)
+        {
+            if (Col.updatableBy() == enuUpdatableBy::__STATUS__)
+            {
+                QT_TRY
+                {
+                    return UpdateQuery(this->Data->Table)
+                            .set(Col.name(), "Removed")
+                            .where(this->WhereTraitData->WhereClauses)
+                            .execute(_currentUserID);
+                }
+                QT_CATCH(std::exception& exp)
+                {
+                    //update failed. use hard delete instead
+                    if (_hardDelete == false)
+                        throw exp;
+                }
+
+                break;
+            }
+        }
+    }
+
+    if (_hardDelete == false)
+        return 0;
+
     QString QueryString = this->buildQueryString(_currentUserID, _args);
 
 #ifdef QT_DEBUG

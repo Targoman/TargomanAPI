@@ -33,6 +33,31 @@ namespace AAA {
 
 using namespace ORM;
 
+/**********************************************************************************************/
+/* OnlinePayments *****************************************************************************/
+/**********************************************************************************************/
+OnlinePayments::OnlinePayments() :
+    clsTable(
+        AAASchema,
+        tblOnlinePayments::Name,
+        {///< ColName                                   Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblOnlinePayments::onpID,                 ORM_PRIMARY_KEY64 },
+            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired, UPNone },
+            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired, UPNone },
+            { tblOnlinePayments::onpPaymentGateway,     S(TAPI::enuPaymentGateway::Type),QFV,                       TAPI::enuPaymentGateway::Zibal, UPNone },
+            { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired, UPNone },
+            { tblOnlinePayments::onpAmount,             S(TAPI::DateTime_t),    QFV,                                QRequired, UPNone },
+            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,     UPNone, false, false },
+            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
+            { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
+            { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
+        },
+        {///< Col                            Reference Table                  ForeignCol         Rename     LeftJoin
+            { tblOnlinePayments::onp_vchID,  R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+        }
+    )
+{}
+
 QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -45,28 +70,34 @@ QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-OnlinePayments::OnlinePayments() :
-    clsTable(AAASchema,
-              tblOnlinePayments::Name,
-              { ///<ColName                              Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblOnlinePayments::onpID,                ORM_PRIMARY_KEY64},
-                {tblOnlinePayments::onpMD5,               S(TAPI::MD5_t),         QFV,                                QRequired,  UPNone},
-                {tblOnlinePayments::onpCreationDateTime,  ORM_CREATED_ON},
-                {tblOnlinePayments::onp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPNone},
-                {tblOnlinePayments::onpPaymentGateway,    S(TAPI::enuPaymentGateway::Type),QFV,                       TAPI::enuPaymentGateway::Zibal, UPNone},
-                {tblOnlinePayments::onpPGTrnID,           S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,   UPNone},
-                {tblOnlinePayments::onpAmount,            S(TAPI::DateTime_t),    QFV,                                QRequired,   UPNone},
-                {tblOnlinePayments::onpLastUpdateDateTime,S(TAPI::DateTime_t),    QFV,                                QAuto,       UPNone},
-                {tblOnlinePayments::onpStatus,            S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPStatus},
-                {tblOnlinePayments::onpResult,            S(QString),             QFV,                                QNull,      UPNone,false,false},
-              },
-              { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                {tblOnlinePayments::onp_vchID,  R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
-              })
-{
-}
-
 /**********************************************************************************************/
+/* OfflinePayments ****************************************************************************/
+/**********************************************************************************************/
+OfflinePayments::OfflinePayments() :
+    clsTable(
+        AAASchema,
+        tblOnlinePayments::Name,
+        {///< ColName                                  Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblOfflinePayments::ofpID,               ORM_PRIMARY_KEY64},
+            { tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
+            { tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
+            { tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
+            { tblOfflinePayments::ofpAmount,           S(quint32),             QFV,                                QRequired,  UPOwner},
+            { tblOfflinePayments::ofpNotes,            S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
+            { tblOfflinePayments::ofpStatus,           ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
+            { tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
+            { tblOfflinePayments::ofpCreationDateTime, ORM_CREATED_ON},
+            { tblOfflinePayments::ofpUpdatedBy_usrID,  ORM_UPDATED_BY},
+        },
+        {///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
+            { tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
+            ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
+        }
+    )
+{}
+
 QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -84,30 +115,6 @@ bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-
-OfflinePayments::OfflinePayments() :
-    clsTable(AAASchema,
-              tblOnlinePayments::Name,
-              { ///<ColName                               Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblOfflinePayments::ofpID,               ORM_PRIMARY_KEY64},
-                {tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
-                {tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
-                {tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-                {tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
-                {tblOfflinePayments::ofpAmount,           S(quint32),             QFV,                                QRequired,  UPOwner},
-                {tblOfflinePayments::ofpNotes,            S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-                {tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblOfflinePayments::ofpCreationDateTime, ORM_CREATED_ON},
-                {tblOfflinePayments::ofpUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblOfflinePayments::ofpStatus,           S(TAPI::enuPaymentStatus::Type),QFV,                        TAPI::enuPaymentStatus::Pending, UPStatus},
-              },
-              { ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                { tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
-                ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
-              })
-{
 }
 
 }

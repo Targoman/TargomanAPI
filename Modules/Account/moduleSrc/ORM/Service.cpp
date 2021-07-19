@@ -33,6 +33,35 @@ namespace AAA {
 
 using namespace ORM;
 
+Service::Service() :
+    clsTable(
+        AAASchema,
+        tblService::Name,
+        {///< ColName                          Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblService::svcID,               ORM_PRIMARY_KEY32 },
+            { tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin },
+            { tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin },
+            { tblService::svcStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { "_svcVersion",                   ORM_VERSION_FIELD },
+            { tblService::svcCreationDateTime, ORM_CREATED_ON },
+            { tblService::svcCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblService::svcUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                    Reference Table              ForeignCol      Rename     LeftJoin
+            { tblService::svc_rolID, R(AAASchema,tblRoles::Name), tblRoles::rolID },
+            ORM_RELATION_OF_CREATOR(tblService::svcCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblService::svcUpdatedBy_usrID),
+        },
+        {
+            { {
+                  tblService::svcName,
+                  tblService::svcStatus,
+                  "_svcVersion"
+              }, enuDBIndex::Unique },
+        }
+    )
+{}
+
 QVariant Service::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -63,26 +92,6 @@ bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-
-Service::Service() :
-    clsTable(AAASchema,
-              tblService::Name,
-              { ///<ColName                        Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblService::svcID,               ORM_PRIMARY_KEY32},
-                {tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin},
-                {tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin},
-                {tblService::svcCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblService::svcCreationDateTime, ORM_CREATED_ON},
-                {tblService::svcUpdatedBy_usrID,  ORM_UPDATED_BY},
-                {tblService::svcStatus,           S(TAPI::enuGenericStatus::Type), QFV,                 TAPI::enuGenericStatus::Active, UPStatus},
-              },
-              { ///< Col                           Reference Table                  ForeignCol          Rename     LeftJoin
-                {tblService::svc_rolID,           R(AAASchema,tblRoles::Name),     tblRoles::rolID},
-                ORM_RELATION_OF_CREATOR(tblService::svcCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblService::svcUpdatedBy_usrID),
-              })
-{
 }
 
 }

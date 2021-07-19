@@ -55,23 +55,33 @@ bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 }
 
 ApprovalRequest::ApprovalRequest() :
-    clsTable(AAASchema,
-              tblApprovalRequest::Name,
-              { ///<ColName                             Type                    Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblApprovalRequest::aprID,             ORM_PRIMARY_KEY64},
-                {tblApprovalRequest::apr_usrID,         S(quint64),             QFV.integer().minValue(1),       QInvalid,  UPNone},
-                {tblApprovalRequest::aprRequestedFor,   S(TAPI::enuApprovalType::Type),    QFV,                  TAPI::enuApprovalType::Email, UPNone},
-                {tblApprovalRequest::aprApprovalCode,   S(QString),             QFV.asciiAlNum().maxLenght(32),  QRequired,        UPNone},
-                {tblApprovalRequest::aprApprovalValue,  S(QString),             QFV.allwaysInvalid(),            QRequired,        UPNone,false,false},
-                {tblApprovalRequest::aprRequestDate,    ORM_CREATED_ON},
-                {tblApprovalRequest::aprApplyDate,      S(TAPI::DateTime_t),    QFV,                             QNull,     UPNone},
-                {tblApprovalRequest::aprStatus,         S(TAPI::enuAPRStatus::Type), QFV,                        TAPI::enuAPRStatus::New, UPStatus},
-              },
-              { ///< Col                                 Reference Table                  ForeignCol        Rename     LeftJoin
-                {tblApprovalRequest::apr_usrID,          R(AAASchema,tblUser::Name),      tblUser::usrID},
-              })
-{
-}
+    clsTable(
+        AAASchema,
+        tblApprovalRequest::Name,
+        {///< ColName                               Type                    Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblApprovalRequest::aprID,            ORM_PRIMARY_KEY64},
+            { tblApprovalRequest::apr_usrID,        S(quint64),             QFV.integer().minValue(1),       QInvalid,  UPNone},
+            { tblApprovalRequest::aprRequestedFor,  S(TAPI::enuApprovalType::Type),    QFV,                  TAPI::enuApprovalType::Email, UPNone},
+            { tblApprovalRequest::aprApprovalCode,  S(QString),             QFV.asciiAlNum().maxLenght(32),  QRequired,        UPNone},
+            { tblApprovalRequest::aprApprovalValue, S(QString),             QFV.allwaysInvalid(),            QRequired,        UPNone,false,false},
+            { tblApprovalRequest::aprRequestDate,   ORM_CREATED_ON},
+            { tblApprovalRequest::aprApplyDate,     S(TAPI::DateTime_t),    QFV,                             QNull,     UPNone},
+            { tblApprovalRequest::aprStatus,        ORM_STATUS_FIELD(TAPI::enuAPRStatus, TAPI::enuAPRStatus::New) },
+            { "_aprVersion",                        ORM_VERSION_FIELD },
+        },
+        {///< Col                           Reference Table                  ForeignCol        Rename     LeftJoin
+            {tblApprovalRequest::apr_usrID, R(AAASchema,tblUser::Name),      tblUser::usrID},
+        },
+        {
+            { {
+                tblApprovalRequest::aprApprovalCode,
+                tblApprovalRequest::aprApprovalValue,
+                tblApprovalRequest::aprStatus,
+                "_aprVersion",
+              }, enuDBIndex::Unique },
+        }
+    )
+{}
 
 }
 }

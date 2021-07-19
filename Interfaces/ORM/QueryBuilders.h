@@ -499,7 +499,7 @@ public:
 public:
     DeleteQuery& addTarget(const QString& _targetTableName);
 
-    quint64 execute(quint64 _currentUserID, QVariantMap _args = {});
+    quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _softDelete = true, bool _hardDelete = false);
 
 private:
     virtual void iAmAbstract() {}

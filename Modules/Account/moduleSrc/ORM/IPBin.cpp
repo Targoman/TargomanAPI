@@ -34,6 +34,34 @@ namespace AAA {
 
 using namespace ORM;
 
+IPBin::IPBin() :
+    clsTable(
+        AAASchema,
+        tblIPBin::Name,
+        {///< ColName                        Type                 Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblIPBin::ipbIP,               ORM_PRIMARY_KEY32 },
+            { tblIPBin::ipbReadable,         S(TAPI::IPv4_t),     QFV,                       QInvalid,  UPNone },
+            { tblIPBin::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
+            { tblIPBin::ipbAccessCount,      S(quint64),          QFV.integer().minValue(0), 0,         UPNone },
+            { tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
+            { tblIPBin::ipbBlockedBy_usrID,  S(quint64),          QFV.integer().minValue(1), QNull,     UPNone },
+            { tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                       QNull,     UPNone },
+            { tblIPBin::ipbStatus,           ORM_STATUS_FIELD(TAPI::enuIPBinStatus, TAPI::enuIPBinStatus::Active) },
+            { "_ipbVersion",                 ORM_VERSION_FIELD },
+        },
+        {///< Col                            Reference Table             ForeignCol      Rename      LeftJoin
+            { tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID, "Blocker_", true },
+        },
+        {
+            { {
+                tblIPBin::ipbIP,
+                tblIPBin::ipbStatus,
+                "_ipbVersion",
+              }, enuDBIndex::Unique },
+        }
+    )
+{}
+
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -43,25 +71,6 @@ QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //    return query.one();
 
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
-}
-
-IPBin::IPBin() :
-    clsTable(AAASchema,
-              tblIPBin::Name,
-              { ///<ColName                     Type                 Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblIPBin::ipbIP,               ORM_PRIMARY_KEY32},
-                {tblIPBin::ipbReadable,         S(TAPI::IPv4_t),     QFV,                                QInvalid,  UPNone},
-                {tblIPBin::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                                QAuto,     UPNone},
-                {tblIPBin::ipbAccessCount,      S(quint64),          QFV.integer().minValue(0),          0,         UPNone},
-                {tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                                QAuto,     UPNone},
-                {tblIPBin::ipbBlockedBy_usrID,  S(quint64),          QFV.integer().minValue(1),          QNull,     UPNone},
-                {tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                                QNull,     UPNone},
-                {tblIPBin::ipbStatus,           S(TAPI::enuIPBinStatus::Type), QFV,                      TAPI::enuIPBinStatus::Active,UPStatus},
-              },
-              { ///< Col                        Reference Table             ForeignCol Rename      LeftJoin
-                {tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID,   "Blocker_", true},
-              })
-{
 }
 
 }

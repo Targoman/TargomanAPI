@@ -42,57 +42,57 @@ QList<intfAPIArgManipulator*> Server::gOrderedMetaTypeInfo;
 QList<intfAPIArgManipulator*> Server::gUserDefinedTypesInfo;
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI,
-    stuTable,
-    [](const stuTable& _value) -> QVariant{return _value.toVariant();}
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
+    /* type               */ stuTable,
+    /* toVariantLambda    */ [](const stuTable& _value) -> QVariant{return _value.toVariant();}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_File,
-    TAPI,
-    stuFileInfo,
-    [](const stuFileInfo& _value) -> QVariant{return _value.toVariant();},
-    [](const QVariant& _value, const QByteArray& _param) -> stuFileInfo {stuFileInfo TempValue; return TempValue.fromVariant(_value, _param);}
+    /* complexity         */ COMPLEXITY_File,
+    /* namespace          */ TAPI,
+    /* type               */ stuFileInfo,
+    /* toVariantLambda    */ [](const stuFileInfo& _value) -> QVariant{return _value.toVariant();},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _param) -> stuFileInfo {stuFileInfo TempValue; return TempValue.fromVariant(_value, _param);}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_File,
-    TAPI,
-    Files_t,
-    [](const Files_t& _value) -> QVariant{ return _value.toVariant();},
-    [](const QVariant& _value, const QByteArray& _param) -> Files_t {Files_t TempValue; return TempValue.fromVariant(_value, _param);}
+    /* complexity         */ COMPLEXITY_File,
+    /* namespace          */ TAPI,
+    /* type               */ Files_t,
+    /* toVariantLambda    */ [](const Files_t& _value) -> QVariant{ return _value.toVariant();},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _param) -> Files_t {Files_t TempValue; return TempValue.fromVariant(_value, _param);}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI,
-    RawData_t,
-    [](const RawData_t& _value) -> QVariant{return _value.toVariant();}
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
+    /* type               */ RawData_t,
+    /* toVariantLambda    */ [](const RawData_t& _value) -> QVariant{return _value.toVariant();}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI,
-    HEADERS_t,
-    [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
-    [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
+    /* type               */ HEADERS_t,
+    /* toVariantLambda    */ [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI,
-    COOKIES_t,
-    [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
-    [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
+    /* type               */ COOKIES_t,
+    /* toVariantLambda    */ [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Object,
-    TAPI,
-    JWT_t,
-    nullptr,
-    [](const QVariant& _value, const QByteArray& _paramName) -> JWT_t {
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ JWT_t,
+    /* toVariantLambda    */ nullptr,
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JWT_t {
         QJsonObject Obj;
         if(_value.canConvert<QVariantMap>())
             Obj = Obj.fromVariantMap(_value.value<QVariantMap>());
@@ -104,23 +104,23 @@ TAPI_REGISTER_METATYPE(
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI,
-    ORMFields_t,
-    nullptr,
-    [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
+    /* type               */ ORMFields_t,
+    /* toVariantLambda    */ nullptr,
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
 );
 
 TAPI_REGISTER_JSON_DERIVED_METATYPE(
-    COMPLEXITY_Object,
-    TAPI,
-    JSON_t
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ JSON_t
 );
 
 TAPI_REGISTER_JSON_DERIVED_METATYPE(
-    COMPLEXITY_Object,
-    TAPI,
-    PrivObject_t
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ PrivObject_t
 );
 /*
     [](const PrivObject_t& _value) -> QVariant {return _value;}
@@ -179,9 +179,9 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 */
 
 TAPI_REGISTER_JSON_DERIVED_METATYPE(
-    COMPLEXITY_Object,
-    TAPI,
-    SaleableAdditive_t
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ SaleableAdditive_t
 );
 /*
             [](const SaleableAdditive_t& _value) -> QVariant {return _value;}
@@ -254,28 +254,28 @@ throw Common::exTargomanMustBeImplemented("SaleableAdditive_t not implemented ye
 */
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    EncodedJWT_t,
-    [](const EncodedJWT_t& _value) -> QVariant {return _value;},
-    nullptr,
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ EncodedJWT_t,
+    /* toVariantLambda    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ nullptr,
     [](const QList<ORM::clsORMField>&){ return "A signed JsonWebToken string"; }
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    RemoteIP_t,
-    [](const RemoteIP_t& _value) -> QVariant {return _value;},
-    [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ RemoteIP_t,
+    /* toVariantLambda    */ [](const RemoteIP_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    PKsByPath_t,
-    [](const PKsByPath_t& _value) -> QVariant {return _value;},
-    [](const QVariant& _value, const QByteArray&) -> PKsByPath_t {
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ PKsByPath_t,
+    /* toVariantLambda    */ [](const PKsByPath_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> PKsByPath_t {
         PKsByPath_t Value;
         QUrl URL = QUrl::fromPercentEncoding(("http://127.0.0.1/" + _value.toString()).toUtf8());
         Value=URL.path().remove(0,1);
@@ -284,22 +284,22 @@ TAPI_REGISTER_METATYPE(
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    CouponCode_t,
-    [](const CouponCode_t& _value) -> QVariant {return _value.mid(0, _value.indexOf('!'));},
-    [](const QVariant& _value, const QByteArray&) -> CouponCode_t {
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ CouponCode_t,
+    /* toVariantLambda    */ [](const CouponCode_t& _value) -> QVariant {return _value.mid(0, _value.indexOf('!'));},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> CouponCode_t {
         auto ValueStr = _value.toString();
         return ValueStr.mid(0, ValueStr.indexOf('!'));
     }
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    Date_t,
-    [](const Date_t& _value) -> QVariant {return _value;},
-    [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ Date_t,
+    /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
         if(_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
         return _value.toDate();
@@ -307,11 +307,11 @@ TAPI_REGISTER_METATYPE(
 )
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    Time_t,
-    [](const Time_t& _value) -> QVariant {return _value;},
-    [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ Time_t,
+    /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
         if(_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
         return _value.toTime();
@@ -319,11 +319,11 @@ TAPI_REGISTER_METATYPE(
 )
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_String,
-    TAPI,
-    DateTime_t,
-    [](const DateTime_t& _value) -> QVariant {return _value;},
-    [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ DateTime_t,
+    /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
         if (_value.canConvert<QDate>() == false)
         {
             print_stacktrace();
