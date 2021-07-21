@@ -18,6 +18,7 @@ HEADERS += \
     ORM/ForgotPassRequest.h \
     ORM/IPBin.h \
     ORM/IPStats.h \
+    ORM/PaymentGateways.h \
     ORM/User.h \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
@@ -40,6 +41,7 @@ SOURCES += \
     ORM/ForgotPassRequest.cpp \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
+    ORM/PaymentGateways.cpp \
     ORM/User.cpp \
     ORM/UserWallets.cpp \
     ORM/WalletTransactions.cpp \

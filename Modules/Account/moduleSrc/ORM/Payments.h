@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
@@ -85,6 +86,5 @@ private slots:
 }
 }
 }
-
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

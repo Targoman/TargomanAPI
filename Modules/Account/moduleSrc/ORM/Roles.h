@@ -20,15 +20,13 @@
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
-
-
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI{
+namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuRoleStatus,
                      Active   = 'A',
                      Blocked  = 'B',
@@ -42,6 +40,7 @@ namespace AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
 namespace tblRoles {
 constexpr char Name[] = "tblRoles";
 TARGOMAN_CREATE_CONSTEXPR(rolID);
@@ -49,24 +48,26 @@ TARGOMAN_CREATE_CONSTEXPR(rolName);
 TARGOMAN_CREATE_CONSTEXPR(rolParent_rolID);
 TARGOMAN_CREATE_CONSTEXPR(rolPrivileges);
 TARGOMAN_CREATE_CONSTEXPR(rolSignupAllowedIPs);
+TARGOMAN_CREATE_CONSTEXPR(rolStatus);
 TARGOMAN_CREATE_CONSTEXPR(rolCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(rolCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(rolStatus);
 }
+
 #pragma GCC diagnostic pop
 
 class Roles : public ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get roles information")
-    bool ORMDELETE("Delete a Role")
-    bool ORMUPDATE("Update role info by priviledged user")
     quint32 ORMCREATE("Create a new Role by priviledged user")
+    bool ORMUPDATE("Update role info by priviledged user")
+    bool ORMDELETE("Delete a Role")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,Roles)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,Roles)
 };
 
 }
@@ -76,5 +77,3 @@ private slots:
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuRoleStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
-
-
