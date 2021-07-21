@@ -61,7 +61,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
                                 )
 }
 
-class testAdvert: public clsBaseTest
+class testAdvert : public clsBaseTest
 {
     Q_OBJECT
 
@@ -70,6 +70,11 @@ class testAdvert: public clsBaseTest
     QVariant bannerSaleableID;
     QVariant couponID;
     QVariant lastPreVoucher;
+
+    void cleanupUnitTestData() {
+        clsDAC DAC;
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
+    }
 
 private slots:
     void initTestCase() {
@@ -91,16 +96,16 @@ private slots:
                                    }).toMap().value("usrID").toULongLong()) > 0);
     }
 
-    void Signup_user_again() {
-        QVERIFY((gUserID = callAPI(PUT,
-                                   "Account/signup", {}, {
-                                       {"emailOrMobile", UT_UserEmail},
-                                       {"name", "unit"},
-                                       {"family", "test"},
-                                       {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                       {"role", UT_RoleName}
-                                   }).toMap().value("usrID").toULongLong()) > 0);
-    }
+//    void Signup_user_again() {
+//        QVERIFY((gUserID = callAPI(PUT,
+//                                   "Account/signup", {}, {
+//                                       {"emailOrMobile", UT_UserEmail},
+//                                       {"name", "unit"},
+//                                       {"family", "test"},
+//                                       {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
+//                                       {"role", UT_RoleName}
+//                                   }).toMap().value("usrID").toULongLong()) > 0);
+//    }
 
     void Signup_admin() {
         QVERIFY((gAdminUserID = callAPI(PUT,
@@ -121,12 +126,11 @@ private slots:
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
-        {gUserID});
+        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { gUserID });
 
         QVERIFY(callAPI(POST,
-                        "Account/approveEmail", {},{
-                            {"uuid", Code}
+                        "Account/approveEmail", {}, {
+                            { "uuid", Code }
                         }).toBool());
     }
 
@@ -202,6 +206,51 @@ private slots:
 */
 
     void getOrCreateLocation() {
+        QVariantList locationInfo = callAdminAPI(
+            GET,
+            "Advert/Locations",
+            {
+                {
+                    "filters", QString("%1=%2 + %3=%4")
+                        .arg(tblLocations::locURL).arg("http://www.abbasgholi.com")
+                        .arg(tblLocations::locPlaceCode).arg("ABC"),
+                },
+                { "reportCount", false },
+                { "cols", tblLocations::locID },
+            }
+        ).toList();
+
+        qDebug() << "--------- locationInfo: " << locationInfo;
+
+        if (locationInfo.isEmpty() == false) {
+            locationID = locationInfo.at(0).toMap()[tblLocations::locID];
+        }
+        else
+        {
+            locationID = callAdminAPI(
+                PUT,
+                "Advert/Locations",
+                {},
+                {
+                    { tblLocations::locURL,        "http://www.abbasgholi.com" },
+                    { tblLocations::locPlaceCode,  "ABC" },
+                }
+            );
+        }
+
+        qDebug() << "--------- locationID: " << locationID;
+    }
+
+    void deleteLocation() {
+        QVariant result = callAdminAPI(
+            DELETE,
+            "Advert/Locations/" + locationID.toString()
+        );
+
+        qDebug() << "--------- DELETE location: " << result;
+    }
+
+    void getOrCreateLocation_2() {
         QVariantList locationInfo = callAdminAPI(
             GET,
             "Advert/Locations",
@@ -503,19 +552,19 @@ private slots:
         );
     }
 
-//    void finalizeBasket() {
-//        QVariant result = callAdminAPI(
-//            POST,
-//            "Account/finalizeBasket",
-//            {},
-//            {
-//                { "preVoucher",     lastPreVoucher },
-//                { "callBack",       "http://www.a.com" },
-//                { "walletID",       9988 },
-//                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
-//            }
-//        );
-//    }
+    void finalizeBasket() {
+        QVariant result = callAdminAPI(
+            POST,
+            "Account/finalizeBasket",
+            {},
+            {
+                { "preVoucher",     lastPreVoucher },
+                { "callBack",       "http://www.a.com" },
+                { "walletID",       9988 },
+                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+            }
+        );
+    }
 
     void cleanupSaleableData() {
     }

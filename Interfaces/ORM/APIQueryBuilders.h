@@ -40,7 +40,7 @@ extern quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL)
 
 extern bool Update(clsTable& _table, UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL, const QVariantMap& _extraFilters = {});
 
-extern bool Delete(clsTable& _table, DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL, const QVariantMap& _extraFilters = {}, bool _realDelete = false);
+extern bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL, const QVariantMap& _extraFilters = {}, bool _realDelete = false);
 
 }
 }

@@ -65,7 +65,7 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
@@ -131,51 +131,63 @@ TAPI::RawData_t User::apiGETPhoto(TAPI::JWT_t _JWT, quint64 _usrID) {
 
 //TODO BAD Gender causes assert
 
-
-User::User() : clsTable(
-    AAASchema,
-    tblUser::Name,
-    {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
-        //ORM_PRIMARY_KEY64 with self:true
-        { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
-        { tblUser::usrGender,           S(TAPI::enuUserGender::Type),   QFV,                                   TAPI::enuUserGender::NotExpressed, UPOwner },
-        { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
-        { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
-        { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
-        { tblUser::usrMobile,           S(TAPI::Mobile_t),              QFV,                                   QNull,     UPOwner },
-        { tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type), QFV,                                   TAPI::enuUserApproval::None },
-        //{ tblUser::usrPass,
-        { tblUser::usr_rolID,           S(quint32),                     QFV.integer().minValue(1),             QRequired, UPAdmin },
-        { tblUser::usrSpecialPrivs,     S(TAPI::PrivObject_t),          QFV,                                   QNull,     UPAdmin, false, false },
-        { tblUser::usrLanguage,         S(QString),                     QFV.languageCode(),                    "fa",      UPOwner },
-        { tblUser::usrMaxSessions,      S(qint32),                      QFV.integer().betweenValues(-1, 100),  -1,        UPAdmin },
-        { tblUser::usrActiveSessions,   S(qint32),                      QFV.integer().betweenValues(-1, 1000), QInvalid,  UPNone },
-        { tblUser::usrLastLogin,        S(TAPI::DateTime_t),            QFV,                                   QInvalid,  UPNone },
-        { tblUser::usrStatus,           ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
-        { "_usrVersion",                ORM_VERSION_FIELD },
-        { tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY },
-        { tblUser::usrCreationDateTime, ORM_CREATED_ON },
-        { tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY },
-    },
-    {///< Col                          Reference Table                        ForeignCol    Rename LeftJoin
-        { tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},
-        { tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  "uei_usrID",  "",    true},
-        ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
-        ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
-    },
-    {
-        { {
-              tblUser::usrEmail,
-              tblUser::usrStatus,
-              "_usrVersion"
-          }, enuDBIndex::Unique },
-        { {
-              tblUser::usrMobile,
-              tblUser::usrStatus,
-              "_usrVersion"
-          }, enuDBIndex::Unique },
-    })
-{}
+User::User() :
+    clsTable(
+        AAASchema,
+        tblUser::Name,
+        {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
+            //ORM_PRIMARY_KEY64 with self:true
+            { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
+            { tblUser::usrGender,           S(TAPI::enuUserGender::Type),   QFV,                                   TAPI::enuUserGender::NotExpressed, UPOwner },
+            { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
+            { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
+            { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
+            { tblUser::usrMobile,           S(TAPI::Mobile_t),              QFV,                                   QNull,     UPOwner },
+            { tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type), QFV,                                   TAPI::enuUserApproval::None },
+            //{ tblUser::usrPass,
+            { tblUser::usr_rolID,           S(quint32),                     QFV.integer().minValue(1),             QRequired, UPAdmin },
+            { tblUser::usrSpecialPrivs,     S(TAPI::PrivObject_t),          QFV,                                   QNull,     UPAdmin, false, false },
+            { tblUser::usrLanguage,         S(QString),                     QFV.languageCode(),                    "fa",      UPOwner },
+            { tblUser::usrMaxSessions,      S(qint32),                      QFV.integer().betweenValues(-1, 100),  -1,        UPAdmin },
+            { tblUser::usrActiveSessions,   S(qint32),                      QFV.integer().betweenValues(-1, 1000), QInvalid,  UPNone },
+            { tblUser::usrLastLogin,        S(TAPI::DateTime_t),            QFV,                                   QInvalid,  UPNone },
+            { tblUser::usrStatus,           ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY },
+            { tblUser::usrCreationDateTime, ORM_CREATED_ON },
+            { tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY },
+        },
+        {///< Col                          Reference Table                        ForeignCol    Rename LeftJoin
+            { tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          "rolID"},
+            { tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  "uei_usrID",  "",    true},
+            ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
+        },
+        {
+            { {
+                  tblUser::usrEmail,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+            { {
+                  tblUser::usrMobile,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+        }
+    )
+{
+    this
+        ->addDBProperty(
+            ORM_TABLE_DBPROPERTY_INVALIDATE_QUERY,
+            "UPDATE :tableName"
+            "   SET :invalidatedAt = UNIX_TIMESTAMP()"
+            " WHERE :invalidatedAt = 0"
+            "   AND usrStatus = 'R'"
+            "   AND ("
+            "       (IFNULL(:usrEmail, '') <> '' AND IFNULL(usrEmail, '') = :usrEmail)"
+            "    OR (IFNULL(:usrMobile, '') <> '' AND IFNULL(usrMobile, '') = :usrMobile)"
+            "       )")
+    ;
+}
 
 bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
     clsDACResult Result = this->execQuery(

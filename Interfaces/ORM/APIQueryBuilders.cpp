@@ -158,23 +158,23 @@ bool Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVari
     return query.execute(_userID) > 0;
 }
 
-bool Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete)
+bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete)
 {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
         throw exHTTPBadRequest("No key provided to delete");
 
-    QString statusColumn = _table.getStatusColumnNam();
-    if (statusColumn.isEmpty() == false) {
-        if (Update(_table, _userID, _pksByPath, TAPI::ORMFields_t({
-                { _table.getStatusColumnNam(), "Removed" }
-            }), _extraFilters) == 0)
-            return false;
-    }
+//    QString statusColumn = _table.getStatusColumnName();
+//    if (statusColumn.isEmpty() == false) {
+//        if (Update(_table, _userID, _pksByPath, TAPI::ORMFields_t({
+//                { statusColumn, "Removed" }
+//            }), _extraFilters) == 0)
+//            return false;
+//    }
 
-    if (_realDelete == false)
-        return true;
+//    if (_realDelete == false)
+//        return true;
 
     DeleteQuery query = DeleteQuery(_table)
         .setPksByPath(_pksByPath)
@@ -190,7 +190,7 @@ bool Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVari
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_userID) > 0;
+    return query.execute(_userID, {}, _realDelete) > 0;
 }
 
 }

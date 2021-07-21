@@ -35,18 +35,19 @@ namespace AAA {
 class Zibal
 {
 private:
-    static QString errorString(int _errCode){
-        switch(_errCode){
-        case  100 : return "Ok";
-        case  102 : return "InvalidAPIKey";
-        case  103 : return "ErroneousAPIKey";
-        case  104 : return "ErroneousAPIKey";
-        case  201 : return "Ok";
-        case  105 : return "InvalidAmount";
-        case  106 : return "InvalidCallBack";
-        default   : return "UNKNOWN";
+    static QString errorString(int _errCode) {
+        switch (_errCode) {
+            case 100 : return "Ok";
+            case 102 : return "InvalidAPIKey";
+            case 103 : return "ErroneousAPIKey";
+            case 104 : return "ErroneousAPIKey";
+            case 201 : return "Ok";
+            case 105 : return "InvalidAmount";
+            case 106 : return "InvalidCallBack";
+            default  : return "UNKNOWN";
         }
     }
+
 public:
     static stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc){
         intfPaymentGateway::log("Zibal", __FUNCTION__, __LINE__, {_orderMD5, _amount, _callback, _desc});

@@ -68,7 +68,7 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
 }
 
 }

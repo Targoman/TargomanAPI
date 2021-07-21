@@ -40,14 +40,14 @@ OnlinePayments::OnlinePayments() :
     clsTable(
         AAASchema,
         tblOnlinePayments::Name,
-        {///< ColName                                   Type                    Validation                          Default    UpBy   Sort  Filter Self  Virt   PK
+        {///< ColName                                   Type                    Validation                           Default    UpBy   Sort  Filter Self  Virt   PK
             { tblOnlinePayments::onpID,                 ORM_PRIMARY_KEY64 },
-            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired, UPNone },
-            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired, UPNone },
-            { tblOnlinePayments::onpPaymentGateway,     S(TAPI::enuPaymentGateway::Type),QFV,                       TAPI::enuPaymentGateway::Zibal, UPNone },
-            { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired, UPNone },
-            { tblOnlinePayments::onpAmount,             S(TAPI::DateTime_t),    QFV,                                QRequired, UPNone },
-            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,     UPNone, false, false },
+            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                 QRequired, UPNone },
+            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPNone },
+            { tblOnlinePayments::onpPaymentGateway,     S(TAPI::enuPaymentGateway::Type),QFV,                        TAPI::enuPaymentGateway::Zibal, UPNone },
+            { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),    QNull,     UPNone },
+            { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPNone },
+            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                 QNull,     UPNone, false, false },
             { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
             { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
             { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },

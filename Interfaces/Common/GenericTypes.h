@@ -36,8 +36,10 @@
 namespace Targoman {
 namespace API {
 namespace Server {
+
 extern QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
 extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
 }
 }
 }

@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "clsORMField.h"
@@ -64,6 +65,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
                 bool _isSelfIdentifier,
                 bool _isVirtual,
                 bool _isPrimaryKey,
+                bool _isSelectable,
                 const QString& _renameAs):
     ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
     Name(_name),
@@ -76,7 +78,9 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
           (_isFilterable ? 0x02 : 0) +
           (_isSelfIdentifier ? 0x4 : 0) +
           (_isPrimaryKey ? 0x8 : 0) +
-          (_isVirtual ? 0x10 : 0))
+          (_isVirtual ? 0x10 : 0) +
+          (_isSelectable ? 0x20 : 0)
+    )
 {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
@@ -110,15 +114,15 @@ void clsORMField::validate(const QVariant _value)
 
 const intfAPIArgManipulator& clsORMField::argSpecs()
 {
+//    qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
+
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType))
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));
 
-//    qDebug() << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
-
     Q_ASSERT(this->Data->ParameterType != QMetaType::UnknownType);
-    return this->Data->ParameterType < TAPI_BASE_USER_DEFINED_TYPEID ?
-                *gOrderedMetaTypeInfo.at(this->Data->ParameterType) :
-                *gUserDefinedTypesInfo.at(this->Data->ParameterType - TAPI_BASE_USER_DEFINED_TYPEID);
+    return (this->Data->ParameterType < TAPI_BASE_USER_DEFINED_TYPEID)
+        ? *gOrderedMetaTypeInfo.at(this->Data->ParameterType)
+        : *gUserDefinedTypesInfo.at(this->Data->ParameterType - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
 QString  clsORMField::toString(const QVariant& _value)

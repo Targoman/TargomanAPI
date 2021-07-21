@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_HPP
@@ -43,7 +44,6 @@ namespace AAA {
 #pragma clang diagnostic ignored "-Wweak-vtables"
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment);
 #pragma clang diagnostic pop
-
 
 struct stuPaymentResponse{
     int     ErrorCode;
@@ -71,33 +71,34 @@ struct stuPaymentResponse{
     {}
 };
 
-class intfPaymentGateway{
+class intfPaymentGateway {
 public:
-    struct stuGateWay {
-        stuGateWay(const QString& _basePath) :
+    struct stuGateway {
+        stuGateway(const QString& _basePath) :
             CallBackDomain(_basePath + "CallBackdomain", "Domain used for callback"),
-            GateWay(_basePath + "Gateway", "Gateway to be used for this callback"),
+            Gateway(_basePath + "Gateway", "Gateway to be used for this callback"),
             CustomerID(_basePath + "Gateway", "Customer ID on the gateway"),
             PrivateToken(_basePath + "Gateway", "PrivateToken for gateway if required")
         {}
 
         Targoman::Common::Configuration::tmplConfigurable<QString>    CallBackDomain;
-        Targoman::Common::Configuration::tmplConfigurable<TAPI::enuPaymentGateway::Type> GateWay;
+        Targoman::Common::Configuration::tmplConfigurable<TAPI::enuPaymentGateway::Type> Gateway;
         Targoman::Common::Configuration::tmplConfigurable<QString>    CustomerID;
         Targoman::Common::Configuration::tmplConfigurable<QString>    PrivateToken;
     };
-    static Targoman::Common::Configuration::tmplConfigurableArray<stuGateWay> GatewayEndPoints;
+
+    static Targoman::Common::Configuration::tmplConfigurableArray<stuGateway> GatewayEndPoints;
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> TransactionLogFile;
 
-    static QString merchantID(const QString _callBack, TAPI::enuPaymentGateway::Type _gateway){
+    static QString merchantID(const QString _callBack, TAPI::enuPaymentGateway::Type _gateway) {
         QString CallBackDomain = _callBack;
         CallBackDomain = CallBackDomain.replace("https://","").replace("http://", "");
 
-        for(size_t i=0; i<intfPaymentGateway::GatewayEndPoints.size(); ++i){
-            if(intfPaymentGateway::GatewayEndPoints.at(i).GateWay.value() == _gateway &&
-               CallBackDomain.startsWith(intfPaymentGateway::GatewayEndPoints.at(i).CallBackDomain.value())) {
+        for (size_t i=0; i<intfPaymentGateway::GatewayEndPoints.size(); ++i) {
+            if (intfPaymentGateway::GatewayEndPoints.at(i).Gateway.value() == _gateway &&
+                    CallBackDomain.startsWith(intfPaymentGateway::GatewayEndPoints.at(i).CallBackDomain.value())
+                )
                 return intfPaymentGateway::GatewayEndPoints.at(i).CustomerID.value();
-            }
         }
         throw exPayment(QString("callback unrecognized for %1: %2").arg(TAPI::enuPaymentGateway::toStr(_gateway), _callBack));
     }

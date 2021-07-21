@@ -82,7 +82,7 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-  return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

@@ -147,7 +147,7 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdOrderedCount,     S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
             { tblAccountProductsBase::prdReturnedCount,    S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
             { tblAccountProductsBase::prdStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_prdVersion",                               ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAccountProductsBase::prdCreationDateTime, ORM_CREATED_ON },
             { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
             { tblAccountProductsBase::prdUpdatedBy_usrID,  ORM_UPDATED_BY },
@@ -160,8 +160,7 @@ intfAccountProducts::intfAccountProducts(
         QList<ORM::stuDBIndex>({
             { {
                 tblAccountProductsBase::prdCode,
-                tblAccountProductsBase::prdStatus,
-                "_prdVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { tblAccountProductsBase::prdValidFromDate },
             { tblAccountProductsBase::prdValidToDate },
@@ -203,7 +202,7 @@ bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
@@ -234,7 +233,7 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbReturnedCount,       S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPNone },
             { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),                      QFV,                             QNull,      UPOwner },
             { tblAccountSaleablesBase::slbStatus,              ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_slbVersion",                                   ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
             { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
@@ -248,8 +247,7 @@ intfAccountSaleables::intfAccountSaleables(
         QList<ORM::stuDBIndex>({
             { {
                 tblAccountSaleablesBase::slbCode,
-                tblAccountSaleablesBase::slbStatus,
-                "_slbVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { tblAccountSaleablesBase::slbType },
             { tblAccountSaleablesBase::slbAvailableFromDate },
@@ -301,7 +299,7 @@ bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
@@ -325,7 +323,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uasPrefered,        S(bool),                   QFV,                       false,      UPOwner },
             { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),       QFV,                       QNow,       UPNone },
             { tblAccountUserAssetsBase::uasStatus,          ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
-            { "_uasVersion",                                ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
@@ -339,10 +337,8 @@ intfAccountUserAssets::intfAccountUserAssets(
         QList<ORM::stuDBIndex>({
             { {
                   tblAccountUserAssetsBase::uas_usrID,
-//                  tblAccountUserAssetsBase::uas_slbID,
                   tblAccountUserAssetsBase::uasVoucherItemUUID,
-                  tblAccountUserAssetsBase::uasStatus,
-                  "_uasVersion",
+                  ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { tblAccountUserAssetsBase::uas_usrID },
             { tblAccountUserAssetsBase::uas_slbID },
@@ -443,7 +439,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnTotalUsedCount,          S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnTotalUsedAmount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_cpnVersion",                                     ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAccountCouponsBase::cpnCreationDateTime,        ORM_CREATED_ON },
             { tblAccountCouponsBase::cpnCreatedBy_usrID,         ORM_CREATED_BY },
             { tblAccountCouponsBase::cpnUpdatedBy_usrID,         ORM_UPDATED_BY },
@@ -455,8 +451,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
         {
             { {
                tblAccountCouponsBase::cpnCode,
-               tblAccountCouponsBase::cpnStatus,
-               "_cpnVersion",
+               ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { tblAccountCouponsBase::cpnAmountType },
             { tblAccountCouponsBase::cpnValidFrom },
@@ -498,7 +493,7 @@ bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
@@ -538,7 +533,7 @@ bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/

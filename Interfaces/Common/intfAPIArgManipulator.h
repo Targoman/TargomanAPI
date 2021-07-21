@@ -56,7 +56,7 @@ public:
 };
 
 /**********************************************************************/
-class intfAPIArgManipulator{
+class intfAPIArgManipulator {
 public:
     intfAPIArgManipulator(const QString& _realTypeName);
     virtual ~intfAPIArgManipulator();
@@ -84,8 +84,6 @@ public:
 
 extern void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator);
 #pragma clang diagnostic pop
-
-
 
 }
 }

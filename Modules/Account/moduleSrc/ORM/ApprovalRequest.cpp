@@ -26,8 +26,8 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuAPRStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI,enuApprovalType);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAPRStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuApprovalType);
 
 namespace Targoman {
 namespace API {
@@ -50,7 +50,7 @@ bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
 }
 
@@ -67,7 +67,7 @@ ApprovalRequest::ApprovalRequest() :
             { tblApprovalRequest::aprRequestDate,   ORM_CREATED_ON},
             { tblApprovalRequest::aprApplyDate,     S(TAPI::DateTime_t),    QFV,                             QNull,     UPNone},
             { tblApprovalRequest::aprStatus,        ORM_STATUS_FIELD(TAPI::enuAPRStatus, TAPI::enuAPRStatus::New) },
-            { "_aprVersion",                        ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
         },
         {///< Col                           Reference Table                  ForeignCol        Rename     LeftJoin
             {tblApprovalRequest::apr_usrID, R(AAASchema,tblUser::Name),      tblUser::usrID},
@@ -76,8 +76,7 @@ ApprovalRequest::ApprovalRequest() :
             { {
                 tblApprovalRequest::aprApprovalCode,
                 tblApprovalRequest::aprApprovalValue,
-                tblApprovalRequest::aprStatus,
-                "_aprVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )

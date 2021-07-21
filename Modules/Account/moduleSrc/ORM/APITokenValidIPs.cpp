@@ -67,7 +67,7 @@ bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 
@@ -81,7 +81,7 @@ APITokenValidIPs::APITokenValidIPs() :
             { tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner },
             { tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone, false, false },
             { tblAPITokenValidIPs::tviStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_tviVersion",                            ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON },
             { tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY },
             { tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY },
@@ -95,8 +95,7 @@ APITokenValidIPs::APITokenValidIPs() :
             { {
                 tblAPITokenValidIPs::tvi_aptID,
                 tblAPITokenValidIPs::tviIP,
-                tblAPITokenValidIPs::tviStatus,
-                "_tviVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )

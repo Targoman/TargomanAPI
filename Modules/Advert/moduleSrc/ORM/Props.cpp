@@ -69,7 +69,7 @@ bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 Props::Props() :

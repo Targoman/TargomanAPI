@@ -47,7 +47,7 @@ IPBin::IPBin() :
             { tblIPBin::ipbBlockedBy_usrID,  S(quint64),          QFV.integer().minValue(1), QNull,     UPNone },
             { tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                       QNull,     UPNone },
             { tblIPBin::ipbStatus,           ORM_STATUS_FIELD(TAPI::enuIPBinStatus, TAPI::enuIPBinStatus::Active) },
-            { "_ipbVersion",                 ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
         },
         {///< Col                            Reference Table             ForeignCol      Rename      LeftJoin
             { tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID, "Blocker_", true },
@@ -55,8 +55,7 @@ IPBin::IPBin() :
         {
             { {
                 tblIPBin::ipbIP,
-                tblIPBin::ipbStatus,
-                "_ipbVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )

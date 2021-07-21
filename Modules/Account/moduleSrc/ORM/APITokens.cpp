@@ -51,7 +51,7 @@ APITokens::APITokens() :
             { tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QInvalid,  UPNone },
             { tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone },
             { tblAPITokens::aptStatus,           ORM_STATUS_FIELD(TAPI::enuAPITokensStatus, TAPI::enuAPITokensStatus::Active) },
-            { "_aptVersion",                     ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY },
             { tblAPITokens::aptCreationDateTime, ORM_CREATED_ON },
             { tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY },
@@ -65,8 +65,7 @@ APITokens::APITokens() :
         {
             { {
                 tblAPITokens::aptToken,
-                tblAPITokens::aptStatus,
-                "_aptVersion"
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )
@@ -104,7 +103,7 @@ bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 }

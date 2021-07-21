@@ -45,7 +45,7 @@ Roles::Roles() :
             { tblRoles::rolPrivileges,        S(TAPI::PrivObject_t), QFV,                              QRequired, UPAdmin, false, false },
             { tblRoles::rolSignupAllowedIPs,  S(QString),            QFV,                              QNull,     UPAdmin, false, false }, //OJO This must be validated after splitting by comma
             { tblRoles::rolStatus,            ORM_STATUS_FIELD(TAPI::enuRoleStatus, TAPI::enuRoleStatus::Active) },
-            { "_rolVersion",                  ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblRoles::rolCreationDateTime,  ORM_CREATED_ON },
             { tblRoles::rolCreatedBy_usrID,   ORM_CREATED_BY },
             { tblRoles::rolUpdatedBy_usrID,   ORM_UPDATED_BY },
@@ -58,8 +58,7 @@ Roles::Roles() :
         {
             { {
                 tblRoles::rolName,
-                tblRoles::rolStatus,
-                "_rolVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )
@@ -94,7 +93,7 @@ bool Roles::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 }

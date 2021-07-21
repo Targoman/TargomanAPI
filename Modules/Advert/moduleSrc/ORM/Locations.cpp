@@ -42,7 +42,7 @@ Locations::Locations() :
             { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
             { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
             { tblLocations::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_locVersion",                     ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblLocations::locCreationDateTime, ORM_CREATED_ON },
             { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
             { tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY },
@@ -55,8 +55,7 @@ Locations::Locations() :
             { {
                 tblLocations::locURL,
                 tblLocations::locPlaceCode,
-                tblLocations::locStatus,
-                "_locVersion",
+                ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { tblLocations::locURL },
             { tblLocations::locPlaceCode },
@@ -93,7 +92,7 @@ bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 }

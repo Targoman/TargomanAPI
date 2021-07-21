@@ -103,13 +103,13 @@ TARGOMAN_DEFINE_ENUM(enuPaymentType,
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
-Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateWay> intfPaymentGateway::GatewayEndPoints(
+Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
         AAA::Accounting::makeConfig("GatewayEndPoints"),
         "Registered payment gateways",
         0
         );
 
-Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile(
+Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile (
         AAA::Accounting::makeConfig("TransactionLogFile"),
         "File to store transaction logs",
         "",
@@ -122,7 +122,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway
         enuConfigSource::Arg | enuConfigSource::File
         );
 
-Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile(
+Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
         AAA::Accounting::makeConfig("InvalidPasswordsFile"),
         "File where invalid pasword MD5s are stored",
         "",
@@ -379,8 +379,8 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
         if (_walletID>=0 && RemainingAfterWallet>0) {
             clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
-                                                   {"iWalletID", _walletID},
-                                                   {"iVoucherID", Voucher.ID},
+                                                   { "iWalletID", _walletID },
+                                                   { "iVoucherID", Voucher.ID },
                                                });
             RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
             if (RemainingAfterWallet < 0)

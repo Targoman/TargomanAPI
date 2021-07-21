@@ -42,7 +42,7 @@ Service::Service() :
             { tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin },
             { tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin },
             { tblService::svcStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { "_svcVersion",                   ORM_VERSION_FIELD },
+            { ORM_INVALIDATED_AT_FIELD },
             { tblService::svcCreationDateTime, ORM_CREATED_ON },
             { tblService::svcCreatedBy_usrID,  ORM_CREATED_BY },
             { tblService::svcUpdatedBy_usrID,  ORM_UPDATED_BY },
@@ -55,8 +55,7 @@ Service::Service() :
         {
             { {
                   tblService::svcName,
-                  tblService::svcStatus,
-                  "_svcVersion"
+                  ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
     )
@@ -91,7 +90,7 @@ bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 }

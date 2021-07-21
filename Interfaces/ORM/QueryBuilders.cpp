@@ -1248,50 +1248,46 @@ public:
         /****************************************************************************/
         if (this->PksByPath.size())
         {
-            QStringList PrimaryKeyQueries = this->PksByPath.split(";");
-            QStringList pkFilters;
-            foreach (auto Query, PrimaryKeyQueries) {
-                foreach (auto Col, this->Owner->Data->Table.BaseCols)
-                if (Col.isPrimaryKey())
-                {
-                    if (Query.size())
-                        pkFilters.append(makeColName(MainTableNameOrAlias, Col) + " = \"" + Query + "\"");
-                    break;
+            QStringList PkFilters;
+
+            QStringList Pks = this->PksByPath.split(QRegularExpression("(;|,)"));
+            foreach (auto PkValue, Pks) {
+                foreach (auto Col, this->Owner->Data->Table.BaseCols) {
+                    if (Col.isPrimaryKey())
+                    {
+                        if (PkValue.size())
+                            PkFilters.append(makeColName(MainTableNameOrAlias, Col) + " = \"" + PkValue + "\"");
+                        break;
+                    }
                 }
             }
-            if (pkFilters.isEmpty())
+
+            if (PkFilters.isEmpty())
                 throw exQueryBuilder("pksByPath had no results");
 
             if (this->PreparedItems.Where.isEmpty())
-                this->PreparedItems.Where = pkFilters.join(" AND ");
+                this->PreparedItems.Where = PkFilters.join(" AND ");
             else
                 this->PreparedItems.Where = QString("%1 AND (%2)")
-                                            .arg(pkFilters.join(" AND "))
+                                            .arg(PkFilters.join(" AND "))
                                             .arg(this->PreparedItems.Where);
         }
 
         /****************************************************************************/
         //only check for stand alone select query
-        if (_checkStatusCol && (StatusColHasCriteria == false))
-        {
-//            foreach (auto FCol, this->Owner->Data->Table.FilterableColsMap) {
-            foreach (auto Col, this->Owner->Data->Table.BaseCols) {
-                if (Col.updatableBy() == enuUpdatableBy::__STATUS__) {
-                    QString w;
-//                    if (FCol.Relation.IsLeftJoin)
-//                        SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
-//                    else
-                        w = QString("%1 != 'R'").arg(makeColName(MainTableNameOrAlias, Col, false)); //, FCol.Relation));
+        QStringList w;
+        foreach (auto Col, this->Owner->Data->Table.BaseCols) {
+            if (_checkStatusCol && (StatusColHasCriteria == false) && Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                    w.append(QString("%1 != 'R'").arg(makeColName(MainTableNameOrAlias, Col, false)));
 
-                    if (this->PreparedItems.Where.length())
-                        this->PreparedItems.Where = w + " AND (" + this->PreparedItems.Where + ")";
-                    else
-                        this->PreparedItems.Where = w;
-
-//                    if (FCol.Relation.Column.size())
-//                        UsedJoins.insert(FCol.Relation);
-                }
-            }
+            if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
+                w.append(QString("%1 = 0").arg(makeColName(MainTableNameOrAlias, Col, false)));
+        }
+        if (w.length()) {
+            if (this->PreparedItems.Where.length())
+                this->PreparedItems.Where = w.join(" AND ") + " AND (" + this->PreparedItems.Where + ")";
+            else
+                this->PreparedItems.Where = w.join(" AND ");
         }
 
         /****************************************************************************/
@@ -1686,9 +1682,12 @@ public:
             return true;
         }; //addCol
 
-        if (this->RequiredCols.isEmpty())
-            foreach(auto Col, this->Table.BaseCols)
-                this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true));
+        if (this->RequiredCols.isEmpty()) {
+            foreach(auto Col, this->Table.BaseCols) {
+                if (Col.isSelectable())
+                    this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true));
+            }
+        }
         else {
 //            qDebug() << MainTableNameOrAlias << "has RequiredCols";
 //            int i = 0;
@@ -2784,39 +2783,151 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
     return BoundQueryString;
 }
 
+//void updateInvalidatedAt(SelectQuery& _select, const QString& invalidateQueryString)
+//{
+//    throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
+//}
+
+QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex)
+{
+    QString invalidatedAtFieldName = _table.getDBProperty(ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME).toString();
+    if (invalidatedAtFieldName.isEmpty())
+        return "";
+
+    QString statusFieldName = _table.getStatusColumnName();
+    if (statusFieldName.isEmpty())
+        throw exQueryBuilder("status field name not provided for " + _table.Name);
+
+    QString invalidateQueryString;
+    QVariant invalidateQuery = _table.getDBProperty(ORM_TABLE_DBPROPERTY_INVALIDATE_QUERY);
+    if (invalidateQuery.isValid()) {
+        invalidateQueryString = invalidateQuery.toString();
+    }
+    else {
+        invalidateQueryString =
+            "UPDATE :tableName"
+            "   SET :invalidatedAt = UNIX_TIMESTAMP()"
+            " WHERE :invalidatedAt = 0"
+            "   AND :statusFieldName = 'R'"
+        ;
+
+        if (_makeWithUniqeIndex)
+        {
+            //make invalidate update query dynamically
+            QStringList w;
+
+            foreach (stuDBIndex Index, _table.Indexes) {
+                if (Index.Type == enuDBIndex::Unique) {
+                    foreach (auto IndexColName, Index.Columns) {
+                        if ((statusFieldName != IndexColName) && (invalidatedAtFieldName != IndexColName))
+                            w.append(QString("(IFNULL(:%1, '') <> '' AND IFNULL(%1, '') = :%1)").arg(IndexColName));
+                    }
+                }
+            }
+
+            if (w.isEmpty())
+                throw exQueryBuilder("unique index not defined for " + _table.Name);
+
+            invalidateQueryString += " AND " + w.join(" AND ");
+        }
+    }
+
+    if (invalidateQueryString.isEmpty())
+        throw exQueryBuilder("invalidate update query not provided for " + _table.Name);
+
+    invalidateQueryString
+        .replace(":tableName", _table.Schema + '.' + _table.Name)
+        .replace(":invalidatedAt", invalidatedAtFieldName)
+        .replace(":statusFieldName", statusFieldName)
+    ;
+
+    return invalidateQueryString;
+}
+
 quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding)
 {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
-#ifdef QT_DEBUG
-    if (_useBinding) {
-        QStringList BindingValuesList;
-        foreach (auto b, BoundQueryString.BindingValues) {
-            BindingValuesList.append(b.toString());
-        }
-
-        qDebug().nospace().noquote() << endl
-                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
-                                     << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
-                                     << "-- [" << BindingValuesList.join(", ") << "]" << endl;
-    }
-    else {
-        qDebug().nospace().noquote() << endl
-                                     << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl;
-    }
-#endif
-
     clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
 
-    clsDACResult Result = DAC.execQuery(
-                              "",
-                              BoundQueryString.QueryString,
-                              BoundQueryString.BindingValues
-                              );
+    ///TODO: start transaction
 
-//    qDebug() << "--- CreateQuery::execute()" << __FILE__ << __LINE__ << Result.toJson(false);
+    QT_TRY
+    {
+        //1: invalidate OLD removed row(s)
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, true);
+        if (invalidateQueryString.length())
+        {
+            if (this->Data->Select.isValid())
+                throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
+//                updateInvalidatedAt(this->Data->Select, invalidateQueryString);
+            else {
+                foreach (QVariantMap oneRecord, this->Data->Values) {
+                    QString query = invalidateQueryString;
+                    foreach (auto Col, this->Data->Table.BaseCols) {
+                        //ignore statusFieldName in update conditions
+//                        if (statusFieldName.length() && (Col.name() == statusFieldName))
+//                            continue;
 
-    return Result.lastInsertId().toULongLong();
+                        for (QVariantMap::const_iterator itr = oneRecord.constBegin(); itr != oneRecord.constEnd(); itr++) {
+                            QString key = itr.key();
+                            if (key == Col.name()) {
+                                QVariant val = itr.value();
+
+                                if ((val.userType() == QMetaType::QJsonObject)
+                                        || (val.userType() == QMetaType::QJsonArray)
+                                    )
+                                    val = QJsonDocument().fromVariant(val).toJson(QJsonDocument::Compact).constData();
+
+                                 QString v = makeValueAsSQL(val, true, &Col);
+                                 query.replace(QString(":%1").arg(key), v);
+                            }
+                        }
+                    }
+                    clsDACResult res = DAC.execQuery("", query);
+                }
+            }
+        }
+
+        //2: create new row(s)
+
+#ifdef QT_DEBUG
+        if (_useBinding) {
+            QStringList BindingValuesList;
+            foreach (auto b, BoundQueryString.BindingValues) {
+                BindingValuesList.append(b.toString());
+            }
+
+            qDebug().nospace().noquote() << endl
+                                         << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl
+                                         << endl << "-- Binding Values:" << endl << BoundQueryString.BindingValues << endl
+                                         << "-- [" << BindingValuesList.join(", ") << "]" << endl;
+        }
+        else {
+            qDebug().nospace().noquote() << endl
+                                         << endl << "-- Query:" << endl << BoundQueryString.QueryString << endl;
+        }
+#endif
+
+        clsDACResult Result = DAC.execQuery(
+                                  "",
+                                  BoundQueryString.QueryString,
+                                  BoundQueryString.BindingValues
+                                  );
+
+//        qDebug() << "--- CreateQuery::execute()" << __FILE__ << __LINE__ << Result.toJson(false);
+
+        auto ret = Result.lastInsertId().toULongLong();
+
+        ///TODO: commit
+
+        return ret;
+    }
+    QT_CATCH(...)
+    {
+        ///TODO: rollback
+        QT_RETHROW;
+    }
 }
 
 /***************************************************************************************/
@@ -3245,48 +3356,69 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
     return QueryString;
 }
 
-quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _softDelete, bool _hardDelete)
+quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _realDelete)
 {
-    if (_softDelete)
-    {
-        foreach (auto Col, this->Data->Table.BaseCols)
-        {
-            if (Col.updatableBy() == enuUpdatableBy::__STATUS__)
-            {
-                QT_TRY
-                {
-                    return UpdateQuery(this->Data->Table)
-                            .set(Col.name(), "Removed")
-                            .where(this->WhereTraitData->WhereClauses)
-                            .execute(_currentUserID);
-                }
-                QT_CATCH(std::exception& exp)
-                {
-                    //update failed. use hard delete instead
-                    if (_hardDelete == false)
-                        throw exp;
-                }
-
-                break;
-            }
-        }
-    }
-
-    if (_hardDelete == false)
-        return 0;
-
     QString QueryString = this->buildQueryString(_currentUserID, _args);
-
-#ifdef QT_DEBUG
-    qDebug().nospace().noquote() << endl
-                                 << endl << "-- Query:" << endl << QueryString << endl;
-#endif
 
     clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
 
-    clsDACResult Result = DAC.execQuery("", QueryString);
+    ///TODO: start transaction
 
-    return Result.numRowsAffected();
+    QT_TRY
+    {
+        QString statusFieldName = this->Data->Table.getStatusColumnName();
+
+        //1: invalidate OLD removed row
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, false);
+//        qDebug() << "-------------" << invalidateQueryString;
+        if (invalidateQueryString.length()) {
+            invalidateQueryString += QString(" AND (%1)").arg(this->WhereTraitData->PreparedItems.Where);
+            DAC.execQuery("", invalidateQueryString).numRowsAffected();
+        }
+
+        //2: soft delete this
+        QT_TRY
+        {
+            quint64 rowsAffected = UpdateQuery(this->Data->Table)
+                    .set(statusFieldName, "Removed")
+                    .where(this->WhereTraitData->WhereClauses)
+                    .execute(_currentUserID);
+            if (rowsAffected > 0) {
+                ///TODO: commit
+                return rowsAffected;
+            }
+        }
+        QT_CATCH(...)
+        {
+            //update failed. use hard delete instead
+            if (_realDelete == false)
+                QT_RETHROW;
+        }
+
+        //3: real delete this
+        if (_realDelete == false) {
+            ///TODO: commit
+            return 0;
+        }
+
+#ifdef QT_DEBUG
+        qDebug().nospace().noquote() << endl
+                                     << endl << "-- Query:" << endl << QueryString << endl;
+#endif
+
+        clsDACResult Result = DAC.execQuery("", QueryString);
+
+        auto ret = Result.numRowsAffected();
+
+        ///TODO: commit
+
+        return ret;
+    }
+    QT_CATCH(...)
+    {
+        ///TODO: rollback
+        QT_RETHROW;
+    }
 }
 
 /***************************************************************************************/

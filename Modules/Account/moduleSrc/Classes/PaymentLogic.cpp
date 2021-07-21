@@ -38,17 +38,24 @@ namespace AAA {
 using namespace DBManager;
 
 ///TODO attention for Minimum Bank Transaction Amount
-QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _vchID, const QString& _invDesc, quint32 _toPay, const QString _callback)
+QString PaymentLogic::createOnlinePaymentLink(
+        TAPI::enuPaymentGateway::Type _gateway,
+        quint64 _vchID,
+        const QString& _invDesc,
+        quint32 _toPay,
+        const QString _callback
+        )
 {
-    TAPI::MD5_t opyMD5;
+    TAPI::MD5_t onpMD5;
     quint8 Retries = 0;
     while(true){
         try{
             clsDACResult Result = OnlinePayments::instance().callSP("sp_CREATE_newOnlinePayment", {
-                                                                        {"iVoucherID", _vchID},
-                                                                        {"iGateway", QString(_gateway)}
+                                                                        { "iVoucherID", _vchID },
+                                                                        { "iGateway", QString(_gateway) },
+                                                                        { "iAmount", _toPay },
                                                                     });
-            opyMD5 = Result.spDirectOutputs().value("oMD5").toString();
+            onpMD5 = Result.spDirectOutputs().value("oMD5").toString();
             break;
         }catch(...){
             if (++Retries > 3)
@@ -60,7 +67,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
         stuPaymentResponse PaymentResponse;
         switch(_gateway){
         case TAPI::enuPaymentGateway::Zibal:
-            PaymentResponse = Zibal::request(opyMD5, _toPay, _callback, _invDesc);
+            PaymentResponse = Zibal::request(onpMD5, _toPay, _callback, _invDesc);
             break;
         case TAPI::enuPaymentGateway::Saman:
         case TAPI::enuPaymentGateway::ZarrinPal:
@@ -85,7 +92,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
                                             { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
                                          }),
                                          {
-                                            { tblOnlinePayments::onpMD5, opyMD5 }
+                                            { tblOnlinePayments::onpMD5, onpMD5 }
                                          });
             throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
         }
@@ -99,7 +106,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
                                         { tblOnlinePayments::onpResult, PaymentResponse.Result },
                                      }),
                                      {
-                                        { tblOnlinePayments::onpMD5, opyMD5 }
+                                        { tblOnlinePayments::onpMD5, onpMD5 }
                                      });
 
         return PaymentResponse.PaymentLink;
@@ -116,7 +123,7 @@ QString PaymentLogic::createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gat
                                         { tblOnlinePayments::onpResult, e.what() },
                                      }),
                                      {
-                                        { tblOnlinePayments::onpMD5, opyMD5 }
+                                        { tblOnlinePayments::onpMD5, onpMD5 }
                                      });
         throw;
     }

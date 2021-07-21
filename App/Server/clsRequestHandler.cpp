@@ -49,7 +49,7 @@ clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QO
 {}
 
 void clsRequestHandler::process(const QString& _api) {
-    this->Request->onData([this](QByteArray _data){
+    this->Request->onData([this](QByteArray _data ){
         try {
             TargomanLogInfo(7,
                             "posted data: " <<

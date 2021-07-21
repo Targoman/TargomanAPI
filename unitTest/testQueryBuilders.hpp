@@ -37,7 +37,8 @@ public:
                 { "colG1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colH1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colI1",   S(QChar),                        QFV,                       QNull,      UPOwner },
-                { "status1", S(TAPI::enuGenericStatus::Type), QFV,                       TAPI::enuGenericStatus::Active, UPStatus},
+                { "status1", ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+                { ORM_INVALIDATED_AT_FIELD },
                 { "CreatedBy_usrID",  ORM_CREATED_BY },
                 { "CreationDateTime", ORM_CREATED_ON },
                 { "UpdatedBy_usrID",  ORM_UPDATED_BY },
@@ -81,6 +82,7 @@ public:
                 { "colF2", S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
                 { "colG2", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
                 { "colH2", S(qreal),                        QFV.real().minValue(0),    QRequired,  UPOwner },
+                { ORM_INVALIDATED_AT_FIELD },
             }
         )
     {}
@@ -361,7 +363,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.UpdatedBy_usrID
                  , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -397,7 +399,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.UpdatedBy_usrID
                  , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1
-             WHERE t1.status1 != 'R' AND (t1.colA1 = 123
+             WHERE t1._InvalidatedAt = 0 AND (t1.colA1 = 123
                AND t1.colB1 = 456)
 )");
         } QT_CATCH (const std::exception &e) {
@@ -427,7 +429,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1 AS ren_colD1
               FROM test.t1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -456,7 +458,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colC1
                  , alias_t1.colD1 AS ren_colD1
               FROM test.t1 alias_t1
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -479,7 +481,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT AVG(t1.colA1) AS avg_colA1
                  , SUM(t1.colB1) AS sum_colB1
               FROM test.t1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -543,7 +545,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -569,7 +571,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -606,7 +608,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND alias_2_t2.colB2 = 'test string'
                AND t77777777.ffffff7 = 456
                AND t77777777.ffffff8 = '456'
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -632,7 +634,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
-             WHERE t1.status1 != 'R'
+             WHERE t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -659,7 +661,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t1 alias_t1
          LEFT JOIN test.t2 alias_t2
                 ON alias_t2.colA2 = alias_t1.colC1
-             WHERE alias_t1.status1 != 'R' AND (alias_t1.colA1 = 123)
+             WHERE alias_t1._InvalidatedAt = 0 AND (alias_t1.colA1 = 123)
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -728,7 +730,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -787,7 +789,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -848,7 +850,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1 AS alias_colB1
                  , COUNT(IF(alias_t1.colB1 = 123,1,NULL)) AS countif_colB
               FROM test.t1 alias_t1
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
           ORDER BY colA1
                  , colB1 DESC
           GROUP BY colA1
@@ -888,7 +890,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT alias_t1.colA1
                  , alias_t1.colB1
               FROM test.t1 alias_t1
-             WHERE alias_t1.status1 != 'R' AND ((
+             WHERE alias_t1._InvalidatedAt = 0 AND ((
                    t1.colA1 >= NOW()
                 OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'
                    ))
@@ -934,7 +936,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , colC2
                    ) tmp_t2_count
                 ON tmp_t2_count.colB2 = alias_t1.colB1
-             WHERE alias_t1.status1 != 'R'
+             WHERE alias_t1._InvalidatedAt = 0
              LIMIT 0,1
 )");
         } QT_CATCH (const std::exception &e) {

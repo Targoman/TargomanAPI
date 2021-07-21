@@ -110,18 +110,45 @@ clsTable::clsTable(const QString& _schema,
                    const QString& _name,
                    const QList<clsORMField>& _cols,
                    const QList<stuRelation>& _relations,
-                   const QList<stuDBIndex>& _indexes) :
+                   const QList<stuDBIndex>& _indexes,
+                   const QVariantMap& _dbProperties) :
     Schema(_schema),
     Name(_name),
     BaseCols(_cols),
     Relations(_relations),
     Indexes(_indexes),
+    DBProperties(_dbProperties),
     CountOfPKs(0)
 {
-                                   ///name                      type                 extraValidator defaultValue updatableBy isSortable isFilterable isSelfIdentifier isVirtual isPrimaryKey renameAs
-    this->BaseCols.append(clsORMField(CURRENT_TIMESTAMP + "()", S(TAPI::DateTime_t), QFV,           QNull,       UPNone,     false,     false,       false,           true,     false,       CURRENT_TIMESTAMP));
+    foreach (auto Col, this->BaseCols)
+    {
+        if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
+            this->addDBProperty(
+                ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME,
+                Col.name());
+        else if (Col.updatableBy() == enuUpdatableBy::__STATUS__)
+            this->addDBProperty(
+                ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME,
+                Col.name());
+    }
+
+                                   ///name                      type                 extraValidator defaultValue updatableBy isSortable isFilterable isSelfIdentifier isVirtual isPrimaryKey isSelectable renameAs
+    this->BaseCols.append(clsORMField(CURRENT_TIMESTAMP + "()", S(TAPI::DateTime_t), QFV,           QNull,       UPNone,     false,     false,       false,           true,     false,       true,        CURRENT_TIMESTAMP));
 
     clsTable::Registry.insert(Schema + "." + Name, this);
+}
+
+clsTable* clsTable::addDBProperty(const QString& _key, const QVariant& _value)
+{
+    this->DBProperties.insert(_key, _value);
+    return this;
+}
+const QVariant clsTable::getDBProperty(const QString& _key)
+{
+    if (this->DBProperties.contains(_key))
+        return this->DBProperties[_key];
+
+    return QVariant();
 }
 
 QList<clsORMField> clsTable::filterItems(THttpMethod _method)
@@ -183,9 +210,12 @@ void clsTable::prepareFiltersList()
 
         stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol);
 
-        this->SelectableColsMap.insert(FinalColName, relatedORMField);
+        if (Col.isSelectable())
+            this->SelectableColsMap.insert(FinalColName, relatedORMField);
+
         if (Col.isFilterable())
             this->FilterableColsMap.insert(FinalColName, relatedORMField);
+
         if (Col.isSortable())
             this->SortableColsMap.insert(FinalColName, relatedORMField);
     }
@@ -204,9 +234,12 @@ void clsTable::prepareFiltersList()
 
             stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol, Relation);
 
-            this->SelectableColsMap.insert(FinalColName, relatedORMField);
+            if (Col.isSelectable())
+                this->SelectableColsMap.insert(FinalColName, relatedORMField);
+
             if (Col.isFilterable())
                 this->FilterableColsMap.insert(FinalColName, relatedORMField);
+
             if (Col.isSortable())
                 this->SortableColsMap.insert(FinalColName, relatedORMField);
         }
@@ -226,237 +259,9 @@ inline const QString clsTable::domain()
             : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
 }
 
-/*
-QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
-    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
-}
-*/
-/*
-QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
-                                   const QString& _extraFilters,
-                                   const TAPI::PKsByPath_t& _pksByPath,
-                                   quint64 _offset,
-                                   quint16 _limit,
-                                   QString _cols,
-                                   const QString& _filters,
-                                   const QString& _orderBy,
-                                   const QString& _groupBy,
-                                   bool _reportCount,
-                                   quint32 _cacheTime)
+const QString clsTable::getStatusColumnName()
 {
-    this->prepareFiltersList();
-//    if(_ormFields.contains(COLS_KEY))
-//        _cols = _ormFields.value(COLS_KEY).toString();
-
-    stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
-    if(_pksByPath.isEmpty()){
-        TAPI::stuTable Table;
-
-        clsDAC DAC(this->domain(), this->Schema);
-        QString QueryString = QString("SELECT ")
-                              + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
-                              + QUERY_SEPARATOR
-                              + SelectItems.Cols.join("," + QUERY_SEPARATOR)
-                              + QUERY_SEPARATOR
-                              + "FROM "
-                              + QUERY_SEPARATOR
-                              + SelectItems.From.join(QUERY_SEPARATOR)
-                              + QUERY_SEPARATOR
-                              + "WHERE "
-                              + (SelectItems.Where.isEmpty() ? "TRUE" : SelectItems.Where.join(QUERY_SEPARATOR))
-                              + QUERY_SEPARATOR
-                              + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
-                              + SelectItems.GroupBy.join(',')
-                              + QUERY_SEPARATOR
-                              + (SelectItems.OrderBy.size() ? "ORDER BY " : "")
-                              + SelectItems.OrderBy.join(',')
-                              + QUERY_SEPARATOR
-                              + QString("LIMIT %1,%2").arg(_offset).arg(_limit);
-
-        if(_cacheTime)
-            Table.Rows = DAC.execQueryCacheable(_cacheTime, "", QueryString).toJson(false, this->Converters).toVariant().toList();
-        else
-            Table.Rows = DAC.execQuery("", QueryString).toJson(false, this->Converters).toVariant().toList();
-
-        if(_reportCount)
-            Table.TotalRows = static_cast<qint64>(DAC.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
-        return Table.toVariant();
-    }else{
-        QStringList PrimaryKeyQueries = _pksByPath.split(";");
-        QStringList Filters;
-        foreach(auto Query, PrimaryKeyQueries)
-            foreach(auto Col, this->BaseCols)
-                if(Col.isPrimaryKey()){
-                    if(Query.size())
-                        Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
-                    break;
-                }
-
-        QString QueryString = QString("SELECT ")
-                              + QUERY_SEPARATOR
-                              + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
-                              + QUERY_SEPARATOR
-                              + "FROM "
-                              + QUERY_SEPARATOR
-                              + SelectItems.From.join(QUERY_SEPARATOR)
-                              + QUERY_SEPARATOR
-                              + "WHERE "
-                              + (Filters.isEmpty() ? "TRUE" : Filters.join(" AND "))
-                              + QUERY_SEPARATOR
-                              + "LIMIT 2"; //Limit is set to 2 in roder to produce error if multi values are selected instead of one
-
-        clsDAC DAC(this->domain(), this->Schema);
-        QJsonDocument Result;
-        if(_cacheTime)
-            Result = DAC.execQueryCacheable(_cacheTime, "", QueryString)
-                        .toJson(true, this->Converters);
-        else
-            Result = DAC.execQuery("", QueryString)
-                        .toJson(true, this->Converters);
-
-        if(Result.object().isEmpty())
-            throw exHTTPNotFound("No item could be found");
-
-        return Result.toVariant();
-    }
-}
-*/
-/*
-bool clsTable::update(quint64 _actorUserID,
-                      TAPI::PKsByPath_t _pksByPath,
-                      const TAPI::ORMFields_t& _updateInfo,
-                      const QVariantMap& _extraFilters)
-{
-    this->prepareFiltersList();
-    if(_pksByPath.isEmpty() && _extraFilters.isEmpty())
-        throw exHTTPBadRequest("No key provided to update");
-
-    if(_updateInfo.isEmpty())
-        throw exHTTPBadRequest("No change provided to update");
-
-    QStringList PrimaryKeyQueries = _pksByPath.split(";");
-    QStringList Filters;
-    foreach(auto Query, PrimaryKeyQueries)
-        foreach(auto Col, this->BaseCols)
-            if(Col.isPrimaryKey()){
-                if(Query.size())
-                    Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
-                break;
-            }
-
-    QStringList  UpdateCommands;
-    QVariantList Values;
-    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter) {
-        if(InfoIter->isValid() == false)
-            continue;
-        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
-        if (relatedORMField.Col.isReadOnly())
-            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
-
-        relatedORMField.Col.validate(InfoIter.value());
-        UpdateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
-        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
-    }
-
-    foreach(auto FCol, this->FilterableColsMap)
-        if(FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__){
-            if(FCol.Relation.Column.isEmpty()){
-                UpdateCommands.append(makeColName(this->Name, FCol.Col) + "=?");
-                Values.append(_actorUserID);
-            }
-        }
-
-    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
-        if(FilterIter->isValid() == false)
-            continue;
-        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
-        if (relatedORMField.Col.isFilterable() == false)
-            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
-        Values.append(FilterIter.value());
-    }
-
-    try{
-        clsDAC DAC(this->domain(), this->Schema);
-        clsDACResult Result = DAC.execQuery("",
-                                            QString("UPDATE ") + this->Schema + "." + this->Name
-                                            + QUERY_SEPARATOR
-                                            + "SET "
-                                            + UpdateCommands.join("," + QUERY_SEPARATOR)
-                                            + QUERY_SEPARATOR
-                                            + "WHERE "
-                                            + QUERY_SEPARATOR
-                                            + Filters.join(" AND " + QUERY_SEPARATOR)
-                                            ,Values);
-
-        return Result.numRowsAffected() > 0;
-
-    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
-        QStringList FKs;
-        foreach(auto FK, this->Relations)
-            if(FK.RenamingPrefix.isEmpty())
-                FKs.append(FK.Column);
-
-        QRegularExpressionMatch Matches;
-        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
-            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
-        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
-            throw exHTTPBadRequest(Matches.captured());
-        else
-            throw;
-    }
-}
-*/
-/*
-bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
-{
-    this->prepareFiltersList();
-
-    if(this->update(_actorUserID, _pksByPath, TAPI::ORMFields_t({{this->BaseCols.last().name(), "Removed"}}), _extraFilters) == 0)
-        return false;
-
-    if(_realDelete == false)
-        return true;
-
-    QStringList PrimaryKeyQueries = _pksByPath.split(";");
-    QStringList Filters;
-    QVariantList Values;
-    foreach(auto Query, PrimaryKeyQueries)
-        foreach(auto Col, this->BaseCols)
-            if(Col.isPrimaryKey()){
-                if(Query.size())
-                    _extraFilters.insert(this->finalColName(Col), Query);
-                break;
-            }
-
-    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); ++FilterIter){
-        if(FilterIter->isValid() == false)
-            continue;
-        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
-        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
-        Values.append(FilterIter.value());
-    }
-
-    clsDAC DAC(this->domain(), this->Schema);
-    clsDACResult Result = DAC.execQuery("",
-                                        QString("DELETE FROM ") + this->Schema + "." +this->Name
-                                        + QUERY_SEPARATOR
-                                        + "WHERE "
-                                        + QUERY_SEPARATOR
-                                        + Filters.join(" AND " + QUERY_SEPARATOR)
-                                        , Values);
-
-    return Result.numRowsAffected() > 0;
-}
-*/
-QString clsTable::getStatusColumnNam() const
-{
-    foreach(auto Col, this->BaseCols) {
-        if (Col.updatableBy() == UPStatus )
-            return Col.name();
-    }
-
-    return "";
+    return this->getDBProperty(ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME).toString();
 }
 
 clsDACResult clsTable::callSP(const QString& _spName, const QVariantMap& _spArgs, const QString& _purpose, quint64* _executionTime)
@@ -494,71 +299,6 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
-
-/*
-QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo)
-{
-    this->prepareFiltersList();
-    QStringList  CreateCommands;
-    QVariantList Values;
-
-    const auto isEmpty = [](const QVariant& _value){
-        return  _value.isNull()
-                || (_value.canConvert<QVariantList>() && _value.toList().isEmpty())
-                || (_value.canConvert<QVariantMap>() && _value.toMap().isEmpty())
-                || (_value.canConvert<QString>() && _value.toString().isEmpty());
-    };
-
-    foreach(auto Item, this->BaseCols)
-        if(Item.defaultValue() == QRequired && (_createInfo.contains(Item.name()) == false || isEmpty(_createInfo.value(Item.name()))))
-            throw exHTTPBadRequest("Required field <"+ Item.name() +"> not provided: ");
-
-    for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
-        if(InfoIter->isValid() == false)
-            continue;
-        if (this->SelectableColsMap.contains(InfoIter.key()) == false)
-            throw exHTTPInternalServerError("Invalid create option: " + InfoIter.key());
-        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
-        if (relatedORMField.Col.defaultValue() == QInvalid || relatedORMField.Col.defaultValue() == QAuto)
-            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
-
-        relatedORMField.Col.validate(InfoIter.value());
-        CreateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
-        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
-    }
-
-    foreach(auto Col, this->BaseCols)
-        if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
-            CreateCommands.append(makeColName(this->Name, Col) + "=?");
-            Values.append(Col.toDB(_actorUserID));
-        }
-
-    clsDAC DAC(this->domain(), this->Schema);
-    try{
-        clsDACResult Result = DAC.execQuery("",
-                                            QString("INSERT INTO ") + this->Schema + "." + this->Name
-                                            + QUERY_SEPARATOR
-                                            + "SET "
-                                            + CreateCommands.join("," + QUERY_SEPARATOR)
-                                            + QUERY_SEPARATOR
-                                            ,Values);
-        return Result.lastInsertId();
-    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
-        QStringList FKs;
-        foreach(auto FK, this->Relations)
-            if(FK.RenamingPrefix.isEmpty())
-                FKs.append(FK.Column);
-
-        QRegularExpressionMatch Matches;
-        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
-            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
-        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
-            throw exHTTPBadRequest(Matches.captured());
-        else
-            throw;
-    }
-}
-*/
 
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters)
 {
@@ -831,8 +571,294 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     return SelectItems;
 }
 */
+/*
+QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy){
+    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
+}
+*/
+/*
+QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
+                                   const QString& _extraFilters,
+                                   const TAPI::PKsByPath_t& _pksByPath,
+                                   quint64 _offset,
+                                   quint16 _limit,
+                                   QString _cols,
+                                   const QString& _filters,
+                                   const QString& _orderBy,
+                                   const QString& _groupBy,
+                                   bool _reportCount,
+                                   quint32 _cacheTime)
+{
+    this->prepareFiltersList();
+//    if(_ormFields.contains(COLS_KEY))
+//        _cols = _ormFields.value(COLS_KEY).toString();
+
+    stuSelectItems SelectItems = this->makeListingQuery(_cols, _extraJoins, _filters + " " + _extraFilters, _orderBy, _groupBy);
+    if(_pksByPath.isEmpty()){
+        TAPI::stuTable Table;
+
+        clsDAC DAC(this->domain(), this->Schema);
+        QString QueryString = QString("SELECT ")
+                              + (_reportCount ? "SQL_CALC_FOUND_ROWS" : "")
+                              + QUERY_SEPARATOR
+                              + SelectItems.Cols.join("," + QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "FROM "
+                              + QUERY_SEPARATOR
+                              + SelectItems.From.join(QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "WHERE "
+                              + (SelectItems.Where.isEmpty() ? "TRUE" : SelectItems.Where.join(QUERY_SEPARATOR))
+                              + QUERY_SEPARATOR
+                              + (SelectItems.GroupBy.size() ? "GROUP BY " : "")
+                              + SelectItems.GroupBy.join(',')
+                              + QUERY_SEPARATOR
+                              + (SelectItems.OrderBy.size() ? "ORDER BY " : "")
+                              + SelectItems.OrderBy.join(',')
+                              + QUERY_SEPARATOR
+                              + QString("LIMIT %1,%2").arg(_offset).arg(_limit);
+
+        if(_cacheTime)
+            Table.Rows = DAC.execQueryCacheable(_cacheTime, "", QueryString).toJson(false, this->Converters).toVariant().toList();
+        else
+            Table.Rows = DAC.execQuery("", QueryString).toJson(false, this->Converters).toVariant().toList();
+
+        if(_reportCount)
+            Table.TotalRows = static_cast<qint64>(DAC.execQuery("","SELECT FOUND_ROWS() AS cnt").toJson(true).object().value("cnt").toDouble());
+        return Table.toVariant();
+    }else{
+        QStringList PrimaryKeyQueries = _pksByPath.split(";");
+        QStringList Filters;
+        foreach(auto Query, PrimaryKeyQueries)
+            foreach(auto Col, this->BaseCols)
+                if(Col.isPrimaryKey()){
+                    if(Query.size())
+                        Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
+                    break;
+                }
+
+        QString QueryString = QString("SELECT ")
+                              + QUERY_SEPARATOR
+                              + SelectItems.Cols.join(',' + QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "FROM "
+                              + QUERY_SEPARATOR
+                              + SelectItems.From.join(QUERY_SEPARATOR)
+                              + QUERY_SEPARATOR
+                              + "WHERE "
+                              + (Filters.isEmpty() ? "TRUE" : Filters.join(" AND "))
+                              + QUERY_SEPARATOR
+                              + "LIMIT 2"; //Limit is set to 2 in roder to produce error if multi values are selected instead of one
+
+        clsDAC DAC(this->domain(), this->Schema);
+        QJsonDocument Result;
+        if(_cacheTime)
+            Result = DAC.execQueryCacheable(_cacheTime, "", QueryString)
+                        .toJson(true, this->Converters);
+        else
+            Result = DAC.execQuery("", QueryString)
+                        .toJson(true, this->Converters);
+
+        if(Result.object().isEmpty())
+            throw exHTTPNotFound("No item could be found");
+
+        return Result.toVariant();
+    }
+}
+*/
+/*
+QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _createInfo)
+{
+    this->prepareFiltersList();
+    QStringList  CreateCommands;
+    QVariantList Values;
+
+    const auto isEmpty = [](const QVariant& _value){
+        return  _value.isNull()
+                || (_value.canConvert<QVariantList>() && _value.toList().isEmpty())
+                || (_value.canConvert<QVariantMap>() && _value.toMap().isEmpty())
+                || (_value.canConvert<QString>() && _value.toString().isEmpty());
+    };
+
+    foreach(auto Item, this->BaseCols)
+        if(Item.defaultValue() == QRequired && (_createInfo.contains(Item.name()) == false || isEmpty(_createInfo.value(Item.name()))))
+            throw exHTTPBadRequest("Required field <"+ Item.name() +"> not provided: ");
+
+    for(auto InfoIter = _createInfo.begin(); InfoIter != _createInfo.end(); ++InfoIter){
+        if(InfoIter->isValid() == false)
+            continue;
+        if (this->SelectableColsMap.contains(InfoIter.key()) == false)
+            throw exHTTPInternalServerError("Invalid create option: " + InfoIter.key());
+        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
+        if (relatedORMField.Col.defaultValue() == QInvalid || relatedORMField.Col.defaultValue() == QAuto)
+            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
+
+        relatedORMField.Col.validate(InfoIter.value());
+        CreateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
+    }
+
+    foreach(auto Col, this->BaseCols)
+        if(Col.updatableBy() == enuUpdatableBy::__CREATOR__){
+            CreateCommands.append(makeColName(this->Name, Col) + "=?");
+            Values.append(Col.toDB(_actorUserID));
+        }
+
+    clsDAC DAC(this->domain(), this->Schema);
+    try{
+        clsDACResult Result = DAC.execQuery("",
+                                            QString("INSERT INTO ") + this->Schema + "." + this->Name
+                                            + QUERY_SEPARATOR
+                                            + "SET "
+                                            + CreateCommands.join("," + QUERY_SEPARATOR)
+                                            + QUERY_SEPARATOR
+                                            ,Values);
+        return Result.lastInsertId();
+    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
+        QStringList FKs;
+        foreach(auto FK, this->Relations)
+            if(FK.RenamingPrefix.isEmpty())
+                FKs.append(FK.Column);
+
+        QRegularExpressionMatch Matches;
+        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
+            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
+        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
+            throw exHTTPBadRequest(Matches.captured());
+        else
+            throw;
+    }
+}
+*/
+/*
+bool clsTable::update(quint64 _actorUserID,
+                      TAPI::PKsByPath_t _pksByPath,
+                      const TAPI::ORMFields_t& _updateInfo,
+                      const QVariantMap& _extraFilters)
+{
+    this->prepareFiltersList();
+    if(_pksByPath.isEmpty() && _extraFilters.isEmpty())
+        throw exHTTPBadRequest("No key provided to update");
+
+    if(_updateInfo.isEmpty())
+        throw exHTTPBadRequest("No change provided to update");
+
+    QStringList PrimaryKeyQueries = _pksByPath.split(";");
+    QStringList Filters;
+    foreach(auto Query, PrimaryKeyQueries)
+        foreach(auto Col, this->BaseCols)
+            if(Col.isPrimaryKey()){
+                if(Query.size())
+                    Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
+                break;
+            }
+
+    QStringList  UpdateCommands;
+    QVariantList Values;
+    for(auto InfoIter = _updateInfo.begin(); InfoIter != _updateInfo.end(); ++InfoIter) {
+        if(InfoIter->isValid() == false)
+            continue;
+        stuRelatedORMField& relatedORMField = this->SelectableColsMap[InfoIter.key()];
+        if (relatedORMField.Col.isReadOnly())
+            throw exHTTPInternalServerError("Invalid change to read-only column <" + InfoIter.key() + ">");
+
+        relatedORMField.Col.validate(InfoIter.value());
+        UpdateCommands.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(relatedORMField.Col.toDB(InfoIter.value()));
+    }
+
+    foreach(auto FCol, this->FilterableColsMap)
+        if(FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__){
+            if(FCol.Relation.Column.isEmpty()){
+                UpdateCommands.append(makeColName(this->Name, FCol.Col) + "=?");
+                Values.append(_actorUserID);
+            }
+        }
+
+    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
+        if(FilterIter->isValid() == false)
+            continue;
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
+        if (relatedORMField.Col.isFilterable() == false)
+            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(FilterIter.value());
+    }
+
+    try{
+        clsDAC DAC(this->domain(), this->Schema);
+        clsDACResult Result = DAC.execQuery("",
+                                            QString("UPDATE ") + this->Schema + "." + this->Name
+                                            + QUERY_SEPARATOR
+                                            + "SET "
+                                            + UpdateCommands.join("," + QUERY_SEPARATOR)
+                                            + QUERY_SEPARATOR
+                                            + "WHERE "
+                                            + QUERY_SEPARATOR
+                                            + Filters.join(" AND " + QUERY_SEPARATOR)
+                                            ,Values);
+
+        return Result.numRowsAffected() > 0;
+
+    }catch(DBManager::exTargomanDBMUnableToExecuteQuery &e){
+        QStringList FKs;
+        foreach(auto FK, this->Relations)
+            if(FK.RenamingPrefix.isEmpty())
+                FKs.append(FK.Column);
+
+        QRegularExpressionMatch Matches;
+        if(e.what().contains(QRegularExpression(QString("FOREIGN KEY \\(`(%1)`\\)").arg(FKs.join('|'))), &Matches))
+            throw exHTTPBadRequest("not a valid " + Matches.captured() + " provided");
+        else if (e.what().contains(QRegularExpression(QString("Duplicate entry '[^']+'")), &Matches))
+            throw exHTTPBadRequest(Matches.captured());
+        else
+            throw;
+    }
+}
+*/
+/*
+bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksByPath, QVariantMap _extraFilters, bool _realDelete)
+{
+    this->prepareFiltersList();
+
+    if(this->update(_actorUserID, _pksByPath, TAPI::ORMFields_t({{this->BaseCols.last().name(), "Removed"}}), _extraFilters) == 0)
+        return false;
+
+    if(_realDelete == false)
+        return true;
+
+    QStringList PrimaryKeyQueries = _pksByPath.split(";");
+    QStringList Filters;
+    QVariantList Values;
+    foreach(auto Query, PrimaryKeyQueries)
+        foreach(auto Col, this->BaseCols)
+            if(Col.isPrimaryKey()){
+                if(Query.size())
+                    _extraFilters.insert(this->finalColName(Col), Query);
+                break;
+            }
+
+    for(auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); ++FilterIter){
+        if(FilterIter->isValid() == false)
+            continue;
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
+        Filters.append(makeColName(this->Name, relatedORMField.Col) + "=?");
+        Values.append(FilterIter.value());
+    }
+
+    clsDAC DAC(this->domain(), this->Schema);
+    clsDACResult Result = DAC.execQuery("",
+                                        QString("DELETE FROM ") + this->Schema + "." +this->Name
+                                        + QUERY_SEPARATOR
+                                        + "WHERE "
+                                        + QUERY_SEPARATOR
+                                        + Filters.join(" AND " + QUERY_SEPARATOR)
+                                        , Values);
+
+    return Result.numRowsAffected() > 0;
+}
+*/
 
 }
 }
 }
-

@@ -318,7 +318,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     } \
     QT_CATCH (const std::exception &e) { \
         qDebug() << "fieldName:" << #_tableFieldName << e.what(); \
-        throw e; \
+        QT_RETHROW; \
     }
 
     stuAssetItem AssetItem;

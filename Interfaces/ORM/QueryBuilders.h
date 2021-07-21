@@ -51,6 +51,8 @@ class clsTable;
 class clsCreateQueryData;
 class clsSelectQueryData;
 
+//extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
+
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotFound, Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotProvided, Common::exTargomanBase);
@@ -499,7 +501,7 @@ public:
 public:
     DeleteQuery& addTarget(const QString& _targetTableName);
 
-    quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _softDelete = true, bool _hardDelete = false);
+    quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _realDelete = false);
 
 private:
     virtual void iAmAbstract() {}

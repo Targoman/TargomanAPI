@@ -36,7 +36,9 @@ class testQueryBuilders;
 namespace Targoman {
 namespace API {
 namespace ORM {
+
 class clsTable;
+
 }
 }
 }
@@ -44,8 +46,10 @@ class clsTable;
 namespace Targoman {
 namespace API {
 namespace Query {
+
 extern bool Update(Targoman::API::ORM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-extern bool Delete(Targoman::API::ORM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+extern bool DeleteByPks(Targoman::API::ORM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+
 }
 }
 }
@@ -80,6 +84,8 @@ class UpdateQuery;
 class clsDeleteQueryData;
 class DeleteQuery;
 
+extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
+
 class clsTable : public intfAPIModule {
 protected:
     struct stuSelectItems {
@@ -95,7 +101,8 @@ public:
              const QString& _name,
              const QList<clsORMField>& _cols,
              const QList<stuRelation>& _relations = {},
-             const QList<stuDBIndex>& _indexes = {});
+             const QList<stuDBIndex>& _indexes = {},
+             const QVariantMap& _dbProperties = {});
 
     QList<clsORMField> filterItems(qhttp::THttpMethod _method);
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
@@ -129,8 +136,6 @@ public:
 //                     const TAPI::PKsByPath_t& _pksByPath,
 //                     QVariantMap _extraFilters={},
 //                     bool _realDelete = false);
-
-    QString getStatusColumnNam() const;
 
     DBManager::clsDACResult callSP(const QString& _spName,
                                    const QVariantMap& _spArgs = QVariantMap(),
@@ -169,6 +174,11 @@ public:
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});
+
+    clsTable* addDBProperty(const QString& _key, const QVariant& _value);
+    const QVariant getDBProperty(const QString& _key);
+    const QString getStatusColumnName();
+
 protected:
     inline const QString domain();
 
@@ -190,6 +200,7 @@ protected:
     QList<clsORMField> BaseCols;
     QList<stuRelation> Relations;
     QList<stuDBIndex> Indexes;
+    QVariantMap DBProperties;
     quint8  CountOfPKs;
     QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
 
@@ -212,11 +223,12 @@ protected:
     friend UpdateQuery;
     friend clsDeleteQueryData;
     friend DeleteQuery;
+    friend QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex);
 
     friend testQueryBuilders;
 
     friend bool Targoman::API::Query::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-    friend bool Targoman::API::Query::Delete(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+    friend bool Targoman::API::Query::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
 }

@@ -26,8 +26,8 @@
 
 #include <QtTest/QtTest>
 #include "QtCUrl.h"
-#include "libTargomanDBM/clsDAC.h"
 
+#include "libTargomanDBM/clsDAC.h"
 using namespace Targoman::DBManager;
 
 constexpr char UT_UserEmail[] = "unit_test@unittest.test";
@@ -91,12 +91,15 @@ class clsBaseTest : public QObject {
 protected:
     void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true) {
         if (_deleteOldTestData)
-            deleteOldTestData();
+            cleanupUnitTestData();
+//            deleteOldTestData();
 
         clsDAC DAC;
-        clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?",
-                            {UT_RoleName, UT_SystemUserID});
+        clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?", { UT_RoleName, UT_SystemUserID });
         auto rolID = Result.lastInsertId().toUInt();
+        if (rolID == 0) {
+            clsDACResult Result2 = DAC.execQuery("", "SELECT rolID FROM tblRoles WHERE rolName=? AND rolStatus <> 'R'", { UT_RoleName });
+        }
 
         if (_createUsers) {
             DAC.execQuery("", R"(
@@ -135,40 +138,37 @@ protected:
 
             gAdminUserID = res2.lastInsertId().toULongLong();
 
-            DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", {gAdminUserID});
+            DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", { gAdminUserID });
         }
     }
 
-    void cleanupUnitTestData() {
+    virtual void cleanupUnitTestData() {
         deleteOldTestData();
     }
 
-    QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
+    QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
       return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
     }
 
-    QVariant callRefreshAPI(){
+    QVariant callRefreshAPI() {
       return callAPIImpl(gLoginJWT, GET, "Account/refreshJWT");
     }
 
-    QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
+    QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
       return callAPIImpl(gEncodedAdminJWT, _method, _api, _urlArgs, _postFields);
     }
 
 private:
-    void deleteOldTestData() { //bool _createUsers=false) {
+    void deleteOldTestData() //bool _createUsers=false)
+    {
         clsDAC DAC;
 
         DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", { UT_NormalToken, UT_AdminToken });
         DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", { UT_ServiceName });
 
-//        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-        DAC.execQuery("", "UPDATE AAA.tblRoles SET rolStatus='R' WHERE rolName IN(?,?)", { UT_ServiceRoleName, UT_RoleName });
-
-//        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
-//        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
+        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
+        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
     }
 
     QVariant callAPIImpl(QString _encodedJWT , HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){

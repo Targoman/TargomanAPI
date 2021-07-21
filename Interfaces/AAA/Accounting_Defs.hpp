@@ -50,7 +50,7 @@ namespace API {
 namespace AAA {
 namespace Accounting {
 
-inline QString makeConfig(const QString& _name){return "/zModule_Account/" + _name;}
+inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 extern Common::Configuration::tmplConfigurable<QString> Secret;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,

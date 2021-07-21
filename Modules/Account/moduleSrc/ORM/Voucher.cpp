@@ -76,7 +76,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
 
-    return Targoman::API::Query::Delete(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
