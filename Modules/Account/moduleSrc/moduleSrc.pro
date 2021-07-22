@@ -23,13 +23,15 @@ HEADERS += \
     ORM/UserWallets.h \
     ORM/WalletTransactions.h \
     ORM/Roles.h \
-    PaymentGateways/Zibal.hpp \
-    PaymentGateways/intfPaymentGateway.hpp \
     ORM/Payments.h \
     Classes/PaymentLogic.h \
     ORM/Voucher.h \
     Classes/Defs.hpp \
-    ORM/Service.h
+    ORM/Service.h \
+    PaymentGateways/gtwDevNull.h \
+    PaymentGateways/gtwMellatBank.h \
+    PaymentGateways/gtwZibal.h \
+    PaymentGateways/intfPaymentGateway.h
 
 SOURCES += \
     Account.cpp \
@@ -49,7 +51,11 @@ SOURCES += \
     ORM/Payments.cpp \
     Classes/PaymentLogic.cpp \
     ORM/Voucher.cpp \
-    ORM/Service.cpp
+    ORM/Service.cpp \
+    PaymentGateways/gtwDevNull.cpp \
+    PaymentGateways/gtwMellatBank.cpp \
+    PaymentGateways/gtwZibal.cpp \
+    PaymentGateways/intfPaymentGateway.cpp
 
 OTHER_FILES += \
     ORM/Schema.my.sql \

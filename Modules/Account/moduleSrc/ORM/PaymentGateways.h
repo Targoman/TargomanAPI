@@ -41,14 +41,17 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayDriver,
                      TurkeyZiraatBank   = 'T',
                      );
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayStatus,
-                     Removed  = 'R',
                      Active   = 'A',
+                     Disabled = 'D',
+                     Removed  = 'R',
+                     );
+TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
+                     Percent = '%',
+                     Currency = '$',
                      );
 }
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,10 +60,23 @@ namespace tblPaymentGateways {
 constexpr char Name[] = "tblPaymentGateways";
 TARGOMAN_CREATE_CONSTEXPR(pgwID);
 TARGOMAN_CREATE_CONSTEXPR(pgwName);
-TARGOMAN_CREATE_CONSTEXPR(pgwUUID); //used for making payment callback url
 TARGOMAN_CREATE_CONSTEXPR(pgwType);
 TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
-TARGOMAN_CREATE_CONSTEXPR(pgwCredentials);
+TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
+TARGOMAN_CREATE_CONSTEXPR(pgwMinPayAmount);
+TARGOMAN_CREATE_CONSTEXPR(pgwMaxPayAmount);
+TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFee);
+TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);
+//load balance:
+TARGOMAN_CREATE_CONSTEXPR(pgwLastPaymentDateTime);
+TARGOMAN_CREATE_CONSTEXPR(pgwSumTodayPaidAmount);
+//using:
+TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestCount);
+TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestAmount);
+TARGOMAN_CREATE_CONSTEXPR(pgwSumFailedCount);
+TARGOMAN_CREATE_CONSTEXPR(pgwSumOkCount);
+TARGOMAN_CREATE_CONSTEXPR(pgwSumPaidAmount);
+//
 TARGOMAN_CREATE_CONSTEXPR(pgwStatus);
 TARGOMAN_CREATE_CONSTEXPR(pgwCreatedBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
@@ -83,9 +99,7 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGateways)
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayType);
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayDriver);

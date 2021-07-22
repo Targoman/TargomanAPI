@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_HPP
-#define TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_HPP
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -34,18 +34,18 @@
 #include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
 #include "Classes/Defs.hpp"
 
+#include "ORM/PaymentGateways.h"
+
 using namespace qhttp;
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment);
 #pragma clang diagnostic pop
 
-struct stuPaymentResponse{
+struct stuPaymentResponse {
     int     ErrorCode;
     QString ErrorString;
     QString Result;
@@ -71,8 +71,45 @@ struct stuPaymentResponse{
     {}
 };
 
-class intfPaymentGateway {
+#define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
+    struct _##_className##_static_constructor { \
+        _##_className##_static_constructor() {
+
+#define TARGOMAN_END_STATIC_CTOR(_className) \
+        } \
+    }; \
+    static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
+
+#define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gtwDriver, _gatewayClassName) \
+public: \
+    instanceGetter(_gatewayClassName); \
+    virtual TAPI::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
+    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() { return _gtwDriver; }; \
+    virtual stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc); \
+    virtual stuPaymentResponse verify(const TAPI::JSON_t& _pgResponse, const QString& _domain); \
+private: \
+    _gatewayClassName(); \
+    TAPI_DISABLE_COPY(_gatewayClassName); \
+    TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
+        PaymentLogic::registerDriver<_gatewayClassName>(_gtwDriver, _gatewayClassName::instance); \
+    TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
+
+#define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
+    _gatewayClassName::_gatewayClassName() {}
+
+/**
+ * @brief The intfPaymentGateway class is base class of gateway drivers
+ */
+class intfPaymentGateway
+{
 public:
+    virtual TAPI::enuPaymentGatewayType::Type getType() = 0;
+    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
+    virtual stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc) = 0;
+    virtual stuPaymentResponse verify(const TAPI::JSON_t& _pgResponse, const QString& _domain) = 0;
+    virtual QString errorString(int _errCode);
+
+    /*
     struct stuGateway {
         stuGateway(const QString& _basePath) :
             CallBackDomain(_basePath + "CallBackdomain", "Domain used for callback"),
@@ -108,7 +145,7 @@ public:
         if (File.open(QFile::WriteOnly | QFile::Append)) {
             QTextStream Out(&File);
             Out << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) <<
-                   QString("[%1:%2:%3] ").arg(_gw, _function).arg(_line)<<
+                   QString("[%1:%2:%3] ").arg(_gw, _function).arg(_line) <<
                    QJsonDocument::fromVariant(_info).toJson();
         }
     }
@@ -147,9 +184,9 @@ public:
         }
         return QJsonDocument(QJsonObject({{"result" , QString(CUrlResult.toUtf8()) }}));
     }
+    */
 };
 
-}
-}
-}
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_HPP
+} //namespace Targoman::API::AAA
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H

@@ -38,11 +38,12 @@ TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      Canceled = 'C',
                      Error    = 'E',
                      Finished = 'F',
-                     Removed  = 'R'
-                                )
+                     Removed  = 'R',
+                     );
 TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Percent = '%',
-                     Currency  = '$')
+                     Currency  = '$',
+                     );
 }
 
 namespace Targoman {

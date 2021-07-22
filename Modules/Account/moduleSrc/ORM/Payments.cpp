@@ -27,15 +27,13 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 using namespace ORM;
 
-/**********************************************************************************************/
-/* OnlinePayments *****************************************************************************/
-/**********************************************************************************************/
+/*****************************************************************\
+|* OnlinePayments ************************************************|
+\*****************************************************************/
 OnlinePayments::OnlinePayments() :
     clsTable(
         AAASchema,
@@ -64,15 +62,11 @@ QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-/**********************************************************************************************/
-/* OfflinePayments ****************************************************************************/
-/**********************************************************************************************/
+/*****************************************************************\
+|* OfflinePayments ***********************************************|
+\*****************************************************************/
 OfflinePayments::OfflinePayments() :
     clsTable(
         AAASchema,
@@ -86,8 +80,8 @@ OfflinePayments::OfflinePayments() :
             { tblOfflinePayments::ofpAmount,           S(quint32),             QFV,                                QRequired,  UPOwner},
             { tblOfflinePayments::ofpNotes,            S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
             { tblOfflinePayments::ofpStatus,           ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
-            { tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
             { tblOfflinePayments::ofpCreationDateTime, ORM_CREATED_ON},
+            { tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
             { tblOfflinePayments::ofpUpdatedBy_usrID,  ORM_UPDATED_BY},
         },
         {///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
@@ -104,19 +98,12 @@ QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-}
-}
-}
+} //namespace Targoman::API::AAA

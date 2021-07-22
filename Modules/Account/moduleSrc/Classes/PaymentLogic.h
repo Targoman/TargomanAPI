@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
@@ -30,20 +31,49 @@
 
 #include "Defs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+#include "PaymentGateways/intfPaymentGateway.h"
+#include "ORM/PaymentGateways.h"
 
-class PaymentLogic {
+typedef intfPaymentGateway& (*PAYMENTGATEWAY_INSTANCE_FUNC)();
+
+namespace Targoman::API::AAA {
+
+/**
+ * @brief The PaymentLogic class is central point of managing payments. Such as start payment, handling payment callback, ...
+ */
+class PaymentLogic
+{
 public:
-    static QString createOnlinePaymentLink(TAPI::enuPaymentGateway::Type _gateway, quint64 _vchID, const QString& _invDesc, quint32 _toPay, const QString _callback);
-    static quint64 approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const TAPI::JSON_t& _pgResponse, const QString& _domain);
+    template <class T> static void registerDriver(const TAPI::enuPaymentGatewayDriver::Type _driver, T& (*_instanceFunc)());
+    static intfPaymentGateway& getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver);
+
+//        static stuPaymentResponse create();
+//        static stuPaymentResponse verify();
+
+    static QString createOnlinePaymentLink(
+            TAPI::enuPaymentGateway::Type _gateway,
+            quint64 _vchID,
+            const QString& _invDesc,
+            quint32 _toPay,
+            const QString _callback);
+
+    static quint64 approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway,
+                                        const TAPI::JSON_t& _pgResponse,
+                                        const QString& _domain);
+
     static TAPI::stuVoucher processVoucher(quint64 _voucherID);
+
+public:
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> TransactionLogFile;
+
+public:
+    /**
+     * @brief RegisteredPaymentGateways stores one instance of payment gateways classes
+     * key: enuPaymentGatewayDriver
+     */
+    static QMap<TAPI::enuPaymentGatewayDriver::Type, PAYMENTGATEWAY_INSTANCE_FUNC> RegisteredDrivers;
 };
 
-}
-}
-}
-
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H

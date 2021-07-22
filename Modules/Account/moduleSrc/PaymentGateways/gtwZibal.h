@@ -18,22 +18,36 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_ZIBA_HPP
-#define TARGOMAN_API_MODULES_ACCOUNT_PG_ZIBA_HPP
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
 
 #include "QFieldValidator.h"
 #include "Interfaces/Common/GenericTypes.h"
-#include "intfPaymentGateway.hpp"
+#include "intfPaymentGateway.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+#include "Classes/PaymentLogic.h"
 
-class Zibal
+namespace Targoman::API::AAA {
+
+class gtwZibal : public intfPaymentGateway
 {
+TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+    TAPI::enuPaymentGatewayType::IranIntermediateGateway,
+    TAPI::enuPaymentGatewayDriver::IranVaseteZibal,
+    gtwZibal)
+
+public:
+/*
+
+
+
+
+
+
 private:
     static QString errorString(int _errCode) {
         switch (_errCode) {
@@ -113,10 +127,9 @@ public:
             throw;
         }
     }
+    */
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PG_ZIBA_HPP
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H

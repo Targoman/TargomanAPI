@@ -22,7 +22,7 @@
  */
 
 #include "PaymentLogic.h"
-#include "PaymentGateways/Zibal.hpp"
+#include "PaymentGateways/gtwZibal.h"
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
@@ -31,11 +31,28 @@
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
+namespace Targoman::API::AAA {
 using namespace DBManager;
+
+QMap<TAPI::enuPaymentGatewayDriver::Type, PAYMENTGATEWAY_INSTANCE_FUNC> PaymentLogic::RegisteredDrivers;
+
+template <class T> void PaymentLogic::registerDriver(const TAPI::enuPaymentGatewayDriver::Type _driver, T& (*_instanceFunc)())
+{
+    if (PaymentLogic::RegisteredDrivers.contains(_driver))
+        throw Common::exTargomanBase("this driver class already registered");
+
+    PaymentLogic::RegisteredDrivers.insert(_driver, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
+}
+
+intfPaymentGateway& PaymentLogic::getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver)
+{
+    if (PaymentLogic::RegisteredDrivers.contains(_driver) == false)
+        throw Common::exTargomanBase("this driver is not registered");
+
+    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driver];
+
+    return InstanceFunc();
+}
 
 ///TODO attention for Minimum Bank Transaction Amount
 QString PaymentLogic::createOnlinePaymentLink(
@@ -224,6 +241,4 @@ TAPI::stuVoucher PaymentLogic::processVoucher(quint64 _voucherID)
 
 }
 
-}
-}
-}
+} //namespace Targoman::API::AAA

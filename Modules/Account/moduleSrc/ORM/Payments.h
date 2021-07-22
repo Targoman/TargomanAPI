@@ -27,38 +27,25 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
+/*****************************************************************\
+|* OnlinePayments ************************************************|
+\*****************************************************************/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOnlinePayments {
 constexpr char Name[] = "tblOnlinePayments";
 TARGOMAN_CREATE_CONSTEXPR(onpID);
-TARGOMAN_CREATE_CONSTEXPR(onpMD5);
-TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify/{onpMD5}
 TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
 TARGOMAN_CREATE_CONSTEXPR(onpPaymentGateway);
 TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
 TARGOMAN_CREATE_CONSTEXPR(onpAmount);
-TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
-TARGOMAN_CREATE_CONSTEXPR(onpStatus);
 TARGOMAN_CREATE_CONSTEXPR(onpResult);
-}
-namespace tblOfflinePayments {
-constexpr char Name[] = "tblOfflinePayments";
-TARGOMAN_CREATE_CONSTEXPR(ofpID);
-TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
-TARGOMAN_CREATE_CONSTEXPR(ofpBank);
-TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
-TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
-TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
-TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
-TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
+TARGOMAN_CREATE_CONSTEXPR(onpStatus);
+TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 }
 #pragma GCC diagnostic pop
 
@@ -68,9 +55,30 @@ class OnlinePayments : public ORM::clsTable
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
 };
+
+/*****************************************************************\
+|* OfflinePayments ***********************************************|
+\*****************************************************************/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblOfflinePayments {
+constexpr char Name[] = "tblOfflinePayments";
+TARGOMAN_CREATE_CONSTEXPR(ofpID);
+TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
+TARGOMAN_CREATE_CONSTEXPR(ofpBank);
+TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
+TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
+TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
+TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
+TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
+TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+}
+#pragma GCC diagnostic pop
 
 class OfflinePayments : public ORM::clsTable
 {
@@ -79,12 +87,10 @@ private slots:
     QVariant ORMGET("Get OfflinePayment information.")
     bool ORMUPDATE("Update OfflinePayment info by priviledged user")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,OfflinePayments)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,OfflinePayments)
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

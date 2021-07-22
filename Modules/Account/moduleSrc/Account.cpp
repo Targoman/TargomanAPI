@@ -43,10 +43,11 @@
 #include "ORM/WalletTransactions.h"
 
 #include "Classes/PaymentLogic.h"
-#include "PaymentGateways/intfPaymentGateway.hpp"
+#include "PaymentGateways/intfPaymentGateway.h"
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+///TODO: move this 3 lines back to PaymentLogic.cpp
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
@@ -103,13 +104,13 @@ TARGOMAN_DEFINE_ENUM(enuPaymentType,
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
 
-Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
-        AAA::Accounting::makeConfig("GatewayEndPoints"),
-        "Registered payment gateways",
-        0
-        );
+//Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
+//        AAA::Accounting::makeConfig("GatewayEndPoints"),
+//        "Registered payment gateways",
+//        0
+//        );
 
-Targoman::Common::Configuration::tmplConfigurable<FilePath_t> intfPaymentGateway::TransactionLogFile (
+Targoman::Common::Configuration::tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile (
         AAA::Accounting::makeConfig("TransactionLogFile"),
         "File to store transaction logs",
         "",
@@ -135,6 +136,9 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
         enuConfigSource::Arg | enuConfigSource::File
         );
 
+/*****************************************************************\
+|* User **********************************************************|
+\*****************************************************************/
 TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                                     QString _login,
                                     TAPI::MD5_t _pass,
@@ -335,7 +339,10 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
     return true;
 }
 
-TAPI::stuVoucher processVoucher(quint64 _vchID){
+/*****************************************************************\
+|* Payments ******************************************************|
+\*****************************************************************/
+TAPI::stuVoucher processVoucher(quint64 _vchID) {
     try {
         return PaymentLogic::processVoucher(_vchID);
     }  catch (...) {
