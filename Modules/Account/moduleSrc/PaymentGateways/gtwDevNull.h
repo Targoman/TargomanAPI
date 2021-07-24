@@ -32,7 +32,7 @@ namespace Targoman::API::AAA {
 /**
  * @brief *********** THE gtwDevNull CLASS IS JUST FOR DEVELOPERS IN DEBUG MODE. NOT FOR PRODUCTION ***********
  */
-class gtwDevNull : public intfPaymentGateway
+class gtwDevNull //: public intfPaymentGateway
 {
 };
 

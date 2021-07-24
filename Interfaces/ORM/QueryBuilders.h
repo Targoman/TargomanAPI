@@ -43,9 +43,7 @@ class testQueryBuilders;
 #include "libTargomanCommon/exTargomanBase.h"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
 
 class clsTable;
 class clsCreateQueryData;
@@ -73,7 +71,9 @@ TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      LessEqual,
                      Null,
                      NotNull,
-                     Like)
+                     Like,
+                     In
+                     )
 
 TARGOMAN_DEFINE_ENUM(enuAggregation,
                      COUNT,
@@ -84,6 +84,7 @@ TARGOMAN_DEFINE_ENUM(enuAggregation,
                      MIN)
 
 TARGOMAN_DEFINE_ENUM(enuConditionalAggregation,
+                     IF,
                      COUNTIF,
                      SUMIF,
                      AVGIF,
@@ -406,6 +407,7 @@ public:
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& setCacheTime(quint16 _cacheTime);
 
+//    template<typename T> inline T one(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});
     QVariantMap tryOne(QVariantMap _args = {});
     QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
@@ -512,9 +514,7 @@ private:
 
 /***************************************************************************************/
 
-}
-}
-}
+} //namespace Targoman::API::ORM
 
 Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpression);
 //Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpressionWithValue);

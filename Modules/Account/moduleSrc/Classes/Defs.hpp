@@ -26,46 +26,46 @@
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "libTargomanCommon/Macros.h"
 
-namespace TAPI {
+//namespace TAPI {
 
-TARGOMAN_DEFINE_ENUM(enuVoucherType,
-                     Withdrawal     = 'W',
-                     Expense        = 'E',
-                     Income         = 'I',
-                     Credit         = 'C',
-                     Prize          = 'Z',
-                     TransferTo     = 'T',
-                     TransferFrom   = 'F',
-                     )
+//TARGOMAN_DEFINE_ENUM(enuVoucherType,
+//                     Withdrawal     = 'W',
+//                     Expense        = 'E',
+//                     Income         = 'I',
+//                     Credit         = 'C',
+//                     Prize          = 'Z',
+//                     TransferTo     = 'T',
+//                     TransferFrom   = 'F',
+//                     )
 
-TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
-                     New      = 'N',
-                     Pending  = 'P',
-                     Payed    = 'Y',
-                     Succeded = 'A',
-                     Error    = 'E',
-                     Removed  = 'R'
-                                )
+//TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
+//                     New      = 'N',
+//                     Pending  = 'P',
+//                     Payed    = 'Y',
+//                     Succeded = 'A',
+//                     Error    = 'E',
+//                     Removed  = 'R'
+//                     )
 
-TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
-                     Zibal    = 'Z',
-                     ZarrinPal= 'L',
-                     NextPay  = 'N',
-                     Pardano  = 'O',
-                     Parsian  = 'P',
-                     Mellat   = 'M',
-                     Pasargad = 'G',
-                     Saman    = 'S',
-                     AsanPardakht = 'A',
-                     Gap      = 'W',
-                     VISA     = 'V',
-                     MasterCard= 'C',
-                                )
+//TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
+//                     Zibal    = 'Z',
+//                     ZarrinPal= 'L',
+//                     NextPay  = 'N',
+//                     Pardano  = 'O',
+//                     Parsian  = 'P',
+//                     Mellat   = 'M',
+//                     Pasargad = 'G',
+//                     Saman    = 'S',
+//                     AsanPardakht = 'A',
+//                     Gap      = 'W',
+//                     VISA     = 'V',
+//                     MasterCard= 'C',
+//                     )
 
-}
+//}
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
 
 #endif //TARGOMAN_API_MODULES_ACCOUNT_CLASSES_DEFS_HPP

@@ -26,11 +26,6 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-//these 3 lines moved to Account.cpp for preventing not registered error:
-//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
-//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
-//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
-
 namespace Targoman::API::AAA {
 using namespace DBManager;
 
@@ -39,67 +34,152 @@ QMap<TAPI::enuPaymentGatewayDriver::Type, PAYMENTGATEWAY_INSTANCE_FUNC> PaymentL
 template <class T> void PaymentLogic::registerDriver(const TAPI::enuPaymentGatewayDriver::Type _driver, T& (*_instanceFunc)())
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driver))
-        throw Common::exTargomanBase("this driver class already registered");
+        throw Common::exTargomanBase("The class for this driver has been already registered");
 
     PaymentLogic::RegisteredDrivers.insert(_driver, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
 }
 
-intfPaymentGateway& PaymentLogic::getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver)
+intfPaymentGateway* PaymentLogic::getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver)
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driver) == false)
         throw Common::exTargomanBase("this driver is not registered");
 
     PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driver];
 
-    return InstanceFunc();
+    return &InstanceFunc();
 }
 
-///TODO attention for Minimum Bank Transaction Amount
+const stuPaymentGateway findBestPaymentGateway(
+        quint32 _amount,
+        TAPI::enuPaymentGatewayType::List _gatewayTypes = {}
+    )
+{
+    QString CSVGatewayTypes = TAPI::enuPaymentGatewayType::toCSV(_gatewayTypes, "'");
+
+    SelectQuery qry = SelectQuery(PaymentGateways::instance())
+        .addCol(tblPaymentGateways::pgwID)
+        .addCol(tblPaymentGateways::pgwName)
+        .addCol(tblPaymentGateways::pgwType)
+        .addCol(tblPaymentGateways::pgwDriver)
+        .addCol(tblPaymentGateways::pgwMetaInfo)
+        .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
+        .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
+        .innerJoin(SelectQuery(PaymentGateways::instance())
+            .addCol(tblPaymentGateways::pgwID)
+            .addCol(enuConditionalAggregation::IF,
+                    { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, TAPI::enuPaymentGatewayTransactionFeeType::Percent }
+                    , DBExpression::VALUE(QString("%1 * %2 / 100").arg(tblPaymentGateways::pgwTransactionFeeValue).arg(_amount))
+                    , tblPaymentGateways::pgwTransactionFeeValue
+                    , "inner_pgwTransactionFeeAmount")
+            .addCol(enuConditionalAggregation::IF,
+                    clsCondition({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Null })
+                    .orCond({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Less, DBExpression::CURDATE() })
+                    , 0
+                    , tblPaymentGateways::pgwSumTodayPaidAmount
+                    , "inner_pgwSumTodayPaidAmount")
+            .where({ tblPaymentGateways::pgwType, enuConditionOperator::In, CSVGatewayTypes })
+            .andWhere({ tblPaymentGateways::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
+            .andWhere(
+                clsCondition({ tblPaymentGateways::pgwMaxPerDayAmount, enuConditionOperator::Null })
+                .orCond(
+                    clsCondition({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Null })
+                    .orCond({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Less, DBExpression::CURDATE() })
+                    .orCond({
+                        tblPaymentGateways::pgwSumTodayPaidAmount,
+                        enuConditionOperator::LessEqual,
+                        DBExpression::VALUE(QString("%1 - %2").arg(tblPaymentGateways::pgwMaxPerDayAmount).arg(_amount))
+                    })
+                )
+            )
+            .andWhere(
+                clsCondition({ tblPaymentGateways::pgwMaxRequestAmount, enuConditionOperator::Null })
+                .orCond({ tblPaymentGateways::pgwMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
+            )
+//            .groupBy(tblPaymentGateways::pgwID)
+            , "tmptbl_inner"
+            , { "tmptbl_inner", tblPaymentGateways::pgwID,
+                enuConditionOperator::Equal,
+                tblPaymentGateways::Name, tblPaymentGateways::pgwID }
+        )
+        .orderBy("tmptbl_inner.inner_pgwTransactionFeeAmount")
+        .orderBy("tmptbl_inner.inner_pgwSumTodayPaidAmount")
+    ;
+
+//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
+    QVariantMap PaymentGatewayInfo = qry.one();
+
+    stuPaymentGateway PaymentGateway;
+    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwID,                  PaymentGatewayInfo, tblPaymentGateways, pgwID);
+    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwName,                PaymentGatewayInfo, tblPaymentGateways, pgwName);
+    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwType,                PaymentGatewayInfo, tblPaymentGateways, pgwType);
+    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwDriver,              PaymentGatewayInfo, tblPaymentGateways, pgwDriver);
+    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwMetaInfo,            PaymentGatewayInfo, tblPaymentGateways, pgwMetaInfo);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwTransactionFeeValue, PaymentGatewayInfo, tblPaymentGateways, pgwTransactionFeeValue);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwTransactionFeeType,  PaymentGatewayInfo, tblPaymentGateways, pgwTransactionFeeType);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwMinRequestAmount,    PaymentGatewayInfo, tblPaymentGateways, pgwMinRequestAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwMaxRequestAmount,    PaymentGatewayInfo, tblPaymentGateways, pgwMaxRequestAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwMaxPerDayAmount,     PaymentGatewayInfo, tblPaymentGateways, pgwMaxPerDayAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwLastPaymentDateTime, PaymentGatewayInfo, tblPaymentGateways, pgwLastPaymentDateTime);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumTodayPaidAmount,  PaymentGatewayInfo, tblPaymentGateways, pgwSumTodayPaidAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumRequestCount,     PaymentGatewayInfo, tblPaymentGateways, pgwSumRequestCount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumRequestAmount,    PaymentGatewayInfo, tblPaymentGateways, pgwSumRequestAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumFailedCount,      PaymentGatewayInfo, tblPaymentGateways, pgwSumFailedCount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumOkCount,          PaymentGatewayInfo, tblPaymentGateways, pgwSumOkCount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwSumPaidAmount,       PaymentGatewayInfo, tblPaymentGateways, pgwSumPaidAmount);
+//    SET_FIELD_FROM_VARIANT_MAP(PaymentGateway.pgwStatus,              PaymentGatewayInfo, tblPaymentGateways, pgwStatus);
+
+    return PaymentGateway;
+}
+
 QString PaymentLogic::createOnlinePaymentLink(
-        TAPI::enuPaymentGateway::Type _gateway,
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
         quint64 _vchID,
         const QString& _invDesc,
         quint32 _toPay,
         const QString _callback
-        )
+    )
 {
+    ///scenario:
+    ///1: find best payment gateway ORM
+    ///2: get payment gateway driver
+    ///3: create payment
+    ///4: call driver::request
+    ///5: return result for client redirecting
+
+    //1: find best payment gateway ORM
+    stuPaymentGateway PaymentGateway = findBestPaymentGateway(_toPay, TAPI::enuPaymentGatewayType::List({ _gatewayType }));
+
+    //2: get payment gateway driver
+    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);
+
+    //3: create payment
     TAPI::MD5_t onpMD5;
     quint8 Retries = 0;
-    while(true){
-        try{
+    while(true) {
+        try {
             clsDACResult Result = OnlinePayments::instance().callSP("sp_CREATE_newOnlinePayment", {
                                                                         { "iVoucherID", _vchID },
-                                                                        { "iGateway", QString(_gateway) },
+                                                                        { "iGatewayID", PaymentGateway.pgwID },
                                                                         { "iAmount", _toPay },
                                                                     });
             onpMD5 = Result.spDirectOutputs().value("oMD5").toString();
             break;
-        }catch(...){
+        }
+        catch(...) {
             if (++Retries > 3)
                 throw;
         }
     }
 
     try{
-        stuPaymentResponse PaymentResponse;
-        switch(_gateway){
-        case TAPI::enuPaymentGateway::Zibal:
-            PaymentResponse = Zibal::request(onpMD5, _toPay, _callback, _invDesc);
-            break;
-        case TAPI::enuPaymentGateway::Saman:
-        case TAPI::enuPaymentGateway::ZarrinPal:
-        case TAPI::enuPaymentGateway::Mellat:
-        case TAPI::enuPaymentGateway::NextPay:
-        case TAPI::enuPaymentGateway::Pardano:
-        case TAPI::enuPaymentGateway::Parsian:
-        case TAPI::enuPaymentGateway::Pasargad:
-        case TAPI::enuPaymentGateway::AsanPardakht:
-        case TAPI::enuPaymentGateway::VISA:
-        case TAPI::enuPaymentGateway::MasterCard:
-        case TAPI::enuPaymentGateway::Gap:
-            throw exHTTPBadRequest("Gateway not suppored yet");
-        }
-
+        //4: call driver::request
+        stuPaymentResponse PaymentResponse = PaymentGatewayDriver->request(
+                                                 PaymentGateway,
+                                                 onpMD5,
+                                                 _toPay,
+                                                 _callback,
+                                                 _invDesc
+                                                 );
         if (PaymentResponse.ErrorCode) {
             Targoman::API::Query::Update(OnlinePayments::instance(),
                                          SYSTEM_USER_ID,
@@ -126,12 +206,16 @@ QString PaymentLogic::createOnlinePaymentLink(
                                         { tblOnlinePayments::onpMD5, onpMD5 }
                                      });
 
+        //5: return result for client redirecting
         return PaymentResponse.PaymentLink;
-    }catch(exPayment&){
+    }
+    catch(exPayment&) {
         throw;
-    }catch(exHTTPBadRequest&){
+    }
+    catch(exHTTPBadRequest&) {
         throw;
-    }catch(std::exception &e){
+    }
+    catch(std::exception &e) {
         Targoman::API::Query::Update(OnlinePayments::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -148,7 +232,11 @@ QString PaymentLogic::createOnlinePaymentLink(
 }
 
 ///TODO settle after verify
-quint64 PaymentLogic::approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const TAPI::JSON_t& _pgResponse, const QString& _domain)
+quint64 PaymentLogic::approveOnlinePayment(
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const TAPI::JSON_t& _pgResponse,
+        const QString& _domain
+    )
 {
     stuPaymentResponse PaymentResponse;
     switch(_gateway){

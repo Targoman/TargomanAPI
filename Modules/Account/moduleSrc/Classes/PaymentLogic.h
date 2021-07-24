@@ -45,26 +45,42 @@ class PaymentLogic
 {
 public:
     template <class T> static void registerDriver(const TAPI::enuPaymentGatewayDriver::Type _driver, T& (*_instanceFunc)());
-    static intfPaymentGateway& getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver);
+    static intfPaymentGateway* getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver);
 
 //        static stuPaymentResponse create();
 //        static stuPaymentResponse verify();
 
     static QString createOnlinePaymentLink(
-            TAPI::enuPaymentGateway::Type _gateway,
-            quint64 _vchID,
-            const QString& _invDesc,
-            quint32 _toPay,
-            const QString _callback);
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        quint64 _vchID,
+        const QString& _invDesc,
+        quint32 _toPay,
+        const QString _callback
+    );
 
-    static quint64 approveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway,
-                                        const TAPI::JSON_t& _pgResponse,
-                                        const QString& _domain);
+    static quint64 approveOnlinePayment(
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const TAPI::JSON_t& _pgResponse,
+        const QString& _domain
+    );
 
     static TAPI::stuVoucher processVoucher(quint64 _voucherID);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> TransactionLogFile;
+    static void log(const QString _gw, const QString _function, quint16 _line, const QVariantList& _info) {
+        if (PaymentLogic::TransactionLogFile.value().isEmpty())
+            return;
+
+        QFile File(PaymentLogic::TransactionLogFile.value()); // TODO read from config file
+
+        if (File.open(QFile::WriteOnly | QFile::Append)) {
+            QTextStream Out(&File);
+            Out << QDateTime::currentDateTime().toString(Qt::ISODateWithMs)
+                << QString("[%1:%2:%3] ").arg(_gw, _function).arg(_line)
+                << QJsonDocument::fromVariant(_info).toJson();
+        }
+    }
 
 public:
     /**

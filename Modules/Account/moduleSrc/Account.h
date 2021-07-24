@@ -29,16 +29,16 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Payments.h"
 #include "Classes/Defs.hpp"
+#include "Classes/PaymentLogic.h"
 
 namespace TAPI {
-    struct stuMultiJWT {
-        TAPI::EncodedJWT_t Login;
-        TAPI::EncodedJWT_t Session;
-    };
+struct stuMultiJWT {
+    TAPI::EncodedJWT_t Login;
+    TAPI::EncodedJWT_t Session;
+};
 }
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 namespace AAA {
 class Voucher;
@@ -63,6 +63,9 @@ private:
     TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
 
 private slots:
+    /*****************************************************************\
+    |* User **********************************************************|
+    \*****************************************************************/
     TAPI::stuMultiJWT REST(,Login,(TAPI::RemoteIP_t _REMOTE_IP,
                                     QString _login,
                                     TAPI::MD5_t _pass,
@@ -122,48 +125,82 @@ private slots:
                                   quint32 _code),
               "Approves Mobile by provided mobile no and code")
 
-    TAPI::stuVoucher REST(POST, finalizeBasket, (TAPI::JWT_t _JWT,
-                                                 TAPI::stuPreVoucher _preVoucher,
-                                                 QString _callBack = {},
-                                                 qint64 _walletID = -1,
-                                                 TAPI::enuPaymentGateway::Type _gateway = TAPI::enuPaymentGateway::Zibal),
-                          "create a voucher based on preVoucher. "
-                          "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment,"
-                          "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
-                          "When callback is set to URL you must specify payment gateway")
+    /*****************************************************************\
+    |* Payments ******************************************************|
+    \*****************************************************************/
+    TAPI::stuVoucher REST(
+        POST,
+        finalizeBasket,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::stuPreVoucher _preVoucher,
+            qint64 _walletID = -1,
+            TAPI::enuPaymentGatewayType::Type _gatewayType = TAPI::enuPaymentGatewayType::IranBank,
+            QString _callBack = {}
+        ),
+        "create a voucher based on preVoucher. "
+        "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment,"
+        "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
+        "When callback is set to URL you must specify payment gateway"
+    )
 
-    TAPI::stuVoucher REST(POST, approveOnlinePayment, (TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse),
-                          "approve payment back from payment gateway")
+    TAPI::stuVoucher REST(
+        POST,
+        approveOnlinePayment,
+        (
+            TAPI::enuPaymentGatewayType::Type _gatewayType,
+            const QString _domain,
+            TAPI::JSON_t _pgResponse
+        ),
+        "approve payment back from payment gateway"
+    )
 
-    TAPI::stuVoucher REST(POST, approveOfflinePayment, (TAPI::JWT_t _JWT,
-                                                        quint64 _vchID,
-                                                        const QString& _bank,
-                                                        const QString& _receiptCode,
-                                                        TAPI::Date_t _receiptDate,
-                                                        quint32 _amount,
-                                                        const QString& _note = {}),
-                          "approve Voucher by offline payment")
+    TAPI::stuVoucher REST(
+        POST,
+        approveOfflinePayment,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _vchID,
+            const QString& _bank,
+            const QString& _receiptCode,
+            TAPI::Date_t _receiptDate,
+            quint32 _amount,
+            const QString& _note = {}
+        ),
+        "approve Voucher by offline payment"
+    )
 
     ///TODO create API for cancelBasketItem
     ///TODO create API for returnBasketItem
 
-    bool REST(POST, addPrizeTo,(TAPI::JWT_t _JWT,
-                                quint64 _targetUsrID,
-                                quint64 _amount,
-                                TAPI::JSON_t _desc),
-              "add prize to a user by priviledged user. "
-              "Description object must contain at least an string field named 'desc'")
+    bool REST(
+        POST,
+        addPrizeTo,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _targetUsrID,
+            quint64 _amount,
+            TAPI::JSON_t _desc
+        ),
+        "add prize to a user by priviledged user. "
+        "Description object must contain at least an string field named 'desc'"
+    )
 
-    bool REST(POST, addIncomeTo,(TAPI::JWT_t _JWT,
-                                 quint64 _targetUsrID,
-                                 quint64 _amount,
-                                 TAPI::JSON_t _desc),
-              "add income to a user by priviledged user. "
-              "Description object must contain at least an string field named 'desc'")
+    bool REST(
+        POST,
+        addIncomeTo,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _targetUsrID,
+            quint64 _amount,
+            TAPI::JSON_t _desc
+        ),
+        "add income to a user by priviledged user. "
+        "Description object must contain at least an string field named 'desc'"
+    )
 };
 
-}
-}
+} //namespace Targoman::API
 
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuOAuthType);
 TAPI_DECLARE_METATYPE(TAPI::stuMultiJWT);

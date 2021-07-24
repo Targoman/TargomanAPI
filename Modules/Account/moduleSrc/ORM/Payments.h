@@ -27,6 +27,20 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
+//-----------------------------------------------------
+namespace TAPI {
+TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
+                     New      = 'N',
+                     Pending  = 'P',
+                     Payed    = 'Y',
+                     Succeded = 'A',
+                     Error    = 'E',
+                     Removed  = 'R'
+                     )
+}
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
+
+//-----------------------------------------------------
 namespace Targoman::API::AAA {
 
 /*****************************************************************\
@@ -39,7 +53,8 @@ constexpr char Name[] = "tblOnlinePayments";
 TARGOMAN_CREATE_CONSTEXPR(onpID);
 TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify/{onpMD5}
 TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
-TARGOMAN_CREATE_CONSTEXPR(onpPaymentGateway);
+//TARGOMAN_CREATE_CONSTEXPR(onpPaymentGateway);
+TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
 TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
 TARGOMAN_CREATE_CONSTEXPR(onpAmount);
 TARGOMAN_CREATE_CONSTEXPR(onpResult);

@@ -27,9 +27,22 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Classes/Defs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+//-----------------------------------------------------
+namespace TAPI {
+TARGOMAN_DEFINE_ENUM(enuVoucherType,
+                     Withdrawal     = 'W',
+                     Expense        = 'E',
+                     Income         = 'I',
+                     Credit         = 'C',
+                     Prize          = 'Z',
+                     TransferTo     = 'T',
+                     TransferFrom   = 'F',
+                     )
+}
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
+
+//-----------------------------------------------------
+namespace Targoman::API::AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -39,7 +52,7 @@ namespace tblVoucher {
     TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
-    TARGOMAN_CREATE_CONSTEXPR(vchType);
+    TARGOMAN_CREATE_CONSTEXPR(vchType)
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
 }
@@ -79,8 +92,6 @@ private slots:
         TARGOMAN_DEFINE_API_SUBMODULE(Account,Voucher)
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H

@@ -24,6 +24,7 @@
 #include "PaymentGateways.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayStatus);
@@ -42,24 +43,29 @@ PaymentGateways::PaymentGateways() :
             { tblPaymentGateways::pgwType,                  S(TAPI::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwDriver,                S(TAPI::enuPaymentGatewayDriver::Type),             QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwMetaInfo,              S(TAPI::JSON_t),                                    QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwMinPayAmount,          S(quint32),                                         QFV.minValue(1),                    QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwMaxPayAmount,          S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwTransactionFee,        S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwTransactionFeeType,    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Percent, UPAdmin },
+            //------------------
+            { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+            { tblPaymentGateways::pgwTransactionFeeType,    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
+            //------------------
+            { tblPaymentGateways::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    QRequired,  UPAdmin },
+            { tblPaymentGateways::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+            { tblPaymentGateways::pgwMaxPerDayAmount,       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+            //------------------
             { tblPaymentGateways::pgwLastPaymentDateTime,   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
             { tblPaymentGateways::pgwSumTodayPaidAmount,    S(quint64),                                         QFV,                                0,          UPAdmin },
+            //------------------
             { tblPaymentGateways::pgwSumRequestCount,       S(quint32),                                         QFV,                                0,          UPAdmin },
             { tblPaymentGateways::pgwSumRequestAmount,      S(quint64),                                         QFV,                                0,          UPAdmin },
             { tblPaymentGateways::pgwSumFailedCount,        S(quint32),                                         QFV,                                0,          UPAdmin },
             { tblPaymentGateways::pgwSumOkCount,            S(quint32),                                         QFV,                                0,          UPAdmin },
             { tblPaymentGateways::pgwSumPaidAmount,         S(quint64),                                         QFV,                                0,          UPAdmin },
+            //------------------
             { tblPaymentGateways::pgwStatus,                ORM_STATUS_FIELD(TAPI::enuPaymentGatewayStatus, TAPI::enuPaymentGatewayStatus::Active) },
-//            { ORM_INVALIDATED_AT_FIELD },
             { tblPaymentGateways::pgwCreationDateTime,      ORM_CREATED_ON },
             { tblPaymentGateways::pgwCreatedBy_usrID,       ORM_CREATED_BY },
             { tblPaymentGateways::pgwUpdatedBy_usrID,       ORM_UPDATED_BY },
         },
-        {///<Col                        Reference Table              ForeignCol       Rename     LeftJoin
+        {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(tblPaymentGateways::pgwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblPaymentGateways::pgwUpdatedBy_usrID),
         }

@@ -312,15 +312,6 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
 
     qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
-#define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
-    QT_TRY { \
-        TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
-    } \
-    QT_CATCH (const std::exception &e) { \
-        qDebug() << "fieldName:" << #_tableFieldName << e.what(); \
-        QT_RETHROW; \
-    }
-
     stuAssetItem AssetItem;
     SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdCode,                SaleableInfo, tblAccountProductsBase,  prdCode);
     SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdName,                SaleableInfo, tblAccountProductsBase,  prdName);

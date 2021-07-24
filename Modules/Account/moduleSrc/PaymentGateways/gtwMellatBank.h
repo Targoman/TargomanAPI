@@ -28,7 +28,7 @@
 
 namespace Targoman::API::AAA {
 
-class gtwMellatBank : public intfPaymentGateway
+class gtwMellatBank //: public intfPaymentGateway
 {
 };
 

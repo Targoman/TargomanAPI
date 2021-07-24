@@ -47,11 +47,6 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-///TODO: move this 3 lines back to PaymentLogic.cpp
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
-
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserGender);
@@ -354,20 +349,33 @@ TAPI::stuVoucher processVoucher(quint64 _vchID) {
 ///TODO remove _gateway from parameters
 ///TODO select gateway (null|single|multiple) from service
 ///TODO check for common gateway voucher
-TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
-                                                TAPI::stuPreVoucher _preVoucher,
-                                                QString _callBack,
-                                                qint64 _walletID,
-                                                TAPI::enuPaymentGateway::Type _gateway)
+TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
+        TAPI::JWT_t _JWT,
+        TAPI::stuPreVoucher _preVoucher,
+        qint64 _walletID,
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        QString _callBack
+    )
 {
-    if (_callBack.size() && _callBack != "OFFLINE")
+    ///scenario:
+    ///1: create voucher
+    ///2: compute wallet remaining
+    ///2.1: process voucher
+    ///2.2: create online/offline payment
+
+    if (_gatewayType != TAPI::enuPaymentGatewayType::COD)
+    {
+        if (_callBack.isEmpty())
+            throw exHTTPBadRequest("callback for non COD is mandatory");
         QFV.url().validate(_callBack, "callBack");
+    }
 
     if (_preVoucher.Items.isEmpty())
         throw exHTTPBadRequest("seems that pre-Voucher is empty");
 
     Accounting::checkPreVoucherSanity(_preVoucher);
 
+    //1: create voucher
     TAPI::stuVoucher Voucher;
     Voucher.Info = _preVoucher;
     ///TODO remove sign from prevoucher before converting to JSON
@@ -382,9 +390,11 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                                                   { tblVoucher::vchDesc, _preVoucher.toJson() },
                                                   { tblVoucher::vchTotalAmount, _preVoucher.ToPay }
                                               })); //.toULongLong();
-    try {
+    try
+    {
+        //2: compute wallet remaining
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
-        if (_walletID>=0 && RemainingAfterWallet>0) {
+        if ((_walletID >= 0) && (RemainingAfterWallet > 0)) {
             clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
                                                    { "iWalletID", _walletID },
                                                    { "iVoucherID", Voucher.ID },
@@ -394,19 +404,26 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
                 throw exHTTPInternalServerError("Remaining after wallet transaction is negative!");
         }
 
-        if (RemainingAfterWallet > 0) {
-            ///TODO rename OFFLINE to COD (as constant)
-            if (_callBack == "OFFLINE") {
-                //Do nothing as it will be created after information upload.
-            }
-            else {
-                Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, _preVoucher.Summary, RemainingAfterWallet, _callBack);
-            }
+        //2.1: process voucher
+        if (RemainingAfterWallet == 0)
+            return processVoucher(Voucher.ID);
+
+        //2.2: create online/offline payment
+        ///TODO rename OFFLINE to COD (as constant)
+        if (_callBack == "OFFLINE") {
+            //Do nothing as it will be created after information upload.
         }
         else {
-            return processVoucher(Voucher.ID);
+            Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
+                                      _gatewayType,
+                                      Voucher.ID,
+                                      _preVoucher.Summary,
+                                      RemainingAfterWallet,
+                                      _callBack
+                                      );
         }
-    } catch (...) {
+    }
+    catch (...) {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -429,7 +446,11 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(TAPI::JWT_t _JWT,
  * @param _pgResponse: ... voucherID ...
  * @return
  */
-TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(TAPI::enuPaymentGateway::Type _gateway, const QString _domain, TAPI::JSON_t _pgResponse)
+TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const QString _domain,
+        TAPI::JSON_t _pgResponse
+    )
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
     try {

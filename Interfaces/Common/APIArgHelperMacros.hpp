@@ -166,6 +166,16 @@
 #define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
+///TODO: complete this and test with stuPaymentGateway
+//#define SF_JSON(_name)                  SF_Generic( \
+//    /* type        */ TAPI::JSON_t, \
+//    /* name        */ _name, \
+//    /* def         */ TAPI::JSON_t(), \
+//    /* validator   */ v.isEmpty() == false, \
+//    /* fromVariant */ [](auto v) { return QJsonValue::fromVariant(v); }(v), \
+//    /* toVariant   */ v \
+//)
+
 //                                                  _type,                  _name, _typeGroup,        _fromVariant,      _toVariant,           _def, _validator
 #define SF_QString(_name, ...)          INTERNAL_SF(QString,                _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
 #define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
@@ -195,6 +205,15 @@
         return *this; \
     } \
 };
+
+#define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
+    QT_TRY { \
+        TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
+    } \
+    QT_CATCH (const std::exception &e) { \
+        qDebug() << "fieldName:" << #_tableFieldName << e.what(); \
+        QT_RETHROW; \
+    }
 
 #define C2DBL(v) INTERNAL_C2DBL(v)
 #define C2U64(v) INTERNAL_C2DBL(v)

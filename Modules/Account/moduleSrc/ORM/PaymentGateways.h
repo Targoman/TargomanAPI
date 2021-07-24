@@ -27,18 +27,53 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
+///TODO: move this to TargomanCommon
+#define TARGOMAN_DEFINE_ENUM_LIST(_name) \
+    namespace _name { \
+        typedef QList<_name::Type> List; \
+        static QString toCSV(_name::List _values, const char* _itemSurrounder="") { \
+            QStringList out; \
+            foreach (_name::Type _value, _values) { \
+                out.append(QString("%1%2%1").arg(_itemSurrounder).arg(_name::toStr(_value))); \
+            } \
+            return out.join(","); \
+        } \
+    }
+
+//-----------------------------------------------------
 namespace TAPI {
+///deprecated
+//TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
+//                     Zibal    = 'Z',
+//                     ZarrinPal= 'L',
+//                     NextPay  = 'N',
+//                     Pardano  = 'O',
+//                     Parsian  = 'P',
+//                     Mellat   = 'M',
+//                     Pasargad = 'G',
+//                     Saman    = 'S',
+//                     AsanPardakht = 'A',
+//                     Gap      = 'W',
+//                     VISA     = 'V',
+//                     MasterCard= 'C',
+//                     )
+
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
+                     COD                        = 'D', //offline payment
                      IranBank                   = 'I',
                      IranIntermediateGateway    = 'M',
                      InternationalDebitCart     = 'D',
                      InternationalCreditCart    = 'C',
+                     CryptoCurrency             = 'B',
                      );
+TARGOMAN_DEFINE_ENUM_LIST(enuPaymentGatewayType);
+
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayDriver,
                      IranMellatBank     = 'M',
                      IranPasargadBank   = 'P',
                      IranVaseteZibal    = 'Z',
                      TurkeyZiraatBank   = 'T',
+                     CryptoEther        = 'E',
                      );
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayStatus,
                      Active   = 'A',
@@ -50,7 +85,15 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
                      Currency = '$',
                      );
 }
+//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
 
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayType);
+TAPI_DECLARE_METATYPE(TAPI::enuPaymentGatewayType::List);
+
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayDriver);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayStatus);
+
+//-----------------------------------------------------
 namespace Targoman::API::AAA {
 
 #pragma GCC diagnostic push
@@ -63,10 +106,13 @@ TARGOMAN_CREATE_CONSTEXPR(pgwName);
 TARGOMAN_CREATE_CONSTEXPR(pgwType);
 TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
 TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
-TARGOMAN_CREATE_CONSTEXPR(pgwMinPayAmount);
-TARGOMAN_CREATE_CONSTEXPR(pgwMaxPayAmount);
-TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFee);
+//------------------
+TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
 TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);
+//------------------
+TARGOMAN_CREATE_CONSTEXPR(pgwMinRequestAmount);
+TARGOMAN_CREATE_CONSTEXPR(pgwMaxRequestAmount);
+TARGOMAN_CREATE_CONSTEXPR(pgwMaxPerDayAmount);
 //load balance:
 TARGOMAN_CREATE_CONSTEXPR(pgwLastPaymentDateTime);
 TARGOMAN_CREATE_CONSTEXPR(pgwSumTodayPaidAmount);
@@ -85,6 +131,36 @@ TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
 
 #pragma GCC diagnostic pop
 
+//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPaymentGateway,
+//    SF_quint32(pgwID),
+//    SF_QString(pgwName),
+//    SF_Enum(TAPI::enuPaymentGatewayType, pgwType, TAPI::enuPaymentGatewayType::COD),
+//    SF_Enum(TAPI::enuPaymentGatewayDriver, pgwDriver, TAPI::enuPaymentGatewayDriver::IranMellatBank),
+//    SF_JSON(pgwMetaInfo)
+//    SF_NULLABLE_quint32(pgwTransactionFeeValue),
+//    SF_Enum(TAPI::enuPaymentGatewayTransactionFeeType::Type(pgwTransactionFeeType),
+//    SF_quint32(pgwMinRequestAmount),
+//    SF_NULLABLE_quint32)(pgwMaxRequestAmount),
+//    SF_NULLABLE_quint32)(pgwMaxPerDayAmount),
+//    SF_Generic(DateTime_t)(pgwLastPaymentDateTime),
+//    SF_quint64(pgwSumTodayPaidAmount),
+//    SF_quint32(pgwSumRequestCount),
+//    SF_quint64(pgwSumRequestAmount),
+//    SF_quint32(pgwSumFailedCount),
+//    SF_quint32(pgwSumOkCount),
+//    SF_quint64(pgwSumPaidAmount),
+//    SF_Enum(TAPI::enuPaymentGatewayStatus::Type, pgwStatus),
+//);
+
+struct stuPaymentGateway
+{
+    quint32 pgwID;
+    QString pgwName;
+    TAPI::enuPaymentGatewayType::Type pgwType;
+    TAPI::enuPaymentGatewayDriver::Type pgwDriver;
+    TAPI::JSON_t pgwMetaInfo;
+};
+
 class PaymentGateways : public ORM::clsTable
 {
     Q_OBJECT
@@ -100,9 +176,5 @@ private:
 };
 
 } //namespace Targoman::API::AAA
-
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayType);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayDriver);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTGATEWAYS_H

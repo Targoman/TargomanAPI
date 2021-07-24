@@ -30,6 +30,8 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
+
 namespace Targoman {
 namespace API {
 namespace AAA {

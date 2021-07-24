@@ -29,9 +29,7 @@
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
 
 stuRelation InvalidRelation("", "", "");
 
@@ -542,6 +540,16 @@ QString clsCondition::buildConditionString(
                 //makeValueAsSQL(
                 CondStr += conditionData.Value.value<QString>();
                 CondStr += "'";
+            }
+            else if (conditionData.Operator == enuConditionOperator::In)
+            {
+                if (conditionData.Value.isValid() == false)
+                    throw exQueryBuilder("Value of IN condition is empty");
+
+                CondStr += " IN (";
+                //makeValueAsSQL(
+                CondStr += conditionData.Value.value<QString>();
+                CondStr += ")";
             }
             else
             {
@@ -1591,10 +1599,14 @@ public:
                 QStringList parts;
 
                 QString AggFunction = enuConditionalAggregation::toStr(*_col.ConditionalAggregation);
-                AggFunction.chop(2);
+                if (_col.ConditionalAggregation != enuConditionalAggregation::IF)
+                    AggFunction.chop(2);
                 AggFunction += "(";
                 if (_col.TrueValue.isValid())
-                    AggFunction += "IF (";
+                {
+                    if (_col.ConditionalAggregation != enuConditionalAggregation::IF)
+                        AggFunction += "IF (";
+                }
                 if (SQLPrettyLen && _col.Condition.hasMany())
                     AggFunction += "\n" + QString(SQLPrettyLen, ' ') + " ";
                 parts.append(AggFunction);
@@ -1611,10 +1623,12 @@ public:
                     parts.append(makeValueAsSQL(_col.FalseValue));
                 }
 
-                parts.append(")");
                 if (_col.TrueValue.isValid() != false)
-                    parts.append(")");
-
+                {
+                    if (_col.ConditionalAggregation != enuConditionalAggregation::IF)
+                        parts.append(")");
+                }
+                parts.append(")");
                 parts.append(" AS ");
                 parts.append(_col.RenameAs);
 
@@ -2266,6 +2280,14 @@ quint64 SelectQuery::count(QVariantMap _args)
     return count;
 }
 */
+
+//template<typename T> T SelectQuery::one(QVariantMap _args)
+//{
+//    QVariantMap info = this->one(_args);
+//    T t;
+//    t.setFromvariant(info);
+//    return t;
+//}
 
 QVariantMap SelectQuery::one(QVariantMap _args)
 {
@@ -3438,8 +3460,6 @@ template class tmplBaseQuery<DeleteQuery, clsDeleteQueryData>;
 template class tmplQueryJoinTrait<DeleteQuery>;
 template class tmplQueryWhereTrait<DeleteQuery>;
 
-}
-}
-}
+} //namespace Targoman::API::ORM
 
 //Q_DECLARE_METATYPE(Targoman::API::ORM::stuColSpecs::unnAggregation);

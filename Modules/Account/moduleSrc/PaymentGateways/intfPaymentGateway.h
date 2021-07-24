@@ -39,6 +39,7 @@
 using namespace qhttp;
 
 namespace Targoman::API::AAA {
+class PaymentLogic;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -83,10 +84,23 @@ struct stuPaymentResponse {
 #define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gtwDriver, _gatewayClassName) \
 public: \
     instanceGetter(_gatewayClassName); \
+protected: \
+    virtual QString getName(); \
     virtual TAPI::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
     virtual TAPI::enuPaymentGatewayDriver::Type getDriver() { return _gtwDriver; }; \
-    virtual stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc); \
-    virtual stuPaymentResponse verify(const TAPI::JSON_t& _pgResponse, const QString& _domain); \
+    virtual stuPaymentResponse request( \
+            const stuPaymentGateway& _paymentGateway, \
+            TAPI::MD5_t _orderMD5, \
+            qint64 _amount, \
+            const QString& _callback, \
+            const QString& _desc \
+            ); \
+    virtual stuPaymentResponse verify( \
+            const stuPaymentGateway& _paymentGateway, \
+            const TAPI::JSON_t& _pgResponse, \
+            const QString& _domain \
+            ); \
+    friend Targoman::API::AAA::PaymentLogic; \
 private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
@@ -102,12 +116,67 @@ private: \
  */
 class intfPaymentGateway
 {
-public:
+    friend Targoman::API::AAA::PaymentLogic;
+
+protected:
+    virtual QString getName() = 0;
     virtual TAPI::enuPaymentGatewayType::Type getType() = 0;
     virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
-    virtual stuPaymentResponse request(TAPI::MD5_t _orderMD5, qint64 _amount, const QString& _callback, const QString& _desc) = 0;
-    virtual stuPaymentResponse verify(const TAPI::JSON_t& _pgResponse, const QString& _domain) = 0;
+    virtual stuPaymentResponse request(
+            const stuPaymentGateway& _paymentGateway,
+            TAPI::MD5_t _orderMD5,
+            qint64 _amount,
+            const QString& _callback,
+            const QString& _desc
+            ) = 0;
+    virtual stuPaymentResponse verify(
+            const stuPaymentGateway& _paymentGateway,
+            const TAPI::JSON_t& _pgResponse,
+            const QString& _domain
+            ) = 0;
     virtual QString errorString(int _errCode);
+
+    static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true)
+    {
+        QtCUrl CUrl;
+        CUrl.setTextCodec("UTF-8");
+
+        QtCUrl::Options Opt;
+        Opt[CURLOPT_URL] = _url;
+        Opt[CURLOPT_HTTPHEADER] = QStringList({
+                                                  "content-type: application/json",
+                                                  "cache-control: no-cache"
+                                              });
+        Opt[CURLOPT_POST] = true;
+        Opt[CURLOPT_FOLLOWLOCATION] = true;
+        Opt[CURLOPT_FAILONERROR] = true;
+        Opt[CURLOPT_TIMEOUT] = 60;
+        Opt[CURLOPT_POSTFIELDS] = _json.toJson();
+
+        QString CUrlResult = CUrl.exec(Opt);
+
+        if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT)
+            throw exPayment("Connection to <" + _url +"> timed out.");
+        else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
+            throw exPayment("Connection to <" + _url +"> failed.");
+        else if(CUrl.lastError().isOk() == false)
+            throw exPayment("Connection to <" + _url + "> error: " + CUrl.lastError().text());
+
+        if (_jsonDecode) {
+            QJsonParseError JsonError;
+            QJsonDocument Json = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
+
+            if (JsonError.error != QJsonParseError::NoError)
+                throw exPayment("Unable to parse gateway response. " + JsonError.errorString());
+
+            return Json;
+        }
+
+        return QJsonDocument(QJsonObject({
+                                             { "result", QString(CUrlResult.toUtf8()) }
+                                         })
+                             );
+    }
 
     /*
     struct stuGateway {
@@ -138,51 +207,6 @@ public:
                 return intfPaymentGateway::GatewayEndPoints.at(i).CustomerID.value();
         }
         throw exPayment(QString("callback unrecognized for %1: %2").arg(TAPI::enuPaymentGateway::toStr(_gateway), _callBack));
-    }
-
-    static void log(const QString _gw, const QString _function, quint16 _line, const QVariantList& _info){
-        QFile File(intfPaymentGateway::TransactionLogFile.value()); // TODO read from config file
-        if (File.open(QFile::WriteOnly | QFile::Append)) {
-            QTextStream Out(&File);
-            Out << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) <<
-                   QString("[%1:%2:%3] ").arg(_gw, _function).arg(_line) <<
-                   QJsonDocument::fromVariant(_info).toJson();
-        }
-    }
-
-    static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true){
-        QtCUrl CUrl;
-        CUrl.setTextCodec("UTF-8");
-
-        QtCUrl::Options Opt;
-        Opt[CURLOPT_URL] = _url;
-        Opt[CURLOPT_HTTPHEADER] = QStringList({
-                                                  "content-type: application/json",
-                                                  "cache-control: no-cache"
-                                              });
-        Opt[CURLOPT_POST] = true;
-        Opt[CURLOPT_FOLLOWLOCATION] = true;
-        Opt[CURLOPT_FAILONERROR] = true;
-        Opt[CURLOPT_TIMEOUT] = 60;
-        Opt[CURLOPT_POSTFIELDS] = _json.toJson();
-
-        QString CUrlResult = CUrl.exec(Opt);
-
-        if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT)
-            throw exPayment("Connection to <" + _url +"> timed out.");
-        else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
-            throw exPayment("Connection to <" + _url +"> failed.");
-        else if(CUrl.lastError().isOk() == false)
-            throw exPayment("Connection to <" + _url + "> error: " + CUrl.lastError().text());
-
-        if(_jsonDecode){
-            QJsonParseError JsonError;
-            QJsonDocument Json = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
-            if(JsonError.error != QJsonParseError::NoError)
-                throw exPayment("Unable to parse gateway response. " + JsonError.errorString());
-            return Json;
-        }
-        return QJsonDocument(QJsonObject({{"result" , QString(CUrlResult.toUtf8()) }}));
     }
     */
 };

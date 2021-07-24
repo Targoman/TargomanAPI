@@ -56,7 +56,7 @@ extern Common::Configuration::tmplConfigurable<QString> Secret;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     QString,      Desc      , QString()    , v.size(), v, v.toString(),
-    QJsonObject , PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
+    QJsonObject,  PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
