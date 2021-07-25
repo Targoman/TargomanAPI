@@ -43,9 +43,10 @@ SOURCES += \
     Server/main.cpp
 
 OTHER_FILES += \
+    dumpDBSchema.sh \
     Schemas/Common.my.sql \
     Schemas/CommonFuncs.my.sql \
-    Schemas/I18N.my.sql \
+    Schemas/I18N.my.sql
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \

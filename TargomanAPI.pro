@@ -23,4 +23,5 @@ OTHER_FILES += \
     conf/invalidPass.tbl \
     conf/api.server.conf \
     conf/api.conf \
-    Docs/Models/Accounting.scxml
+    Docs/Models/Accounting.scxml \
+    dumpDBSchema-all.sh

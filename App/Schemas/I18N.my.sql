@@ -1,19 +1,25 @@
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
--- Dumping database structure for I18N
-DROP DATABASE IF EXISTS `I18N`;
-CREATE DATABASE IF NOT EXISTS `I18N` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
-USE `I18N`;
-
--- Dumping structure for function I18N.farsiDigit
-DROP FUNCTION IF EXISTS `farsiDigit`;
-DELIMITER //
-CREATE FUNCTION `farsiDigit`(
+/*!50003 DROP FUNCTION IF EXISTS `farsiDigit` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `farsiDigit`(
 	`iChar` CHAR(1)
 ) RETURNS varchar(1000) CHARSET utf8
     NO SQL
@@ -32,13 +38,23 @@ BEGIN
     WHEN '0' THEN RETURN '۰';
     ELSE   RETURN iChar;
   END CASE;
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.farsiMonthName
-DROP FUNCTION IF EXISTS `farsiMonthName`;
-DELIMITER //
-CREATE FUNCTION `farsiMonthName`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `farsiMonthName` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `farsiMonthName`(
 	`iMonth` TINYINT
 ) RETURNS varchar(100) CHARSET utf8mb4
     NO SQL
@@ -64,13 +80,23 @@ BEGIN
         ELSE RETURN CONCAT_WS(':','ERROR',iMonth);
     END CASE;
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.farsiNumerals
-DROP FUNCTION IF EXISTS `farsiNumerals`;
-DELIMITER //
-CREATE FUNCTION `farsiNumerals`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `farsiNumerals` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `farsiNumerals`(
 	`iText` VARCHAR(5000)
 ) RETURNS varchar(5000) CHARSET utf8mb4
     NO SQL
@@ -87,13 +113,23 @@ BEGIN
   END LOOP;
   RETURN PersianText;
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.fromJalali
-DROP FUNCTION IF EXISTS `fromJalali`;
-DELIMITER //
-CREATE FUNCTION `fromJalali`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fromJalali` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fromJalali`(
 	`iJalaliYear` smallint,
 	`iJalaliMonth` TINYINT,
 	`iJalaliDay` TINYINT
@@ -198,13 +234,23 @@ BEGIN
   SET gd=g_day_mo;
 
   RETURN CONCAT_WS('-',gy,gm,gd);
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.fromJalaliStr
-DROP FUNCTION IF EXISTS `fromJalaliStr`;
-DELIMITER //
-CREATE FUNCTION `fromJalaliStr`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fromJalaliStr` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fromJalaliStr`(
 	`iJalaliDate` VARCHAR(50)
 ) RETURNS datetime
     NO SQL
@@ -232,13 +278,23 @@ BEGIN
   
   RETURN CONCAT_WS(' ',I18N.fromJalali(jy,jm,jd), jTime);
   
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.jalaliDateTime
-DROP FUNCTION IF EXISTS `jalaliDateTime`;
-DELIMITER //
-CREATE FUNCTION `jalaliDateTime`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `jalaliDateTime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `jalaliDateTime`(
 	`iDateTime` DATETIME
 
 ) RETURNS varchar(50) CHARSET utf8mb4
@@ -301,17 +357,27 @@ BEGIN
 	END IF;
 
 	RETURN resout;
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.jalaliDay
-DROP FUNCTION IF EXISTS `jalaliDay`;
-DELIMITER //
-CREATE FUNCTION `jalaliDay`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `jalaliDay` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `jalaliDay`(
 	`iDate` DATE
 
 
-) RETURNS tinyint(4)
+) RETURNS tinyint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -364,15 +430,25 @@ BEGIN
 
 	RETURN jd;
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.jalaliMonth
-DROP FUNCTION IF EXISTS `jalaliMonth`;
-DELIMITER //
-CREATE FUNCTION `jalaliMonth`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `jalaliMonth` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `jalaliMonth`(
 	`iDate` DATE
-) RETURNS tinyint(4)
+) RETURNS tinyint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -424,16 +500,26 @@ BEGIN
 --	SET jd = j_day_no + 1;
 
 	RETURN jm;
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N.jalaliYear
-DROP FUNCTION IF EXISTS `jalaliYear`;
-DELIMITER //
-CREATE FUNCTION `jalaliYear`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `jalaliYear` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `jalaliYear`(
 	`iDate` DATE
 
-) RETURNS smallint(5) unsigned
+) RETURNS smallint unsigned
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -474,15 +560,25 @@ BEGIN
 	END IF;
 
 	RETURN jy;
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N._gdmarray
-DROP FUNCTION IF EXISTS `_gdmarray`;
-DELIMITER //
-CREATE FUNCTION `_gdmarray`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `_gdmarray` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `_gdmarray`(
 	`m` smallint
-) RETURNS smallint(2)
+) RETURNS smallint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -505,16 +601,26 @@ BEGIN
 		WHEN 11 THEN RETURN 31;
 	END CASE;
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N._gdmarray2
-DROP FUNCTION IF EXISTS `_gdmarray2`;
-DELIMITER //
-CREATE FUNCTION `_gdmarray2`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `_gdmarray2` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `_gdmarray2`(
 	`m` smallint,
 	`k` SMALLINT
-) RETURNS tinyint(4)
+) RETURNS tinyint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -538,16 +644,26 @@ BEGIN
 	END CASE;
    
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N._intDiv
-DROP FUNCTION IF EXISTS `_intDiv`;
-DELIMITER //
-CREATE FUNCTION `_intDiv`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `_intDiv` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `_intDiv`(
 	`a` int,
 	`b` int
-) RETURNS bigint(20)
+) RETURNS bigint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -556,15 +672,25 @@ BEGIN
 # Version V1.0.2
 
 	return FLOOR(a / b);
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N._jdmarray
-DROP FUNCTION IF EXISTS `_jdmarray`;
-DELIMITER //
-CREATE FUNCTION `_jdmarray`(
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `_jdmarray` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `_jdmarray`(
 	`m` smallint
-) RETURNS smallint(2)
+) RETURNS smallint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -587,13 +713,23 @@ BEGIN
 		WHEN 11 THEN RETURN 29;
 	END CASE;
 
-END//
+END ;;
 DELIMITER ;
-
--- Dumping structure for function I18N._jdmarray2
-DROP FUNCTION IF EXISTS `_jdmarray2`;
-DELIMITER //
-CREATE FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint(2)
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `_jdmarray2` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint
     NO SQL
     DETERMINISTIC
 BEGIN
@@ -616,10 +752,19 @@ BEGIN
 		WHEN 12 THEN RETURN 29;
 	END CASE;
 
-END//
+END ;;
 DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+

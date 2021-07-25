@@ -1,26 +1,18 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               8.0.25 - MySQL Community Server - GPL
--- Server OS:                    Linux
--- HeidiSQL Version:             11.2.0.6213
--- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
-
--- Dumping database structure for Advert
-DROP DATABASE IF EXISTS `Advert`;
-CREATE DATABASE IF NOT EXISTS `Advert` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `Advert`;
-
--- Dumping structure for table Advert.tblAccountAssetUsage
 DROP TABLE IF EXISTS `tblAccountAssetUsage`;
-CREATE TABLE IF NOT EXISTS `tblAccountAssetUsage` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblAccountAssetUsage` (
   `usg_uasID` bigint unsigned NOT NULL,
   `usgRemainingDays` smallint NOT NULL DEFAULT '0',
   `usgDayShow` bigint unsigned NOT NULL DEFAULT '0',
@@ -32,140 +24,180 @@ CREATE TABLE IF NOT EXISTS `tblAccountAssetUsage` (
   KEY `usg_uasID` (`usg_uasID`) USING BTREE,
   CONSTRAINT `FK_tblAccountAssetUsage_tblAccountUserAssets` FOREIGN KEY (`usg_uasID`) REFERENCES `tblAccountUserAssets` (`uasID`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblAccountAssetUsage: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblAccountAssetUsage` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblAccountAssetUsage` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblAccountCoupons
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountCoupons`;
-CREATE TABLE IF NOT EXISTS `tblAccountCoupons` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblAccountCoupons` (
   `cpnID` int unsigned NOT NULL AUTO_INCREMENT,
-  `cpnCode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
-  `cpnType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '%' COMMENT '%: Percent, $:Amount, Z: Free',
-  `cpnPackageBasedAmount` json NOT NULL,
+  `cpnCode` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
+  `cpnPrimaryCount` int unsigned NOT NULL DEFAULT '1',
+  `cpnTotalMaxAmount` int unsigned NOT NULL DEFAULT '1',
+  `cpnPerUserMaxCount` int unsigned DEFAULT NULL,
+  `cpnPerUserMaxAmount` int unsigned DEFAULT NULL,
   `cpnValidFrom` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `cpnExpiryTime` datetime DEFAULT NULL,
-  `cpnPrimaryCount` int unsigned NOT NULL DEFAULT '1',
-  `cpnUsedCount` int unsigned NOT NULL DEFAULT '0',
-  `cpnCreatedBy_usrID` bigint unsigned NOT NULL,
+  `cpnAmount` int NOT NULL,
+  `cpnAmountType` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '%' COMMENT '%: Percent, $:Amount, Z: Free',
+  `cpnMaxAmount` int unsigned DEFAULT NULL,
+  `cpnSaleableBasedMultiplier` json NOT NULL,
+  `cpnTotalUsedCount` int NOT NULL DEFAULT '0',
+  `cpnTotalUsedAmount` int NOT NULL DEFAULT '0',
+  `cpnStatus` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, Removed',
+  `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
   `cpnCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `cpnCreatedBy_usrID` bigint unsigned NOT NULL,
   `cpnUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
-  `cpnStatus` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'A: Active, Removed',
   PRIMARY KEY (`cpnID`) USING BTREE,
-  UNIQUE KEY `cpnCode` (`cpnCode`) USING BTREE,
-  KEY `cpnType` (`cpnType`) USING BTREE,
+  UNIQUE KEY `cpnCode__InvalidatedAt` (`cpnCode`,`_InvalidatedAt`),
   KEY `cpnExpiryTime` (`cpnExpiryTime`) USING BTREE,
   KEY `cpnCreatedBy_usrID` (`cpnCreatedBy_usrID`) USING BTREE,
   KEY `cpnCreationDateTime` (`cpnCreationDateTime`) USING BTREE,
   KEY `cpnUpdatedBy_usrID` (`cpnUpdatedBy_usrID`) USING BTREE,
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
-  KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblAccountCoupons: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblAccountCoupons` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblAccountCoupons` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblAccountSaleables
+  KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
+  KEY `cpnType` (`cpnAmountType`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblAccountProducts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblAccountProducts` (
+  `prdID` int unsigned NOT NULL AUTO_INCREMENT,
+  `prdCode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prdName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prdDesc` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prdValidFromDate` date DEFAULT NULL,
+  `prdValidToDate` date DEFAULT NULL,
+  `prdValidFromHour` tinyint DEFAULT NULL,
+  `prdValidToHour` tinyint DEFAULT NULL,
+  `prdType` char(1) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prd_locID` int unsigned DEFAULT NULL,
+  `prdDuration` int DEFAULT '-1',
+  `prdShowPerDay` int DEFAULT '-1',
+  `prdShowTotal` int DEFAULT '-1',
+  `prdClicksPerDay` int DEFAULT '-1',
+  `prdClicksPerMonth` int DEFAULT '-1',
+  `prdClicksTotal` bigint DEFAULT '-1',
+  `prdPrivs` json DEFAULT NULL,
+  `prdVAT` double DEFAULT NULL,
+  `prdInStockCount` int DEFAULT NULL,
+  `prdOrderedCount` int DEFAULT NULL,
+  `prdReturnedCount` int DEFAULT NULL,
+  `prdStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, R: Removed',
+  `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
+  `prdCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `prdCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `prdUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`prdID`) USING BTREE,
+  UNIQUE KEY `prdCode__InvalidatedAt` (`prdCode`,`_InvalidatedAt`),
+  KEY `prdCreationDateTime` (`prdCreationDateTime`) USING BTREE,
+  KEY `prdStatus` (`prdStatus`) USING BTREE,
+  KEY `prdValidFrom` (`prdValidFromDate`) USING BTREE,
+  KEY `prdValidTo` (`prdValidToDate`) USING BTREE,
+  KEY `prdCreatedBy_usrID` (`prdCreatedBy_usrID`) USING BTREE,
+  KEY `prdUpdatedBy_usrID` (`prdUpdatedBy_usrID`) USING BTREE,
+  KEY `FK_tblAccountProducts_tblLocations` (`prd_locID`),
+  KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
+  KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
+  CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
-CREATE TABLE IF NOT EXISTS `tblAccountSaleables` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblAccountSaleables` (
   `slbID` int unsigned NOT NULL AUTO_INCREMENT,
+  `slb_prdID` int unsigned NOT NULL,
   `slbCode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `slbName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `slbDesc` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `slbType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'N: Normal, S: Special',
-  `slbValidFromDate` date DEFAULT NULL,
-  `slbValidToDate` date DEFAULT NULL,
-  `slbValidFromTime` tinyint DEFAULT NULL,
-  `slbValidToTime` tinyint DEFAULT NULL,
-  `slb_locID` int unsigned NOT NULL,
-  `slbDuration` int NOT NULL DEFAULT '-1',
-  `slbShowPerDay` int NOT NULL DEFAULT '-1',
-  `slbShowTotal` int NOT NULL DEFAULT '-1',
-  `slbClicksPerDay` int NOT NULL DEFAULT '-1',
-  `slbClicksPerMonth` int NOT NULL DEFAULT '-1',
-  `slbClicksTotal` bigint NOT NULL DEFAULT '-1',
+  `slbAvailableFromDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `slbAvailableToDate` datetime DEFAULT NULL,
   `slbPrivs` json DEFAULT NULL,
-  `slbPrice` int unsigned NOT NULL,
-  `slbCanBePurchasedSince` datetime DEFAULT CURRENT_TIMESTAMP,
-  `slbNotAvailableSince` datetime DEFAULT NULL,
-  `slbInvoiceTemplate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `slbCreatedBy_usrID` bigint unsigned NOT NULL,
-  `slbCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `slbUpdatedBy_usrID` bigint unsigned NOT NULL,
+  `slbBasePrice` int unsigned NOT NULL,
+  `slbAdditives` json DEFAULT NULL,
+  `slbProductCount` int NOT NULL,
+  `slbMaxSaleCountPerUser` int DEFAULT NULL,
+  `slbInStockCount` int DEFAULT NULL,
+  `slbOrderedCount` int DEFAULT NULL,
+  `slbReturnedCount` int DEFAULT NULL,
+  `slbVoucherTemplate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `slbShowPerDay` int NOT NULL DEFAULT '0',
+  `slbShowTotal` int NOT NULL DEFAULT '0',
+  `slbClicksPerDay` int NOT NULL DEFAULT '0',
+  `slbClicksPerMonth` int NOT NULL DEFAULT '0',
+  `slbClicksTotal` int NOT NULL DEFAULT '0',
   `slbStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, R: Removed',
+  `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
+  `slbCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `slbCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `slbUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`slbID`) USING BTREE,
-  UNIQUE KEY `slbCode` (`slbCode`,`slbStatus`) USING BTREE,
+  UNIQUE KEY `slbCode__InvalidatedAt` (`slbCode`,`_InvalidatedAt`),
   KEY `slbCreationDateTime` (`slbCreationDateTime`) USING BTREE,
   KEY `slbStatus` (`slbStatus`) USING BTREE,
-  KEY `slbValidFrom` (`slbValidFromDate`) USING BTREE,
-  KEY `slbValidTo` (`slbValidToDate`) USING BTREE,
   KEY `slbCreatedBy_usrID` (`slbCreatedBy_usrID`) USING BTREE,
   KEY `slbUpdatedBy_usrID` (`slbUpdatedBy_usrID`) USING BTREE,
-  KEY `slbValidFromTime` (`slbValidFromTime`) USING BTREE,
-  KEY `slbValidToTime` (`slbValidToTime`) USING BTREE,
   KEY `slbType` (`slbType`) USING BTREE,
-  KEY `slbCanBePurchasedFrom` (`slbCanBePurchasedSince`) USING BTREE,
-  KEY `slbNotAvailableSince` (`slbNotAvailableSince`) USING BTREE,
-  KEY `FK_tblAccountSaleables_tblLocations` (`slb_locID`) USING BTREE,
-  CONSTRAINT `FK_tblAccountSaleables_tblLocations` FOREIGN KEY (`slb_locID`) REFERENCES `tblLocations` (`locID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblAccountSaleables: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblAccountSaleables` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblAccountSaleables` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblAccountUserAssets
+  KEY `slbAvailableToDate` (`slbAvailableToDate`),
+  KEY `slbAvailableFromDate` (`slbAvailableFromDate`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
-CREATE TABLE IF NOT EXISTS `tblAccountUserAssets` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblAccountUserAssets` (
   `uasID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uas_usrID` bigint unsigned NOT NULL,
   `uas_slbID` int unsigned NOT NULL,
+  `uas_vchID` bigint unsigned DEFAULT NULL,
+  `uasVoucherItemUUID` char(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `uas_cpnID` int unsigned DEFAULT NULL,
+  `uasDiscountAmount` int unsigned DEFAULT NULL,
   `uasPrefered` bit(1) DEFAULT NULL,
-  `uasPurchaseRequestDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `uasPaymentDateTime` datetime DEFAULT NULL,
-  `uas_vchID` bigint unsigned NOT NULL,
-  `uasUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `uasOrderDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `uasDays` mediumint DEFAULT '0',
+  `uasDayShow` int unsigned DEFAULT '0',
+  `uasTotalShow` bigint unsigned DEFAULT '0',
+  `uasDayClicks` int unsigned DEFAULT '0',
+  `uasMonthClicks` int unsigned DEFAULT '0',
+  `uasTotalClicks` bigint unsigned DEFAULT '0',
   `uasStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'P' COMMENT 'P: Pending, A: Active, R: Removed, B: Blocked',
+  `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
+  `uasUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`uasID`) USING BTREE,
-  UNIQUE KEY `uas_usrID_uas_slbID_uasPrefered` (`uas_usrID`,`uas_slbID`,`uasPrefered`,`uasStatus`) USING BTREE,
+  UNIQUE KEY `uas_usrID_uasVoucherItemUUID__InvalidatedAt` (`uas_usrID`,`uasVoucherItemUUID`,`_InvalidatedAt`),
   KEY `uasStatus` (`uasStatus`) USING BTREE,
   KEY `uas_usrID` (`uas_usrID`) USING BTREE,
-  KEY `uasPurchaseDate` (`uasPurchaseRequestDateTime`) USING BTREE,
-  KEY `uasPaymentDataTime` (`uasPaymentDateTime`) USING BTREE,
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
-  KEY `FK_tblAccountUserAssets_tblAccountSaleables` (`uas_slbID`) USING BTREE,
-  CONSTRAINT `FK_tblAccountUserAssets_tblAccountSaleables` FOREIGN KEY (`uas_slbID`) REFERENCES `tblAccountSaleables` (`slbID`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblAccountUserAssets: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblAccountUserAssets` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblAccountUserAssets` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblActionLogs
+  KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
-CREATE TABLE IF NOT EXISTS `tblActionLogs` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblActionLogs` (
   `atlID` bigint NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
   `atlInsertionDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atlType` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `atlType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `atlDescription` json DEFAULT NULL,
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblActionLogs: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblActionLogs` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblActionLogs` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblActiveAds
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
-CREATE TABLE IF NOT EXISTS `tblActiveAds` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblActiveAds` (
   `act_binID` int unsigned NOT NULL,
   `act_locID` int unsigned NOT NULL,
-  `actOrder` char(1) COLLATE utf8mb4_general_ci NOT NULL,
-  `actOnKeyword` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `actOrder` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `actOnKeyword` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   KEY `FK_tblActiveAds_tblBin` (`act_binID`),
   KEY `FK_tblActiveAds_tblLocations` (`act_locID`),
   KEY `actOrder` (`actOrder`),
@@ -173,43 +205,63 @@ CREATE TABLE IF NOT EXISTS `tblActiveAds` (
   CONSTRAINT `FK_tblActiveAds_tblBin` FOREIGN KEY (`act_binID`) REFERENCES `tblBin` (`binid`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblActiveAds_tblLocations` FOREIGN KEY (`act_locID`) REFERENCES `tblLocations` (`locid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblActiveAds: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblActiveAds` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblActiveAds` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblBanners
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBanners`;
-CREATE TABLE IF NOT EXISTS `tblBanners` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblBanners` (
   `bnr_binID` int unsigned NOT NULL,
-  `bnrImage` text COLLATE utf8mb4_general_ci NOT NULL,
-  `bnrSize` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Check c++ code it is too complex',
+  `bnrImage` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `bnrSize` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Check c++ code it is too complex',
   `bnrUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   KEY `bnrSize` (`bnrSize`),
   KEY `FK_tblBanners_tblBin` (`bnr_binID`),
   KEY `bnrUpdatedBy_usrID` (`bnrUpdatedBy_usrID`),
   CONSTRAINT `FK_tblBanners_tblBin` FOREIGN KEY (`bnr_binID`) REFERENCES `tblBin` (`binid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblBanners: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblBanners` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblBanners` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblBin
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50032 DROP TRIGGER IF EXISTS tblBanners_after_update */;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblBanners_after_update` AFTER UPDATE ON `tblBanners` FOR EACH ROW BEGIN
+  DECLARE Changes  JSON DEFAULT "{}";
+  
+  IF NEW.bnrImage           != OLD.bnrImage           THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("bnrImage", OLD.bnrImage)); END IF;
+  IF NEW.bnrSize            != OLD.bnrSize            THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("bnrSize", OLD.bnrSize)); END IF;
+  
+  INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = NEW.bnrUpdatedBy_usrID,
+         tblActionLogs.atlType = "tblBanners-Updated",
+         tblActionLogs.atlDescription = Changes;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblBin`;
-CREATE TABLE IF NOT EXISTS `tblBin` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblBin` (
   `binID` int unsigned NOT NULL AUTO_INCREMENT,
-  `binType` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'T' COMMENT 'T: Text, I:Image',
-  `binTitle` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `binDesc` varchar(400) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `binPrettyURL` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `binURL` varchar(400) COLLATE utf8mb4_general_ci NOT NULL,
+  `binType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'T' COMMENT 'T: Text, I:Image',
+  `binTitle` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `binDesc` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `binPrettyURL` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `binURL` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `binShown` bigint NOT NULL DEFAULT '0',
   `binClicks` bigint NOT NULL DEFAULT '0',
-  `binCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `binStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'P' COMMENT 'P:Pending, A:Active, B:Blocked, R:Removed',
   `binCreationDateTime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `binCreatedBy_usrID` bigint unsigned DEFAULT NULL,
   `binUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
-  `binStatus` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'P' COMMENT 'P:Pending, A:Active, B:Blocked, R:Removed',
   PRIMARY KEY (`binID`),
   KEY `advStatus` (`binStatus`),
   KEY `adbType` (`binType`),
@@ -219,23 +271,50 @@ CREATE TABLE IF NOT EXISTS `tblBin` (
   KEY `adbClicks` (`binClicks`),
   KEY `binCreatedBy_usrID` (`binCreatedBy_usrID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblBin: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblBin` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblBin` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblClicks
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50032 DROP TRIGGER IF EXISTS tblBin_after_update */;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblBin_after_update` AFTER UPDATE ON `tblBin` FOR EACH ROW BEGIN
+  DECLARE Changes  JSON DEFAULT "{}";
+  
+  IF NEW.binType          != OLD.binType         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binType", OLD.binType)); END IF;
+  IF NEW.binTitle         != OLD.binTitle        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binTitle", OLD.binTitle)); END IF;
+  IF NEW.binDesc          != OLD.binDesc         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binDesc", OLD.binDesc)); END IF;
+  IF NEW.binPrettyURL     != OLD.binPrettyURL    THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binPrettyURL", OLD.binPrettyURL)); END IF;
+  IF NEW.binURL           != OLD.binURL          THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binURL", OLD.binURL)); END IF;
+  IF NEW.binStatus        != OLD.binStatus       THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binStatus", OLD.binStatus)); END IF;
+  
+  INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = NEW.binUpdatedBy_usrID,
+         tblActionLogs.atlType = "tblBin-Updated",
+         tblActionLogs.atlDescription = Changes;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblClicks`;
-CREATE TABLE IF NOT EXISTS `tblClicks` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblClicks` (
   `clkID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `clk_binID` int unsigned NOT NULL,
   `clk_locID` int unsigned NOT NULL,
   `clkDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `clkIP` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `clkDevice` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `clkScreenSize` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `clkOS` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `clkBrowser` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `clkIP` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `clkDevice` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `clkScreenSize` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `clkOS` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `clkBrowser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`clkID`),
   KEY `clkDevice` (`clkDevice`),
   KEY `clkScreenSize` (`clkScreenSize`),
@@ -248,41 +327,64 @@ CREATE TABLE IF NOT EXISTS `tblClicks` (
   CONSTRAINT `FK_tblClicks_tblBin` FOREIGN KEY (`clk_binID`) REFERENCES `tblBin` (`binID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblClicks_tblLocations` FOREIGN KEY (`clk_locID`) REFERENCES `tblLocations` (`locid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblClicks: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblClicks` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblClicks` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblLocations
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblLocations`;
-CREATE TABLE IF NOT EXISTS `tblLocations` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblLocations` (
   `locID` int unsigned NOT NULL AUTO_INCREMENT,
   `locURL` varchar(200) COLLATE utf8mb4_general_ci NOT NULL,
-  `locPlaceCode` char(3) COLLATE utf8mb4_general_ci NOT NULL,
-  `locCreatedBy_usrID` bigint unsigned DEFAULT NULL,
-  `locCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `locUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `locPlaceCode` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `locStatus` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, R: Removed',
+  `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
+  `locCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `locCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `locUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`locID`),
+  UNIQUE KEY `locURL_locPlaceCode__InvalidatedAt` (`locURL`,`locPlaceCode`,`_InvalidatedAt`),
   KEY `locURL` (`locURL`),
   KEY `locStatus` (`locStatus`),
   KEY `locPlaceCode` (`locPlaceCode`),
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblLocations: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblLocations` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblLocations` ENABLE KEYS */;
-
--- Dumping structure for table Advert.tblProps
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50032 DROP TRIGGER IF EXISTS tblLocations_after_update */;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblLocations_after_update` AFTER UPDATE ON `tblLocations` FOR EACH ROW BEGIN
+  DECLARE Changes  JSON DEFAULT "{}";
+  
+  IF NEW.locURL          != OLD.locURL         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locURL", OLD.locURL)); END IF;
+  IF NEW.locPlaceCode    != OLD.locPlaceCode   THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locPlaceCode", OLD.locPlaceCode)); END IF;
+  IF NEW.locStatus       != OLD.locStatus      THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locStatus", OLD.locStatus)); END IF;
+  
+  INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = NEW.locUpdatedBy_usrID,
+         tblActionLogs.atlType = "locStatus-Updated",
+         tblActionLogs.atlDescription = Changes;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblProps`;
-CREATE TABLE IF NOT EXISTS `tblProps` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblProps` (
   `prp_binID` int unsigned NOT NULL,
   `prp_locID` int unsigned NOT NULL,
-  `prpOrder` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'F: First, S: Second, T: Third, H: HugeReq, R: Normal',
-  `prpKeyword` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prpOrder` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'F: First, S: Second, T: Third, H: HugeReq, R: Normal',
+  `prpKeyword` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `prpStartDate` date NOT NULL,
   `prpEndDate` date NOT NULL,
   `prpCreatedBy_usrID` bigint unsigned DEFAULT NULL,
@@ -301,15 +403,48 @@ CREATE TABLE IF NOT EXISTS `tblProps` (
   CONSTRAINT `FK_tblProps_tblBin` FOREIGN KEY (`prp_binID`) REFERENCES `tblBin` (`binID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblProps_tblLocations` FOREIGN KEY (`prp_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for table Advert.tblProps: ~0 rows (approximately)
-/*!40000 ALTER TABLE `tblProps` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tblProps` ENABLE KEYS */;
-
--- Dumping structure for procedure Advert.sp_UPDATE_setAsPrefered
-DROP PROCEDURE IF EXISTS `sp_UPDATE_setAsPrefered`;
-DELIMITER //
-CREATE PROCEDURE `sp_UPDATE_setAsPrefered`(
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50032 DROP TRIGGER IF EXISTS tblProps_after_update */;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblProps_after_update` AFTER UPDATE ON `tblProps` FOR EACH ROW BEGIN
+  DECLARE Changes  JSON DEFAULT "{}";
+  
+  IF NEW.prp_binID         != OLD.prp_binID         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prp_binID", OLD.prp_binID)); END IF;
+  IF NEW.prp_locID         != OLD.prp_locID         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prp_locID", OLD.prp_locID)); END IF;
+  IF NEW.prpOrder          != OLD.prpOrder          THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpOrder", OLD.prpOrder)); END IF;
+  IF NEW.prpKeyword        != OLD.prpKeyword        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpKeyword", OLD.prpKeyword)); END IF;
+  IF NEW.prpStartDate      != OLD.prpStartDate      THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpStartDate", OLD.prpStartDate)); END IF;
+  IF NEW.prpEndDate        != OLD.prpEndDate        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpEndDate", OLD.prpEndDate)); END IF;
+  
+  INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = NEW.prpUpdatedBy_usrID,
+         tblActionLogs.atlType = "tblProps-Updated",
+         tblActionLogs.atlDescription = Changes;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_setAsPrefered` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_setAsPrefered`(
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iUASID` BIGINT UNSIGNED
 )
@@ -339,91 +474,19 @@ BEGIN
        AND tblAccountUserAssets.uasID = iUASID;
   COMMIT;
 
-END//
+END ;;
 DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
--- Dumping structure for trigger Advert.tblBanners_after_update
-DROP TRIGGER IF EXISTS `tblBanners_after_update`;
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `tblBanners_after_update` AFTER UPDATE ON `tblBanners` FOR EACH ROW BEGIN
-  DECLARE Changes  JSON DEFAULT "{}";
-  
-  IF NEW.bnrImage           != OLD.bnrImage           THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("bnrImage", OLD.bnrImage)); END IF;
-  IF NEW.bnrSize            != OLD.bnrSize            THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("bnrSize", OLD.bnrSize)); END IF;
-  
-  INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = NEW.bnrUpdatedBy_usrID,
-         tblActionLogs.atlType = "tblBanners-Updated",
-         tblActionLogs.atlDescription = Changes;
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Dumping structure for trigger Advert.tblBin_after_update
-DROP TRIGGER IF EXISTS `tblBin_after_update`;
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `tblBin_after_update` AFTER UPDATE ON `tblBin` FOR EACH ROW BEGIN
-  DECLARE Changes  JSON DEFAULT "{}";
-  
-  IF NEW.binType          != OLD.binType         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binType", OLD.binType)); END IF;
-  IF NEW.binTitle         != OLD.binTitle        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binTitle", OLD.binTitle)); END IF;
-  IF NEW.binDesc          != OLD.binDesc         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binDesc", OLD.binDesc)); END IF;
-  IF NEW.binPrettyURL     != OLD.binPrettyURL    THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binPrettyURL", OLD.binPrettyURL)); END IF;
-  IF NEW.binURL           != OLD.binURL          THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binURL", OLD.binURL)); END IF;
-  IF NEW.binStatus        != OLD.binStatus       THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binStatus", OLD.binStatus)); END IF;
-  
-  INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = NEW.binUpdatedBy_usrID,
-         tblActionLogs.atlType = "tblBin-Updated",
-         tblActionLogs.atlDescription = Changes;
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Dumping structure for trigger Advert.tblLocations_after_update
-DROP TRIGGER IF EXISTS `tblLocations_after_update`;
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `tblLocations_after_update` AFTER UPDATE ON `tblLocations` FOR EACH ROW BEGIN
-  DECLARE Changes  JSON DEFAULT "{}";
-  
-  IF NEW.locURL          != OLD.locURL         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locURL", OLD.locURL)); END IF;
-  IF NEW.locPlaceCode    != OLD.locPlaceCode   THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locPlaceCode", OLD.locPlaceCode)); END IF;
-  IF NEW.locStatus       != OLD.locStatus      THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locStatus", OLD.locStatus)); END IF;
-  
-  INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = NEW.locUpdatedBy_usrID,
-         tblActionLogs.atlType = "locStatus-Updated",
-         tblActionLogs.atlDescription = Changes;
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Dumping structure for trigger Advert.tblProps_after_update
-DROP TRIGGER IF EXISTS `tblProps_after_update`;
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `tblProps_after_update` AFTER UPDATE ON `tblProps` FOR EACH ROW BEGIN
-  DECLARE Changes  JSON DEFAULT "{}";
-  
-  IF NEW.prp_binID         != OLD.prp_binID         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prp_binID", OLD.prp_binID)); END IF;
-  IF NEW.prp_locID         != OLD.prp_locID         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prp_locID", OLD.prp_locID)); END IF;
-  IF NEW.prpOrder          != OLD.prpOrder          THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpOrder", OLD.prpOrder)); END IF;
-  IF NEW.prpKeyword        != OLD.prpKeyword        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpKeyword", OLD.prpKeyword)); END IF;
-  IF NEW.prpStartDate      != OLD.prpStartDate      THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpStartDate", OLD.prpStartDate)); END IF;
-  IF NEW.prpEndDate        != OLD.prpEndDate        THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prpEndDate", OLD.prpEndDate)); END IF;
-  
-  INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = NEW.prpUpdatedBy_usrID,
-         tblActionLogs.atlType = "tblProps-Updated",
-         tblActionLogs.atlDescription = Changes;
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
