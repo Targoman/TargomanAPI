@@ -81,13 +81,12 @@ struct stuPaymentResponse {
     }; \
     static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
 
-#define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gtwDriver, _gatewayClassName) \
+#define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gatewayClassName) \
 public: \
     instanceGetter(_gatewayClassName); \
 protected: \
     virtual QString getName(); \
     virtual TAPI::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
-    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() { return _gtwDriver; }; \
     virtual stuPaymentResponse request( \
             const stuPaymentGateway& _paymentGateway, \
             TAPI::MD5_t _orderMD5, \
@@ -105,7 +104,7 @@ private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        PaymentLogic::registerDriver<_gatewayClassName>(_gtwDriver, _gatewayClassName::instance); \
+        PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instance); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
@@ -119,9 +118,8 @@ class intfPaymentGateway
     friend Targoman::API::AAA::PaymentLogic;
 
 protected:
-    virtual QString getName() = 0;
     virtual TAPI::enuPaymentGatewayType::Type getType() = 0;
-    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
+//    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
     virtual stuPaymentResponse request(
             const stuPaymentGateway& _paymentGateway,
             TAPI::MD5_t _orderMD5,

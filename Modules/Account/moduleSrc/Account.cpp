@@ -335,12 +335,41 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
 }
 
 /*****************************************************************\
-|* Payments ******************************************************|
+|* Voucher & Payments ********************************************|
 \*****************************************************************/
-TAPI::stuVoucher processVoucher(quint64 _vchID) {
-    try {
-        return PaymentLogic::processVoucher(_vchID);
-    }  catch (...) {
+TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
+{
+    try
+    {
+        QVariant VoucherDesc = SelectQuery(Voucher::instance())
+                               .addCol(tblVoucher::vchDesc)
+                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                               .one()
+                               .value(tblVoucher::vchDesc);
+
+        //QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
+
+        if (!VoucherDesc.canConvert<QJsonObject>())
+            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
+
+        TAPI::stuPreVoucher PreVoucher;
+        PreVoucher.fromJson(VoucherDesc.toJsonObject());
+
+        ///TODO process voucher and apply it
+
+        foreach(auto VoucherItem, PreVoucher.Items){
+            ///TODO call svcProcessVoucherEndPoint
+        }
+
+        return TAPI::stuVoucher(
+                    _voucherID,
+                    PreVoucher,
+                    QString(),
+                    TAPI::enuVoucherStatus::Finished
+                    );
+    }
+    catch (...)
+    {
         ///TODO create cancel voucher and credit to wallet
         throw;
     }
@@ -352,9 +381,9 @@ TAPI::stuVoucher processVoucher(quint64 _vchID) {
 TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
         TAPI::stuPreVoucher _preVoucher,
-        qint64 _walletID,
         TAPI::enuPaymentGatewayType::Type _gatewayType,
-        QString _callBack
+        qint64 _walletID,
+        QString _paymentVerifyCallback
     )
 {
     ///scenario:
@@ -365,9 +394,9 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
 
     if (_gatewayType != TAPI::enuPaymentGatewayType::COD)
     {
-        if (_callBack.isEmpty())
+        if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
-        QFV.url().validate(_callBack, "callBack");
+        QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 
     if (_preVoucher.Items.isEmpty())
@@ -377,7 +406,9 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
 
     //1: create voucher
     TAPI::stuVoucher Voucher;
+
     Voucher.Info = _preVoucher;
+
     ///TODO remove sign from prevoucher before converting to JSON
     ///TODO recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
     ///TODO reserve saleables before returning voucher
@@ -394,7 +425,8 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
     {
         //2: compute wallet remaining
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
-        if ((_walletID >= 0) && (RemainingAfterWallet > 0)) {
+        if ((_walletID >= 0) && (RemainingAfterWallet > 0))
+        {
             clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
                                                    { "iWalletID", _walletID },
                                                    { "iVoucherID", Voucher.ID },
@@ -406,20 +438,21 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
 
         //2.1: process voucher
         if (RemainingAfterWallet == 0)
-            return processVoucher(Voucher.ID);
+            return Account::processVoucher(Voucher.ID);
 
         //2.2: create online/offline payment
-        ///TODO rename OFFLINE to COD (as constant)
-        if (_callBack == "OFFLINE") {
+        if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
+        {
             //Do nothing as it will be created after information upload.
         }
-        else {
+        else
+        {
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
                                       Voucher.ID,
                                       _preVoucher.Summary,
                                       RemainingAfterWallet,
-                                      _callBack
+                                      _paymentVerifyCallback
                                       );
         }
     }
@@ -447,18 +480,19 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
  * @return
  */
 TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+//        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const QString _paymentMD5,
         const QString _domain,
         TAPI::JSON_t _pgResponse
     )
 {
-    quint64 VoucherID = PaymentLogic::approveOnlinePayment(_gateway, _pgResponse, _domain);
+    quint64 VoucherID = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
     try {
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
                          {"iVoucherID", VoucherID},
                          {"iPaymentType", enuPaymentType::Online}
                      });
-        return processVoucher(VoucherID);
+        return Account::processVoucher(VoucherID);
     } catch(...) {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
@@ -526,7 +560,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                          {"iVoucherID", _vchID},
                          {"iPaymentType", enuPaymentType::Offline}
                      });
-        return processVoucher(_vchID);
+        return Account::processVoucher(_vchID);
     }  catch (...) {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,

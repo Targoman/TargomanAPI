@@ -41,7 +41,7 @@ WalletTransactions::WalletTransactions() :
         AAASchema,
         tblWalletsTransactions::Name,
         {///< ColName                              Type                           Validation                 Default    UpBy    Sort   Filter Self  Virt   PK
-            { tblWalletsTransactions::wltID,       ORM_PRIMARY_KEY64 },
+            { tblWalletsTransactions::wltID,       ORM_PRIMARYKEY_64 },
             { tblWalletsTransactions::wlt_walID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
             { tblWalletsTransactions::wlt_vchID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
             { tblWalletsTransactions::wlt_vchType, S(TAPI::enuVoucherType::Type), QFV,                       TAPI::enuVoucherType::Expense, UPNone },
@@ -74,7 +74,7 @@ WalletBalances::WalletBalances() :
         AAASchema,
         tblWalletBalances::Name,
         {///< ColName                           Type       Validation            Default   UpBy    Sort   Filter Self  Virt   PK
-            //{tblWalletBalances::wbl_wltID,      ORM_PRIMARY_KEY64},
+            //{tblWalletBalances::wbl_wltID,      ORM_PRIMARYKEY_64},
             { tblWalletBalances::wblBalance,    S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
             { tblWalletBalances::wblSumDebit,   S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
             { tblWalletBalances::wblSumCredit,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },

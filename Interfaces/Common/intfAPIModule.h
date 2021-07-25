@@ -180,16 +180,16 @@ public: \
     static _name& instance(){static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name));} \
 private: \
     _name(); \
-    TAPI_DISABLE_COPY(_name) \
+    TAPI_DISABLE_COPY(_name)
 
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
     struct DB{ \
         static inline QString makeConfig(const QString& _name){return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name);} \
-        static Common::Configuration::tmplConfigurable<QString>      Host;   \
-        static Common::Configuration::tmplRangedConfigurable<quint16>Port;   \
-        static Common::Configuration::tmplConfigurable<QString>      User;   \
-        static Common::Configuration::tmplConfigurable<QString>      Pass;   \
-        static Common::Configuration::tmplConfigurable<QString>      Schema; \
+        static Common::Configuration::tmplConfigurable<QString>       Host;   \
+        static Common::Configuration::tmplRangedConfigurable<quint16> Port;   \
+        static Common::Configuration::tmplConfigurable<QString>       User;   \
+        static Common::Configuration::tmplConfigurable<QString>       Pass;   \
+        static Common::Configuration::tmplConfigurable<QString>       Schema; \
     }
 
 #define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module)     \

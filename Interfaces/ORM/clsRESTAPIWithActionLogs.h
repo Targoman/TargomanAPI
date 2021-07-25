@@ -39,7 +39,7 @@ public:
         clsTable(_schema,
                 "tblActionLogs",
                 { ///<ColName             Type                  Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-                  {"atlID",               ORM_PRIMARY_KEY64},
+                  {"atlID",               ORM_PRIMARYKEY_64},
                   {"atlBy_usrID",         S(quint64),           QFV.integer().minValue(1),      {},      UPNone},
                   {"atlInsertionDateTime",S(TAPI::DateTime_t),  QFV,                            {},      UPNone},
                   {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},      UPNone},

@@ -75,7 +75,7 @@ Tickets::Tickets() :
         TicketingSchema,
         tblTickets::Name,
         {///< ColName                          Type                    Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblTickets::tktID,               ORM_PRIMARY_KEY64 },
+            { tblTickets::tktID,               ORM_PRIMARYKEY_64 },
             { tblTickets::tktTarget_usrID,     S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
@@ -105,7 +105,7 @@ TicketRead::TicketRead() :
     clsTable(TicketingSchema,
               tblTicketRead::Name,
               { ///<ColName                     Type                   Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-//              {tblTicketRead::tkr_tktID",     ORM_PRIMARY_KEY64},
+//              {tblTicketRead::tkr_tktID",     ORM_PRIMARYKEY_64},
                 {tblTicketRead::tkrBy_usrID,    S(quint64),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
                 {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
               },

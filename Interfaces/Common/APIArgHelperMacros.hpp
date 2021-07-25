@@ -167,13 +167,13 @@
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
 ///TODO: complete this and test with stuPaymentGateway
-//#define SF_JSON(_name)                  SF_Generic( \
-//    /* type        */ TAPI::JSON_t, \
-//    /* name        */ _name, \
-//    /* def         */ TAPI::JSON_t(), \
-//    /* validator   */ v.isEmpty() == false, \
-//    /* fromVariant */ [](auto v) { return QJsonValue::fromVariant(v); }(v), \
-//    /* toVariant   */ v \
+//#define SF_JSON(_name)                  SF_Generic(
+//    /* type        */ TAPI::JSON_t,
+//    /* name        */ _name,
+//    /* def         */ TAPI::JSON_t(),
+//    /* validator   */ v.isEmpty() == false,
+//    /* fromVariant */ [](auto v) { return QJsonValue::fromVariant(v); }(v),
+//    /* toVariant   */ v
 //)
 
 //                                                  _type,                  _name, _typeGroup,        _fromVariant,      _toVariant,           _def, _validator

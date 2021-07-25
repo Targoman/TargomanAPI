@@ -172,15 +172,16 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 
 #define ORM_INVALIDATED_AT_FIELD_NAME "_InvalidatedAt"
 
-///                                 type                 validator                  Default         UPBy    Sort  Filter Self  Virt   PK Sel
-#define ORM_PRIMARY_KEY32           S(quint32),          QFV.integer().minValue(1), ORM_PRIMARY_KEY
-#define ORM_PRIMARY_KEY64           S(quint64),          QFV.integer().minValue(1), ORM_PRIMARY_KEY
-#define ORM_CREATED_ON              S(TAPI::DateTime_t), QFV,                       QAuto,          UPNone
-#define ORM_CREATED_BY              S(quint64),          QFV.integer().minValue(1), QInvalid,       enuUpdatableBy::__CREATOR__
-#define ORM_UPDATED_ON              S(TAPI::DateTime_t), QFV,                       QAuto,          UPNone
-#define ORM_UPDATED_BY              S(quint64),          QFV.integer().minValue(1), QInvalid,       enuUpdatableBy::__UPDATER__
-#define ORM_STATUS_FIELD(T, Def)    S(T::Type),          QFV,                       Def,            UPStatus
-#define ORM_INVALIDATED_AT_FIELD    ORM_INVALIDATED_AT_FIELD_NAME, S(quint32), QFV, QDBInternal,    UPSystem, true, true, false, false, false, false
+///                                 type                                validator                   Default         UPBy    Sort  Filter Self  Virt   PK Sel
+#define ORM_PRIMARYKEY_32           S(quint32),                         QFV.integer().minValue(1),  ORM_PRIMARY_KEY
+#define ORM_PRIMARYKEY_64           S(quint64),                         QFV.integer().minValue(1),  ORM_PRIMARY_KEY
+#define ORM_CREATED_ON              S(TAPI::DateTime_t),                QFV,                        QAuto,          UPNone
+#define ORM_CREATED_BY              S(quint64),                         QFV.integer().minValue(1),  QInvalid,       enuUpdatableBy::__CREATOR__
+#define ORM_CREATED_BY_NULLABLE     S(NULLABLE_TYPE(quint64)),          QFV.integer().minValue(1),  QInvalid,       enuUpdatableBy::__CREATOR__
+#define ORM_UPDATED_ON              S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                        QAuto,          UPNone
+#define ORM_UPDATED_BY              S(NULLABLE_TYPE(quint64)),          QFV.integer().minValue(1),  QInvalid,       enuUpdatableBy::__UPDATER__
+#define ORM_STATUS_FIELD(T, Def)    S(T::Type),                         QFV,                        Def,            UPStatus
+#define ORM_INVALIDATED_AT_FIELD    ORM_INVALIDATED_AT_FIELD_NAME, S(quint32), QFV,                 QDBInternal,    UPSystem, true, true, false, false, false, false
 
 #define ORM_RELATION_OF_CREATOR_NAME "Creator"
 #define ORM_RELATION_OF_UPDATER_NAME "Editor"

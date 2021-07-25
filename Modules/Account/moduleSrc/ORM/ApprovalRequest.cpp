@@ -59,7 +59,7 @@ ApprovalRequest::ApprovalRequest() :
         AAASchema,
         tblApprovalRequest::Name,
         {///< ColName                               Type                    Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblApprovalRequest::aprID,            ORM_PRIMARY_KEY64},
+            { tblApprovalRequest::aprID,            ORM_PRIMARYKEY_64},
             { tblApprovalRequest::apr_usrID,        S(quint64),             QFV.integer().minValue(1),       QInvalid,  UPNone},
             { tblApprovalRequest::aprRequestedFor,  S(TAPI::enuApprovalType::Type),    QFV,                  TAPI::enuApprovalType::Email, UPNone},
             { tblApprovalRequest::aprApprovalCode,  S(QString),             QFV.asciiAlNum().maxLenght(32),  QRequired,        UPNone},

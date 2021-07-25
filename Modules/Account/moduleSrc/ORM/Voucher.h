@@ -26,6 +26,7 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Classes/Defs.hpp"
+#include "ORM/PaymentGateways.h"
 
 //-----------------------------------------------------
 namespace TAPI {
@@ -52,7 +53,7 @@ namespace tblVoucher {
     TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
-    TARGOMAN_CREATE_CONSTEXPR(vchType)
+    TARGOMAN_CREATE_CONSTEXPR(vchType);
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
 }
@@ -65,31 +66,46 @@ private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete an Voucher. Take note that User can just delete Vouchers with Payoff type")
 
-    TAPI::stuVoucher REST(CREATE, requestIncrease, (TAPI::JWT_t _JWT,
-                                                  quint32 _amount,
-                                                  QString _callBack = {},
-                                                  quint64 _walletID = 0,
-                                                  TAPI::enuPaymentGateway::Type _gateway = TAPI::enuPaymentGateway::Zibal),
-                          "Increase wallet balance by online payment"
-                          "Set callbackURL = OFFLINE for offline payment, url for online payment"
-                          "Also set walletID >0 to use specified wallet or 0 for using default wallet"
-                          "When callback is set to URL you must specify payment gateway")
+    TAPI::stuVoucher REST(
+            CREATE,
+            requestIncrease,
+            (
+                TAPI::JWT_t _JWT,
+                quint32 _amount,
+                TAPI::enuPaymentGatewayType::Type _gatewayType,
+                quint64 _walletID = 0,
+                QString _paymentVerifyCallback = {}
+            ),
+            "Increase wallet balance by online payment"
+            "Set callbackURL = OFFLINE for offline payment, url for online payment"
+            "Also set walletID >0 to use specified wallet or 0 for using default wallet"
+            "When callback is set to URL you must specify payment gateway")
 
-    quint64 REST(CREATE, requestWithdraw,(TAPI::JWT_t _JWT,
-                                          quint64 _amount,
-                                          quint64 _walID,
-                                          const QString& _desc = {}),
-                 "Create a new withdraw request by user.")
+    quint64 REST(
+            CREATE,
+            requestWithdraw,
+            (
+                TAPI::JWT_t _JWT,
+                quint64 _amount,
+                quint64 _walID,
+                const QString& _desc = {}
+            ),
+            "Create a new withdraw request by user.")
 
-    quint64 REST(CREATE, requestWithdrawFor,(TAPI::JWT_t _JWT,
-                                             quint64 _targetUsrID,
-                                             quint64 _amount,
-                                             TAPI::JSON_t _desc),
-                 "Create a new withdraw request for another user by priviledged user. "
-                 "Description object must contain at least an string field named 'desc'")
+    quint64 REST(
+            CREATE,
+            requestWithdrawFor,
+            (
+                TAPI::JWT_t _JWT,
+                quint64 _targetUsrID,
+                quint64 _amount,
+                TAPI::JSON_t _desc
+            ),
+            "Create a new withdraw request for another user by priviledged user. "
+            "Description object must contain at least an string field named 'desc'")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,Voucher)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 };
 
 } //namespace Targoman::API::AAA

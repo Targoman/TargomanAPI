@@ -65,16 +65,17 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
                      InternationalDebitCart     = 'D',
                      InternationalCreditCart    = 'C',
                      CryptoCurrency             = 'B',
+                     DevelopersTest             = '-',
                      );
 TARGOMAN_DEFINE_ENUM_LIST(enuPaymentGatewayType);
 
-TARGOMAN_DEFINE_ENUM(enuPaymentGatewayDriver,
-                     IranMellatBank     = 'M',
-                     IranPasargadBank   = 'P',
-                     IranVaseteZibal    = 'Z',
-                     TurkeyZiraatBank   = 'T',
-                     CryptoEther        = 'E',
-                     );
+//TARGOMAN_DEFINE_ENUM(enuPaymentGatewayDriver,
+//                     IranMellatBank     = 'M',
+//                     IranPasargadBank   = 'P',
+//                     IranVaseteZibal    = 'Z',
+//                     TurkeyZiraatBank   = 'T',
+//                     CryptoEther        = 'E',
+//                     );
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayStatus,
                      Active   = 'A',
                      Disabled = 'D',
@@ -90,7 +91,6 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayType);
 TAPI_DECLARE_METATYPE(TAPI::enuPaymentGatewayType::List);
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayDriver);
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayStatus);
 
 //-----------------------------------------------------
@@ -157,8 +157,30 @@ struct stuPaymentGateway
     quint32 pgwID;
     QString pgwName;
     TAPI::enuPaymentGatewayType::Type pgwType;
-    TAPI::enuPaymentGatewayDriver::Type pgwDriver;
+    QString pgwDriver;
     TAPI::JSON_t pgwMetaInfo;
+
+    void readFromVariantMap(const QVariantMap& _info)
+    {
+        SET_FIELD_FROM_VARIANT_MAP(this->pgwID,                  _info, tblPaymentGateways, pgwID);
+        SET_FIELD_FROM_VARIANT_MAP(this->pgwName,                _info, tblPaymentGateways, pgwName);
+        SET_FIELD_FROM_VARIANT_MAP(this->pgwType,                _info, tblPaymentGateways, pgwType);
+        SET_FIELD_FROM_VARIANT_MAP(this->pgwDriver,              _info, tblPaymentGateways, pgwDriver);
+        SET_FIELD_FROM_VARIANT_MAP(this->pgwMetaInfo,            _info, tblPaymentGateways, pgwMetaInfo);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeValue, _info, tblPaymentGateways, pgwTransactionFeeValue);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeType,  _info, tblPaymentGateways, pgwTransactionFeeType);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMinRequestAmount,    _info, tblPaymentGateways, pgwMinRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxRequestAmount,    _info, tblPaymentGateways, pgwMaxRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxPerDayAmount,     _info, tblPaymentGateways, pgwMaxPerDayAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwLastPaymentDateTime, _info, tblPaymentGateways, pgwLastPaymentDateTime);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumTodayPaidAmount,  _info, tblPaymentGateways, pgwSumTodayPaidAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestCount,     _info, tblPaymentGateways, pgwSumRequestCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestAmount,    _info, tblPaymentGateways, pgwSumRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumFailedCount,      _info, tblPaymentGateways, pgwSumFailedCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumOkCount,          _info, tblPaymentGateways, pgwSumOkCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumPaidAmount,       _info, tblPaymentGateways, pgwSumPaidAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwStatus,              _info, tblPaymentGateways, pgwStatus);
+    }
 };
 
 class PaymentGateways : public ORM::clsTable

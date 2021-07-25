@@ -27,7 +27,7 @@ public:
             "test",
             "t1",
             {///< ColName    Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "colID1",  ORM_PRIMARY_KEY32 },
+                { "colID1",  ORM_PRIMARYKEY_32 },
                 { "colA1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colB1",   S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
                 { "colC1",   S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
@@ -74,7 +74,7 @@ public:
             "test",
             "t2",
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
-                { "colA2", ORM_PRIMARY_KEY32 },
+                { "colA2", ORM_PRIMARYKEY_32 },
                 { "colB2", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
                 { "colC2", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },
                 { "colD2", S(QString),                      QFV,                       QRequired,  UPOwner },

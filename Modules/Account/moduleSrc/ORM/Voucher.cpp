@@ -43,7 +43,7 @@ Voucher::Voucher() :
         AAASchema,
         tblVoucher::Name,
         {///< ColName                          Type                     Validation                  Default    UpBy    Sort   Filter Self  Virt   PK
-            { tblVoucher::vchID,               ORM_PRIMARY_KEY64 },
+            { tblVoucher::vchID,               ORM_PRIMARYKEY_64 },
             { tblVoucher::vch_usrID,           S(quint64),              QFV.integer().minValue(1),  QRequired, UPNone },
             { tblVoucher::vchDesc,             S(TAPI::DBMediumText_t), QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
             { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                  TAPI::enuVoucherType::Expense, UPNone },
@@ -81,15 +81,14 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
-                                                   quint32 _amount,
-                                                   QString _callBack,
-                                                   quint64 _walletID,
-                                                   TAPI::enuPaymentGateway::Type _gateway)
+TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
+        TAPI::JWT_t _JWT,
+        quint32 _amount,
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        quint64 _walletID,
+        QString _paymentVerifyCallback
+    )
 {
-    if (_callBack.size() && _callBack != "OFFLINE")
-        QFV.url().validate(_callBack, "callBack");
-
     TAPI::stuVoucher Voucher;
     Voucher.Info.Items.append(TAPI::stuVoucherItem("INC_WALLET", _walletID));
     Voucher.Info.ToPay = _amount;
@@ -102,19 +101,25 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(TAPI::JWT_t _JWT,
                                                 { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                                 { tblVoucher::vchTotalAmount, Voucher.Info.ToPay }
                                               }));
-//    Voucher.ID = Voucher::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
-//                                                {tblVoucher::vch_usrID,clsJWT(_JWT).usrID()},
-//                                                {tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData()},
-//                                                {tblVoucher::vchTotalAmount, Voucher.Info.ToPay}
-//                                            })).toULongLong();
 
-    try {
-        if(_callBack == "OFFLINE") {
+    try
+    {
+        if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
+        {
             //Do nothing as it will be created after information upload.
-        } else {
-            Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(_gateway, Voucher.ID, Voucher.Info.Summary, Voucher.Info.ToPay, _callBack);
         }
-    } catch (...) {
+        else
+        {
+            Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
+                                      _gatewayType,
+                                      Voucher.ID,
+                                      Voucher.Info.Summary,
+                                      Voucher.Info.ToPay,
+                                      _paymentVerifyCallback);
+        }
+    }
+    catch (...)
+    {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},

@@ -136,7 +136,7 @@ User::User() :
         AAASchema,
         tblUser::Name,
         {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
-            //ORM_PRIMARY_KEY64 with self:true
+            //ORM_PRIMARYKEY_64 with self:true
             { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
             { tblUser::usrGender,           S(TAPI::enuUserGender::Type),   QFV,                                   TAPI::enuUserGender::NotExpressed, UPOwner },
             { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
@@ -153,8 +153,8 @@ User::User() :
             { tblUser::usrLastLogin,        S(TAPI::DateTime_t),            QFV,                                   QInvalid,  UPNone },
             { tblUser::usrStatus,           ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
             { ORM_INVALIDATED_AT_FIELD },
-            { tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY },
             { tblUser::usrCreationDateTime, ORM_CREATED_ON },
+            { tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY_NULLABLE },
             { tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY },
         },
         {///< Col                          Reference Table                        ForeignCol    Rename LeftJoin
@@ -233,7 +233,7 @@ UserExtraInfo::UserExtraInfo() :
     clsTable ("AAA",
                tblUserExtraInfo::Name,
                {  ///<ColName                             Type                      Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-//                 {tblUserExtraInfo::uei_usrID,          ORM_PRIMARY_KEY64},
+//                 {tblUserExtraInfo::uei_usrID,          ORM_PRIMARYKEY_64},
                    {tblUserExtraInfo::ueiGender,          S(TAPI::enuUserGender::Type),QFV,                         TAPI::enuUserGender::NotExpressed,  UPOwner,false,false},
                    {tblUserExtraInfo::ueiExtraInfo,       S(QString),                  QFV,                         QNull,  UPOwner,false,false},
                    {tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),      QFV,                         QNull,  UPOwner,false,false},

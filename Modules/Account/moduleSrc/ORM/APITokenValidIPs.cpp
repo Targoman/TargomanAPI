@@ -76,7 +76,7 @@ APITokenValidIPs::APITokenValidIPs() :
         AAASchema,
         tblAPITokenValidIPs::Name,
         {///< ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAPITokenValidIPs::tviID,               ORM_PRIMARY_KEY64 },
+            { tblAPITokenValidIPs::tviID,               ORM_PRIMARYKEY_64 },
             { tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone },
             { tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner },
             { tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone, false, false },

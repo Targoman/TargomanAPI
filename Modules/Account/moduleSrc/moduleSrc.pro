@@ -28,7 +28,7 @@ HEADERS += \
     ORM/Voucher.h \
     Classes/Defs.hpp \
     ORM/Service.h \
-    PaymentGateways/gtwDevNull.h \
+    PaymentGateways/gtwDevTest.h \
     PaymentGateways/gtwMellatBank.h \
     PaymentGateways/gtwZibal.h \
     PaymentGateways/intfPaymentGateway.h
@@ -52,7 +52,7 @@ SOURCES += \
     Classes/PaymentLogic.cpp \
     ORM/Voucher.cpp \
     ORM/Service.cpp \
-    PaymentGateways/gtwDevNull.cpp \
+    PaymentGateways/gtwDevTest.cpp \
     PaymentGateways/gtwMellatBank.cpp \
     PaymentGateways/gtwZibal.cpp \
     PaymentGateways/intfPaymentGateway.cpp
@@ -63,3 +63,6 @@ OTHER_FILES += \
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
+
+DISTFILES += \
+    ORM/Data.my.sql

@@ -41,11 +41,10 @@ OnlinePayments::OnlinePayments() :
         AAASchema,
         tblOnlinePayments::Name,
         {///< ColName                                   Type                    Validation                           Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblOnlinePayments::onpID,                 ORM_PRIMARY_KEY64 },
+            { tblOnlinePayments::onpID,                 ORM_PRIMARYKEY_64 },
             { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                 QRequired, UPNone },
             { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPNone },
-//            { tblOnlinePayments::onpPaymentGateway,     S(TAPI::enuPaymentGateway::Type),QFV,                        TAPI::enuPaymentGateway::Zibal, UPNone },
-            { tblOnlinePayments::onp_pgwID,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPNone },
+            { tblOnlinePayments::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),           QRequired, UPNone },
             { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),    QNull,     UPNone },
             { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPNone },
             { tblOnlinePayments::onpResult,             S(QString),             QFV,                                 QNull,     UPNone, false, false },
@@ -53,9 +52,9 @@ OnlinePayments::OnlinePayments() :
             { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
             { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
         },
-        {///< Col                            Reference Table                            ForeignCol         Rename     LeftJoin
-            { tblOnlinePayments::onp_vchID,  R(AAASchema, tblVoucher::Name),            tblVoucher::vchID },
-            { tblOnlinePayments::onp_pgwID,  R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID },
+        {///<                     Col                           Reference Table                            ForeignCol         Rename     LeftJoin
+            { "voucher",        { tblOnlinePayments::onp_vchID, R(AAASchema, tblVoucher::Name),            tblVoucher::vchID } },
+            { "paymentGateway", { tblOnlinePayments::onp_pgwID, R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID } },
         }
     )
 {}
@@ -76,7 +75,7 @@ OfflinePayments::OfflinePayments() :
         AAASchema,
         tblOnlinePayments::Name,
         {///< ColName                                  Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblOfflinePayments::ofpID,               ORM_PRIMARY_KEY64},
+            { tblOfflinePayments::ofpID,               ORM_PRIMARYKEY_64},
             { tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
             { tblOfflinePayments::ofpBank,             S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
             { tblOfflinePayments::ofpReceiptCode,      S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},

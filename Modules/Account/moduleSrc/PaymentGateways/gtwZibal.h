@@ -24,20 +24,18 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
 #define TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
 
-#include "QFieldValidator.h"
-#include "Interfaces/Common/GenericTypes.h"
 #include "intfPaymentGateway.h"
-#include "libTargomanCommon/Configuration/ConfigManager.h"
-
 #include "Classes/PaymentLogic.h"
 
 namespace Targoman::API::AAA {
 
 class gtwZibal : public intfPaymentGateway
 {
+public:
+    constexpr static char Name[] = "Zibal";
+
 TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
     TAPI::enuPaymentGatewayType::IranIntermediateGateway,
-    TAPI::enuPaymentGatewayDriver::IranVaseteZibal,
     gtwZibal)
 
 private:

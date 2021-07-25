@@ -44,27 +44,27 @@ namespace Targoman::API::AAA {
 class PaymentLogic
 {
 public:
-    template <class T> static void registerDriver(const TAPI::enuPaymentGatewayDriver::Type _driver, T& (*_instanceFunc)());
-    static intfPaymentGateway* getDriver(const TAPI::enuPaymentGatewayDriver::Type _driver);
+    template <class T> static void registerDriver(const QString& _driverName, T& (*_instanceFunc)());
+    static intfPaymentGateway* getDriver(const QString& _driverName);
 
-//        static stuPaymentResponse create();
-//        static stuPaymentResponse verify();
+    static const stuPaymentGateway findBestPaymentGateway(
+        quint32 _amount,
+        TAPI::enuPaymentGatewayType::List _gatewayTypes = {}
+    );
 
     static QString createOnlinePaymentLink(
         TAPI::enuPaymentGatewayType::Type _gatewayType,
         quint64 _vchID,
         const QString& _invDesc,
         quint32 _toPay,
-        const QString _callback
+        const QString _paymentVerifyCallback
     );
 
     static quint64 approveOnlinePayment(
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const QString& _paymentMD5,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain
     );
-
-    static TAPI::stuVoucher processVoucher(quint64 _voucherID);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> TransactionLogFile;
@@ -85,9 +85,9 @@ public:
 public:
     /**
      * @brief RegisteredPaymentGateways stores one instance of payment gateways classes
-     * key: enuPaymentGatewayDriver
+     * key: QString Driver Name
      */
-    static QMap<TAPI::enuPaymentGatewayDriver::Type, PAYMENTGATEWAY_INSTANCE_FUNC> RegisteredDrivers;
+    static QMap<QString, PAYMENTGATEWAY_INSTANCE_FUNC> RegisteredDrivers;
 };
 
 } //namespace Targoman::API::AAA

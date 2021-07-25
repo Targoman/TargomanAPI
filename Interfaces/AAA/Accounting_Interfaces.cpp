@@ -133,7 +133,7 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                                      Type                      Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountProductsBase::prdID,               ORM_PRIMARY_KEY32 },
+            { tblAccountProductsBase::prdID,               ORM_PRIMARYKEY_32 },
             { tblAccountProductsBase::prdCode,             S(TAPI::ProductCode_t),    QFV,                                     QRequired,  UPOwner },
             { tblAccountProductsBase::prdName,             S(QString),                QFV,                                     QRequired,  UPOwner },
             { tblAccountProductsBase::prdDesc,             S(QString),                QFV,                                     QNull,      UPOwner },
@@ -215,7 +215,7 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                                          Type                             Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
-            { tblAccountSaleablesBase::slbID,                  ORM_PRIMARY_KEY32 },
+            { tblAccountSaleablesBase::slbID,                  ORM_PRIMARYKEY_32 },
             { tblAccountSaleablesBase::slb_prdID,              S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbCode,                S(TAPI::SaleableCode_t),         QFV,                             QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbName,                S(QString),                      QFV,                             QRequired,  UPOwner },
@@ -313,7 +313,7 @@ intfAccountUserAssets::intfAccountUserAssets(
         tblAccountUserAssetsBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                                       Type                       Validation                 Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountUserAssetsBase::uasID,              ORM_PRIMARY_KEY64 },
+            { tblAccountUserAssetsBase::uasID,              ORM_PRIMARYKEY_64 },
             { tblAccountUserAssetsBase::uas_usrID,          S(quint64),                QFV.integer().minValue(1), QRequired,  UPAdmin },
             { tblAccountUserAssetsBase::uas_slbID,          S(quint64),                QFV.integer().minValue(1), QRequired,  UPNone },
             { tblAccountUserAssetsBase::uas_vchID,          S(NULLABLE_TYPE(quint64)), QFV.integer().minValue(1), QNull,      UPNone },
@@ -399,7 +399,7 @@ intfAccountAssetUsage::intfAccountAssetUsage(
         tblAccountAssetUsageBase::Name,
         QList<ORM::clsORMField>({
         ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARY_KEY64},
+            { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARYKEY_64},
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
         ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
@@ -423,7 +423,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
         _schema,
         tblAccountCouponsBase::Name,
         {///< ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountCouponsBase::cpnID,                      ORM_PRIMARY_KEY32 },
+            { tblAccountCouponsBase::cpnID,                      ORM_PRIMARYKEY_32 },
             { tblAccountCouponsBase::cpnCode,                    S(TAPI::CouponCode_t),             QFV,                                     QRequired, UPAdmin },
             { tblAccountCouponsBase::cpnPrimaryCount,            S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
             { tblAccountCouponsBase::cpnTotalMaxAmount,          S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },

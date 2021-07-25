@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=486 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -271,7 +271,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprRequestDate` (`aprRequestDate`),
   KEY `aprApplyDate` (`aprApplyDate`),
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -479,8 +479,7 @@ CREATE TABLE `tblOnlinePayments` (
   `onpID` bigint NOT NULL AUTO_INCREMENT,
   `onpMD5` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `onp_vchID` bigint unsigned NOT NULL,
-  `onpPaymentGateway` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Z' COMMENT 'Z: Zibal, ZarrinPal, N:NextPay, O: Pardano, P:Parsian, M:Mellat, G:Padsargad, S:Saman, A:AsanPardakht, W:Gap, V:VISA, C: MasterCard, ',
-  `onp_pgwID` int unsigned NOT NULL DEFAULT '0',
+  `onp_pgwID` int unsigned NOT NULL,
   `onpPGTrnID` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `onpAmount` bigint NOT NULL,
   `onpResult` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -494,9 +493,10 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `onpStatus` (`onpStatus`),
   KEY `onpCreationDateTime` (`onpCreationDateTime`),
   KEY `onpAmount` (`onpAmount`),
-  KEY `onpBank` (`onpPaymentGateway`),
   KEY `onpLastUpdateDateTime` (`onpLastUpdateDateTime`),
-  CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
+  CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -510,8 +510,8 @@ CREATE TABLE `tblOnlinePayments` (
 /*!50032 DROP TRIGGER IF EXISTS trg_tblOnlinePayments_before_update */;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_tblOnlinePayments_before_update` BEFORE UPDATE ON `tblOnlinePayments` FOR EACH ROW BEGIN
-	SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblOnlinePayments';
+--	SIGNAL SQLSTATE '45000'
+--    SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblOnlinePayments';
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -525,7 +525,7 @@ CREATE TABLE `tblPaymentGateways` (
   `pgwID` int unsigned NOT NULL AUTO_INCREMENT,
   `pgwName` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
   `pgwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `pgwDriver` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `pgwDriver` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `pgwMetaInfo` json NOT NULL,
   `pgwTransactionFeeValue` int unsigned DEFAULT NULL,
   `pgwTransactionFeeType` char(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '$',
@@ -558,7 +558,7 @@ CREATE TABLE `tblRoles` (
   `rolStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, B: Blocked, R: Removed',
   `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
   `rolCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `rolCreatedBy_usrID` bigint unsigned NOT NULL,
+  `rolCreatedBy_usrID` bigint unsigned DEFAULT NULL,
   `rolUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`rolID`),
   UNIQUE KEY `rolName__InvalidatedAt` (`rolName`,`_InvalidatedAt`),
@@ -618,7 +618,7 @@ CREATE TABLE `tblUser` (
   `usrStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'V' COMMENT 'A: Active, R: Removed, B: Banned, C: Must Change Pass, V:Must validate',
   `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
   `usrCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `usrCreatedBy_usrID` bigint unsigned NOT NULL,
+  `usrCreatedBy_usrID` bigint unsigned DEFAULT NULL,
   `usrUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`usrID`),
   UNIQUE KEY `usrEmail__InvalidatedAt` (`usrEmail`,`_InvalidatedAt`),
@@ -1280,10 +1280,16 @@ BEGIN
   
   INSERT
     INTO tblOnlinePayments
-     SET tblOnlinePayments.onpMD5 = oMD5,
-         tblOnlinePayments.onp_vchID = iVoucherID,
-         tblOnlinePayments.onp_pgwID = iGatewayID,
-         tblOnlinePayments.onpAmount = iAmount
+     SET onpMD5 = oMD5
+       , onp_vchID = iVoucherID
+       , onp_pgwID = iGatewayID
+       , onpAmount = iAmount
+  ;
+  
+  UPDATE tblPaymentGateways
+     SET pgwSumRequestCount = pgwSumRequestCount + 1
+       , pgwSumRequestAmount = pgwSumRequestAmount + iAmount
+   WHERE pgwID = iGatewayID
   ;
 END ;;
 DELIMITER ;

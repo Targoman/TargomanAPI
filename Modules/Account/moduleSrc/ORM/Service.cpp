@@ -38,7 +38,7 @@ Service::Service() :
         AAASchema,
         tblService::Name,
         {///< ColName                          Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblService::svcID,               ORM_PRIMARY_KEY32 },
+            { tblService::svcID,               ORM_PRIMARYKEY_32 },
             { tblService::svcName,             S(QString),          QFV,                             QRequired, UPAdmin },
             { tblService::svc_rolID,           S(quint32),          QFV,                             QRequired, UPAdmin },
             { tblService::svcStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },

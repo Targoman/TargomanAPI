@@ -26,6 +26,7 @@
 
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "PaymentGateways.h"
 
 //-----------------------------------------------------
 namespace TAPI {
@@ -51,9 +52,8 @@ namespace Targoman::API::AAA {
 namespace tblOnlinePayments {
 constexpr char Name[] = "tblOnlinePayments";
 TARGOMAN_CREATE_CONSTEXPR(onpID);
-TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify/{onpMD5}
+TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
 TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
-//TARGOMAN_CREATE_CONSTEXPR(onpPaymentGateway);
 TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
 TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
 TARGOMAN_CREATE_CONSTEXPR(onpAmount);
@@ -63,6 +63,34 @@ TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
 TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 }
 #pragma GCC diagnostic pop
+
+struct stuOnlinePayment
+{
+    quint64 onpID;
+    TAPI::MD5_t onpMD5;
+    quint64 onp_vchID;
+    quint32 onp_pgwID;
+    QString onpPGTrnID;
+    quint64 onpAmount;
+    QString onpResult;
+    TAPI::enuPaymentStatus::Type onpStatus;
+
+    stuPaymentGateway PaymentGateway;
+
+    void readFromVariantMap(const QVariantMap& _info)
+    {
+        SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, tblOnlinePayments, onpID);
+        SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, tblOnlinePayments, onpMD5);
+        SET_FIELD_FROM_VARIANT_MAP(this->onp_vchID,  _info, tblOnlinePayments, onp_vchID);
+        SET_FIELD_FROM_VARIANT_MAP(this->onp_pgwID,  _info, tblOnlinePayments, onp_pgwID);
+        SET_FIELD_FROM_VARIANT_MAP(this->onpPGTrnID, _info, tblOnlinePayments, onpPGTrnID);
+        SET_FIELD_FROM_VARIANT_MAP(this->onpAmount,  _info, tblOnlinePayments, onpAmount);
+        SET_FIELD_FROM_VARIANT_MAP(this->onpResult,  _info, tblOnlinePayments, onpResult);
+        SET_FIELD_FROM_VARIANT_MAP(this->onpStatus,  _info, tblOnlinePayments, onpStatus);
+
+        this->PaymentGateway.readFromVariantMap(_info);
+    }
+};
 
 class OnlinePayments : public ORM::clsTable
 {

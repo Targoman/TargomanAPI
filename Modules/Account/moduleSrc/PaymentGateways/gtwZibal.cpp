@@ -21,11 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-//#include "ORM/PaymentGateways.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
-
 #include "gtwZibal.h"
-#include "Classes/PaymentLogic.h"
 
 namespace Targoman::API::AAA {
 
@@ -39,11 +35,6 @@ const char* URL_GTW_VERIFY  = "https://gateway.zibal.ir/v1/verify";
 //const char* METAINFO_KEY_PASSWORD       = "password";
 const char* METAINFO_KEY_MERCHANT_ID    = "merchantid";
 
-QString gtwZibal::getName()
-{
-    return "Zibal";
-}
-
 stuPaymentResponse gtwZibal::request(
         const stuPaymentGateway& _paymentGateway,
         TAPI::MD5_t _orderMD5,
@@ -54,7 +45,7 @@ stuPaymentResponse gtwZibal::request(
 {
     QString MerchantID = _paymentGateway.pgwMetaInfo[METAINFO_KEY_MERCHANT_ID].toString();
 
-    PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
+    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
 
     try
     {
@@ -69,7 +60,7 @@ stuPaymentResponse gtwZibal::request(
                                                            }))
                                  );
 
-        PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, { Json });
+        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { Json });
 
         if (Json.isObject() == false)
             throw exPayment("JsonObject expected as Zibal response");
@@ -95,7 +86,7 @@ stuPaymentResponse gtwZibal::request(
     }
     catch(std::exception &e)
     {
-        PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, { e.what() });
+        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
         throw;
     }
 }
@@ -108,7 +99,7 @@ stuPaymentResponse gtwZibal::verify(
 {
     QString MerchantID = _paymentGateway.pgwMetaInfo[METAINFO_KEY_MERCHANT_ID].toString();
 
-    PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, { _pgResponse, _domain });
+    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
     try
     {
         QString OrderMD5 = _pgResponse.object().value("orderId").toString();
@@ -128,7 +119,7 @@ stuPaymentResponse gtwZibal::verify(
                                                            }))
                                  );
 
-        PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, {Json});
+        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, {Json});
 
         if (Json.isObject() == false)
             return stuPaymentResponse(
@@ -154,7 +145,7 @@ stuPaymentResponse gtwZibal::verify(
         return {};
     }
     catch (std::exception &e) {
-        PaymentLogic::log(this->getName(), __FUNCTION__, __LINE__, { e.what() });
+        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
         throw;
     }
 }

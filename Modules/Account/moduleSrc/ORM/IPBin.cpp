@@ -39,7 +39,7 @@ IPBin::IPBin() :
         AAASchema,
         tblIPBin::Name,
         {///< ColName                        Type                 Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblIPBin::ipbIP,               ORM_PRIMARY_KEY32 },
+            { tblIPBin::ipbIP,               ORM_PRIMARYKEY_32 },
             { tblIPBin::ipbReadable,         S(TAPI::IPv4_t),     QFV,                       QInvalid,  UPNone },
             { tblIPBin::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
             { tblIPBin::ipbAccessCount,      S(quint64),          QFV.integer().minValue(0), 0,         UPNone },

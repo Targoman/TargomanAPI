@@ -35,7 +35,7 @@ Bin::Bin() :
     clsTable(AdvertSchema,
               tblBin::Name,
               { ///<ColName                   Type                    Validation                                Default   UpBy   Sort  Filter Self  Virt   PK
-                {tblBin::binID,               ORM_PRIMARY_KEY32},
+                {tblBin::binID,               ORM_PRIMARYKEY_32},
                 {tblBin::binType,             S(TAPI::enuAdvertType::Type), QFV,                                TAPI::enuAdvertType::Text, UPOwner},
                 {tblBin::binTitle,            S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QRequired, UPOwner},
                 {tblBin::binDesc,             S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QNull,     UPOwner},

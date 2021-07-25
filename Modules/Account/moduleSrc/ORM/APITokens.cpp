@@ -40,7 +40,7 @@ APITokens::APITokens() :
         AAASchema,
         "tblAPITokens",
         {///< ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAPITokens::aptID,               ORM_PRIMARY_KEY64 },
+            { tblAPITokens::aptID,               ORM_PRIMARYKEY_64 },
             { tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false },
             { tblAPITokens::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone },
             { tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin },

@@ -38,7 +38,7 @@ Locations::Locations() :
         AdvertSchema,
         tblLocations::Name,
         {///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblLocations::locID,               ORM_PRIMARY_KEY32 },
+            { tblLocations::locID,               ORM_PRIMARYKEY_32 },
             { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
             { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
             { tblLocations::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },

@@ -21,17 +21,28 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-//#include "Interfaces/Common/base.h"
-//#include "ORM/PaymentGateways.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
-#include "gtwDevNull.h"
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
+
+#include <qglobal.h>
+#include "intfPaymentGateway.h"
+#include "Classes/PaymentLogic.h"
 
 namespace Targoman::API::AAA {
 
-#ifdef QT_DEBUG
-//return true
-#else
-//return false
-#endif // QT_DEBUG
+/**
+ * @brief *********** THE gtwDevTest CLASS IS JUST FOR DEVELOPERS IN DEBUG MODE. NOT FOR PRODUCTION ***********
+ */
+class gtwDevTest : public intfPaymentGateway
+{
+public:
+    constexpr static char Name[] = "DevTest";
+
+TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+    TAPI::enuPaymentGatewayType::DevelopersTest,
+    gtwDevTest)
+};
 
 } //namespace Targoman::API::AAA
+
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H

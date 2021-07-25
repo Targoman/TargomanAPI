@@ -58,6 +58,9 @@ public:
     stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
     virtual QJsonObject todayPrivs(quint64 _usrID) final {Q_UNUSED(_usrID) return {}; }
 
+public:
+    static TAPI::stuVoucher processVoucher(quint64 _voucherID);
+
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
     TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
@@ -126,7 +129,7 @@ private slots:
               "Approves Mobile by provided mobile no and code")
 
     /*****************************************************************\
-    |* Payments ******************************************************|
+    |* Voucher & Payments ********************************************|
     \*****************************************************************/
     TAPI::stuVoucher REST(
         POST,
@@ -134,12 +137,12 @@ private slots:
         (
             TAPI::JWT_t _JWT,
             TAPI::stuPreVoucher _preVoucher,
+            TAPI::enuPaymentGatewayType::Type _gatewayType,
             qint64 _walletID = -1,
-            TAPI::enuPaymentGatewayType::Type _gatewayType = TAPI::enuPaymentGatewayType::IranBank,
-            QString _callBack = {}
+            QString _paymentVerifyCallback = {}
         ),
         "create a voucher based on preVoucher. "
-        "Set callbackURL = OFFLINE for offline payment, url for online payment or keep empty for wallet payment,"
+        "Set gatewayType = COD for offline payment, url for online payment or keep empty for wallet payment,"
         "Also set walletID >0 to use specified wallet, 0 for using default wallet, <0 to discard wallet usage."
         "When callback is set to URL you must specify payment gateway"
     )
@@ -148,7 +151,8 @@ private slots:
         POST,
         approveOnlinePayment,
         (
-            TAPI::enuPaymentGatewayType::Type _gatewayType,
+//            TAPI::enuPaymentGatewayType::Type _gatewayType,
+            const QString _paymentMD5,
             const QString _domain,
             TAPI::JSON_t _pgResponse
         ),

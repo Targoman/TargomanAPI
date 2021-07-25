@@ -26,7 +26,7 @@
 
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayType);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayStatus);
 
 namespace Targoman::API::AAA {
@@ -38,10 +38,10 @@ PaymentGateways::PaymentGateways() :
         AAASchema,
         tblPaymentGateways::Name,
         {///< ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
-            { tblPaymentGateways::pgwID,                    ORM_PRIMARY_KEY32 },
+            { tblPaymentGateways::pgwID,                    ORM_PRIMARYKEY_32 },
             { tblPaymentGateways::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             { tblPaymentGateways::pgwType,                  S(TAPI::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwDriver,                S(TAPI::enuPaymentGatewayDriver::Type),             QFV,                                QRequired,  UPAdmin },
+            { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwMetaInfo,              S(TAPI::JSON_t),                                    QFV,                                QRequired,  UPAdmin },
             //------------------
             { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },

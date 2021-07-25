@@ -40,7 +40,7 @@ UserWallets::UserWallets() :
         AAASchema,
         tblUserWallets::Name,
         {///<ColName                                    Type                        Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
-            { tblUserWallets::walID,                    ORM_PRIMARY_KEY64 },
+            { tblUserWallets::walID,                    ORM_PRIMARYKEY_64 },
             { tblUserWallets::wal_usrID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
             { tblUserWallets::walName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner },
             { tblUserWallets::walDefault,               S(bool),                    QFV,                                false,      UPOwner },
