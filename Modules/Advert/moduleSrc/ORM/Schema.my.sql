@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=124 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -188,7 +188,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;

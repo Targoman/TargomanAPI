@@ -347,13 +347,14 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
                                .one()
                                .value(tblVoucher::vchDesc);
 
-        //QVariant VoucherDesc = Voucher::instance().selectFromTableByID(_voucherID, tblVoucher::vchDesc).toMap().value(tblVoucher::vchDesc);
-
-        if (!VoucherDesc.canConvert<QJsonObject>())
-            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
-
         TAPI::stuPreVoucher PreVoucher;
-        PreVoucher.fromJson(VoucherDesc.toJsonObject());
+
+        if (VoucherDesc.canConvert<QJsonObject>())
+            PreVoucher.fromJson(VoucherDesc.toJsonObject());
+        else if (VoucherDesc.canConvert<QVariantMap>())
+            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
+        else
+            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
 
         ///TODO process voucher and apply it
 
@@ -418,7 +419,8 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
                                               clsJWT(_JWT).usrID(),
                                               TAPI::ORMFields_t({
                                                   { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
-                                                  { tblVoucher::vchDesc, _preVoucher.toJson() },
+//                                                  { tblVoucher::vchDesc, QJsonDocument(_preVoucher.toJson()).toJson().constData() },
+                                                  { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
                                                   { tblVoucher::vchTotalAmount, _preVoucher.ToPay }
                                               })); //.toULongLong();
     try
