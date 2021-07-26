@@ -45,20 +45,15 @@ using namespace Targoman::API::Advertisement;
 
 
 namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuPaymentGateway,
-                     Zibal    = 'Z',
-                     ZarrinPal= 'L',
-                     NextPay  = 'N',
-                     Pardano  = 'O',
-                     Parsian  = 'P',
-                     Mellat   = 'M',
-                     Pasargad = 'G',
-                     Saman    = 'S',
-                     AsanPardakht = 'A',
-                     Gap      = 'W',
-                     VISA     = 'V',
-                     MasterCard= 'C',
-                                )
+TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
+                     COD                        = 'D', //offline payment
+                     IranBank                   = 'I',
+                     IranIntermediateGateway    = 'M',
+                     InternationalDebitCart     = 'D',
+                     InternationalCreditCart    = 'C',
+                     CryptoCurrency             = 'B',
+                     DevelopersTest             = '-',
+                     );
 }
 
 class testAdvert : public clsBaseTest
@@ -366,6 +361,42 @@ private slots:
         qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
     }
 
+    void getOrCreatePaymentGateway_devtest() {
+        auto info = callAdminAPI(
+            PUT,
+            "Account/PaymentGateways",
+            {},
+            {
+                { "pgwName",                  QString("devtest %1").arg(time(nullptr)) },
+                { "pgwType",                  TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                { "pgwDriver",                "DevTest" },
+                { "pgwMetaInfo",              QVariantMap({
+                                                { "username", "hello" },
+                                                { "password", "123" },
+                                              })
+                },
+                //"
+//                { "pgwTransactionFeeValue",   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+//                { "pgwTransactionFeeType",    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
+                //"
+//                { "pgwMinRequestAmount",      1 },
+//                { "pgwMaxRequestAmount",      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+//                { "pgwMaxPerDayAmount",       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+                //"
+//                { "pgwLastPaymentDateTime",   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
+//                { "pgwSumTodayPaidAmount",    S(quint64),                                         QFV,                                0,          UPAdmin },
+                //"
+//                { "pgwSumRequestCount",       S(quint32),                                         QFV,                                0,          UPAdmin },
+//                { "pgwSumRequestAmountv,      S(quint64),                                         QFV,                                0,          UPAdmin },
+//                { "pgwSumFailedCount",        S(quint32),                                         QFV,                                0,          UPAdmin },
+//                { "pgwSumOkCount",            S(quint32),                                         QFV,                                0,          UPAdmin },
+//                { "pgwSumPaidAmount",         S(quint64),                                         QFV,                                0,          UPAdmin },
+            }
+        );
+
+        qDebug() << "--------- devtest: " << info;
+    }
+
     void initializeLastPreVoucher() {
         lastPreVoucher = QVariantMap({
 //              { "items", {} },
@@ -544,26 +575,47 @@ private slots:
             "Account/finalizeBasket",
             {},
             {
-                { "preVoucher",     {} },
-                { "callBack",       "http://www.a.com" },
-                { "walletID",       9988 },
-                { "gateway",        "Zibal" }, //TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+                { "preVoucher",             {} },
+                { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                { "walletID",               9988 },
+                { "paymentVerifyCallback",  "http://www.a.com" },
             }
         );
     }
 
-    void finalizeBasket() {
-        QVariant result = callAdminAPI(
+    void finalizeBasket_online() {
+        QVariantMap voucherInfo = callAdminAPI(
             POST,
             "Account/finalizeBasket",
             {},
             {
-                { "preVoucher",     lastPreVoucher },
-                { "callBack",       "http://www.a.com" },
-                { "walletID",       9988 },
-                { "gateway",        TAPI::enuPaymentGateway::toStr(TAPI::enuPaymentGateway::Zibal) }, //zibal
+                { "preVoucher",             lastPreVoucher },
+                { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                { "walletID",               9988 },
+                { "paymentVerifyCallback",  "http://www.a.com" },
             }
-        );
+        ).toMap();
+        qDebug() << "--------- voucherInfo" << voucherInfo;
+
+        QString PaymentMD5 = voucherInfo.value("paymentMD5").toString();
+        if (PaymentMD5.isEmpty() == false)
+        {
+            QVariant Result = callAdminAPI(
+                POST,
+                "Account/approveOnlinePayment",
+                {},
+                {
+                    { "paymentMD5",     PaymentMD5 },
+                    { "domain",         "this.is.domain" },
+                    { "pgResponse",     QVariantMap({
+                          { "resp_1", 1 },
+                          { "resp_2", 2 },
+                          { "resp_3", 3 },
+                      }) },
+                }
+            );
+            qDebug() << "--------- approveOnlinePayment Result" << Result;
+        }
     }
 
     void cleanupSaleableData() {

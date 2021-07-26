@@ -287,8 +287,13 @@ namespace Targoman {namespace API { \
         _storage.customFromVariant(_val); \
     } \
     inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val) { \
-        if (_val.isValid() && _val.isNull() == false) \
-            _storage->customFromVariant(_val); \
+        if (_val.isValid() && _val.isNull() == false) { \
+            _typeName var; \
+            var.customFromVariant(_val); \
+            NULLABLE_SET(_storage, var); \
+        } \
+        else \
+            NULLABLE_RESET(_storage); \
     }
 
 /************************************************************/

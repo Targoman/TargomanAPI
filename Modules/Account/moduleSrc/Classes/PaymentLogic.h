@@ -34,7 +34,8 @@
 #include "PaymentGateways/intfPaymentGateway.h"
 #include "ORM/PaymentGateways.h"
 
-typedef intfPaymentGateway& (*PAYMENTGATEWAY_INSTANCE_FUNC)();
+typedef intfPaymentGateway* (*PAYMENTGATEWAY_INSTANCE_FUNC)();
+#define PAYMENTGATEWAY_REGISTERED_DRIVERS_PAIR_TYPES QString,PAYMENTGATEWAY_INSTANCE_FUNC
 
 namespace Targoman::API::AAA {
 
@@ -44,12 +45,13 @@ namespace Targoman::API::AAA {
 class PaymentLogic
 {
 public:
-    template <class T> static void registerDriver(const QString& _driverName, T& (*_instanceFunc)());
+    template <class TPaymentGatewayClass>
+    static void registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)());
     static intfPaymentGateway* getDriver(const QString& _driverName);
 
     static const stuPaymentGateway findBestPaymentGateway(
         quint32 _amount,
-        TAPI::enuPaymentGatewayType::List _gatewayTypes = {}
+        TAPI::enuPaymentGatewayType::Type _gatewayType
     );
 
     static QString createOnlinePaymentLink(
@@ -57,7 +59,8 @@ public:
         quint64 _vchID,
         const QString& _invDesc,
         quint32 _toPay,
-        const QString _paymentVerifyCallback
+        const QString _paymentVerifyCallback,
+        /*OUT*/ TAPI::MD5_t& _outPaymentMD5
     );
 
     static quint64 approveOnlinePayment(
@@ -82,12 +85,12 @@ public:
         }
     }
 
-public:
+protected:
     /**
      * @brief RegisteredPaymentGateways stores one instance of payment gateways classes
      * key: QString Driver Name
      */
-    static QMap<QString, PAYMENTGATEWAY_INSTANCE_FUNC> RegisteredDrivers;
+    static inline QMap<PAYMENTGATEWAY_REGISTERED_DRIVERS_PAIR_TYPES> RegisteredDrivers;
 };
 
 } //namespace Targoman::API::AAA

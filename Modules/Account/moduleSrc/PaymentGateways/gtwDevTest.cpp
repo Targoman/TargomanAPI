@@ -35,16 +35,30 @@ stuPaymentResponse gtwDevTest::request(
         const QString& _desc
     )
 {
-    Q_UNUSED(_paymentGateway);
     Q_UNUSED(_orderMD5);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
     Q_UNUSED(_desc);
 
+    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+
 #ifdef QT_DEBUG
+    bool raiseError = MetaInfo["raiseError"].toBool();
+
+//    raiseError = true;
+
+    if (raiseError)
+        return stuPaymentResponse(
+            _orderMD5,
+            {},
+            -1,
+            "raiseError is TRUE"
+        );
+
+    QString TrackID = "devtest_track_id";
     return stuPaymentResponse(
-        "devtest_track_id",
-        "http://devtest.gateway/pay"
+        TrackID,
+        QString(gtwDevTest::URL_GTW_PAY).replace("{{track_id}}", TrackID)
     );
 #else
     throw exPayment("THIS PAYMENT GATEWAY ONLY WORKS ON DEVELEOPMENT PHASE.");
@@ -57,11 +71,27 @@ stuPaymentResponse gtwDevTest::verify(
         const QString& _domain
     )
 {
-    Q_UNUSED(_paymentGateway);
     Q_UNUSED(_pgResponse);
     Q_UNUSED(_domain);
 
+    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+
 #ifdef QT_DEBUG
+    bool raiseError = MetaInfo["raiseError"].toBool();
+
+//    raiseError = true;
+
+    QString OrderMD5 = _pgResponse.object().value("orderId").toString();
+//    QString TrackID = _pgResponse.object().value("trackId").toString();
+
+    if (raiseError)
+        return stuPaymentResponse(
+            OrderMD5,
+            {},
+            -1,
+            "raiseError is TRUE"
+        );
+
     return {};
 #else
     throw exPayment("THIS PAYMENT GATEWAY ONLY WORKS ON DEVELEOPMENT PHASE.");

@@ -209,7 +209,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
     SF_quint64(ID, 0, v>0),
     SF_Struct(stuPreVoucher, Info, v.ToPay),
     SF_QString(PaymentLink),
-    SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New)
+    SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New),
+    SF_QString(PaymentMD5)
 );
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}

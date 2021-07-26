@@ -447,13 +447,16 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
         }
         else
         {
+            TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
                                       Voucher.ID,
                                       _preVoucher.Summary,
                                       RemainingAfterWallet,
-                                      _paymentVerifyCallback
+                                      _paymentVerifyCallback,
+                                      PaymentMD5
                                       );
+            Voucher.PaymentMD5 = PaymentMD5;
         }
     }
     catch (...) {
@@ -487,13 +490,17 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
     )
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
-    try {
+
+    try
+    {
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
-                         {"iVoucherID", VoucherID},
-                         {"iPaymentType", enuPaymentType::Online}
+                         { "iVoucherID", VoucherID },
+                         { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
         return Account::processVoucher(VoucherID);
-    } catch(...) {
+    }
+    catch(...)
+    {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -557,8 +564,8 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
 
     try {
         this->callSP("sp_CREATE_walletTransactionOnPayment", {
-                         {"iVoucherID", _vchID},
-                         {"iPaymentType", enuPaymentType::Offline}
+                         { "iVoucherID", _vchID },
+                         { "iPaymentType", QChar(enuPaymentType::Offline) }
                      });
         return Account::processVoucher(_vchID);
     }  catch (...) {
@@ -629,6 +636,7 @@ Account::Account() :
     this->addSubModule(&Voucher::instance());
     this->addSubModule(&IPBin::instance());
     this->addSubModule(&IPStats::instance());
+    this->addSubModule(&PaymentGateways::instance());
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&OfflinePayments::instance());
     this->addSubModule(&Roles::instance());

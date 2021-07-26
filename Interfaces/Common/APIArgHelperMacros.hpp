@@ -244,6 +244,7 @@
 #define NULLABLE_GET_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
 #define NULLABLE_SET(_var, _value) (_var = _value)
 #define NULLABLE_NULL_VALUE std::nullopt
+#define NULLABLE_RESET(_var) (_var = NULLABLE_NULL_VALUE)
 #define NULLABLE_IS_NULL(_nullable) (_nullable.has_value() == false)
 #define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))

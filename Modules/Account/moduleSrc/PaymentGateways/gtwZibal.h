@@ -27,18 +27,28 @@
 #include "intfPaymentGateway.h"
 #include "Classes/PaymentLogic.h"
 
+/**
+ * CAUTION:
+ * place #include "PaymentGateways/gtwZibal.h" in PaymentLogic.cpp for proper driver registration
+ */
+
 namespace Targoman::API::AAA {
 
 class gtwZibal : public intfPaymentGateway
 {
+    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+        TAPI::enuPaymentGatewayType::IranIntermediateGateway,
+        gtwZibal)
+
 public:
     constexpr static char Name[] = "Zibal";
 
-TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-    TAPI::enuPaymentGatewayType::IranIntermediateGateway,
-    gtwZibal)
-
 private:
+    constexpr static char URL_GTW_REQUEST[] = "https://gateway.zibal.ir/v1/request";
+    constexpr static char URL_GTW_VERIFY[]  = "https://gateway.zibal.ir/v1/verify";
+    constexpr static char URL_GTW_PAY[]     = "https://gateway.zibal.ir/start/{{track_id}}/direct";
+    constexpr static char METAINFO_KEY_MERCHANT_ID[] = "merchantid";
+
     virtual QString errorString(int _errCode);
 };
 

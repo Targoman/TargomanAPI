@@ -24,9 +24,13 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
 #define TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
 
-#include <qglobal.h>
 #include "intfPaymentGateway.h"
 #include "Classes/PaymentLogic.h"
+
+/**
+ * CAUTION:
+ * place #include "PaymentGateways/gtwDevTest.h" in PaymentLogic.cpp for proper driver registration
+ */
 
 namespace Targoman::API::AAA {
 
@@ -35,12 +39,15 @@ namespace Targoman::API::AAA {
  */
 class gtwDevTest : public intfPaymentGateway
 {
+    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+        TAPI::enuPaymentGatewayType::DevelopersTest,
+        gtwDevTest)
+
 public:
     constexpr static char Name[] = "DevTest";
 
-TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-    TAPI::enuPaymentGatewayType::DevelopersTest,
-    gtwDevTest)
+private:
+    constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
 };
 
 } //namespace Targoman::API::AAA

@@ -27,14 +27,6 @@ namespace Targoman::API::AAA {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
-const char* URL_GTW_PAY     = "https://gateway.zibal.ir/start/{{track_id}}/direct";
-const char* URL_GTW_REQUEST = "https://gateway.zibal.ir/v1/request";
-const char* URL_GTW_VERIFY  = "https://gateway.zibal.ir/v1/verify";
-
-//const char* METAINFO_KEY_USERNAME       = "username";
-//const char* METAINFO_KEY_PASSWORD       = "password";
-const char* METAINFO_KEY_MERCHANT_ID    = "merchantid";
-
 stuPaymentResponse gtwZibal::request(
         const stuPaymentGateway& _paymentGateway,
         TAPI::MD5_t _orderMD5,
@@ -43,14 +35,15 @@ stuPaymentResponse gtwZibal::request(
         const QString& _desc
     )
 {
-    QString MerchantID = _paymentGateway.pgwMetaInfo[METAINFO_KEY_MERCHANT_ID].toString();
+    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
 
     try
     {
         QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
-                                 URL_GTW_REQUEST,
+                                 gtwZibal::URL_GTW_REQUEST,
                                  QJsonDocument(QJsonObject({
                                                                { "merchant"    , MerchantID },
                                                                { "amount"      , _amount },
@@ -97,7 +90,8 @@ stuPaymentResponse gtwZibal::verify(
         const QString& _domain
     )
 {
-    QString MerchantID = _paymentGateway.pgwMetaInfo[METAINFO_KEY_MERCHANT_ID].toString();
+    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
     try
@@ -112,7 +106,7 @@ stuPaymentResponse gtwZibal::verify(
         QFV.asciiAlNum(false).maxLenght(32).validate(TrackID, "trackId");
 
         QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
-                                 URL_GTW_VERIFY,
+                                 gtwZibal::URL_GTW_VERIFY,
                                  QJsonDocument(QJsonObject({
                                                                { "merchant" , MerchantID },
                                                                { "trackId"  , TrackID },

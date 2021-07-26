@@ -21,48 +21,22 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "gtwMellatBank.h"
+#include "URLHelper.h"
+#include <QUrl>
+#include <QUrlQuery>
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::Helpers {
 
-TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwMellatBank)
-
-stuPaymentResponse gtwMellatBank::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    )
+QString URLHelper::addParameter(const QString &_url, const QString& _paramName, const QVariant& _value)
 {
-    Q_UNUSED(_paymentGateway);
-    Q_UNUSED(_orderMD5);
-    Q_UNUSED(_amount);
-    Q_UNUSED(_callback);
-    Q_UNUSED(_desc);
+    QUrl Url = QUrl(_url);
 
-    return stuPaymentResponse(
-        "devtest_track_id",
-        "http://devtest.gateway/pay"
-    );
+    QUrlQuery UrlQuery = QUrlQuery(Url);
+    UrlQuery.addQueryItem(_paramName, _value.toString());
+
+    Url.setQuery(UrlQuery);
+
+    return Url.toString();
 }
 
-stuPaymentResponse gtwMellatBank::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    )
-{
-    Q_UNUSED(_paymentGateway);
-    Q_UNUSED(_pgResponse);
-    Q_UNUSED(_domain);
-
-    return {};
-}
-
-QString gtwMellatBank::errorString(int _errCode)
-{
-    return "UNKNOWN";
-}
-
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::Helpers

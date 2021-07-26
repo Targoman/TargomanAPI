@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=692 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -271,7 +271,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprRequestDate` (`aprRequestDate`),
   KEY `aprApplyDate` (`aprApplyDate`),
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -497,7 +497,7 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
   CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -526,7 +526,7 @@ CREATE TABLE `tblPaymentGateways` (
   `pgwName` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
   `pgwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `pgwDriver` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `pgwMetaInfo` json NOT NULL,
+  `pgwMetaInfo` json DEFAULT NULL,
   `pgwTransactionFeeValue` int unsigned DEFAULT NULL,
   `pgwTransactionFeeType` char(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '$',
   `pgwMinRequestAmount` int unsigned NOT NULL,
@@ -544,7 +544,7 @@ CREATE TABLE `tblPaymentGateways` (
   `pgwCreatedBy_usrID` bigint unsigned NOT NULL DEFAULT '0',
   `pgwUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`pgwID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblRoles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -570,7 +570,7 @@ CREATE TABLE `tblRoles` (
   CONSTRAINT `FK_tblRoles_tblRoles` FOREIGN KEY (`rolParent_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser` FOREIGN KEY (`rolCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser_2` FOREIGN KEY (`rolUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=663 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=680 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -639,7 +639,7 @@ CREATE TABLE `tblUser` (
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1349 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1381 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -755,7 +755,7 @@ CREATE TABLE `tblUserWallets` (
   CONSTRAINT `FK_tblUserWallets_tblUser` FOREIGN KEY (`wal_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_2` FOREIGN KEY (`walCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_3` FOREIGN KEY (`walUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1172 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1204 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -774,7 +774,7 @@ CREATE TABLE `tblVoucher` (
   KEY `vchCreationDateTime` (`vchCreationDateTime`),
   KEY `FK_tblVoucher_tblUser` (`vch_usrID`),
   CONSTRAINT `FK_tblVoucher_tblUser` FOREIGN KEY (`vch_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1284,12 +1284,6 @@ BEGIN
        , onp_vchID = iVoucherID
        , onp_pgwID = iGatewayID
        , onpAmount = iAmount
-  ;
-  
-  UPDATE tblPaymentGateways
-     SET pgwSumRequestCount = pgwSumRequestCount + 1
-       , pgwSumRequestAmount = pgwSumRequestAmount + iAmount
-   WHERE pgwID = iGatewayID
   ;
 END ;;
 DELIMITER ;

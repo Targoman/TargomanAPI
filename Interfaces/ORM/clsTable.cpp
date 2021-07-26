@@ -92,9 +92,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
     //                                               return "Comma separated columns" ;
 });
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
 
 using namespace Targoman::DBManager;
 
@@ -859,6 +857,4 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
 }
 */
 
-}
-}
-}
+} //namespace Targoman::API::ORM

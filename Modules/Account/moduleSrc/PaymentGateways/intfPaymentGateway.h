@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
 #define TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
 
+#include <qglobal.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -55,7 +56,9 @@ struct stuPaymentResponse {
     QString PaymentLink;
 
     stuPaymentResponse() :
-        ErrorCode(-1)
+        ///TODO: why -1????
+//        ErrorCode(-1)
+        ErrorCode(0)
     {}
 
     stuPaymentResponse(const QString& _trackID, const QString& _paymentLink) :
@@ -81,11 +84,14 @@ struct stuPaymentResponse {
     }; \
     static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
 
+#define instanceGetterPtr(_class) static _class* instancePtr() { \
+    static _class* Instance = nullptr; return (Q_LIKELY(Instance) ? Instance : (Instance = new _class)); \
+}
+
 #define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gatewayClassName) \
 public: \
-    instanceGetter(_gatewayClassName); \
+    instanceGetterPtr(_gatewayClassName); \
 protected: \
-    virtual QString getName(); \
     virtual TAPI::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
     virtual stuPaymentResponse request( \
             const stuPaymentGateway& _paymentGateway, \
@@ -104,8 +110,10 @@ private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instance); \
+        PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
+
+//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name); \
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
     _gatewayClassName::_gatewayClassName() {}
@@ -132,7 +140,7 @@ protected:
             const TAPI::JSON_t& _pgResponse,
             const QString& _domain
             ) = 0;
-    virtual QString errorString(int _errCode);
+    virtual QString errorString(int _errCode) { return QString("unknown error %1").arg(_errCode); }
 
     static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true)
     {

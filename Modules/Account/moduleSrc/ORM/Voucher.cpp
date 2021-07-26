@@ -63,10 +63,6 @@ QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
@@ -110,12 +106,16 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
         }
         else
         {
+            TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
                                       Voucher.ID,
                                       Voucher.Info.Summary,
                                       Voucher.Info.ToPay,
-                                      _paymentVerifyCallback);
+                                      _paymentVerifyCallback,
+                                      PaymentMD5
+                                      );
+            Voucher.PaymentMD5 = PaymentMD5;
         }
     }
     catch (...)

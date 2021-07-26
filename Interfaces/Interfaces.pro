@@ -39,6 +39,7 @@ SOURCES += \
     AAA/PrivHelpers.cpp \
     Common/GenericTypes.cpp \
     Common/base.cpp \
+    Helpers/URLHelper.cpp \
     ORM/APIQueryBuilders.cpp \
     ORM/QueryBuilders.cpp \
     ORM/clsORMField.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
     Common/APIArgHelperMacrosPrivate.h \
     Common/base.h \
     Common/tmplNullable.hpp \
+    Helpers/URLHelper.h \
     ORM/APIQueryBuilders.h \
     ORM/Defs.hpp \
     ORM/QueryBuilders.h

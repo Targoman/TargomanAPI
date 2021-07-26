@@ -28,6 +28,7 @@
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayType);
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayTransactionFeeType);
 
 namespace Targoman::API::AAA {
 
@@ -42,12 +43,12 @@ PaymentGateways::PaymentGateways() :
             { tblPaymentGateways::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             { tblPaymentGateways::pgwType,                  S(TAPI::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwMetaInfo,              S(TAPI::JSON_t),                                    QFV,                                QRequired,  UPAdmin },
+            { tblPaymentGateways::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
             //------------------
             { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             { tblPaymentGateways::pgwTransactionFeeType,    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
             //------------------
-            { tblPaymentGateways::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    QRequired,  UPAdmin },
+            { tblPaymentGateways::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    1,          UPAdmin },
             { tblPaymentGateways::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             { tblPaymentGateways::pgwMaxPerDayAmount,       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             //------------------

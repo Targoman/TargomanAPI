@@ -28,18 +28,19 @@
 #include "Interfaces/AAA/AAA.hpp"
 
 ///TODO: move this to TargomanCommon
+/*
 #define TARGOMAN_DEFINE_ENUM_LIST(_name) \
     namespace _name { \
         typedef QList<_name::Type> List; \
-        static QString toCSV(_name::List _values, const char* _itemSurrounder="") { \
+        static inline QString toCSV(const List& _values, const char* _itemSurrounder="") { \
             QStringList out; \
-            foreach (_name::Type _value, _values) { \
+            foreach (Type _value, _values) { \
                 out.append(QString("%1%2%1").arg(_itemSurrounder).arg(_name::toStr(_value))); \
             } \
             return out.join(","); \
         } \
     }
-
+*/
 //-----------------------------------------------------
 namespace TAPI {
 ///deprecated
@@ -67,7 +68,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
                      CryptoCurrency             = 'B',
                      DevelopersTest             = '-',
                      );
-TARGOMAN_DEFINE_ENUM_LIST(enuPaymentGatewayType);
+//TARGOMAN_DEFINE_ENUM_LIST(enuPaymentGatewayType);
 
 //TARGOMAN_DEFINE_ENUM(enuPaymentGatewayDriver,
 //                     IranMellatBank     = 'M',
@@ -89,9 +90,10 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
 //TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
 
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayType);
-TAPI_DECLARE_METATYPE(TAPI::enuPaymentGatewayType::List);
+//TAPI_DECLARE_METATYPE(TAPI::enuPaymentGatewayType::List);
 
 TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayStatus);
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGatewayTransactionFeeType);
 
 //-----------------------------------------------------
 namespace Targoman::API::AAA {
@@ -158,7 +160,7 @@ struct stuPaymentGateway
     QString pgwName;
     TAPI::enuPaymentGatewayType::Type pgwType;
     QString pgwDriver;
-    TAPI::JSON_t pgwMetaInfo;
+    NULLABLE_TYPE(TAPI::JSON_t) pgwMetaInfo;
 
     void readFromVariantMap(const QVariantMap& _info)
     {

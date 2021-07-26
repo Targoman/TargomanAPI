@@ -33,29 +33,17 @@
 
 class testQueryBuilders;
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
+
 namespace ORM {
-
 class clsTable;
-
-}
-}
 }
 
-namespace Targoman {
-namespace API {
 namespace Query {
-
 extern bool Update(Targoman::API::ORM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
 extern bool DeleteByPks(Targoman::API::ORM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
-
-}
-}
 }
 
-namespace Targoman {
-namespace API {
 namespace ORM {
 
 class clsCondition;
@@ -231,8 +219,8 @@ protected:
     friend bool Targoman::API::Query::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
-}
-}
-}
+} //namespace Targoman::ORM
+
+} //namespace Targoman::API
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H

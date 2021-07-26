@@ -27,9 +27,7 @@
 
 using namespace Targoman::API::ORM;
 
-namespace Targoman {
-namespace API {
-namespace Query {
+namespace Targoman::API::Query {
 
 //extern QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
 //extern QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_HEADER_INTERNAL_CALL, QString _extraFilters = {}, quint16 _cacheTime = 0);
@@ -42,8 +40,6 @@ extern bool Update(clsTable& _table, UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL, co
 
 extern bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL, const QVariantMap& _extraFilters = {}, bool _realDelete = false);
 
-}
-}
-}
+} //namespace Targoman::API::Query
 
 #endif // TARGOMAN_API_QUERYBUILDERS_H

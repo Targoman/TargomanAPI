@@ -46,7 +46,7 @@ CREATE TABLE `tblAlerts` (
   KEY `alr_altCode` (`alr_altCode`),
   KEY `alrCreateDate` (`alrCreateDate`),
   KEY `alrSentDate` (`alrSentDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=1179 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1211 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDBG`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -59,7 +59,7 @@ CREATE TABLE `tblDBG` (
   PRIMARY KEY (`dbgID`),
   KEY `dbgTimestamp` (`dbgTimestamp`),
   KEY `dbgFrom` (`dbgFrom`)
-) ENGINE=MyISAM AUTO_INCREMENT=1230 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1262 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDownloadRequests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
