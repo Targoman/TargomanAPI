@@ -98,11 +98,11 @@ bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
                          _file.Size > 0, clsJWT(_JWT).usrID());
 
   if (_file.Size > 0) {
-    // TODO move to tiockt attachemnts with ID
+    ///TODO: move to tickt attachemnts with ID
     // QFile::rename(_file.TempName, )
   }
 
-  // TODO return  true if file moved
+  ///TODO: return  true if file moved
   return true;
 }
 

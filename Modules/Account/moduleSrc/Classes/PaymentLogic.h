@@ -75,7 +75,7 @@ public:
         if (PaymentLogic::TransactionLogFile.value().isEmpty())
             return;
 
-        QFile File(PaymentLogic::TransactionLogFile.value()); // TODO read from config file
+        QFile File(PaymentLogic::TransactionLogFile.value());
 
         if (File.open(QFile::WriteOnly | QFile::Append)) {
             QTextStream Out(&File);

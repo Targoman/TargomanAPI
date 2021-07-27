@@ -89,8 +89,8 @@ private slots:
                                                  TAPI::JSON_t _extraRefererParams = {},
                                                  TAPI::stuPreVoucher _lastPreVoucher = {}),
                                 "add a package to basket and return updated pre-Voucher")
-    ///TODO removeFromBasket
-    ///TODO updateItemInBasket
+    ///TODO: removeFromBasket
+    ///TODO: updateItemInBasket
 
 protected:
     QScopedPointer<intfAccountProducts> AccountProducts;

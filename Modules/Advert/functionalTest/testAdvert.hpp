@@ -596,6 +596,53 @@ private slots:
             }
         ).toMap();
         qDebug() << "--------- voucherInfo" << voucherInfo;
+        /*
+        TAPI::stuVoucher:
+        QVariantMap, QMap(
+            ("iD", QVariant(double, 83))
+            ("info", QVariant(QVariantMap, QMap(
+                ("items", QVariant(QVariantList, (
+                    QVariant(QVariantMap, QMap(
+                        ("desc", QVariant(QString, "test Saleable 456 name"))
+                        ("disAmount", QVariant(double, 1800))
+                        ("discount", QVariant(QVariantMap, QMap(
+                            ("amount", QVariant(double, 1800))
+                            ("code", QVariant(QString, "cpn-code-aaa"))
+                            ("iD", QVariant(double, 1))
+                        )))
+                        ("orderID", QVariant(double, 202))
+                        ("qty", QVariant(double, 1))
+                        ("sign", QVariant(QString, "NJja6zFf7NOAtQSji+FXTAiDhKFx23Qsrn4adUnb9xg="))
+                        ("subTotal", QVariant(double, 12000))
+                        ("uUID", QVariant(QString, "6f987a18cf4501b5579ba0da8cbd81c9"))
+                        ("unitPrice", QVariant(double, 12000))
+                    ))
+                    , QVariant(QVariantMap, QMap(
+                        ("desc", QVariant(QString, "test Saleable 456 name"))
+                        ("disAmount", QVariant(double, 1800))
+                        ("discount", QVariant(QVariantMap, QMap(
+                            ("amount", QVariant(double, 1800))
+                            ("code", QVariant(QString, "cpn-code-aaa"))
+                            ("iD", QVariant(double, 1))
+                        )))
+                        ("orderID", QVariant(double, 203))
+                        ("qty", QVariant(double, 1))
+                        ("sign", QVariant(QString, "G38evDwq/stAJ+Zk7uDNvEhWbeVPiE6jwhJkCgK5L1M="))
+                        ("subTotal", QVariant(double, 12000))
+                        ("uUID", QVariant(QString, "c876d40dcff62b6330d323c987c0600c"))
+                        ("unitPrice", QVariant(double, 12000))
+                    ))
+                )))
+                ("round", QVariant(double, 204))
+                ("sign", QVariant(QString, "HEJIoCoisRNYftbKYwGfBMwl1FKrDr2TqTpX3si2PaA="))
+                ("summary", QVariant(QString, "2 items"))
+                ("toPay", QVariant(double, 20196))
+            )))
+            ("paymentLink", QVariant(QString, "https://devtest.dom/pay/devtest_track_id"))
+            ("paymentMD5", QVariant(QString, "89ca6efe9a2abf7e12e5d05506f29bb6"))
+            ("status", QVariant(double, 78))
+        )
+        */
 
         QString PaymentMD5 = voucherInfo.value("paymentMD5").toString();
         if (PaymentMD5.isEmpty() == false)
@@ -615,6 +662,51 @@ private slots:
                 }
             );
             qDebug() << "--------- approveOnlinePayment Result" << Result;
+            /*
+            TAPI::stuVoucher:
+            QVariantMap, QMap(
+                ("iD", QVariant(double, 83))
+                ("info", QVariant(QVariantMap, QMap(
+                    ("items", QVariant(QVariantList, (
+                        QVariant(QVariantMap, QMap(
+                            ("desc", QVariant(QString, "test Saleable 456 name"))
+                            ("disAmount", QVariant(double, 1800))
+                            ("discount", QVariant(QVariantMap, QMap(
+                                ("amount", QVariant(double, 1800))
+                                ("code", QVariant(QString, "cpn-code-aaa"))
+                                ("iD", QVariant(double, 1))
+                            )))
+                            ("orderID", QVariant(double, 202))
+                            ("qty", QVariant(double, 1))
+                            ("sign", QVariant(QString, "NJja6zFf7NOAtQSji+FXTAiDhKFx23Qsrn4adUnb9xg="))
+                            ("subTotal", QVariant(double, 12000))
+                            ("uUID", QVariant(QString, "6f987a18cf4501b5579ba0da8cbd81c9"))
+                            ("unitPrice", QVariant(double, 12000))
+                        ))
+                        , QVariant(QVariantMap, QMap(
+                            ("desc", QVariant(QString, "test Saleable 456 name"))
+                            ("disAmount", QVariant(double, 1800))
+                            ("discount", QVariant(QVariantMap, QMap(
+                                ("amount", QVariant(double, 1800))
+                                ("code", QVariant(QString, "cpn-code-aaa"))
+                                ("iD", QVariant(double, 1))
+                            )))
+                            ("orderID", QVariant(double, 203))
+                            ("qty", QVariant(double, 1))
+                            ("sign", QVariant(QString, "G38evDwq/stAJ+Zk7uDNvEhWbeVPiE6jwhJkCgK5L1M="))
+                            ("subTotal", QVariant(double, 12000))
+                            ("uUID", QVariant(QString, "c876d40dcff62b6330d323c987c0600c"))
+                            ("unitPrice", QVariant(double, 12000))
+                        ))
+                    )))
+                    ("round", QVariant(double, 204))
+                    ("sign", QVariant(QString, "HEJIoCoisRNYftbKYwGfBMwl1FKrDr2TqTpX3si2PaA="))
+                    ("summary", QVariant(QString, "2 items"))
+                    ("toPay", QVariant(double, 20196))
+                )))
+                ("status", QVariant(double, 70))
+            )
+            */
         }
     }
 

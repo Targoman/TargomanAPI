@@ -25,7 +25,10 @@
 #include "PrivHelpers.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Server/ServerConfigs.h"
-#include "Server/clsSimpleCrypt.h"
+
+//#include "Server/clsSimpleCrypt.h"
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
 
 #include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
@@ -615,7 +618,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     } //if discount
 
     //-- new pre voucher item --------------------------------
-    ///TODO add ttl for order item
+    ///TODO: add ttl for order item
 
     stuVoucherItem PreVoucherItem;
     PreVoucherItem.Service = this->ServiceName;
@@ -628,7 +631,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
     PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
     PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
-    PreVoucherItem.UUID = clsSimpleCrypt::UUIDtoMD5();
+    PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
     //PreVoucherItem.Sign
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
@@ -668,7 +671,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _J
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
-    ///TODO PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
+    ///TODO: PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
     /// used for DMLogic::applyCoupon -> match item.DMInfo by coupon rules
     /// return: amount of using coupon
 

@@ -34,7 +34,7 @@ using namespace DBManager;
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-//TODO BAD Gender causes assert
+///TODO: BAD Gender causes assert
 User::User() :
     clsTable(
         AAASchema,

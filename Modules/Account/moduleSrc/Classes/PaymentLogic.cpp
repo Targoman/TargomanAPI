@@ -268,7 +268,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
 }
 
-///TODO settle after verify
+///TODO: settle after verify
 quint64 PaymentLogic::approveOnlinePayment(
         const QString& _paymentMD5,
         const TAPI::JSON_t& _pgResponse,

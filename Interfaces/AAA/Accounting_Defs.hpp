@@ -209,8 +209,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
     SF_quint64(ID, 0, v>0),
     SF_Struct(stuPreVoucher, Info, v.ToPay),
     SF_QString(PaymentLink),
-    SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New),
-    SF_QString(PaymentMD5)
+    SF_QString(PaymentMD5),
+    SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New)
 );
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}
@@ -312,8 +312,8 @@ namespace tblAccountAssetUsageBase {
     TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
 }
 
-//TODO: max usage count (user, system)
-//TODO: CodeCommentMark
+///TODO: max usage count (user, system)
+///TODO: CodeCommentMark
 namespace tblAccountCouponsBase {
     constexpr char Name[] = "tblAccountCoupons";
     TARGOMAN_CREATE_CONSTEXPR(cpnID);

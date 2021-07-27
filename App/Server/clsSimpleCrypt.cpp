@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QDateTime>
 #include <QDataStream>
 #include <QCryptographicHash>
-#include <QUuid>
 
 clsSimpleCrypt::clsSimpleCrypt():
     m_key(0),
@@ -245,21 +244,4 @@ QByteArray clsSimpleCrypt::decryptToByteArray(QByteArray _cypher)
 
     m_lastError = ErrorNoError;
     return ba;
-}
-
-const QString clsSimpleCrypt::UUIDtoMD5()
-{
-    QByteArray data;
-
-//    qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
-    data.append(qrand());
-
-    data.append(QUuid::createUuid().toByteArray());
-
-//    qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
-    data.append(qrand());
-
-//    qDebug() << data;
-
-    return QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex().constData();
 }

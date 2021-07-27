@@ -212,26 +212,33 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 
                 QJsonObject PrivObj = Doc.object();
 
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
-/// ///TODO
+
+
+
+
+/// ///TODO:
+
+
+
+
+
 throw Common::exTargomanMustBeImplemented("SaleableAdditive_t not implemented yet!");
 
                 return  Doc;
             },
             [](const QList<ORM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
             [](const QVariant& _value) {
-    /// ///TODO
+
+
+
+
+/// ///TODO:
+
+
+
+
+
+
                 if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
                     return QJsonDocument();
                 QJsonParseError Error;
@@ -341,7 +348,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,             
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](const QList<clsORMField>&){ return "A valid ISO639 two-letter language code"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](const QList<clsORMField>&){ return "A valid base64 encoded png/jpg image"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
-//TODO Ether/Bitcoin validator
+///TODO: Ether/Bitcoin validator
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](const QList<clsORMField>&){ return "A valid ethercoin address"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](const QList<clsORMField>&){ return "A valid URL"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t,              optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&){ return "A valid ProductCode"; });

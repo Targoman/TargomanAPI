@@ -174,8 +174,8 @@ private slots:
         "approve Voucher by offline payment"
     )
 
-    ///TODO create API for cancelBasketItem
-    ///TODO create API for returnBasketItem
+    ///TODO: create API for cancelBasketItem
+    ///TODO: create API for returnBasketItem
 
     bool REST(
         POST,

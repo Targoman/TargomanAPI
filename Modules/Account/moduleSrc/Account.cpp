@@ -163,9 +163,9 @@ TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
                              });
 }
 
-//TODO cache to ban users for every service
-//TODO update cache for each module
-//TODO JWT lifetime dynamic based on current hour
+///TODO: cache to ban users for every service
+///TODO: update cache for each module
+///TODO: JWT lifetime dynamic based on current hour
 TAPI::stuMultiJWT Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
                                             TAPI::enuOAuthType::Type _type,
                                             QString _oAuthToken,
@@ -176,7 +176,7 @@ TAPI::stuMultiJWT Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
     Authentication::stuOAuthInfo OAuthInfo;
-    //TODO validate _oAuthToken
+    ///TODO: validate _oAuthToken
 
     switch(_type){
     case TAPI::enuOAuthType::Google:
@@ -356,29 +356,29 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
         else
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
 
-        ///TODO process voucher and apply it
+        ///TODO: process voucher and apply it
 
-        foreach(auto VoucherItem, PreVoucher.Items){
-            ///TODO call svcProcessVoucherEndPoint
+        foreach(auto VoucherItem, PreVoucher.Items) {
+            ///TODO: call svcProcessVoucherEndPoint
         }
 
         return TAPI::stuVoucher(
                     _voucherID,
                     PreVoucher,
                     QString(),
+                    QString(),
                     TAPI::enuVoucherStatus::Finished
                     );
     }
     catch (...)
     {
-        ///TODO create cancel voucher and credit to wallet
+        ///TODO: create cancel voucher and credit to wallet
         throw;
     }
 }
 
-///TODO remove _gateway from parameters
-///TODO select gateway (null|single|multiple) from service
-///TODO check for common gateway voucher
+///TODO: select gateway (null|single|multiple) from service
+///TODO: check for common gateway voucher
 TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
         TAPI::stuPreVoucher _preVoucher,
@@ -410,10 +410,10 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
 
     Voucher.Info = _preVoucher;
 
-    ///TODO remove sign from prevoucher before converting to JSON
-    ///TODO recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
-    ///TODO reserve saleables before returning voucher
-    ///TODO implement overall coupon at the end of checkout steps
+    ///TODO: remove sign from prevoucher before converting to JSON
+    ///TODO: recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
+    ///TODO: reserve saleables before returning voucher
+    ///TODO: implement overall coupon at the end of checkout steps
 
     Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
                                               clsJWT(_JWT).usrID(),
@@ -516,7 +516,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
     }
 }
 
-///TODO implement auto verify daemon OJO on failed payments in the daemon
+///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
 TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                                        quint64 _vchID,

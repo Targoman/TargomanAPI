@@ -2275,7 +2275,6 @@ quint64 SelectQuery::count(QVariantMap _args)
     //execute
     quint64 count = 0;
 
-    ///TODO: run query
 
     return count;
 }

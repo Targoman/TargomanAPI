@@ -193,8 +193,6 @@ public:
                    };
     Q_DECLARE_FLAGS(CryptoFlags, CryptoFlag)
 
-    static const QString UUIDtoMD5();
-
 private:
     void splitKey();
 
