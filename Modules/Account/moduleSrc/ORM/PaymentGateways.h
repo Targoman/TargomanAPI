@@ -108,6 +108,7 @@ TARGOMAN_CREATE_CONSTEXPR(pgwName);
 TARGOMAN_CREATE_CONSTEXPR(pgwType);
 TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
 TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
+TARGOMAN_CREATE_CONSTEXPR(pgwAllowedDomainName);
 //------------------
 TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
 TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);

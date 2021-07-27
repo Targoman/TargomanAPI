@@ -68,6 +68,7 @@ using namespace DBManager;
 using namespace Common;
 using namespace Common::Configuration;
 
+///TODO: move this to config file
 static QSet<QString> InvalidPasswords = {
     "d41d8cd98f00b204e9800998ecf8427e",
     "c4ca4238a0b923820dcc509a6f75849b",
@@ -383,6 +384,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
         TAPI::stuPreVoucher _preVoucher,
         TAPI::enuPaymentGatewayType::Type _gatewayType,
+        QString _domain,
         qint64 _walletID,
         QString _paymentVerifyCallback
     )
@@ -452,6 +454,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
+                                      _domain,
                                       Voucher.ID,
                                       _preVoucher.Summary,
                                       RemainingAfterWallet,

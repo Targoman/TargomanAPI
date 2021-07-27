@@ -301,7 +301,9 @@ namespace Targoman {namespace API { \
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
         /* namespace          */ _namespace, \
         /* enum               */ _enum, \
-        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant { return _namespace::_enum::toStr(_value); }, \
+        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant { \
+            return _namespace::_enum::toStr(_value); \
+        }, \
         /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_enum::Type { \
             QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
             if (_namespace::_enum::options().contains(_val.toString())) \
@@ -316,7 +318,9 @@ namespace Targoman {namespace API { \
                     ); \
                 } \
         }, \
-        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString { return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); }, \
+        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString { \
+            return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); \
+        }, \
         /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \
             return _namespace::_enum::toStr(static_cast<_namespace::_enum::Type>(_value.toString().toLatin1().at(0))); \
         }, \
@@ -422,11 +426,13 @@ namespace Targoman {namespace API { \
 #define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_enum) \
     TAPI_DECLARE_METATYPE(_enum::Type); \
 namespace TAPI { \
-    inline void setFromVariant(_enum::Type& _storage, const QVariant& _val){ _storage = _enum::toEnum(_val.toString()); } \
-    inline void setFromVariant(NULLABLE_TYPE(_enum::Type)& _storage, const QVariant& _val){ \
-        if(_val.isValid() && _val.isNull() == false) _storage = _enum::toEnum(_val.toString()); \
+    inline void setFromVariant(_enum::Type& _storage, const QVariant& _val) { \
+        _storage = _enum::toEnum(_val.toString()); \
+    } \
+    inline void setFromVariant(NULLABLE_TYPE(_enum::Type)& _storage, const QVariant& _val) { \
+        if (_val.isValid() && _val.isNull() == false) \
+            _storage = _enum::toEnum(_val.toString()); \
     } \
 }
-
 
 #endif // APIARGHELPERMACROSPRIVATE_H

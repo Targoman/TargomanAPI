@@ -44,6 +44,7 @@ PaymentGateways::PaymentGateways() :
             { tblPaymentGateways::pgwType,                  S(TAPI::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
+            { tblPaymentGateways::pgwAllowedDomainName,     S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             //------------------
             { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             { tblPaymentGateways::pgwTransactionFeeType,    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },

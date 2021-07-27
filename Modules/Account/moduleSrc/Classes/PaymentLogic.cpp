@@ -33,25 +33,40 @@ namespace Targoman::API::AAA {
 using namespace Targoman::DBManager;
 using namespace Targoman::API::Helpers;
 
-template <class TPaymentGatewayClass>
-void PaymentLogic::registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)())
+void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName))
         throw Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
 
     qDebug() << "registering payment gateway driver:" << _driverName;
-    PaymentLogic::RegisteredDrivers.insert(_driverName, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
+    PaymentLogic::RegisteredDrivers.insert(_driverName,  _driver);
 }
-
 intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
         throw Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
 
-    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driverName];
-
-    return InstanceFunc();
+    return PaymentLogic::RegisteredDrivers[_driverName];
 }
+
+//template <class TPaymentGatewayClass>
+//void PaymentLogic::registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)())
+//{
+//    if (PaymentLogic::RegisteredDrivers.contains(_driverName))
+//        throw Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
+
+//    qDebug() << "registering payment gateway driver:" << _driverName;
+//    PaymentLogic::RegisteredDrivers.insert(_driverName, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
+//}
+//intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
+//{
+//    if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
+//        throw Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
+
+//    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driverName];
+
+//    return InstanceFunc();
+//}
 
 //static inline QString enuPaymentGatewayTypeToCSV(const TAPI::enuPaymentGatewayType::Types &_values, const char* _itemSurrounder="") {
 //    QStringList out;
@@ -65,7 +80,8 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 
 const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         quint32 _amount,
-        TAPI::enuPaymentGatewayType::Type _gatewayType
+        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const QString& _domain
     )
 {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
@@ -83,15 +99,18 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
             .addCol(enuConditionalAggregation::IF,
                     { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, TAPI::enuPaymentGatewayTransactionFeeType::Percent }
                     , DBExpression::VALUE(QString("%1 * %2 / 100").arg(tblPaymentGateways::pgwTransactionFeeValue).arg(_amount))
-                    , tblPaymentGateways::pgwTransactionFeeValue
-                    , "inner_pgwTransactionFeeAmount")
+                    , DBExpression::VALUE(tblPaymentGateways::pgwTransactionFeeValue)
+                    , "inner_pgwTransactionFeeAmount"
+                   )
             .addCol(enuConditionalAggregation::IF,
                     clsCondition({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Null })
                     .orCond({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Less, DBExpression::CURDATE() })
                     , 0
-                    , tblPaymentGateways::pgwSumTodayPaidAmount
-                    , "inner_pgwSumTodayPaidAmount")
+                    , DBExpression::VALUE(tblPaymentGateways::pgwSumTodayPaidAmount)
+                    , "inner_pgwSumTodayPaidAmount"
+                   )
             .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
+            .andWhere({ tblPaymentGateways::pgwAllowedDomainName, enuConditionOperator::Equal, _domain })
             .andWhere({ tblPaymentGateways::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
             .andWhere(
                 clsCondition({ tblPaymentGateways::pgwMaxPerDayAmount, enuConditionOperator::Null })
@@ -115,6 +134,8 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
                 enuConditionOperator::Equal,
                 tblPaymentGateways::Name, tblPaymentGateways::pgwID }
         )
+        .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
+        .andWhere({ tblPaymentGateways::pgwAllowedDomainName, enuConditionOperator::Equal, _domain })
         .orderBy("tmptbl_inner.inner_pgwTransactionFeeAmount")
         .orderBy("tmptbl_inner.inner_pgwSumTodayPaidAmount")
         .orderBy("RAND()")
@@ -130,6 +151,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 
 QString PaymentLogic::createOnlinePaymentLink(
         TAPI::enuPaymentGatewayType::Type _gatewayType,
+        const QString& _domain,
         quint64 _vchID,
         const QString& _invDesc,
         quint32 _toPay,
@@ -150,7 +172,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     QFV.url().validate(_paymentVerifyCallback, "callBack");
 
     //1: find best payment gateway
-    stuPaymentGateway PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType);
+    stuPaymentGateway PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
 
     //2: get payment gateway driver
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);

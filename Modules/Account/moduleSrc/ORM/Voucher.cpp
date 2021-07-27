@@ -81,6 +81,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
         TAPI::JWT_t _JWT,
         quint32 _amount,
         TAPI::enuPaymentGatewayType::Type _gatewayType,
+        QString _domain,
         quint64 _walletID,
         QString _paymentVerifyCallback
     )
@@ -110,6 +111,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
+                                      _domain,
                                       Voucher.ID,
                                       Voucher.Info.Summary,
                                       Voucher.Info.ToPay,

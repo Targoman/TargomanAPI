@@ -375,6 +375,7 @@ private slots:
                                                 { "password", "123" },
                                               })
                 },
+                { "pgwAllowedDomainName",     "devtest.com" },
                 //"
 //                { "pgwTransactionFeeValue",   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
 //                { "pgwTransactionFeeType",    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
@@ -577,6 +578,7 @@ private slots:
             {
                 { "preVoucher",             {} },
                 { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                { "domain",                 "devtest.com" },
                 { "walletID",               9988 },
                 { "paymentVerifyCallback",  "http://www.a.com" },
             }
@@ -591,6 +593,7 @@ private slots:
             {
                 { "preVoucher",             lastPreVoucher },
                 { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                { "domain",                 "devtest.com" },
                 { "walletID",               9988 },
                 { "paymentVerifyCallback",  "http://www.a.com" },
             }

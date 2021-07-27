@@ -138,6 +138,7 @@ private slots:
             TAPI::JWT_t _JWT,
             TAPI::stuPreVoucher _preVoucher,
             TAPI::enuPaymentGatewayType::Type _gatewayType,
+            QString _domain,
             qint64 _walletID = -1,
             QString _paymentVerifyCallback = {}
         ),

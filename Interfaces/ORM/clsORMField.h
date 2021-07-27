@@ -27,8 +27,7 @@
 #include "QFieldValidator.h"
 #include "libTargomanCommon/Macros.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 class intfAPIModule;
 class intfAPIArgManipulator;
@@ -194,8 +193,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME          "StatusFieldName"
 #define ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME   "InvalidatedAtFieldName"
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API
 
 #endif // TARGOMAN_API_ORM_CLSORMFIELD_H

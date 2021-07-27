@@ -110,10 +110,11 @@ private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr); \
+        PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
-//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name); \
+//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
+//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name);
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
     _gatewayClassName::_gatewayClassName() {}

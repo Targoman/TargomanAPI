@@ -26,9 +26,7 @@
 #include "Server/RESTAPIRegistry.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
 
 using namespace Targoman::API::Server;
 
@@ -132,7 +130,16 @@ QString  clsORMField::toString(const QVariant& _value)
 
 QVariant clsORMField::toDB(const QVariant& _value)
 {
-    return this->argSpecs().fromORMValueConverter() ? this->argSpecs().fromORMValueConverter()(_value) : _value;
+//    qDebug() << "***********************" << __FUNCTION__ << _value << this->name() << this->parameterType() << this->paramTypeName()
+//             << (this->argSpecs().fromORMValueConverter() ? "has fromORMValueConverter" : "return _value")
+//             << QMetaType::QChar << _value.toString();
+
+    return this->argSpecs().fromORMValueConverter()
+            ? this->argSpecs().fromORMValueConverter()(_value)
+            : (this->parameterType() == QMetaType::QChar
+              ? QVariant(_value.value<QChar>())
+              : _value)
+    ;
 }
 
 QVariant clsORMField::fromDB(const QString& _value)
@@ -140,6 +147,4 @@ QVariant clsORMField::fromDB(const QString& _value)
     return this->argSpecs().toORMValue(_value);
 }
 
-}
-}
-}
+} //namespace Targoman::API::ORM

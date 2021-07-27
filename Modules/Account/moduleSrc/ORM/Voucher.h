@@ -73,6 +73,7 @@ private slots:
                 TAPI::JWT_t _JWT,
                 quint32 _amount,
                 TAPI::enuPaymentGatewayType::Type _gatewayType,
+                QString _domain,
                 quint64 _walletID = 0,
                 QString _paymentVerifyCallback = {}
             ),

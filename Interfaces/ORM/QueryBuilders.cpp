@@ -525,6 +525,8 @@ QString clsCondition::buildConditionString(
         }
         else
         {
+            auto relatedORMField = _filterables.value(conditionData.Col);
+
             CondStr += makeColNameHelper(conditionData.TableNameOrAlias, conditionData.Col, _statusColHasCriteria);
 
             if (conditionData.Operator == enuConditionOperator::Null)
@@ -583,7 +585,10 @@ QString clsCondition::buildConditionString(
                     CondStr += " ";
 
                 if (conditionData.Value.isValid())
-                    CondStr += makeValueAsSQL(conditionData.Value);
+                {
+//                    qDebug() << "^^^^^^^^^^^^^^^^^^^^^^^^^" << __FUNCTION__ << conditionData.Value << conditionData.Col;
+                    CondStr += makeValueAsSQL(conditionData.Value, true, relatedORMField.isValid() ? &relatedORMField.Col : nullptr);
+                }
                 else
                     CondStr += makeColNameHelper(conditionData.OtherTableNameOrAlias, conditionData.OtherCol, nullptr);
             }
@@ -2494,7 +2499,7 @@ public:
                          && (baseCol.defaultValue() != QDBInternal)
                     )
                 {
-//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << baseCol.defaultValue();
+//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
                     this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
                     extraBaseColsValues.append(baseCol.toDB(baseCol.defaultValue()));
                 }
@@ -2566,7 +2571,8 @@ public:
                             this->CreateQueryPreparedItems.BindingValues.append(v);
                         }
                         else {
-                            QString v = makeValueAsSQL(val, _useBinding == false);
+                            QString v = makeValueAsSQL(val, true);
+//                            qDebug() << val << v;
                             oneRecordToString.append(v);
                         }
                     }
@@ -2580,7 +2586,7 @@ public:
         else if (this->Select.isValid()) {
             if (extraBaseColsValues.length()) {
                 foreach (auto val, extraBaseColsValues) {
-                    this->Select.addCol(DBExpression(val.toString(), enuDBExpressionType::Value));
+                    this->Select.addCol(DBExpression(makeValueAsSQL(val, true), enuDBExpressionType::Value));
                 }
             }
 
@@ -3018,7 +3024,6 @@ public:
                 if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                     relatedORMField.Col.validate(val);
 
-
                 if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
                     QString v = makeValueAsSQL(val, _useBinding == false, &relatedORMField.Col);
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
@@ -3114,6 +3119,9 @@ UpdateQuery& UpdateQuery::decreament(const QString& _col, qreal _value)
 \***********************/
 stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding)
 {
+    if (this->WhereTraitData->WhereClauses.isEmpty())
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+
     stuBoundQueryString BoundQueryString;
 
     this->Data->prepare(_currentUserID, _useBinding/*, _prettifierJustifyLen*/);
@@ -3296,6 +3304,9 @@ DeleteQuery& DeleteQuery::addTarget(const QString& _targetTableName)
 \***********************/
 QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
 {
+    if (this->WhereTraitData->WhereClauses.isEmpty())
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+
     this->Data->prepare(_currentUserID, false/*, _prettifierJustifyLen*/);
     this->WhereTraitData->prepare();
     //it should be the last preparation call, as the previous preparation may cause an automatic join
