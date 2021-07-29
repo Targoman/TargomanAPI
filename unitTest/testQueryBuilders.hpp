@@ -111,6 +111,29 @@ public:
         } \
     } while (false)
 
+
+/*
+void f1(QVariant v) {}
+//    void f1(QString v) {}
+void f1(const DBExpression& v) {}
+void f1(const clsColSpecs& v) {}
+
+void test_overloaded_function() {
+    QString s1;
+    f1(s1);
+
+    f1("hello");
+
+    quint32 s2;
+    f1(s2);
+
+    clsColSpecs s3;
+    f1(s3);
+
+    f1(DBExpression::NOW());
+}
+*/
+
 class testQueryBuilders: public QObject
 {
     Q_OBJECT
@@ -203,7 +226,14 @@ private slots:
                 clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+            QStringList RenamedCols;
+            QString qry = cnd.buildConditionString(
+                              t1.Name,
+                              t1.SelectableColsMap,
+                              t1.FilterableColsMap,
+                              false,
+                              RenamedCols
+                              );
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -223,7 +253,14 @@ t1.colA1 = 101
                 .andCond({ "colB1", enuConditionOperator::NotNull })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+            QStringList RenamedCols;
+            QString qry = cnd.buildConditionString(
+                              t1.Name,
+                              t1.SelectableColsMap,
+                              t1.FilterableColsMap,
+                              false,
+                              RenamedCols
+                              );
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -254,7 +291,14 @@ t1.colA1 = 101
                 .orCond({ "colH1", enuConditionOperator::Equal, 107 })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+            QStringList RenamedCols;
+            QString qry = cnd.buildConditionString(
+                              t1.Name,
+                              t1.SelectableColsMap,
+                              t1.FilterableColsMap,
+                              false,
+                              RenamedCols
+                              );
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
@@ -296,7 +340,14 @@ t1.colA1 = 101
                 .andCond({ "colC1", enuConditionOperator::Equal, DBExpression::DATE_ADD("colZZ", "1:2", enuDBExpressionIntervalUnit::MINUTE_SECOND) })
             ;
 
-            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+            QStringList RenamedCols;
+            QString qry = cnd.buildConditionString(
+                              t1.Name,
+                              t1.SelectableColsMap,
+                              t1.FilterableColsMap,
+                              false,
+                              RenamedCols
+                              );
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
@@ -318,7 +369,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
 //            clsCondition cnd = clsCondition::parse(filters, t1);
 
-//            QString qry = cnd.buildConditionString(t1.Name, t1.FilterableColsMap, false);
+//            QString qry = cnd.buildConditionString(
+//                        t1.Name,
+//                        t1.SelectableColsMap,
+//                        t1.FilterableColsMap,
+//                        false
+//                        );
 
 //            if (SQLPrettyLen)
 //                qDebug().nospace().noquote() << endl
@@ -517,7 +573,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         20,
                         "sumif__t1_colC1__t2_colD2"
                         )
-                .leftJoin(R("test", "t2"))
+                .leftJoin("t2")
             ;
 
             QString qry = query.buildQueryString({}, false, false, true);
@@ -557,8 +613,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SelectQuery query = SelectQuery(t1)
                 .addCols(QStringList({
                     "colA1",
+                    "colA2",
+                    "alias_1_t2.colA2",
                 }))
-                .leftJoin("test.t2")
+                .leftJoin("t2")
+                .leftJoin("t2", "alias_1_t2")
             ;
 
             QString qry = query.buildQueryString({}, false, false, true);
@@ -568,16 +627,20 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
             QCOMPARE("\n" + qry + "\n", R"(
             SELECT t1.colA1
+                 , t1.colA2
+                 , alias_1_t2.colA2
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
+         LEFT JOIN test.t2 alias_1_t2
+                ON alias_1_t2.colA2 = t1.colC1
              WHERE t1.status1 != 'R' AND t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-
+//private:
     void queryString_SELECT_join_WithAlias() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
@@ -586,10 +649,10 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 }))
                 .leftJoin("test.t2", "alias_t2")
                 .leftJoin("test.t2", "alias_2_t2",
-                    clsCondition({ "alias_2_t2", "colA2", enuConditionOperator::Equal, "t1", "colB" })
+                    clsCondition({ "alias_2_t2", "colA2", enuConditionOperator::Equal, "t1", "colB1" })
                     .andCond({ "alias_2_t2", "colB2", enuConditionOperator::Equal, "test string" })
-                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, 456})
-                    .andCond({ "t77777777", "ffffff8", enuConditionOperator::Equal, "456"})
+//                    .andCond({ "t77777777", "ffffff7", enuConditionOperator::Equal, 456})
+//                    .andCond({ "t77777777", "ffffff8", enuConditionOperator::Equal, "456"})
                 )
             ;
 
@@ -604,10 +667,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
          LEFT JOIN test.t2 alias_t2
                 ON alias_t2.colA2 = alias_t1.colC1
          LEFT JOIN test.t2 alias_2_t2
-                ON alias_2_t2.colA2 = t1.colB
+                ON alias_2_t2.colA2 = t1.colB1
                AND alias_2_t2.colB2 = 'test string'
-               AND t77777777.ffffff7 = 456
-               AND t77777777.ffffff8 = '456'
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
 )");
         } QT_CATCH (const std::exception &e) {
@@ -879,7 +940,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     "colA1",
                     "colB1",
                 }))
-                .addFilters("( colA1>=NOW() | colB1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
+                .addFilters("( CreationDateTime>=NOW() | colE1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
             ;
 
             QString qry = query.buildQueryString({}, true, false, true);
@@ -892,8 +953,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , alias_t1.colB1
               FROM test.t1 alias_t1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0 AND ((
-                   t1.colA1 >= NOW()
-                OR t1.colB1 < 'DATE_ADD(NOW(),INTERVAL 15 Min)'
+                   alias_t1.CreationDateTime >= NOW()
+                OR alias_t1.colE1 < DATE_ADD(NOW(),INTERVAL 15 Min)
                    ))
              LIMIT 0,1
 )");
@@ -901,7 +962,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-
+//private:
     void queryString_SELECT_nested_join() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
@@ -939,6 +1000,47 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    ) tmp_t2_count
                 ON tmp_t2_count.colB2 = alias_t1.colB1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
+             LIMIT 0,1
+)");
+        } QT_CATCH (const std::exception &e) {
+            QTest::qFail(e.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void queryString_SELECT_colspec_as_condition() {
+        QT_TRY {
+            SelectQuery query = SelectQuery(t1, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                }))
+                .andWhere({
+                              { enuAggregation::SUM, "colB1" },
+                              enuConditionOperator::GreaterEqual,
+                              123
+                          })
+                .andWhere({
+                              { enuAggregation::SUM, "colC1" },
+                              enuConditionOperator::GreaterEqual,
+                              clsColSpecs(enuAggregation::SUM, "colD1")
+                          })
+                .andWhere({
+                              "colE1",
+                              enuConditionOperator::GreaterEqual,
+                              clsColSpecs(enuAggregation::SUM, "colF1")
+                          })
+            ;
+
+            QString qry = query.buildQueryString({}, true, false, true);
+
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+            QCOMPARE("\n" + qry + "\n", R"(
+            SELECT alias_t1.colA1
+              FROM test.t1 alias_t1
+             WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0 AND (SUM(alias_t1.colB1) >= 123
+               AND SUM(alias_t1.colC1) >= SUM(alias_t1.colD1)
+               AND alias_t1.colE1 >= SUM(alias_t1.colF1))
              LIMIT 0,1
 )");
         } QT_CATCH (const std::exception &e) {

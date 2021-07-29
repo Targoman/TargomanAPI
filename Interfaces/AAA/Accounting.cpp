@@ -250,14 +250,16 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(TAPI::JWT_t _JWT,
-                                                                  TAPI::SaleableCode_t _saleableCode,
-                                                                  TAPI::OrderAdditives_t _orderAdditives,
-                                                                  quint16 _qty, ///TODO: use float for qty
-                                                                  TAPI::CouponCode_t _discountCode,
-                                                                  QString _referrer,
-                                                                  TAPI::JSON_t _extraRefererParams,
-                                                                  TAPI::stuPreVoucher _lastPreVoucher)
+TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
+        TAPI::JWT_t _JWT,
+        TAPI::SaleableCode_t _saleableCode,
+        TAPI::OrderAdditives_t _orderAdditives,
+        quint16 _qty, ///TODO: use float for qty
+        TAPI::CouponCode_t _discountCode,
+        QString _referrer,
+        TAPI::JSON_t _extraRefererParams,
+        TAPI::stuPreVoucher _lastPreVoucher
+    )
 {
     clsJWT JWT(_JWT);
     quint64 currentUserID = JWT.usrID();

@@ -101,7 +101,8 @@ TARGOMAN_DEFINE_ENUM(enuOrderDir,
                      Ascending,
                      Descending)
 
-struct stuBoundQueryString {
+struct stuBoundQueryString
+{
     QString QueryString;
 //    QVariantMap BindingValues;
     QVariantList BindingValues;
@@ -137,7 +138,8 @@ TARGOMAN_DEFINE_ENUM(enuDBExpressionIntervalUnit,
 
 class DBExpressionData;
 
-class DBExpression {
+class DBExpression
+{
 public:
     DBExpression();
     DBExpression(const DBExpression& _other);
@@ -145,7 +147,7 @@ public:
     virtual ~DBExpression();
 
     operator QVariant() const;
-    QVariant operator =(DBExpression& _other) const;
+//    QVariant operator =(const DBExpression& _other) const;
 
 //    QVariant toVariant() const;
 //    void fromVariant(DBExpression& _other) const;
@@ -173,41 +175,41 @@ protected:
 };
 
 /***************************************************************************************/
+class clsColSpecs;
+
 class clsConditionData;
 
-class clsCondition {
+class clsCondition
+{
 public:
     clsCondition();
     clsCondition(const clsCondition& _other);
-
-    clsCondition(
-            QString _col,
-            enuConditionOperator::Type _operator,
-            QVariant _value = {});
-    clsCondition(
-            QString _tableNameOrAlias,
-            QString _col,
-            enuConditionOperator::Type _operator,
-            QVariant _value = {});
-
-//    clsCondition(
-//            QString _col,
-//            enuConditionOperator::Type _operator,
-//            const DBExpression& _expression);
-//    clsCondition(
-//            QString _tableNameOrAlias,
-//            QString _col,
-//            enuConditionOperator::Type _operator,
-//            const DBExpression& _expression);
-
-    clsCondition(
-            QString _leftHandTableNameOrAlias,
-            QString _leftHandCol,
-            enuConditionOperator::Type _operator,
-            QString _rightHandTableNameOrAlias,
-            QString _rightHandCol);
-
     virtual ~clsCondition();
+
+    clsCondition(QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
+//    clsCondition(QString _col, enuConditionOperator::Type _operator, QString _value);
+    clsCondition(QString _col, enuConditionOperator::Type _operator, const DBExpression& _value);
+    clsCondition(QString _col, enuConditionOperator::Type _operator, const clsColSpecs& _rightHandColSpec);
+
+    clsCondition(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, QVariant _value = {});
+//    clsCondition(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, QString _value);
+    clsCondition(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, const DBExpression& _value);
+    clsCondition(QString _tableNameOrAlias, QString _col, enuConditionOperator::Type _operator, const clsColSpecs& _rightHandColSpec);
+
+    clsCondition(QString _leftHandTableNameOrAlias, QString _leftHandCol, enuConditionOperator::Type _operator, QString _rightHandTableNameOrAlias, QString _rightHandCol);
+    clsCondition(QString _leftHandTableNameOrAlias, QString _leftHandCol, enuConditionOperator::Type _operator, QString _rightHandTableNameOrAlias, const clsColSpecs& _rightHandColSpec);
+
+    clsCondition(const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, QVariant _value = {});
+//    clsCondition(const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, QString _value);
+    clsCondition(const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, const DBExpression& _value);
+    clsCondition(const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, const clsColSpecs& _rightHandColSpecs);
+
+    clsCondition(QString _tableNameOrAlias, const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, QVariant _value = {});
+//    clsCondition(QString _tableNameOrAlias, const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, QString _value);
+    clsCondition(QString _tableNameOrAlias, const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, const DBExpression& _value);
+    clsCondition(QString _tableNameOrAlias, const clsColSpecs& _colSpec, enuConditionOperator::Type _operator, const clsColSpecs& _rightHandColSpecs);
+
+    clsCondition(QString _leftHandTableNameOrAlias, const clsColSpecs& _leftHandColSpecs, enuConditionOperator::Type _operator, QString _rightHandTableNameOrAlias, QString _rightHandCol);
 
 //    static clsCondition& parse(
 //        const QString& _filters,
@@ -229,8 +231,10 @@ public:
 
     QString buildConditionString(
             const QString &_mainTableNameOrAlias,
-            const QMap<QString, stuRelatedORMField>& _filterables,
-            bool _allowUseColumnAlias = false,
+            const QMap<QString, stuRelatedORMField> &_selectableColsMap,
+            const QMap<QString, stuRelatedORMField> &_filterableColsMap,
+            bool _allowUseColumnAlias,
+            QStringList& _renamedColumns,
             bool *_statusColHasCriteria = nullptr) const;
 
 protected:
@@ -238,6 +242,63 @@ protected:
     void addCondition(enuPreConditionOperator::Type _aggregator, const clsCondition& _nextCondition);
 
     friend testQueryBuilders;
+};
+
+/***************************************************************************************/
+class clsColSpecs
+{
+public:
+    clsColSpecs();
+    clsColSpecs(const clsColSpecs& _other);
+    clsColSpecs(
+        const QString& _name,
+        const QString& _renameAs // = {}
+    );
+    clsColSpecs(
+        const DBExpression& _expression,
+        const QString& _renameAs = {}
+    );
+    clsColSpecs(
+        const enuAggregation::Type _aggregation_Simple,
+        const QString& _name,
+        const QString& _renameAs = {}
+    );
+    clsColSpecs(
+        const enuConditionalAggregation::Type _ConditionalAggregation,
+        const clsCondition& _condition,
+        const QString& _renameAs = {},
+        const QVariant& _trueValue = {},
+        const QVariant& _falseValue = {}
+    );
+
+    QString toString(const QString& _mainTableNameOrAlias,
+        const QMap<QString, stuRelatedORMField> &_selectableColsMap,
+        const QMap<QString, stuRelatedORMField> &_filterableColsMap,
+        bool _allowUseColumnAlias,
+        QStringList &_renamedColumns,
+        const stuRelation &_relation = InvalidRelation,
+        /*OUT*/ bool *_isStatusColumn = nullptr
+    );
+
+    const inline QString renameAs() const { return this->RenameAs; }
+
+private:
+    QString Name;
+    QString RenameAs;
+//    union unnAggregation {
+//        enuAggregation::Type Simple;
+//        enuConditionalAggregation::Type Conditional;
+//    };
+//    NULLABLE_TYPE(unnAggregation) Aggregation = NULLABLE_NULL_VALUE;
+    NULLABLE_TYPE(enuAggregation::Type) SimpleAggregation;
+    NULLABLE_TYPE(enuConditionalAggregation::Type) ConditionalAggregation;
+    clsCondition Condition;
+    QVariant TrueValue;
+    QVariant FalseValue;
+    DBExpression Expression;
+//    QVariant Expression;
+
+    friend clsCondition;
 };
 
 /***************************************************************************************/
@@ -290,7 +351,7 @@ public:
     tmplQueryJoinTrait(itmplDerived* _owner);
     virtual ~tmplQueryJoinTrait();
 
-    itmplDerived& join(enuJoinType::Type _joinType, const QString& _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
+    itmplDerived& join(enuJoinType::Type _joinType, QString _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
     itmplDerived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
     itmplDerived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
@@ -322,7 +383,7 @@ class tmplQueryWhereTrait
 {
 public:
     tmplQueryWhereTrait(const tmplQueryWhereTrait<itmplDerived>& _other);
-    tmplQueryWhereTrait(const itmplDerived* _owner);
+    tmplQueryWhereTrait(itmplDerived* _owner);
     virtual ~tmplQueryWhereTrait();
 
     itmplDerived& where(const clsCondition& _condition);
@@ -345,7 +406,7 @@ class tmplQueryGroupAndHavingTrait
 {
 public:
     tmplQueryGroupAndHavingTrait(const tmplQueryGroupAndHavingTrait<itmplDerived>& _other);
-    tmplQueryGroupAndHavingTrait(const itmplDerived* _owner);
+    tmplQueryGroupAndHavingTrait(itmplDerived* _owner);
     virtual ~tmplQueryGroupAndHavingTrait();
 
 //    itmplDerived& groupBy(const clsCondition& _condition);
@@ -381,7 +442,8 @@ public:
     SelectQuery(clsTable& _table, const QString& _alias = {});
     virtual ~SelectQuery();
 
-    SelectQuery& addCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    SelectQuery& addCol(const clsColSpecs& _colSpecs);
+    SelectQuery& addCSVCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});

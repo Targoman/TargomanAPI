@@ -83,20 +83,18 @@ TAPI_ADD_STRING_TYPE(QString, OrderBy_t);
 TAPI_ADD_STRING_TYPE(QString, GroupBy_t);
 }
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 static QString QUERY_SEPARATOR = "\n";
 static QString CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 
-}
-}
+} //namespace Targoman::API
 
-namespace Targoman {
-namespace API {
-namespace ORM {
 
-struct stuRelation{
+namespace Targoman::API::ORM {
+
+struct stuRelation
+{
     QString RelationName; //used by joinWith
     QString Column;
     QString ReferenceTable;
@@ -162,14 +160,12 @@ struct stuRelatedORMField{
 };
 
 extern QString finalColName(const clsORMField& _col, const QString& _prefix = {});
-extern QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {});
-extern QString makeColName(const QString& _tableName, const clsORMField& _col, bool _appendAs = false, const stuRelation& _relation = InvalidRelation);
+//extern QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {});
+//extern QString makeColName(const QString& _tableName, const clsORMField& _col, bool _appendAs = false, const stuRelation& _relation = InvalidRelation);
 
 unsigned int qHash(const Targoman::API::ORM::stuRelation& _relation);
 
-}
-}
-}
+} //namespace Targoman::API::ORM
 
 TAPI_DECLARE_METATYPE(TAPI::Cols_t);
 TAPI_DECLARE_METATYPE(TAPI::Filter_t);
