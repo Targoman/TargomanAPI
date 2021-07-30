@@ -26,14 +26,14 @@ public:
         : clsTable(
             "test",
             "t1",
-            {///< ColName    Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
+            {///< ColName    Type                             Validation                 Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
                 { "colID1",  ORM_PRIMARYKEY_32 },
                 { "colA1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colB1",   S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
                 { "colC1",   S(quint32),                      QFV.integer().minValue(1), QNull,      UPOwner },
                 { "colD1",   S(QString),                      QFV,                       QNull,      UPOwner },
                 { "colE1",   S(TAPI::DateTime_t),             QFV,                       QNull,      UPOwner },
-                { "colF1",   S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner },
+                { "colF1",   S(TAPI::JSON_t),                 QFV,                       QNull,      UPOwner,   true,   true,   false,  false,  false,  true,   "newNamerFor_F1" },
                 { "colG1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colH1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colI1",   S(QChar),                        QFV,                       QNull,      UPOwner },
@@ -213,7 +213,7 @@ private slots:
                         .orCond({ "colD1", enuConditionOperator::Equal, 123 })
                         .xorCond(
                             clsCondition("colE1", enuConditionOperator::Equal, 123)
-                            .orCond({ "colF1", enuConditionOperator::Equal, 123 })
+                            .orCond({ "newNamerFor_F1", enuConditionOperator::Equal, 123 })
                         )
                     )
                     .isEmpty() == false);
@@ -229,6 +229,7 @@ private slots:
             QStringList RenamedCols;
             QString qry = cnd.buildConditionString(
                               t1.Name,
+                              "",
                               t1.SelectableColsMap,
                               t1.FilterableColsMap,
                               false,
@@ -256,6 +257,7 @@ t1.colA1 = 101
             QStringList RenamedCols;
             QString qry = cnd.buildConditionString(
                               t1.Name,
+                              "",
                               t1.SelectableColsMap,
                               t1.FilterableColsMap,
                               false,
@@ -284,7 +286,7 @@ t1.colA1 = 101
                     clsCondition("colD1", enuConditionOperator::Equal, 103)
                     .orCond({ "colE1", enuConditionOperator::Equal, 104 })
                     .xorCond(
-                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        clsCondition("newNamerFor_F1", enuConditionOperator::Equal, 105)
                         .orCond({ "colG1", enuConditionOperator::Equal, 106 })
                     )
                 )
@@ -294,6 +296,7 @@ t1.colA1 = 101
             QStringList RenamedCols;
             QString qry = cnd.buildConditionString(
                               t1.Name,
+                              "",
                               t1.SelectableColsMap,
                               t1.FilterableColsMap,
                               false,
@@ -310,7 +313,7 @@ t1.colA1 = 101
                    t1.colD1 = 103
                 OR t1.colE1 = 104
                XOR (
-                   t1.colF1 = ''
+                   t1.newNamerFor_F1 = ''
                 OR t1.colG1 = 106
                    )
                    )
@@ -343,6 +346,7 @@ t1.colA1 = 101
             QStringList RenamedCols;
             QString qry = cnd.buildConditionString(
                               t1.Name,
+                              "",
                               t1.SelectableColsMap,
                               t1.FilterableColsMap,
                               false,
@@ -409,7 +413,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1
                  , t1.colE1
-                 , t1.colF1
+                 , t1.colF1 AS newNamerFor_F1
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
@@ -445,7 +449,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1
                  , t1.colE1
-                 , t1.colF1
+                 , t1.colF1 AS newNamerFor_F1
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
@@ -560,7 +564,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         clsCondition("colB1", enuConditionOperator::Equal, 123)
                         .andCond({ "colC1", enuConditionOperator::Like, "test it"})
                         .xorCond(
-                            clsCondition("colF1", enuConditionOperator::Equal, 105)
+                            clsCondition("newNamerFor_F1", enuConditionOperator::Equal, 105)
                             .orCond({ "colG1", enuConditionOperator::Equal, 106 })
                         )
                         ,
@@ -610,37 +614,54 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_join() {
         QT_TRY {
-            SelectQuery query = SelectQuery(t1)
+            SelectQuery query = SelectQuery(t1
+                                            , "________"
+                                            )
                 .addCols(QStringList({
                     "colA1",
                     "colA2",
-                    "alias_1_t2.colA2",
+//                    "newNamerFor_F1",
+                    "ZZZZZZZZZ.colA2",
                 }))
+                .addCol("newNamerFor_F1")
+                .addCol("newNamerFor_F1", "OTHER_F1_NAME")
+                .addCol(enuAggregation::SUM, "newNamerFor_F1", "SUM_F1_NAME")
+                .addCol(Targoman::API::CURRENT_TIMESTAMP)
                 .leftJoin("t2")
-                .leftJoin("t2", "alias_1_t2")
+                .leftJoin("t2", "ZZZZZZZZZ")
+                .orderBy("newNamerFor_F1")
+                .groupBy("newNamerFor_F1")
+                .having({ "SUM_F1_NAME", enuConditionOperator::Equal, QVariantMap({ { "aaa", "bbb" } }) })
             ;
 
             QString qry = query.buildQueryString({}, false, false, true);
 
-//            if (SQLPrettyLen)
-//                qDebug().nospace().noquote() << endl << endl << qry << endl;
+            if (SQLPrettyLen)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
-            SELECT t1.colA1
-                 , t1.colA2
-                 , alias_1_t2.colA2
-              FROM test.t1
+            SELECT ________.colA1
+                 , t2.colA2
+                 , ZZZZZZZZZ.colA2
+                 , ________.colF1 AS newNamerFor_F1
+                 , ________.colF1 AS OTHER_F1_NAME
+                 , SUM(________.colF1) AS SUM_F1_NAME
+                 , CURRENT_TIMESTAMP() AS CURRENT_TIMESTAMP
+              FROM test.t1 ________
          LEFT JOIN test.t2
-                ON t2.colA2 = t1.colC1
-         LEFT JOIN test.t2 alias_1_t2
-                ON alias_1_t2.colA2 = t1.colC1
-             WHERE t1.status1 != 'R' AND t1._InvalidatedAt = 0
+                ON t2.colA2 = ________.colC1
+         LEFT JOIN test.t2 ZZZZZZZZZ
+                ON ZZZZZZZZZ.colA2 = ________.colC1
+             WHERE ________.status1 != 'R' AND ________._InvalidatedAt = 0
+          ORDER BY newNamerFor_F1
+          GROUP BY newNamerFor_F1
+            HAVING SUM_F1_NAME = '{"aaa":"bbb"}'
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-//private:
+private:
     void queryString_SELECT_join_WithAlias() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
@@ -773,7 +794,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     clsCondition("colB1", enuConditionOperator::Equal, 123)
                     .andCond({ "colC1", enuConditionOperator::Like, "test it"})
                     .xorCond(
-                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        clsCondition("newNamerFor_F1", enuConditionOperator::Equal, 105)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
@@ -830,7 +851,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     clsCondition("colB1", enuConditionOperator::Equal, 123)
                     .andCond({ "colC1", enuConditionOperator::Like, "test it"})
                     .xorCond(
-                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        clsCondition("newNamerFor_F1", enuConditionOperator::Equal, 105)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
@@ -889,7 +910,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     clsCondition("colB1", enuConditionOperator::Equal, 123)
                     .andCond({ "colC1", enuConditionOperator::Like, "test it"})
                     .xorCond(
-                        clsCondition("colF1", enuConditionOperator::Equal, 105)
+                        clsCondition("newNamerFor_F1", enuConditionOperator::Equal, 105)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
@@ -962,7 +983,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-//private:
+
     void queryString_SELECT_nested_join() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
@@ -1102,14 +1123,14 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addCol("colB1")
                 .addCol("colD1")
                 .addCol("colA1")
-                .addCol("colF1")
+                .addCol("newNamerFor_F1")
                 .values(QVariantMap({
                     { "colD1", "hasan" },
                     { "colZ1", "222" },
                     { "colA1", DBExpression::NIL() },
                     { "colB1", DBExpression::NOW() },
                     { "colC1", DBExpression::CURDATE() },
-                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
+                    { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
                 }))
             ;
 
@@ -1193,7 +1214,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     void queryString_CREATE_values_multi() {
         QT_TRY {
             CreateQuery query = CreateQuery(t1) //, "alias_t1")
-                .addCol("colF1")
+                .addCol("newNamerFor_F1")
                 .addCol("colB1")
                 .addCol("colA1")
                 .addCol("colC1")

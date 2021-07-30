@@ -181,6 +181,7 @@ protected:
     QString Schema;
     QString Name;
     QString Domain;
+    QMap<QString, stuRelatedORMField /*clsORMField*/> HasMasterNameColsMap;
     QMap<QString, stuRelatedORMField /*clsORMField*/> SelectableColsMap;
     QMap<QString, stuRelatedORMField>                 FilterableColsMap;
     QMap<QString, stuRelatedORMField /*clsORMField*/> SortableColsMap;

@@ -47,7 +47,8 @@ TARGOMAN_DEFINE_ENUM(enuUpdatableBy,
                      __STATUS__
                      );
 
-class clsORMFieldData : public QSharedData {
+class clsORMFieldData : public QSharedData
+{
 public:
     clsORMFieldData();
     clsORMFieldData(const QString& _name,
@@ -73,62 +74,43 @@ public:
     inline bool isSelectable()      { return this->Privs & 0x20; }
 
 public:
-    QMetaType::Type ParameterType;
-    QString         Name;
-    QString         ParamTypeName;
-    QVariant        DefaultValue;
-    QFieldValidator ExtraValidator;
-    QString         RenameAs;
-    enuUpdatableBy::Type  UpdatableBy;
+    QMetaType::Type         ParameterType;
+    QString                 Name;
+    QString                 ParamTypeName;
+    QVariant                DefaultValue;
+    QFieldValidator         ExtraValidator;
+    QString                 RenameAs;
+    enuUpdatableBy::Type    UpdatableBy;
+    QString                 MasterName;
+
 private:
     quint32         Privs;
 };
 
-class clsORMField {
+class clsORMField
+{
 public:
-    inline clsORMField():
-        Data(new clsORMFieldData)
-    {}
-    inline clsORMField(const clsORMField& _other, const QString& _newName = QString()):
-        Data(_other.Data) {
-        if (_newName.size()) {
-            this->Data.detach();
-            this->Data->Name = _newName;
-        }
-    }
-    inline clsORMField(const QString& _name,
-                       const QString& _type,
-                       const QFieldValidator& _extraValidator = QFV.allwaysValid(),
-                       QVariant _defaultValue = {},
-                       enuUpdatableBy::Type _updatableBy = enuUpdatableBy::OWNER,
-                       bool _isSortable = true,
-                       bool _isFilterable = true,
-                       bool _isSelfIdentifier = false,
-                       bool _isVirtual = false,
-                       bool _isPrimaryKey = false,
-                       bool _isSelectable = true,
-                       const QString& _renameAs = {}) :
-        Data(new clsORMFieldData(
-                 _name,
-                 _type,
-                 _defaultValue,
-                 _extraValidator,
-                 _updatableBy,
-                 _isSortable,
-                 _isFilterable,
-                 _isSelfIdentifier,
-                 _isVirtual,
-                 _isPrimaryKey,
-                 _isSelectable,
-                 _renameAs
-                 ))
-    {}
+    clsORMField();
+    clsORMField(const clsORMField& _other, const QString& _newName = {});
+    clsORMField(const QString& _name,
+                const QString& _type,
+                const QFieldValidator& _extraValidator = QFV.allwaysValid(),
+                QVariant _defaultValue = {},
+                enuUpdatableBy::Type _updatableBy = enuUpdatableBy::OWNER,
+                bool _isSortable = true,
+                bool _isFilterable = true,
+                bool _isSelfIdentifier = false,
+                bool _isVirtual = false,
+                bool _isPrimaryKey = false,
+                bool _isSelectable = true,
+                const QString& _renameAs = {});
 
     void registerTypeIfNotRegisterd(intfAPIModule* _module);
     void updateTypeID(QMetaType::Type _type);
     void validate(const QVariant _value);
 
     inline QString         name() const                         { return this->Data->Name; }
+    inline QString         masterName() const                   { return this->Data->MasterName; }
     inline int             parameterType() const                { return this->Data->ParameterType; }
     inline QString         paramTypeName() const                { return this->Data->ParamTypeName; }
     inline QFieldValidator extraValidator() const               { return this->Data->ExtraValidator; }

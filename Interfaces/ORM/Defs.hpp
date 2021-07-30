@@ -85,7 +85,7 @@ TAPI_ADD_STRING_TYPE(QString, GroupBy_t);
 
 namespace Targoman::API {
 
-static QString QUERY_SEPARATOR = "\n";
+static QString QUERY_SEPARATOR   = "\n";
 static QString CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 
 } //namespace Targoman::API

@@ -175,6 +175,8 @@ protected:
 };
 
 /***************************************************************************************/
+class clsColSpecsData;
+
 class clsColSpecs;
 
 class clsConditionData;
@@ -230,7 +232,8 @@ public:
     bool hasMany() const;
 
     QString buildConditionString(
-            const QString &_mainTableNameOrAlias,
+            const QString &_tableName,
+            const QString &_tableAlias,
             const QMap<QString, stuRelatedORMField> &_selectableColsMap,
             const QMap<QString, stuRelatedORMField> &_filterableColsMap,
             bool _allowUseColumnAlias,
@@ -250,6 +253,8 @@ class clsColSpecs
 public:
     clsColSpecs();
     clsColSpecs(const clsColSpecs& _other);
+    ~clsColSpecs();
+
     clsColSpecs(
         const QString& _name,
         const QString& _renameAs // = {}
@@ -271,7 +276,10 @@ public:
         const QVariant& _falseValue = {}
     );
 
-    QString toString(const QString& _mainTableNameOrAlias,
+    QString buildColNameString(
+        const QString &_tableName,
+        const QString &_tableAlias,
+        const QString &_otherTableAlias,
         const QMap<QString, stuRelatedORMField> &_selectableColsMap,
         const QMap<QString, stuRelatedORMField> &_filterableColsMap,
         bool _allowUseColumnAlias,
@@ -280,23 +288,10 @@ public:
         /*OUT*/ bool *_isStatusColumn = nullptr
     );
 
-    const inline QString renameAs() const { return this->RenameAs; }
+    const QString renameAs() const;
 
-private:
-    QString Name;
-    QString RenameAs;
-//    union unnAggregation {
-//        enuAggregation::Type Simple;
-//        enuConditionalAggregation::Type Conditional;
-//    };
-//    NULLABLE_TYPE(unnAggregation) Aggregation = NULLABLE_NULL_VALUE;
-    NULLABLE_TYPE(enuAggregation::Type) SimpleAggregation;
-    NULLABLE_TYPE(enuConditionalAggregation::Type) ConditionalAggregation;
-    clsCondition Condition;
-    QVariant TrueValue;
-    QVariant FalseValue;
-    DBExpression Expression;
-//    QVariant Expression;
+protected:
+    QSharedDataPointer<clsColSpecsData> Data;
 
     friend clsCondition;
 };

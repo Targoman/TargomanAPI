@@ -42,26 +42,74 @@ QString makeColRenamedAs(const clsORMField& _col, const QString& _prefix = {})
     return (_col.renameAs().isEmpty() && _prefix.isEmpty() ? "" : " AS `"+ finalColName(_col, _prefix) + "`");
 };
 
-QString makeColName(const QString& _tableName, const clsORMField& _col, bool _appendAs = false, const stuRelation& _relation = InvalidRelation)
+QString makeColName(
+        const QString& _tableName,
+        const QString& _tableAlias,
+        const clsORMField& _col,
+        bool _appendAs = false,
+        const stuRelation& _relation = InvalidRelation
+    )
 {
-    QString ColName = _col.name();
+//    qDebug() << _col.masterName() << _col.name() << _col.renameAs() << _appendAs;
 
-    if (_relation.Column.size() && _relation.RenamingPrefix.size())
-        ColName = ColName.replace(QRegularExpression("^" + _relation.RenamingPrefix), "");
+    QStringList ret;
 
-    return (_relation.Column.isEmpty()
-            ? (_col.isVirtual() ? "" : _tableName + ".")
-            : (_relation.RenamingPrefix.isEmpty()
-                ? (_tableName.length() ? _tableName : _relation.ReferenceTable)
-                : _relation.RenamingPrefix
-              ) + "."
-           )
-//           + "."
-           + ColName
-           + (_appendAs
-              ? makeColRenamedAs(_col, _relation.RenamingPrefix)
-              : ""
-             );
+    //order:
+    // 1:alias
+    // 2:relation
+    // 3:table
+
+    //check names e.g. CURRENT_TIMESTAMP()
+//    if (ColName.indexOf('(') < 0)
+    if (_col.isVirtual() == false)
+    {
+        if (_tableAlias.length())
+            ret.append(_tableAlias + ".");
+        else if (_relation.ReferenceTable.isEmpty() == false)
+            ret.append(_relation.ReferenceTable.split('.').last() + ".");
+        else if (_tableName.length())
+            ret.append(_tableName + ".");
+    }
+
+    if (_col.masterName().length())
+    {
+        ret.append(_col.masterName());
+        if (_appendAs)
+        {
+            ret.append(" AS ");
+            if (_col.renameAs().length())
+                ret.append(_col.renameAs());
+            else
+                ret.append(_col.name());
+        }
+    }
+    else
+    {
+        QString ColName = _col.name();
+
+        if (_relation.Column.size() && _relation.RenamingPrefix.size())
+            ColName = ColName.replace(QRegularExpression("^" + _relation.RenamingPrefix), "");
+
+        ret.append(ColName);
+
+        if (_appendAs)
+            ret.append(makeColRenamedAs(_col, _relation.RenamingPrefix));
+    }
+
+    return ret.join("");
+
+//    return (_relation.Column.isEmpty()
+//            ? (_col.isVirtual() ? "" : _tableName + ".")
+//            : (_relation.RenamingPrefix.isEmpty()
+//                ? (_tableName.length() ? _tableName : _relation.ReferenceTable)
+//                : _relation.RenamingPrefix
+//              ) + "."
+//           )
+//           + ColName
+//           + (_appendAs
+//              ? makeColRenamedAs(_col, _relation.RenamingPrefix)
+//              : ""
+//             );
 };
 
 QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, clsORMField* baseCol = nullptr)
@@ -242,48 +290,75 @@ DBExpression DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _i
 }
 
 /***************************************************************************************/
+/* clsColSpecs *************************************************************************/
 /***************************************************************************************/
-/***************************************************************************************/
-clsColSpecs::clsColSpecs() {}
+class clsColSpecsData : public QSharedData
+{
+public:
+    clsColSpecsData() : QSharedData() {}
 
-clsColSpecs::clsColSpecs(const clsColSpecs& _other) :
-    Name(_other.Name),
-    RenameAs(_other.RenameAs),
-    SimpleAggregation(_other.SimpleAggregation),
-    ConditionalAggregation(_other.ConditionalAggregation),
-    Condition(_other.Condition),
-    TrueValue(_other.TrueValue),
-    FalseValue(_other.FalseValue),
-    Expression(_other.Expression)
-{}
+    clsColSpecsData(const clsColSpecsData &_other) :
+        QSharedData(_other),
+        Name(_other.Name),
+        RenameAs(_other.RenameAs),
+        SimpleAggregation(_other.SimpleAggregation),
+        ConditionalAggregation(_other.ConditionalAggregation),
+        Condition(_other.Condition),
+        TrueValue(_other.TrueValue),
+        FalseValue(_other.FalseValue),
+        Expression(_other.Expression)
+    {}
+
+public:
+    QString Name;
+    QString RenameAs;
+//    union unnAggregation {
+//        enuAggregation::Type Simple;
+//        enuConditionalAggregation::Type Conditional;
+//    };
+//    NULLABLE_TYPE(unnAggregation) Aggregation = NULLABLE_NULL_VALUE;
+    NULLABLE_TYPE(enuAggregation::Type) SimpleAggregation;
+    NULLABLE_TYPE(enuConditionalAggregation::Type) ConditionalAggregation;
+    clsCondition Condition;
+    QVariant TrueValue;
+    QVariant FalseValue;
+    DBExpression Expression;
+//    QVariant Expression;
+};
+
+/***************************************************************************************/
+clsColSpecs::clsColSpecs() : Data(new clsColSpecsData) {}
+clsColSpecs::clsColSpecs(const clsColSpecs& _other) : Data(_other.Data) {}
+clsColSpecs::~clsColSpecs() {}
 
 clsColSpecs::clsColSpecs(
         const QString& _name,
         const QString& _renameAs
-    ) :
-    Name(_name),
-    RenameAs(_renameAs)
-{}
+    ) : Data(new clsColSpecsData)
+{
+    this->Data->Name = _name;
+    this->Data->RenameAs = _renameAs;
+}
 
 clsColSpecs::clsColSpecs(
         const DBExpression& _expression,
         const QString& _renameAs
-    ) :
-    RenameAs(_renameAs),
-    Expression(_expression)
+    ) : Data(new clsColSpecsData)
 {
-//    this->Expression = _expression;
+    this->Data->RenameAs = _renameAs;
+    this->Data->Expression = _expression;
 }
 
 clsColSpecs::clsColSpecs(
         const enuAggregation::Type _aggregation_Simple,
         const QString& _name,
         const QString& _renameAs
-    ) :
-    Name(_name),
-    RenameAs(_renameAs),
-    SimpleAggregation(_aggregation_Simple)
-{}
+    ) : Data(new clsColSpecsData)
+{
+    this->Data->Name = _name;
+    this->Data->RenameAs = _renameAs;
+    this->Data->SimpleAggregation = _aggregation_Simple;
+}
 
 clsColSpecs::clsColSpecs(
         const enuConditionalAggregation::Type _ConditionalAggregation,
@@ -291,16 +366,24 @@ clsColSpecs::clsColSpecs(
         const QString& _renameAs,
         const QVariant& _trueValue,
         const QVariant& _falseValue
-    ) :
-    RenameAs(_renameAs),
-    ConditionalAggregation(_ConditionalAggregation),
-    Condition(_condition),
-    TrueValue(_trueValue),
-    FalseValue(_falseValue)
-{}
+    ) : Data(new clsColSpecsData)
+{
+    this->Data->RenameAs = _renameAs;
+    this->Data->ConditionalAggregation = _ConditionalAggregation;
+    this->Data->Condition = _condition;
+    this->Data->TrueValue = _trueValue;
+    this->Data->FalseValue = _falseValue;
+}
 
-QString clsColSpecs::toString(
-        const QString &_mainTableNameOrAlias,
+const QString clsColSpecs::renameAs() const
+{
+    return this->Data->RenameAs;
+}
+
+QString clsColSpecs::buildColNameString(
+        const QString &_tableName,
+        const QString &_tableAlias,
+        const QString &_otherTableAlias,
         const QMap<QString, stuRelatedORMField> &_selectableColsMap,
         const QMap<QString, stuRelatedORMField> &_filterableColsMap,
         bool _allowUseColumnAlias,
@@ -311,118 +394,118 @@ QString clsColSpecs::toString(
 {
     auto applyRenameAs = [this, _allowUseColumnAlias](QString _fieldString)
     {
-        if ((_allowUseColumnAlias == false) || this->RenameAs.isEmpty())
+        if ((_allowUseColumnAlias == false) || this->Data->RenameAs.isEmpty())
             return _fieldString;
 
         if (_fieldString.contains(" AS "))
             _fieldString.replace(QRegularExpression(" AS .*"), "");
 
-        return _fieldString + " AS " + this->RenameAs;
+        return _fieldString + " AS " + this->Data->RenameAs;
     };
 
     //Expression
-    if (this->Expression.isValid())
+    if (this->Data->Expression.isValid())
     {
-//        DBExpression exp = this->Expression.value<DBExpression>();
+//        DBExpression exp = this->Data->Expression.value<DBExpression>();
 //        return applyRenameAs(exp.name());
-        return applyRenameAs(this->Expression.name());
+        return applyRenameAs(this->Data->Expression.name());
     }
 
     //ConditionalAggregation
-    if (NULLABLE_HAS_VALUE(this->ConditionalAggregation))
+    if (NULLABLE_HAS_VALUE(this->Data->ConditionalAggregation))
     {
-        if (this->Condition.isEmpty())
+        if (this->Data->Condition.isEmpty())
             throw exQueryBuilder("Condition is not provided for conditional aggregation");
 
-        if (this->TrueValue.isValid() != this->FalseValue.isValid())
-            throw exQueryBuilder(QString("Emptiness of TrueValue and FalseValue must be the same").arg(this->Name));
+        if (this->Data->TrueValue.isValid() != this->Data->FalseValue.isValid())
+            throw exQueryBuilder(QString("Emptiness of TrueValue and FalseValue must be the same").arg(this->Data->Name));
 
         QStringList parts;
 
-        QString AggFunction = enuConditionalAggregation::toStr(*this->ConditionalAggregation);
-        if (this->ConditionalAggregation != enuConditionalAggregation::IF)
+        QString AggFunction = enuConditionalAggregation::toStr(*this->Data->ConditionalAggregation);
+        if (this->Data->ConditionalAggregation != enuConditionalAggregation::IF)
             AggFunction.chop(2);
         AggFunction += "(";
-        if (this->TrueValue.isValid())
+        if (this->Data->TrueValue.isValid())
         {
-            if (this->ConditionalAggregation != enuConditionalAggregation::IF)
+            if (this->Data->ConditionalAggregation != enuConditionalAggregation::IF)
                 AggFunction += "IF (";
         }
-        if (SQLPrettyLen && this->Condition.hasMany())
+        if (SQLPrettyLen && this->Data->Condition.hasMany())
             AggFunction += "\n" + QString(SQLPrettyLen, ' ') + " ";
         parts.append(AggFunction);
 
-        parts.append(this->Condition.buildConditionString(
-                         _mainTableNameOrAlias,
+        parts.append(this->Data->Condition.buildConditionString(
+                         _tableName,
+                         _tableAlias,
                          _selectableColsMap,
                          _filterableColsMap,
                          false,
                          _renamedColumns,
                          _isStatusColumn));
 
-        if (this->TrueValue.isValid())
+        if (this->Data->TrueValue.isValid())
         {
-            if (SQLPrettyLen && this->Condition.hasMany())
+            if (SQLPrettyLen && this->Data->Condition.hasMany())
                 parts.append("\n" + QString(SQLPrettyLen, ' ') + " ");
             parts.append(",");
-            parts.append(makeValueAsSQL(this->TrueValue));
+            parts.append(makeValueAsSQL(this->Data->TrueValue));
             parts.append(",");
-            parts.append(makeValueAsSQL(this->FalseValue));
+            parts.append(makeValueAsSQL(this->Data->FalseValue));
         }
 
-        if (this->TrueValue.isValid() != false)
+        if (this->Data->TrueValue.isValid() != false)
         {
-            if (this->ConditionalAggregation != enuConditionalAggregation::IF)
+            if (this->Data->ConditionalAggregation != enuConditionalAggregation::IF)
                 parts.append(")");
         }
         parts.append(")");
         parts.append(" AS ");
-        parts.append(this->RenameAs);
+        parts.append(this->Data->RenameAs);
 
         return applyRenameAs(parts.join(""));
     }
 
     //SimpleAggregation or normal column
-    if (this->Name.isEmpty())
+    if (this->Data->Name.isEmpty())
         throw exQueryBuilder("Column name is not provided");
 
     QString AggFunction;
 
-    if (NULLABLE_IS_NULL(this->SimpleAggregation)) {
+    if (NULLABLE_IS_NULL(this->Data->SimpleAggregation)) {
        ///TODO: why using ANY_VALUE?
-//                   if (this->GroupByCols.size())
+//                   if (this->Data->GroupByCols.size())
 //                       AggFunction = "ANY_VALUE(";
     }
-    else if (*this->SimpleAggregation == enuAggregation::DISTINCT_COUNT)
+    else if (*this->Data->SimpleAggregation == enuAggregation::DISTINCT_COUNT)
         AggFunction = "COUNT(DISTINCT ";
     else
-        AggFunction = enuAggregation::toStr(*this->SimpleAggregation)
+        AggFunction = enuAggregation::toStr(*this->Data->SimpleAggregation)
                       + "(";
 
+    QString ColumnPrefix = (_otherTableAlias.length() ? _otherTableAlias : _tableAlias);
 
-    QString ColumnPrefix = _mainTableNameOrAlias;
-
-    QString NameToSearch = this->Name;
-    if (this->Name.indexOf('.') >= 0)
+    QString NameToSearch = this->Data->Name;
+    if (this->Data->Name.indexOf('.') >= 0)
     {
-        ColumnPrefix = this->Name.split('.').first();
+        ColumnPrefix = this->Data->Name.split('.').first();
 
         if (_renamedColumns.contains(ColumnPrefix))
-            NameToSearch = this->Name.split('.').last();
+            NameToSearch = this->Data->Name.split('.').last();
     }
 
     QString ColFinalName;
     const stuRelatedORMField& relatedORMField = _selectableColsMap[NameToSearch];
     if (relatedORMField.Col.name().isNull())
     {
-        if (_renamedColumns.contains(this->Name))
-            ColFinalName = this->Name;
+        if (_renamedColumns.contains(this->Data->Name))
+            ColFinalName = this->Data->Name;
         else
         {
 //            qDebug() << _renamedColumns.join(" | ");
 //            qDebug() << _selectableColsMap.keys();
 //            print_stacktrace();
-            throw exQueryBuilder("Invalid column for filtering: " + this->Name);
+            throw exQueryBuilder("Invalid column for filtering: " + this->Data->Name);
 //            return false;
         }
     }
@@ -431,23 +514,27 @@ QString clsColSpecs::toString(
         if (_isStatusColumn && (relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__))
             *_isStatusColumn = true;
 
+        if (!(relatedORMField.Relation == InvalidRelation) && (ColumnPrefix == _tableAlias))
+            ColumnPrefix = "";
+
         ColFinalName = makeColName(
+                               _tableName,
                                ColumnPrefix,
                                relatedORMField.Col,
-                               false,
+                               _allowUseColumnAlias && AggFunction.isEmpty(),
                                relatedORMField.Relation == InvalidRelation
                                     ? _relation
                                     : relatedORMField.Relation
                             );
     }
 
-    if (AggFunction.size())
+    if (AggFunction.length())
        return applyRenameAs(AggFunction
                             + ColFinalName.split(' ').first()
                             + ")"
 //                                + " AS "
-//                                + (this->RenameAs.size()
-//                                   ? this->RenameAs
+//                                + (this->Data->RenameAs.size()
+//                                   ? this->Data->RenameAs
 //                                   : AggFunction.replace('(', "") + '_' + ColFinalName.split(' ').last()
 //                                  )
                             );
@@ -788,7 +875,8 @@ clsCondition& clsCondition::parse(
 */
 
 QString clsCondition::buildConditionString(
-        const QString &_mainTableNameOrAlias,
+        const QString &_tableName,
+        const QString &_tableAlias,
         const QMap<QString, stuRelatedORMField> &_selectableColsMap,
         const QMap<QString, stuRelatedORMField> &_filterableColsMap,
         bool _allowUseColumnAlias, //for having
@@ -799,20 +887,15 @@ QString clsCondition::buildConditionString(
     if (this->Data->Conditions.isEmpty())
         return "";
 
-    /*std::function<QString(
-        const QString& _tableNameOrAlias,
-//        const QString& _col,
-        const clsColSpecs& _colSpecs,
-        bool *_statusColHasCriteria
-    )>*/ auto makeColNameHelper = [
-        &_mainTableNameOrAlias,
+    auto makeColNameHelper = [
+        &_tableName,
+        &_tableAlias,
         &_selectableColsMap,
         &_filterableColsMap,
         &_allowUseColumnAlias, //for having
         &_renamedColumns
     ] (
         const QString& _tableNameOrAlias,
-//        const QString& _col,
         clsColSpecs& _colSpecs,
         bool *_statusColHasCriteria
     ) {
@@ -820,9 +903,14 @@ QString clsCondition::buildConditionString(
 //            return QString("%1.%2")
 //                .arg(_tableNameOrAlias)
 //                .arg(_col);
+
+//        bool IsFromMasterTable = (relatedORMField.Relation == InvalidRelation);
+
         bool IsStatusColumn = false;
-        QString ret = _colSpecs.toString(
-                    _tableNameOrAlias.length() ? _tableNameOrAlias : _mainTableNameOrAlias,
+        QString ret = _colSpecs.buildColNameString(
+                    _tableName,
+                    _tableAlias,
+                    _tableNameOrAlias,
                     _selectableColsMap,
                     _filterableColsMap,
                     _allowUseColumnAlias,
@@ -868,12 +956,12 @@ QString clsCondition::buildConditionString(
         if (conditionData.isAggregator())
         {
             if (iter == this->Data->Conditions.end()-1)
-                throw exQueryBuilder(QString("aggregator '%1' must follow a valid condition").arg(conditionData.ColSpecs.Name));
+                throw exQueryBuilder(QString("aggregator '%1' must follow a valid condition").arg(conditionData.ColSpecs.Data->Name));
 
             if (SQLPrettyLen)
-                CondStr += "\n" + conditionData.ColSpecs.Name.rightJustified(SQLPrettyLen);
+                CondStr += "\n" + conditionData.ColSpecs.Data->Name.rightJustified(SQLPrettyLen);
             else
-                CondStr += " " + conditionData.ColSpecs.Name;
+                CondStr += " " + conditionData.ColSpecs.Data->Name;
 
             CondStr += " ";
         }
@@ -887,7 +975,8 @@ QString clsCondition::buildConditionString(
             }
 
             CondStr += conditionData.Condition.buildConditionString(
-                _mainTableNameOrAlias,
+                _tableName,
+                _tableAlias,
                 _selectableColsMap,
                 _filterableColsMap,
                 _allowUseColumnAlias, //for having
@@ -903,10 +992,6 @@ QString clsCondition::buildConditionString(
         }
         else
         {
-            stuRelatedORMField relatedORMField;
-            if (conditionData.ColSpecs.Name.isEmpty() == false)
-                relatedORMField = _filterableColsMap.value(conditionData.ColSpecs.Name);
-
             CondStr += makeColNameHelper(
                            conditionData.TableNameOrAlias,
                            conditionData.ColSpecs,
@@ -969,14 +1054,21 @@ QString clsCondition::buildConditionString(
 
                 if (conditionData.Value.isValid())
                 {
-//                    qDebug() << "^^^^^^^^^^^^^^^^^^^^^^^^^" << __FUNCTION__ << conditionData.Value << conditionData.Col;
+                    stuRelatedORMField relatedORMField;
+                    if (conditionData.ColSpecs.Data->Name.isEmpty() == false)
+                        relatedORMField = _filterableColsMap.value(conditionData.ColSpecs.Data->Name);
+
+                    //                    qDebug() << "^^^^^^^^^^^^^^^^^^^^^^^^^" << __FUNCTION__ << conditionData.Value << conditionData.Col;
+
                     CondStr += makeValueAsSQL(conditionData.Value, true, relatedORMField.isValid() ? &relatedORMField.Col : nullptr);
                 }
                 else
+                {
                     CondStr += makeColNameHelper(
                                    conditionData.OtherTableNameOrAlias,
                                    conditionData.OtherColSpecs,
                                    nullptr);
+                }
             }
         }
     }
@@ -1249,7 +1341,8 @@ public:
                     j += " ON ";
 
                 j += Join.On.buildConditionString(
-                    MainTableNameOrAlias,
+                    this->Owner->Data->Table.Name,
+                    this->Owner->Data->Alias,
                     this->Owner->Data->Table.SelectableColsMap,
                     this->Owner->Data->Table.FilterableColsMap,
                     false,
@@ -1495,7 +1588,8 @@ public:
         bool StatusColHasCriteria = false;
 
         this->PreparedItems.Where = this->WhereClauses.buildConditionString(
-            MainTableNameOrAlias,
+            this->Owner->Data->Table.Name,
+            this->Owner->Data->Alias,
             this->Owner->Data->Table.SelectableColsMap,
             this->Owner->Data->Table.FilterableColsMap,
             false,
@@ -1566,7 +1660,8 @@ public:
                     stuRelatedORMField relatedORMField = this->Owner->Data->Table.FilterableColsMap.value(PatternMatches.captured(1).trimmed());
                     if (relatedORMField.isValid())
                         Rule += makeColName(
-                                    MainTableNameOrAlias,
+                                    this->Owner->Data->Table.Name,
+                                    this->Owner->Data->Alias,
                                     relatedORMField.Col,
                                     false,
                                     relatedORMField.Relation
@@ -1640,7 +1735,15 @@ public:
                     if (Col.isPrimaryKey())
                     {
                         if (PkValue.size())
-                            PkFilters.append(makeColName(MainTableNameOrAlias, Col) + " = \"" + PkValue + "\"");
+                        {
+                            QString ColName = makeColName(
+                                                  this->Owner->Data->Table.Name,
+                                                  this->Owner->Data->Alias,
+                                                  Col,
+                                                  false);
+
+                            PkFilters.append(ColName + " = \"" + PkValue + "\"");
+                        }
                         break;
                     }
                 }
@@ -1662,10 +1765,10 @@ public:
         QStringList w;
         foreach (auto Col, this->Owner->Data->Table.BaseCols) {
             if (_checkStatusCol && (StatusColHasCriteria == false) && Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                    w.append(QString("%1 != 'R'").arg(makeColName(MainTableNameOrAlias, Col, false)));
+                    w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, Col, false)));
 
             if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
-                w.append(QString("%1 = 0").arg(makeColName(MainTableNameOrAlias, Col, false)));
+                w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, Col, false)));
         }
         if (w.length()) {
             if (this->PreparedItems.Where.length())
@@ -1817,7 +1920,8 @@ public:
 
         /****************************************************************************/
         this->PreparedItems.Having = this->HavingClauses.buildConditionString(
-            MainTableNameOrAlias,
+            this->Owner->Data->Table.Name,
+            this->Owner->Data->Alias,
             this->Owner->Data->Table.SelectableColsMap,
             this->Owner->Data->Table.FilterableColsMap,
             true,
@@ -1942,8 +2046,7 @@ public:
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
 
         /****************************************************************************/
-        auto addCol = [this, &MainTableNameOrAlias/*, _prettifierJustifyLen*/]
-                      (clsColSpecs& _col, const stuRelation& _relation = InvalidRelation)
+        auto addCol = [this](clsColSpecs& _col, const stuRelation& _relation = InvalidRelation)
         {
 //            auto updateRename = [this, _col](QString _fieldString)
 //            {
@@ -1959,8 +2062,10 @@ public:
 
             this->SelectQueryPreparedItems.Cols.append(
 //                        updateRename(
-                            _col.toString(
-                                MainTableNameOrAlias,
+                            _col.buildColNameString(
+                                this->Table.Name,
+                                this->Alias,
+                                "",
                                 this->Table.SelectableColsMap,
                                 this->Table.FilterableColsMap,
                                 true,
@@ -1979,7 +2084,7 @@ public:
         if (this->RequiredCols.isEmpty()) {
             foreach(auto Col, this->Table.BaseCols) {
                 if (Col.isSelectable())
-                    this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true));
+                    this->SelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, Col, true));
             }
         }
         else {
@@ -2425,20 +2530,6 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     }
 
     //-----------
-    if (this->Data->SelectQueryPreparedItems.OrderBy.size())
-    {
-        if (SQLPrettyLen) {
-            QueryParts.append(QString("ORDER BY").rightJustified(SQLPrettyLen)
-                              + " "
-                              + this->Data->SelectQueryPreparedItems.OrderBy.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
-        }
-        else {
-            QueryParts.append("ORDER BY");
-            QueryParts.append(this->Data->SelectQueryPreparedItems.OrderBy.join(","));
-        }
-    }
-
-    //-----------
     if (this->GroupAndHavingTraitData->PreparedItems.GroupBy.size())
     {
         if (SQLPrettyLen) {
@@ -2463,6 +2554,20 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
         else {
             QueryParts.append("HAVING");
             QueryParts.append(this->GroupAndHavingTraitData->PreparedItems.Having);
+        }
+    }
+
+    //-----------
+    if (this->Data->SelectQueryPreparedItems.OrderBy.size())
+    {
+        if (SQLPrettyLen) {
+            QueryParts.append(QString("ORDER BY").rightJustified(SQLPrettyLen)
+                              + " "
+                              + this->Data->SelectQueryPreparedItems.OrderBy.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+        }
+        else {
+            QueryParts.append("ORDER BY");
+            QueryParts.append(this->Data->SelectQueryPreparedItems.OrderBy.join(","));
         }
     }
 
@@ -2745,7 +2850,7 @@ public:
 
                     providedBaseCols.append(baseCol);
 
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
 
                     found = true;
 
@@ -2764,14 +2869,14 @@ public:
 
                 if (baseCol.updatableBy() == enuUpdatableBy::__CREATOR__) {
 //                    extraBaseCols.append(baseCol);
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
                     extraBaseColsValues.append(baseCol.toDB(_currentUserID));
                 }
                 else if (baseCol.defaultValue() == QNow)
                 {
                     //NOW() is defined as default value in db schema
 
-//                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+//                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol, false));
 //                    extraBaseColsValues.append(DBExpression::NOW().toString());
                 }
                 else if ((baseCol.defaultValue() != QNull)
@@ -2780,8 +2885,8 @@ public:
                          && (baseCol.defaultValue() != QDBInternal)
                     )
                 {
-//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol));
+//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol, false) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
                     extraBaseColsValues.append(baseCol.toDB(baseCol.defaultValue()));
                 }
             }
@@ -3287,7 +3392,7 @@ public:
             if (relatedORMField.Col.isReadOnly())
                 throw exHTTPInternalServerError("Invalid change to read-only column <" + key + ">");
 
-            QString colName = makeColName(MainTableNameOrAlias, relatedORMField.Col);
+            QString colName = makeColName(this->Table.Name, this->Alias, relatedORMField.Col, false);
 
             if (val.userType() == QMetaType::QStringList) {
                 QStringList l = val.value<QStringList>();
@@ -3318,7 +3423,7 @@ public:
 
         foreach (clsORMField baseCol, this->Table.BaseCols) {
             if (providedCols.contains(baseCol.name()) == false && baseCol.updatableBy() == enuUpdatableBy::__UPDATER__ ) {
-                auto colName = makeColName(MainTableNameOrAlias, baseCol);
+                auto colName = makeColName(this->Table.Name, this->Alias, baseCol, false);
 
                 if (_useBinding == false)
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.toDB(_currentUserID).toString()));

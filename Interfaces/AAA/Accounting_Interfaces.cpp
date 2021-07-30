@@ -444,9 +444,10 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnCreatedBy_usrID,         ORM_CREATED_BY },
             { tblAccountCouponsBase::cpnUpdatedBy_usrID,         ORM_UPDATED_BY },
         },
-        {///< Col                                                               Reference Table   ForeignCol          Rename     LeftJoin
+        {///< Col                           Reference Table                             ForeignCol                              Rename    LeftJoin
             ORM_RELATION_OF_CREATOR(tblAccountCouponsBase::cpnCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountCouponsBase::cpnUpdatedBy_usrID),
+            { tblAccountCouponsBase::cpnID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uas_cpnID,    "",       true },
         },
         {
             { {

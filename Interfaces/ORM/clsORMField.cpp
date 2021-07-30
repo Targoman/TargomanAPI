@@ -21,6 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
+#include "Interfaces/Common/base.h"
 #include "clsORMField.h"
 #include "Server/ServerConfigs.h"
 #include "Server/RESTAPIRegistry.h"
@@ -89,6 +90,55 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
     }
     this->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->ParamTypeName.toUtf8()));
 }
+
+/****************************************************************/
+clsORMField::clsORMField() :
+    Data(new clsORMFieldData)
+{}
+
+clsORMField::clsORMField(const clsORMField& _other, const QString& _newName) :
+    Data(_other.Data)
+{
+    if (_newName.length() && (this->Data->Name != _newName))
+    {
+//        print_stacktrace();
+        this->Data.detach();
+        this->Data->MasterName = this->Data->Name;
+        this->Data->Name = _newName;
+        this->Data->RenameAs = "";
+    }
+}
+
+clsORMField::clsORMField(
+        const QString& _name,
+        const QString& _type,
+        const QFieldValidator& _extraValidator,
+        QVariant _defaultValue,
+        enuUpdatableBy::Type _updatableBy,
+        bool _isSortable,
+        bool _isFilterable,
+        bool _isSelfIdentifier,
+        bool _isVirtual,
+        bool _isPrimaryKey,
+        bool _isSelectable,
+        const QString& _renameAs
+    ) :
+    Data(new clsORMFieldData(
+             _name,
+             _type,
+             _defaultValue,
+             _extraValidator,
+             _updatableBy,
+             _isSortable,
+             _isFilterable,
+             _isSelfIdentifier,
+             _isVirtual,
+             _isPrimaryKey,
+             _isSelectable,
+             _renameAs
+             )
+    )
+{}
 
 void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
 {

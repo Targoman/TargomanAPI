@@ -208,6 +208,9 @@ void clsTable::prepareFiltersList()
 
         stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol);
 
+        if (NewCol.masterName().length())
+            this->HasMasterNameColsMap.insert(NewCol.masterName(), relatedORMField);
+
         if (Col.isSelectable())
             this->SelectableColsMap.insert(FinalColName, relatedORMField);
 
@@ -231,6 +234,9 @@ void clsTable::prepareFiltersList()
             this->AllCols.append(NewCol);
 
             stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol, Relation);
+
+            if (NewCol.masterName().length())
+                this->HasMasterNameColsMap.insert(NewCol.masterName(), relatedORMField);
 
             if (Col.isSelectable())
                 this->SelectableColsMap.insert(FinalColName, relatedORMField);

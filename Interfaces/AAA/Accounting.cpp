@@ -427,7 +427,9 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
                       .groupBy(tblAccountUserAssetsBase::uas_vchID)
                 , "tmp_cpn_count"
-                , { "tmp_cpn_count", tblAccountUserAssetsBase::uas_cpnID, enuConditionOperator::Equal, tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
+                , { "tmp_cpn_count", tblAccountUserAssetsBase::uas_cpnID,
+                    enuConditionOperator::Equal,
+                    tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
             )
             .addCol("tmp_cpn_count._discountUsedCount")
 
@@ -437,7 +439,9 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
                       .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, currentUserID })
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
                 , "tmp_cpn_amount"
-                , { "tmp_cpn_amount", tblAccountUserAssetsBase::uas_cpnID, enuConditionOperator::Equal, tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
+                , { "tmp_cpn_amount", tblAccountUserAssetsBase::uas_cpnID,
+                    enuConditionOperator::Equal,
+                    tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
             )
             .addCol("tmp_cpn_amount._discountUsedAmount")
 
