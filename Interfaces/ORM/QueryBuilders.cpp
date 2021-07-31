@@ -23,9 +23,6 @@
 
 #include "QueryBuilders.h"
 #include "clsTable.h"
-
-//using namespace Targoman::DBManager;
-
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
@@ -33,7 +30,8 @@ namespace Targoman::API::ORM {
 
 stuRelation InvalidRelation("", "", "");
 
-QString finalColName(const clsORMField& _col, const QString& _prefix) {
+QString finalColName(const clsORMField& _col, const QString& _prefix)
+{
     return _prefix + (_col.renameAs().isEmpty() ? _col.name() : _col.renameAs());
 }
 
@@ -60,7 +58,6 @@ QString makeColName(
     // 3:table
 
     //check names e.g. CURRENT_TIMESTAMP()
-//    if (ColName.indexOf('(') < 0)
     if (_col.isVirtual() == false)
     {
         if (_tableAlias.length())
@@ -98,19 +95,6 @@ QString makeColName(
     }
 
     return ret.join("");
-
-//    return (_relation.Column.isEmpty()
-//            ? (_col.isVirtual() ? "" : _tableName + ".")
-//            : (_relation.RenamingPrefix.isEmpty()
-//                ? (_tableName.length() ? _tableName : _relation.ReferenceTable)
-//                : _relation.RenamingPrefix
-//              ) + "."
-//           )
-//           + ColName
-//           + (_appendAs
-//              ? makeColRenamedAs(_col, _relation.RenamingPrefix)
-//              : ""
-//             );
 };
 
 QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, clsORMField* baseCol = nullptr)
@@ -393,13 +377,14 @@ QString clsColSpecs::buildColNameString(
         const QMap<QString, stuRelatedORMField> &_filterableColsMap,
         bool _allowUseColumnAlias,
         QStringList &_renamedColumns,
+        bool _appendAs,
         const stuRelation &_relation,
         /*OUT*/ bool *_isStatusColumn
     )
 {
-    auto applyRenameAs = [this, _allowUseColumnAlias](QString _fieldString)
+    auto applyRenameAs = [this, &_appendAs](QString _fieldString)
     {
-        if ((_allowUseColumnAlias == false) || this->Data->RenameAs.isEmpty())
+        if ((_appendAs == false) || this->Data->RenameAs.isEmpty())
             return _fieldString;
 
         if (_fieldString.contains(" AS "))
@@ -445,7 +430,7 @@ QString clsColSpecs::buildColNameString(
                          _tableAlias,
                          _selectableColsMap,
                          _filterableColsMap,
-                         false,
+                         _allowUseColumnAlias,
                          _renamedColumns,
                          _isStatusColumn));
 
@@ -478,7 +463,8 @@ QString clsColSpecs::buildColNameString(
 
     QString AggFunction;
 
-    if (NULLABLE_IS_NULL(this->Data->SimpleAggregation)) {
+    if (NULLABLE_IS_NULL(this->Data->SimpleAggregation))
+    {
        ///TODO: why using ANY_VALUE?
 //                   if (this->Data->GroupByCols.size())
 //                       AggFunction = "ANY_VALUE(";
@@ -496,7 +482,7 @@ QString clsColSpecs::buildColNameString(
     {
         ColumnPrefix = this->Data->Name.split('.').first();
 
-        if (_renamedColumns.contains(ColumnPrefix))
+        if (_allowUseColumnAlias && _renamedColumns.contains(ColumnPrefix))
             NameToSearch = this->Data->Name.split('.').last();
     }
 
@@ -504,7 +490,7 @@ QString clsColSpecs::buildColNameString(
     const stuRelatedORMField& relatedORMField = _selectableColsMap[NameToSearch];
     if (relatedORMField.Col.name().isNull())
     {
-        if (_renamedColumns.contains(this->Data->Name))
+        if (_allowUseColumnAlias && _renamedColumns.contains(this->Data->Name))
             ColFinalName = this->Data->Name;
         else
         {
@@ -527,7 +513,7 @@ QString clsColSpecs::buildColNameString(
                                _tableName,
                                ColumnPrefix,
                                relatedORMField.Col,
-                               _allowUseColumnAlias && AggFunction.isEmpty(),
+                               _appendAs && AggFunction.isEmpty(),
                                relatedORMField.Relation == InvalidRelation
                                     ? _relation
                                     : relatedORMField.Relation
@@ -921,6 +907,7 @@ QString clsCondition::buildConditionString(
                     _filterableColsMap,
                     _allowUseColumnAlias,
                     _renamedColumns,
+                    false,
                     InvalidRelation,
                     &IsStatusColumn);
 
@@ -1781,7 +1768,7 @@ public:
             if (baseCol.Relation == InvalidRelation)
             {
                 if (_checkStatusCol && (StatusColHasCriteria == false) && baseCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                        w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
+                    w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
 
                 if (baseCol.Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
                     w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
@@ -1791,12 +1778,18 @@ public:
         if (w.length())
         {
             if (this->PreparedItems.Where.length())
-                this->PreparedItems.Where = w.join(" AND ") + " AND (" + this->PreparedItems.Where + ")";
+            {
+                if (SQLPrettyLen)
+                    w.append(QString("(\n%1 %2\n%1 )").arg(QString(SQLPrettyLen, ' ')).arg(this->PreparedItems.Where));
+                else
+                    w.append(QString("(%1)").arg(this->PreparedItems.Where));
+            }
+
+            if (SQLPrettyLen)
+                this->PreparedItems.Where = w.join("\n" + QString("AND").rightJustified(SQLPrettyLen) + " ");
             else
                 this->PreparedItems.Where = w.join(" AND ");
         }
-
-        /****************************************************************************/
     }
 
 public:
@@ -1943,7 +1936,7 @@ public:
             this->Owner->Data->Alias,
             this->Owner->Data->Table.SelectableColsMap,
             this->Owner->Data->Table.FilterableColsMap,
-            false,
+            true,
             this->Owner->Data->BaseQueryPreparedItems.RenamedCols);
     }
 
@@ -2067,32 +2060,19 @@ public:
         /****************************************************************************/
         auto addCol = [this](clsColSpecs& _col, const stuRelation& _relation = InvalidRelation)
         {
-//            auto updateRename = [this, _col](QString _fieldString)
-//            {
-//                if (_col.renameAs().isEmpty())
-//                    return _fieldString;
-
-//                this->BaseQueryPreparedItems.RenamedCols.append(_col.renameAs());
-
-//                if (_fieldString.contains(" AS "))
-//                    _fieldString.replace(QRegularExpression(" AS .*"), "");
-//                return _fieldString + " AS " + _col.renameAs();
-//            }; //updateRename
-
             this->SelectQueryPreparedItems.Cols.append(
-//                        updateRename(
-                            _col.buildColNameString(
-                                this->Table.Name,
-                                this->Alias,
-                                "",
-                                this->Table.SelectableColsMap,
-                                this->Table.FilterableColsMap,
-                                true,
-                                this->BaseQueryPreparedItems.RenamedCols,
-                                _relation
-                                )
-//                            )
-                        );
+                _col.buildColNameString(
+                    this->Table.Name,
+                    this->Alias,
+                    "",
+                    this->Table.SelectableColsMap,
+                    this->Table.FilterableColsMap,
+                    true,
+                    this->BaseQueryPreparedItems.RenamedCols,
+                    true,
+                    _relation
+                )
+            );
 
             if (_col.renameAs().size())
                 this->BaseQueryPreparedItems.RenamedCols.append(_col.renameAs());

@@ -284,6 +284,7 @@ public:
         const QMap<QString, stuRelatedORMField> &_filterableColsMap,
         bool _allowUseColumnAlias,
         QStringList &_renamedColumns,
+        bool _appendAs,
         const stuRelation &_relation = InvalidRelation,
         /*OUT*/ bool *_isStatusColumn = nullptr
     );

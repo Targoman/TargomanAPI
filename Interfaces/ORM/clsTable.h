@@ -74,7 +74,8 @@ class DeleteQuery;
 
 extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
 
-class clsTable : public intfAPIModule {
+class clsTable : public intfAPIModule
+{
 protected:
     struct stuSelectItems {
         QStringList Cols;
