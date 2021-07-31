@@ -313,7 +313,7 @@ t1.colA1 = 101
                    t1.colD1 = 103
                 OR t1.colE1 = 104
                XOR (
-                   t1.newNamerFor_F1 = ''
+                   t1.colF1 = ''
                 OR t1.colG1 = 106
                    )
                    )
@@ -413,7 +413,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1
                  , t1.colE1
-                 , t1.colF1 AS newNamerFor_F1
+                 , t1.colF1 AS `newNamerFor_F1`
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
@@ -449,7 +449,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , t1.colC1
                  , t1.colD1
                  , t1.colE1
-                 , t1.colF1 AS newNamerFor_F1
+                 , t1.colF1 AS `newNamerFor_F1`
                  , t1.colG1
                  , t1.colH1
                  , t1.colI1
@@ -487,7 +487,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT t1.colA1
                  , t1.colB1
                  , t1.colC1
-                 , t1.colD1 AS ren_colD1
+                 , t1.colD1 AS `ren_colD1`
               FROM test.t1
              WHERE t1.status1 != 'R' AND t1._InvalidatedAt = 0
 )");
@@ -516,7 +516,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             SELECT alias_t1.colA1
                  , alias_t1.colB1
                  , alias_t1.colC1
-                 , alias_t1.colD1 AS ren_colD1
+                 , alias_t1.colD1 AS `ren_colD1`
               FROM test.t1 alias_t1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
 )");
@@ -538,8 +538,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
-            SELECT AVG(t1.colA1) AS avg_colA1
-                 , SUM(t1.colB1) AS sum_colB1
+            SELECT AVG(t1.colA1) AS `avg_colA1`
+                 , SUM(t1.colB1) AS `sum_colB1`
               FROM test.t1
              WHERE t1.status1 != 'R' AND t1._InvalidatedAt = 0
 )");
@@ -588,8 +588,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QCOMPARE("\n" + qry + "\n", R"(
             SELECT t1.colA1
                  , t1.colC1
-                 , t1.colB1 AS alias_colB1
-                 , COUNT(IF (t1.colB1 = 123,1,NULL)) AS countif_colB
+                 , t1.colB1 AS `alias_colB1`
+                 , COUNT(IF (t1.colB1 = 123,1,NULL)) AS `countif_colB`
                  , COUNT(IF (
                    t1.colB1 = 123
                AND t1.colC1 LIKE 'test it'
@@ -597,11 +597,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colF1 = ''
                 OR t1.colG1 = 106
                    )
-                   ,1,NULL)) AS countif_colB1
+                   ,1,NULL)) AS `countif_colB1`
                  , SUM(IF (
                    t1.colC1 > 123
                AND t2.colD2 = 456
-                   ,10,20)) AS sumif__t1_colC1__t2_colD2
+                   ,10,20)) AS `sumif__t1_colC1__t2_colD2`
               FROM test.t1
          LEFT JOIN test.t2
                 ON t2.colA2 = t1.colC1
@@ -629,39 +629,48 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .addCol(Targoman::API::CURRENT_TIMESTAMP)
                 .leftJoin("t2")
                 .leftJoin("t2", "ZZZZZZZZZ")
-                .orderBy("newNamerFor_F1")
+                .andWhere({ "newNamerFor_F1",   enuConditionOperator::Equal, QVariantMap({ { "wa1", "wb1" } }) })
+                .andWhere({ "OTHER_F1_NAME",    enuConditionOperator::Equal, QVariantMap({ { "wa2", "wb2" } }) })
+                .andWhere({ "SUM_F1_NAME",      enuConditionOperator::Equal, QVariantMap({ { "wa3", "wb3" } }) })
                 .groupBy("newNamerFor_F1")
-                .having({ "SUM_F1_NAME", enuConditionOperator::Equal, QVariantMap({ { "aaa", "bbb" } }) })
+                .andHaving({ "newNamerFor_F1",  enuConditionOperator::Equal, QVariantMap({ { "ha1", "hb1" } }) })
+                .andHaving({ "OTHER_F1_NAME",   enuConditionOperator::Equal, QVariantMap({ { "ha2", "hb2" } }) })
+                .andHaving({ "SUM_F1_NAME",     enuConditionOperator::Equal, QVariantMap({ { "ha3", "hb3" } }) })
+                .orderBy("newNamerFor_F1")
             ;
 
             QString qry = query.buildQueryString({}, false, false, true);
 
-            if (SQLPrettyLen)
-                qDebug().nospace().noquote() << endl << endl << qry << endl;
+//            if (SQLPrettyLen)
+//                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
             SELECT ________.colA1
                  , t2.colA2
                  , ZZZZZZZZZ.colA2
-                 , ________.colF1 AS newNamerFor_F1
-                 , ________.colF1 AS OTHER_F1_NAME
-                 , SUM(________.colF1) AS SUM_F1_NAME
-                 , CURRENT_TIMESTAMP() AS CURRENT_TIMESTAMP
+                 , ________.colF1 AS `newNamerFor_F1`
+                 , ________.colF1 AS `OTHER_F1_NAME`
+                 , SUM(________.colF1) AS `SUM_F1_NAME`
+                 , CURRENT_TIMESTAMP() AS `CURRENT_TIMESTAMP`
               FROM test.t1 ________
          LEFT JOIN test.t2
                 ON t2.colA2 = ________.colC1
          LEFT JOIN test.t2 ZZZZZZZZZ
                 ON ZZZZZZZZZ.colA2 = ________.colC1
-             WHERE ________.status1 != 'R' AND ________._InvalidatedAt = 0
-          ORDER BY newNamerFor_F1
+             WHERE ________.status1 != 'R' AND ________._InvalidatedAt = 0 AND (________.colF1 = '{"wa1":"wb1"}'
+               AND OTHER_F1_NAME = '{"wa2":"wb2"}'
+               AND SUM_F1_NAME = '{"wa3":"wb3"}')
           GROUP BY newNamerFor_F1
-            HAVING SUM_F1_NAME = '{"aaa":"bbb"}'
+            HAVING ________.colF1 = '{"ha1":"hb1"}'
+               AND OTHER_F1_NAME = '{"ha2":"hb2"}'
+               AND SUM_F1_NAME = '{"ha3":"hb3"}'
+          ORDER BY newNamerFor_F1
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     void queryString_SELECT_join_WithAlias() {
         QT_TRY {
             SelectQuery query = SelectQuery(t1, "alias_t1")
@@ -809,12 +818,10 @@ private:
 
             QCOMPARE("\n" + qry + "\n", R"(
             SELECT alias_t1.colA1
-                 , alias_t1.colB1 AS alias_colB1
-                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+                 , alias_t1.colB1 AS `alias_colB1`
+                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS `countif_colB`
               FROM test.t1 alias_t1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
-          ORDER BY colA1
-                 , colB1 DESC
           GROUP BY colA1
                  , slbStatus
             HAVING alias_t1.colB1 = 123
@@ -823,6 +830,8 @@ private:
                    alias_t1.colF1 = ''
                 OR alias_colB1 = 106
                    )
+          ORDER BY colA1
+                 , colB1 DESC
              LIMIT 20,1
 )");
         } QT_CATCH (const std::exception &e) {
@@ -865,15 +874,13 @@ private:
 //                qDebug().nospace().noquote() << endl << endl << qry << endl;
 
             QCOMPARE("\n" + qry + "\n", R"(
-            SELECT COUNT(*) AS cnt
+            SELECT COUNT(*) AS `cnt`
               FROM (
             SELECT alias_t1.colA1
-                 , alias_t1.colB1 AS alias_colB1
-                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+                 , alias_t1.colB1 AS `alias_colB1`
+                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS `countif_colB`
               FROM test.t1 alias_t1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
-          ORDER BY colA1
-                 , colB1 DESC
           GROUP BY colA1
                  , slbStatus
             HAVING alias_t1.colB1 = 123
@@ -882,7 +889,9 @@ private:
                    alias_t1.colF1 = ''
                 OR alias_colB1 = 106
                    )
-                   ) qry
+          ORDER BY colA1
+                 , colB1 DESC
+                   ) `qry`
 )");
         } QT_CATCH (const std::exception &e) {
             QTest::qFail(e.what(), __FILE__, __LINE__);
@@ -929,12 +938,10 @@ private:
 
             QCOMPARE("\n" + qry + "\n", R"(
             SELECT alias_t1.colA1
-                 , alias_t1.colB1 AS alias_colB1
-                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS countif_colB
+                 , alias_t1.colB1 AS `alias_colB1`
+                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS `countif_colB`
               FROM test.t1 alias_t1
              WHERE alias_t1.status1 != 'R' AND alias_t1._InvalidatedAt = 0
-          ORDER BY colA1
-                 , colB1 DESC
           GROUP BY colA1
                  , slbStatus
             HAVING alias_t1.colB1 = 123
@@ -943,6 +950,8 @@ private:
                    alias_t1.colF1 = ''
                 OR alias_colB1 = 106
                    )
+          ORDER BY colA1
+                 , colB1 DESC
              LIMIT 20,1
          UNION ALL
             SELECT t2.colA2
@@ -1013,7 +1022,7 @@ private:
          LEFT JOIN (
             SELECT t2.colB2
                  , t2.colC2
-                 , COUNT(t2.colA2) AS cnt
+                 , COUNT(t2.colA2) AS `cnt`
               FROM test.t2
              WHERE t2._InvalidatedAt = 0
           GROUP BY colB2
@@ -1047,7 +1056,7 @@ private:
                 .andWhere({
                               "colE1",
                               enuConditionOperator::GreaterEqual,
-                              clsColSpecs(enuAggregation::SUM, "colF1")
+                              clsColSpecs(enuAggregation::SUM, "newNamerFor_F1")
                           })
             ;
 
@@ -1223,14 +1232,14 @@ private:
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
-                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d1" } }) },
+                    { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d1" } }) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
                     {"colZ1", "22Z"},
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
-                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d2" } }) },
+                    { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d2" } }) },
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1238,14 +1247,14 @@ private:
                         { "colC1", DBExpression::CURDATE() },
                         { "colZ1", "33Z" },
                         { "colA1", DBExpression::NOW() },
-                        { "colF1", QVariantMap({ { "a", "b" }, { "c", "d3" } }) },
+                        { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d3" } }) },
                     },
                     {
                         { "colB1", 444 },
                         { "colZ1", "44Z" },
                         { "colA1", DBExpression::NOW() },
                         { "colC1", DBExpression::CURDATE() },
-                        { "colF1", QVariantMap({ { "a", "b'b" }, { "c", "d4" } }) },
+                        { "newNamerFor_F1", QVariantMap({ { "a", "b'b" }, { "c", "d4" } }) },
                     },
                 }))
             ;
@@ -1312,14 +1321,14 @@ private:
                 .addCol("colB1")
                 .addCol("colA1")
                 .addCol("colC1")
-                .addCol("colF1")
+                .addCol("newNamerFor_F1")
                 .values(QVariantMap({
                     {"colC1", DBExpression::CURDATE()},
                     {"colB1", 111},
                     {"colZ1", "11Z"},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 112},
-                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
+                    { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d" } }) },
                 }))
                 .values(QVariantMap({
                     {"colB1", 222},
@@ -1327,7 +1336,7 @@ private:
                     {"colC1", DBExpression::CURDATE()},
                     {"colA1", DBExpression::NOW()},
                     {"colG1", 212},
-                    { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
+                    { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
                 }))
                 .values(QList<QVariantMap>({
                     {
@@ -1336,7 +1345,7 @@ private:
                         {"colZ1", "33Z"},
                         {"colA1", DBExpression::NOW()},
                         {"colG1", 312},
-                        { "colF1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
+                        { "newNamerFor_F1", QVariantMap({ { "a", "b" }, { "c", "d" } }) }
                     },
                     {
                         {"colB1", 444},
@@ -1344,7 +1353,7 @@ private:
                         {"colA1", DBExpression::NOW()},
                         {"colC1", DBExpression::CURDATE()},
                         {"colG1", 412},
-                        { "colF1", QVariantMap({ { "a", "b'b" }, { "c", "d" } }) }
+                        { "newNamerFor_F1", QVariantMap({ { "a", "b'b" }, { "c", "d" } }) }
                     },
                 }))
             ;

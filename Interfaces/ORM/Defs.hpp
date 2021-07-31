@@ -145,7 +145,8 @@ struct stuDBIndex {
 extern stuRelation InvalidRelation;
 extern QString COLS_KEY;
 
-struct stuRelatedORMField{
+struct stuRelatedORMField
+{
     clsORMField Col;
     stuRelation Relation;
 

@@ -76,11 +76,12 @@ QString makeColName(
         ret.append(_col.masterName());
         if (_appendAs)
         {
-            ret.append(" AS ");
+            ret.append(" AS `");
             if (_col.renameAs().length())
                 ret.append(_col.renameAs());
             else
                 ret.append(_col.name());
+            ret.append("`");
         }
     }
     else
@@ -132,12 +133,16 @@ QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, cls
 
     QString v = _v2.value<QString>();
 
+    if ((baseCol == nullptr) && (_value.userType() == QMetaType::QVariantMap))
+        v = QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact);
+
     if (_qouteIfIsString
             && (_v2.userType() == QMetaType::QString
                 || _v2.userType() == QMetaType::QChar
                 || _value.userType() == QMetaType::QString
                 || _value.userType() == QMetaType::QChar
                 || _value.userType() == QMetaType::QJsonDocument
+                || _value.userType() == QMetaType::QVariantMap
             )
         )
         return QString("'%1'").arg(v.replace("'", "''"));
@@ -400,7 +405,7 @@ QString clsColSpecs::buildColNameString(
         if (_fieldString.contains(" AS "))
             _fieldString.replace(QRegularExpression(" AS .*"), "");
 
-        return _fieldString + " AS " + this->Data->RenameAs;
+        return _fieldString + " AS `" + this->Data->RenameAs + "`";
     };
 
     //Expression
@@ -460,8 +465,9 @@ QString clsColSpecs::buildColNameString(
                 parts.append(")");
         }
         parts.append(")");
-        parts.append(" AS ");
+        parts.append(" AS `");
         parts.append(this->Data->RenameAs);
+        parts.append("`");
 
         return applyRenameAs(parts.join(""));
     }
@@ -1058,9 +1064,16 @@ QString clsCondition::buildConditionString(
                     if (conditionData.ColSpecs.Data->Name.isEmpty() == false)
                         relatedORMField = _filterableColsMap.value(conditionData.ColSpecs.Data->Name);
 
-                    //                    qDebug() << "^^^^^^^^^^^^^^^^^^^^^^^^^" << __FUNCTION__ << conditionData.Value << conditionData.Col;
+//                    qDebug() << "^^^^^^^^^^^^^^^^^^^^^^^^^" << __FUNCTION__
+//                             << conditionData.Value
+//                             << conditionData.ColSpecs.Data->Name
+//                             << relatedORMField.Col.name()
+//                                ;
 
-                    CondStr += makeValueAsSQL(conditionData.Value, true, relatedORMField.isValid() ? &relatedORMField.Col : nullptr);
+                    CondStr += makeValueAsSQL(
+                                   conditionData.Value,
+                                   true,
+                                   relatedORMField.isValid() ? &relatedORMField.Col : nullptr);
                 }
                 else
                 {
@@ -1731,15 +1744,15 @@ public:
 
             QStringList Pks = this->PksByPath.split(QRegularExpression("(;|,)"));
             foreach (auto PkValue, Pks) {
-                foreach (auto Col, this->Owner->Data->Table.BaseCols) {
-                    if (Col.isPrimaryKey())
+                foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols) {
+                    if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isPrimaryKey())
                     {
                         if (PkValue.size())
                         {
                             QString ColName = makeColName(
                                                   this->Owner->Data->Table.Name,
                                                   this->Owner->Data->Alias,
-                                                  Col,
+                                                  baseCol.Col,
                                                   false);
 
                             PkFilters.append(ColName + " = \"" + PkValue + "\"");
@@ -1763,14 +1776,20 @@ public:
         /****************************************************************************/
         //only check for stand alone select query
         QStringList w;
-        foreach (auto Col, this->Owner->Data->Table.BaseCols) {
-            if (_checkStatusCol && (StatusColHasCriteria == false) && Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                    w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, Col, false)));
+        foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols)
+        {
+            if (baseCol.Relation == InvalidRelation)
+            {
+                if (_checkStatusCol && (StatusColHasCriteria == false) && baseCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                        w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
 
-            if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
-                w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, Col, false)));
+                if (baseCol.Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
+                    w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
+            }
         }
-        if (w.length()) {
+
+        if (w.length())
+        {
             if (this->PreparedItems.Where.length())
                 this->PreparedItems.Where = w.join(" AND ") + " AND (" + this->PreparedItems.Where + ")";
             else
@@ -1924,7 +1943,7 @@ public:
             this->Owner->Data->Alias,
             this->Owner->Data->Table.SelectableColsMap,
             this->Owner->Data->Table.FilterableColsMap,
-            true,
+            false,
             this->Owner->Data->BaseQueryPreparedItems.RenamedCols);
     }
 
@@ -2082,9 +2101,9 @@ public:
         }; //addCol
 
         if (this->RequiredCols.isEmpty()) {
-            foreach(auto Col, this->Table.BaseCols) {
-                if (Col.isSelectable())
-                    this->SelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, Col, true));
+            foreach(stuRelatedORMField baseCol, this->Table.AllCols) {
+                if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isSelectable())
+                    this->SelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, true));
             }
         }
         else {
@@ -2636,17 +2655,17 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
             QueryParts.clear();
             QueryParts.append(QString("SELECT").rightJustified(SQLPrettyLen)
                               + " "
-                              + "COUNT(*) AS cnt");
+                              + "COUNT(*) AS `cnt`");
             QueryParts.append(QString("FROM").rightJustified(SQLPrettyLen)
                               + " "
                               + "(");
             QueryParts.append(QueryString);
             QueryParts.append(QString(")").rightJustified(SQLPrettyLen + 2)
-                              + " qry");
+                              + " `qry`");
             QueryString = QueryParts.join(SQLPrettyLen ? "\n" : " ");
         }
         else {
-            QueryString = "SELECT COUNT(*) AS cnt FROM (" + QueryString + ") qry";
+            QueryString = "SELECT COUNT(*) AS `cnt` FROM (" + QueryString + ") `qry`";
         }
     }
 
@@ -2839,18 +2858,18 @@ public:
         //1- check Cols by BaseCols
         foreach (auto col, this->Cols) {
             bool found = false;
-            foreach (clsORMField baseCol, this->Table.BaseCols) {
+            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
 //                qDebug() << "compare" << col << baseCol.name();
-                if (col == baseCol.name()) {
-                    if ((baseCol.defaultValue() == QInvalid)
-                            || (baseCol.defaultValue() == QAuto)
-                            || (baseCol.defaultValue() == QDBInternal)
+                if (col == baseCol.Col.name()) {
+                    if ((baseCol.Col.defaultValue() == QInvalid)
+                            || (baseCol.Col.defaultValue() == QAuto)
+                            || (baseCol.Col.defaultValue() == QDBInternal)
                         )
                         throw exHTTPInternalServerError("Invalid set read-only column <" + col + ">");
 
-                    providedBaseCols.append(baseCol);
+                    providedBaseCols.append(baseCol.Col);
 
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
+                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
 
                     found = true;
 
@@ -2862,32 +2881,37 @@ public:
         }
 
         //2- check BaseCols (required, ...)
-        foreach (clsORMField baseCol, this->Table.BaseCols) {
-            if (this->Cols.contains(baseCol.name()) == false) {
-                if (baseCol.defaultValue() == QRequired)
-                    throw exQueryBuilderColumnNotProvided("Required field <" + baseCol.name() + "> not provided");
-
-                if (baseCol.updatableBy() == enuUpdatableBy::__CREATOR__) {
-//                    extraBaseCols.append(baseCol);
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
-                    extraBaseColsValues.append(baseCol.toDB(_currentUserID));
-                }
-                else if (baseCol.defaultValue() == QNow)
+        foreach (stuRelatedORMField baseCol, this->Table.AllCols)
+        {
+            if (baseCol.Relation == InvalidRelation)
+            {
+                if (this->Cols.contains(baseCol.Col.name()) == false)
                 {
-                    //NOW() is defined as default value in db schema
+                    if (baseCol.Col.defaultValue() == QRequired)
+                        throw exQueryBuilderColumnNotProvided("Required field <" + baseCol.Col.name() + "> not provided");
 
-//                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol, false));
-//                    extraBaseColsValues.append(DBExpression::NOW().toString());
-                }
-                else if ((baseCol.defaultValue() != QNull)
-                         && (baseCol.defaultValue() != QInvalid)
-                         && (baseCol.defaultValue() != QAuto)
-                         && (baseCol.defaultValue() != QDBInternal)
-                    )
-                {
-//                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol, false) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol, false));
-                    extraBaseColsValues.append(baseCol.toDB(baseCol.defaultValue()));
+                    if (baseCol.Col.updatableBy() == enuUpdatableBy::__CREATOR__) {
+    //                    extraBaseCols.append(baseCol);
+                        this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        extraBaseColsValues.append(baseCol.Col.toDB(_currentUserID));
+                    }
+                    else if (baseCol.Col.defaultValue() == QNow)
+                    {
+                        //NOW() is defined as default value in db schema
+
+    //                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol, false));
+    //                    extraBaseColsValues.append(DBExpression::NOW().toString());
+                    }
+                    else if ((baseCol.Col.defaultValue() != QNull)
+                             && (baseCol.Col.defaultValue() != QInvalid)
+                             && (baseCol.Col.defaultValue() != QAuto)
+                             && (baseCol.Col.defaultValue() != QDBInternal)
+                        )
+                    {
+    //                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol, false) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
+                        this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        extraBaseColsValues.append(baseCol.Col.toDB(baseCol.Col.defaultValue()));
+                    }
                 }
             }
         }
@@ -3274,26 +3298,33 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
             if (this->Data->Select.isValid())
                 throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
 //                updateInvalidatedAt(this->Data->Select, invalidateQueryString);
-            else {
-                foreach (QVariantMap oneRecord, this->Data->Values) {
+            else
+            {
+                foreach (QVariantMap oneRecord, this->Data->Values)
+                {
                     QString query = invalidateQueryString;
-                    foreach (auto Col, this->Data->Table.BaseCols) {
+                    foreach (stuRelatedORMField baseCol, this->Data->Table.AllCols)
+                    {
+                        if (baseCol.Relation == InvalidRelation)
+                        {
                         //ignore statusFieldName in update conditions
 //                        if (statusFieldName.length() && (Col.name() == statusFieldName))
 //                            continue;
 
-                        for (QVariantMap::const_iterator itr = oneRecord.constBegin(); itr != oneRecord.constEnd(); itr++) {
-                            QString key = itr.key();
-                            if (key == Col.name()) {
-                                QVariant val = itr.value();
+                            for (QVariantMap::const_iterator itr = oneRecord.constBegin(); itr != oneRecord.constEnd(); itr++)
+                            {
+                                QString key = itr.key();
+                                if (key == baseCol.Col.name()) {
+                                    QVariant val = itr.value();
 
-                                if ((val.userType() == QMetaType::QJsonObject)
-                                        || (val.userType() == QMetaType::QJsonArray)
-                                    )
-                                    val = QJsonDocument().fromVariant(val).toJson(QJsonDocument::Compact).constData();
+                                    if ((val.userType() == QMetaType::QJsonObject)
+                                            || (val.userType() == QMetaType::QJsonArray)
+                                        )
+                                        val = QJsonDocument().fromVariant(val).toJson(QJsonDocument::Compact).constData();
 
-                                 QString v = makeValueAsSQL(val, true, &Col);
-                                 query.replace(QString(":%1").arg(key), v);
+                                     QString v = makeValueAsSQL(val, true, &baseCol.Col);
+                                     query.replace(QString(":%1").arg(key), v);
+                                }
                             }
                         }
                     }
@@ -3421,15 +3452,20 @@ public:
             }
         }
 
-        foreach (clsORMField baseCol, this->Table.BaseCols) {
-            if (providedCols.contains(baseCol.name()) == false && baseCol.updatableBy() == enuUpdatableBy::__UPDATER__ ) {
-                auto colName = makeColName(this->Table.Name, this->Alias, baseCol, false);
+        foreach (stuRelatedORMField baseCol, this->Table.AllCols)
+        {
+            if ((baseCol.Relation == InvalidRelation)
+                    && (providedCols.contains(baseCol.Col.name()) == false)
+                    && (baseCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__ ))
+            {
+                auto colName = makeColName(this->Table.Name, this->Alias, baseCol.Col, false);
 
                 if (_useBinding == false)
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.toDB(_currentUserID).toString()));
-                else {
+                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.Col.toDB(_currentUserID).toString()));
+                else
+                {
                     this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
-                    this->UpdateQueryPreparedItems.BindingValues.append(baseCol.toDB(_currentUserID));
+                    this->UpdateQueryPreparedItems.BindingValues.append(baseCol.Col.toDB(_currentUserID));
                 }
             }
         }
@@ -3859,3 +3895,39 @@ template class tmplQueryWhereTrait<DeleteQuery>;
 } //namespace Targoman::API::ORM
 
 //Q_DECLARE_METATYPE(Targoman::API::ORM::clsColSpecs::unnAggregation);
+
+/*
+ * https://dev.mysql.com/doc/refman/8.0/en/select.html:
+SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+    [HIGH_PRIORITY]
+    [STRAIGHT_JOIN]
+    [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+    [SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr] ...
+    [into_option]
+    [FROM table_references
+      [PARTITION partition_list]]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [WINDOW window_name AS (window_spec)
+        [, window_name AS (window_spec)] ...]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [into_option]
+    [FOR {UPDATE | SHARE}
+        [OF tbl_name [, tbl_name] ...]
+        [NOWAIT | SKIP LOCKED]
+      | LOCK IN SHARE MODE]
+    [into_option]
+
+into_option: {
+    INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+  | INTO DUMPFILE 'file_name'
+  | INTO var_name [, var_name] ...
+}
+*/

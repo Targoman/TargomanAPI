@@ -177,19 +177,24 @@ private:
 //                                    const QString& _orderBy = {},
 //                                    const QString _groupBy = {}) const;
 
+private:
+    QList<clsORMField> BaseCols;
+
 protected:
     QString Schema;
     QString Name;
     QString Domain;
+
+    QList<stuRelation> Relations;
+    QList<stuDBIndex> Indexes;
+    QVariantMap DBProperties;
+
+    QList<stuRelatedORMField> AllCols;
     QMap<QString, stuRelatedORMField /*clsORMField*/> HasMasterNameColsMap;
     QMap<QString, stuRelatedORMField /*clsORMField*/> SelectableColsMap;
     QMap<QString, stuRelatedORMField>                 FilterableColsMap;
     QMap<QString, stuRelatedORMField /*clsORMField*/> SortableColsMap;
-    QList<clsORMField> AllCols;
-    QList<clsORMField> BaseCols;
-    QList<stuRelation> Relations;
-    QList<stuDBIndex> Indexes;
-    QVariantMap DBProperties;
+
     quint8  CountOfPKs;
     QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
 

@@ -179,7 +179,9 @@ QList<clsORMField> clsTable::filterItems(THttpMethod _method)
                 Filters.append(Filter);
         break;
     default:
-        Filters = this->AllCols;
+//          Filters = this->AllCols;
+        foreach (stuRelatedORMField baseCol, this->AllCols)
+            Filters.append(baseCol.Col);
         break;
     }
     return Filters;
@@ -204,9 +206,10 @@ void clsTable::prepareFiltersList()
 
         QString FinalColName = this->finalColName(Col);
         clsORMField NewCol = clsORMField(Col, FinalColName);
-        this->AllCols.append(NewCol);
 
         stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol);
+
+        this->AllCols.append(relatedORMField);
 
         if (NewCol.masterName().length())
             this->HasMasterNameColsMap.insert(NewCol.masterName(), relatedORMField);
@@ -231,9 +234,10 @@ void clsTable::prepareFiltersList()
         foreach (clsORMField Col, ForeignTable->BaseCols) {
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
             clsORMField NewCol = clsORMField(Col, FinalColName);
-            this->AllCols.append(NewCol);
 
             stuRelatedORMField relatedORMField = stuRelatedORMField(NewCol, Relation);
+
+            this->AllCols.append(relatedORMField);
 
             if (NewCol.masterName().length())
                 this->HasMasterNameColsMap.insert(NewCol.masterName(), relatedORMField);
@@ -249,10 +253,10 @@ void clsTable::prepareFiltersList()
         }
     }
 
-    foreach (clsORMField Col, this->AllCols)
+    foreach (stuRelatedORMField baseCol, this->AllCols)
     {
-        if (Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(Col)))
-            this->Converters.insert(this->finalColName(Col), Col.argSpecs().toORMValueConverter());
+        if (baseCol.Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(baseCol.Col)))
+            this->Converters.insert(this->finalColName(baseCol.Col), baseCol.Col.argSpecs().toORMValueConverter());
     }
 }
 
