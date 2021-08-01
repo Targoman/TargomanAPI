@@ -105,8 +105,8 @@ public:
     do { \
         QT_TRY { \
             QVERIFY(expression); \
-        } QT_CATCH (const std::exception &e) { \
-            QTest::qFail(e.what(), __FILE__, __LINE__);\
+        } QT_CATCH (const std::exception &exp) { \
+            QTest::qFail(exp.what(), __FILE__, __LINE__);\
             return; \
         } \
     } while (false)
@@ -182,8 +182,8 @@ private slots:
             this->currentUserID = 9090;
             t1.prepareFiltersList();
             t2.prepareFiltersList();
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     };
 
@@ -241,8 +241,8 @@ private slots:
             QCOMPARE("\n" + qry + "\n", R"(
 t1.colA1 = 101
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -270,8 +270,8 @@ t1.colA1 = 101
 t1.colA1 = 101
                AND t1.colB1 IS NOT NULL
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -319,8 +319,8 @@ t1.colA1 = 101
                    )
                 OR t1.colH1 = 107
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -361,8 +361,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND t1.colB1 = DATE_ADD(colZZ,INTERVAL 45 MINUTE)
                AND t1.colC1 = DATE_ADD(colZZ,INTERVAL '1:2' MINUTE_SECOND)
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -388,8 +388,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //            QCOMPARE("\n" + qry + "\n", R"(
 //?????????????????????
 //)");
-//        } QT_CATCH (const std::exception &e) {
-//            QTest::qFail(e.what(), __FILE__, __LINE__);
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
 //        }
 //    }
 
@@ -426,8 +426,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE t1.status1 != 'R'
                AND t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -467,8 +467,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND t1.colB1 = 456
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -497,8 +497,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE t1.status1 != 'R'
                AND t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -527,8 +527,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE alias_t1.status1 != 'R'
                AND alias_t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -551,8 +551,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE t1.status1 != 'R'
                AND t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -616,8 +616,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE t1.status1 != 'R'
                AND t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -677,8 +677,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND SUM_F1_NAME = '{"ha3":"hb3"}'
           ORDER BY newNamerFor_F1
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 //private:
@@ -713,8 +713,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE alias_t1.status1 != 'R'
                AND alias_t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -740,8 +740,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
              WHERE t1.status1 != 'R'
                AND t1._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -771,8 +771,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    alias_t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -797,8 +797,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                                         CAUTION: NOT COMPLETED
                                         CAUTION: NOT COMPLETED
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -852,8 +852,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , colB1 DESC
              LIMIT 20,1
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -912,8 +912,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , colB1 DESC
                    ) `qry`
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -978,8 +978,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
               FROM test.t2
              WHERE t2._InvalidatedAt = 0
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1012,8 +1012,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    )
              LIMIT 0,1
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1057,8 +1057,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND alias_t1._InvalidatedAt = 0
              LIMIT 0,1
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1102,8 +1102,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    )
              LIMIT 0,1
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1127,8 +1127,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderColumnNotFound);
 
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1149,8 +1149,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderColumnNotProvided);
 
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1200,8 +1200,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , 9090
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1244,8 +1244,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 )");
 
             QCOMPARE(BindingValuesList.join(", "), "111, A, 9090");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1338,8 +1338,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                  , 9090
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1421,8 +1421,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
 //            QCOMPARE(BindingValuesList.join(", "), R"(112, 111, {"a":"b","c":"d"}, 'A', 9090, 212, 222, {"a":"b","c":"d"}, 'A', 9090, 312, 333, {"a":"b","c":"d"}, 'A', 9090, 412, 444, {"a":"b\'b","c":"d"}, 'A', 9090)");
 
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1475,8 +1475,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t2.colE2 > 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1495,8 +1495,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         query.buildQueryString(this->currentUserID, {}, false),
                         exQueryBuilderWhereClauseNotProvided);
 
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1533,8 +1533,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1586,8 +1586,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 )");
 
             QCOMPARE(BindingValuesList.join(", "), "v c1, 123, T, 9090");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1612,8 +1612,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1629,8 +1629,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         query.buildQueryString(this->currentUserID, {}),
                         exQueryBuilderWhereClauseNotProvided);
 
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1653,8 +1653,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1680,8 +1680,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
@@ -1713,8 +1713,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    t1.colA1 = 123
                    )
 )");
-        } QT_CATCH (const std::exception &e) {
-            QTest::qFail(e.what(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 

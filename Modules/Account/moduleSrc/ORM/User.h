@@ -38,9 +38,10 @@ class User : public ORM::clsTable
 
 private slots:
     QVariant ORMGET("Get user information")
-    bool ORMDELETE("Delete a User by priviledged user")
-    bool ORMUPDATE("Update User info by priviledged user")
     quint64 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
+    bool ORMUPDATE("Update User info by priviledged user")
+    bool ORMDELETE("Delete a User by priviledged user")
+
     TAPI::RawData_t REST(GET,Photo, (TAPI::JWT_t _JWT, quint64 _usrID),
                              "Get user photo as image")
 

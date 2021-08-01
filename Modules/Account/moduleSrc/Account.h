@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_AAA_H

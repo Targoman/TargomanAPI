@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_AAA_ACCOUNTING_DEFS_H
 #define TARGOMAN_API_AAA_ACCOUNTING_DEFS_H
 
+//#include "Interfaces/Common/APIArgHelperMacrosPrivate.h"
 #include "AAADefs.hpp"
 #include "clsJWT.hpp"
 #include "Interfaces/Common/GenericTypes.h"
@@ -46,10 +47,7 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      );
 }
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting {
+namespace Targoman::API::AAA::Accounting {
 
 inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 extern Common::Configuration::tmplConfigurable<QString> Secret;
@@ -179,7 +177,7 @@ struct stuActiveCredit {
     stuActiveCredit& fromJson(const QJsonObject _obj);
 };
 
-}}}}
+} //namespace Targoman::API::AAA::Accounting
 
 #include <QJsonArray>
 namespace TAPI {
@@ -225,10 +223,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
 
 //TAPI_DECLARE_METATYPE(TAPI::stuDiscountSaleableBasedMultiplier)
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting {
+namespace Targoman::API::AAA::Accounting {
 
 typedef QMap<QString, qint32> ServiceUsage_t;
 
@@ -357,11 +352,12 @@ namespace tblAccountReferalsBase {
 
 #pragma GCC diagnostic pop
 
-}
-}
-}
-}
+} //namespace Targoman::API::AAA::Accounting
 
+TAPI_DECLARE_METATYPE(TAPI::stuPrize)
+TAPI_DECLARE_METATYPE(TAPI::stuDiscount)
+TAPI_DECLARE_METATYPE(TAPI::stuVoucherItem)
+TAPI_DECLARE_METATYPE(TAPI::stuUsage)
 TAPI_DECLARE_METATYPE(TAPI::stuVoucher)
 TAPI_DECLARE_METATYPE(TAPI::OrderAdditives_t)
 TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)

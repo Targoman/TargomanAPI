@@ -137,7 +137,12 @@
 #define TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT19(t,n,d,i,to,fr, ...) n(_##n), TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT18(__VA_ARGS__)
 #define TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT20(t,n,d,i,to,fr, ...) n(_##n), TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT19(__VA_ARGS__)
 
-extern QString toCammel(const QString& n);
+//extern QString toCammel(const QString& _name);
+inline QString toCammel(const QString& _name)
+{
+    return _name.mid(0,1).toLower() + _name.mid(1);
+}
+
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to) \
     if ([](auto v)->bool{return i;}(n)) Obj[toCammel(#n)]=[](auto v)->QJsonValue{return to;}(n);
 #define TAPI_HELEPER_VARIANTSTRUCT_TOJSON1(t, n,d,i,to,fr)     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON_METHOD(n, i, to);

@@ -72,7 +72,7 @@ class UpdateQuery;
 class clsDeleteQueryData;
 class DeleteQuery;
 
-extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
+extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true, bool _lookupFromRegistryFirst = true);
 
 class clsTable : public intfAPIModule
 {
@@ -218,7 +218,7 @@ protected:
     friend UpdateQuery;
     friend clsDeleteQueryData;
     friend DeleteQuery;
-    friend QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex);
+    friend QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, bool _lookupFromRegistryFirst);
 
     friend testQueryBuilders;
 

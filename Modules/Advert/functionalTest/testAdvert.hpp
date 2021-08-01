@@ -43,7 +43,6 @@ using namespace Targoman::API::AAA::Accounting;
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::Advertisement;
 
-
 namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
                      COD                        = 'D', //offline payment
@@ -63,24 +62,31 @@ class testAdvert : public clsBaseTest
     QVariant locationID;
     QVariant bannerProductID;
     QVariant bannerSaleableID;
+//    QVariant paymentGatewayID;
     QVariant couponID;
-    QVariant lastPreVoucher;
+    TAPI::stuPreVoucher lastPreVoucher;
+    TAPI::stuVoucher voucher;
+    TAPI::stuVoucher approveOnlinePaymentVoucher;
 
-    void cleanupUnitTestData() {
+    void cleanupUnitTestData()
+    {
         clsDAC DAC;
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
     }
 
 private slots:
-    void initTestCase() {
+    void initTestCase()
+    {
         initUnitTestData(false);
     }
 
-    void cleanupTestCase() {
+    void cleanupTestCase()
+    {
         cleanupUnitTestData();
     }
 
-    void Signup_user() {
+    void Signup_user()
+    {
         QVERIFY((gUserID = callAPI(PUT,
                                    "Account/signup", {}, {
                                        {"emailOrMobile", UT_UserEmail},
@@ -91,7 +97,8 @@ private slots:
                                    }).toMap().value("usrID").toULongLong()) > 0);
     }
 
-//    void Signup_user_again() {
+//    void Signup_user_again()
+//      {
 //        QVERIFY((gUserID = callAPI(PUT,
 //                                   "Account/signup", {}, {
 //                                       {"emailOrMobile", UT_UserEmail},
@@ -102,7 +109,8 @@ private slots:
 //                                   }).toMap().value("usrID").toULongLong()) > 0);
 //    }
 
-    void Signup_admin() {
+    void Signup_admin()
+    {
         QVERIFY((gAdminUserID = callAPI(PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
@@ -116,7 +124,8 @@ private slots:
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, gAdminUserID });
     }
 
-    void ApproveEmail_user() {
+    void ApproveEmail_user()
+    {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gUserID}).toJson(true).object().value("aprApprovalCode").toString();
@@ -129,7 +138,8 @@ private slots:
                         }).toBool());
     }
 
-    void ApproveEmail_admin() {
+    void ApproveEmail_admin()
+    {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
@@ -143,7 +153,8 @@ private slots:
                         }).toBool());
     }
 
-    void Login_admin() {
+    void Login_admin()
+    {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(POST,
                                 "Account/login",{},{
@@ -159,69 +170,12 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    /*
-    void createDiscount() {
-        callAdminAPI(
-            PUT,
-            "Advert/AccountCoupons",
-            {},
-            {
-                { tblAccountCouponsBase::cpnCode, "cpn-code-aaa" },
-//                    { tblAccountCouponsBase::cpnPrimaryCount,           S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
-//                    { tblAccountCouponsBase::cpnTotalMaxAmount,         S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin},
-//                    { tblAccountCouponsBase::cpnPerUserMaxCount,        S(NULLABLE_TYPE(quint32)),         QFV.optional(QFV.integer().minValue(1)), QNull,     UPAdmin},
-//                    { tblAccountCouponsBase::cpnPerUserMaxAmount,       S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin},
-                { tblAccountCouponsBase::cpnValidFrom,                "2020/1/1 1:2:3" },
-//                    { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-                { tblAccountCouponsBase::cpnAmount,                   15 },
-                { tblAccountCouponsBase::cpnAmountType,               TAPI::enuDiscountType::toStr(TAPI::enuDiscountType::Percent) },
-//                    { tblAccountCouponsBase::cpnMaxAmount,              S(quint32),                        QFV,                                     1,         UPAdmin, false, false},
-                { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
-//                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
-//                            { "p123-s456", 1.5, 0 },
-//                            { "p123-s456", 1.8, 5 },
-//                            { "other",     2.0 },
-//                        })
-                    QVariantList({
-                        QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.5 }, { "minCount", 0 } }),
-                        QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.8 }, { "minCount", 5 } }),
-                        QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
-                    })
-                },
-//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
-//                    { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-//                    { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-//                    { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
-//                    { tblAccountCouponsBase::cpnCreatedBy_usrID,        ORM_CREATED_BY},
-//                    { tblAccountCouponsBase::cpnCreationDateTime,       ORM_CREATED_ON},
-//                    { tblAccountCouponsBase::cpnUpdatedBy_usrID,        ORM_UPDATED_BY},
-            }
-        );
-    }
-*/
-
-    void getOrCreateLocation() {
-        QVariantList locationInfo = callAdminAPI(
-            GET,
-            "Advert/Locations",
-            {
-                {
-                    "filters", QString("%1=%2 + %3=%4")
-                        .arg(tblLocations::locURL).arg("http://www.abbasgholi.com")
-                        .arg(tblLocations::locPlaceCode).arg("ABC"),
-                },
-                { "reportCount", false },
-                { "cols", tblLocations::locID },
-            }
-        ).toList();
-
-        qDebug() << "--------- locationInfo: " << locationInfo;
-
-        if (locationInfo.isEmpty() == false) {
-            locationID = locationInfo.at(0).toMap()[tblLocations::locID];
-        }
-        else
-        {
+    /***************************************************************************************/
+    /***************************************************************************************/
+    /***************************************************************************************/
+    void createLocation()
+    {
+        QT_TRY {
             locationID = callAdminAPI(
                 PUT,
                 "Advert/Locations",
@@ -231,77 +185,19 @@ private slots:
                     { tblLocations::locPlaceCode,  "ABC" },
                 }
             );
-        }
 
         qDebug() << "--------- locationID: " << locationID;
-    }
 
-    void deleteLocation() {
-        QVariant result = callAdminAPI(
-            DELETE,
-            "Advert/Locations/" + locationID.toString()
-        );
+            QVERIFY(locationID > 0);
 
-        qDebug() << "--------- DELETE location: " << result;
-    }
-
-    void getOrCreateLocation_2() {
-        QVariantList locationInfo = callAdminAPI(
-            GET,
-            "Advert/Locations",
-            {
-                {
-                    "filters", QString("%1=%2 + %3=%4")
-                        .arg(tblLocations::locURL).arg("http://www.abbasgholi.com")
-                        .arg(tblLocations::locPlaceCode).arg("ABC"),
-                },
-                { "reportCount", false },
-                { "cols", tblLocations::locID },
-            }
-        ).toList();
-
-        qDebug() << "--------- locationInfo: " << locationInfo;
-
-        if (locationInfo.isEmpty() == false) {
-            locationID = locationInfo.at(0).toMap()[tblLocations::locID];
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
-        else
-        {
-            locationID = callAdminAPI(
-                PUT,
-                "Advert/Locations",
-                {},
-                {
-                    { tblLocations::locURL,        "http://www.abbasgholi.com" },
-                    { tblLocations::locPlaceCode,  "ABC" },
-                }
-            );
-        }
-
-        qDebug() << "--------- locationID: " << locationID;
     }
 
-    void getOrCreateProduct_banner() {
-        QVariantList productInfo = callAdminAPI(
-            GET,
-            "Advert/AccountProducts",
-            {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountProductsBase::prdCode)
-                        .arg("p123")
-                },
-                { "reportCount", false },
-                { "cols", tblAccountProductsBase::prdID },
-            }
-        ).toList();
-
-        qDebug() << "--------- productInfo: " << productInfo;
-
-        if (productInfo.isEmpty() == false)
-            bannerProductID = productInfo.at(0).toMap()[tblAccountProductsBase::prdID];
-        else
-        {
+    void createProduct_banner()
+    {
+        QT_TRY {
             bannerProductID = callAdminAPI(
                 PUT,
                 "Advert/AccountProducts",
@@ -314,32 +210,19 @@ private slots:
                     { tblAccountProducts::prd_locID,            locationID },
                 }
             );
-        }
 
-        qDebug() << "--------- bannerProductID: " << bannerProductID;
+            qDebug() << "--------- bannerProductID: " << bannerProductID;
+
+            QVERIFY(bannerProductID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
     }
 
-    void getOrCreateSaleable_banner() {
-        QVariantList saleableInfo = callAdminAPI(
-            GET,
-            "Advert/AccountSaleables",
-            {
-                {
-                    "filters", QString("%1=%2")
-                        .arg(tblAccountSaleablesBase::slbCode)
-                        .arg("p123-s456")
-                },
-                { "reportCount", false },
-                { "cols", tblAccountSaleablesBase::slbID },
-            }
-        ).toList();
-
-        qDebug() << "--------- saleableInfo: " << saleableInfo;
-
-        if (saleableInfo.isEmpty() == false)
-            bannerSaleableID = saleableInfo.at(0).toMap()[tblAccountSaleablesBase::slbID];
-        else
-        {
+    void createSaleable_banner()
+    {
+        QT_TRY {
             bannerSaleableID = callAdminAPI(
                 PUT,
                 "Advert/AccountSaleables",
@@ -356,141 +239,161 @@ private slots:
                     { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
                 }
             );
+
+            qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
+
+            QVERIFY(bannerSaleableID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
-
-        qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
     }
 
-    void getOrCreatePaymentGateway_devtest() {
-        auto info = callAdminAPI(
-            PUT,
-            "Account/PaymentGateways",
-            {},
-            {
-                { "pgwName",                  QString("devtest %1").arg(time(nullptr)) },
-                { "pgwType",                  TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
-                { "pgwDriver",                "DevTest" },
-                { "pgwMetaInfo",              QVariantMap({
-                                                { "username", "hello" },
-                                                { "password", "123" },
-                                              })
-                },
-                { "pgwAllowedDomainName",     "devtest.com" },
-                //"
-//                { "pgwTransactionFeeValue",   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-//                { "pgwTransactionFeeType",    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
-                //"
-//                { "pgwMinRequestAmount",      1 },
-//                { "pgwMaxRequestAmount",      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-//                { "pgwMaxPerDayAmount",       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-                //"
-//                { "pgwLastPaymentDateTime",   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
-//                { "pgwSumTodayPaidAmount",    S(quint64),                                         QFV,                                0,          UPAdmin },
-                //"
-//                { "pgwSumRequestCount",       S(quint32),                                         QFV,                                0,          UPAdmin },
-//                { "pgwSumRequestAmountv,      S(quint64),                                         QFV,                                0,          UPAdmin },
-//                { "pgwSumFailedCount",        S(quint32),                                         QFV,                                0,          UPAdmin },
-//                { "pgwSumOkCount",            S(quint32),                                         QFV,                                0,          UPAdmin },
-//                { "pgwSumPaidAmount",         S(quint64),                                         QFV,                                0,          UPAdmin },
-            }
-        );
-
-        qDebug() << "--------- devtest: " << info;
-    }
-
-    void initializeLastPreVoucher() {
-        lastPreVoucher = QVariantMap({
-//              { "items", {} },
-//              { "prize", {} },
-//              { "summary", "" },
-//              { "round", 0 },
-//              { "toPay", 0 },
-//              { "sign", 0 }
-        });
-    }
-
-    void addToBasket_invalid_saleable_code() {
-        QVariant result = callAdminAPI(
-            POST,
-            "Advert/addToBasket",
-            {},
-            {
-                { "saleableCode", "p123-s456 zzzzzzzzz" },
-//                { "orderAdditives", {} },
-//                { "qty", 12 },
-//                { "discountCode", "abcd11" },
-//                { "referrer", "" },
-//                { "extraRefererParams", {} },
-//                { "lastPreVoucher", {} },
-            }
-        );
-        //exHTTPNotFound("No item could be found");
-    }
-
-    void addToBasket_invalid_coupon_qty_not_available() {
-        QVariant result = callAdminAPI(
-            POST,
-            "Advert/addToBasket",
-            {},
-            {
-                { "saleableCode", "p123-s456" },
-                { "orderAdditives", {} },
-                { "qty", 999 },
-//                { "discountCode", "zzzzzzzzzzzzzzzzzz" },
-                { "referrer", "" },
-                { "extraRefererParams", {} },
-                { "lastPreVoucher", lastPreVoucher },
-            }
-        );
-    }
-
-    void addToBasket_invalid_coupon_code() {
-//        TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
-//        TAPI::stuPreVoucher voucher
-        QVariant result = callAdminAPI(
-            POST,
-            "Advert/addToBasket",
-            {},
-            {
-                { "saleableCode", "p123-s456" },
-                { "orderAdditives", {} },
-                { "qty", 1 },
-                { "discountCode", "zzzzzzzzzzzzzzzzzz" },
-                { "referrer", "" },
-                { "extraRefererParams", {} },
-                { "lastPreVoucher", lastPreVoucher },
-            }
-        );
-    }
-
-    void getOrCreateDiscount() {
-        QVariantList couponInfo = callAdminAPI(
+    void createPaymentGateway_devtest()
+    {
+        auto ret = callAdminAPI(
             GET,
-            "Advert/AccountCoupons",
+            "Account/PaymentGateways",
             {
                 {
                     "filters", QString("%1=%2")
-                        .arg(tblAccountCouponsBase::cpnCode).arg("cpn-code-aaa")
+                        .arg("pgwType").arg(TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest)),
                 },
-                { "reportCount", false },
-                { "cols", tblAccountCouponsBase::cpnID },
+                { "reportCount", true },
+                { "cols", "pgwID" },
             }
-        ).toList();
+        ).toMap();
+//        qDebug() << "--------- PaymentGateways: " << ret;
 
-        qDebug() << "--------- couponInfo: " << couponInfo;
-
-//        qDebug() << endl
-//                 << "------------------------------" << endl
-//                 << QJsonDocument(QJsonObject({ { "a", "b" } })) << endl
-//                 << QJsonDocument(QJsonObject({ { "a", "b" } })).toJson() << endl
-//                 << QJsonDocument(QJsonObject({ { "a", "b" } })).toVariant() << endl
-//                 << endl;
-
-        if (couponInfo.isEmpty() == false) {
-            couponID = couponInfo.at(0).toMap()[tblAccountCouponsBase::cpnID];
-        }
-        else
+        auto totalRows = ret["totalRows"].toUInt();
+        if (totalRows < 3)
         {
+            for (int i=totalRows; i<3; ++i)
+            {
+                QT_TRY {
+                    auto paymentGatewayID = callAdminAPI(
+                        PUT,
+                        "Account/PaymentGateways",
+                        {},
+                        {
+                            { "pgwName",                  QString("devtest %1").arg(time(nullptr)) },
+                            { "pgwType",                  TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                            { "pgwDriver",                "DevTest" },
+                            { "pgwMetaInfo",              QVariantMap({
+                                                            { "username", "hello" },
+                                                            { "password", "123" },
+                                                          })
+                            },
+                            { "pgwAllowedDomainName",     "devtest.com" },
+                            //"
+            //                { "pgwTransactionFeeValue",   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+            //                { "pgwTransactionFeeType",    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
+                            //"
+            //                { "pgwMinRequestAmount",      1 },
+            //                { "pgwMaxRequestAmount",      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+            //                { "pgwMaxPerDayAmount",       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+                            //"
+            //                { "pgwLastPaymentDateTime",   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
+            //                { "pgwSumTodayPaidAmount",    S(quint64),                                         QFV,                                0,          UPAdmin },
+                            //"
+            //                { "pgwSumRequestCount",       S(quint32),                                         QFV,                                0,          UPAdmin },
+            //                { "pgwSumRequestAmountv,      S(quint64),                                         QFV,                                0,          UPAdmin },
+            //                { "pgwSumFailedCount",        S(quint32),                                         QFV,                                0,          UPAdmin },
+            //                { "pgwSumOkCount",            S(quint32),                                         QFV,                                0,          UPAdmin },
+            //                { "pgwSumPaidAmount",         S(quint64),                                         QFV,                                0,          UPAdmin },
+                        }
+                    );
+
+                    qDebug() << "--------- paymentGatewayID: " << paymentGatewayID;
+
+                    QVERIFY(paymentGatewayID > 0);
+
+                } QT_CATCH (const std::exception &exp) {
+                    QTest::qFail(exp.what(), __FILE__, __LINE__);
+                }
+            }
+        }
+    }
+
+    void addToBasket_invalid_saleable_code()
+    {
+        QT_TRY {
+            QVariant result = callAdminAPI(
+                POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode", "p123-s456 zzzzzzzzz" },
+//                    { "orderAdditives", {} },
+//                    { "qty", 12 },
+//                    { "discountCode", "abcd11" },
+//                    { "referrer", "" },
+//                    { "extraRefererParams", {} },
+                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+            //exHTTPNotFound("No item could be found");
+
+            //QEXCEPTION
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void addToBasket_invalid_coupon_qty_not_available()
+    {
+        QT_TRY {
+            QVariant result = callAdminAPI(
+                POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode", "p123-s456" },
+                    { "orderAdditives", {} },
+                    { "qty", 999 },
+//                    { "discountCode", "zzzzzzzzzzzzzzzzzz" },
+                    { "referrer", "" },
+                    { "extraRefererParams", {} },
+                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            //QEXCEPTION
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void addToBasket_invalid_coupon_code()
+    {
+        QT_TRY {
+            QVariant result = callAdminAPI(
+                POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode", "p123-s456" },
+                    { "orderAdditives", {} },
+                    { "qty", 1 },
+                    { "discountCode", "zzzzzzzzzzzzzzzzzz" },
+                    { "referrer", "" },
+                    { "extraRefererParams", {} },
+                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            //QEXCEPTION
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void createDiscount()
+    {
+        QT_TRY {
             couponID = callAdminAPI(
                 PUT,
                 "Advert/AccountCoupons",
@@ -527,193 +430,324 @@ private slots:
 //                    { tblAccountCouponsBase::cpnUpdatedBy_usrID,        ORM_UPDATED_BY},
                 }
             );
+
+            qDebug() << "--------- couponID: " << couponID;
+
+            QVERIFY(couponID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
-
-        qDebug() << "--------- couponID: " << couponID;
     }
 
-    void addToBasket_valid_coupon_code_1() {
-        lastPreVoucher = callAdminAPI(
-            POST,
-            "Advert/addToBasket",
-            {},
-            {
-                { "saleableCode",       "p123-s456" },
-                { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                { "qty",                1 },
-                { "discountCode",       "cpn-code-aaa" },
-                { "referrer",           "" },
-                { "extraRefererParams", {} },
-                { "lastPreVoucher",     lastPreVoucher },
-            }
-        );
+    void addToBasket_valid_coupon_code_1()
+    {
+        QT_TRY {
+            int ItemsCount = lastPreVoucher.Items.length();
 
-//        qDebug() << "--------- lastPreVoucher" << lastPreVoucher;
-    }
-
-    void addToBasket_valid_coupon_code_2() {
-        lastPreVoucher = callAdminAPI(
-            POST,
-            "Advert/addToBasket",
-            {},
-            {
-                { "saleableCode",       "p123-s456" },
-                { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                { "qty",                1 },
-                { "discountCode",       "cpn-code-aaa" },
-                { "referrer",           "" },
-                { "extraRefererParams", {} },
-                { "lastPreVoucher",     lastPreVoucher },
-            }
-        );
-
-//        qDebug() << "--------- lastPreVoucher" << lastPreVoucher;
-    }
-
-    void finalizeBasket_empty_items() {
-        QVariant result = callAdminAPI(
-            POST,
-            "Account/finalizeBasket",
-            {},
-            {
-                { "preVoucher",             {} },
-                { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
-                { "domain",                 "devtest.com" },
-                { "walletID",               9988 },
-                { "paymentVerifyCallback",  "http://www.a.com" },
-            }
-        );
-    }
-
-    void finalizeBasket_online() {
-        QVariantMap voucherInfo = callAdminAPI(
-            POST,
-            "Account/finalizeBasket",
-            {},
-            {
-                { "preVoucher",             lastPreVoucher },
-                { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
-                { "domain",                 "devtest.com" },
-                { "walletID",               9988 },
-                { "paymentVerifyCallback",  "http://www.a.com" },
-            }
-        ).toMap();
-        qDebug() << "--------- voucherInfo" << voucherInfo;
-        /*
-        TAPI::stuVoucher:
-        QVariantMap, QMap(
-            ("iD", QVariant(double, 83))
-            ("info", QVariant(QVariantMap, QMap(
-                ("items", QVariant(QVariantList, (
-                    QVariant(QVariantMap, QMap(
-                        ("desc", QVariant(QString, "test Saleable 456 name"))
-                        ("disAmount", QVariant(double, 1800))
-                        ("discount", QVariant(QVariantMap, QMap(
-                            ("amount", QVariant(double, 1800))
-                            ("code", QVariant(QString, "cpn-code-aaa"))
-                            ("iD", QVariant(double, 1))
-                        )))
-                        ("orderID", QVariant(double, 202))
-                        ("qty", QVariant(double, 1))
-                        ("sign", QVariant(QString, "NJja6zFf7NOAtQSji+FXTAiDhKFx23Qsrn4adUnb9xg="))
-                        ("subTotal", QVariant(double, 12000))
-                        ("uUID", QVariant(QString, "6f987a18cf4501b5579ba0da8cbd81c9"))
-                        ("unitPrice", QVariant(double, 12000))
-                    ))
-                    , QVariant(QVariantMap, QMap(
-                        ("desc", QVariant(QString, "test Saleable 456 name"))
-                        ("disAmount", QVariant(double, 1800))
-                        ("discount", QVariant(QVariantMap, QMap(
-                            ("amount", QVariant(double, 1800))
-                            ("code", QVariant(QString, "cpn-code-aaa"))
-                            ("iD", QVariant(double, 1))
-                        )))
-                        ("orderID", QVariant(double, 203))
-                        ("qty", QVariant(double, 1))
-                        ("sign", QVariant(QString, "G38evDwq/stAJ+Zk7uDNvEhWbeVPiE6jwhJkCgK5L1M="))
-                        ("subTotal", QVariant(double, 12000))
-                        ("uUID", QVariant(QString, "c876d40dcff62b6330d323c987c0600c"))
-                        ("unitPrice", QVariant(double, 12000))
-                    ))
-                )))
-                ("round", QVariant(double, 204))
-                ("sign", QVariant(QString, "HEJIoCoisRNYftbKYwGfBMwl1FKrDr2TqTpX3si2PaA="))
-                ("summary", QVariant(QString, "2 items"))
-                ("toPay", QVariant(double, 20196))
-            )))
-            ("paymentLink", QVariant(QString, "https://devtest.dom/pay/devtest_track_id"))
-            ("paymentMD5", QVariant(QString, "89ca6efe9a2abf7e12e5d05506f29bb6"))
-            ("status", QVariant(double, 78))
-        )
-        */
-
-        QString PaymentMD5 = voucherInfo.value("paymentMD5").toString();
-        if (PaymentMD5.isEmpty() == false)
-        {
             QVariant Result = callAdminAPI(
                 POST,
-                "Account/approveOnlinePayment",
+                "Advert/addToBasket",
                 {},
                 {
-                    { "paymentMD5",     PaymentMD5 },
-                    { "domain",         "this.is.domain" },
-                    { "pgResponse",     QVariantMap({
-                          { "resp_1", 1 },
-                          { "resp_2", 2 },
-                          { "resp_3", 3 },
-                      }) },
+                    { "saleableCode",       "p123-s456" },
+                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                1 },
+                    { "discountCode",       "cpn-code-aaa" },
+                    { "referrer",           "" },
+                    { "extraRefererParams", {} },
+                    { "lastPreVoucher",     lastPreVoucher.toJson().toVariantMap() },
                 }
             );
-            qDebug() << "--------- approveOnlinePayment Result" << Result;
-            /*
-            TAPI::stuVoucher:
-            QVariantMap, QMap(
-                ("iD", QVariant(double, 83))
-                ("info", QVariant(QVariantMap, QMap(
-                    ("items", QVariant(QVariantList, (
-                        QVariant(QVariantMap, QMap(
-                            ("desc", QVariant(QString, "test Saleable 456 name"))
-                            ("disAmount", QVariant(double, 1800))
-                            ("discount", QVariant(QVariantMap, QMap(
-                                ("amount", QVariant(double, 1800))
-                                ("code", QVariant(QString, "cpn-code-aaa"))
-                                ("iD", QVariant(double, 1))
-                            )))
-                            ("orderID", QVariant(double, 202))
-                            ("qty", QVariant(double, 1))
-                            ("sign", QVariant(QString, "NJja6zFf7NOAtQSji+FXTAiDhKFx23Qsrn4adUnb9xg="))
-                            ("subTotal", QVariant(double, 12000))
-                            ("uUID", QVariant(QString, "6f987a18cf4501b5579ba0da8cbd81c9"))
-                            ("unitPrice", QVariant(double, 12000))
-                        ))
-                        , QVariant(QVariantMap, QMap(
-                            ("desc", QVariant(QString, "test Saleable 456 name"))
-                            ("disAmount", QVariant(double, 1800))
-                            ("discount", QVariant(QVariantMap, QMap(
-                                ("amount", QVariant(double, 1800))
-                                ("code", QVariant(QString, "cpn-code-aaa"))
-                                ("iD", QVariant(double, 1))
-                            )))
-                            ("orderID", QVariant(double, 203))
-                            ("qty", QVariant(double, 1))
-                            ("sign", QVariant(QString, "G38evDwq/stAJ+Zk7uDNvEhWbeVPiE6jwhJkCgK5L1M="))
-                            ("subTotal", QVariant(double, 12000))
-                            ("uUID", QVariant(QString, "c876d40dcff62b6330d323c987c0600c"))
-                            ("unitPrice", QVariant(double, 12000))
-                        ))
-                    )))
-                    ("round", QVariant(double, 204))
-                    ("sign", QVariant(QString, "HEJIoCoisRNYftbKYwGfBMwl1FKrDr2TqTpX3si2PaA="))
-                    ("summary", QVariant(QString, "2 items"))
-                    ("toPay", QVariant(double, 20196))
-                )))
-                ("status", QVariant(double, 70))
-            )
-            */
+
+            qDebug() << "--------- addToBasket" << Result;
+
+            lastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
-    void cleanupSaleableData() {
+    void addToBasket_valid_coupon_code_2()
+    {
+        QT_TRY {
+            int ItemsCount = lastPreVoucher.Items.length();
+
+            QVariant Result = callAdminAPI(
+                POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode",       "p123-s456" },
+                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                1 },
+                    { "discountCode",       "cpn-code-aaa" },
+                    { "referrer",           "" },
+                    { "extraRefererParams", {} },
+                    { "lastPreVoucher",     lastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            qDebug() << "--------- addToBasket" << Result;
+
+            lastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void finalizeBasket_empty_items()
+    {
+        QT_TRY {
+            QVariant result = callAdminAPI(
+                POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             {} },
+                    { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                    { "domain",                 "devtest.com" },
+                    { "walletID",               9988 },
+                    { "paymentVerifyCallback",  "http://www.a.com" },
+                }
+            );
+
+            //QEXCEPTION
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void finalizeBasket()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             lastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                    { "domain",                 "devtest.com" },
+                    { "walletID",               9988 },
+                    { "paymentVerifyCallback",  "http://www.a.com" },
+                }
+            );
+
+            qDebug() << "--------- voucherInfo" << Result;
+
+            voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(voucher.ID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void approveOnlinePayment()
+    {
+        if (voucher.PaymentMD5.isEmpty() == false)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentMD5",     voucher.PaymentMD5 },
+                        { "domain",         "this.is.domain" },
+                        { "pgResponse",     QVariantMap({
+                              { "resp_1", 1 },
+                              { "resp_2", 2 },
+                              { "resp_3", 3 },
+                          }) },
+                    }
+                );
+
+                qDebug() << "--------- approveOnlinePayment Result" << Result;
+
+                approveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(approveOnlinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    /***************************************************************************************/
+    /* cleanup *****************************************************************************/
+    /***************************************************************************************/
+//    TAPI::stuVoucher approveOnlinePaymentVoucher;
+//    void deleteOnlinePayment()
+//    {
+//        QT_TRY {
+//            int ItemsCount = lastPreVoucher.Items.length();
+
+//            QVariant Result = callAdminAPI(
+//                DELETE,
+//                QString("Account/onlinePayment"
+//            );
+
+//            qDebug() << "--------- addToBasket" << Result;
+
+//            lastPreVoucher.fromJson(Result.toJsonObject());
+
+//            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
+//    TAPI::stuVoucher voucher;
+//    TAPI::stuPreVoucher lastPreVoucher;
+
+    void deleteDiscount()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                DELETE,
+                QString("Advert/AccountCoupons/%1").arg(couponID.toString())
+            );
+
+//            qDebug() << "--------- DELETE result: " << Result;
+
+            QVERIFY(Result == true);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+//    void deletePaymentGateway_devtest()
+//    {
+//        if (paymentGatewayID > 0)
+//        {
+//            QT_TRY {
+//                QVariant Result = callAdminAPI(
+//                    DELETE,
+//                    QString("Advert/PaymentGateways/%1").arg(paymentGatewayID.toString())
+//                );
+
+////                qDebug() << "--------- DELETE result: " << Result;
+
+//                QVERIFY(Result == true);
+
+//            } QT_CATCH (const std::exception &exp) {
+//                QTest::qFail(exp.what(), __FILE__, __LINE__);
+//            }
+//        }
+//    }
+
+    void deleteSaleable_banner()
+    {
+        if (bannerSaleableID > 0)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    DELETE,
+                    QString("Advert/AccountSaleables/%1").arg(bannerSaleableID.toString())
+                );
+
+//                qDebug() << "--------- DELETE result: " << Result;
+
+                QVERIFY(Result == true);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void deleteProduct_banner()
+    {
+        if (bannerProductID > 0)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    DELETE,
+                    QString("Advert/AccountProducts/%1").arg(bannerProductID.toString())
+                );
+
+//                qDebug() << "--------- DELETE result: " << Result;
+
+                QVERIFY(Result == true);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void deleteLocation()
+    {
+        if (locationID > 0)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    DELETE,
+                    QString("Advert/Locations/%1").arg(locationID.toString())
+                );
+
+//                qDebug() << "--------- DELETE result: " << Result;
+
+                QVERIFY(Result == true);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    /***************************************************************************************/
+    void deleteAdminUser()
+    {
+        if (gAdminUserID > 0)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    DELETE,
+                    QString("Account/User/%1").arg(gAdminUserID)
+                );
+
+//                qDebug() << "--------- DELETE result: " << Result;
+
+                QVERIFY(Result == true);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void deleteUser()
+    {
+        if (gUserID > 0)
+        {
+            QT_TRY {
+                QVariant Result = callAdminAPI(
+                    DELETE,
+                    QString("Account/User/%1").arg(gUserID)
+                );
+
+//                qDebug() << "--------- DELETE result: " << Result;
+
+                QVERIFY(Result == true);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
     }
 
 };

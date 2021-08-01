@@ -87,19 +87,22 @@ extern quint64 gUserID;
 extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
-class clsBaseTest : public QObject {
+class clsBaseTest : public QObject
+{
 protected:
-    void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true) {
+    void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true)
+    {
         if (_deleteOldTestData)
             cleanupUnitTestData();
 //            deleteOldTestData();
 
         clsDAC DAC;
+
         clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?", { UT_RoleName, UT_SystemUserID });
         auto rolID = Result.lastInsertId().toUInt();
-        if (rolID == 0) {
+
+        if (rolID == 0)
             clsDACResult Result2 = DAC.execQuery("", "SELECT rolID FROM tblRoles WHERE rolName=? AND rolStatus <> 'R'", { UT_RoleName });
-        }
 
         if (_createUsers) {
             DAC.execQuery("", R"(
@@ -147,15 +150,15 @@ protected:
     }
 
     QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
-      return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
+        return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
     }
 
     QVariant callRefreshAPI() {
-      return callAPIImpl(gLoginJWT, GET, "Account/refreshJWT");
+        return callAPIImpl(gLoginJWT, GET, "Account/refreshJWT");
     }
 
     QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
-      return callAPIImpl(gEncodedAdminJWT, _method, _api, _urlArgs, _postFields);
+        return callAPIImpl(gEncodedAdminJWT, _method, _api, _urlArgs, _postFields);
     }
 
 private:
@@ -171,18 +174,29 @@ private:
         DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
     }
 
-    QVariant callAPIImpl(QString _encodedJWT , HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}){
+    QVariant callAPIImpl(
+            QString _encodedJWT,
+            HTTPMethod _method,
+            const QString& _api,
+            const QVariantMap& _urlArgs = {},
+            const QVariantMap& _postFields = {}
+        )
+    {
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
         auto makeURL = [_method, _api, _urlArgs]() {
             QUrlQuery URLQuery;
-            for(auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
+
+            for (auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
                 URLQuery.addQueryItem(ArgIter.key(), ArgIter.value().toString());
+
             QUrl URL(APIURL + "/" + _api);
             URL.setQuery(URLQuery);
             QString URLStr = URL.toString().replace(" ", "%20").replace("+","%2B");
-            qDebug()<<"Request"<<HTTPMethodString[_method]<<URLStr;
+
+//            qDebug() << "Request" << HTTPMethodString[_method] << URLStr;
+
             return URLStr;
         };
 
@@ -197,7 +211,8 @@ private:
 
         Opt[CURLOPT_HTTPHEADER] = Headers;
 
-        switch (_method) {
+        switch (_method)
+        {
             case GET:
                 Opt[CURLOPT_CUSTOMREQUEST] = "GET";
                 break;
@@ -215,7 +230,8 @@ private:
                 break;
         }
 
-        switch (_method) {
+        switch (_method)
+        {
             case GET:
             case DELETE:
                 break;
@@ -227,17 +243,23 @@ private:
 
         QString CUrlResult = CUrl.exec(Opt);
 
-        if (CUrl.lastError().isOk() == false) {
+        if (CUrl.lastError().isOk() == false)
+        {
             qDebug() << CUrl.errorBuffer();
             return gInvalid;
         }
-        else {
+        else
+        {
             QJsonParseError JsonError;
             QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
+
             if (JsonError.error != QJsonParseError::NoError)
                 qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+
             QVariant Result = Doc.toVariant().toMap().value("result");
-            qDebug() << "Result: " << Result;
+
+//            qDebug() << "Result:" << Result;
+
             return Result;
         }
     }

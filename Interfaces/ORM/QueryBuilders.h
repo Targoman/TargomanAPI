@@ -388,7 +388,9 @@ public:
     itmplDerived& xorWhere(const clsCondition& _condition);
 
     itmplDerived& setPksByPath(TAPI::PKsByPath_t _pksByPath);
+
     itmplDerived& addFilters(const QString& _filters);
+    itmplDerived& addFilters(const QStringList& _filters);
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -509,7 +511,7 @@ public:
 
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
-    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
+    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 private:
     virtual void iAmAbstract() {}
     friend testQueryBuilders;
@@ -540,7 +542,7 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true/*, quint8 _prettifierJustifyLen = 0*/);
+    stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
     friend tmplQueryJoinTrait<UpdateQuery>;
     friend testQueryBuilders;
 };
@@ -565,7 +567,7 @@ public:
 
 private:
     virtual void iAmAbstract() {}
-    QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}/*, quint8 _prettifierJustifyLen = 0*/);
+    QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {});
     friend tmplQueryJoinTrait<DeleteQuery>;
     friend testQueryBuilders;
 };

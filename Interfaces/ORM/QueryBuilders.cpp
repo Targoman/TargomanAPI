@@ -1143,10 +1143,9 @@ public:
         Table(_table), Alias(_alias)
     {}
 
-    virtual void prepare(quint64 _currentUserID, bool _useBinding /*, quint8 _prettifierJustifyLen*/) {
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
         Q_UNUSED(_useBinding)
-//        Q_UNUSED(_prettifierJustifyLen)
 
         if (this->BaseQueryPreparedItems.IsPrepared)
             return;
@@ -1792,6 +1791,12 @@ public:
         }
     }
 
+    bool isEmpty() const {
+        return (this->WhereClauses.isEmpty()
+                && this->PksByPath.isEmpty()
+                && this->Filters.isEmpty());
+    }
+
 public:
     itmplDerived*                   Owner;
     bool                            IsPrepared = false;
@@ -1895,6 +1900,13 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::addFilters(const QString& _filt
 
 //        this->andWhere(clsCondition::parse(Filters, MainTableNameOrAlias, this->WhereTraitData->Owner->Data->Table.FilterableColsMap));
     }
+
+    return (itmplDerived&)*this;
+}
+template <class itmplDerived>
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::addFilters(const QStringList& _filters)
+{
+    this->WhereTraitData->Filters.append(_filters);
 
     return (itmplDerived&)*this;
 }
@@ -2047,12 +2059,12 @@ public:
 //    clsSelectQueryData(const clsSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) {}
 //    ~clsSelectQueryData() {}
 
-    virtual void prepare(quint64 _currentUserID, bool _useBinding /*, quint8 _prettifierJustifyLen*/) {
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         if (this->SelectQueryPreparedItems.IsPrepared)
             return;
         this->SelectQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<SelectQuery>::prepare(_currentUserID, _useBinding /*, _prettifierJustifyLen*/);
+        clsBaseQueryData<SelectQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -2457,6 +2469,43 @@ SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime)
 /***********************\
 |* Execute             *|
 \***********************/
+
+/*
+ * https://dev.mysql.com/doc/refman/8.0/en/select.html:
+SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+    [HIGH_PRIORITY]
+    [STRAIGHT_JOIN]
+    [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+    [SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr] ...
+    [into_option]
+    [FROM table_references
+      [PARTITION partition_list]]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [WINDOW window_name AS (window_spec)
+        [, window_name AS (window_spec)] ...]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [into_option]
+    [FOR {UPDATE | SHARE}
+        [OF tbl_name [, tbl_name] ...]
+        [NOWAIT | SKIP LOCKED]
+      | LOCK IN SHARE MODE]
+    [into_option]
+
+into_option: {
+    INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+  | INTO DUMPFILE 'file_name'
+  | INTO var_name [, var_name] ...
+}
+*/
+
 QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _reportCount, bool _checkStatusCol)
 {
     //this->Data->Table.prepareFiltersList();
@@ -2815,14 +2864,14 @@ public:
 //    clsCreateQueryData(const clsCreateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) {}
 //    ~clsCreateQueryData() {}
 
-    virtual void prepare(quint64 _currentUserID, bool _useBinding/*, quint8 _prettifierJustifyLen*/) {
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
 
         if (this->CreateQueryPreparedItems.IsPrepared)
             return;
         this->CreateQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<CreateQuery>::prepare(_currentUserID, _useBinding /*, _prettifierJustifyLen*/);
+        clsBaseQueryData<CreateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -3097,7 +3146,7 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
 {
     stuBoundQueryString BoundQueryString;
 
-    this->Data->prepare(_currentUserID, _useBinding/*, _prettifierJustifyLen*/);
+    this->Data->prepare(_currentUserID, _useBinding);
 
     if (_useBinding)
         BoundQueryString.BindingValues = this->Data->CreateQueryPreparedItems.BindingValues;
@@ -3205,7 +3254,7 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
 //    throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
 //}
 
-QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex)
+QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, bool _lookupFromRegistryFirst)
 {
     QString invalidatedAtFieldName = _table.getDBProperty(ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME).toString();
     if (invalidatedAtFieldName.isEmpty())
@@ -3216,11 +3265,15 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex)
         throw exQueryBuilder("status field name not provided for " + _table.Name);
 
     QString invalidateQueryString;
-    QVariant invalidateQuery = _table.getDBProperty(ORM_TABLE_DBPROPERTY_INVALIDATE_QUERY);
-    if (invalidateQuery.isValid()) {
-        invalidateQueryString = invalidateQuery.toString();
+
+    if (_lookupFromRegistryFirst)
+    {
+        QVariant invalidateQuery = _table.getDBProperty(ORM_TABLE_DBPROPERTY_INVALIDATE_QUERY);
+        if (invalidateQuery.isValid())
+            invalidateQueryString = invalidateQuery.toString();
     }
-    else {
+
+    if (invalidateQueryString.isEmpty())
         invalidateQueryString =
             "UPDATE :tableName"
             "   SET :invalidatedAt = UNIX_TIMESTAMP()"
@@ -3228,6 +3281,11 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex)
             "   AND :statusFieldName = 'R'"
         ;
 
+    if (invalidateQueryString.isEmpty())
+        throw exQueryBuilder("invalidate update query not provided for " + _table.Name);
+
+    if (invalidateQueryString.length())
+    {
         if (_makeWithUniqeIndex)
         {
             //make invalidate update query dynamically
@@ -3249,9 +3307,6 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex)
         }
     }
 
-    if (invalidateQueryString.isEmpty())
-        throw exQueryBuilder("invalidate update query not provided for " + _table.Name);
-
     invalidateQueryString
         .replace(":tableName", _table.Schema + '.' + _table.Name)
         .replace(":invalidatedAt", invalidatedAtFieldName)
@@ -3272,7 +3327,7 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
     QT_TRY
     {
         //1: invalidate OLD removed row(s)
-        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, true);
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, true, true);
         if (invalidateQueryString.length())
         {
             if (this->Data->Select.isValid())
@@ -3371,13 +3426,13 @@ public:
 //    clsUpdateQueryData(const clsUpdateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) {}
 //    ~clsUpdateQueryData() {}
 
-    virtual void prepare(quint64 _currentUserID, bool _useBinding/*, quint8 _prettifierJustifyLen*/) {
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         if (this->UpdateQueryPreparedItems.IsPrepared)
             return;
 
         this->UpdateQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<UpdateQuery>::prepare(_currentUserID, _useBinding /*, _prettifierJustifyLen*/);
+        clsBaseQueryData<UpdateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -3521,18 +3576,18 @@ UpdateQuery& UpdateQuery::decreament(const QString& _col, qreal _value)
 \***********************/
 stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding)
 {
-    if (this->WhereTraitData->WhereClauses.isEmpty())
-        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+    if (this->WhereTraitData->isEmpty())
+        throw exQueryBuilderWhereClauseNotProvided("Where conditions of update query is empty. This is very dangerous.");
 
     stuBoundQueryString BoundQueryString;
 
-    this->Data->prepare(_currentUserID, _useBinding/*, _prettifierJustifyLen*/);
+    this->Data->prepare(_currentUserID, _useBinding);
     this->WhereTraitData->prepare();
     //it should be the last preparation call, as the previous preparation may cause an automatic join
     this->JoinTraitData->prepare();
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
-        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of update query is empty. This is very dangerous.");
 
     if (_useBinding)
         BoundQueryString.BindingValues = this->Data->UpdateQueryPreparedItems.BindingValues;
@@ -3651,14 +3706,14 @@ public:
 //    clsDeleteQueryData(const clsDeleteQueryData& _other) : Table(_other.Table), Alias(_other.Alias) {}
 //    ~clsDeleteQueryData() {}
 
-    virtual void prepare(quint64 _currentUserID, bool _useBinding/*, quint8 _prettifierJustifyLen*/) {
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
 
         if (this->DeleteQueryPreparedItems.IsPrepared)
             return;
         this->DeleteQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<DeleteQuery>::prepare(_currentUserID, _useBinding /*, _prettifierJustifyLen*/);
+        clsBaseQueryData<DeleteQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -3706,16 +3761,16 @@ DeleteQuery& DeleteQuery::addTarget(const QString& _targetTableName)
 \***********************/
 QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
 {
-    if (this->WhereTraitData->WhereClauses.isEmpty())
-        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+    if (this->WhereTraitData->isEmpty())
+        throw exQueryBuilderWhereClauseNotProvided("Where conditions of delete query is empty. This is very dangerous.");
 
-    this->Data->prepare(_currentUserID, false/*, _prettifierJustifyLen*/);
+    this->Data->prepare(_currentUserID, false);
     this->WhereTraitData->prepare();
     //it should be the last preparation call, as the previous preparation may cause an automatic join
     this->JoinTraitData->prepare();
 
     if (this->WhereTraitData->PreparedItems.Where.isEmpty())
-        throw exQueryBuilderWhereClauseNotProvided("Where cluase of query is empty. This is very dangerous.");
+        throw exQueryBuilderWhereClauseNotProvided("Where cluase of delete query is empty. This is very dangerous.");
 
     //push
     QStringList QueryParts;
@@ -3803,9 +3858,12 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
         QString statusFieldName = this->Data->Table.getStatusColumnName();
 
         //1: invalidate OLD removed row
-        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, false);
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, false, false);
+
 //        qDebug() << "-------------" << invalidateQueryString;
-        if (invalidateQueryString.length()) {
+
+        if (invalidateQueryString.length())
+        {
             invalidateQueryString += QString(" AND (%1)").arg(this->WhereTraitData->PreparedItems.Where);
             DAC.execQuery("", invalidateQueryString).numRowsAffected();
         }
@@ -3816,6 +3874,8 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
             quint64 rowsAffected = UpdateQuery(this->Data->Table)
                     .set(statusFieldName, "Removed")
                     .where(this->WhereTraitData->WhereClauses)
+                    .setPksByPath(this->WhereTraitData->PksByPath)
+                    .addFilters(this->WhereTraitData->Filters)
                     .execute(_currentUserID);
             if (rowsAffected > 0) {
                 ///TODO: commit
@@ -3875,39 +3935,3 @@ template class tmplQueryWhereTrait<DeleteQuery>;
 } //namespace Targoman::API::ORM
 
 //Q_DECLARE_METATYPE(Targoman::API::ORM::clsColSpecs::unnAggregation);
-
-/*
- * https://dev.mysql.com/doc/refman/8.0/en/select.html:
-SELECT
-    [ALL | DISTINCT | DISTINCTROW ]
-    [HIGH_PRIORITY]
-    [STRAIGHT_JOIN]
-    [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
-    [SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
-    select_expr [, select_expr] ...
-    [into_option]
-    [FROM table_references
-      [PARTITION partition_list]]
-    [WHERE where_condition]
-    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
-    [HAVING where_condition]
-    [WINDOW window_name AS (window_spec)
-        [, window_name AS (window_spec)] ...]
-    [ORDER BY {col_name | expr | position}
-      [ASC | DESC], ... [WITH ROLLUP]]
-    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
-    [into_option]
-    [FOR {UPDATE | SHARE}
-        [OF tbl_name [, tbl_name] ...]
-        [NOWAIT | SKIP LOCKED]
-      | LOCK IN SHARE MODE]
-    [into_option]
-
-into_option: {
-    INTO OUTFILE 'file_name'
-        [CHARACTER SET charset_name]
-        export_options
-  | INTO DUMPFILE 'file_name'
-  | INTO var_name [, var_name] ...
-}
-*/

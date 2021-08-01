@@ -18,17 +18,23 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
+#include "APIArgHelperMacrosPrivate.h"
+///*extern */QString toCammel(const QString& _name)
+//{
+//    return _name.mid(0,1).toLower() + _name.mid(1);
+//}
 
 #include "intfAPIArgManipulator.h"
 #include "intfAPIModule.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 intfAPIObject::~intfAPIObject() {}
 
-intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
+intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName) {
     Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer") == false, "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
     this->PrettyTypeName = _realTypeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX) ? _realTypeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX) - 1, _realTypeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX))) : _realTypeName;
     this->PrettyTypeName = (this->PrettyTypeName.startsWith('Q') ? this->PrettyTypeName.mid(1) : this->PrettyTypeName).toLower();
@@ -41,6 +47,7 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName){
 }
 
 intfAPIArgManipulator::~intfAPIArgManipulator() {}
+
 /******************************************************************************/
 intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
     Host(_host),
@@ -50,7 +57,7 @@ intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _hos
     Schema(_schema)
 {}
 
-QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema){
+QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema) {
     return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
                 this->Host).arg(
                 this->Port).arg(
@@ -65,10 +72,4 @@ intfAPIModule::intfAPIModule(Common::Configuration::intfModule *_parent) :
 
 intfAPIModule::~intfAPIModule(){}
 
-}
-}
-
-extern QString toCammel(const QString& _name){
-    return _name.mid(0,1).toLower() + _name.mid(1);
-}
-
+} //namespace Targoman::API
