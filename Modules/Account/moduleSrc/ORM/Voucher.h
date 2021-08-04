@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H
@@ -62,6 +63,7 @@ namespace tblVoucher {
 class Voucher : public ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete an Voucher. Take note that User can just delete Vouchers with Payoff type")

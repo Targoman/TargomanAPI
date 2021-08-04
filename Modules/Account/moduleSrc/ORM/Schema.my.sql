@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22687 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -271,7 +271,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprRequestDate` (`aprRequestDate`),
   KEY `aprApplyDate` (`aprApplyDate`),
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=239 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -497,7 +497,7 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
   CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -545,7 +545,7 @@ CREATE TABLE `tblPaymentGateways` (
   `pgwCreatedBy_usrID` bigint unsigned NOT NULL DEFAULT '0',
   `pgwUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblRoles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -571,7 +571,7 @@ CREATE TABLE `tblRoles` (
   CONSTRAINT `FK_tblRoles_tblRoles` FOREIGN KEY (`rolParent_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser` FOREIGN KEY (`rolCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser_2` FOREIGN KEY (`rolUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=733 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=785 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -640,7 +640,7 @@ CREATE TABLE `tblUser` (
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1485 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1587 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -756,7 +756,7 @@ CREATE TABLE `tblUserWallets` (
   CONSTRAINT `FK_tblUserWallets_tblUser` FOREIGN KEY (`wal_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_2` FOREIGN KEY (`walCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_3` FOREIGN KEY (`walUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1308 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1410 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -775,7 +775,7 @@ CREATE TABLE `tblVoucher` (
   KEY `vchCreationDateTime` (`vchCreationDateTime`),
   KEY `FK_tblVoucher_tblUser` (`vch_usrID`),
   CONSTRAINT `FK_tblVoucher_tblUser` FOREIGN KEY (`vch_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -835,7 +835,7 @@ CREATE TABLE `tblWalletsTransactions` (
   KEY `wltType` (`wlt_vchType`),
   CONSTRAINT `FK_tblWalletsTransactions_tblInvoice` FOREIGN KEY (`wlt_vchID`) REFERENCES `tblVoucher` (`vchID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblWalletsTransactions_tblUserWallets` FOREIGN KEY (`wlt_walID`) REFERENCES `tblUserWallets` (`walID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1319,6 +1319,31 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_newOnlinePayment`(
 	OUT `oMD5` VARCHAR(50)
 )
 BEGIN
+	SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = '500:DEPRECATED. use sp_CREATE_onlinePayment instead';
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_onlinePayment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_onlinePayment`(
+	IN `iVoucherID` BIGINT UNSIGNED,
+	IN `iGatewayID` INT,
+	IN `iAmount` BIGINT UNSIGNED,
+	OUT `oMD5` VARCHAR(50)
+)
+BEGIN
   SET oMD5 = Common.fnCreateRandomMD5();
   
   INSERT
@@ -1609,30 +1634,34 @@ BEGIN
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
     GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = UserID,
-         tblActionLogs.atlType = 'WLT.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iWalletID", iWalletID,
-              "iVoucherID",iVoucherID
-          );
+
+    INSERT
+      INTO tblActionLogs
+       SET tblActionLogs.atlBy_usrID = UserID,
+           tblActionLogs.atlType = 'WLT.Error',
+           tblActionLogs.atlDescription = JSON_OBJECT(
+               "err", Err,
+               "iWalletID", iWalletID,
+               "iVoucherID",iVoucherID
+           );
+
 --	  ROLLBACK;  
 	  RESIGNAL;  
   END;
 
-  SELECT tblVoucher.vch_usrID,
-         tblVoucher.vchType, 
-         tblVoucher.vchTotalAmount
-    INTO UserID, 
-         TransactionType,
-         oAmount
-    FROM tblVoucher
-   WHERE tblVoucher.vchID = iVoucherID
-     AND tblVoucher.vchStatus = 'N';
+    SELECT tblVoucher.vch_usrID,
+           tblVoucher.vchType, 
+           tblVoucher.vchTotalAmount
+      INTO UserID, 
+           TransactionType,
+           oAmount
+      FROM tblVoucher
+     WHERE tblVoucher.vchID = iVoucherID
+       AND tblVoucher.vchStatus = 'N'
+  ;
    
   IF ISNULL(UserID) THEN 
- 		SIGNAL SQLSTATE '45000'
+    SIGNAL SQLSTATE '45000'
        SET MESSAGE_TEXT = '401:Invalid voucher ID';
   END IF;
 
@@ -2863,21 +2892,16 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_setSessionExpired`(
 	IN `iSessionGUID` INT,
 	IN `Param2` INT
-
-
-
-
-
 )
 BEGIN
-	UPDATE tblActiveSessions
-		SET tblActiveSessions.ssnStatus = 'E'
-	 WHERE tblActiveSessions.ssnKey = iSessionGUID;
+    UPDATE tblActiveSessions
+       SET tblActiveSessions.ssnStatus = 'E'
+     WHERE tblActiveSessions.ssnKey = iSessionGUID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

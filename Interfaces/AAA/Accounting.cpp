@@ -33,10 +33,7 @@ using namespace Targoman::API::Helpers;
 #include "Interfaces/ORM/QueryBuilders.h"
 using namespace Targoman::API::ORM;
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting{
+namespace Targoman::API::AAA::Accounting {
 
 using namespace Common;
 using namespace Common::Configuration;
@@ -55,7 +52,7 @@ QByteArray hash(const QByteArray& _data)
 
 void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher)
 {
-    if(_preVoucher.Items.isEmpty())
+    if (_preVoucher.Items.isEmpty())
         return;
 
     QString Sign = _preVoucher.Sign;
@@ -63,46 +60,43 @@ void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher)
     if (Sign != QString(Accounting::hash(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
         throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
 
-    foreach(auto VoucherItem, _preVoucher.Items){
+    foreach (auto VoucherItem, _preVoucher.Items)
+    {
         QString Sign = VoucherItem.Sign;
         VoucherItem.Sign.clear();
+
         if (Sign != QString(Accounting::hash(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
 }
 
-intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
-{
-    Q_UNUSED(serviceAccounting);
-    return ServiceRegistry.value(_serviceName);
-}
-
-stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
-{
-    return this->findBestMatchedCredit(_usrID);
-}
-
-intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
-                                                     const QString& _module,
-                                                     AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-                                                     intfAccountProducts* _products,
-                                                     intfAccountSaleables* _saleables,
-                                                     intfAccountUserAssets* _userAssets,
-                                                     intfAccountAssetUsage* _assetusage,
-                                                     intfAccountCoupons* _discounts,
-                                                     intfAccountPrizes* _prizes) :
+/***************************************************************************************************\
+|** intfRESTAPIWithAccounting **********************************************************************|
+\***************************************************************************************************/
+intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
+        const QString& _schema,
+        const QString& _module,
+        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+        intfAccountProducts* _products,
+        intfAccountSaleables* _saleables,
+        intfAccountUserAssets* _userAssets,
+        intfAccountAssetUsage* _assetUsages,
+        intfAccountCoupons* _discounts,
+        intfAccountPrizes* _prizes
+    ) :
     ORM::clsRESTAPIWithActionLogs(_schema, _module),
     AccountProducts(_products),
     AccountSaleables(_saleables),
     AccountUserAssets(_userAssets),
-    AccountAssetUsage(_assetusage),
+    AccountAssetUsages(_assetUsages),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
     ServiceRegistry.insert(_schema, this);
 
-    foreach(auto Col, this->AssetUsageLimitsCols) {
+    foreach(auto Col, this->AssetUsageLimitsCols)
+    {
         if (Col.PerDay.size())
             this->AssetUsageLimitsColsName.append(Col.PerDay);
 
@@ -119,6 +113,17 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(const QString& _schema,
 
 intfRESTAPIWithAccounting::~intfRESTAPIWithAccounting()
 {}
+
+intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
+{
+    Q_UNUSED(serviceAccounting);
+    return ServiceRegistry.value(_serviceName);
+}
+
+stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
+{
+    return this->findBestMatchedCredit(_usrID);
+}
 
 stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
@@ -154,12 +159,15 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
             )
             return false;
 
-        if (_requestedUsage.size()) {
+        if (_requestedUsage.size())
+        {
             for (auto UsageIter = _requestedUsage.begin();
                 UsageIter != _requestedUsage.end();
-                UsageIter++) {
+                UsageIter++)
+            {
                 if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
+
                 if (this->isUnlimited(_assetItem.Digested.Limits) == false){
                     stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
                     if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
@@ -200,14 +208,15 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
 
     for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
         AccountIter != ServiceCreditsInfo.ActiveCredits.end();
-        AccountIter++) {
-
+        AccountIter++)
+    {
         const stuAssetItem& Item = AccountIter.value();
 
         if (isInvalidPackage(Item))
             continue;
 
-        if (CandidateCredit.isEmpty()) {
+        if (CandidateCredit.isEmpty())
+        {
             CandidateCredit.append(Item);
             continue;
         }
@@ -215,8 +224,10 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
         bool Inserted = false;
         for (auto CandidateIter = CandidateCredit.begin();
             CandidateIter != CandidateCredit.end();
-            CandidateIter++) {
-            if (comparePackages(Item, *CandidateIter) <0) {
+            CandidateIter++)
+        {
+            if (comparePackages(Item, *CandidateIter) <0)
+            {
                 this->breakCredit(CandidateIter->slbID);
                 CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
@@ -227,7 +238,8 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
             CandidateCredit.append(Item);
     }
 
-    if (CandidateCredit.isEmpty()) {
+    if (CandidateCredit.isEmpty())
+    {
         if (_requestedUsage.size())
             throw exPaymentRequired("You don't have any active account");
 
@@ -236,12 +248,14 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
 
     const stuAssetItem& ActivePackage = CandidateCredit.first();
     QDateTime NextDigestTime;
-    if (ActivePackage.prdValidToDate.isNull() == false) {
+    if (ActivePackage.prdValidToDate.isNull() == false)
+    {
         if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
             NextDigestTime = effectiveEndDateTime(ActivePackage);
         else
             NextDigestTime = QDateTime(ActivePackage.prdValidToDate.addDays(1));
-    } else if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
+    }
+    else if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
         NextDigestTime = effectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
@@ -257,7 +271,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         quint16 _qty, ///TODO: use float for qty
         TAPI::CouponCode_t _discountCode,
         QString _referrer,
-        TAPI::JSON_t _extraRefererParams,
+        TAPI::JSON_t _extraReferrerParams,
         TAPI::stuPreVoucher _lastPreVoucher
     )
 {
@@ -385,7 +399,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
     this->applyAssetAdditives(_JWT, AssetItem, _orderAdditives);
     qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
-    this->applyReferrer(_JWT, AssetItem, _referrer, _extraRefererParams);
+    this->applyReferrer(_JWT, AssetItem, _referrer, _extraReferrerParams);
 
     //-- --------------------------------
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
@@ -554,7 +568,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 //            if (multiplier.Multiplier == 0) //not found
 //                throw exHTTPBadRequest("Discount code is not valid on selected package");
 
-            if (multiplier.Multiplier > 0) { //found
+            if (multiplier.Multiplier > 0) //found
+            {
                 auto m = Discount.Amount;
                 Discount.Amount = Discount.Amount * multiplier.Multiplier;
                 qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount.Amount << ")";
@@ -585,7 +600,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 
         //check total
         qint32 remainDiscountAmount = cpnTotalMaxAmount - cpnTotalUsedAmount;
-        if (remainDiscountAmount < Discount.Amount) {
+        if (remainDiscountAmount < Discount.Amount)
+        {
             Discount.Amount = remainDiscountAmount;
             qDebug() << "4 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
         }
@@ -604,7 +620,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         Discount.Amount = ceil(Discount.Amount);
         qDebug() << "Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
-        if (Discount.Amount > 0) {
+        if (Discount.Amount > 0)
+        {
             AssetItem.Discount = Discount;
             AssetItem.TotalPrice = AssetItem.SubTotal - Discount.Amount;
             qDebug() << "AssetItem.TotalPrice:" << AssetItem.TotalPrice;
@@ -661,7 +678,8 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 //            { tblAccountUserAssetsBase::uasStatus, },
     };
 
-    if (Discount.ID > 0) {
+    if (Discount.ID > 0)
+    {
         qry
             .addCol(tblAccountUserAssetsBase::uas_cpnID)
             .addCol(tblAccountUserAssetsBase::uasDiscountAmount)
@@ -701,30 +719,38 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
+
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
     stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+
     if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
-    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type)
+    {
         if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
+
         if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
+
         if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
+
         if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
     };
 
     const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
-    if (BestMatchedCredit.IsFromParent) {
+
+    if (BestMatchedCredit.IsFromParent)
+    {
         for(auto UsageIter = _requestedUsage.begin();
             UsageIter != _requestedUsage.end();
-            UsageIter++) {
-
+            UsageIter++)
+        {
             if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
                 continue;
 
@@ -733,6 +759,7 @@ void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const Se
 
             checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
         }
+
         return;
     }
 
@@ -741,8 +768,8 @@ void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const Se
 
     for (auto UsageIter = _requestedUsage.begin();
         UsageIter != _requestedUsage.end();
-        UsageIter++) {
-
+        UsageIter++)
+    {
         if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
             continue;
 
@@ -750,8 +777,4 @@ void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const Se
     }
 }
 
-}
-}
-}
-}
-
+} //namespace Targoman::API::AAA::Accounting

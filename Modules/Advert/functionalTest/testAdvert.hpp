@@ -43,30 +43,18 @@ using namespace Targoman::API::AAA::Accounting;
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::Advertisement;
 
-namespace TAPI {
-TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
-                     COD                        = 'D', //offline payment
-                     IranBank                   = 'I',
-                     IranIntermediateGateway    = 'M',
-                     InternationalDebitCart     = 'D',
-                     InternationalCreditCart    = 'C',
-                     CryptoCurrency             = 'B',
-                     DevelopersTest             = '-',
-                     );
-}
-
 class testAdvert : public clsBaseTest
 {
     Q_OBJECT
 
-    QVariant locationID;
-    QVariant bannerProductID;
-    QVariant bannerSaleableID;
-//    QVariant paymentGatewayID;
-    QVariant couponID;
-    TAPI::stuPreVoucher lastPreVoucher;
-    TAPI::stuVoucher voucher;
-    TAPI::stuVoucher approveOnlinePaymentVoucher;
+    QVariant LocationID;
+    QVariant BannerProductID;
+    QVariant BannerSaleableID;
+//    QVariant PaymentGatewayID;
+    QVariant CouponID;
+    TAPI::stuPreVoucher LastPreVoucher;
+    TAPI::stuVoucher Voucher;
+    TAPI::stuVoucher ApproveOnlinePaymentVoucher;
 
     void cleanupUnitTestData()
     {
@@ -176,7 +164,7 @@ private slots:
     void createLocation()
     {
         QT_TRY {
-            locationID = callAdminAPI(
+            this->LocationID = callAdminAPI(
                 PUT,
                 "Advert/Locations",
                 {},
@@ -186,9 +174,9 @@ private slots:
                 }
             );
 
-        qDebug() << "--------- locationID: " << locationID;
+        qDebug() << "--------- locationID: " << this->LocationID;
 
-            QVERIFY(locationID > 0);
+            QVERIFY(this->LocationID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -198,7 +186,7 @@ private slots:
     void createProduct_banner()
     {
         QT_TRY {
-            bannerProductID = callAdminAPI(
+            this->BannerProductID = callAdminAPI(
                 PUT,
                 "Advert/AccountProducts",
                 {},
@@ -207,13 +195,13 @@ private slots:
                     { tblAccountProductsBase::prdName,          "test product 123" },
                     { tblAccountProductsBase::prdInStockCount,  1 },
                     { tblAccountProducts::prdType,              TAdvertisement::enuProductType::toStr(TAdvertisement::enuProductType::Advertise) },
-                    { tblAccountProducts::prd_locID,            locationID },
+                    { tblAccountProducts::prd_locID,            this->LocationID },
                 }
             );
 
-            qDebug() << "--------- bannerProductID: " << bannerProductID;
+            qDebug() << "--------- bannerProductID: " << this->BannerProductID;
 
-            QVERIFY(bannerProductID > 0);
+            QVERIFY(this->BannerProductID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -223,7 +211,7 @@ private slots:
     void createSaleable_banner()
     {
         QT_TRY {
-            bannerSaleableID = callAdminAPI(
+            this->BannerSaleableID = callAdminAPI(
                 PUT,
                 "Advert/AccountSaleables",
                 {},
@@ -231,7 +219,7 @@ private slots:
                     { tblAccountSaleablesBase::slbCode,             "p123-s456" },
                     { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
                     { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
-                    { tblAccountSaleablesBase::slb_prdID,           bannerProductID },
+                    { tblAccountSaleablesBase::slb_prdID,           this->BannerProductID },
                     { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
                     { tblAccountSaleablesBase::slbBasePrice,        12000 },
                     { tblAccountSaleablesBase::slbProductCount,     900 },
@@ -240,9 +228,9 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- bannerSaleableID: " << bannerSaleableID;
+            qDebug() << "--------- bannerSaleableID: " << this->BannerSaleableID;
 
-            QVERIFY(bannerSaleableID > 0);
+            QVERIFY(this->BannerSaleableID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -257,7 +245,7 @@ private slots:
             {
                 {
                     "filters", QString("%1=%2")
-                        .arg("pgwType").arg(TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest)),
+                        .arg("pgwType").arg("_DeveloperTest"),
                 },
                 { "reportCount", true },
                 { "cols", "pgwID" },
@@ -277,7 +265,7 @@ private slots:
                         {},
                         {
                             { "pgwName",                  QString("devtest %1").arg(time(nullptr)) },
-                            { "pgwType",                  TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                            { "pgwType",                  "_DeveloperTest" },
                             { "pgwDriver",                "DevTest" },
                             { "pgwMetaInfo",              QVariantMap({
                                                             { "username", "hello" },
@@ -328,8 +316,8 @@ private slots:
 //                    { "qty", 12 },
 //                    { "discountCode", "abcd11" },
 //                    { "referrer", "" },
-//                    { "extraRefererParams", {} },
-                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+//                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
             //exHTTPNotFound("No item could be found");
@@ -354,8 +342,8 @@ private slots:
                     { "qty", 999 },
 //                    { "discountCode", "zzzzzzzzzzzzzzzzzz" },
                     { "referrer", "" },
-                    { "extraRefererParams", {} },
-                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
@@ -379,8 +367,8 @@ private slots:
                     { "qty", 1 },
                     { "discountCode", "zzzzzzzzzzzzzzzzzz" },
                     { "referrer", "" },
-                    { "extraRefererParams", {} },
-                    { "lastPreVoucher", lastPreVoucher.toJson().toVariantMap() },
+                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
@@ -394,7 +382,7 @@ private slots:
     void createDiscount()
     {
         QT_TRY {
-            couponID = callAdminAPI(
+            this->CouponID = callAdminAPI(
                 PUT,
                 "Advert/AccountCoupons",
                 {},
@@ -431,9 +419,9 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- couponID: " << couponID;
+            qDebug() << "--------- couponID: " << this->CouponID;
 
-            QVERIFY(couponID > 0);
+            QVERIFY(this->CouponID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -443,7 +431,7 @@ private slots:
     void addToBasket_valid_coupon_code_1()
     {
         QT_TRY {
-            int ItemsCount = lastPreVoucher.Items.length();
+            int ItemsCount = this->LastPreVoucher.Items.length();
 
             QVariant Result = callAdminAPI(
                 POST,
@@ -455,16 +443,16 @@ private slots:
                     { "qty",                1 },
                     { "discountCode",       "cpn-code-aaa" },
                     { "referrer",           "" },
-                    { "extraRefererParams", {} },
-                    { "lastPreVoucher",     lastPreVoucher.toJson().toVariantMap() },
+                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
             qDebug() << "--------- addToBasket" << Result;
 
-            lastPreVoucher.fromJson(Result.toJsonObject());
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -474,7 +462,7 @@ private slots:
     void addToBasket_valid_coupon_code_2()
     {
         QT_TRY {
-            int ItemsCount = lastPreVoucher.Items.length();
+            int ItemsCount = this->LastPreVoucher.Items.length();
 
             QVariant Result = callAdminAPI(
                 POST,
@@ -486,16 +474,16 @@ private slots:
                     { "qty",                1 },
                     { "discountCode",       "cpn-code-aaa" },
                     { "referrer",           "" },
-                    { "extraRefererParams", {} },
-                    { "lastPreVoucher",     lastPreVoucher.toJson().toVariantMap() },
+                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
             qDebug() << "--------- addToBasket" << Result;
 
-            lastPreVoucher.fromJson(Result.toJsonObject());
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -511,7 +499,7 @@ private slots:
                 {},
                 {
                     { "preVoucher",             {} },
-                    { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                    { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "devtest.com" },
                     { "walletID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
@@ -533,8 +521,8 @@ private slots:
                 "Account/finalizeBasket",
                 {},
                 {
-                    { "preVoucher",             lastPreVoucher.toJson().toVariantMap() },
-                    { "gatewayType",            TAPI::enuPaymentGatewayType::toStr(TAPI::enuPaymentGatewayType::DevelopersTest) },
+                    { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "devtest.com" },
                     { "walletID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
@@ -543,9 +531,9 @@ private slots:
 
             qDebug() << "--------- voucherInfo" << Result;
 
-            voucher.fromJson(Result.toJsonObject());
+            this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(voucher.ID > 0);
+            QVERIFY(this->Voucher.ID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -554,7 +542,7 @@ private slots:
 
     void approveOnlinePayment()
     {
-        if (voucher.PaymentMD5.isEmpty() == false)
+        if (this->Voucher.PaymentMD5.isEmpty() == false)
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
@@ -562,7 +550,7 @@ private slots:
                     "Account/approveOnlinePayment",
                     {},
                     {
-                        { "paymentMD5",     voucher.PaymentMD5 },
+                        { "paymentMD5",     this->Voucher.PaymentMD5 },
                         { "domain",         "this.is.domain" },
                         { "pgResponse",     QVariantMap({
                               { "resp_1", 1 },
@@ -574,9 +562,9 @@ private slots:
 
                 qDebug() << "--------- approveOnlinePayment Result" << Result;
 
-                approveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(approveOnlinePaymentVoucher.ID > 0);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -617,7 +605,7 @@ private slots:
         QT_TRY {
             QVariant Result = callAdminAPI(
                 DELETE,
-                QString("Advert/AccountCoupons/%1").arg(couponID.toString())
+                QString("Advert/AccountCoupons/%1").arg(this->CouponID.toString())
             );
 
 //            qDebug() << "--------- DELETE result: " << Result;
@@ -651,12 +639,12 @@ private slots:
 
     void deleteSaleable_banner()
     {
-        if (bannerSaleableID > 0)
+        if (this->BannerSaleableID > 0)
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     DELETE,
-                    QString("Advert/AccountSaleables/%1").arg(bannerSaleableID.toString())
+                    QString("Advert/AccountSaleables/%1").arg(this->BannerSaleableID.toString())
                 );
 
 //                qDebug() << "--------- DELETE result: " << Result;
@@ -671,12 +659,12 @@ private slots:
 
     void deleteProduct_banner()
     {
-        if (bannerProductID > 0)
+        if (this->BannerProductID > 0)
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     DELETE,
-                    QString("Advert/AccountProducts/%1").arg(bannerProductID.toString())
+                    QString("Advert/AccountProducts/%1").arg(this->BannerProductID.toString())
                 );
 
 //                qDebug() << "--------- DELETE result: " << Result;
@@ -691,12 +679,12 @@ private slots:
 
     void deleteLocation()
     {
-        if (locationID > 0)
+        if (this->LocationID > 0)
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     DELETE,
-                    QString("Advert/Locations/%1").arg(locationID.toString())
+                    QString("Advert/Locations/%1").arg(this->LocationID.toString())
                 );
 
 //                qDebug() << "--------- DELETE result: " << Result;

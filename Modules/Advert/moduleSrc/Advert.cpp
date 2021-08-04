@@ -46,19 +46,76 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAccountOrdersStatus);
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI, stuAdvert,
+    TAPI,
+    stuAdvert,
     [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
 //    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 using namespace AAA;
 using namespace Advertisement;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
 
+Advert::Advert() :
+    Accounting::intfRESTAPIWithAccounting(
+        AdvertSchema,
+        AdvertDomain,
+        {
+            //           day                week   month                total
+            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
+            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+        },
+        &Advertisement::AccountProducts::instance(),
+        &Advertisement::AccountSaleables::instance(),
+        &Advertisement::AccountUserAssets::instance(),
+        &Advertisement::AccountAssetUsage::instance(),
+        &Advertisement::AccountCoupons::instance()
+    )
+{
+    this->addSubModule(AccountProducts.data());
+    this->addSubModule(AccountSaleables.data());
+    this->addSubModule(AccountUserAssets.data());
+    this->addSubModule(AccountAssetUsages.data());
+    this->addSubModule(AccountCoupons.data());
+    //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
+
+    this->addSubModule(&Advertisement::ActiveAds::instance());
+    this->addSubModule(&Advertisement::Bin::instance());
+    this->addSubModule(&Advertisement::Locations::instance());
+    this->addSubModule(&Advertisement::Banners::instance());
+    this->addSubModule(&Advertisement::Clicks::instance());
+    this->addSubModule(&Advertisement::Props::instance());
+}
+
+Accounting::stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
+{
+}
+
+void Advert::breakCredit(quint64 _slbID)
+{
+}
+
+bool Advert::isUnlimited(const Accounting::UsageLimits_t& _limits) const
+{
+}
+
+bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
+{
+}
+
+void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
+                                 INOUT stuAssetItem& _assetItem,
+                                 const OrderAdditives_t& _orderAdditives)
+{
+//    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
+
+//    _assetItem.slbBasePrice *= 1.1;
+};
+
+/***************************************************************************************************/
 TAPI::stuAdvert Advert::apiGETNewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
@@ -85,64 +142,4 @@ QString Advert::apiGETRetrieveURL(
 {
 }
 
-Advert::Advert() :
-    Accounting::intfRESTAPIWithAccounting(AdvertSchema,
-                                         AdvertDomain,
-                                         {
-                                            //        day                 week   month                total
-                                            {"show",  {"slbShowPerDay",   {},    {},                  "slbShowTotal"}},
-                                            {"click", {"slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal"}},
-                                         },
-                                         &Advertisement::AccountProducts::instance(),
-                                         &Advertisement::AccountSaleables::instance(),
-                                         &Advertisement::AccountUserAssets::instance(),
-                                         &Advertisement::AccountAssetUsage::instance(),
-                                         &Advertisement::AccountCoupons::instance()
-                                         )
-{
-    this->addSubModule(AccountProducts.data());
-    this->addSubModule(AccountSaleables.data());
-    this->addSubModule(AccountUserAssets.data());
-    this->addSubModule(AccountAssetUsage.data());
-    this->addSubModule(AccountCoupons.data());
-    //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
-
-    this->addSubModule(&Advertisement::ActiveAds::instance());
-    this->addSubModule(&Advertisement::Bin::instance());
-    this->addSubModule(&Advertisement::Locations::instance());
-    this->addSubModule(&Advertisement::Banners::instance());
-    this->addSubModule(&Advertisement::Clicks::instance());
-    this->addSubModule(&Advertisement::Props::instance());
-}
-
-/*******************************************************************************************************************/
-Accounting::stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
-{
-}
-
-void Advert::breakCredit(quint64 _slbID)
-{
-}
-
-bool Advert::isUnlimited(const Accounting::UsageLimits_t& _limits) const
-{
-}
-
-bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
-{
-}
-
-void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
-                                 INOUT stuAssetItem& _assetItem,
-                                 const OrderAdditives_t& _orderAdditives)
-{
-    Q_UNUSED(_JWT);
-    Q_UNUSED(_assetItem)
-
-    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
-
-//    _assetItem.slbBasePrice *= 1.1;
-};
-
-}
-}
+} //namespace Targoman::API

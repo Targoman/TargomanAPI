@@ -40,7 +40,7 @@ namespace Targoman::API::AAA {
 class gtwDevTest : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        TAPI::enuPaymentGatewayType::DevelopersTest,
+        TAPI::enuPaymentGatewayType::_DeveloperTest,
         gtwDevTest)
 
 public:

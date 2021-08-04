@@ -359,6 +359,11 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
 
         ///TODO: process voucher and apply it
 
+        /**
+         * retreieve end point
+         * call end point
+         * fail:
+         */
         foreach(auto VoucherItem, PreVoucher.Items) {
             ///TODO: call svcProcessVoucherEndPoint
         }
@@ -417,14 +422,17 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
     ///TODO: reserve saleables before returning voucher
     ///TODO: implement overall coupon at the end of checkout steps
 
-    Voucher.ID = Targoman::API::Query::Create(Voucher::instance(),
-                                              clsJWT(_JWT).usrID(),
-                                              TAPI::ORMFields_t({
-                                                  { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
-//                                                  { tblVoucher::vchDesc, QJsonDocument(_preVoucher.toJson()).toJson().constData() },
-                                                  { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
-                                                  { tblVoucher::vchTotalAmount, _preVoucher.ToPay }
-                                              })); //.toULongLong();
+    Voucher.ID = Targoman::API::Query::Create(
+                     Voucher::instance(),
+                     clsJWT(_JWT).usrID(),
+                     TAPI::ORMFields_t({
+                                           { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
+                                           { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
+                                           { tblVoucher::vchType, TAPI::enuVoucherType::Expense },
+                                           { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
+                                       })
+                     );
+
     try
     {
         //2: compute wallet remaining

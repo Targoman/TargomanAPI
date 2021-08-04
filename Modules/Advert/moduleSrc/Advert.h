@@ -63,8 +63,7 @@ struct stuAdvertBill {
 
 }
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 class Advert : public Accounting::intfRESTAPIWithAccounting
 {
@@ -88,17 +87,41 @@ protected:
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
 private slots:
-    TAPI::stuAdvert REST(GET, NewBanner, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order),
-                         "Get new banner based on location and order info")
-    TAPI::stuAdvert REST(GET, NewText, (TAPI::RemoteIP_t _REMOTE_IP, QString _location, TAPI::enuAdvertOrder::Type _order, QString _keywords),
-                         "Get new text advertisement")
-    QString         REST(GET, RetrieveURL, (TAPI::RemoteIP_t _REMOTE_IP, quint64 _id, TAPI::IPv4_t _clientIP, QString _agent),
-                         "Retrieve URL of the specified Advertisement")
+    TAPI::stuAdvert REST(
+            GET,
+            NewBanner,
+            (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _location,
+                TAPI::enuAdvertOrder::Type _order
+            ),
+            "Get new banner based on location and order info")
+
+    TAPI::stuAdvert REST(
+            GET,
+            NewText,
+            (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _location,
+                TAPI::enuAdvertOrder::Type _order,
+                QString _keywords
+            ),
+            "Get new text advertisement")
+
+    QString REST(
+            GET,
+            RetrieveURL,
+            (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                quint64 _id,
+                TAPI::IPv4_t _clientIP,
+                QString _agent
+            ),
+            "Retrieve URL of the specified Advertisement")
 
 };
 
-}
-}
+} //namespace Targoman::API
 
 TAPI_DECLARE_METATYPE(TAPI::stuAdvert);
 

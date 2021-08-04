@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_ACCOUNTING_H
@@ -25,41 +26,44 @@
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting {
+namespace Targoman::API::AAA::Accounting {
 
-class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs {
+class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs
+{
     Q_OBJECT
+
+protected:
+    intfRESTAPIWithAccounting(
+            const QString& _schema,
+            const QString& _module,
+            AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+            intfAccountProducts* _products,
+            intfAccountSaleables* _saleables,
+            intfAccountUserAssets* _userAssets,
+            intfAccountAssetUsage* _assetUsages,
+            intfAccountCoupons* _discounts = nullptr,
+            intfAccountPrizes* _prizes = nullptr);
+    virtual ~intfRESTAPIWithAccounting();
 
 public:
     stuActiveCredit activeAccountObject(quint64 _usrID);
 
 protected:
-    intfRESTAPIWithAccounting(const QString& _schema,
-                             const QString& _module,
-                             AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-                             intfAccountProducts* _products,
-                             intfAccountSaleables* _saleables,
-                             intfAccountUserAssets* _userAssets,
-                             intfAccountAssetUsage* _assetusage,
-                             intfAccountCoupons* _discounts = nullptr,
-                             intfAccountPrizes* _prizes = nullptr);
-    virtual ~intfRESTAPIWithAccounting();
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
     virtual void breakCredit(quint64 _slbID) = 0;
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
     virtual void digestPrivs(TAPI::JWT_t _JWT,
-                             INOUT stuAssetItem& _assetItem) {
+                             INOUT stuAssetItem& _assetItem)
+    {
         Q_UNUSED(_JWT);
         Q_UNUSED(_assetItem)
     };
     virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
                                      INOUT stuAssetItem& _assetItem,
-                                     const OrderAdditives_t& _orderAdditives) {
+                                     const OrderAdditives_t& _orderAdditives)
+    {
         Q_UNUSED(_JWT);
         Q_UNUSED(_assetItem)
         Q_UNUSED(_orderAdditives)
@@ -67,11 +71,12 @@ protected:
     virtual void applyReferrer(TAPI::JWT_t _JWT,
                                INOUT stuAssetItem& AssetItem,
                                QString _referrer,
-                               TAPI::JSON_t _extraRefererParams) {
+                               TAPI::JSON_t _extraReferrerParams)
+    {
         Q_UNUSED(_JWT);
         Q_UNUSED(AssetItem);
         Q_UNUSED(_referrer);
-        Q_UNUSED(_extraRefererParams);
+        Q_UNUSED(_extraReferrerParams);
     };
 
     void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
@@ -86,7 +91,7 @@ private slots:
                                                  quint16 _qty = 1,
                                                  TAPI::CouponCode_t _discountCode = {},
                                                  QString _referrer = {},
-                                                 TAPI::JSON_t _extraRefererParams = {},
+                                                 TAPI::JSON_t _extraReferrerParams = {},
                                                  TAPI::stuPreVoucher _lastPreVoucher = {}),
                                 "add a package to basket and return updated pre-Voucher")
     ///TODO: removeFromBasket
@@ -96,7 +101,7 @@ protected:
     QScopedPointer<intfAccountProducts> AccountProducts;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
-    QScopedPointer<intfAccountAssetUsage> AccountAssetUsage;
+    QScopedPointer<intfAccountAssetUsage> AccountAssetUsages;
     QScopedPointer<intfAccountCoupons> AccountCoupons;
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
@@ -110,9 +115,6 @@ private:
 
 extern intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName);
 
-}
-}
-}
-}
+} //namespace Targoman::API::AAA::Accounting
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_H

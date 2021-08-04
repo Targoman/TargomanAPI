@@ -60,13 +60,13 @@ namespace TAPI {
 //                     )
 
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
+                     _DeveloperTest             = '-',
                      COD                        = 'D', //offline payment
                      IranBank                   = 'I',
                      IranIntermediateGateway    = 'M',
                      InternationalDebitCart     = 'D',
                      InternationalCreditCart    = 'C',
                      CryptoCurrency             = 'B',
-                     DevelopersTest             = '-',
                      );
 //TARGOMAN_DEFINE_ENUM_LIST(enuPaymentGatewayType);
 

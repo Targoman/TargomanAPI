@@ -185,7 +185,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         try
         {
             onpMD5 = OnlinePayments::instance()
-                     .callSP("sp_CREATE_newOnlinePayment", {
+                     .callSP("sp_CREATE_onlinePayment", {
                                  { "iVoucherID", _vchID },
                                  { "iGatewayID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
