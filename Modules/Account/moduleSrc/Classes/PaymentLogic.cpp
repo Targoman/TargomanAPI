@@ -26,12 +26,14 @@
 #include "PaymentGateways/gtwMellatBank.h"
 #include "PaymentGateways/gtwZibal.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
+
 #include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
+using namespace Targoman::DBManager;
 
 namespace Targoman::API::AAA {
 
-using namespace Targoman::DBManager;
-using namespace Targoman::API::Helpers;
 
 void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {
@@ -86,6 +88,8 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
 
+    QString Domain = URLHelper::domain(_domain);
+
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
         .addCol(tblPaymentGateways::pgwID)
         .addCol(tblPaymentGateways::pgwName)
@@ -110,7 +114,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
                     , "inner_pgwSumTodayPaidAmount"
                    )
             .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
-            .andWhere({ tblPaymentGateways::pgwAllowedDomainName, enuConditionOperator::Equal, _domain })
+            .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
             .andWhere({ tblPaymentGateways::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
             .andWhere(
                 clsCondition({ tblPaymentGateways::pgwMaxPerDayAmount, enuConditionOperator::Null })
@@ -135,7 +139,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
                 tblPaymentGateways::Name, tblPaymentGateways::pgwID }
         )
         .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
-        .andWhere({ tblPaymentGateways::pgwAllowedDomainName, enuConditionOperator::Equal, _domain })
+        .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
         .orderBy("tmptbl_inner.inner_pgwTransactionFeeAmount")
         .orderBy("tmptbl_inner.inner_pgwSumTodayPaidAmount")
         .orderBy("RAND()")

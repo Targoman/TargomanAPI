@@ -21,10 +21,7 @@
  */
 
 #include <QtTest>
-//#include "Interfaces/Test/testCommon.hpp"
-//#include "Interfaces/Common/GenericTypes.h"
 #include "testQueryBuilders.hpp"
-
 #include "App/Server/RESTAPIRegistry.h"
 
 int main(int argc, char *argv[])

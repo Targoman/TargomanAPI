@@ -75,7 +75,7 @@ private slots:
 
     void Signup_user()
     {
-        QVERIFY((gUserID = callAPI(PUT,
+        QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
                                    "Account/signup", {}, {
                                        {"emailOrMobile", UT_UserEmail},
                                        {"name", "unit"},
@@ -99,7 +99,7 @@ private slots:
 
     void Signup_admin()
     {
-        QVERIFY((gAdminUserID = callAPI(PUT,
+        QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
                                             {"name", "admin unit"},
@@ -120,7 +120,7 @@ private slots:
 
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { gUserID });
 
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {}, {
                             { "uuid", Code }
                         }).toBool());
@@ -135,7 +135,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
         {gAdminUserID});
 
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
                             {"uuid", Code}
                         }).toBool());
@@ -144,7 +144,7 @@ private slots:
     void Login_admin()
     {
         QJsonObject MultiJWT;
-        QVERIFY((MultiJWT = callAPI(POST,
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     { "login", UT_AdminUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
@@ -165,7 +165,7 @@ private slots:
     {
         QT_TRY {
             this->LocationID = callAdminAPI(
-                PUT,
+                RESTClientHelper::PUT,
                 "Advert/Locations",
                 {},
                 {
@@ -187,7 +187,7 @@ private slots:
     {
         QT_TRY {
             this->BannerProductID = callAdminAPI(
-                PUT,
+                RESTClientHelper::PUT,
                 "Advert/AccountProducts",
                 {},
                 {
@@ -212,7 +212,7 @@ private slots:
     {
         QT_TRY {
             this->BannerSaleableID = callAdminAPI(
-                PUT,
+                RESTClientHelper::PUT,
                 "Advert/AccountSaleables",
                 {},
                 {
@@ -240,7 +240,7 @@ private slots:
     void createPaymentGateway_devtest()
     {
         auto ret = callAdminAPI(
-            GET,
+            RESTClientHelper::GET,
             "Account/PaymentGateways",
             {
                 {
@@ -260,7 +260,7 @@ private slots:
             {
                 QT_TRY {
                     auto paymentGatewayID = callAdminAPI(
-                        PUT,
+                        RESTClientHelper::PUT,
                         "Account/PaymentGateways",
                         {},
                         {
@@ -307,7 +307,7 @@ private slots:
     {
         QT_TRY {
             QVariant result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
                 {
@@ -333,7 +333,7 @@ private slots:
     {
         QT_TRY {
             QVariant result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
                 {
@@ -358,7 +358,7 @@ private slots:
     {
         QT_TRY {
             QVariant result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
                 {
@@ -383,7 +383,7 @@ private slots:
     {
         QT_TRY {
             this->CouponID = callAdminAPI(
-                PUT,
+                RESTClientHelper::PUT,
                 "Advert/AccountCoupons",
                 {},
                 {
@@ -434,7 +434,7 @@ private slots:
             int ItemsCount = this->LastPreVoucher.Items.length();
 
             QVariant Result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
                 {
@@ -465,7 +465,7 @@ private slots:
             int ItemsCount = this->LastPreVoucher.Items.length();
 
             QVariant Result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
                 {
@@ -494,7 +494,7 @@ private slots:
     {
         QT_TRY {
             QVariant result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Account/finalizeBasket",
                 {},
                 {
@@ -517,7 +517,7 @@ private slots:
     {
         QT_TRY {
             QVariant Result = callAdminAPI(
-                POST,
+                RESTClientHelper::POST,
                 "Account/finalizeBasket",
                 {},
                 {
@@ -546,7 +546,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    POST,
+                    RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
                     {
@@ -604,7 +604,7 @@ private slots:
     {
         QT_TRY {
             QVariant Result = callAdminAPI(
-                DELETE,
+                RESTClientHelper::DELETE,
                 QString("Advert/AccountCoupons/%1").arg(this->CouponID.toString())
             );
 
@@ -643,7 +643,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    DELETE,
+                    RESTClientHelper::DELETE,
                     QString("Advert/AccountSaleables/%1").arg(this->BannerSaleableID.toString())
                 );
 
@@ -663,7 +663,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    DELETE,
+                    RESTClientHelper::DELETE,
                     QString("Advert/AccountProducts/%1").arg(this->BannerProductID.toString())
                 );
 
@@ -683,7 +683,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    DELETE,
+                    RESTClientHelper::DELETE,
                     QString("Advert/Locations/%1").arg(this->LocationID.toString())
                 );
 
@@ -704,7 +704,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    DELETE,
+                    RESTClientHelper::DELETE,
                     QString("Account/User/%1").arg(gAdminUserID)
                 );
 
@@ -724,7 +724,7 @@ private slots:
         {
             QT_TRY {
                 QVariant Result = callAdminAPI(
-                    DELETE,
+                    RESTClientHelper::DELETE,
                     QString("Account/User/%1").arg(gUserID)
                 );
 

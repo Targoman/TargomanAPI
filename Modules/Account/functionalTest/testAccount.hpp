@@ -19,6 +19,7 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
+
 #ifndef TEST_ACCOUNT_HPP
 #define TEST_ACCOUNT_HPP
 
@@ -35,7 +36,7 @@
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
 
-class testAccount: public clsBaseTest
+class testAccount : public clsBaseTest
 {
     Q_OBJECT
 
@@ -49,7 +50,7 @@ private slots:
     }
 
     void Signup(){
-        QVERIFY((gUserID = callAPI(PUT,
+        QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_UserEmail},
                                             {"name", "unit"},
@@ -58,7 +59,7 @@ private slots:
                                             {"role", UT_RoleName}
                                         }).toMap().value("usrID").toULongLong()) > 0);
 
-        QVERIFY((gAdminUserID = callAPI(PUT,
+        QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
                                             {"name", "admin unit"},
@@ -83,7 +84,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
         {gUserID});
 
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
                             {"uuid", Code}
                         }).toBool());
@@ -97,7 +98,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
         {gAdminUserID});
 
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
                             {"uuid", Code}
                         }).toBool());
@@ -105,7 +106,7 @@ private slots:
 
     void Login(){
         QJsonObject MultiJWT;
-        QVERIFY((MultiJWT = callAPI(POST,
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"login", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
@@ -120,12 +121,12 @@ private slots:
     }
 
     void Logout(){
-        QVERIFY(callAPI(POST, "Account/logout").toBool());
-        QVERIFY((gEncodedJWT = callAPI(POST, "Account/refreshJWT").toString()).isEmpty());
+        QVERIFY(callAPI(RESTClientHelper::POST, "Account/logout").toBool());
+        QVERIFY((gEncodedJWT = callAPI(RESTClientHelper::POST, "Account/refreshJWT").toString()).isEmpty());
     }
 
 //    void loginAsGuest(){
-//        QVERIFY((callAPI(POST,
+//        QVERIFY((callAPI(RESTClientHelper::POST,
 //                         "Account/loginAsGuest",{},{
 //                             {"sessionInfo", "{\"a\":1}"},
 //                        }).toString()).size());
@@ -133,7 +134,7 @@ private slots:
 
     void LoginAgain(){
         QJsonObject MultiJWT;
-        QVERIFY((MultiJWT = callAPI(POST,
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"login", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
@@ -143,7 +144,7 @@ private slots:
         gLoginJWT = MultiJWT.value("lgn").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY((MultiJWT = callAPI(POST,
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"login", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
@@ -161,7 +162,7 @@ private slots:
     }
 
     void CreateForgotPasswordLink(){
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink",{},{
                             {"login", UT_UserEmail},
                             {"via", "Web"},
@@ -176,7 +177,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprUUID=?",
         {Code});
 
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePassByUUID", {},{
                             {"uuid", Code},
                             {"newPass", "827ccb0eea8a706c4c34a16891f84e7b"}
@@ -184,7 +185,7 @@ private slots:
     }
 
     void ChangePass(){
-        QVERIFY(callAPI(POST,
+        QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePass", {},{
                             {"oldPass", "d769dd673f86addfe039dc2d2dab4f73"},
                             {"oldPassSalt", 1234},
@@ -212,7 +213,7 @@ private slots:
             DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
             {gUserID});
 
-            QVERIFY(callAPI(POST,
+            QVERIFY(callAPI(RESTClientHelper::POST,
                             "Account/approveMobile", {},{
                                 {"mobile", "09121234567"},
                                 {"code", Code}

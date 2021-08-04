@@ -32,6 +32,17 @@ DIST_HEADERS += \
 
 PRIVATE_HEADERS += \
 
+HEADERS += \
+    Common/APIArgHelperMacrosPrivate.h \
+    Common/base.h \
+    Common/tmplNullable.hpp \
+    Helpers/RESTClientHelper.h \
+    Helpers/SecurityHelper.h \
+    Helpers/URLHelper.h \
+    ORM/APIQueryBuilders.h \
+    ORM/Defs.hpp \
+    ORM/QueryBuilders.h
+
 SOURCES += \
     AAA/Accounting.cpp \
     AAA/Authentication.cpp \
@@ -39,6 +50,7 @@ SOURCES += \
     AAA/PrivHelpers.cpp \
     Common/GenericTypes.cpp \
     Common/base.cpp \
+    Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
     Helpers/URLHelper.cpp \
     ORM/APIQueryBuilders.cpp \
@@ -58,13 +70,3 @@ INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)
-
-HEADERS += \
-    Common/APIArgHelperMacrosPrivate.h \
-    Common/base.h \
-    Common/tmplNullable.hpp \
-    Helpers/SecurityHelper.h \
-    Helpers/URLHelper.h \
-    ORM/APIQueryBuilders.h \
-    ORM/Defs.hpp \
-    ORM/QueryBuilders.h

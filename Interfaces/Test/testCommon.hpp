@@ -25,10 +25,12 @@
 #define TESTCOMMON_HPP
 
 #include <QtTest/QtTest>
-#include "QtCUrl.h"
 
 #include "libTargomanDBM/clsDAC.h"
 using namespace Targoman::DBManager;
+
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 constexpr char UT_UserEmail[] = "unit_test@unittest.test";
 constexpr char UT_AdminUserEmail[] = "unit_test_admin@unittest.test";
@@ -60,22 +62,6 @@ extern unsigned int gAPIAdminTokenID;
     unsigned int gServiceID; \
     unsigned int gAPITokenID; \
     unsigned int gAPIAdminTokenID;
-
-enum HTTPMethod{
-    GET,
-    POST,
-    PUT,
-    PATCH,
-    DELETE,
-};
-
-static const char* HTTPMethodString[] = {
-  "GET",
-  "POST",
-  "PUT",
-  "PATCH",
-  "DELETE"
-};
 
 extern QString APIURL;
 extern QString gEncodedJWT;
@@ -149,16 +135,34 @@ protected:
         deleteOldTestData();
     }
 
-    QVariant callAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
-        return callAPIImpl(gEncodedJWT, _method, _api, _urlArgs, _postFields);
-    }
-
     QVariant callRefreshAPI() {
-        return callAPIImpl(gLoginJWT, GET, "Account/refreshJWT");
+        return RESTClientHelper::callAPI(
+            gLoginJWT, RESTClientHelper::GET, "Account/refreshJWT", {}, {}, APIURL
+        );
     }
 
-    QVariant callAdminAPI(HTTPMethod _method, const QString& _api, const QVariantMap& _urlArgs = {}, const QVariantMap& _postFields = {}) {
-        return callAPIImpl(gEncodedAdminJWT, _method, _api, _urlArgs, _postFields);
+    QVariant callAPI(
+            RESTClientHelper::enuHTTPMethod _method,
+            const QString& _api,
+            const QVariantMap& _urlArgs = {},
+            const QVariantMap& _postFields = {}
+        )
+    {
+        return RESTClientHelper::callAPI(
+            gEncodedJWT, _method, _api, _urlArgs, _postFields, APIURL
+        );
+    }
+
+    QVariant callAdminAPI(
+            RESTClientHelper::enuHTTPMethod _method,
+            const QString& _api,
+            const QVariantMap& _urlArgs = {},
+            const QVariantMap& _postFields = {}
+        )
+    {
+        return RESTClientHelper::callAPI(
+            gEncodedAdminJWT, _method, _api, _urlArgs, _postFields, APIURL
+        );
     }
 
 private:
@@ -172,96 +176,6 @@ private:
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
         DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
         DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
-    }
-
-    QVariant callAPIImpl(
-            QString _encodedJWT,
-            HTTPMethod _method,
-            const QString& _api,
-            const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postFields = {}
-        )
-    {
-        QtCUrl CUrl;
-        CUrl.setTextCodec("UTF-8");
-
-        auto makeURL = [_method, _api, _urlArgs]() {
-            QUrlQuery URLQuery;
-
-            for (auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
-                URLQuery.addQueryItem(ArgIter.key(), ArgIter.value().toString());
-
-            QUrl URL(APIURL + "/" + _api);
-            URL.setQuery(URLQuery);
-            QString URLStr = URL.toString().replace(" ", "%20").replace("+","%2B");
-
-//            qDebug() << "Request" << HTTPMethodString[_method] << URLStr;
-
-            return URLStr;
-        };
-
-        QtCUrl::Options Opt;
-        Opt[CURLOPT_URL] = makeURL();
-        Opt[CURLOPT_TIMEOUT] = 10000;
-        Opt[CURLOPT_FAILONERROR] = true;
-        QStringList Headers = QStringList({"Content-Type: application/json"});
-
-        if (_encodedJWT.size())
-            Headers.append("Authorization: Bearer " + _encodedJWT);
-
-        Opt[CURLOPT_HTTPHEADER] = Headers;
-
-        switch (_method)
-        {
-            case GET:
-                Opt[CURLOPT_CUSTOMREQUEST] = "GET";
-                break;
-            case DELETE:
-                Opt[CURLOPT_CUSTOMREQUEST] = "DELETE";
-                break;
-            case POST:
-                Opt[CURLOPT_POST] = true;
-                break;
-            case PUT:
-                Opt[CURLOPT_CUSTOMREQUEST] = "PUT";
-                break;
-            case PATCH:
-                Opt[CURLOPT_CUSTOMREQUEST] = "PATCH";
-                break;
-        }
-
-        switch (_method)
-        {
-            case GET:
-            case DELETE:
-                break;
-            case POST:
-            case PUT:
-            case PATCH:
-                Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(_postFields).toJson(QJsonDocument::Compact);
-        }
-
-        QString CUrlResult = CUrl.exec(Opt);
-
-        if (CUrl.lastError().isOk() == false)
-        {
-            qDebug() << CUrl.errorBuffer();
-            return gInvalid;
-        }
-        else
-        {
-            QJsonParseError JsonError;
-            QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
-
-            if (JsonError.error != QJsonParseError::NoError)
-                qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
-
-            QVariant Result = Doc.toVariant().toMap().value("result");
-
-//            qDebug() << "Result:" << Result;
-
-            return Result;
-        }
     }
 };
 

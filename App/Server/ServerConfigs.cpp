@@ -352,4 +352,3 @@ tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
 }
 }
 }
-

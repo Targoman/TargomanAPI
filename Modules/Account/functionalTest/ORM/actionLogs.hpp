@@ -23,8 +23,8 @@
 #define TEST_ACCOUNT_ORM_ACTIVELOGS_HPP
 
 #include "Interfaces/Test/testCommon.hpp"
-#include "Interfaces/AAA/clsJWT.hpp"
 
+#include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
 class testActionLogs: public clsBaseTest
@@ -33,7 +33,7 @@ class testActionLogs: public clsBaseTest
 
 private slots:
     void unprivActionLogs(){
-        QVERIFY(callAPI(GET, "Account/ActionLogs").toString().isEmpty());
+        QVERIFY(callAPI(RESTClientHelper::GET, "Account/ActionLogs").toString().isEmpty());
     }
 };
 

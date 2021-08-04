@@ -25,31 +25,16 @@
 #define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
 
 #include "Interfaces/ORM/clsTable.h"
-#include "Interfaces/AAA/AAADefs.hpp"
+//#include "Interfaces/AAA/AAADefs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
 
-class clsRESTAPIWithActionLogs : public ORM::clsTable {
+class clsRESTAPIWithActionLogs : public ORM::clsTable
+{
     Q_OBJECT
 
 public:
-    inline clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module) :
-        clsTable(_schema,
-                "tblActionLogs",
-                { ///<ColName             Type                  Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-                  {"atlID",               ORM_PRIMARYKEY_64},
-                  {"atlBy_usrID",         S(quint64),           QFV.integer().minValue(1),      {},      UPNone},
-                  {"atlInsertionDateTime",S(TAPI::DateTime_t),  QFV,                            {},      UPNone},
-                  {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},      UPNone},
-                  {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},      UPNone, false,false},
-                },
-                {
-                    {"atlBy_usrID",        R(AAA::AAASchema,  "tblUser"),      "usrID",     "By_"},
-                }),
-        Module(_module)
-    {}
+    clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module);
 
 private slots:
     QVariant ORMGET("Get ActionLogs information")
@@ -58,8 +43,6 @@ protected:
     QString Module;
 };
 
-}
-}
-}
+} // namespace Targoman::API::ORM
 
 #endif // TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP

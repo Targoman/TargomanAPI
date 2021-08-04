@@ -18,30 +18,38 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
-#include "Interfaces/Common/QtTypes.hpp"
-#include "libTargomanDBM/clsDAC.h"
-
+//#include "Interfaces/Common/QtTypes.hpp"
+//#include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace ORM {
+namespace Targoman::API::ORM {
+
+clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module) :
+    clsTable(
+        _schema,
+        "tblActionLogs",
+        {///< ColName               Type                  Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
+            {"atlID",               ORM_PRIMARYKEY_64},
+            {"atlBy_usrID",         S(quint64),           QFV.integer().minValue(1),      {},      UPNone},
+            {"atlInsertionDateTime",S(TAPI::DateTime_t),  QFV,                            {},      UPNone},
+            {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},      UPNone},
+            {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},      UPNone, false,false},
+        },
+        {
+            {"atlBy_usrID",        R(AAA::AAASchema,  "tblUser"),      "usrID",     "By_"},
+        }),
+    Module(_module)
+{}
 
 QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
-
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-}
-}
-}
+} // namespace Targoman::API::ORM

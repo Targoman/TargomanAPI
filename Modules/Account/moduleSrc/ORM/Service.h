@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
@@ -26,9 +27,7 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -37,28 +36,28 @@ constexpr char Name[] = "tblService";
 TARGOMAN_CREATE_CONSTEXPR(svcID);
 TARGOMAN_CREATE_CONSTEXPR(svcName);
 TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
-TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(svcProcessVoucherEndPoint);
 TARGOMAN_CREATE_CONSTEXPR(svcStatus);
+TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
 class Service : public ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get Service information")
-    bool ORMDELETE("Delete a Service")
-    bool ORMUPDATE("Update Service info by priviledged user")
     quint64 ORMCREATE("Create a new Service by priviledged user")
+    bool ORMUPDATE("Update Service info by priviledged user")
+    bool ORMDELETE("Delete a Service")
 
 private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,Service)
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H

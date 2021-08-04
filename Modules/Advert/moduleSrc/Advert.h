@@ -74,7 +74,7 @@ class Advert : public Accounting::intfRESTAPIWithAccounting
     TARGOMAN_DEFINE_API_MODULE(Advert);
 
 public:
-    stuDBInfo requiredDB() const {return stuDBInfo(AdvertSchema);}
+    stuDBInfo requiredDB() const { return stuDBInfo(AdvertSchema); }
 
 private:
     Accounting::stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);

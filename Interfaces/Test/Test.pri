@@ -10,6 +10,10 @@
 HEADERS += \
     $$BASE_PROJECT_PATH/Interfaces/Test/testBase.hpp \
     $$BASE_PROJECT_PATH/Interfaces/Test/testCommon.hpp \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.h \
+
+SOURCES += \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.cpp \
 
 DEFINES += UNITTEST_DB_HOST="127.0.0.1"
 DEFINES += UNITTEST_DB_PORT=3306

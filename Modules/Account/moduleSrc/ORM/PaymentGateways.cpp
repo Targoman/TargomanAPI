@@ -24,6 +24,9 @@
 #include "PaymentGateways.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+#include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayType);
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
@@ -83,6 +86,10 @@ QVariant PaymentGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 quint32 PaymentGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+    if (_createInfo.contains(tblPaymentGateways::pgwAllowedDomainName))
+        _createInfo[tblPaymentGateways::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::pgwAllowedDomainName].toString());
+
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 

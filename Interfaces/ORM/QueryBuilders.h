@@ -81,7 +81,10 @@ TARGOMAN_DEFINE_ENUM(enuAggregation,
                      SUM,
                      AVG,
                      MAX,
-                     MIN)
+                     MIN,
+                     LOWER,
+                     UPPER,
+                     )
 
 TARGOMAN_DEFINE_ENUM(enuConditionalAggregation,
                      IF,

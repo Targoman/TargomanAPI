@@ -23,8 +23,8 @@
 #define TEST_ACCOUNT_ORM_ROLES_HPP
 
 #include "Interfaces/Test/testCommon.hpp"
-#include "Interfaces/AAA/clsJWT.hpp"
 
+#include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
 class testRoles: public clsBaseTest
@@ -33,81 +33,80 @@ class testRoles: public clsBaseTest
 
 private slots:
     void Roles_CREATE_Unprivileged(){
-        QVERIFY(callAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
     }
 
     void Roles_CREATE_Admin(){
-        QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonArray({"12"})}
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject()}
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject({{"ALL",1}})}
                              }) == gInvalid);
-        QVERIFY((gServiceRoleID = callAdminAPI(PUT, QString("Account/Roles/"),{},{
+        QVERIFY((gServiceRoleID = callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }).toUInt()) > 0);
     }
 
     void Roles_UPDATE_Unprivileged(){
-        QVERIFY(callAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }) == gInvalid);
     }
 
     void Roles_UPDATE_Admin(){
-        QVERIFY(callAdminAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonArray({"12"})}
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject()}
                              }) .toBool());
-        QVERIFY(callAdminAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject({{"ALL",1}})}
                              }) == gInvalid);
-        QVERIFY(callAdminAPI(PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }).toBool());
     }
 
     void Roles_DELETE_Unprivileged(){
-        QVERIFY(callAPI(DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)) == gInvalid);
+        QVERIFY(callAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)) == gInvalid);
     }
 
     void Roles_DELETE_Admin(){
-        QVERIFY(callAdminAPI(DELETE, QString("Account/Roles/")) == gInvalid);
-        QVERIFY(callAdminAPI(DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)).toBool());
+        QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Roles/")) == gInvalid);
+        QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)).toBool());
     }
 
     void Roles_GET_Unpriviledged(){
-        QVERIFY(callAPI(GET, QString("Account/Roles/")) == gInvalid);
-        QVERIFY(callAPI(GET,
+        QVERIFY(callAPI(RESTClientHelper::GET, QString("Account/Roles/")) == gInvalid);
+        QVERIFY(callAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
                             {"rolName",UT_ServiceRoleName}, {"cols", "rolName"}
                         }) == gInvalid);
     }
 
     void Roles_GET_Admin(){
-        QVERIFY(callAdminAPI(GET, QString("Account/Roles/"),{{"cols", "rolName"}}).toMap().size());
-        QVERIFY(callAdminAPI(GET,
+        QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/Roles/"),{{"cols", "rolName"}}).toMap().size());
+        QVERIFY(callAdminAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
                             {"rolName",UT_ServiceRoleName}, {"cols", "rolName"}
                         }).toMap().value("rolName").toString() == UT_ServiceRoleName);
     }
 };
-
 
 #endif // TEST_ACCOUNT_ORM_ROLES_HPP

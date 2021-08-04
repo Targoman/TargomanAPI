@@ -85,6 +85,7 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
         intfAccountPrizes* _prizes
     ) :
     ORM::clsRESTAPIWithActionLogs(_schema, _module),
+    ServiceName(_schema),
     AccountProducts(_products),
     AccountSaleables(_saleables),
     AccountUserAssets(_userAssets),
@@ -93,7 +94,7 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
-    ServiceRegistry.insert(_schema, this);
+    ServiceRegistry.insert(this->ServiceName, this);
 
     foreach(auto Col, this->AssetUsageLimitsCols)
     {
@@ -123,6 +124,66 @@ intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
 stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
 {
     return this->findBestMatchedCredit(_usrID);
+}
+
+void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+{
+    QJsonObject Privs = _jwt.privsObject();
+
+    if (Privs.contains(this->ServiceName) == false)
+        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
+
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+
+    if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
+        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
+
+    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
+    };
+
+    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
+
+    if (BestMatchedCredit.IsFromParent)
+    {
+        for(auto UsageIter = _requestedUsage.begin();
+            UsageIter != _requestedUsage.end();
+            UsageIter++)
+        {
+            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+                continue;
+
+            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
+                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
+
+            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+        }
+
+        return;
+    }
+
+    if (this->isUnlimited(ActiveCredit.Digested.Limits))
+        return;
+
+    for (auto UsageIter = _requestedUsage.begin();
+        UsageIter != _requestedUsage.end();
+        UsageIter++)
+    {
+        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+            continue;
+
+        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+    }
 }
 
 stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
@@ -714,67 +775,6 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
     _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
     return _lastPreVoucher;
-}
-
-void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
-{
-    QJsonObject Privs = _jwt.privsObject();
-
-    if (Privs.contains(this->ServiceName) == false)
-        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
-
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
-
-    if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
-        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
-
-    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type)
-    {
-        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
-    };
-
-    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
-
-    if (BestMatchedCredit.IsFromParent)
-    {
-        for(auto UsageIter = _requestedUsage.begin();
-            UsageIter != _requestedUsage.end();
-            UsageIter++)
-        {
-            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-                continue;
-
-            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
-                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
-
-            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
-        }
-
-        return;
-    }
-
-    if (this->isUnlimited(ActiveCredit.Digested.Limits))
-        return;
-
-    for (auto UsageIter = _requestedUsage.begin();
-        UsageIter != _requestedUsage.end();
-        UsageIter++)
-    {
-        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-            continue;
-
-        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
-    }
 }
 
 } //namespace Targoman::API::AAA::Accounting

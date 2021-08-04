@@ -22,12 +22,17 @@
 
 #include <QtTest>
 #include "testBase.hpp"
-#include "test.hpp"
+#include "testAccount.hpp"
+
+//#include "Interfaces/Helpers/RESTClientHelper.h"
+//using namespace Targoman::API::Helpers;
 
 TAPI_MARSHAL_TEST_VARIABLES
 
 int main(int argc, char *argv[])
 {
+//RESTClientHelper::callAPI("", RESTClientHelper::GET, "Account/refreshJWT");
+
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Account --------------------------";
     qDebug() << "--------------------------------------------------";

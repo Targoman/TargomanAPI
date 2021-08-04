@@ -21,37 +21,44 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "URLHelper.h"
-#include <QUrl>
-#include <QUrlQuery>
+#ifndef TARGOMAN_API_RESTCLIENTHELPER_H
+#define TARGOMAN_API_RESTCLIENTHELPER_H
+
+#include <QString>
+#include <QVariant>
+#include "QtCUrl.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 namespace Targoman::API::Helpers {
 
-QString URLHelper::domain(QString _url)
+struct ClientConfigs
 {
-    if (!_url.startsWith("http://") && !_url.startsWith("https://") && (_url.indexOf("://") < 0))
-        _url = "http://" + _url;
-
-    QUrl Url = QUrl(_url);
-
-    QString Domain = Url.host().trimmed().toLower();
-
-    if (Domain.endsWith("/"))
-        Domain.chop(1);
-
-    return Domain;
+    static inline QString makeConfig(const QString& _name) { return "/Client/" + _name; }
+    static Common::Configuration::tmplConfigurable<QString> RESTServerAddress;
 };
 
-QString URLHelper::addParameter(const QString &_url, const QString& _paramName, const QVariant& _value)
+class RESTClientHelper
 {
-    QUrl Url = QUrl(_url);
+public:
+    enum enuHTTPMethod {
+        GET,
+        POST,
+        PUT,
+        PATCH,
+        DELETE,
+    };
 
-    QUrlQuery UrlQuery = QUrlQuery(Url);
-    UrlQuery.addQueryItem(_paramName, _value.toString());
+    static QVariant callAPI(
+        QString _encodedJWT,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postFields = {},
+        QString _aPIURL = {}
+    );
 
-    Url.setQuery(UrlQuery);
-
-    return Url.toString();
-}
+};
 
 } //namespace Targoman::API::Helpers
+
+#endif // TARGOMAN_API_RESTCLIENTHELPER_H

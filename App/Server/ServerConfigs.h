@@ -24,9 +24,7 @@
 #define TARGOMAN_API_SERVER_CONFIGS_H
 
 #include <QHostAddress>
-
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-
 #include "Interfaces/Common/GenericTypes.h"
 
 namespace Targoman{

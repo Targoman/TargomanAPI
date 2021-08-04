@@ -7,8 +7,6 @@
 #include <optional>
 using namespace std;
 
-//#include "Interfaces/Test/testCommon.hpp"
-
 #include "Interfaces/AAA/Accounting_Interfaces.h"
 using namespace Targoman::API::AAA::Accounting;
 
@@ -1083,6 +1081,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                               enuConditionOperator::GreaterEqual,
                               clsColSpecs(enuAggregation::SUM, "newNamerFor_F1")
                           })
+                .andWhere({
+                              { enuAggregation::LOWER, "colC1" },
+                              enuConditionOperator::Equal,
+                              "abcdef"
+                          })
             ;
 
             QString qry = query.buildQueryString({}, true, false, true);
@@ -1099,6 +1102,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    SUM(alias_t1.colB1) >= 123
                AND SUM(alias_t1.colC1) >= SUM(alias_t1.colD1)
                AND alias_t1.colE1 >= SUM(alias_t1.colF1)
+               AND LOWER(alias_t1.colC1) = 'abcdef'
                    )
              LIMIT 0,1
 )");
@@ -1106,7 +1110,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-
+private:
     /***************************************************************************************/
     /* CreateQuery *************************************************************************/
     /***************************************************************************************/

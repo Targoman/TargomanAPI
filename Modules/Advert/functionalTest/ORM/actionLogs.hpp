@@ -26,7 +26,6 @@
 
 #include "Interfaces/Test/testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
-
 using namespace Targoman::API::AAA;
 
 class testActionLogs: public clsBaseTest
@@ -35,7 +34,7 @@ class testActionLogs: public clsBaseTest
 
 private slots:
     void unprivActionLogs(){
-        QVERIFY(callAPI(GET, "Advert/ActionLogs").toString().isEmpty());
+        QVERIFY(callAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
     }
 };
 

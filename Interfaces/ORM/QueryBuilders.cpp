@@ -2748,7 +2748,7 @@ QVariantMap SelectQuery::one(QVariantMap _args)
                             .toJson(true, this->Data->Table.Converters);
 
     if (Result.object().isEmpty())
-        throw exHTTPNotFound("No item could be found");
+        throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(this->Data->Table.Schema).arg(this->Data->Table.Name));
 
 //    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
 //    qDebug() << "--- SelectQuery::one(){tovariant}" << __FILE__ << __LINE__ << Result.toVariant();

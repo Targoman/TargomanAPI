@@ -24,7 +24,6 @@
 #include "Account.h"
 #include "QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
-
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
 #include "ORM/APITokenValidIPs.h"
@@ -41,11 +40,12 @@
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
-
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.h"
-
 #include "Interfaces/ORM/APIQueryBuilders.h"
+
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserStatus);
@@ -364,8 +364,40 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
          * call end point
          * fail:
          */
-        foreach(auto VoucherItem, PreVoucher.Items) {
-            ///TODO: call svcProcessVoucherEndPoint
+        foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
+        {
+            QVariantMap ServiceInfo = SelectQuery(Service::instance())
+                    .addCol(tblService::svcID)
+                    .addCol(tblService::svcName)
+                    .addCol(tblService::svcProcessVoucherEndPoint)
+                    .where({ tblService::svcName, enuConditionOperator::Equal, VoucherItem.Service })
+                    .one();
+
+            QString ProcessVoucherEndPoint;
+            TAPI::setFromVariant(ProcessVoucherEndPoint, ServiceInfo.value(tblService::svcProcessVoucherEndPoint));
+
+            //do not need process by end point
+            if (ProcessVoucherEndPoint.isEmpty() || (ProcessVoucherEndPoint == "INVALID"))
+                continue;
+
+            /**
+              * ProcessVoucherEndPoint:
+              *     Advert/ProcessVoucher
+              *     .../ProcessVoucher
+              */
+            QVariant Result = RESTClientHelper::callAPI(
+                {},
+                RESTClientHelper::POST,
+                ProcessVoucherEndPoint,
+                {},
+                {
+                    { "voucherItem", VoucherItem.toJson().toVariantMap() },
+                }
+            );
+
+            ///TODO: check result and raise error if not ok
+            if (Result.isValid() == false)
+                throw exHTTPInternalServerError("error in process voucher");
         }
 
         return TAPI::stuVoucher(

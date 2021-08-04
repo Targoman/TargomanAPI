@@ -23,8 +23,8 @@
 #define TEST_ACCOUNT_ORM_ACTIVESESSIONS_HPP
 
 #include "Interfaces/Test/testCommon.hpp"
-#include "Interfaces/AAA/clsJWT.hpp"
 
+#include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
 class testActiveSessions: public clsBaseTest
@@ -33,22 +33,22 @@ class testActiveSessions: public clsBaseTest
 
 private slots:
     void ActiveSessions_GET_Unpriviledged(){
-        QVERIFY(callAPI(GET, QString("Account/ActiveSessions/")).toString().isEmpty());
-        QVERIFY(callAPI(GET,
+        QVERIFY(callAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toString().isEmpty());
+        QVERIFY(callAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session()), {
                             {"ssn_usrID",gUserID}, {"cols", "ssnKey"}
                         }).toMap().value("ssnKey") == clsJWT(gJWT).session());
-        QVERIFY(callAPI(GET,
+        QVERIFY(callAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/"),{
                             {"filters",QString("ssn_usrID=%1 + ssnKey=%2").arg(gUserID).arg(clsJWT(gJWT).session())},
                             {"cols", "ssnKey"}
                         }).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
-        QVERIFY(callAPI(DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool() == false);
+        QVERIFY(callAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool() == false);
     }
 
     void ActiveSessions_GET_Admin(){
-        QVERIFY(callAdminAPI(GET, QString("Account/ActiveSessions/")).toMap().value("rows").toList().size() > 0);
-        QVERIFY(callAdminAPI(DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool());
+        QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toMap().value("rows").toList().size() > 0);
+        QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool());
     }
 };
 

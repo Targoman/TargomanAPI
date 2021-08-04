@@ -19,6 +19,7 @@
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
+
 #ifndef TESTBASE_HPP
 #define TESTBASE_HPP
 
@@ -27,18 +28,11 @@
 class testBase: public clsBaseTest
 {
     Q_OBJECT
+
 private slots:
-    void initTestCase(){
-
-    }
-
-    void cleanupTestCase(){
-
-    }
-
-    void openAPI(){
-
-    }
+    void initTestCase() {}
+    void cleanupTestCase() {}
+    void openAPI() {}
 };
 
 #endif // TESTBASE_HPP

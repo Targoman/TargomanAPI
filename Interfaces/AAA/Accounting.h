@@ -97,6 +97,9 @@ private slots:
     ///TODO: removeFromBasket
     ///TODO: updateItemInBasket
 
+private:
+    QString ServiceName;
+
 protected:
     QScopedPointer<intfAccountProducts> AccountProducts;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
@@ -106,11 +109,8 @@ protected:
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
 private:
-    QString ServiceName;
-
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
     QStringList AssetUsageLimitsColsName;
-
 };
 
 extern intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName);
