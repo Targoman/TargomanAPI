@@ -373,11 +373,12 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
                     .where({ tblService::svcName, enuConditionOperator::Equal, VoucherItem.Service })
                     .one();
 
-            QString ProcessVoucherEndPoint;
+            NULLABLE_TYPE(QString) ProcessVoucherEndPoint;
             TAPI::setFromVariant(ProcessVoucherEndPoint, ServiceInfo.value(tblService::svcProcessVoucherEndPoint));
 
-            //do not need process by end point
-            if (ProcessVoucherEndPoint.isEmpty() || (ProcessVoucherEndPoint == "INVALID"))
+            //bypass process by end point?
+//            if (ProcessVoucherEndPoint.isEmpty() || (ProcessVoucherEndPoint == tblService::Invalid_ProcessVoucherEndPoint))
+            if (NULLABLE_IS_NULL(ProcessVoucherEndPoint))
                 continue;
 
             /**
@@ -388,7 +389,7 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
             QVariant Result = RESTClientHelper::callAPI(
                 {},
                 RESTClientHelper::POST,
-                ProcessVoucherEndPoint,
+                NULLABLE_GET_OR_DEFAULT(ProcessVoucherEndPoint, ""),
                 {},
                 {
                     { "voucherItem", VoucherItem.toJson().toVariantMap() },

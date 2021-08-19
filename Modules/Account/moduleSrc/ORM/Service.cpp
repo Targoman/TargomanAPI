@@ -35,16 +35,16 @@ Service::Service() :
     clsTable(
         AAASchema,
         tblService::Name,
-        {///< ColName                               Type                 Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblService::svcID,                    ORM_PRIMARYKEY_32 },
-            { tblService::svcName,                  S(QString),          QFV,                             QRequired, UPAdmin },
-            { tblService::svc_rolID,                S(quint32),          QFV,                             QRequired, UPAdmin },
-            { tblService::svcProcessVoucherEndPoint,S(QString),          QFV,                             "INVALID", UPAdmin },
-            { tblService::svcStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+        {///< ColName                                   Type                        Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblService::svcID,                        ORM_PRIMARYKEY_32 },
+            { tblService::svcName,                      S(QString),                 QFV,                             QRequired, UPAdmin },
+            { tblService::svc_rolID,                    S(quint32),                 QFV,                             QRequired, UPAdmin },
+            { tblService::svcProcessVoucherEndPoint,    S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
+            { tblService::svcStatus,                    ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
-            { tblService::svcCreationDateTime,      ORM_CREATED_ON },
-            { tblService::svcCreatedBy_usrID,       ORM_CREATED_BY },
-            { tblService::svcUpdatedBy_usrID,       ORM_UPDATED_BY },
+            { tblService::svcCreationDateTime,          ORM_CREATED_ON },
+            { tblService::svcCreatedBy_usrID,           ORM_CREATED_BY },
+            { tblService::svcUpdatedBy_usrID,           ORM_UPDATED_BY },
         },
         {///< Col                    Reference Table              ForeignCol      Rename     LeftJoin
             { tblService::svc_rolID, R(AAASchema,tblRoles::Name), tblRoles::rolID },

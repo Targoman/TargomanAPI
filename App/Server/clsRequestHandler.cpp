@@ -267,8 +267,9 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 
 clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath)
 {
-    try{
-        for(auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
+    try
+    {
+        for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
 
         if (!this->Request)
@@ -278,17 +279,22 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
         qhttp::THeaderHash Cookies;
         QJsonObject JWT;
 
-        if(_apiObject->requiresJWT()){
+        if (_apiObject->requiresJWT())
+        {
             QString Auth = Headers.value("authorization");
-            if(Auth.startsWith("Bearer ")){
+            if (Auth.startsWith("Bearer "))
+            {
                 JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
                 Headers.remove("authorization");
-            } else
+            }
+            else
                 throw exHTTPForbidden("No valid authentication header is present");
         }
 
-        if(_apiObject->requiresCookies() && Headers.value("cookie").size()){
-            foreach (auto Cookie, Headers.value("cookie").split(';')) {
+        if (_apiObject->requiresCookies() && Headers.value("cookie").size())
+        {
+            foreach (auto Cookie, Headers.value("cookie").split(';'))
+            {
                 auto CookieParts = Cookie.split('=');
                 Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
             }
@@ -307,15 +313,25 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                              _pksByPath
                              ));
 
-    }catch(exTargomanBase& ex){
+    }
+    catch(exTargomanBase& ex)
+    {
         return stuResult(ex.what(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
-    }catch(QFieldValidator::exRequiredParam &ex){
+    }
+    catch(QFieldValidator::exRequiredParam &ex)
+    {
         return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
-    }catch(QFieldValidator::exInvalidValue &ex){
+    }
+    catch(QFieldValidator::exInvalidValue &ex)
+    {
         return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
-    }catch(std::exception &ex){
+    }
+    catch(std::exception &ex)
+    {
         return stuResult(ex.what(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
-    }catch(...){
+    }
+    catch(...)
+    {
         return stuResult("INTERNAL SERVER ERROR!!!", qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
@@ -353,20 +369,21 @@ void clsRequestHandler::findAndCallAPI(QString _api)
     }
 
     QString ExtraAPIPath;
-
-    clsAPIObject* APIObject = RESTAPIRegistry::getAPIObject(this->Request->methodString(), _api);
-    if (!APIObject) {
+    QString MethodString = this->Request->methodString();
+    clsAPIObject* APIObject = RESTAPIRegistry::getAPIObject(MethodString, _api);
+    if (!APIObject)
+    {
         QString Path = _api;
-        if(Path.endsWith('/'))
+        if (Path.endsWith('/'))
             Path.truncate(Path.size() - 1);
         ExtraAPIPath = Path.mid(Path.lastIndexOf('/') + 1);
         Path = Path.mid(0, Path.lastIndexOf('/'));
-        APIObject = RESTAPIRegistry::getAPIObject(this->Request->methodString(), Path);
+        APIObject = RESTAPIRegistry::getAPIObject(MethodString, Path);
     }
 
     if (!APIObject)
         return this->sendError(qhttp::ESTATUS_NOT_FOUND,
-                               "API not found("+this->Request->methodString()+": "+_api+")",
+                               QString("API not found [%1] (%2)").arg(MethodString).arg(_api),
                                true);
 
     if(ServerConfigs::MultiThreaded.value()){

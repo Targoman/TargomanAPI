@@ -121,8 +121,7 @@ TAPI::stuAdvert Advert::apiGETNewBanner(
         QString _location,
         TAPI::enuAdvertOrder::Type _order
     )
-{
-}
+{}
 
 TAPI::stuAdvert Advert::apiGETNewText(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -130,8 +129,7 @@ TAPI::stuAdvert Advert::apiGETNewText(
         TAPI::enuAdvertOrder::Type _order,
         const QString _keywords
     )
-{
-}
+{}
 
 QString Advert::apiGETRetrieveURL(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -139,7 +137,14 @@ QString Advert::apiGETRetrieveURL(
         TAPI::IPv4_t _clientIP,
         QString _agent
     )
+{}
+
+quint64 Advert::apiPOSTProcessVoucher(
+//        TAPI::JWT_t _JWT,
+        TAPI::JSON_t _voucherItem
+    )
 {
+    return 1234;
 }
 
 } //namespace Targoman::API

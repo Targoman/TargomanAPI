@@ -119,6 +119,15 @@ private slots:
             ),
             "Retrieve URL of the specified Advertisement")
 
+    quint64 REST(
+            POST,
+            ProcessVoucher,
+            (
+//                TAPI::JWT_t _JWT,
+                TAPI::JSON_t _voucherItem
+            ),
+            "Process voucher.")
+
 };
 
 } //namespace Targoman::API

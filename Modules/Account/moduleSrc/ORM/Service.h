@@ -33,6 +33,7 @@ namespace Targoman::API::AAA {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblService {
 constexpr char Name[] = "tblService";
+//constexpr char Invalid_ProcessVoucherEndPoint[] = "INVALID";
 TARGOMAN_CREATE_CONSTEXPR(svcID);
 TARGOMAN_CREATE_CONSTEXPR(svcName);
 TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
