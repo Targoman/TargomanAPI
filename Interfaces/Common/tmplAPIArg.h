@@ -27,8 +27,7 @@
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 namespace Server {
 class intfCacheConnector;
@@ -125,7 +124,6 @@ private:
     friend class intfCacheConnector;
 };
 
-}
-}
+} //namespace Targoman::API
 
 #endif // TARGOMAN_API_TMPLAPIARG_HPP

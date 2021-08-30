@@ -95,7 +95,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 #define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)
 #define DO_ON_NULLABLE_TYPE(_complexity, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, IGNORE_TYPE_##_typeName)
 
-#define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral,  _typeName, _baseType)
+#define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral, _typeName, _baseType)
 #define MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Complex, _typeName, _baseType)
 #define MAKE_INVALID_NULLABLE_METATYPE(_typeName, _id, _baseType)
 
@@ -129,7 +129,7 @@ namespace Server {
 
 using namespace ORM;
 
-struct stuNullableQtType{
+struct stuNullableQtType {
     std::function<void()>  registerInMetaTypes;
     intfAPIArgManipulator* ArgManipulator;
 
@@ -141,20 +141,20 @@ struct stuNullableQtType{
 
 /***********************************************************************************************/
 void RESTAPIRegistry::registerMetaTypeInfoMap() {
-    if(Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())){
+    if (Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())) {
         gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
 
-        for(auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
-            MetaTypeInfoMapIter != MetaTypeInfoMap.end();
-            ++MetaTypeInfoMapIter){
+        for (auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
+                MetaTypeInfoMapIter != MetaTypeInfoMap.end();
+                ++MetaTypeInfoMapIter) {
             int Gap = MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size();
-            for(int i = 0; i< Gap; ++i)
+            for (int i = 0; i< Gap; ++i)
                 gOrderedMetaTypeInfo.append(nullptr);
             gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
         }
     }
 }
-void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
+void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method) {
     if ((_method.name().startsWith("api") == false &&
          _method.name().startsWith("asyncApi") == false)||
         _method.typeName() == nullptr)
@@ -538,7 +538,6 @@ void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, c
     else
         this->setKeyValImpl(_key, _value.toString(), _ttl);
 }
-
 
 }
 }

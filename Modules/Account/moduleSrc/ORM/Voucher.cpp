@@ -48,7 +48,7 @@ Voucher::Voucher() :
             { tblVoucher::vchDesc,             S(TAPI::JSON_t),         QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
             { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                  TAPI::enuVoucherType::Expense, UPNone },
             { tblVoucher::vchTotalAmount,      S(quint64),              QFV,                        0,         UPNone },
-            { tblVoucher::vchStatus,           ORM_STATUS_FIELD(TAPI::enuVoucherStatus, TAPI::enuVoucherStatus::New) },
+            { tblVoucher::vchStatus,           ORM_STATUS_FIELD(Targoman::API::AAA::Accounting::enuVoucherStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::New) },
             { tblVoucher::vchCreationDateTime, ORM_CREATED_ON },
         },
         {///< Col                     Reference Table              ForeignCol
@@ -77,7 +77,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
+Targoman::API::AAA::Accounting::stuVoucher Voucher::apiCREATErequestIncrease(
         TAPI::JWT_t _JWT,
         quint32 _amount,
         TAPI::enuPaymentGatewayType::Type _gatewayType,
@@ -86,8 +86,8 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
         QString _paymentVerifyCallback
     )
 {
-    TAPI::stuVoucher Voucher;
-    Voucher.Info.Items.append(TAPI::stuVoucherItem("INC_WALLET", _walletID));
+    Targoman::API::AAA::Accounting::stuVoucher Voucher;
+    Voucher.Info.Items.append(Targoman::API::AAA::Accounting::stuVoucherItem("INC_WALLET", _walletID));
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Summary = "Increase wallet";
 
@@ -127,7 +127,7 @@ TAPI::stuVoucher Voucher::apiCREATErequestIncrease(
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, Voucher.ID }

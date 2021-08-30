@@ -68,7 +68,7 @@ private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete an Voucher. Take note that User can just delete Vouchers with Payoff type")
 
-    TAPI::stuVoucher REST(
+    Targoman::API::AAA::Accounting::stuVoucher REST(
             CREATE,
             requestIncrease,
             (

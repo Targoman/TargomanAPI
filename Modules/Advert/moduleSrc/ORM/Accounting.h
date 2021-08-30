@@ -27,21 +27,15 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-//must use single level namespace for enums: error in dangling
-namespace TAdvertisement {
+namespace Targoman::API::Advertisement {
+
 TARGOMAN_DEFINE_ENUM (enuProductType,
                       Advertise = 'A',
                       Reportage = 'R',
                       );
-}
-
-namespace Targoman {
-namespace API {
-namespace Advertisement {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-
 
 namespace tblAccountProducts {
 TARGOMAN_CREATE_CONSTEXPR(prdType);
@@ -141,10 +135,8 @@ public:
 };
 */
 
-}
-}
-}
+} // namespace Targoman::API::Advertisement
 
-TAPI_DECLARE_METATYPE_ENUM(TAdvertisement::enuProductType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuProductType);
 
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

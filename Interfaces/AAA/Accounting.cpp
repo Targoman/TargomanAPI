@@ -50,7 +50,7 @@ QByteArray hash(const QByteArray& _data)
    return QMessageAuthenticationCode::hash(_data, Accounting::Secret.value().toUtf8(), QCryptographicHash::Sha256);
 }
 
-void checkPreVoucherSanity(TAPI::stuPreVoucher _preVoucher)
+void checkPreVoucherSanity(Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher)
 {
     if (_preVoucher.Items.isEmpty())
         return;
@@ -325,15 +325,15 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
+Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         TAPI::JWT_t _JWT,
         TAPI::SaleableCode_t _saleableCode,
-        TAPI::OrderAdditives_t _orderAdditives,
+        Targoman::API::AAA::Accounting::OrderAdditives_t _orderAdditives,
         quint16 _qty, ///TODO: use float for qty
         TAPI::CouponCode_t _discountCode,
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams,
-        TAPI::stuPreVoucher _lastPreVoucher
+        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
     )
 {
     clsJWT JWT(_JWT);
@@ -548,7 +548,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
         SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                   DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
         SET_FIELD_FROM_VARIANT_MAP(Discount.Amount,                 DiscountInfo, tblAccountCouponsBase, cpnAmount);
-        TAPI::enuDiscountType::Type cpnAmountType;
+        Targoman::API::AAA::Accounting::enuDiscountType::Type cpnAmountType;
         SET_FIELD_FROM_VARIANT_MAP(cpnAmountType,                   DiscountInfo, tblAccountCouponsBase, cpnAmountType);
         NULLABLE_TYPE(quint32) cpnMaxAmount;
 //        TAPI::setFromVariant(cpnMaxAmount, DiscountInfo.value("cpnMaxAmount"));
@@ -600,7 +600,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         if (arr.size())
         {
 //            qDebug() << "AAAAAAAAAAAAAAA 2" << arr;
-            TAPI::stuDiscountSaleableBasedMultiplier multiplier;
+            Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier multiplier;
 
             for (QJsonArray::const_iterator itr = arr.constBegin();
                 itr != arr.constEnd();
@@ -610,7 +610,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 
 //                qDebug() << "elm" << elm << "elm.toObject()=" << elm.toObject();
 
-                TAPI::stuDiscountSaleableBasedMultiplier cur;
+                Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier cur;
                 cur.fromJson(elm.toObject());
 
                 qint32 MinCount = NULLABLE_GET_OR_DEFAULT(cur.MinCount, -1);
@@ -641,7 +641,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
 
         qDebug() << "1 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
-        if (cpnAmountType == TAPI::enuDiscountType::Percent)
+        if (cpnAmountType == Targoman::API::AAA::Accounting::enuDiscountType::Percent)
             Discount.Amount = AssetItem.SubTotal * Discount.Amount / 100.0;
 
         qDebug() << "2 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
@@ -650,7 +650,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
         if (NULLABLE_HAS_VALUE(cpnMaxAmount))
         {
             //note: cpnMaxAmount type is reverse of cpnAmountType
-            if (cpnAmountType == TAPI::enuDiscountType::Percent)
+            if (cpnAmountType == Targoman::API::AAA::Accounting::enuDiscountType::Percent)
                 Discount.Amount = fmin(Discount.Amount, NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0));
             else {
                 quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0) / 100.0);

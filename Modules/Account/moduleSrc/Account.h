@@ -60,7 +60,7 @@ public:
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:
-    static TAPI::stuVoucher processVoucher(quint64 _voucherID);
+    static Targoman::API::AAA::Accounting::stuVoucher processVoucher(quint64 _voucherID);
     static bool tryCancelVoucher(quint64 _voucherID);
 
 private:
@@ -133,12 +133,12 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-    TAPI::stuVoucher REST(
+    Targoman::API::AAA::Accounting::stuVoucher REST(
         POST,
         finalizeBasket,
         (
             TAPI::JWT_t _JWT,
-            TAPI::stuPreVoucher _preVoucher,
+            Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
             TAPI::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
             qint64 _walletID = -1,
@@ -150,7 +150,7 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    TAPI::stuVoucher REST(
+    Targoman::API::AAA::Accounting::stuVoucher REST(
         POST,
         approveOnlinePayment,
         (
@@ -162,7 +162,7 @@ private slots:
         "approve payment back from payment gateway"
     )
 
-    TAPI::stuVoucher REST(
+    Targoman::API::AAA::Accounting::stuVoucher REST(
         POST,
         approveOfflinePayment,
         (

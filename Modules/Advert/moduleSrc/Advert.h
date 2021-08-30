@@ -124,7 +124,7 @@ private slots:
             ProcessVoucher,
             (
 //                TAPI::JWT_t _JWT,
-                TAPI::stuVoucherItem _voucherItem
+                Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
 //                TAPI::JSON_t _voucherItem
             ),
             "Process voucher.")

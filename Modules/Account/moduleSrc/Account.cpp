@@ -399,7 +399,7 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
 /*****************************************************************\
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
-TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
+Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _voucherID)
 {
     try
     {
@@ -409,7 +409,7 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
                                .one()
                                .value(tblVoucher::vchDesc);
 
-        TAPI::stuPreVoucher PreVoucher;
+        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
 
         if (VoucherDesc.canConvert<QJsonObject>())
             PreVoucher.fromJson(VoucherDesc.toJsonObject());
@@ -433,7 +433,7 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
              * call end point
              * fail:
              */
-            foreach(TAPI::stuVoucherItem VoucherItem, PreVoucher.Items)
+            foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
             {
                 //lookup services
                 foreach (QVariant Service, Services)
@@ -474,12 +474,12 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
             }
         } //if (Services.isEmpty() == false)
 
-        return TAPI::stuVoucher(
+        return Targoman::API::AAA::Accounting::stuVoucher(
                     _voucherID,
                     PreVoucher,
                     QString(),
                     QString(),
-                    TAPI::enuVoucherStatus::Finished
+                    Targoman::API::AAA::Accounting::enuVoucherStatus::Finished
                     );
     }
     catch (...)
@@ -502,7 +502,7 @@ bool Account::tryCancelVoucher(quint64 _voucherID)
 //                               .one()
 //                               .value(tblVoucher::vchDesc);
 
-//        TAPI::stuPreVoucher PreVoucher;
+//        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
 
 //        if (VoucherDesc.canConvert<QJsonObject>())
 //            PreVoucher.fromJson(VoucherDesc.toJsonObject());
@@ -538,9 +538,9 @@ bool Account::tryCancelVoucher(quint64 _voucherID)
 
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
-TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
+Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
-        TAPI::stuPreVoucher _preVoucher,
+        Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
         TAPI::enuPaymentGatewayType::Type _gatewayType,
         QString _domain,
         qint64 _walletID,
@@ -566,7 +566,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
     Accounting::checkPreVoucherSanity(_preVoucher);
 
     //1: create voucher
-    TAPI::stuVoucher Voucher;
+    Targoman::API::AAA::Accounting::stuVoucher Voucher;
 
     Voucher.Info = _preVoucher;
 
@@ -630,7 +630,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, Voucher.ID }
@@ -648,7 +648,7 @@ TAPI::stuVoucher Account::apiPOSTfinalizeBasket(
  * @param _pgResponse: ... voucherID ...
  * @return
  */
-TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
+Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
 //        TAPI::enuPaymentGatewayType::Type _gatewayType,
         const QString _paymentMD5,
         const QString _domain,
@@ -671,7 +671,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, VoucherID }
@@ -682,7 +682,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
-TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
+Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                                        quint64 _vchID,
                                                        const QString& _bank,
                                                        const QString& _receiptCode,
@@ -739,7 +739,7 @@ TAPI::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, TAPI::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, _vchID }

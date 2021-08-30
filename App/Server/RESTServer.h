@@ -18,8 +18,8 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_RESTSERVER_H
 #define TARGOMAN_API_SERVER_RESTSERVER_H
@@ -36,9 +36,10 @@
 
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
+
 class intfAPIArgManipulator;
+
 namespace Server {
 
 /********************************************************************************/
@@ -101,7 +102,7 @@ private:
     bool IsStarted;
 };
 
-}
-}
-}
+} //namespace Server
+} //namespace Targoman::API
+
 #endif // TARGOMAN_API_SERVER_RESTSERVER_H

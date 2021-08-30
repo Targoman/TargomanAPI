@@ -141,7 +141,7 @@ QString Advert::apiGETRetrieveURL(
 
 quint64 Advert::apiPOSTProcessVoucher(
 //        TAPI::JWT_t _JWT,
-        TAPI::stuVoucherItem _voucherItem
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
 //        TAPI::JSON_t _voucherItem
     )
 {

@@ -32,20 +32,22 @@ using namespace Targoman::API;
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+using namespace Targoman::API::AAA::Accounting;
+
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ TAPI,
+    /* namespace          */ Targoman::API::AAA::Accounting,
     /* type               */ stuVoucherItem,
-    /* toVariantLambda    */ [](const TAPI::stuVoucherItem& _value) -> QVariant {
+    /* toVariantLambda    */ [](const stuVoucherItem& _value) -> QVariant {
 //        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
         return _value.toJson().toVariantMap();
     },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::stuVoucherItem {
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuVoucherItem {
 //        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false)
         {
 //            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
-            return TAPI::stuVoucherItem();
+            return stuVoucherItem();
         }
 
         if (_value.canConvert<QVariantMap>()
@@ -55,13 +57,13 @@ TAPI_REGISTER_METATYPE(
         {
             auto ret = QJsonDocument::fromVariant(_value);
 //            qDebug() << "stuVoucherItem(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
-            return TAPI::stuVoucherItem().fromJson(ret.object());
+            return stuVoucherItem().fromJson(ret.object());
         }
 
         if (_value.toString().isEmpty())
         {
 //            qDebug() << "stuVoucherItem(2.3) =================================" << _paramName << ":" << _value;
-            return TAPI::stuVoucherItem();
+            return stuVoucherItem();
         }
 
         QJsonParseError Error;
@@ -73,24 +75,24 @@ TAPI_REGISTER_METATYPE(
             throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
         if (Doc.isObject() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
-        return TAPI::stuVoucherItem().fromJson(Doc.object());
+        return stuVoucherItem().fromJson(Doc.object());
     }
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ TAPI,
+    /* namespace          */ Targoman::API::AAA::Accounting,
     /* type               */ stuPreVoucher,
-    /* toVariantLambda    */ [](const TAPI::stuPreVoucher& _value) -> QVariant {
+    /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant {
 //        qDebug() << "stuPreVoucher(1) ================================= round:" << _value.Round;
         return _value.toJson().toVariantMap();
     },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::stuPreVoucher {
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher {
 //        qDebug() << "stuPreVoucher(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false)
         {
 //            qDebug() << "stuPreVoucher(2.1) =================================" << _paramName << ":" << _value;
-            return TAPI::stuPreVoucher();
+            return stuPreVoucher();
         }
 
         if (_value.canConvert<QVariantMap>()
@@ -100,13 +102,13 @@ TAPI_REGISTER_METATYPE(
         {
             auto ret = QJsonDocument::fromVariant(_value);
 //            qDebug() << "stuPreVoucher(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
-            return TAPI::stuPreVoucher().fromJson(ret.object());
+            return stuPreVoucher().fromJson(ret.object());
         }
 
         if (_value.toString().isEmpty())
         {
 //            qDebug() << "stuPreVoucher(2.3) =================================" << _paramName << ":" << _value;
-            return TAPI::stuPreVoucher();
+            return stuPreVoucher();
         }
 
         QJsonParseError Error;
@@ -118,33 +120,33 @@ TAPI_REGISTER_METATYPE(
             throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
         if (Doc.isObject() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
-        return TAPI::stuPreVoucher().fromJson(Doc.object());
+        return stuPreVoucher().fromJson(Doc.object());
     }
 );
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI,
+    Targoman::API::AAA::Accounting,
     stuVoucher,
-    [](const TAPI::stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+    [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI,
+    Targoman::API::AAA::Accounting,
     OrderAdditives_t,
-    [](const TAPI::OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
-    [](const QVariant& _value, const QByteArray&) -> TAPI::OrderAdditives_t {
+    [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
+    [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
-        TAPI::OrderAdditives_t Additives;
+        OrderAdditives_t Additives;
         for(auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
             Additives.insert(Iter.key(), Iter.value().toString());
         return Additives;
     }
 );
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA::Accounting, enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA::Accounting, enuDiscountType);
 
 namespace Targoman::API::AAA::Accounting {
 
@@ -475,7 +477,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnValidFrom,               S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin },
             { tblAccountCouponsBase::cpnExpiryTime,              S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin },
             { tblAccountCouponsBase::cpnAmount,                  S(quint32),                        QFV,                                     QRequired, UPAdmin }, //, false, false },
-            { tblAccountCouponsBase::cpnAmountType,              S(TAPI::enuDiscountType::Type),    QFV,                                     TAPI::enuDiscountType::Percent, UPAdmin },
+            { tblAccountCouponsBase::cpnAmountType,              S(Targoman::API::AAA::Accounting::enuDiscountType::Type), QFV,              Targoman::API::AAA::Accounting::enuDiscountType::Percent, UPAdmin },
             { tblAccountCouponsBase::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
             { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
 //            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
@@ -580,12 +582,12 @@ bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
   return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-} //namespace Targoman::API::AAA::Accounting {
+//} //namespace Targoman::API::AAA::Accounting {
 
 /******************************************************************/
-namespace TAPI {
+//namespace TAPI {
 
-using namespace Targoman::API::AAA::Accounting;
+//using namespace Targoman::API::AAA::Accounting;
 
 stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
   Credit(_credit),

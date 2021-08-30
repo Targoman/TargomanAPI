@@ -232,8 +232,8 @@ inline QString toCammel(const QString& _name)
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
-        static tmplAPIArg<_type, _complexity, false>* Dangling_##_type = tmplAPIArg<_type, _complexity, false>::instance(TARGOMAN_M2STR(_type)); \
-        static tmplAPIArg<NULLABLE_TYPE(_type), _complexity, true>* Dangling_QSP_##_type = tmplAPIArg<NULLABLE_TYPE(_type), _complexity, true>::instance(QSP_M2STR(_type)); \
+        static tmplAPIArg<_type, _complexity, false>* Dangling_##_type = tmplAPIArg<_type, _complexity, false>::instance(TARGOMAN_M2STR(_namespace::_type)); \
+        static tmplAPIArg<NULLABLE_TYPE(_type), _complexity, true>* Dangling_QSP_##_type = tmplAPIArg<NULLABLE_TYPE(_type), _complexity, true>::instance(QSP_M2STR(_namespace::_type)); \
     }
 //            NULLABLE_TYPE(_namespace::_type) Value(new _namespace::_type);
 
@@ -281,8 +281,8 @@ inline QString toCammel(const QString& _name)
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
-        static tmplAPIArg<_enum::Type, COMPLEXITY_Enum, false>* Dangling_##_enum = tmplAPIArg<_enum::Type, COMPLEXITY_Enum, false>::instance(TARGOMAN_M2STR(_enum::Type)); \
-        static tmplAPIArg<NULLABLE_TYPE(_enum::Type), COMPLEXITY_Enum, true>* Dangling_QSP_##_enum = tmplAPIArg<NULLABLE_TYPE(_enum::Type), COMPLEXITY_Enum, true>::instance(QSP_M2STR(_enum::Type)); \
+        static tmplAPIArg<_enum::Type, COMPLEXITY_Enum, false>* Dangling_##_enum = tmplAPIArg<_enum::Type, COMPLEXITY_Enum, false>::instance(TARGOMAN_M2STR(_namespace::_enum::Type)); \
+        static tmplAPIArg<NULLABLE_TYPE(_enum::Type), COMPLEXITY_Enum, true>* Dangling_QSP_##_enum = tmplAPIArg<NULLABLE_TYPE(_enum::Type), COMPLEXITY_Enum, true>::instance(QSP_M2STR(_namespace::_enum::Type)); \
     }
 //NULLABLE_TYPE(_namespace::_enum::Type) Value(new _namespace::_enum::Type);
 

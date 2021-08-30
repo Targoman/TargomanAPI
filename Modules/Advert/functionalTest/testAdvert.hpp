@@ -52,9 +52,9 @@ class testAdvert : public clsBaseTest
     QVariant BannerSaleableID;
 //    QVariant PaymentGatewayID;
     QVariant CouponID;
-    TAPI::stuPreVoucher LastPreVoucher;
-    TAPI::stuVoucher Voucher;
-    TAPI::stuVoucher ApproveOnlinePaymentVoucher;
+    Targoman::API::AAA::Accounting::stuPreVoucher LastPreVoucher;
+    Targoman::API::AAA::Accounting::stuVoucher Voucher;
+    Targoman::API::AAA::Accounting::stuVoucher ApproveOnlinePaymentVoucher;
 
     void cleanupUnitTestData()
     {
@@ -194,7 +194,7 @@ private slots:
                     { tblAccountProductsBase::prdCode,          "p123" },
                     { tblAccountProductsBase::prdName,          "test product 123" },
                     { tblAccountProductsBase::prdInStockCount,  1 },
-                    { tblAccountProducts::prdType,              TAdvertisement::enuProductType::toStr(TAdvertisement::enuProductType::Advertise) },
+                    { tblAccountProducts::prdType,              Targoman::API::Advertisement::enuProductType::toStr(Targoman::API::Advertisement::enuProductType::Advertise) },
                     { tblAccountProducts::prd_locID,            this->LocationID },
                 }
             );
@@ -395,7 +395,7 @@ private slots:
                     { tblAccountCouponsBase::cpnValidFrom,                "2020/1/1 1:2:3" },
 //                    { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
                     { tblAccountCouponsBase::cpnAmount,                   10 },
-                    { tblAccountCouponsBase::cpnAmountType,               TAPI::enuDiscountType::toStr(TAPI::enuDiscountType::Percent) },
+                    { tblAccountCouponsBase::cpnAmountType,               Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
                     { tblAccountCouponsBase::cpnMaxAmount,                250000 },
                     { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
 //                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
@@ -575,7 +575,7 @@ private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-//    TAPI::stuVoucher approveOnlinePaymentVoucher;
+//    Targoman::API::AAA::Accounting::stuVoucher approveOnlinePaymentVoucher;
 //    void deleteOnlinePayment()
 //    {
 //        QT_TRY {
@@ -597,8 +597,8 @@ private slots:
 //        }
 //    }
 
-//    TAPI::stuVoucher voucher;
-//    TAPI::stuPreVoucher lastPreVoucher;
+//    Targoman::API::AAA::Accounting::stuVoucher voucher;
+//    Targoman::API::AAA::Accounting::stuPreVoucher lastPreVoucher;
 
     void deleteDiscount()
     {

@@ -44,20 +44,21 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
     qint64 MinTTL = LLONG_MAX;
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
-        for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            if(PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())){
+        for (auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
+            if (PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())) {
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
-                if(PrivIter.key() != "ALL"){
-                    TAPI::stuActiveCredit ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
-                    if(ActiveAccount.TTL){
+                if (PrivIter.key() != "ALL") {
+                    Targoman::API::AAA::Accounting::stuActiveCredit ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
+                    if (ActiveAccount.TTL) {
                         Privs = Common::mergeJsonObjects(Privs, QJsonObject({ {PrivIter.key(), ActiveAccount.toJson(false)}}).begin());
-                        if(ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)
+                        if (ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)
                             MinTTL = ActiveAccount.TTL;
                     }
                 }
             }
     }
-    if(Privs.contains("ALL") == false)
+
+    if (Privs.contains("ALL") == false)
         foreach (auto Service, _services)
             if(Privs.contains(Service) == false)
                 throw exAuthorization("Not enough priviledges to access <"+Service+">");

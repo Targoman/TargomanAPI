@@ -31,18 +31,20 @@ namespace Targoman::API::ORM {
 
 using namespace Targoman::API::Server;
 
-clsORMFieldData::clsORMFieldData() : ParameterType(QMetaType::UnknownType) { }
+clsORMFieldData::clsORMFieldData() :
+    ParameterType(QMetaType::UnknownType)
+{}
 
-clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o)
-    : QSharedData(_o),
-      ParameterType(_o.ParameterType),
-      Name(_o.Name),
-      ParamTypeName(_o.ParamTypeName),
-      DefaultValue(_o.DefaultValue),
-      ExtraValidator(_o.ExtraValidator),
-      RenameAs(_o.RenameAs),
-      UpdatableBy(_o.UpdatableBy),
-      Privs(_o.Privs)
+clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
+    QSharedData(_o),
+    ParameterType(_o.ParameterType),
+    Name(_o.Name),
+    ParamTypeName(_o.ParamTypeName),
+    DefaultValue(_o.DefaultValue),
+    ExtraValidator(_o.ExtraValidator),
+    RenameAs(_o.RenameAs),
+    UpdatableBy(_o.UpdatableBy),
+    Privs(_o.Privs)
 {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
@@ -65,7 +67,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
                 bool _isVirtual,
                 bool _isPrimaryKey,
                 bool _isSelectable,
-                const QString& _renameAs):
+                const QString& _renameAs) :
     ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
     Name(_name),
     ParamTypeName(_type),
@@ -168,6 +170,7 @@ const intfAPIArgManipulator& clsORMField::argSpecs()
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));
 
     Q_ASSERT(this->Data->ParameterType != QMetaType::UnknownType);
+
     return (this->Data->ParameterType < TAPI_BASE_USER_DEFINED_TYPEID)
         ? *gOrderedMetaTypeInfo.at(this->Data->ParameterType)
         : *gUserDefinedTypesInfo.at(this->Data->ParameterType - TAPI_BASE_USER_DEFINED_TYPEID);
