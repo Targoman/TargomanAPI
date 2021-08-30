@@ -34,8 +34,8 @@
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, this->fromVariant(_value) )
 
-#define TAPI_ADD_STRING_TYPE(_baseType, _typeName) \
-    TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _value.toString() )
+#define TAPI_ADD_TYPE_STRING(_typeName) \
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT(QString, _typeName, _value.toString() )
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \

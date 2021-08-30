@@ -61,8 +61,7 @@ TAPI_REGISTER_METATYPE(
     [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 );
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 using namespace DBManager;
 using namespace Common;
@@ -131,6 +130,68 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
         "invalid-md5-passwords",
         enuConfigSource::Arg | enuConfigSource::File
         );
+
+/*****************************************************************/
+/*****************************************************************/
+/*****************************************************************/
+Account::Account() :
+    clsRESTAPIWithActionLogs("AAA", "Account")
+{
+    this->addSubModule(&ActiveSessions::instance());
+    this->addSubModule(&APITokens::instance());
+    this->addSubModule(&APITokenValidIPs::instance());
+    this->addSubModule(&ApprovalRequest::instance());
+    this->addSubModule(&BlockingRules::instance());
+    this->addSubModule(&ForgotPassRequest::instance());
+    this->addSubModule(&Voucher::instance());
+    this->addSubModule(&IPBin::instance());
+    this->addSubModule(&IPStats::instance());
+    this->addSubModule(&PaymentGateways::instance());
+    this->addSubModule(&OnlinePayments::instance());
+    this->addSubModule(&OfflinePayments::instance());
+    this->addSubModule(&Roles::instance());
+    this->addSubModule(&Service::instance());
+    this->addSubModule(&User::instance());
+    this->addSubModule(&UserExtraInfo::instance());
+    this->addSubModule(&UserWallets::instance());
+    this->addSubModule(&WalletTransactions::instance());
+    this->addSubModule(&WalletBalances::instance());
+
+    if(Account::InvalidPasswordsFile.value().size()){
+        QFile InputFile(Account::InvalidPasswordsFile.value());
+        if (InputFile.open(QIODevice::ReadOnly)) {
+            QTextStream Stream(&InputFile);
+            while (!Stream.atEnd())
+                InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
+            InputFile.close();
+        }
+    }
+}
+
+TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
+{
+    return clsJWT::createSigned({
+                                    {JWTItems::usrLogin,        _login},
+                                    {JWTItems::usrName,         _activeAccount.Privs["usrGivenName"]},
+                                    {JWTItems::usrFamily,       _activeAccount.Privs["usrFamilyName"]},
+                                    {JWTItems::rolName,         _activeAccount.Privs["rolName"]},
+                                    {JWTItems::rolID,           _activeAccount.Privs["rolID"]},
+                                    {JWTItems::privs,           _activeAccount.Privs["privs"]},
+                                    {JWTItems::usrID,           _activeAccount.Privs["usrID"]},
+                                    {JWTItems::canChangePass,   _activeAccount.Privs["hasPass"]},
+                                    {JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString())},
+                                    {JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString())},
+                                },
+                                QJsonObject({{"svc", _services}}),
+                                _activeAccount.TTL,
+                                _activeAccount.Privs["ssnKey"].toString()
+            );
+}
+
+TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
+{
+    return clsJWT::createSignedLogin(_remember, { {JWTItems::usrLogin, _login} }, QJsonObject({{"svc", _services}}), _ssid);
+}
 
 /*****************************************************************\
 |* User **********************************************************|
@@ -329,8 +390,8 @@ bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {
-                      {"iUUID", _code},
-                      {"iMobile", _mobile},
+                      { "iUUID", _code },
+                      { "iMobile", _mobile },
                   });
     return true;
 }
@@ -359,47 +420,59 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
 
         ///TODO: process voucher and apply it
 
-        /**
-         * retreieve end point
-         * call end point
-         * fail:
-         */
-        foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
+        QVariantList Services = SelectQuery(Service::instance())
+                .addCol(tblService::svcID)
+                .addCol(tblService::svcName)
+                .addCol(tblService::svcProcessVoucherEndPoint)
+                .all();
+
+        if (Services.isEmpty() == false)
         {
-            QVariantMap ServiceInfo = SelectQuery(Service::instance())
-                    .addCol(tblService::svcID)
-                    .addCol(tblService::svcName)
-                    .addCol(tblService::svcProcessVoucherEndPoint)
-                    .where({ tblService::svcName, enuConditionOperator::Equal, VoucherItem.Service })
-                    .one();
-
-            NULLABLE_TYPE(QString) ProcessVoucherEndPoint;
-            TAPI::setFromVariant(ProcessVoucherEndPoint, ServiceInfo.value(tblService::svcProcessVoucherEndPoint));
-
-            //bypass process by end point?
-//            if (ProcessVoucherEndPoint.isEmpty() || (ProcessVoucherEndPoint == tblService::Invalid_ProcessVoucherEndPoint))
-            if (NULLABLE_IS_NULL(ProcessVoucherEndPoint))
-                continue;
-
             /**
-              * ProcessVoucherEndPoint:
-              *     Advert/ProcessVoucher
-              *     .../ProcessVoucher
-              */
-            QVariant Result = RESTClientHelper::callAPI(
-                {},
-                RESTClientHelper::POST,
-                NULLABLE_GET_OR_DEFAULT(ProcessVoucherEndPoint, ""),
-                {},
+             * retreieve end point
+             * call end point
+             * fail:
+             */
+            foreach(TAPI::stuVoucherItem VoucherItem, PreVoucher.Items)
+            {
+                //lookup services
+                foreach (QVariant Service, Services)
                 {
-                    { "voucherItem", VoucherItem.toJson().toVariantMap() },
-                }
-            );
+                    QVariantMap ServiceInfo = Service.toMap();
 
-            ///TODO: check result and raise error if not ok
-            if (Result.isValid() == false)
-                throw exHTTPInternalServerError("error in process voucher");
-        }
+                    if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
+                    {
+                        NULLABLE_TYPE(QString) ProcessVoucherEndPoint;
+                        TAPI::setFromVariant(ProcessVoucherEndPoint, ServiceInfo.value(tblService::svcProcessVoucherEndPoint));
+
+                        //bypass process by end point?
+                        if (NULLABLE_HAS_VALUE(ProcessVoucherEndPoint))
+                        {
+                            /**
+                              * ProcessVoucherEndPoint:
+                              *     Advert/ProcessVoucher
+                              *     .../ProcessVoucher
+                              */
+                            QVariant Result = RESTClientHelper::callAPI(
+                                {},
+                                RESTClientHelper::POST,
+                                NULLABLE_GET_OR_DEFAULT(ProcessVoucherEndPoint, ""),
+                                {},
+                                {
+                                    { "voucherItem", VoucherItem.toJson().toVariantMap() },
+                                }
+                            );
+
+                            ///TODO: check result and raise error if not ok
+                            if (Result.isValid() == false)
+                                throw exHTTPInternalServerError("error in process voucher");
+                        }
+
+                        break;
+                    }
+                }
+            }
+        } //if (Services.isEmpty() == false)
 
         return TAPI::stuVoucher(
                     _voucherID,
@@ -412,8 +485,55 @@ TAPI::stuVoucher Account::processVoucher(quint64 _voucherID)
     catch (...)
     {
         ///TODO: create cancel voucher and credit to wallet
+
+        Account::tryCancelVoucher(_voucherID);
+
         throw;
     }
+}
+
+bool Account::tryCancelVoucher(quint64 _voucherID)
+{
+    try
+    {
+//        QVariant VoucherDesc = SelectQuery(Voucher::instance())
+//                               .addCol(tblVoucher::vchDesc)
+//                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+//                               .one()
+//                               .value(tblVoucher::vchDesc);
+
+//        TAPI::stuPreVoucher PreVoucher;
+
+//        if (VoucherDesc.canConvert<QJsonObject>())
+//            PreVoucher.fromJson(VoucherDesc.toJsonObject());
+//        else if (VoucherDesc.canConvert<QVariantMap>())
+//            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
+//        else
+//            return false;
+
+
+
+
+
+
+        ///TODO: complete sp_UPDATE_voucher_cancel
+
+
+
+
+
+
+
+        clsDACResult Result = Voucher::instance().callSP("sp_UPDATE_voucher_cancel", {
+                                                             { "iVoucherID", _voucherID },
+                                                         });
+        return true;
+    }
+    catch (...)
+    {
+    }
+
+    return false;
 }
 
 ///TODO: select gateway (null|single|multiple) from service
@@ -670,64 +790,4 @@ bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64
     return true;
 }
 
-Account::Account() :
-    clsRESTAPIWithActionLogs("AAA", "Account")
-{
-    this->addSubModule(&ActiveSessions::instance());
-    this->addSubModule(&APITokens::instance());
-    this->addSubModule(&APITokenValidIPs::instance());
-    this->addSubModule(&ApprovalRequest::instance());
-    this->addSubModule(&BlockingRules::instance());
-    this->addSubModule(&ForgotPassRequest::instance());
-    this->addSubModule(&Voucher::instance());
-    this->addSubModule(&IPBin::instance());
-    this->addSubModule(&IPStats::instance());
-    this->addSubModule(&PaymentGateways::instance());
-    this->addSubModule(&OnlinePayments::instance());
-    this->addSubModule(&OfflinePayments::instance());
-    this->addSubModule(&Roles::instance());
-    this->addSubModule(&Service::instance());
-    this->addSubModule(&User::instance());
-    this->addSubModule(&UserExtraInfo::instance());
-    this->addSubModule(&UserWallets::instance());
-    this->addSubModule(&WalletTransactions::instance());
-    this->addSubModule(&WalletBalances::instance());
-
-    if(Account::InvalidPasswordsFile.value().size()){
-        QFile InputFile(Account::InvalidPasswordsFile.value());
-        if (InputFile.open(QIODevice::ReadOnly)) {
-            QTextStream Stream(&InputFile);
-            while (!Stream.atEnd())
-                InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
-            InputFile.close();
-        }
-    }
-}
-
-TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
-{
-    return clsJWT::createSigned({
-                                    {JWTItems::usrLogin,        _login},
-                                    {JWTItems::usrName,         _activeAccount.Privs["usrGivenName"]},
-                                    {JWTItems::usrFamily,       _activeAccount.Privs["usrFamilyName"]},
-                                    {JWTItems::rolName,         _activeAccount.Privs["rolName"]},
-                                    {JWTItems::rolID,           _activeAccount.Privs["rolID"]},
-                                    {JWTItems::privs,           _activeAccount.Privs["privs"]},
-                                    {JWTItems::usrID,           _activeAccount.Privs["usrID"]},
-                                    {JWTItems::canChangePass,   _activeAccount.Privs["hasPass"]},
-                                    {JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString())},
-                                    {JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString())},
-                                },
-                                QJsonObject({{"svc", _services}}),
-                                _activeAccount.TTL,
-                                _activeAccount.Privs["ssnKey"].toString()
-            );
-}
-
-TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
-{
-    return clsJWT::createSignedLogin(_remember, { {JWTItems::usrLogin, _login} }, QJsonObject({{"svc", _services}}), _ssid);
-}
-
-}
-}
+} //namespace Targoman::API

@@ -77,10 +77,10 @@
 #define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _pksByPath
 
 namespace TAPI {
-TAPI_ADD_STRING_TYPE(QString, Cols_t);
-TAPI_ADD_STRING_TYPE(QString, Filter_t);
-TAPI_ADD_STRING_TYPE(QString, OrderBy_t);
-TAPI_ADD_STRING_TYPE(QString, GroupBy_t);
+TAPI_ADD_TYPE_STRING(Cols_t);
+TAPI_ADD_TYPE_STRING(Filter_t);
+TAPI_ADD_TYPE_STRING(OrderBy_t);
+TAPI_ADD_TYPE_STRING(GroupBy_t);
 }
 
 namespace Targoman::API {

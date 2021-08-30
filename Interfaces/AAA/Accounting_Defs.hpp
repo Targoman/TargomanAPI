@@ -32,6 +32,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include <QString>
+#include <QJsonArray>
 
 namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
@@ -51,6 +52,11 @@ namespace Targoman::API::AAA::Accounting {
 
 inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 extern Common::Configuration::tmplConfigurable<QString> Secret;
+
+}
+
+//namespace Targoman::API::AAA::Accounting {
+namespace TAPI {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     QString,      Desc      , QString()    , v.size(), v, v.toString(),
@@ -177,15 +183,15 @@ struct stuActiveCredit {
     stuActiveCredit& fromJson(const QJsonObject _obj);
 };
 
-} //namespace Targoman::API::AAA::Accounting
+//} //namespace Targoman::API::AAA::Accounting
+} //namespace TAPI
 
-#include <QJsonArray>
 namespace TAPI {
 
 //using namespace Targoman::API;
-using namespace Targoman::API::AAA::Accounting;
+//using namespace Targoman::API::AAA::Accounting;
 
-typedef QList<stuVoucherItem> InvItems_t;
+typedef QList<TAPI::stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
     SF_Generic(
@@ -194,9 +200,9 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
         /* def         */ InvItems_t(),
         /* validator   */ v.size(),
         /* fromVariant */ [](auto v){QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
-        /* toVariant   */ [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+        /* toVariant   */ [](auto v){InvItems_t L; foreach(auto I, v.toArray()) L.append(TAPI::stuVoucherItem().fromJson(I.toObject())); return L;}(v)
     ),
-    SF_Struct(stuPrize, Prize, v.Desc.size()),
+    SF_Struct(TAPI::stuPrize, Prize, v.Desc.size()),
     SF_QString(Summary),
     SF_quint16(Round),
     SF_quint32(ToPay, 0, v>0),
@@ -356,12 +362,14 @@ namespace tblAccountReferalsBase {
 
 TAPI_DECLARE_METATYPE(TAPI::stuPrize)
 TAPI_DECLARE_METATYPE(TAPI::stuDiscount)
-TAPI_DECLARE_METATYPE(TAPI::stuVoucherItem)
+TAPI_DECLARE_METATYPE(TAPI::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(TAPI::stuUsage)
-TAPI_DECLARE_METATYPE(TAPI::stuVoucher)
-TAPI_DECLARE_METATYPE(TAPI::OrderAdditives_t)
-TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherStatus)
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuDiscountType)
+
+TAPI_DECLARE_METATYPE(TAPI::stuPreVoucher)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE(TAPI::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE(TAPI::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(TAPI::enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

@@ -26,6 +26,8 @@
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
 
+using namespace TAPI;
+
 namespace Targoman::API::AAA::Accounting {
 
 class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs

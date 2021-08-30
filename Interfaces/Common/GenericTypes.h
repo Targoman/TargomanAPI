@@ -95,7 +95,7 @@ struct stuStatistics {
 /**
  * @brief The stuTable struct
  */
-struct stuTable{
+struct stuTable {
     qint64 TotalRows;
     QVariantList Rows;
     stuTable(qint64 _totalRows = -1, const QVariantList& _rows = QVariantList()):
@@ -110,7 +110,7 @@ struct stuTable{
     }
 };
 
-struct stuFileInfo{
+struct stuFileInfo {
   QString Name;
   QString TempName;
   quint64 Size;
@@ -178,27 +178,27 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, SaleableAdditive_t, *this = QJso
 
 TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
 TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
-TAPI_ADD_STRING_TYPE(QString, EncodedJWT_t);
-TAPI_ADD_STRING_TYPE(QString, CommaSeparatedStringList_t);
-TAPI_ADD_STRING_TYPE(QString, PKsByPath_t);
-TAPI_ADD_STRING_TYPE(QString, RemoteIP_t);
-TAPI_ADD_STRING_TYPE(QString, MD5_t);
-TAPI_ADD_STRING_TYPE(QString, IPv4_t);
-TAPI_ADD_STRING_TYPE(QString, Email_t);
-TAPI_ADD_STRING_TYPE(QString, Mobile_t);
-TAPI_ADD_STRING_TYPE(QString, Sheba_t);
-TAPI_ADD_STRING_TYPE(QString, Ether_t);
-TAPI_ADD_STRING_TYPE(QString, ISO639_2_t);
-TAPI_ADD_STRING_TYPE(QString, Base64Image_t);
-TAPI_ADD_STRING_TYPE(QString, URL_t);
-TAPI_ADD_STRING_TYPE(QString, ProductCode_t);
-TAPI_ADD_STRING_TYPE(QString, SaleableCode_t);
-TAPI_ADD_STRING_TYPE(QString, CouponCode_t);
-TAPI_ADD_STRING_TYPE(QString, DBTinyText_t);
-TAPI_ADD_STRING_TYPE(QString, DBText_t);
-TAPI_ADD_STRING_TYPE(QString, DBMediumText_t);
-TAPI_ADD_STRING_TYPE(QString, DBLongText_t);
-TAPI_ADD_STRING_TYPE(QString, String_t);
+TAPI_ADD_TYPE_STRING(EncodedJWT_t);
+TAPI_ADD_TYPE_STRING(CommaSeparatedStringList_t);
+TAPI_ADD_TYPE_STRING(PKsByPath_t);
+TAPI_ADD_TYPE_STRING(RemoteIP_t);
+TAPI_ADD_TYPE_STRING(MD5_t);
+TAPI_ADD_TYPE_STRING(IPv4_t);
+TAPI_ADD_TYPE_STRING(Email_t);
+TAPI_ADD_TYPE_STRING(Mobile_t);
+TAPI_ADD_TYPE_STRING(Sheba_t);
+TAPI_ADD_TYPE_STRING(Ether_t);
+TAPI_ADD_TYPE_STRING(ISO639_2_t);
+TAPI_ADD_TYPE_STRING(Base64Image_t);
+TAPI_ADD_TYPE_STRING(URL_t);
+TAPI_ADD_TYPE_STRING(ProductCode_t);
+TAPI_ADD_TYPE_STRING(SaleableCode_t);
+TAPI_ADD_TYPE_STRING(CouponCode_t);
+TAPI_ADD_TYPE_STRING(DBTinyText_t);
+TAPI_ADD_TYPE_STRING(DBText_t);
+TAPI_ADD_TYPE_STRING(DBMediumText_t);
+TAPI_ADD_TYPE_STRING(DBLongText_t);
+TAPI_ADD_TYPE_STRING(String_t);
 
 }
 

@@ -25,7 +25,6 @@
 #define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
@@ -63,9 +62,12 @@ struct stuAdvertBill {
 
 }
 
+using namespace TAPI;
+//using namespace Targoman::API::AAA::Accounting;
+
 namespace Targoman::API {
 
-class Advert : public Accounting::intfRESTAPIWithAccounting
+class Advert : public intfRESTAPIWithAccounting
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
@@ -76,13 +78,11 @@ class Advert : public Accounting::intfRESTAPIWithAccounting
 public:
     stuDBInfo requiredDB() const { return stuDBInfo(AdvertSchema); }
 
-private:
-    Accounting::stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
-    void breakCredit(quint64 _slbID);
-    bool isUnlimited(const Accounting::UsageLimits_t& _limits) const;
-    bool isEmpty(const Accounting::UsageLimits_t& _limits) const;
-
 protected:
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
+    virtual void breakCredit(quint64 _slbID);
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const;
     virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
@@ -124,7 +124,8 @@ private slots:
             ProcessVoucher,
             (
 //                TAPI::JWT_t _JWT,
-                TAPI::JSON_t _voucherItem
+                TAPI::stuVoucherItem _voucherItem
+//                TAPI::JSON_t _voucherItem
             ),
             "Process voucher.")
 

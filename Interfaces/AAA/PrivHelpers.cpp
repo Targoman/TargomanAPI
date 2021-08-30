@@ -48,7 +48,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
             if(PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())){
                 Privs = Common::mergeJsonObjects(Privs, PrivIter);
                 if(PrivIter.key() != "ALL"){
-                    Accounting::stuActiveCredit ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
+                    TAPI::stuActiveCredit ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
                     if(ActiveAccount.TTL){
                         Privs = Common::mergeJsonObjects(Privs, QJsonObject({ {PrivIter.key(), ActiveAccount.toJson(false)}}).begin());
                         if(ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)

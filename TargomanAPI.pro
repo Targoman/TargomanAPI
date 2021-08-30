@@ -24,4 +24,5 @@ OTHER_FILES += \
     conf/api.server.conf \
     conf/api.conf \
     Docs/Models/Accounting.scxml \
-    dumpDBSchema-all.sh
+    dumpDBSchema-all.sh \
+    SwaggerUI/*

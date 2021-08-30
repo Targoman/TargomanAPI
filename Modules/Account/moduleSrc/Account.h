@@ -56,11 +56,12 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
 
 public:
-    stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
-    virtual QJsonObject todayPrivs(quint64 _usrID) final {Q_UNUSED(_usrID) return {}; }
+    stuDBInfo requiredDB() const { return stuDBInfo(AAASchema); }
+    virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:
     static TAPI::stuVoucher processVoucher(quint64 _voucherID);
+    static bool tryCancelVoucher(quint64 _voucherID);
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});

@@ -90,7 +90,7 @@ Advert::Advert() :
     this->addSubModule(&Advertisement::Props::instance());
 }
 
-Accounting::stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
+stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
 {
 }
 
@@ -98,11 +98,11 @@ void Advert::breakCredit(quint64 _slbID)
 {
 }
 
-bool Advert::isUnlimited(const Accounting::UsageLimits_t& _limits) const
+bool Advert::isUnlimited(const UsageLimits_t& _limits) const
 {
 }
 
-bool Advert::isEmpty(const Accounting::UsageLimits_t& _limits) const
+bool Advert::isEmpty(const UsageLimits_t& _limits) const
 {
 }
 
@@ -141,7 +141,8 @@ QString Advert::apiGETRetrieveURL(
 
 quint64 Advert::apiPOSTProcessVoucher(
 //        TAPI::JWT_t _JWT,
-        TAPI::JSON_t _voucherItem
+        TAPI::stuVoucherItem _voucherItem
+//        TAPI::JSON_t _voucherItem
     )
 {
     return 1234;

@@ -635,7 +635,7 @@ TAPI::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
                 Discount.Amount = Discount.Amount * multiplier.Multiplier;
                 qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount.Amount << ")";
             }
-        }
+        } //if (arr.size())
 
         Discount.Code = _discountCode;
 

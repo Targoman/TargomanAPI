@@ -33,9 +33,48 @@ using namespace Targoman::API;
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    TAPI, stuVoucher,
-    [](const TAPI::stuVoucher& _value) -> QVariant{return _value.toJson().toVariantMap();}
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ stuVoucherItem,
+    /* toVariantLambda    */ [](const TAPI::stuVoucherItem& _value) -> QVariant {
+//        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
+        return _value.toJson().toVariantMap();
+    },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> TAPI::stuVoucherItem {
+//        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
+        if (_value.isValid() == false)
+        {
+//            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
+            return TAPI::stuVoucherItem();
+        }
+
+        if (_value.canConvert<QVariantMap>()
+//                || _value.canConvert<QVariantList>()
+//                || _value.canConvert<double>()
+            )
+        {
+            auto ret = QJsonDocument::fromVariant(_value);
+//            qDebug() << "stuVoucherItem(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
+            return TAPI::stuVoucherItem().fromJson(ret.object());
+        }
+
+        if (_value.toString().isEmpty())
+        {
+//            qDebug() << "stuVoucherItem(2.3) =================================" << _paramName << ":" << _value;
+            return TAPI::stuVoucherItem();
+        }
+
+        QJsonParseError Error;
+        QJsonDocument Doc;
+        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+//        qDebug() << "stuVoucherItem(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
+
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
+        if (Doc.isObject() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
+        return TAPI::stuVoucherItem().fromJson(Doc.object());
+    }
 );
 
 TAPI_REGISTER_METATYPE(
@@ -85,8 +124,16 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI, OrderAdditives_t,
-    [](const TAPI::OrderAdditives_t& _value) -> QVariant{return QVariant::fromValue(_value);},
+    TAPI,
+    stuVoucher,
+    [](const TAPI::stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+);
+
+TAPI_REGISTER_METATYPE(
+    COMPLEXITY_Complex,
+    TAPI,
+    OrderAdditives_t,
+    [](const TAPI::OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
     [](const QVariant& _value, const QByteArray&) -> TAPI::OrderAdditives_t {
         auto Map = _value.toMap();
         TAPI::OrderAdditives_t Additives;
@@ -99,11 +146,7 @@ TAPI_REGISTER_METATYPE(
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuDiscountType);
 
-
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting {
+namespace Targoman::API::AAA::Accounting {
 
 //constexpr char PKG_ID[] = "ID";
 //constexpr char PKG_CODE[] = "CD";
@@ -537,54 +580,13 @@ bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
   return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-/******************************************************************/
-QJsonObject stuAssetItem::toJson(bool _full)
-{
-    ///TODO: Complete me
-  QJsonObject Info;/*
-  if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
-  if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
-  if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
-  if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
-  if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
-  if(this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
-  if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
-  if(this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
-  if(this->Properties.size())   Info[PKG_PROPS] = this->Properties;
-  if(_full){
-    QJsonObject Limits;
-    for(auto LimitIter = this->Remaining.begin();
-        LimitIter != this->Remaining.end();
-        LimitIter++)
-      Limits.insert(LimitIter.key(), LimitIter->toJson());
-    Info[PKG_LIMITS] = Limits;
-  }*/
-  return Info;
-}
-
-stuAssetItem&stuAssetItem::fromJson(const QJsonObject& _obj)
-{
-    /*
-    ///TODO: COMPLETE ME
-  this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
-  this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
-  this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
-  this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
-  this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
-  this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
-  this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
-  this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
-  this->Properties = _obj.value(PKG_PROPS).toObject();
-  QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
-  for(auto LimitIter = Limits.begin();
-      LimitIter != Limits.end();
-      LimitIter++)
-    this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
-    */
-  return *this;
-}
+} //namespace Targoman::API::AAA::Accounting {
 
 /******************************************************************/
+namespace TAPI {
+
+using namespace Targoman::API::AAA::Accounting;
+
 stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
   Credit(_credit),
   IsFromParent(_isFromParent),
@@ -595,8 +597,8 @@ stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent
 QJsonObject stuActiveCredit::toJson(bool _full)
 {
   QJsonObject Account = {
-    {ASA_PACKAGE, this->Credit.toJson(_full)},
-    {ASA_TTL, static_cast<double>(this->TTL)},
+    { ASA_PACKAGE, this->Credit.toJson(_full) },
+    { ASA_TTL, static_cast<double>(this->TTL) },
   };
   if(this->IsFromParent)
     Account.insert(ASA_ISFROMPARENT, true);
@@ -635,12 +637,52 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     DBCurrentDateTime(_dbCurrentDateTime)
 {}
 
-} //namespace Accounting
-} //namespace AAA
-} //namespace API
-} //namespace Targoman
+QJsonObject stuAssetItem::toJson(bool _full)
+{
+    ///TODO: Complete me
+  QJsonObject Info;/*
+  if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
+  if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
+  if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
+  if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
+  if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
+  if(this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
+  if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
+  if(this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
+  if(this->Properties.size())   Info[PKG_PROPS] = this->Properties;
+  if(_full){
+    QJsonObject Limits;
+    for(auto LimitIter = this->Remaining.begin();
+        LimitIter != this->Remaining.end();
+        LimitIter++)
+      Limits.insert(LimitIter.key(), LimitIter->toJson());
+    Info[PKG_LIMITS] = Limits;
+  }*/
+  return Info;
+}
 
-namespace TAPI {
+stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
+{
+    /*
+    ///TODO: COMPLETE ME
+  this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
+  this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
+  this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
+  this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
+  this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
+  this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
+  this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
+  this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
+  this->Properties = _obj.value(PKG_PROPS).toObject();
+  QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
+  for(auto LimitIter = Limits.begin();
+      LimitIter != Limits.end();
+      LimitIter++)
+    this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
+    */
+  return *this;
+}
+
 /******************************************************************/
 /*QVariant stuAssetItemReq_t::toVariant() const{
     QVariantMap Value;
@@ -659,4 +701,5 @@ stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const 
         this->insert(Iter.key(), static_cast<qint16>(Iter.value().toInt()));
     return  *this;
 }*/
+
 }
