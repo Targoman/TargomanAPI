@@ -409,13 +409,6 @@ private slots:
                             QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
                         })
                     },
-//                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,  QJsonDocument(QJsonObject({ { "p123-s456", "10" }, { "other", "20" } })) },
-//                    { tblAccountCouponsBase::cpnTotalUsedCount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-//                    { tblAccountCouponsBase::cpnTotalUsedAmount,        S(quint32),                        QFV.integer().minValue(0),               0,         UPNone},
-//                    { tblAccountCouponsBase::cpnStatus,                 S(TAPI::enuGenericStatus::Type),   QFV,                                     TAPI::enuGenericStatus::Active, UPStatus},
-//                    { tblAccountCouponsBase::cpnCreatedBy_usrID,        ORM_CREATED_BY},
-//                    { tblAccountCouponsBase::cpnCreationDateTime,       ORM_CREATED_ON},
-//                    { tblAccountCouponsBase::cpnUpdatedBy_usrID,        ORM_UPDATED_BY},
                 }
             );
 
@@ -583,7 +576,7 @@ private slots:
 
 //            QVariant Result = callAdminAPI(
 //                DELETE,
-//                QString("Account/onlinePayment"
+//                QString("Account/OnlinePayment"
 //            );
 
 //            qDebug() << "--------- addToBasket" << Result;

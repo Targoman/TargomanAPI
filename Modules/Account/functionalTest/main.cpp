@@ -31,8 +31,6 @@ TAPI_MARSHAL_TEST_VARIABLES
 
 int main(int argc, char *argv[])
 {
-//RESTClientHelper::callAPI("", RESTClientHelper::GET, "Account/refreshJWT");
-
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Account --------------------------";
     qDebug() << "--------------------------------------------------";

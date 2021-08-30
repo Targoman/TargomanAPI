@@ -87,15 +87,22 @@ private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 private slots:
-    Targoman::API::AAA::Accounting::stuPreVoucher REST(POST, addToBasket, (TAPI::JWT_t _JWT,
-                                                 TAPI::SaleableCode_t _saleableCode,
-                                                 Targoman::API::AAA::Accounting::OrderAdditives_t _orderAdditives = {},
-                                                 quint16 _qty = 1,
-                                                 TAPI::CouponCode_t _discountCode = {},
-                                                 QString _referrer = {},
-                                                 TAPI::JSON_t _extraReferrerParams = {},
-                                                 Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher = {}),
-                                "add a package to basket and return updated pre-Voucher")
+    Targoman::API::AAA::Accounting::stuPreVoucher REST(
+        POST,
+        addToBasket,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::SaleableCode_t _saleableCode,
+            Targoman::API::AAA::Accounting::OrderAdditives_t _orderAdditives = {},
+            quint16 _qty = 1,
+            TAPI::CouponCode_t _discountCode = {},
+            QString _referrer = {},
+            TAPI::JSON_t _extraReferrerParams = {},
+            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher = {}
+        ),
+        "add a package to basket and return updated pre-Voucher"
+    )
+
     ///TODO: removeFromBasket
     ///TODO: updateItemInBasket
 

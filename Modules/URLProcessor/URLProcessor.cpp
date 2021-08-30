@@ -35,7 +35,7 @@ QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW)
     return Normalized;
 }
 
-QString URLProcessor::apiGETconvertHexCodes (const QString _url, bool _convertAll)
+QString URLProcessor::apiGETconvertHexCodes(const QString _url, bool _convertAll)
 {
     char Normalized[MAX_URL_SIZE+1];
     strncpy(Normalized, _url.toLatin1().constData(), MAX_URL_SIZE);

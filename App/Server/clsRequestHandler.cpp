@@ -338,32 +338,34 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
 void clsRequestHandler::findAndCallAPI(QString _api)
 {
-    if(_api == "/openAPI.json"){
+    if (_api == "/openAPI.json") {
         gServerStats.Success.inc();
         return this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson());
     }
 
-    if(_api == "/openAPI.yaml")
+    if (_api == "/openAPI.yaml")
         throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 
     _api.replace(QRegularExpression("//+"), "/");
 
-    if(_api.toLower().startsWith("/swaggerui")){
-        if(ServerConfigs::SwaggerUI.value().isEmpty())
+    if (_api.toLower().startsWith("/swaggerui")) {
+        if (ServerConfigs::SwaggerUI.value().isEmpty())
             return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
 
 
         QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
-        if(File.isEmpty())
+        if (File.isEmpty())
             return this->redirect(_api + "/");
-        if(File == "/")
+
+        if (File == "/")
             File = "index.html";
+
         return this->sendFile(ServerConfigs::SwaggerUI.value(), File);
     }
 
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
-    if(_api == "/stats.json"){
+    if (_api == "/stats.json") {
         gServerStats.Success.inc();
         return this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
     }
@@ -371,8 +373,8 @@ void clsRequestHandler::findAndCallAPI(QString _api)
     QString ExtraAPIPath;
     QString MethodString = this->Request->methodString();
     clsAPIObject* APIObject = RESTAPIRegistry::getAPIObject(MethodString, _api);
-    if (!APIObject)
-    {
+
+    if (!APIObject) {
         QString Path = _api;
         if (Path.endsWith('/'))
             Path.truncate(Path.size() - 1);
@@ -386,27 +388,27 @@ void clsRequestHandler::findAndCallAPI(QString _api)
                                QString("API not found [%1] (%2)").arg(MethodString).arg(_api),
                                true);
 
-    if(ServerConfigs::MultiThreaded.value()){
+    if (ServerConfigs::MultiThreaded.value()) {
         this->connect(&this->FutureTimer, SIGNAL(timeout()), &this->FutureWatcher, SLOT(cancel()));
-        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::canceled, [this](){
+
+        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::canceled, [this]() {
             this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "Request Timed Out");
         });
-        this->connect (&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this](){
+
+        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this]() {
             stuResult Result = this->FutureWatcher.result();
-            if(Result.StatusCode == qhttp::ESTATUS_OK)
-                this->sendResponse(
-                        StatusCodeOnMethod[this->Request->method()],
-                    Result.Result
-                    );
+            if (Result.StatusCode == qhttp::ESTATUS_OK)
+                this->sendResponse(StatusCodeOnMethod[this->Request->method()], Result.Result);
             else
                 this->sendError(Result.StatusCode, Result.Result.toString(), Result.StatusCode >= 500);
         });
-        this->FutureWatcher.setFuture(
-                    QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath)
-                    );
-        if(ServerConfigs::APICallTimeout.value() > -1)
+
+        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
+
+        if (ServerConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());
-    }else
+    }
+    else
         run(APIObject, Queries, ExtraAPIPath);
 }
 

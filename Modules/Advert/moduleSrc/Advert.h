@@ -32,7 +32,8 @@
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 using namespace Targoman::API::AAA::Accounting;
 
-namespace TAPI {
+//namespace TAPI {
+namespace Targoman::API::Advertisement {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
     SF_quint64(ID),
@@ -60,7 +61,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 struct stuAdvertBill {
 };
 
-}
+} //namespace
 
 using namespace TAPI;
 //using namespace Targoman::API::AAA::Accounting;
@@ -87,52 +88,63 @@ protected:
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
 private slots:
-    TAPI::stuAdvert REST(
-            GET,
-            NewBanner,
-            (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _location,
-                TAPI::enuAdvertOrder::Type _order
-            ),
-            "Get new banner based on location and order info")
+    Targoman::API::Advertisement::stuAdvert REST(
+        GET,
+        newBanner,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _location,
+            Targoman::API::Advertisement::enuAdvertOrder::Type _order
+        ),
+        "Get new banner based on location and order info"
+    )
 
-    TAPI::stuAdvert REST(
-            GET,
-            NewText,
-            (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _location,
-                TAPI::enuAdvertOrder::Type _order,
-                QString _keywords
-            ),
-            "Get new text advertisement")
+    Targoman::API::Advertisement::stuAdvert REST(
+        GET,
+        newText,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _location,
+            Targoman::API::Advertisement::enuAdvertOrder::Type _order,
+            QString _keywords
+        ),
+        "Get new text advertisement"
+    )
 
     QString REST(
-            GET,
-            RetrieveURL,
-            (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                quint64 _id,
-                TAPI::IPv4_t _clientIP,
-                QString _agent
-            ),
-            "Retrieve URL of the specified Advertisement")
+        GET,
+        retrieveURL,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            quint64 _id,
+            TAPI::IPv4_t _clientIP,
+            QString _agent
+        ),
+        "Retrieve URL of the specified Advertisement"
+    )
 
     quint64 REST(
-            POST,
-            ProcessVoucher,
-            (
-//                TAPI::JWT_t _JWT,
-                Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-//                TAPI::JSON_t _voucherItem
-            ),
-            "Process voucher.")
+        POST,
+        processVoucher,
+        (
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Process voucher item"
+    )
+
+    quint64 REST(
+        POST,
+        cancelVoucher,
+        (
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Cancel voucher item"
+    )
 
 };
 
 } //namespace Targoman::API
 
-TAPI_DECLARE_METATYPE(TAPI::stuAdvert);
+TAPI_DECLARE_METATYPE(Targoman::API::Advertisement::stuAdvert);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H

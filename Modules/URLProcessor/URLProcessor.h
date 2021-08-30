@@ -36,11 +36,25 @@ class URLProcessor : public intfAPIModule
     TARGOMAN_DEFINE_API_MODULE(URLProcessor);
 
 private slots:
-    QString REST(GET, canonicalize, (const QString _url, bool _removeWWW = true),
-                "normalizes url in a common format to be canonical")
+    QString REST(
+        GET,
+        canonicalize,
+        (
+            const QString _url,
+            bool _removeWWW = true
+        ),
+        "normalizes url in a common format to be canonical"
+    )
 
-    QString REST(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
-                "helper method which converts URL encoded strings to normal strings")
+    QString REST(
+        GET,
+        convertHexCodes,
+        (
+            const QString _url,
+            bool _convertAll = false
+        ),
+        "helper method which converts URL encoded strings to normal strings"
+    )
 };
 
 }

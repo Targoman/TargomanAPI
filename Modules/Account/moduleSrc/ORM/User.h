@@ -42,20 +42,33 @@ private slots:
     bool ORMUPDATE("Update User info by priviledged user")
     bool ORMDELETE("Delete a User by priviledged user")
 
-    TAPI::RawData_t REST(GET,Photo, (TAPI::JWT_t _JWT, quint64 _usrID),
-                             "Get user photo as image")
+    TAPI::RawData_t REST(
+        GET,
+        photo,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _usrID
+        ),
+        "Get user photo as image"
+    )
 
-    bool REST(UPDATE,profile,(TAPI::JWT_t _JWT,
-                              NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender = {},
-                              NULLABLE_TYPE(QString) _name = {},
-                              NULLABLE_TYPE(QString) _family = {},
-                              NULLABLE_TYPE(TAPI::ISO639_2_t) _lang = {},
-                              NULLABLE_TYPE(TAPI::Email_t) _email = {},
-                              NULLABLE_TYPE(TAPI::Mobile_t) _mobile = {},
-                              NULLABLE_TYPE(TAPI::MD5_t) _pass = {},
-                              NULLABLE_TYPE(QString) _salt = {}),
-              "Update User profile. Take note that this method does not change password "
-              "Password and Salt are required to change email or mobile")
+    bool REST(
+        UPDATE,
+        profile,
+        (
+            TAPI::JWT_t _JWT,
+            NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender = {},
+            NULLABLE_TYPE(QString) _name = {},
+            NULLABLE_TYPE(QString) _family = {},
+            NULLABLE_TYPE(TAPI::ISO639_2_t) _lang = {},
+            NULLABLE_TYPE(TAPI::Email_t) _email = {},
+            NULLABLE_TYPE(TAPI::Mobile_t) _mobile = {},
+            NULLABLE_TYPE(TAPI::MD5_t) _pass = {},
+            NULLABLE_TYPE(QString) _salt = {}
+        ),
+        "Update User profile. Take note that this method does not change password "
+        "Password and Salt are required to change email or mobile"
+    )
 
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
@@ -84,12 +97,35 @@ class UserExtraInfo : public ORM::clsTable
     Q_OBJECT
 
 private slots:
-    bool REST(UPDATE,Photo,(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image),
-              "Updates user image based using a base64 encoded image")
-    bool REST(UPDATE,Sheba,(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba),
-              "Updates user Sheba address")
-    bool REST(UPDATE,EtherAdress,(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress),
-              "Updates user ethercoin address")
+    bool REST(
+        UPDATE,
+        photo,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::Base64Image_t _image
+        ),
+        "Updates user image based using a base64 encoded image"
+    )
+
+    bool REST(
+        UPDATE,
+        sheba,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::Sheba_t _sheba
+        ),
+        "Updates user Sheba address"
+    )
+
+    bool REST(
+        UPDATE,
+        etherAdress,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::Ether_t _etherAddress
+        ),
+        "Updates user ethercoin address"
+    )
 
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)

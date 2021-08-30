@@ -50,16 +50,35 @@ private:
                          quint64 _createdBy);
 
 private slots:
-    bool REST(PUT, NewMessage, (TAPI::JWT_t _JWT, const QString& _title, const QString& _bodyMarkdown, quint32 _serviceID, quint64 _targetUserID = 0),
-              "create new message targeting a user or all users (if target user is 0)")
-    bool REST(PUT, NewFeedback, (TAPI::JWT_t _JWT,
-                                 const QString& _title,
-                                 const QString& _text,
-                                 TAPI::enuTicketType::Type _ticketType,
-                                 quint32 _serviceID,
-                                 quint64 _inReplyTo = 0,
-                                 TAPI::stuFileInfo _file = {}),
-              "create a new/reply feedback with")
+    bool REST(
+        PUT,
+        newMessage,
+        (
+            TAPI::JWT_t _JWT,
+            const QString& _title,
+            const QString& _bodyMarkdown,
+            quint32 _serviceID,
+            quint64 _targetUserID = 0
+        ),
+        "create new message targeting a user or all users (if target user is 0)"
+    )
+
+    bool REST(
+        PUT,
+        newFeedback,
+        (
+            TAPI::JWT_t _JWT,
+            const QString& _title,
+            const QString& _text,
+            TAPI::enuTicketType::Type _ticketType,
+            quint32 _serviceID,
+            quint64 _inReplyTo = 0,
+            TAPI::stuFileInfo _file = {}
+        ),
+        "create a new/reply feedback with"
+    )
+
+private:
     stuDBInfo requiredDB() const {return stuDBInfo("Ticketing");}
 
 };

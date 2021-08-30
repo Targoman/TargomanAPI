@@ -40,6 +40,7 @@ Service::Service() :
             { tblService::svcName,                      S(QString),                 QFV,                             QRequired, UPAdmin },
             { tblService::svc_rolID,                    S(quint32),                 QFV,                             QRequired, UPAdmin },
             { tblService::svcProcessVoucherEndPoint,    S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
+            { tblService::svcCancelVoucherEndPoint,     S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
             { tblService::svcStatus,                    ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { tblService::svcCreationDateTime,          ORM_CREATED_ON },

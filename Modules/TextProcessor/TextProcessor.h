@@ -39,27 +39,53 @@ public:
     bool init();
 
 private slots:
-    QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector = true),
-                 "Normalizes input text")
-    QString REST(, Text2IXML, (
-                     const QString& _text,
-                     const TAPI::ISO639_2_t& _lang,
-                     bool _useSpellCorrector = true),
-                 "Normalizes and tokenizes text and tags special fields in an inline-XML format")
-    QString REST(, Ixml2Text, (const QString& _ixml,
-                               bool _detokenize = true,
-                               bool _hinidiDigits = false,
-                               bool _arabicPunctuations = false,
-                               bool _breakSentences = false),
-                 "Removes IXML tags injected by text2IXML API")
+    QString REST(
+        ,
+        normalize,
+        (
+            const QString _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true
+        ),
+        "Normalizes input text"
+    )
 
-    QString REST(, Tokenize, (
-                     const QString& _text,
-                     const TAPI::ISO639_2_t& _lang,
-                     bool _useSpellCorrector = true,
-                     bool _hindiNumerals = false,
-                     bool _arabicPunctuations = false),
-                 "Tokenizes string without tagging special fields")
+    QString REST(
+        ,
+        text2IXML,
+        (
+            const QString& _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true
+        ),
+        "Normalizes and tokenizes text and tags special fields in an inline-XML format"
+    )
+
+    QString REST(
+        ,
+        ixml2Text,
+        (
+            const QString& _ixml,
+            bool _detokenize = true,
+            bool _hinidiDigits = false,
+            bool _arabicPunctuations = false,
+            bool _breakSentences = false
+        ),
+        "Removes IXML tags injected by text2IXML API"
+    )
+
+    QString REST(
+        ,
+        tokenize,
+        (
+            const QString& _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true,
+            bool _hindiNumerals = false,
+            bool _arabicPunctuations = false
+        ),
+        "Tokenizes string without tagging special fields"
+    )
 };
 
 }

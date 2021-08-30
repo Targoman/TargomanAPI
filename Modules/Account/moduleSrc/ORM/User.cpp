@@ -128,15 +128,18 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
-                            NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender,
-                            NULLABLE_TYPE(QString) _name,
-                            NULLABLE_TYPE(QString) _family,
-                            NULLABLE_TYPE(TAPI::ISO639_2_t) _lang,
-                            NULLABLE_TYPE(TAPI::Email_t) _email,
-                            NULLABLE_TYPE(TAPI::Mobile_t) _mobile,
-                            NULLABLE_TYPE(TAPI::MD5_t) _pass,
-                            NULLABLE_TYPE(QString) _salt){
+bool User::apiUPDATEprofile(
+        TAPI::JWT_t _JWT,
+        NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender,
+        NULLABLE_TYPE(QString) _name,
+        NULLABLE_TYPE(QString) _family,
+        NULLABLE_TYPE(TAPI::ISO639_2_t) _lang,
+        NULLABLE_TYPE(TAPI::Email_t) _email,
+        NULLABLE_TYPE(TAPI::Mobile_t) _mobile,
+        NULLABLE_TYPE(TAPI::MD5_t) _pass,
+        NULLABLE_TYPE(QString) _salt
+    )
+{
     if (NULLABLE_HAS_VALUE(_email) || NULLABLE_HAS_VALUE(_mobile)){
         if (NULLABLE_IS_NULL(_pass) || _pass->isEmpty() || NULLABLE_IS_NULL(_salt))
             throw exHTTPBadRequest("Password and salt are required to change email");
@@ -170,7 +173,7 @@ bool User::apiUPDATEprofile(TAPI::JWT_t _JWT,
     return true;
 }
 
-TAPI::RawData_t User::apiGETPhoto(TAPI::JWT_t _JWT, quint64 _usrID) {
+TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID) {
 //    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
 
     auto Photo = SelectQuery(*this)
@@ -213,7 +216,7 @@ UserExtraInfo::UserExtraInfo() :
 {
 }
 
-bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
+bool UserExtraInfo::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
@@ -226,7 +229,7 @@ bool UserExtraInfo::apiUPDATEPhoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
     return Result.numRowsAffected() > 0;
 }
 
-bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
+bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
@@ -239,7 +242,7 @@ bool UserExtraInfo::apiUPDATESheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
     return Result.numRowsAffected() > 0;
 }
 
-bool UserExtraInfo::apiUPDATEEtherAdress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress){
+bool UserExtraInfo::apiUPDATEetherAdress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress){
     clsDACResult Result = this->execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR

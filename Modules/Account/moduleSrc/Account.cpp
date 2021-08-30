@@ -157,7 +157,7 @@ Account::Account() :
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletBalances::instance());
 
-    if(Account::InvalidPasswordsFile.value().size()){
+    if (Account::InvalidPasswordsFile.value().size()) {
         QFile InputFile(Account::InvalidPasswordsFile.value());
         if (InputFile.open(QIODevice::ReadOnly)) {
             QTextStream Stream(&InputFile);
@@ -196,14 +196,16 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
-                                    QString _login,
-                                    TAPI::MD5_t _pass,
-                                    QString _salt,
-                                    TAPI::CommaSeparatedStringList_t _services,
-                                    bool _rememberMe,
-                                    TAPI::JSON_t _sessionInfo,
-                                    TAPI::MD5_t _fingerprint)
+TAPI::stuMultiJWT Account::apilogin(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _login,
+        TAPI::MD5_t _pass,
+        QString _salt,
+        TAPI::CommaSeparatedStringList_t _services,
+        bool _rememberMe,
+        TAPI::JSON_t _sessionInfo,
+        TAPI::MD5_t _fingerprint
+    )
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -228,12 +230,14 @@ TAPI::stuMultiJWT Account::apiLogin(TAPI::RemoteIP_t _REMOTE_IP,
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
-TAPI::stuMultiJWT Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
-                                            TAPI::enuOAuthType::Type _type,
-                                            QString _oAuthToken,
-                                            TAPI::CommaSeparatedStringList_t _services,
-                                            TAPI::JSON_t _sessionInfo,
-                                            TAPI::MD5_t _fingerprint)
+TAPI::stuMultiJWT Account::apiloginByOAuth(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::enuOAuthType::Type _type,
+        QString _oAuthToken,
+        TAPI::CommaSeparatedStringList_t _services,
+        TAPI::JSON_t _sessionInfo,
+        TAPI::MD5_t _fingerprint
+    )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     QString Login;
@@ -264,7 +268,7 @@ TAPI::stuMultiJWT Account::apiLoginByOAuth(TAPI::RemoteIP_t _REMOTE_IP,
                              });
 }
 
-TAPI::stuMultiJWT Account::apiRefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
+TAPI::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
 {
     QJsonObject Obj;
 
@@ -282,14 +286,16 @@ TAPI::stuMultiJWT Account::apiRefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_
                              });
 }
 
-QVariantMap Account::apiPUTSignup(TAPI::RemoteIP_t _REMOTE_IP,
-                                  QString _emailOrMobile,
-                                  TAPI::MD5_t _pass,
-                                  QString _role,
-                                  QString _name,
-                                  QString _family,
-                                  TAPI::JSON_t _specialPrivs,
-                                  qint8 _maxSessions)
+QVariantMap Account::apiPUTsignup(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile,
+        TAPI::MD5_t _pass,
+        QString _role,
+        QString _name,
+        QString _family,
+        TAPI::JSON_t _specialPrivs,
+        qint8 _maxSessions
+    )
 {
     QString Type;
     if(QFV.email().isValid(_emailOrMobile)){
@@ -309,48 +315,47 @@ QVariantMap Account::apiPUTSignup(TAPI::RemoteIP_t _REMOTE_IP,
     if(InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
-    return  {
-        {"type", Type == 'E' ? "email" : "mobile"},
-            {"usrID",
-                this->callSP("AAA.sp_CREATE_signup", {
-                                 {"iBy", Type},
-                                 {"iLogin", _emailOrMobile},
-                                 {"iPass", _pass},
-                                 {"iRole", _role},
-                                 {"iIP", _REMOTE_IP},
-                                 {"iName", _name.isEmpty()? QVariant() : _name},
-                                 {"iFamily", _family.isEmpty()? QVariant() : _family},
-                                 {"iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs},
-                                 {"iMaxSessions", _maxSessions},
-                                 {"iCreatorUserID", QVariant()},
-                             }).spDirectOutputs().value("oUserID").toDouble()
-            }
-        };
-    }
+    return {
+        { "type", Type == 'E' ? "email" : "mobile" },
+        { "usrID", this->callSP("AAA.sp_CREATE_signup", {
+                { "iBy", Type },
+                { "iLogin", _emailOrMobile },
+                { "iPass", _pass },
+                { "iRole", _role },
+                { "iIP", _REMOTE_IP },
+                { "iName", _name.isEmpty()? QVariant() : _name },
+                { "iFamily", _family.isEmpty()? QVariant() : _family },
+                { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+                { "iMaxSessions", _maxSessions },
+                { "iCreatorUserID", QVariant() },
+            }).spDirectOutputs().value("oUserID").toDouble()
+        }
+    };
+}
 
-    bool Account::apiLogout(TAPI::JWT_t _JWT)
-    {
+bool Account::apilogout(TAPI::JWT_t _JWT)
+{
     clsJWT JWT(_JWT);
     this->callSP("AAA.sp_UPDATE_logout", {
-                     {"iByUserID", clsJWT(_JWT).usrID()},
-                     {"iSessionGUID", clsJWT(_JWT).session()},
-                 });
+        { "iByUserID", clsJWT(_JWT).usrID() },
+        { "iSessionGUID", clsJWT(_JWT).session() },
+    });
     return true;
 }
 
-QString Account::apiCreateForgotPasswordLink(TAPI::RemoteIP_t _REMOTE_IP, QString _login)
+QString Account::apicreateForgotPasswordLink(TAPI::RemoteIP_t _REMOTE_IP, QString _login)
 {
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP("AAA.sp_CREATE_forgotPassRequest", {
-                     {"iLogin", _login},
-                     {"iVia", QString(_login.contains('@') ? 'E' : 'M')},
-                 });
+        { "iLogin", _login },
+        { "iVia", QString(_login.contains('@') ? 'E' : 'M') },
+    });
     return _login.contains('@') ? "email" : "mobile";
 }
 
-bool Account::apiChangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _oldPassSalt, TAPI::MD5_t _newPass)
+bool Account::apichangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _oldPassSalt, TAPI::MD5_t _newPass)
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
@@ -363,7 +368,7 @@ bool Account::apiChangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _old
     return true;
 }
 
-bool Account::apiChangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid, TAPI::MD5_t _newPass)
+bool Account::apichangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid, TAPI::MD5_t _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP("AAA.sp_UPDATE_changePassByUUID", {
@@ -373,8 +378,10 @@ bool Account::apiChangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid
     return true;
 }
 
-bool Account::apiPOSTApproveEmail(TAPI::RemoteIP_t _REMOTE_IP,
-                                  TAPI::MD5_t _uuid)
+bool Account::apiPOSTapproveEmail(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::MD5_t _uuid
+    )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {
@@ -384,9 +391,11 @@ bool Account::apiPOSTApproveEmail(TAPI::RemoteIP_t _REMOTE_IP,
     return true;
 }
 
-bool Account::apiPOSTApproveMobile(TAPI::RemoteIP_t _REMOTE_IP,
-                                   TAPI::Mobile_t _mobile,
-                                   quint32 _code)
+bool Account::apiPOSTapproveMobile(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile,
+        quint32 _code
+    )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
     this->callSP( "AAA.sp_UPDATE_acceptApproval", {
@@ -418,7 +427,11 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
         else
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
 
-        ///TODO: process voucher and apply it
+        struct stuDiscountUsed {
+            quint32 Count;
+            quint32 Amount;
+        };
+        QMap<quint32, stuDiscountUsed> UsedDiscounts;
 
         QVariantList Services = SelectQuery(Service::instance())
                 .addCol(tblService::svcID)
@@ -448,11 +461,6 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
                         //bypass process by end point?
                         if (NULLABLE_HAS_VALUE(ProcessVoucherEndPoint))
                         {
-                            /**
-                              * ProcessVoucherEndPoint:
-                              *     Advert/ProcessVoucher
-                              *     .../ProcessVoucher
-                              */
                             QVariant Result = RESTClientHelper::callAPI(
                                 {},
                                 RESTClientHelper::POST,
@@ -471,8 +479,36 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
                         break;
                     }
                 }
+
+                if (VoucherItem.DisAmount > 0)
+                {
+                    if (UsedDiscounts.contains(VoucherItem.Discount.ID))
+                    {
+                        ++UsedDiscounts[VoucherItem.Discount.ID].Count;
+                        UsedDiscounts[VoucherItem.Discount.ID].Amount += VoucherItem.DisAmount;
+                    }
+                    else
+                    {
+                        UsedDiscounts.insert(VoucherItem.Discount.ID, { 1, VoucherItem.DisAmount });
+                    }
+                }
             }
         } //if (Services.isEmpty() == false)
+
+        if (UsedDiscounts.isEmpty() == false)
+        {
+            foreach (quint32 _discountID, UsedDiscounts.keys())
+            {
+                stuDiscountUsed Discount = UsedDiscounts.value(_discountID);
+
+                ///TODO: increament cpnTotalUsedCount & cpnTotalUsedAmount
+//                quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
+//                    .increament(tblAccountCouponsBase::cpnTotalUsedCount, Discount.Count)
+//                    .increament(tblAccountCouponsBase::cpnTotalUsedAmount, Discount.Amount)
+//                    .where({ tblAccountCouponsBase::cpnID , enuConditionOperator::Equal, _discountID })
+//                    .execute(currentUserID);
+            }
+        }
 
         return Targoman::API::AAA::Accounting::stuVoucher(
                     _voucherID,
@@ -492,48 +528,109 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
     }
 }
 
-bool Account::tryCancelVoucher(quint64 _voucherID)
+void Account::tryCancelVoucher(quint64 _voucherID)
 {
+    //1: cancel voucher items
     try
     {
-//        QVariant VoucherDesc = SelectQuery(Voucher::instance())
-//                               .addCol(tblVoucher::vchDesc)
-//                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
-//                               .one()
-//                               .value(tblVoucher::vchDesc);
+        QVariant VoucherDesc = SelectQuery(Voucher::instance())
+                               .addCol(tblVoucher::vchDesc)
+                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                               .tryOne()
+                               .value(tblVoucher::vchDesc);
 
-//        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
+        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
 
-//        if (VoucherDesc.canConvert<QJsonObject>())
-//            PreVoucher.fromJson(VoucherDesc.toJsonObject());
-//        else if (VoucherDesc.canConvert<QVariantMap>())
-//            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
-//        else
-//            return false;
+        if (VoucherDesc.canConvert<QJsonObject>())
+            PreVoucher.fromJson(VoucherDesc.toJsonObject());
+        else if (VoucherDesc.canConvert<QVariantMap>())
+            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
 
+        if (PreVoucher.Items.length())
+        {
+            QVariantList Services = SelectQuery(Service::instance())
+                    .addCol(tblService::svcID)
+                    .addCol(tblService::svcName)
+                    .addCol(tblService::svcCancelVoucherEndPoint)
+                    .all();
 
+            if (Services.isEmpty() == false)
+            {
+                /**
+                 * retreieve end point
+                 * call end point
+                 * fail:
+                 */
+                foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
+                {
+                    //lookup services
+                    foreach (QVariant Service, Services)
+                    {
+                        QVariantMap ServiceInfo = Service.toMap();
 
+                        if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
+                        {
+                            NULLABLE_TYPE(QString) CancelVoucherEndPoint;
+                            TAPI::setFromVariant(CancelVoucherEndPoint, ServiceInfo.value(tblService::svcCancelVoucherEndPoint));
 
+                            //bypass process by end point?
+                            if (NULLABLE_HAS_VALUE(CancelVoucherEndPoint))
+                            {
+                                /**
+                                  * CancelVoucherEndPoint:
+                                  *     Advert/cancelVoucher
+                                  *     .../cancelVoucher
+                                  */
+                                try
+                                {
+                                    QVariant Result = RESTClientHelper::callAPI(
+                                        {},
+                                        RESTClientHelper::POST,
+                                        NULLABLE_GET_OR_DEFAULT(CancelVoucherEndPoint, ""),
+                                        {},
+                                        {
+                                            { "voucherItem", VoucherItem.toJson().toVariantMap() },
+                                        }
+                                    );
 
+                                    ///TODO:
+//                                    DELETE FROM {MODULE}.AccountUserAssets
+//                                    WHERE tblAccountUserAssetsBase::uasID = VoucherItem.UserAssetID
+//                                    AND tblAccountUserAssetsBase::uasVoucherItemUUID = VoucherItem.UUID
 
-        ///TODO: complete sp_UPDATE_voucher_cancel
+                                }
+                                catch (...)
+                                {
+                                }
+                            }
 
-
-
-
-
-
-
-        clsDACResult Result = Voucher::instance().callSP("sp_UPDATE_voucher_cancel", {
-                                                             { "iVoucherID", _voucherID },
-                                                         });
-        return true;
+                            break;
+                        }
+                    }
+                }
+            } //if (Services.isEmpty() == false)
+        } //if (PreVoucher.Items.length())
     }
     catch (...)
     {
     }
 
-    return false;
+    //2: cancel voucher
+    ///TODO: complete sp_UPDATE_voucher_cancel
+//    clsDACResult Result = Voucher::instance().callSP("sp_UPDATE_voucher_cancel", {
+//                                                         { "iVoucherID", _voucherID },
+//                                                     });
+
+
+    Targoman::API::Query::Update(Voucher::instance(),
+                                 SYSTEM_USER_ID,
+                                 {},
+                                 TAPI::ORMFields_t({
+                                    { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Canceled }
+                                 }),
+                                 {
+                                    { tblVoucher::vchID, _voucherID }
+                                 });
 }
 
 ///TODO: select gateway (null|single|multiple) from service
@@ -682,14 +779,15 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
-Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment(TAPI::JWT_t _JWT,
-                                                       quint64 _vchID,
-                                                       const QString& _bank,
-                                                       const QString& _receiptCode,
-                                                       TAPI::Date_t _receiptDate,
-                                                       quint32 _amount,
-                                                       const QString& _note
-                                                       )
+Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment(
+        TAPI::JWT_t _JWT,
+        quint64 _vchID,
+        const QString& _bank,
+        const QString& _receiptCode,
+        TAPI::Date_t _receiptDate,
+        quint32 _amount,
+        const QString& _note
+    )
 {
     qint64 ApprovalLimit = Authorization::getPrivValue(_JWT, "AAA:approveOffline:maxAmount").toLongLong();
     if(ApprovalLimit == 0)
@@ -748,7 +846,12 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment
     }
 }
 
-bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+bool Account::apiPOSTaddPrizeTo(
+        TAPI::JWT_t _JWT,
+        quint64 _targetUsrID,
+        quint64 _amount,
+        TAPI::JSON_t _desc
+    )
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addPrizeTo:maxAmount").toLongLong();
     if(Limit == 0)
@@ -769,7 +872,12 @@ bool Account::apiPOSTaddPrizeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 
     return true;
 }
 
-bool Account::apiPOSTaddIncomeTo(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
+bool Account::apiPOSTaddIncomeTo(
+        TAPI::JWT_t _JWT,
+        quint64 _targetUsrID,
+        quint64 _amount,
+        TAPI::JSON_t _desc
+    )
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addIncomeTo:maxAmount").toLongLong();
     if(Limit == 0)

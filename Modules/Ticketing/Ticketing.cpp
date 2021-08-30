@@ -62,7 +62,7 @@ quint64 Ticketing::insertTicket(quint64 _targetUserID,
       .toULongLong();
 }
 
-bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT,
+bool Ticketing::apiPUTnewMessage(TAPI::JWT_t _JWT,
                                  const QString& _title,
                                  const QString& _bodyMarkdown,
                                  quint32 _serviceID,
@@ -76,7 +76,7 @@ bool Ticketing::apiPUTNewMessage(TAPI::JWT_t _JWT,
              _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
-bool Ticketing::apiPUTNewFeedback(TAPI::JWT_t _JWT,
+bool Ticketing::apiPUTnewFeedback(TAPI::JWT_t _JWT,
                                   const QString& _title,
                                   const QString& _text,
                                   TAPI::enuTicketType::Type _ticketType,

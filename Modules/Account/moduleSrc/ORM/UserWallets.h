@@ -64,24 +64,39 @@ TARGOMAN_CREATE_CONSTEXPR(walStatus);
 class UserWallets : public ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get UserWallets information")
-    bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
-    bool ORMUPDATE("Update Wallet info by priviledged user")
     quint64 ORMCREATE("Create a new Wallet")
+    bool ORMUPDATE("Update Wallet info by priviledged user")
+    bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
 
-    bool REST(UPDATE,defaultWallet,(TAPI::JWT_t _JWT, quint64 _walID),
-             "change default wallet")
+    bool REST(
+        UPDATE,
+        defaultWallet,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _walID
+        ),
+        "change default wallet"
+    )
 
-    bool REST(CREATE,transfer,(TAPI::JWT_t _JWT,
-                              const QString& _destLogin,
-                              quint32 _amount,
-                              const TAPI::MD5_t& _pass,
-                              const QString& _salt,
-                              quint64 _fromWalID = 0),
-             "Transfer money to other user's default wallet. Default wallet will be used if not specified")
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,UserWallets)
+    bool REST(
+        CREATE,
+        transfer,
+        (
+            TAPI::JWT_t _JWT,
+            const QString& _destLogin,
+            quint32 _amount,
+            const TAPI::MD5_t& _pass,
+            const QString& _salt,
+            quint64 _fromWalID = 0
+        ),
+        "Transfer money to other user's default wallet. Default wallet will be used if not specified"
+    )
+
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,UserWallets)
 };
 
 }

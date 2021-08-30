@@ -50,7 +50,7 @@ QByteArray hash(const QByteArray& _data)
    return QMessageAuthenticationCode::hash(_data, Accounting::Secret.value().toUtf8(), QCryptographicHash::Sha256);
 }
 
-void checkPreVoucherSanity(Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher)
+void checkPreVoucherSanity(stuPreVoucher _preVoucher)
 {
     if (_preVoucher.Items.isEmpty())
         return;
@@ -494,6 +494,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
                 Targoman::API::CURRENT_TIMESTAMP,
             }))
 
+            ///TODO: use WHERE uasStatus != TAPI::enuAuditableStatus::Pending ?
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(tblAccountUserAssetsBase::uas_vchID)
@@ -508,6 +509,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
             )
             .addCol("tmp_cpn_count._discountUsedCount")
 
+            ///TODO: use WHERE uasStatus != TAPI::enuAuditableStatus::Pending ?
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::uasDiscountAmount, "_discountUsedAmount")
@@ -548,7 +550,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
         SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                   DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
         SET_FIELD_FROM_VARIANT_MAP(Discount.Amount,                 DiscountInfo, tblAccountCouponsBase, cpnAmount);
-        Targoman::API::AAA::Accounting::enuDiscountType::Type cpnAmountType;
+        enuDiscountType::Type cpnAmountType;
         SET_FIELD_FROM_VARIANT_MAP(cpnAmountType,                   DiscountInfo, tblAccountCouponsBase, cpnAmountType);
         NULLABLE_TYPE(quint32) cpnMaxAmount;
 //        TAPI::setFromVariant(cpnMaxAmount, DiscountInfo.value("cpnMaxAmount"));
@@ -600,7 +602,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         if (arr.size())
         {
 //            qDebug() << "AAAAAAAAAAAAAAA 2" << arr;
-            Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier multiplier;
+            stuDiscountSaleableBasedMultiplier multiplier;
 
             for (QJsonArray::const_iterator itr = arr.constBegin();
                 itr != arr.constEnd();
@@ -610,7 +612,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
 //                qDebug() << "elm" << elm << "elm.toObject()=" << elm.toObject();
 
-                Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier cur;
+                stuDiscountSaleableBasedMultiplier cur;
                 cur.fromJson(elm.toObject());
 
                 qint32 MinCount = NULLABLE_GET_OR_DEFAULT(cur.MinCount, -1);
@@ -641,7 +643,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
         qDebug() << "1 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
-        if (cpnAmountType == Targoman::API::AAA::Accounting::enuDiscountType::Percent)
+        if (cpnAmountType == enuDiscountType::Percent)
             Discount.Amount = AssetItem.SubTotal * Discount.Amount / 100.0;
 
         qDebug() << "2 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
@@ -649,17 +651,18 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         //check cpnMaxAmount
         if (NULLABLE_HAS_VALUE(cpnMaxAmount))
         {
-            //note: cpnMaxAmount type is reverse of cpnAmountType
-            if (cpnAmountType == Targoman::API::AAA::Accounting::enuDiscountType::Percent)
+            //note: cpnMaxAmount type is opposite to cpnAmountType
+            if (cpnAmountType == enuDiscountType::Percent)
                 Discount.Amount = fmin(Discount.Amount, NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0));
-            else {
+            else
+            {
                 quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0) / 100.0);
                 Discount.Amount = fmin(Discount.Amount, _max);
             }
             qDebug() << "3 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
         }
 
-        //check total
+        //check total - used amount
         qint32 remainDiscountAmount = cpnTotalMaxAmount - cpnTotalUsedAmount;
         if (remainDiscountAmount < Discount.Amount)
         {
@@ -667,8 +670,9 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
             qDebug() << "4 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
         }
 
-        //check per user
-        if (NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) > 0) {
+        //check per user - used amount
+        if (NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) > 0)
+        {
             remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
             if (remainDiscountAmount <= 0)
                 Discount.Amount = 0;
@@ -705,8 +709,8 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     ///TODO: add ttl for order item
 
     stuVoucherItem PreVoucherItem;
+
     PreVoucherItem.Service = this->ServiceName;
-    //PreVoucherItem.OrderID
     PreVoucherItem.Desc = AssetItem.slbName;
     PreVoucherItem.UnitPrice = AssetItem.slbBasePrice;
     PreVoucherItem.Qty = _qty;
@@ -752,7 +756,8 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
     qry.values(values);
 
-    PreVoucherItem.OrderID = qry.execute(currentUserID);
+    //UserAssetID is OrderID
+    PreVoucherItem.UserAssetID = qry.execute(currentUserID);
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
@@ -769,6 +774,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
                         + (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
     if (FinalPrice < 0)
         throw exHTTPInternalServerError("Final amount computed negative!");
+
     _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();

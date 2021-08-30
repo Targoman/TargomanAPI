@@ -32,12 +32,12 @@ using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::ModuleHelpers;
 
-QString TextProcessor::apiNormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector)
+QString TextProcessor::apinormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector)
 {
     return NLP::TextProcessor::instance().normalizeText(_text, _useSpellCorrector ? _lang : TAPI::ISO639_2_t());
 }
 
-QString TextProcessor::apiText2IXML (const QString& _text,
+QString TextProcessor::apitext2IXML (const QString& _text,
                                      const TAPI::ISO639_2_t& _lang,
                                      bool _useSpellCorrector)
 {
@@ -58,7 +58,7 @@ QString TextProcessor::apiText2IXML (const QString& _text,
                 );
 }
 
-QString TextProcessor::apiIxml2Text(const QString& _ixml,
+QString TextProcessor::apiixml2Text(const QString& _ixml,
                                     bool _detokenize,
                                     bool _hinidiDigits,
                                     bool _arabicPunctuations,
@@ -67,11 +67,11 @@ QString TextProcessor::apiIxml2Text(const QString& _ixml,
     return NLP::TextProcessor::instance().ixml2Text(_ixml, _detokenize, _hinidiDigits, _arabicPunctuations, _breakSentences);
 }
 
-QString TextProcessor::apiTokenize (const QString& _text,
-                                    const TAPI::ISO639_2_t& _lang,
-                                    bool _useSpellCorrector,
-                                    bool _hindiNumerals,
-                                    bool _arabicPunctuations)
+QString TextProcessor::apitokenize(const QString& _text,
+                                   const TAPI::ISO639_2_t& _lang,
+                                   bool _useSpellCorrector,
+                                   bool _hindiNumerals,
+                                   bool _arabicPunctuations)
 {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;

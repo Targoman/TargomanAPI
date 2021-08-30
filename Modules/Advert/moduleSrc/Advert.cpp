@@ -39,17 +39,17 @@ using namespace Targoman::API::AAA::Accounting;
 #include "ORM/Props.h"
 #include "ORM/Locations.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAdvertType);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAdvertOrder);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuBannerSizes);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAccountOrdersStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAdvertType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAdvertOrder);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuBannerSize);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAccountOrdersStatus);
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI,
+    Targoman::API::Advertisement,
     stuAdvert,
-    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
-//    [](const TAPI::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
+    [](const Targoman::API::Advertisement::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
+//    [](const Targoman::API::Advertisement::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
 
 namespace Targoman::API {
@@ -116,22 +116,22 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 };
 
 /***************************************************************************************************/
-TAPI::stuAdvert Advert::apiGETNewBanner(
+Targoman::API::Advertisement::stuAdvert Advert::apiGETnewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
-        TAPI::enuAdvertOrder::Type _order
+        Targoman::API::Advertisement::enuAdvertOrder::Type _order
     )
 {}
 
-TAPI::stuAdvert Advert::apiGETNewText(
+Targoman::API::Advertisement::stuAdvert Advert::apiGETnewText(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
-        TAPI::enuAdvertOrder::Type _order,
+        Targoman::API::Advertisement::enuAdvertOrder::Type _order,
         const QString _keywords
     )
 {}
 
-QString Advert::apiGETRetrieveURL(
+QString Advert::apiGETretrieveURL(
         TAPI::RemoteIP_t _REMOTE_IP,
         quint64 _id,
         TAPI::IPv4_t _clientIP,
@@ -139,13 +139,18 @@ QString Advert::apiGETRetrieveURL(
     )
 {}
 
-quint64 Advert::apiPOSTProcessVoucher(
-//        TAPI::JWT_t _JWT,
+quint64 Advert::apiPOSTprocessVoucher(
         Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-//        TAPI::JSON_t _voucherItem
     )
 {
-    return 1234;
+    return 123;
+}
+
+quint64 Advert::apiPOSTcancelVoucher(
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
+{
+    return 456;
 }
 
 } //namespace Targoman::API

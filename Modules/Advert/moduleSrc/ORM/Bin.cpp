@@ -36,7 +36,7 @@ Bin::Bin() :
               tblBin::Name,
               { ///<ColName                   Type                    Validation                                Default   UpBy   Sort  Filter Self  Virt   PK
                 {tblBin::binID,               ORM_PRIMARYKEY_32},
-                {tblBin::binType,             S(TAPI::enuAdvertType::Type), QFV,                                TAPI::enuAdvertType::Text, UPOwner},
+                {tblBin::binType,             S(Targoman::API::Advertisement::enuAdvertType::Type), QFV,                                Targoman::API::Advertisement::enuAdvertType::Text, UPOwner},
                 {tblBin::binTitle,            S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QRequired, UPOwner},
                 {tblBin::binDesc,             S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QNull,     UPOwner},
                 {tblBin::binPrettyURL,        S(QString),             QFV.url(),                                QRequired, UPOwner},
@@ -69,9 +69,9 @@ QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 Banners::Banners() :
     clsTable("Advert",
               tblBanners::Name,
-              { ///<ColName                       Type                          Validation                 Default   UpBy   Sort  Filter Self  Virt   PK
-                {tblBanners::bnrImage,            S(TAPI::Base64Image_t),       QFV,                       QInvalid, UPOwner,false,false},
-                {tblBanners::bnrSize,             S(TAPI::enuBannerSizes::Type),QFV,                       QInvalid, UPOwner },
+              { ///<ColName                       Type                          Validation                  Default   UpBy   Sort  Filter Self  Virt   PK
+                {tblBanners::bnrImage,            S(TAPI::Base64Image_t),       QFV,                        QInvalid, UPOwner,false,false},
+                {tblBanners::bnrSize,             S(Targoman::API::Advertisement::enuBannerSize::Type), QFV,QInvalid, UPOwner },
                 {tblBanners::bnrUpdatedBy_usrID,  ORM_UPDATED_BY},
               },
               {///< Col                           Reference Table             ForeignCol      Rename      LeftJoin

@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
@@ -26,7 +27,8 @@
 #include "libTargomanCommon/Macros.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace TAPI {
+//namespace TAPI {
+namespace Targoman::API::Advertisement {
 
 TARGOMAN_DEFINE_ENUM (enuAdvertOrder,
                       First  = '1',
@@ -34,14 +36,14 @@ TARGOMAN_DEFINE_ENUM (enuAdvertOrder,
                       Third  = '3',
                       HugeRequest = 'H',
                       Normal = 'R'
-                               );
+                      );
 
 TARGOMAN_DEFINE_ENUM (enuAdvertType,
                       Text,
                       Image
                       );
 
-TARGOMAN_DEFINE_ENUM (enuBannerSizes,
+TARGOMAN_DEFINE_ENUM (enuBannerSize,
                       MedimRectangle_300x250   = 'A',
                       LargeRectangle_336x280   = 'B',
                       LeaderBoard_728x90       = 'C',
@@ -69,16 +71,14 @@ TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
                       Removed   = 'R',
                       );
 
-
-}
+} //namespace Targoman::API::Advertisement
 
 constexpr char AdvertSchema[] = "Advert";
 constexpr char AdvertDomain[] = "Advert";
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAdvertOrder);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAdvertType);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuBannerSizes);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAccountOrdersStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAdvertOrder);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAdvertType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuBannerSize);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAccountOrdersStatus);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
-
