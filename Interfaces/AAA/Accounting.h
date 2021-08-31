@@ -36,15 +36,16 @@ class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs
 
 protected:
     intfRESTAPIWithAccounting(
-            const QString& _schema,
-            const QString& _module,
-            AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-            intfAccountProducts* _products,
-            intfAccountSaleables* _saleables,
-            intfAccountUserAssets* _userAssets,
-            intfAccountAssetUsage* _assetUsages,
-            intfAccountCoupons* _discounts = nullptr,
-            intfAccountPrizes* _prizes = nullptr);
+        const QString& _schema,
+        const QString& _module,
+        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+        intfAccountProducts* _products,
+        intfAccountSaleables* _saleables,
+        intfAccountUserAssets* _userAssets,
+        intfAccountAssetUsage* _assetUsages,
+        intfAccountCoupons* _discounts = nullptr,
+        intfAccountPrizes* _prizes = nullptr);
+
     virtual ~intfRESTAPIWithAccounting();
 
 public:
@@ -82,6 +83,10 @@ protected:
     };
 
     void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
+
+    virtual void increaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual void decreaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual void removeFromUserAssets(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
 
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});

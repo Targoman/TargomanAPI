@@ -756,8 +756,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
     qry.values(values);
 
-    //UserAssetID is OrderID
-    PreVoucherItem.UserAssetID = qry.execute(currentUserID);
+    PreVoucherItem.OrderID = qry.execute(currentUserID);
     PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
@@ -781,6 +780,39 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
     return _lastPreVoucher;
+}
+
+void intfRESTAPIWithAccounting::increaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+{
+    if (_voucherItem.DisAmount > 0)
+    {
+        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_increaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+}
+
+void intfRESTAPIWithAccounting::decreaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+{
+//    if (_voucherItem.DisAmount > 0)
+//    {
+//        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
+//            { "iDiscountID", _voucherItem.Discount.ID },
+//            { "iTotalUsedCount", 1 },
+//            { "iTotalUsedAmount", _voucherItem.DisAmount },
+//        });
+//    }
+}
+
+void intfRESTAPIWithAccounting::removeFromUserAssets(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+{
+    ///TODO:
+//    DELETE FROM {MODULE}.AccountUserAssets
+//    WHERE tblAccountUserAssetsBase::uasID = VoucherItem.OrderID
+//    AND tblAccountUserAssetsBase::uasVoucherItemUUID = VoucherItem.UUID
+
 }
 
 } //namespace Targoman::API::AAA::Accounting

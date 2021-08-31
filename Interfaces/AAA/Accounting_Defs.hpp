@@ -52,7 +52,8 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
 
 //namespace Targoman::API::AAA::Accounting {
 
-inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
+//inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
+inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Common::Configuration::tmplConfigurable<QString> Secret;
 
 //}
@@ -71,21 +72,20 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
     SF_qreal(Amount)
 );
 
-//UserAssetID is OrderID
-//Caution: Do not rename fields. Field names are used in vchDesc (Json)
+//Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    QString     , Service    , QString()    , v.size(), v         , v.toString(),
-    quint64     , UserAssetID, 0            , v       , C2DBL(v)  , static_cast<quint64>(v.toDouble()),
-    QString     , Desc       , QString()    , v.size(), v         , v.toString(),
-    quint32     , UnitPrice  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-    qint16      , Qty        , 0            , v       , v         , static_cast<qint16>(v.toDouble()),
-    quint32     , SubTotal   , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-    stuDiscount , Discount   , stuDiscount(), v.ID>0  , v.toJson(), stuDiscount().fromJson(v.toObject()),
-    quint32     , DisAmount  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-    quint8      , VATPercent , 0            , v       , C2DBL(v)  , static_cast<quint8>(v.toInt()),
-    quint32     , VATAmount  , 0            , v       , C2DBL(v)  , static_cast<quint32>(v.toDouble()),
-    TAPI::MD5_t , UUID       , QString()    , v.size(), v         , v.toString(),
-    QString     , Sign       , QString()    , v.size(), v         , v.toString()
+    QString     , Service    , QString()     , v.size() , v          , v.toString()                         ,
+    quint64     , OrderID    , 0             , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())   ,
+    QString     , Desc       , QString()     , v.size() , v          , v.toString()                         ,
+    quint32     , UnitPrice  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
+    qint16      , Qty        , 0             , v        , v          , static_cast<qint16>(v.toDouble())    ,
+    quint32     , SubTotal   , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
+    stuDiscount , Discount   , stuDiscount() , v.ID>0   , v.toJson() , stuDiscount().fromJson(v.toObject()) ,
+    quint32     , DisAmount  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
+    quint8      , VATPercent , 0             , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())       ,
+    quint32     , VATAmount  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
+    TAPI::MD5_t , UUID       , QString()     , v.size() , v          , v.toString()                         ,
+    QString     , Sign       , QString()     , v.size() , v          , v.toString()
 );
 
 /*****************************************************************************/

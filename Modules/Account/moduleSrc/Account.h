@@ -58,7 +58,17 @@ class Account : public ORM::clsRESTAPIWithActionLogs
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
 
 public:
-    stuDBInfo requiredDB() const { return stuDBInfo(AAASchema); }
+//    stuDBInfo requiredDB() const { return stuDBInfo(AAASchema); }
+    stuDBInfo requiredDB() const {
+        return stuDBInfo(
+            DB::Schema.value(),
+            DB::Port.value(),
+            DB::Host.value(),
+            DB::User.value(),
+            DB::Pass.value()
+        );
+    }
+
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:

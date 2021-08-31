@@ -182,9 +182,10 @@ private: \
     _name(); \
     TAPI_DISABLE_COPY(_name)
 
+//static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
-    struct DB{ \
-        static inline QString makeConfig(const QString& _name){return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name);} \
+    struct DB { \
+        static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); } \
         static Common::Configuration::tmplConfigurable<QString>       Host;   \
         static Common::Configuration::tmplRangedConfigurable<quint16> Port;   \
         static Common::Configuration::tmplConfigurable<QString>       User;   \
@@ -192,22 +193,36 @@ private: \
         static Common::Configuration::tmplConfigurable<QString>       Schema; \
     }
 
-#define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module)     \
-    using namespace Targoman::Common::Configuration;    \
-    tmplConfigurable<QString> _module::DB::Host(        \
-            _module::DB::makeConfig("Host"),            \
-            "Database Host address", "127.0.0.1");      \
-    tmplRangedConfigurable<quint16> _module::DB::Port(  \
-            _module::DB::makeConfig("Port"),            \
-            "Database port", 10, 65000, 3306);          \
-    tmplConfigurable<QString> _module::DB::User(        \
-            _module::DB::makeConfig("User"), "Database username for connection", \
-            "root");                                   \
-    tmplConfigurable<QString> _module::DB::Pass(        \
-            _module::DB::makeConfig("Pass"),            \
-            "Database password", "");                   \
-    tmplConfigurable<QString> _module::DB::Schema(      \
-            _module::DB::makeConfig("Schema"),          \
-            "Database schema");
+/**
+  * Host must be no default, because requiredDB() uses this
+  */
+#define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module, _schema)\
+    using namespace Targoman::Common::Configuration;        \
+    tmplConfigurable<QString> _module::DB::Host(            \
+        _module::DB::makeConfig("Host"),                    \
+        "Database Host address",                            \
+        ""                                                  \
+    );                                                      \
+    tmplRangedConfigurable<quint16> _module::DB::Port(      \
+        _module::DB::makeConfig("Port"),                    \
+        "Database port",                                    \
+        10, 65000,                                          \
+        3306                                                \
+    );                                                      \
+    tmplConfigurable<QString> _module::DB::User(            \
+        _module::DB::makeConfig("User"),                    \
+        "Database username for connection",                 \
+        "root"                                              \
+    );                                                      \
+    tmplConfigurable<QString> _module::DB::Pass(            \
+        _module::DB::makeConfig("Pass"),                    \
+        "Database password",                                \
+        ""                                                  \
+    );                                                      \
+    tmplConfigurable<QString> _module::DB::Schema(          \
+        _module::DB::makeConfig("Schema"),                  \
+        "Database schema",                                  \
+        _schema                                             \
+    );                                                      \
 
 #endif // TARGOMAN_API_INTFAPIMODULE_HPP

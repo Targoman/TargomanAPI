@@ -57,10 +57,10 @@ namespace Targoman::API {
 using namespace AAA;
 using namespace Advertisement;
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert);
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
 Advert::Advert() :
-    Accounting::intfRESTAPIWithAccounting(
+    intfRESTAPIWithAccounting(
         AdvertSchema,
         AdvertDomain,
         {
@@ -68,11 +68,11 @@ Advert::Advert() :
             { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
             { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
         },
-        &Advertisement::AccountProducts::instance(),
-        &Advertisement::AccountSaleables::instance(),
-        &Advertisement::AccountUserAssets::instance(),
-        &Advertisement::AccountAssetUsage::instance(),
-        &Advertisement::AccountCoupons::instance()
+        &AccountProducts::instance(),
+        &AccountSaleables::instance(),
+        &AccountUserAssets::instance(),
+        &AccountAssetUsage::instance(),
+        &AccountCoupons::instance()
     )
 {
     this->addSubModule(AccountProducts.data());
@@ -82,12 +82,12 @@ Advert::Advert() :
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
 
-    this->addSubModule(&Advertisement::ActiveAds::instance());
-    this->addSubModule(&Advertisement::Bin::instance());
-    this->addSubModule(&Advertisement::Locations::instance());
-    this->addSubModule(&Advertisement::Banners::instance());
-    this->addSubModule(&Advertisement::Clicks::instance());
-    this->addSubModule(&Advertisement::Props::instance());
+    this->addSubModule(&ActiveAds::instance());
+    this->addSubModule(&Bin::instance());
+    this->addSubModule(&Locations::instance());
+    this->addSubModule(&Banners::instance());
+    this->addSubModule(&Clicks::instance());
+    this->addSubModule(&Props::instance());
 }
 
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
@@ -116,6 +116,26 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 };
 
 /***************************************************************************************************/
+bool Advert::apiPOSTprocessVoucher(
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
+{
+    this->increaseDiscountUsage(_voucherItem);
+
+    return true;
+}
+
+bool Advert::apiPOSTcancelVoucher(
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
+{
+    this->decreaseDiscountUsage(_voucherItem);
+
+    this->removeFromUserAssets(_voucherItem);
+
+    return true;
+}
+
 Targoman::API::Advertisement::stuAdvert Advert::apiGETnewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
@@ -138,19 +158,5 @@ QString Advert::apiGETretrieveURL(
         QString _agent
     )
 {}
-
-quint64 Advert::apiPOSTprocessVoucher(
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-    )
-{
-    return 123;
-}
-
-quint64 Advert::apiPOSTcancelVoucher(
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-    )
-{
-    return 456;
-}
 
 } //namespace Targoman::API

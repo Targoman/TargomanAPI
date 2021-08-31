@@ -74,7 +74,7 @@ void appTargomanAPI::slotExecute()
             foreach(auto ModuleMethod, Module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
-            if(Module->requiredDB().Schema.size())
+            if (Module->requiredDB().Schema.size())
                 RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
 
             if (!Module->init())
@@ -82,11 +82,15 @@ void appTargomanAPI::slotExecute()
         }
 
         //Prepare database connections
-        if(RequiredDBs.size()) {
+        if (RequiredDBs.size())
+        {
             DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
+
             QSet<QString> ConnectionStrings;
-            if(ServerConfigs::MasterDB::Host.value().size()
-               && ServerConfigs::MasterDB::Schema.value().size()){
+
+            if (ServerConfigs::MasterDB::Host.value().size()
+                    && ServerConfigs::MasterDB::Schema.value().size())
+            {
                 intfAPIModule::stuDBInfo MasterDBInfo = {
                                                             ServerConfigs::MasterDB::Schema.value(),
                                                             ServerConfigs::MasterDB::Port.value(),
@@ -94,15 +98,19 @@ void appTargomanAPI::slotExecute()
                                                             ServerConfigs::MasterDB::User.value(),
                                                             ServerConfigs::MasterDB::Pass.value()
                                                         };
+
                 ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
             }
 
-            for(auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
-                if(DBInfoIter->Host.size()
-                   && ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false) {
+            for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
+            {
+                if (DBInfoIter->Host.size()
+                        && ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false)
+                {
                     ConnectionStrings.insert(DBInfoIter->toConnStr(true));
-                    if(ConnectionStrings.isEmpty())
+
+                    if (ConnectionStrings.isEmpty())
                         DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
                     else
                         DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr(), DBInfoIter.key());

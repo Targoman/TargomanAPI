@@ -97,7 +97,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentType,
                      Offline = 'F'
                      )
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account);
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 
 //Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
 //        AAA::Accounting::makeConfig("GatewayEndPoints"),
@@ -427,11 +427,11 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
         else
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json").arg(_voucherID));
 
-        struct stuDiscountUsed {
-            quint32 Count;
-            quint32 Amount;
-        };
-        QMap<quint32, stuDiscountUsed> UsedDiscounts;
+//        struct stuDiscountUsed {
+//            quint32 Count;
+//            quint32 Amount;
+//        };
+//        QMap<quint32, stuDiscountUsed> UsedDiscounts;
 
         QVariantList Services = SelectQuery(Service::instance())
                 .addCol(tblService::svcID)
@@ -478,37 +478,33 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
 
                         break;
                     }
-                }
+                } //foreach (QVariant Service, Services)
 
-                if (VoucherItem.DisAmount > 0)
-                {
-                    if (UsedDiscounts.contains(VoucherItem.Discount.ID))
-                    {
-                        ++UsedDiscounts[VoucherItem.Discount.ID].Count;
-                        UsedDiscounts[VoucherItem.Discount.ID].Amount += VoucherItem.DisAmount;
-                    }
-                    else
-                    {
-                        UsedDiscounts.insert(VoucherItem.Discount.ID, { 1, VoucherItem.DisAmount });
-                    }
-                }
+                //used discount
+//                if (VoucherItem.DisAmount > 0)
+//                {
+//                    if (UsedDiscounts.contains(VoucherItem.Discount.ID))
+//                    {
+//                        ++UsedDiscounts[VoucherItem.Discount.ID].Count;
+//                        UsedDiscounts[VoucherItem.Discount.ID].Amount += VoucherItem.DisAmount;
+//                    }
+//                    else
+//                    {
+//                        UsedDiscounts.insert(VoucherItem.Discount.ID, { 1, VoucherItem.DisAmount });
+//                    }
+//                }
             }
         } //if (Services.isEmpty() == false)
 
-        if (UsedDiscounts.isEmpty() == false)
-        {
-            foreach (quint32 _discountID, UsedDiscounts.keys())
-            {
-                stuDiscountUsed Discount = UsedDiscounts.value(_discountID);
+//        if (UsedDiscounts.isEmpty() == false)
+//        {
+//            foreach (quint32 DiscountID, UsedDiscounts.keys())
+//            {
+//                stuDiscountUsed Discount = UsedDiscounts.value(DiscountID);
 
-                ///TODO: increament cpnTotalUsedCount & cpnTotalUsedAmount
-//                quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
-//                    .increament(tblAccountCouponsBase::cpnTotalUsedCount, Discount.Count)
-//                    .increament(tblAccountCouponsBase::cpnTotalUsedAmount, Discount.Amount)
-//                    .where({ tblAccountCouponsBase::cpnID , enuConditionOperator::Equal, _discountID })
-//                    .execute(currentUserID);
-            }
-        }
+//                ///TODO: increament cpnTotalUsedCount & cpnTotalUsedAmount
+//            }
+//        }
 
         return Targoman::API::AAA::Accounting::stuVoucher(
                     _voucherID,
@@ -592,12 +588,6 @@ void Account::tryCancelVoucher(quint64 _voucherID)
                                             { "voucherItem", VoucherItem.toJson().toVariantMap() },
                                         }
                                     );
-
-                                    ///TODO:
-//                                    DELETE FROM {MODULE}.AccountUserAssets
-//                                    WHERE tblAccountUserAssetsBase::uasID = VoucherItem.UserAssetID
-//                                    AND tblAccountUserAssetsBase::uasVoucherItemUUID = VoucherItem.UUID
-
                                 }
                                 catch (...)
                                 {

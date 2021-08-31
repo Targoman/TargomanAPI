@@ -21,15 +21,14 @@
  */
 
 #include "NGTv1.h"
-#include "ORM/Defs.hpp"
 
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1);
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1, NGTv1Schema);
 
 NGTv1::NGTv1() :
-    ORM::clsRESTAPIWithActionLogs("NGT", "Targoman"){
+    ORM::clsRESTAPIWithActionLogs("NGT", "Targoman") {
 }
 
 

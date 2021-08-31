@@ -77,7 +77,16 @@ class Advert : public intfRESTAPIWithAccounting
     TARGOMAN_DEFINE_API_MODULE(Advert);
 
 public:
-    stuDBInfo requiredDB() const { return stuDBInfo(AdvertSchema); }
+//    stuDBInfo requiredDB() const { return stuDBInfo(AdvertSchema); }
+    stuDBInfo requiredDB() const {
+        return stuDBInfo(
+            DB::Schema.value(),
+            DB::Port.value(),
+            DB::Host.value(),
+            DB::User.value(),
+            DB::Pass.value()
+        );
+    }
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
@@ -88,6 +97,24 @@ protected:
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
 private slots:
+    bool REST(
+        POST,
+        processVoucher,
+        (
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Process voucher item"
+    )
+
+    bool REST(
+        POST,
+        cancelVoucher,
+        (
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Cancel voucher item"
+    )
+
     Targoman::API::Advertisement::stuAdvert REST(
         GET,
         newBanner,
@@ -121,24 +148,6 @@ private slots:
             QString _agent
         ),
         "Retrieve URL of the specified Advertisement"
-    )
-
-    quint64 REST(
-        POST,
-        processVoucher,
-        (
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-        ),
-        "Process voucher item"
-    )
-
-    quint64 REST(
-        POST,
-        cancelVoucher,
-        (
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-        ),
-        "Cancel voucher item"
     )
 
 };

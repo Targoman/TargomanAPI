@@ -24,9 +24,9 @@
 #define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "ORM/Defs.hpp"
 
 namespace TAPI {
 struct stuNGTPriceInfo{
@@ -45,7 +45,16 @@ class NGTv1 : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
 
 public:
-    stuDBInfo requiredDB() const {return stuDBInfo(AAASchema);}
+//    stuDBInfo requiredDB() const {return stuDBInfo(NGTv1Schema);}
+    stuDBInfo requiredDB() const {
+        return stuDBInfo(
+            DB::Schema.value(),
+            DB::Port.value(),
+            DB::Host.value(),
+            DB::User.value(),
+            DB::Pass.value()
+        );
+    }
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())

@@ -232,7 +232,7 @@ tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
 tmplRangedConfigurable<quint16> ServerConfigs::MasterDB::Port(
         ServerConfigs::MasterDB::makeConfig("Port"),
         "Database port",
-        10,65000,
+        10, 65000,
         3306,
         ReturnTrueCrossValidator(),
         "",

@@ -34,7 +34,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTicketType);
 namespace Targoman {
 namespace API {
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing);
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 
 quint64 Ticketing::insertTicket(quint64 _targetUserID,
                                 quint32 _serviceID,
