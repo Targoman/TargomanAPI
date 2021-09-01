@@ -76,18 +76,6 @@ class Advert : public intfRESTAPIWithAccounting
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
     TARGOMAN_DEFINE_API_MODULE(Advert);
 
-public:
-//    stuDBInfo requiredDB() const { return stuDBInfo(AdvertSchema); }
-    stuDBInfo requiredDB() const {
-        return stuDBInfo(
-            DB::Schema.value(),
-            DB::Port.value(),
-            DB::Host.value(),
-            DB::User.value(),
-            DB::Pass.value()
-        );
-    }
-
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
     virtual void breakCredit(quint64 _slbID);

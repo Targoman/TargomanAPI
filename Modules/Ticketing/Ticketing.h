@@ -40,18 +40,6 @@ class Ticketing : public ORM::clsRESTAPIWithActionLogs
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
 
 private:
-//    stuDBInfo requiredDB() const { return stuDBInfo(TicketingSchema); }
-    stuDBInfo requiredDB() const {
-        return stuDBInfo(
-            DB::Schema.value(),
-            DB::Port.value(),
-            DB::Host.value(),
-            DB::User.value(),
-            DB::Pass.value()
-        );
-    }
-
-private:
     quint64 insertTicket(quint64 _targetUserID,
                          quint32 _serviceID,
                          quint64 _inReplyTo,

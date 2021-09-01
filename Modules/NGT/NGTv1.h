@@ -44,18 +44,6 @@ class NGTv1 : public ORM::clsRESTAPIWithActionLogs
     Q_INTERFACES(Targoman::API::intfAPIModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
 
-public:
-//    stuDBInfo requiredDB() const {return stuDBInfo(NGTv1Schema);}
-    stuDBInfo requiredDB() const {
-        return stuDBInfo(
-            DB::Schema.value(),
-            DB::Port.value(),
-            DB::Host.value(),
-            DB::User.value(),
-            DB::Pass.value()
-        );
-    }
-
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
 

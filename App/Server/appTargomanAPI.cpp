@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QCoreApplication>
@@ -36,9 +37,7 @@
 #include "ServerConfigs.h"
 #include "OpenAPIGenerator.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 using namespace Common;
 
@@ -50,21 +49,20 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exInvalidAPIModule, exModuleLoader);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exAPIModuleInitiailization, exModuleLoader);
 #pragma clang diagnostic pop
 
-
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 {}
 
 void appTargomanAPI::slotExecute()
 {
-    try{
+    try {
         // Load modules
         QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
 
         auto LoadedModules = Configuration::ConfigManager::instance().loadedPlugins();
-        if(LoadedModules.isEmpty())
+        if (LoadedModules.isEmpty())
             throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
-        foreach(auto Plugin, LoadedModules){
+        foreach (auto Plugin, LoadedModules) {
             intfAPIModule* Module = qobject_cast<intfAPIModule*>(Plugin.Instance);
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
@@ -74,8 +72,9 @@ void appTargomanAPI::slotExecute()
             foreach(auto ModuleMethod, Module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
-            if (Module->requiredDB().Schema.size())
-                RequiredDBs.insert(Module->moduleBaseName(), Module->requiredDB());
+            auto DBInfo = Module->requiredDB();
+            if (DBInfo.Schema.size())
+                RequiredDBs.insert(Module->moduleBaseName(), DBInfo);
 
             if (!Module->init())
                 throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
@@ -99,20 +98,20 @@ void appTargomanAPI::slotExecute()
                                                             ServerConfigs::MasterDB::Pass.value()
                                                         };
 
-                ConnectionStrings.insert(MasterDBInfo.toConnStr(true));
+                ConnectionStrings.insert(MasterDBInfo.toConnStr(/*true*/));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
             }
 
             for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
             {
                 if (DBInfoIter->Host.size()
-                        && ConnectionStrings.contains(DBInfoIter->toConnStr(true)) == false)
+                        && ConnectionStrings.contains(DBInfoIter->toConnStr(/*true*/)) == false)
                 {
-                    ConnectionStrings.insert(DBInfoIter->toConnStr(true));
+                    ConnectionStrings.insert(DBInfoIter->toConnStr(/*true*/));
 
-                    if (ConnectionStrings.isEmpty())
-                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
-                    else
+//                    if (ConnectionStrings.isEmpty())
+//                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
+//                    else
                         DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr(), DBInfoIter.key());
                 }
             }
@@ -130,6 +129,4 @@ void appTargomanAPI::slotExecute()
     }
 }
 
-}
-}
-}
+} //namespace Targoman::API::Server

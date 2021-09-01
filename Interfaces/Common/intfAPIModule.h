@@ -141,9 +141,9 @@ protected:
     ModuleMethods_t Methods;
 };
 
+}
+}
 
-}
-}
 Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
@@ -191,6 +191,16 @@ private: \
         static Common::Configuration::tmplConfigurable<QString>       User;   \
         static Common::Configuration::tmplConfigurable<QString>       Pass;   \
         static Common::Configuration::tmplConfigurable<QString>       Schema; \
+    }; \
+public: \
+    stuDBInfo requiredDB() const { \
+        return stuDBInfo( \
+            DB::Schema.value(), \
+            DB::Port.value(), \
+            DB::Host.value(), \
+            DB::User.value(), \
+            DB::Pass.value() \
+        ); \
     }
 
 /**
