@@ -105,14 +105,21 @@ void appTargomanAPI::slotExecute()
             for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
             {
                 if (DBInfoIter->Host.size()
+                        && DBInfoIter->Schema.size()
                         && ConnectionStrings.contains(DBInfoIter->toConnStr(/*true*/)) == false)
                 {
+                    DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL, DBInfoIter.key(), DBInfoIter->Schema);
+
                     ConnectionStrings.insert(DBInfoIter->toConnStr(/*true*/));
 
 //                    if (ConnectionStrings.isEmpty())
 //                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
 //                    else
-                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr(), DBInfoIter.key());
+                        DBManager::clsDAC::setConnectionString(
+                                    DBInfoIter->toConnStr(),
+                                    DBInfoIter.key(),
+                                    DBInfoIter->Schema
+                                    );
                 }
             }
         }
@@ -121,9 +128,9 @@ void appTargomanAPI::slotExecute()
 
         OpenAPIGenerator::retrieveJson();
 
-        TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("",true,true).join("\n"));
-
-    }catch(Common::exTargomanBase& e){
+        TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
+    }
+    catch(Common::exTargomanBase& e) {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);
     }

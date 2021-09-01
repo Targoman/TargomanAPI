@@ -175,7 +175,7 @@ QStringList RESTServer::registeredAPIs(bool _showParams, bool _showTypes, bool _
 
 void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator)
 {
-//    qDebug() << "registering User Defined Type: (" << _typeName << ")";
+//    TargomanInfo(9, "registering User Defined Type: (" << _typeName << ")");
 
     Q_ASSERT_X(QMetaType::type(_typeName), QString("registerUserDefinedType typeName(%1)").arg(_typeName).toStdString().c_str(), "Seems that registering syntax is erroneous");
 
