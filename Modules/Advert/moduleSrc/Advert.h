@@ -89,6 +89,7 @@ private slots:
         POST,
         processVoucher,
         (
+            TAPI::JWT_t _JWT,
             Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
         ),
         "Process voucher item"
@@ -98,6 +99,7 @@ private slots:
         POST,
         cancelVoucher,
         (
+            TAPI::JWT_t _JWT,
             Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
         ),
         "Cancel voucher item"

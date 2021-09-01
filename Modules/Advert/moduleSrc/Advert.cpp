@@ -117,21 +117,28 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 
 /***************************************************************************************************/
 bool Advert::apiPOSTprocessVoucher(
+        TAPI::JWT_t _JWT,
         Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
     )
 {
-    this->increaseDiscountUsage(_voucherItem);
+    clsJWT JWT(_JWT);
+    quint64 currentUserID = JWT.usrID();
+
+    this->increaseDiscountUsage(currentUserID, _voucherItem);
 
     return true;
 }
 
 bool Advert::apiPOSTcancelVoucher(
+        TAPI::JWT_t _JWT,
         Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
     )
 {
-    this->decreaseDiscountUsage(_voucherItem);
+    clsJWT JWT(_JWT);
+    quint64 currentUserID = JWT.usrID();
 
-    this->removeFromUserAssets(_voucherItem);
+    this->decreaseDiscountUsage(currentUserID, _voucherItem);
+    this->removeFromUserAssets(currentUserID, _voucherItem);
 
     return true;
 }

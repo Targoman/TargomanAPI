@@ -25,6 +25,11 @@
 #include <QUrlQuery>
 #include <QJsonDocument>
 #include <QDebug>
+#include "Interfaces/AAA/PrivHelpers.h"
+//#include "Interfaces/AAA/clsJWT.hpp"
+#include "App/Server/QJWT.h"
+
+using namespace Targoman::API::AAA;
 
 namespace Targoman::API::Helpers {
 
@@ -48,6 +53,36 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 //    "PATCH",
 //    "DELETE"
 //};
+
+QVariant RESTClientHelper::callAPI(
+        TAPI::JWT_t _JWT,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs,
+        const QVariantMap& _postFields,
+        QString _aPIURL
+    )
+{
+//    clsJWT JWT(_JWT);
+//    QString EncodedJWT = JWT.session();
+
+//    QString EncodedJWT = clsJWT::createSigned(_JWT);
+
+    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
+        {},
+        300, //Targoman::API::Server::QJWT::TTL.value(),
+        {}
+    );
+
+    return RESTClientHelper::callAPI(
+        EncodedJWT,
+        _method,
+        _api,
+        _urlArgs,
+        _postFields,
+        _aPIURL
+    );
+}
 
 QVariant RESTClientHelper::callAPI(
         QString _encodedJWT,

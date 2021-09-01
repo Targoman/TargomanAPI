@@ -24,7 +24,7 @@
 #include "Accounting.h"
 #include "PrivHelpers.h"
 #include "Interfaces/AAA/Authorization.h"
-#include "Server/ServerConfigs.h"
+#include "App/Server/ServerConfigs.h"
 
 //#include "Server/clsSimpleCrypt.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
@@ -782,7 +782,10 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     return _lastPreVoucher;
 }
 
-void intfRESTAPIWithAccounting::increaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+void intfRESTAPIWithAccounting::increaseDiscountUsage(
+        quint64 _userID,
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
 {
     if (_voucherItem.DisAmount > 0)
     {
@@ -794,7 +797,10 @@ void intfRESTAPIWithAccounting::increaseDiscountUsage(Targoman::API::AAA::Accoun
     }
 }
 
-void intfRESTAPIWithAccounting::decreaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+void intfRESTAPIWithAccounting::decreaseDiscountUsage(
+        quint64 _userID,
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
 {
 //    if (_voucherItem.DisAmount > 0)
 //    {
@@ -806,13 +812,20 @@ void intfRESTAPIWithAccounting::decreaseDiscountUsage(Targoman::API::AAA::Accoun
 //    }
 }
 
-void intfRESTAPIWithAccounting::removeFromUserAssets(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem)
+void intfRESTAPIWithAccounting::removeFromUserAssets(
+        quint64 _userID,
+        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+    )
 {
     ///TODO:
 //    DELETE FROM {MODULE}.AccountUserAssets
 //    WHERE tblAccountUserAssetsBase::uasID = VoucherItem.OrderID
 //    AND tblAccountUserAssetsBase::uasVoucherItemUUID = VoucherItem.UUID
 
+    DeleteQuery(*this->AccountUserAssets)
+        .setPksByPath(_voucherItem.OrderID)
+        .execute(_userID)
+    ;
 }
 
 } //namespace Targoman::API::AAA::Accounting

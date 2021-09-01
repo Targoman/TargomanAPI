@@ -28,9 +28,7 @@
 #include "clsJWT.hpp"
 #include "Accounting.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 using namespace DBManager;
 
@@ -190,8 +188,4 @@ TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payloa
                                       _sessionID);
 }
 
-}
-}
-}
-
-
+} //namespace Targoman::API::AAA

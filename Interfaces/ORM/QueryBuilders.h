@@ -390,6 +390,8 @@ public:
     itmplDerived& orWhere(const clsCondition& _condition);
     itmplDerived& xorWhere(const clsCondition& _condition);
 
+    itmplDerived& setPksByPath(quint32 _pksByPath);
+    itmplDerived& setPksByPath(quint64 _pksByPath);
     itmplDerived& setPksByPath(TAPI::PKsByPath_t _pksByPath);
 
     itmplDerived& addFilters(const QString& _filters);

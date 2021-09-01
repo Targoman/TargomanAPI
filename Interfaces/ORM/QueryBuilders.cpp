@@ -1876,6 +1876,22 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::xorWhere(const clsCondition& _c
 |* PKsByPath           *|
 \***********************/
 template <class itmplDerived>
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(quint32 _pksByPath)
+{
+    this->WhereTraitData->PksByPath = QString("%1").arg(_pksByPath);
+
+    return (itmplDerived&)*this;
+}
+
+template <class itmplDerived>
+itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(quint64 _pksByPath)
+{
+    this->WhereTraitData->PksByPath = QString("%1").arg(_pksByPath);
+
+    return (itmplDerived&)*this;
+}
+
+template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(TAPI::PKsByPath_t _pksByPath)
 {
     this->WhereTraitData->PksByPath = _pksByPath.trimmed();

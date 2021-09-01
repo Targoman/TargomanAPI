@@ -61,8 +61,8 @@ public:
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:
-    static Targoman::API::AAA::Accounting::stuVoucher processVoucher(quint64 _voucherID);
-    static void tryCancelVoucher(quint64 _voucherID);
+    static Targoman::API::AAA::Accounting::stuVoucher processVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
+    static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
@@ -216,6 +216,7 @@ private slots:
         POST,
         approveOnlinePayment,
         (
+            TAPI::JWT_t _JWT,
 //            TAPI::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,

@@ -408,7 +408,10 @@ bool Account::apiPOSTapproveMobile(
 /*****************************************************************\
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
-Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _voucherID)
+Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
+        TAPI::JWT_t _JWT,
+        quint64 _voucherID
+    )
 {
     try
     {
@@ -462,7 +465,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
                         if (NULLABLE_HAS_VALUE(ProcessVoucherEndPoint))
                         {
                             QVariant Result = RESTClientHelper::callAPI(
-                                {},
+                                _JWT,
                                 RESTClientHelper::POST,
                                 NULLABLE_GET_OR_DEFAULT(ProcessVoucherEndPoint, ""),
                                 {},
@@ -518,13 +521,16 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(quint64 _vouc
     {
         ///TODO: create cancel voucher and credit to wallet
 
-        Account::tryCancelVoucher(_voucherID);
+        Account::tryCancelVoucher(_JWT, _voucherID);
 
         throw;
     }
 }
 
-void Account::tryCancelVoucher(quint64 _voucherID)
+void Account::tryCancelVoucher(
+        TAPI::JWT_t _JWT,
+        quint64 _voucherID
+    )
 {
     //1: cancel voucher items
     try
@@ -580,7 +586,7 @@ void Account::tryCancelVoucher(quint64 _voucherID)
                                 try
                                 {
                                     QVariant Result = RESTClientHelper::callAPI(
-                                        {},
+                                        _JWT,
                                         RESTClientHelper::POST,
                                         NULLABLE_GET_OR_DEFAULT(CancelVoucherEndPoint, ""),
                                         {},
@@ -690,7 +696,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
 
         //2.1: process voucher
         if (RemainingAfterWallet == 0)
-            return Account::processVoucher(Voucher.ID);
+            return Account::processVoucher(_JWT, Voucher.ID);
 
         //2.2: create online/offline payment
         if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
@@ -736,6 +742,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
  * @return
  */
 Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
+        TAPI::JWT_t _JWT,
 //        TAPI::enuPaymentGatewayType::Type _gatewayType,
         const QString _paymentMD5,
         const QString _domain,
@@ -750,7 +757,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
                          { "iVoucherID", VoucherID },
                          { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
-        return Account::processVoucher(VoucherID);
+        return Account::processVoucher(_JWT, VoucherID);
     }
     catch(...)
     {
@@ -821,7 +828,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment
                          { "iVoucherID", _vchID },
                          { "iPaymentType", QChar(enuPaymentType::Offline) }
                      });
-        return Account::processVoucher(_vchID);
+        return Account::processVoucher(_JWT, _vchID);
     }  catch (...) {
         Targoman::API::Query::Update(Voucher::instance(),
                                      SYSTEM_USER_ID,

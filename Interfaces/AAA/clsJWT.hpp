@@ -29,9 +29,7 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 namespace JWTItems{
 TARGOMAN_CREATE_CONSTEXPR(usrLogin);
@@ -98,7 +96,6 @@ private:
     const QJsonObject& Token;
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
+
 #endif // TARGOMAN_API_AAA_CLSJWT_HPP

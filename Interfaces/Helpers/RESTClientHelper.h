@@ -27,6 +27,7 @@
 #include <QString>
 #include <QVariant>
 #include "QtCUrl.h"
+#include "Interfaces/Common/GenericTypes.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 namespace Targoman::API::Helpers {
@@ -47,6 +48,15 @@ public:
         PATCH,
         DELETE,
     };
+
+    static QVariant callAPI(
+        TAPI::JWT_t _JWT,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postFields = {},
+        QString _aPIURL = {}
+    );
 
     static QVariant callAPI(
         QString _encodedJWT,

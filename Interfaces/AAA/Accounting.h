@@ -84,9 +84,9 @@ protected:
 
     void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
-    virtual void increaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
-    virtual void decreaseDiscountUsage(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
-    virtual void removeFromUserAssets(Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual void increaseDiscountUsage(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual void decreaseDiscountUsage(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual void removeFromUserAssets(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
 
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
