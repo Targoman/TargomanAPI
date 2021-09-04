@@ -23,7 +23,7 @@
 
 #include <QUuid>
 #include <QCryptographicHash>
-
+#include <QRandomGenerator>
 #include "SecurityHelper.h"
 #include "App/Server/clsSimpleCrypt.h"
 
@@ -33,9 +33,9 @@ const QString SecurityHelper::UUIDtoMD5()
 {
     QByteArray data;
 
-    data.append(qrand());
+    data.append(QRandomGenerator::global()->generate());
     data.append(QUuid::createUuid().toByteArray());
-    data.append(qrand());
+    data.append(QRandomGenerator::global()->generate());
 
     return QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex().constData();
 }

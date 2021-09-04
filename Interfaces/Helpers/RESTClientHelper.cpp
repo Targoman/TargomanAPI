@@ -159,23 +159,22 @@ QVariant RESTClientHelper::callAPI(
 
     if (CUrl.lastError().isOk() == false)
     {
-        qDebug() << CUrl.errorBuffer();
+        qDebug() << "CURL ERROR:" << CUrl.lastError().code() << CUrl.lastError().text()
+                 << ", BUFFER:" << CUrl.errorBuffer()
+                 << ", RESULT:" << CUrlResult;
         return QVariant();
     }
-    else
-    {
-        QJsonParseError JsonError;
-        QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
 
-        if (JsonError.error != QJsonParseError::NoError)
-            qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+    QJsonParseError JsonError;
+    QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
 
-        QVariant Result = Doc.toVariant().toMap().value("result");
+    if (JsonError.error != QJsonParseError::NoError)
+        qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
 
-//            qDebug() << "Result:" << Result;
+    QVariant Result = Doc.toVariant().toMap().value("result");
+//    qDebug() << "Result:" << Result;
 
-        return Result;
-    }
+    return Result;
 }
 
 } //namespace Targoman::API::Helpers

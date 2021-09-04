@@ -24,6 +24,7 @@
 #ifndef TEST_ADVERT_HPP
 #define TEST_ADVERT_HPP
 
+#include <QRandomGenerator>
 #include "Interfaces/Test/testCommon.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/actionLogs.hpp"
@@ -193,7 +194,7 @@ private slots:
 
     void createProduct_banner()
     {
-        this->BannerProductCode = QString("p%1").arg(qrand());
+        this->BannerProductCode = QString("p%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
             this->BannerProductID = callAdminAPI(
@@ -220,7 +221,7 @@ private slots:
 
     void createSaleable_banner()
     {
-        this->BannerSaleableCode = QString("%1-s%2").arg(this->BannerProductCode).arg(qrand());
+        this->BannerSaleableCode = QString("%1-s%2").arg(this->BannerProductCode).arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
             this->BannerSaleableID = callAdminAPI(
@@ -318,6 +319,7 @@ private slots:
     void addToBasket_invalid_saleable_code()
     {
         QT_TRY {
+//            QVERIFY_EXCEPTION_THROWN
             QVariant result = callAdminAPI(
                 RESTClientHelper::POST,
                 "Advert/addToBasket",
@@ -332,6 +334,9 @@ private slots:
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
+
+            qDebug() << "ZZZZZZZZZZZZZZZZZ" << result;
+
             //exHTTPNotFound("No item could be found");
 
             //QEXCEPTION
@@ -393,7 +398,7 @@ private slots:
 
     void createDiscount()
     {
-        this->CouponCode = QString("cpn-code-%1").arg(qrand());
+        this->CouponCode = QString("cpn-code-%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
             this->CouponID = callAdminAPI(
