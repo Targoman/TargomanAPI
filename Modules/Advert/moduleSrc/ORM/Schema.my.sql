@@ -30,7 +30,7 @@ DROP TABLE IF EXISTS `tblAccountCoupons`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblAccountCoupons` (
   `cpnID` int unsigned NOT NULL AUTO_INCREMENT,
-  `cpnCode` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
+  `cpnCode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
   `cpnPrimaryCount` int unsigned NOT NULL DEFAULT '1',
   `cpnTotalMaxAmount` int unsigned NOT NULL DEFAULT '1',
   `cpnPerUserMaxCount` int unsigned DEFAULT NULL,
@@ -57,14 +57,14 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblAccountProducts` (
   `prdID` int unsigned NOT NULL AUTO_INCREMENT,
-  `prdCode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prdCode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `prdName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `prdDesc` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `prdValidFromDate` date DEFAULT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -109,7 +109,7 @@ DROP TABLE IF EXISTS `tblAccountSaleables`;
 CREATE TABLE `tblAccountSaleables` (
   `slbID` int unsigned NOT NULL AUTO_INCREMENT,
   `slb_prdID` int unsigned NOT NULL,
-  `slbCode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `slbCode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `slbName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `slbDesc` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `slbType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'N: Normal, S: Special',
@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=390 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=418 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -188,7 +188,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=192 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=194 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;

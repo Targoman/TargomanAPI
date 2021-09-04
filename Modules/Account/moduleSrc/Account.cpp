@@ -439,7 +439,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
                 .addCol(tblService::svcName)
                 .addCol(tblService::svcProcessVoucherItemEndPoint)
                 .all();
-        if (Services.isEmpty() == false)
+        if (Services.isEmpty())
             throw exHTTPInternalServerError("There is no services registered.");
 
         //1: process voucher items

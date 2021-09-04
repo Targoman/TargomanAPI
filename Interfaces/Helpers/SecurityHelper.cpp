@@ -21,11 +21,11 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "SecurityHelper.h"
-#include "Server/clsSimpleCrypt.h"
-
 #include <QUuid>
 #include <QCryptographicHash>
+
+#include "SecurityHelper.h"
+#include "App/Server/clsSimpleCrypt.h"
 
 namespace Targoman::API::Helpers {
 

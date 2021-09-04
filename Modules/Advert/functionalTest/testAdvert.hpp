@@ -43,6 +43,9 @@ using namespace Targoman::API::AAA::Accounting;
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::Advertisement;
 
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
+
 class testAdvert : public clsBaseTest
 {
     Q_OBJECT
@@ -50,7 +53,10 @@ class testAdvert : public clsBaseTest
     QVariant LocationID;
     QVariant BannerProductID;
     QVariant BannerSaleableID;
-//    QVariant PaymentGatewayID;
+    QString BannerProductCode;
+    QString BannerSaleableCode;
+    //    QVariant PaymentGatewayID;
+    QString CouponCode;
     QVariant CouponID;
     Targoman::API::AAA::Accounting::stuPreVoucher LastPreVoucher;
     Targoman::API::AAA::Accounting::stuVoucher Voucher;
@@ -163,18 +169,20 @@ private slots:
     /***************************************************************************************/
     void createLocation()
     {
+        QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
+
         QT_TRY {
             this->LocationID = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/Locations",
                 {},
                 {
-                    { tblLocations::locURL,        "http://www.abbasgholi.com" },
+                    { tblLocations::locURL,        url },
                     { tblLocations::locPlaceCode,  "ABC" },
                 }
             );
 
-        qDebug() << "--------- locationID: " << this->LocationID;
+            qDebug() << "--------- locationID: " << this->LocationID;
 
             QVERIFY(this->LocationID > 0);
 
@@ -185,13 +193,15 @@ private slots:
 
     void createProduct_banner()
     {
+        this->BannerProductCode = QString("p%1").arg(qrand());
+
         QT_TRY {
             this->BannerProductID = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountProducts",
                 {},
                 {
-                    { tblAccountProductsBase::prdCode,          "p123" },
+                    { tblAccountProductsBase::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::prdName,          "test product 123" },
                     { tblAccountProductsBase::prdInStockCount,  1 },
                     { tblAccountProducts::prdType,              Targoman::API::Advertisement::enuProductType::toStr(Targoman::API::Advertisement::enuProductType::Advertise) },
@@ -210,13 +220,15 @@ private slots:
 
     void createSaleable_banner()
     {
+        this->BannerSaleableCode = QString("%1-s%2").arg(this->BannerProductCode).arg(qrand());
+
         QT_TRY {
             this->BannerSaleableID = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountSaleables",
                 {},
                 {
-                    { tblAccountSaleablesBase::slbCode,             "p123-s456" },
+                    { tblAccountSaleablesBase::slbCode,             this->BannerSaleableCode },
                     { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
                     { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
                     { tblAccountSaleablesBase::slb_prdID,           this->BannerProductID },
@@ -337,7 +349,7 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode", "p123-s456" },
+                    { "saleableCode", this->BannerSaleableCode },
                     { "orderAdditives", {} },
                     { "qty", 999 },
 //                    { "discountCode", "zzzzzzzzzzzzzzzzzz" },
@@ -362,7 +374,7 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode", "p123-s456" },
+                    { "saleableCode", this->BannerSaleableCode },
                     { "orderAdditives", {} },
                     { "qty", 1 },
                     { "discountCode", "zzzzzzzzzzzzzzzzzz" },
@@ -381,31 +393,33 @@ private slots:
 
     void createDiscount()
     {
+        this->CouponCode = QString("cpn-code-%1").arg(qrand());
+
         QT_TRY {
             this->CouponID = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountCoupons",
                 {},
                 {
-                    { tblAccountCouponsBase::cpnCode, "cpn-code-aaa" },
-                    { tblAccountCouponsBase::cpnPrimaryCount,             500 },
-                    { tblAccountCouponsBase::cpnTotalMaxAmount,           15000000 },
-                    { tblAccountCouponsBase::cpnPerUserMaxCount,          2 },
-                    { tblAccountCouponsBase::cpnPerUserMaxAmount,         1000000 },
-                    { tblAccountCouponsBase::cpnValidFrom,                "2020/1/1 1:2:3" },
-//                    { tblAccountCouponsBase::cpnExpiryTime,             S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-                    { tblAccountCouponsBase::cpnAmount,                   10 },
-                    { tblAccountCouponsBase::cpnAmountType,               Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
-                    { tblAccountCouponsBase::cpnMaxAmount,                250000 },
+                    { tblAccountCouponsBase::cpnCode,                       this->CouponCode },
+                    { tblAccountCouponsBase::cpnPrimaryCount,               500 },
+                    { tblAccountCouponsBase::cpnTotalMaxAmount,             15000000 },
+                    { tblAccountCouponsBase::cpnPerUserMaxCount,            2 },
+                    { tblAccountCouponsBase::cpnPerUserMaxAmount,           1000000 },
+                    { tblAccountCouponsBase::cpnValidFrom,                  "2020/1/1 1:2:3" },
+//                    { tblAccountCouponsBase::cpnExpiryTime,               S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
+                    { tblAccountCouponsBase::cpnAmount,                     10 },
+                    { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
+                    { tblAccountCouponsBase::cpnMaxAmount,                  250000 },
                     { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
 //                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
-//                            { "p123-s456", 1.5, 0 },
-//                            { "p123-s456", 1.8, 5 },
+//                            { this->BannerSaleableCode, 1.5, 0 },
+//                            { this->BannerSaleableCode, 1.8, 5 },
 //                            { "other",     2.0 },
 //                        })
                         QVariantList({
-                            QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.5 }, { "minCount", 0 } }),
-                            QVariantMap({ { "saleableCode", "p123-s456" }, { "multiplier", 1.8 }, { "minCount", 5 } }),
+                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.5 }, { "minCount", 0 } }),
+                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.8 }, { "minCount", 5 } }),
                             QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
                         })
                     },
@@ -431,10 +445,10 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode",       "p123-s456" },
+                    { "saleableCode",       this->BannerSaleableCode },
                     { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                1 },
-                    { "discountCode",       "cpn-code-aaa" },
+                    { "discountCode",       this->CouponCode },
                     { "referrer",           "" },
                     { "extraReferrerParams", {} },
                     { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
@@ -462,10 +476,10 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode",       "p123-s456" },
+                    { "saleableCode",       this->BannerSaleableCode },
                     { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                1 },
-                    { "discountCode",       "cpn-code-aaa" },
+                    { "discountCode",       this->CouponCode },
                     { "referrer",           "" },
                     { "extraReferrerParams", {} },
                     { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },

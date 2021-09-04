@@ -15,12 +15,14 @@ HEADERS += \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/clsJWT.hpp \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/PrivHelpers.h \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.h \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.h \
 
 SOURCES += \
     $$BASE_PROJECT_PATH/App/Server/clsSimpleCrypt.cpp \
     $$BASE_PROJECT_PATH/App/Server/QJWT.cpp \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/PrivHelpers.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.cpp \
 
 DEFINES += UNITTEST_DB_HOST="127.0.0.1"
 DEFINES += UNITTEST_DB_PORT=3306
