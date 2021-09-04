@@ -115,6 +115,7 @@ typedef QMap<QString, QString> OrderAdditives_t;
 
 struct stuAssetItem {
     //product
+    quint32                         prdID;
     TAPI::ProductCode_t             prdCode;
     QString                         prdName;
     TAPI::Date_t                    prdValidFromDate;

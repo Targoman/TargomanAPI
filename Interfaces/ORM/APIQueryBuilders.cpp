@@ -27,9 +27,7 @@ using namespace Targoman::API::ORM;
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
-namespace Targoman {
-namespace API {
-namespace Query {
+namespace Targoman::API::Query {
 
 QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime)
 {
@@ -193,6 +191,4 @@ bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const 
     return query.execute(_userID, {}, _realDelete) > 0;
 }
 
-}
-}
-}
+} //namespace Targoman::API::Query

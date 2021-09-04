@@ -224,14 +224,40 @@ void clsTable::prepareFiltersList()
             this->SortableColsMap.insert(FinalColName, relatedORMField);
     }
 
-    foreach (stuRelation Relation, this->Relations) {
+    QStringList AppliedRelations;
+    this->prepareRelationsFiltersList(this->Relations, AppliedRelations);
+
+    foreach (stuRelatedORMField baseCol, this->AllCols)
+    {
+        if (baseCol.Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(baseCol.Col)))
+            this->Converters.insert(this->finalColName(baseCol.Col), baseCol.Col.argSpecs().toORMValueConverter());
+    }
+}
+
+void clsTable::prepareRelationsFiltersList(const QList<stuRelation> &_relations, QStringList &_appliedRelations)
+{
+    if (_relations.isEmpty())
+        return;
+
+    foreach (stuRelation Relation, _relations)
+    {
+        QStringList parts;
+        if (Relation.RenamingPrefix.length())
+            parts.append(Relation.RenamingPrefix);
+        parts.append(Relation.ReferenceTable);
+        QString RelationFullName = parts.join("_");
+        if (_appliedRelations.contains(RelationFullName))
+            continue;
+        _appliedRelations.append(RelationFullName);
+
         if (clsTable::Registry.contains(Relation.ReferenceTable) == false)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable + " (Relation defined in: " + this->Name + ")");
 
         clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
-//        if (ForeignTable == nullptr)
+        //if (ForeignTable == nullptr)
 
-        foreach (clsORMField Col, ForeignTable->BaseCols) {
+        foreach (clsORMField Col, ForeignTable->BaseCols)
+        {
             QString FinalColName = this->finalColName(Col, Relation.RenamingPrefix);
             clsORMField NewCol = clsORMField(Col, FinalColName);
 
@@ -251,12 +277,8 @@ void clsTable::prepareFiltersList()
             if (Col.isSortable())
                 this->SortableColsMap.insert(FinalColName, relatedORMField);
         }
-    }
 
-    foreach (stuRelatedORMField baseCol, this->AllCols)
-    {
-        if (baseCol.Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(baseCol.Col)))
-            this->Converters.insert(this->finalColName(baseCol.Col), baseCol.Col.argSpecs().toORMValueConverter());
+        this->prepareRelationsFiltersList(ForeignTable->Relations, _appliedRelations);
     }
 }
 
@@ -321,11 +343,11 @@ void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_
     _providedFilters += Postfix;
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters)
-{
-    for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
-        _extraFilters.insert(FilterIter.key(), FilterIter.value());
-}
+//void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters)
+//{
+//    for(auto FilterIter = _requiredFilters.begin(); FilterIter != _requiredFilters.end(); ++FilterIter)
+//        _extraFilters.insert(FilterIter.key(), FilterIter.value());
+//}
 
 QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 {

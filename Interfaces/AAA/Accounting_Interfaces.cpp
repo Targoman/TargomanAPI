@@ -189,8 +189,8 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdPrivs,            S(TAPI::PrivObject_t),     QFV,                                     QNull,      UPOwner },
             { tblAccountProductsBase::prdVAT,              S(NULLABLE_TYPE(double)),  QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
             { tblAccountProductsBase::prdInStockCount,     S(quint32),                QFV.integer().minValue(0),               QRequired,  UPAdmin },
-            { tblAccountProductsBase::prdOrderedCount,     S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
-            { tblAccountProductsBase::prdReturnedCount,    S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPNone },
+            { tblAccountProductsBase::prdOrderedCount,     S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPAdmin },
+            { tblAccountProductsBase::prdReturnedCount,    S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPAdmin },
             { tblAccountProductsBase::prdStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { tblAccountProductsBase::prdCreationDateTime, ORM_CREATED_ON },
@@ -199,6 +199,7 @@ intfAccountProducts::intfAccountProducts(
         }) + _exclusiveCols,
         QList<ORM::stuRelation>({
         ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
+            { "saleable",  { tblAccountProductsBase::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slb_prdID } },
             ORM_RELATION_OF_CREATOR(tblAccountProductsBase::prdCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
         }) + _exclusiveRelations,
@@ -274,8 +275,8 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbProductCount,        S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
             { tblAccountSaleablesBase::slbMaxSaleCountPerUser, S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPOwner},
             { tblAccountSaleablesBase::slbInStockCount,        S(quint32),                      QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { tblAccountSaleablesBase::slbOrderedCount,        S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPNone },
-            { tblAccountSaleablesBase::slbReturnedCount,       S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPNone },
+            { tblAccountSaleablesBase::slbOrderedCount,        S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPAdmin },
+            { tblAccountSaleablesBase::slbReturnedCount,       S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPAdmin },
             { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),                      QFV,                             QNull,      UPOwner },
             { tblAccountSaleablesBase::slbStatus,              ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
@@ -286,6 +287,7 @@ intfAccountSaleables::intfAccountSaleables(
         QList<ORM::stuRelation>({
         ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
             { "product",  { tblAccountSaleablesBase::slb_prdID, R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID } },
+            { "userAsset", { tblAccountSaleablesBase::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uas_slbID } },
             ORM_RELATION_OF_CREATOR(tblAccountSaleablesBase::slbCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountSaleablesBase::slbUpdatedBy_usrID),
         }) + _exclusiveRelations,

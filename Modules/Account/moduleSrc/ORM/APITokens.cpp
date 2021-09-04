@@ -101,7 +101,8 @@ bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+        ExtraFilters.insert(tblAPITokens::apt_usrID, clsJWT(_JWT).usrID());
+//    this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }

@@ -73,7 +73,7 @@ private slots:
 
     bool REST(
         UPDATE,
-        defaultWallet,
+        setAsDefault, //defaultWallet,
         (
             TAPI::JWT_t _JWT,
             quint64 _walID

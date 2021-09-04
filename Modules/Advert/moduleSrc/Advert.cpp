@@ -116,32 +116,33 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 };
 
 /***************************************************************************************************/
-bool Advert::apiPOSTprocessVoucher(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-    )
-{
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+//bool Advert::apiPOSTprocessVoucher(
+//        TAPI::JWT_t _JWT,
+//        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//    )
+//{
+//    clsJWT JWT(_JWT);
+//    quint64 currentUserID = JWT.usrID();
 
-    this->increaseDiscountUsage(currentUserID, _voucherItem);
+//    this->increaseDiscountUsage(_voucherItem);
+//    this->activateUserAsset(currentUserID, _voucherItem);
 
-    return true;
-}
+//    return true;
+//}
 
-bool Advert::apiPOSTcancelVoucher(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-    )
-{
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+//bool Advert::apiPOSTcancelVoucher(
+//        TAPI::JWT_t _JWT,
+//        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//    )
+//{
+//    clsJWT JWT(_JWT);
+//    quint64 currentUserID = JWT.usrID();
 
-    this->decreaseDiscountUsage(currentUserID, _voucherItem);
-    this->removeFromUserAssets(currentUserID, _voucherItem);
+//    this->decreaseDiscountUsage(_voucherItem);
+//    this->removeFromUserAssets(currentUserID, _voucherItem);
 
-    return true;
-}
+//    return true;
+//}
 
 Targoman::API::Advertisement::stuAdvert Advert::apiGETnewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,

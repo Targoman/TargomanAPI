@@ -85,25 +85,25 @@ protected:
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
 private slots:
-    bool REST(
-        POST,
-        processVoucher,
-        (
-            TAPI::JWT_t _JWT,
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-        ),
-        "Process voucher item"
-    )
+//    bool REST(
+//        POST,
+//        processVoucher,
+//        (
+//            TAPI::JWT_t _JWT,
+//            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//        ),
+//        "Process voucher item"
+//    )
 
-    bool REST(
-        POST,
-        cancelVoucher,
-        (
-            TAPI::JWT_t _JWT,
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-        ),
-        "Cancel voucher item"
-    )
+//    bool REST(
+//        POST,
+//        cancelVoucher,
+//        (
+//            TAPI::JWT_t _JWT,
+//            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//        ),
+//        "Cancel voucher item"
+//    )
 
     Targoman::API::Advertisement::stuAdvert REST(
         GET,

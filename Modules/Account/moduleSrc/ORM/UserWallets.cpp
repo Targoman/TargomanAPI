@@ -28,9 +28,7 @@
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserWalletStatus);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 using namespace ORM;
 using namespace DBManager;
@@ -77,7 +75,7 @@ UserWallets::UserWallets() :
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
+        this->setSelfFilters({ { tblUserWallets::wal_usrID, clsJWT(_JWT).usrID() } }, _filters);
 
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -88,9 +86,12 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+    {
         _createInfo.insert(tblUserWallets::walDefault, 0);
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _createInfo);
+
+//        this->setSelfFilters({ { tblUserWallets::wal_usrID, clsJWT(_JWT).usrID() } }, _createInfo);
+        _createInfo.insert(tblUserWallets::wal_usrID, clsJWT(_JWT).usrID());
     }
 
     return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -107,55 +108,84 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false){
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+    {
         ExtraFilters.insert(tblUserWallets::walDefault, 0);
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+
+//        this->setSelfFilters({ { tblUserWallets::wal_usrID, clsJWT(_JWT).usrID() } }, ExtraFilters);
+        ExtraFilters.insert(tblUserWallets::wal_usrID, clsJWT(_JWT).usrID());
     }
 
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-bool UserWallets::apiUPDATEdefaultWallet(TAPI::JWT_t _JWT, quint64 _walID){
+//bool UserWallets::apiUPDATEdefaultWallet(
+bool UserWallets::apiUPDATEsetAsDefault(
+        TAPI::JWT_t _JWT,
+        quint64 _walID
+    )
+{
     bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    clsDACResult Result = this->execQuery(
-                              "UPDATE " + this->Name
-                              + QUERY_SEPARATOR
-                              + "SET " + tblUserWallets::walDefault + "= 1, " + tblUserWallets::walUpdatedBy_usrID + " = ?"
-                              + QUERY_SEPARATOR
-                              + "WHERE "
-                              + (IsPrivileged ? "TRUE" : (tblUserWallets::wal_usrID + QStringLiteral(" = ? ")))
-                              + " AND walID = ?",
-                              (IsPrivileged ?
-                                   QVariantList({ clsJWT(_JWT).usrID(), _walID }) :
-                                   QVariantList({ clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID(), _walID })
-                                   )
-                              );
 
-    return Result.numRowsAffected() > 0;
+//    clsDACResult Result = this->execQuery(
+//                              "UPDATE " + this->Name
+//                              + QUERY_SEPARATOR
+//                              + "SET " + tblUserWallets::walDefault + "= 1, " + tblUserWallets::walUpdatedBy_usrID + " = ?"
+//                              + QUERY_SEPARATOR
+//                              + "WHERE "
+//                              + (IsPrivileged ? "TRUE" : (tblUserWallets::wal_usrID + QStringLiteral(" = ? ")))
+//                              + " AND walID = ?",
+//                              (IsPrivileged ?
+//                                   QVariantList({ clsJWT(_JWT).usrID(), _walID }) :
+//                                   QVariantList({ clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID(), _walID })
+//                                   )
+//                              );
+//    return Result.numRowsAffected() > 0;
+
+    clsJWT JWT(_JWT);
+    quint64 CurrentUserID = JWT.usrID();
+
+    QVariantMap ExtraFilters;
+
+    ExtraFilters.insert(tblUserWallets::walID, _walID);
+    if (IsPrivileged == false)
+        ExtraFilters.insert(tblUserWallets::wal_usrID, CurrentUserID);
+
+    return Targoman::API::Query::Update(*this,
+                                 CurrentUserID,
+                                 {},
+                                 TAPI::ORMFields_t({
+                                    { tblUserWallets::walDefault, 1 },
+                                    { tblUserWallets::walUpdatedBy_usrID, CurrentUserID },
+                                 }),
+                                 ExtraFilters);
+
+    ///TODO: important: remove default flag from other user wallets
 }
 
-bool UserWallets::apiCREATEtransfer(TAPI::JWT_t _JWT,
-                                    const QString& _destLogin,
-                                    quint32 _amount,
-                                    const TAPI::MD5_t& _pass,
-                                    const QString& _salt,
-                                    quint64 _walID){
+bool UserWallets::apiCREATEtransfer(
+        TAPI::JWT_t _JWT,
+        const QString& _destLogin,
+        quint32 _amount,
+        const TAPI::MD5_t& _pass,
+        const QString& _salt,
+        quint64 _walID
+    )
+{
 
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destLogin, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP("AAA.sp_CREATE_transfer", {
-                     {"iFromUserID", clsJWT(_JWT).usrID()},
-                     {"iFromWalID", _walID},
-                     {"iToUserLogin", _destLogin},
-                     {"iAmount", _amount},
-                     {"iPass", _pass},
-                     {"iSalt", _salt},
+    this->callSP("AAA.sp_CREATE_transfer",
+                 {
+                     { "iFromUserID", clsJWT(_JWT).usrID() },
+                     { "iFromWalID", _walID },
+                     { "iToUserLogin", _destLogin },
+                     { "iAmount", _amount },
+                     { "iPass", _pass },
+                     { "iSalt", _salt },
                  });
     return true;
 }
 
-}
-}
-}
-
+} //namespace Targoman::API::AAA

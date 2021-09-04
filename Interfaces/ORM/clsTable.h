@@ -97,6 +97,10 @@ public:
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
     void prepareFiltersList();
 
+private:
+    void prepareRelationsFiltersList(const QList<stuRelation> &_relations, QStringList &_appliedRelations);
+
+public:
 //    QVariant selectFromTableByID(quint64 _id,
 //                                 QString _cols = {},
 //                                 const QStringList& _extraJoins = {},
@@ -159,7 +163,7 @@ public:
 
     void setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters);
 
-    void setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters);
+//    void setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters);
 
     QStringList privOn(qhttp::THttpMethod _method, QString _moduleName);
     static QString finalColName(const clsORMField& _col, const QString& _prefix = {});

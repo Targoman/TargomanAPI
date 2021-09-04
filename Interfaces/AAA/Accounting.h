@@ -84,14 +84,43 @@ protected:
 
     void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
-    virtual void increaseDiscountUsage(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
-    virtual void decreaseDiscountUsage(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
-    virtual void removeFromUserAssets(quint64 _userID, Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem);
+    virtual bool increaseDiscountUsage(const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+
+    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+
+    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool cancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 private slots:
+    bool REST(
+        POST,
+        processVoucherItem,
+        (
+            TAPI::JWT_t _JWT,
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Process voucher item"
+    )
+
+    bool REST(
+        POST,
+        cancelVoucherItem,
+        (
+            TAPI::JWT_t _JWT,
+            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        ),
+        "Cancel voucher item"
+    )
+
     Targoman::API::AAA::Accounting::stuPreVoucher REST(
         POST,
         addToBasket,

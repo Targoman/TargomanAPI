@@ -71,7 +71,9 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false){
         ExtraFilters.insert(tblVoucher::vchType, TAPI::enuVoucherType::toStr(TAPI::enuVoucherType::Withdrawal));
-        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+
+        ExtraFilters.insert(tblVoucher::vch_usrID, clsJWT(_JWT).usrID());
+//        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
     }
 
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);

@@ -62,7 +62,7 @@ public:
 
 public:
     static Targoman::API::AAA::Accounting::stuVoucher processVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
-    static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
+    static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID, bool _setAsError = false);
 
 private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});

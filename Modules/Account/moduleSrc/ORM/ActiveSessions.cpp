@@ -80,7 +80,8 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     throw exHTTPForbidden("Deleting current session is not allowed");
 
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+      ExtraFilters.insert(tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID());
+//  this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
   return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

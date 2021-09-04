@@ -362,7 +362,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
             //tblAccountSaleablesBase::slbCreationDateTime,
             //tblAccountSaleablesBase::slbUpdatedBy_usrID,
 
-            //tblAccountProductsBase::prdID,
+            tblAccountProductsBase::prdID,
             tblAccountProductsBase::prdCode,
             tblAccountProductsBase::prdName,
             //tblAccountProductsBase::prdDesc,
@@ -393,6 +393,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
+    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdID,                  SaleableInfo, tblAccountProductsBase,  prdID);
     SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdCode,                SaleableInfo, tblAccountProductsBase,  prdCode);
     SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdName,                SaleableInfo, tblAccountProductsBase,  prdName);
     SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidFromDate,       SaleableInfo, tblAccountProductsBase,  prdValidFromDate);
@@ -689,9 +690,11 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         {
             AssetItem.Discount = Discount;
             AssetItem.TotalPrice = AssetItem.SubTotal - Discount.Amount;
-            qDebug() << "AssetItem.TotalPrice:" << AssetItem.TotalPrice;
 
-            ///TODO: why cpnTotalUsedCount is readonly?
+            TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
+
+            ///@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
+            /// because the customer may be angry about not being able to use the coupon again in same voucher
 //            quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
 //                .increament(tblAccountCouponsBase::cpnTotalUsedCount, 1)
 //                .increament(tblAccountCouponsBase::cpnTotalUsedAmount, Discount.Amount)
@@ -704,6 +707,18 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 //            TargomanLogInfo(5, "Discount Usages updated (+1, +" << Discount.Amount << ")");
         }
     } //if discount
+
+    //-- reserve saleable ------------------------------------
+    UpdateQuery(*this->AccountSaleables)
+        .increament(tblAccountSaleablesBase::slbOrderedCount, _qty)
+        .where({ tblAccountSaleablesBase::slbID, enuConditionOperator::Equal, AssetItem.slbID })
+        .execute(currentUserID);
+
+    //-- reserve product ------------------------------------
+    UpdateQuery(*this->AccountProducts)
+        .increament(tblAccountProductsBase::prdOrderedCount, _qty)
+        .where({ tblAccountProductsBase::prdID, enuConditionOperator::Equal, AssetItem.prdID })
+        .execute(currentUserID);
 
     //-- new pre voucher item --------------------------------
     ///TODO: add ttl for order item
@@ -782,10 +797,8 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     return _lastPreVoucher;
 }
 
-void intfRESTAPIWithAccounting::increaseDiscountUsage(
-        quint64 _userID,
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
-    )
+bool intfRESTAPIWithAccounting::increaseDiscountUsage(
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem)
 {
     if (_voucherItem.DisAmount > 0)
     {
@@ -795,37 +808,142 @@ void intfRESTAPIWithAccounting::increaseDiscountUsage(
             { "iTotalUsedAmount", _voucherItem.DisAmount },
         });
     }
+    return true;
 }
 
-void intfRESTAPIWithAccounting::decreaseDiscountUsage(
+bool intfRESTAPIWithAccounting::decreaseDiscountUsage(
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem)
+{
+    if (_voucherItem.DisAmount > 0)
+    {
+        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+    return true;
+}
+
+bool intfRESTAPIWithAccounting::activateUserAsset(
         quint64 _userID,
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+    )
+{
+    return Targoman::API::Query::Update(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        TAPI::ORMFields_t({
+           { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active }
+        }),
+        {
+            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        });
+}
+
+bool intfRESTAPIWithAccounting::removeFromUserAssets(
+        quint64 _userID,
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+    )
+{
+    return Targoman::API::Query::DeleteByPks(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        {
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        },
+        false
+    );
+}
+
+bool intfRESTAPIWithAccounting::processVoucherItem(
+        quint64 _userID,
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+    )
+{
+    if (!this->preProcessVoucherItem(_userID, _voucherItem))
+        return false;
+
+    if (this->activateUserAsset(_userID, _voucherItem) == false)
+        return false;
+
+    this->increaseDiscountUsage(_voucherItem);
+
+    this->postProcessVoucherItem(_userID, _voucherItem);
+
+    return true;
+}
+
+bool intfRESTAPIWithAccounting::cancelVoucherItem(
+        quint64 _userID,
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+    )
+{
+    if (!this->preCancelVoucherItem(_userID, _voucherItem))
+        return false;
+
+    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+                                .addCol(tblAccountUserAssetsBase::uasID)
+                                .addCol(tblAccountUserAssetsBase::uasStatus)
+                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+                                .one();
+
+    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
+                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                     .value<TAPI::enuAuditableStatus::Type>();
+
+    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
+        this->decreaseDiscountUsage(_voucherItem);
+
+
+    //-- un-reserve saleable ------------------------------------
+    UpdateQuery(*this->AccountSaleables)
+        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
+        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
+        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+        .execute(_userID);
+
+    //-- un-reserve product -------------------------------------
+    UpdateQuery(*this->AccountProducts)
+        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
+        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
+        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
+        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+        .execute(_userID);
+
+    //-----------------------------------------------------------
+    this->removeFromUserAssets(_userID, _voucherItem);
+
+    this->postCancelVoucherItem(_userID, _voucherItem);
+
+    return true;
+}
+
+bool intfRESTAPIWithAccounting::apiPOSTprocessVoucherItem(
+        TAPI::JWT_t _JWT,
         Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
     )
 {
-//    if (_voucherItem.DisAmount > 0)
-//    {
-//        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
-//            { "iDiscountID", _voucherItem.Discount.ID },
-//            { "iTotalUsedCount", 1 },
-//            { "iTotalUsedAmount", _voucherItem.DisAmount },
-//        });
-//    }
+    clsJWT JWT(_JWT);
+    quint64 CurrentUserID = JWT.usrID();
+
+    return this->processVoucherItem(CurrentUserID, _voucherItem);
 }
 
-void intfRESTAPIWithAccounting::removeFromUserAssets(
-        quint64 _userID,
+bool intfRESTAPIWithAccounting::apiPOSTcancelVoucherItem(
+        TAPI::JWT_t _JWT,
         Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
     )
 {
-    ///TODO:
-//    DELETE FROM {MODULE}.AccountUserAssets
-//    WHERE tblAccountUserAssetsBase::uasID = VoucherItem.OrderID
-//    AND tblAccountUserAssetsBase::uasVoucherItemUUID = VoucherItem.UUID
+    clsJWT JWT(_JWT);
+    quint64 CurrentUserID = JWT.usrID();
 
-    DeleteQuery(*this->AccountUserAssets)
-        .setPksByPath(_voucherItem.OrderID)
-        .execute(_userID)
-    ;
+    return this->cancelVoucherItem(CurrentUserID, _voucherItem);
 }
 
 } //namespace Targoman::API::AAA::Accounting

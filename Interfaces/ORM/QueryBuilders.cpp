@@ -494,9 +494,14 @@ QString clsColSpecs::buildColNameString(
             ColFinalName = this->Data->Name;
         else
         {
-//            qDebug() << _renamedColumns.join(" | ");
-//            qDebug() << _selectableColsMap.keys();
+//            qDebug() << "tableName" << _tableName;
+//            qDebug() << "otherTableAlias" << _otherTableAlias;
+//            qDebug() << "NameToSearch" << NameToSearch;
+//            qDebug() << "renamedColumns" << _renamedColumns.join(" | ");
+//            qDebug() << "selectableColsMap" << _selectableColsMap.keys();
+//            qDebug() << "filterableColsMap" << _filterableColsMap.keys();
 //            print_stacktrace();
+
             throw exQueryBuilder("Invalid column for filtering: " + this->Data->Name);
 //            return false;
         }
@@ -1297,23 +1302,23 @@ public:
             else
             {
                 //2: find relation definition
-                stuRelation* Relation = nullptr;
-                foreach (stuRelation Rel, this->Owner->Data->Table.Relations)
-                {
-                    if (Rel.ReferenceTable == Join.ForeignTable) {
-                        Relation = &Rel;
-                        break;
-                    }
-                }
-                if (Relation == nullptr) {
-                    throw exHTTPInternalServerError(QString("Relation to table (%1) has not been defined.").arg(Join.ForeignTable));
-                }
+//                stuRelation* Relation = nullptr;
+//                foreach (stuRelation Rel, this->Owner->Data->Table.Relations)
+//                {
+//                    if (Rel.ReferenceTable == Join.ForeignTable) {
+//                        Relation = &Rel;
+//                        break;
+//                    }
+//                }
+//                if (Relation == nullptr) {
+//                    throw exHTTPInternalServerError(QString("Relation to table (%1) has not been defined.").arg(Join.ForeignTable));
+//                }
 
-                clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
-                if (ForeignTable == nullptr)
-                    throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+//                clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+//                if (ForeignTable == nullptr)
+//                    throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
 
-                ReferenceTable = Relation->ReferenceTable;
+                ReferenceTable = Join.ForeignTable;
 //                Join.JoinType;
 //                Join.ForeignTable;
 //                Join.Alias;
@@ -1403,7 +1408,8 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     if (_foreignTable.isEmpty())
         throw exHTTPInternalServerError("Foreign Table is empty.");
 
-    if ((_joinType == enuJoinType::CROSS) || !_on.isEmpty()) {
+    if ((_joinType == enuJoinType::CROSS) || (_on.isEmpty() == false))
+    {
         this->JoinTraitData->Joins.append({ _joinType, _foreignTable, _alias, _on });
 
         if (_alias.length())

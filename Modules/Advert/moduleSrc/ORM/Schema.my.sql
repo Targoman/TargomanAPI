@@ -37,12 +37,12 @@ CREATE TABLE `tblAccountCoupons` (
   `cpnPerUserMaxAmount` int unsigned DEFAULT NULL,
   `cpnValidFrom` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `cpnExpiryTime` datetime DEFAULT NULL,
-  `cpnAmount` int NOT NULL,
+  `cpnAmount` int unsigned NOT NULL,
   `cpnAmountType` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '%' COMMENT '%: Percent, $:Amount, Z: Free',
   `cpnMaxAmount` int unsigned DEFAULT NULL,
   `cpnSaleableBasedMultiplier` json NOT NULL,
-  `cpnTotalUsedCount` int NOT NULL DEFAULT '0',
-  `cpnTotalUsedAmount` int NOT NULL DEFAULT '0',
+  `cpnTotalUsedCount` int unsigned NOT NULL DEFAULT '0',
+  `cpnTotalUsedAmount` int unsigned NOT NULL DEFAULT '0',
   `cpnStatus` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, Removed',
   `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
   `cpnCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,7 +57,7 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=318 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=390 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -429,6 +429,60 @@ DELIMITER ;;
          tblActionLogs.atlType = "tblProps-Updated",
          tblActionLogs.atlDescription = Changes;
 END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_coupon_decreaseStats` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_decreaseStats`(
+	IN `iDiscountID` INT UNSIGNED,
+	IN `iTotalUsedCount` INT UNSIGNED,
+	IN `iTotalUsedAmount` INT UNSIGNED
+)
+BEGIN
+    UPDATE tblAccountCoupons
+       SET tblAccountCoupons.cpnTotalUsedCount = tblAccountCoupons.cpnTotalUsedCount - iTotalUsedCount
+         , tblAccountCoupons.cpnTotalUsedAmount = tblAccountCoupons.cpnTotalUsedAmount - iTotalUsedAmount
+     WHERE tblAccountCoupons.cpnID = iDiscountID
+    ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_coupon_increaseStats` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_increaseStats`(
+	IN `iDiscountID` INT UNSIGNED,
+	IN `iTotalUsedCount` INT UNSIGNED,
+	IN `iTotalUsedAmount` INT UNSIGNED
+)
+BEGIN
+    UPDATE tblAccountCoupons
+       SET tblAccountCoupons.cpnTotalUsedCount = tblAccountCoupons.cpnTotalUsedCount + iTotalUsedCount
+         , tblAccountCoupons.cpnTotalUsedAmount = tblAccountCoupons.cpnTotalUsedAmount + iTotalUsedAmount
+     WHERE tblAccountCoupons.cpnID = iDiscountID
+    ;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
