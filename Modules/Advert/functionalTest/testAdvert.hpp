@@ -43,6 +43,7 @@ using namespace Targoman::API::AAA::Accounting;
 #include "../moduleSrc/ORM/Accounting.h"
 #include "../moduleSrc/ORM/Locations.h"
 using namespace Targoman::API::AdvertModule;
+using namespace Targoman::API::AdvertModule::ORM;
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;

@@ -26,13 +26,11 @@
 #include "Defs.hpp"
 #include "Bin.h"
 #include "Locations.h"
-
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
-using namespace ORM;
+namespace Targoman::API::AdvertModule::ORM {
+
+//using namespace ORM;
 
 QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -68,6 +66,4 @@ ActiveAds::ActiveAds() :
 {
 }
 
-}
-}
-}
+} //namespace Targoman::API::AdvertModule::ORM

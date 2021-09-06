@@ -45,7 +45,7 @@ Tickets::Tickets() :
             { tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tktBase_tktID,       S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
-            { tblTickets::tktType,             S(Targoman::API::TicketingModule::enuTicketType::Type), QFV,                 Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
+            { tblTickets::tktType,             S(Targoman::API::TicketingModule::enuTicketType::Type), QFV, Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
             { tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                       QRequired, UPNone, false, false },
             { tblTickets::tktBodyMarkdown,     S(QString),             QFV.allwaysValid(),        QRequired, UPNone, false, false },
             { tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                       false,     UPNone },

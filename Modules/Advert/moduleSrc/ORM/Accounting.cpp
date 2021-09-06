@@ -22,17 +22,19 @@
  */
 
 #include "Accounting.h"
+#include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 #include "Locations.h"
+#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
-namespace Targoman::API::AdvertModule {
-
-using namespace ORM;
-using namespace AAA;
-using namespace AAA::Accounting;
+//using namespace ORM;
+//using namespace AAA;
+//using namespace AAA::Accounting;
 using namespace Targoman::API::AAA::Accounting;
+
+namespace Targoman::API::AdvertModule::ORM {
 
 /******************************************************/
 AccountProducts::AccountProducts()
@@ -87,4 +89,4 @@ AccountCoupons::AccountCoupons()
     : intfAccountCoupons(AdvertSchema)
 {}
 
-} // namespace Targoman::API::AdvertModule
+} // namespace Targoman::API::AdvertModule::ORM

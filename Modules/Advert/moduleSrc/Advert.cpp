@@ -50,10 +50,12 @@ TAPI_REGISTER_METATYPE(
 //    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
 
-namespace Targoman::API {
+//using namespace Targoman::API::AAA;
+//using namespace AdvertModule;
 
-using namespace AAA;
-using namespace AdvertModule;
+namespace Targoman::API::AdvertModule {
+
+using namespace ORM;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
@@ -165,4 +167,4 @@ QString Advert::apiGETretrieveURL(
     )
 {}
 
-} //namespace Targoman::API
+} //namespace Targoman::API::AdvertModule

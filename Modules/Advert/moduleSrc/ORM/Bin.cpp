@@ -26,10 +26,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
-using namespace ORM;
+namespace Targoman::API::AdvertModule::ORM {
+
+//using namespace ORM;
 
 Bin::Bin() :
     clsTable(AdvertSchema,
@@ -80,6 +79,5 @@ Banners::Banners() :
               )
 {
 }
-}
-}
-}
+
+} //namespace Targoman::API::AdvertModule::ORM

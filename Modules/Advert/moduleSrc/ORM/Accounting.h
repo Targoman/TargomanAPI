@@ -29,10 +29,14 @@
 
 namespace Targoman::API::AdvertModule {
 
+//tructures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM (enuProductType,
                       Advertise = 'A',
                       Reportage = 'R',
                       );
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -135,7 +139,8 @@ public:
 };
 */
 
-} // namespace Targoman::API::AdvertModule
+} //namespace ORM
+} //namespace Targoman::API::AdvertModule
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuProductType);
 

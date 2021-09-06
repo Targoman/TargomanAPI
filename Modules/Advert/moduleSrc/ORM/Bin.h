@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H
@@ -26,9 +27,11 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
+namespace Targoman::API::AdvertModule {
+
+//tructures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,7 +60,7 @@ TARGOMAN_CREATE_CONSTEXPR(bnrUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class Bin : public ORM::clsTable
+class Bin : public Targoman::API::ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -67,13 +70,14 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,Bin)
 };
 
-class Banners : public ORM::clsTable
+class Banners : public Targoman::API::ORM::clsTable
 {
     Q_OBJECT
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,Banners)
 };
-}
-}
-}
+
+} //namespace ORM
+} //namespace Targoman::API::AdvertModule
+
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H

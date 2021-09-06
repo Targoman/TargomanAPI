@@ -25,13 +25,11 @@
 #include "Defs.hpp"
 #include "Locations.h"
 #include "Bin.h"
-
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
-using namespace ORM;
+namespace Targoman::API::AdvertModule::ORM {
+
+//using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -98,6 +96,4 @@ Props::Props() :
 {
 }
 
-}
-}
-}
+} //namespace Targoman::API::AdvertModule::ORM

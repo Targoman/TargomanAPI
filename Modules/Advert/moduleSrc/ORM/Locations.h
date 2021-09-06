@@ -27,9 +27,11 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
+namespace Targoman::API::AdvertModule {
+
+//tructures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -47,7 +49,7 @@ TARGOMAN_CREATE_CONSTEXPR(locStatus);
 
 #pragma GCC diagnostic pop
 
-class Locations : public ORM::clsTable
+class Locations : public Targoman::API::ORM::clsTable
 {
     Q_OBJECT
 private slots:
@@ -60,8 +62,7 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert,Locations)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AdvertModule
 
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_LOCATIONS_H

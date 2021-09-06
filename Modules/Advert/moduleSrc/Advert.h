@@ -28,9 +28,9 @@
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
-
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 using namespace Targoman::API::AAA::Accounting;
+//using namespace Targoman::API::ORM;
 
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
@@ -60,13 +60,6 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 
 struct stuAdvertBill {
 };
-
-} //namespace
-
-using namespace TAPI;
-//using namespace Targoman::API::AAA::Accounting;
-
-namespace Targoman::API {
 
 class Advert : public intfRESTAPIWithAccounting
 {
@@ -142,7 +135,7 @@ private slots:
 
 };
 
-} //namespace Targoman::API
+} //namespace Targoman::API::AdvertModule
 
 TAPI_DECLARE_METATYPE(Targoman::API::AdvertModule::stuAdvert);
 

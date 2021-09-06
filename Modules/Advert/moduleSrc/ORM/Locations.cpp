@@ -27,11 +27,9 @@
 #include "Interfaces/ORM/APIQueryBuilders.h"
 //using namespace Targoman::API::ORM;
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
+namespace Targoman::API::AdvertModule::ORM {
 
-using namespace ORM;
+//using namespace ORM;
 
 Locations::Locations() :
     clsTable(
@@ -95,6 +93,4 @@ bool Locations::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-}
-}
-}
+} //namespace Targoman::API::AdvertModule::ORM

@@ -28,11 +28,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AdvertModule {
+namespace Targoman::API::AdvertModule::ORM {
 
-using namespace ORM;
+//using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -67,6 +65,4 @@ Clicks::Clicks() :
 {
 }
 
-}
-}
-}
+} //namespace Targoman::API::AdvertModule::ORM
