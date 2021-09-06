@@ -44,7 +44,7 @@ private:
     quint64 insertTicket(quint64 _targetUserID,
                          quint32 _serviceID,
                          quint64 _inReplyTo,
-                         Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+                         enuTicketType::Type _ticketType,
                          const QString& _title,
                          const QString& _body,
                          bool _hasAttachemnt,

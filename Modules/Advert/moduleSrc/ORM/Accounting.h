@@ -29,7 +29,7 @@
 
 namespace Targoman::API::AdvertModule {
 
-//tructures and enumes goes here
+//structures and enumes goes here
 
 TARGOMAN_DEFINE_ENUM (enuProductType,
                       Advertise = 'A',

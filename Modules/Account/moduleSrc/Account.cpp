@@ -299,37 +299,40 @@ QVariantMap Account::apiPUTsignup(
     )
 {
     QString Type;
-    if(QFV.email().isValid(_emailOrMobile)){
+
+    if (QFV.email().isValid(_emailOrMobile)) {
         if(QFV.emailNotFake().isValid(_emailOrMobile))
             Type = 'E';
         else
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }else if(QFV.mobile().isValid(_emailOrMobile))
+    }
+    else if(QFV.mobile().isValid(_emailOrMobile))
         Type = 'M';
     else
         throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
 
     QFV.asciiAlNum().maxLenght(50).validate(_role);
-    if(_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
+
+    if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
         throw exHTTPForbidden("Selected role is not allowed to signup");
 
-    if(InvalidPasswords.contains(_pass))
+    if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
     return {
         { "type", Type == 'E' ? "email" : "mobile" },
         { "usrID", this->callSP("AAA.sp_CREATE_signup", {
-                { "iBy", Type },
-                { "iLogin", _emailOrMobile },
-                { "iPass", _pass },
-                { "iRole", _role },
-                { "iIP", _REMOTE_IP },
-                { "iName", _name.isEmpty()? QVariant() : _name },
-                { "iFamily", _family.isEmpty()? QVariant() : _family },
-                { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
-                { "iMaxSessions", _maxSessions },
-                { "iCreatorUserID", QVariant() },
-            }).spDirectOutputs().value("oUserID").toDouble()
+                                    { "iBy", Type },
+                                    { "iLogin", _emailOrMobile },
+                                    { "iPass", _pass },
+                                    { "iRole", _role },
+                                    { "iIP", _REMOTE_IP },
+                                    { "iName", _name.isEmpty()? QVariant() : _name },
+                                    { "iFamily", _family.isEmpty()? QVariant() : _family },
+                                    { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+                                    { "iMaxSessions", _maxSessions },
+                                    { "iCreatorUserID", QVariant() },
+                                }).spDirectOutputs().value("oUserID").toDouble()
         }
     };
 }
@@ -337,10 +340,12 @@ QVariantMap Account::apiPUTsignup(
 bool Account::apilogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
+
     this->callSP("AAA.sp_UPDATE_logout", {
-        { "iByUserID", clsJWT(_JWT).usrID() },
-        { "iSessionGUID", clsJWT(_JWT).session() },
-    });
+                     { "iByUserID", clsJWT(_JWT).usrID() },
+                     { "iSessionGUID", clsJWT(_JWT).session() },
+                 });
+
     return true;
 }
 
@@ -349,10 +354,12 @@ QString Account::apicreateForgotPasswordLink(TAPI::RemoteIP_t _REMOTE_IP, QStrin
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     Authorization::validateIPAddress(_REMOTE_IP);
+
     this->callSP("AAA.sp_CREATE_forgotPassRequest", {
-        { "iLogin", _login },
-        { "iVia", QString(_login.contains('@') ? 'E' : 'M') },
-    });
+                     { "iLogin", _login },
+                     { "iVia", QString(_login.contains('@') ? 'E' : 'M') },
+                 });
+
     return _login.contains('@') ? "email" : "mobile";
 }
 
@@ -361,21 +368,24 @@ bool Account::apichangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _old
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
     this->callSP("AAA.sp_UPDATE_changePass", {
-                     {"iUserID", clsJWT(_JWT).usrID()},
-                     {"iOldPass", _oldPass},
-                     {"iOldPassSalt", _oldPassSalt},
-                     {"iNewPass", _newPass},
+                     { "iUserID", clsJWT(_JWT).usrID() },
+                     { "iOldPass", _oldPass },
+                     { "iOldPassSalt", _oldPassSalt },
+                     { "iNewPass", _newPass },
                  });
+
     return true;
 }
 
 bool Account::apichangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid, TAPI::MD5_t _newPass)
 {
     Authorization::validateIPAddress(_REMOTE_IP);
+
     this->callSP("AAA.sp_UPDATE_changePassByUUID", {
-                     {"iUUID", _uuid},
-                     {"iNewPass", _newPass},
+                     { "iUUID", _uuid },
+                     { "iNewPass", _newPass },
                  });
+
     return true;
 }
 
@@ -385,10 +395,12 @@ bool Account::apiPOSTapproveEmail(
     )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    this->callSP( "AAA.sp_UPDATE_acceptApproval", {
-                      {"iUUID", _uuid},
-                      {"iMobile", {}},
-                  });
+
+    this->callSP("AAA.sp_UPDATE_acceptApproval", {
+                     { "iUUID", _uuid },
+                     { "iMobile", {} },
+                 });
+
     return true;
 }
 
@@ -399,10 +411,12 @@ bool Account::apiPOSTapproveMobile(
     )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
-    this->callSP( "AAA.sp_UPDATE_acceptApproval", {
-                      { "iUUID", _code },
-                      { "iMobile", _mobile },
-                  });
+
+    this->callSP("AAA.sp_UPDATE_acceptApproval", {
+                     { "iUUID", _code },
+                     { "iMobile", _mobile },
+                 });
+
     return true;
 }
 

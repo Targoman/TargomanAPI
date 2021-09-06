@@ -32,14 +32,14 @@ constexpr char TicketingSchema[] = "Ticketing";
 
 namespace Targoman::API::TicketingModule {
 
-TARGOMAN_DEFINE_ENUM (enuTicketType,
-                       Bug        = 'B',
-                       Critical   = 'C',
-                       Suggestion = 'S',
-                       Message    = 'M',
-                       Reply      = 'R',
-                       Broadcast  = 'G'
-                       );
+TARGOMAN_DEFINE_ENUM(enuTicketType,
+                     Bug        = 'B',
+                     Critical   = 'C',
+                     Suggestion = 'S',
+                     Message    = 'M',
+                     Reply      = 'R',
+                     Broadcast  = 'G'
+                     );
 
 } //namespace Targoman::API::TicketingModule
 

@@ -28,6 +28,8 @@
 
 namespace Targoman::API::TicketingModule {
 
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      New       = 'N',
                      Removed   = 'R'

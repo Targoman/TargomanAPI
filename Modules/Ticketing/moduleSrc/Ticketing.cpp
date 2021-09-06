@@ -35,22 +35,22 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
 namespace Targoman::API::TicketingModule {
 
-using namespace TicketingModule;
+using namespace ORM;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 
 Ticketing::Ticketing() :
     clsRESTAPIWithActionLogs(TicketingSchema, TicketingDomain)
 {
-    this->addSubModule(&ORM::Tickets::instance());
-    this->addSubModule(&ORM::TicketRead::instance());
+    this->addSubModule(&Tickets::instance());
+    this->addSubModule(&TicketRead::instance());
 }
 
 quint64 Ticketing::insertTicket(
         quint64 _targetUserID,
         quint32 _serviceID,
         quint64 _inReplyTo,
-        Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+        enuTicketType::Type _ticketType,
         const QString& _title,
         const QString& _body,
         bool _hasAttachemnt,
@@ -58,21 +58,28 @@ quint64 Ticketing::insertTicket(
     )
 {
   return this->execQuery(
-          "INSERT INTO tblTickets "
-          "   SET tblTickets.tktTarget_usrID =?,"
-          "       tblTickets.tkt_svcID =?,"
-          "       tblTickets.tktInReply_tktID =?,"
-          "       tblTickets.tktType =?,"
-          "       tblTickets.tktTitle =?,"
-          "       tblTickets.tktBodyMarkdown =?,"
-          "       tblTickets.tktHasAttachment =?,"
-          "       tblTickets.tktCreatedBy_usrID =?",
-          {_targetUserID ? _targetUserID : QVariant(),
-           _serviceID ? _serviceID : QVariant(),
-           _inReplyTo ? _inReplyTo : QVariant(), QString("%1").arg(_ticketType),
-           _title, _body, _hasAttachemnt, _createdBy})
-      .lastInsertId()
-      .toULongLong();
+        "INSERT INTO tblTickets "
+        "   SET tblTickets.tktTarget_usrID =?,"
+        "       tblTickets.tkt_svcID =?,"
+        "       tblTickets.tktInReply_tktID =?,"
+        "       tblTickets.tktType =?,"
+        "       tblTickets.tktTitle =?,"
+        "       tblTickets.tktBodyMarkdown =?,"
+        "       tblTickets.tktHasAttachment =?,"
+        "       tblTickets.tktCreatedBy_usrID =?",
+        {
+            _targetUserID ? _targetUserID : QVariant(),
+            _serviceID ? _serviceID : QVariant(),
+            _inReplyTo ? _inReplyTo : QVariant(),
+            QString("%1").arg(_ticketType),
+            _title,
+            _body,
+            _hasAttachemnt,
+            _createdBy
+        }
+    )
+    .lastInsertId()
+    .toULongLong();
 }
 
 bool Ticketing::apiPUTnewMessage(
@@ -87,7 +94,7 @@ bool Ticketing::apiPUTnewMessage(
 
   return this->insertTicket(
              _targetUserID, _serviceID, 0,
-             _targetUserID ? Targoman::API::TicketingModule::enuTicketType::Message : Targoman::API::TicketingModule::enuTicketType::Broadcast,
+             _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
              _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
@@ -103,11 +110,11 @@ bool Ticketing::apiPUTnewFeedback(
 {
   Authorization::checkPriv(_JWT, {});
 
-  if (_inReplyTo && (_ticketType != Targoman::API::TicketingModule::enuTicketType::Reply))
+  if (_inReplyTo && (_ticketType != enuTicketType::Reply))
     throw exHTTPBadRequest("Reply tickets must have reply type");
 
-  if (_ticketType == Targoman::API::TicketingModule::enuTicketType::Message ||
-      _ticketType == Targoman::API::TicketingModule::enuTicketType::Broadcast)
+  if (_ticketType == enuTicketType::Message ||
+      _ticketType == enuTicketType::Broadcast)
     throw exHTTPBadRequest(
         "Message and Broadcast tickets must be sent via newMessage method");
 
@@ -127,7 +134,7 @@ bool Ticketing::apiPUTnewFeedback(
     // QFile::rename(_file.TempName, )
   }
 
-  ///TODO: return  true if file moved
+  ///TODO: return true if file moved
   return true;
 }
 

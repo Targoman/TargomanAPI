@@ -46,8 +46,8 @@ TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
     Targoman::API::AdvertModule,
     stuAdvert,
-    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
-//    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
+    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant { return _value.toJson(); }
+//    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant { return _value.toVariant(); }
 );
 
 //using namespace Targoman::API::AAA;

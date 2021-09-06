@@ -86,7 +86,15 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
                            Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
             );
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    ///TODO: complete this lambda for retreiving lastReplyDateTime and totalReplyCount
+    auto QueryLambda = [](SelectQuery &_query) {
+//        _query
+//            .leftJoin(SelectQuery(Tickets::instance())
+
+//            )
+    };
+
+    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query
