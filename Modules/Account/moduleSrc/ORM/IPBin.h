@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
@@ -26,17 +27,19 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuIPBinStatus,
                      Active  = 'A',
                      Blocked = 'B',
                      Removed = 'R'
                                )
-}
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -54,20 +57,20 @@ TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
 #pragma GCC diagnostic pop
 
 
-class IPBin : public ORM::clsTable
+class IPBin : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get IPBin information")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,IPBin)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPBin)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuIPBinStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuIPBinStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H

@@ -26,10 +26,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::ORM {
 
-using namespace ORM;
-using namespace DBManager;
+//using namespace DBManager;
 
 /*****************************************************************\
 |* User **********************************************************|
@@ -255,4 +254,4 @@ bool UserExtraInfo::apiUPDATEetherAdress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherA
     return Result.numRowsAffected() > 0;
 }
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::ORM

@@ -88,6 +88,6 @@ private:
 } //namespace ORM
 } //namespace Targoman::API::TicketingModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule::enuTicketStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H

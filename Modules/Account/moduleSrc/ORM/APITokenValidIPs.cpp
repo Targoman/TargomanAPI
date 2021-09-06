@@ -27,11 +27,7 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
@@ -104,6 +100,4 @@ APITokenValidIPs::APITokenValidIPs() :
     )
 {}
 
-}
-}
-}
+} //namespace Targoman::API::AccountModule::ORM

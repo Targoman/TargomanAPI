@@ -26,14 +26,10 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuFPRStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuForgotPassLinkVia);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuFPRStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 ForgotPassRequest::ForgotPassRequest() :
     clsTable(
@@ -42,10 +38,10 @@ ForgotPassRequest::ForgotPassRequest() :
         {///< ColName                                Type                 Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
             { tblForgotPassRequest::fprUUID,         S(TAPI::MD5_t),      QFV,                        ORM_PRIMARY_KEY },
             { tblForgotPassRequest::fpr_usrID,       S(quint64),          QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblForgotPassRequest::fprRequestedVia, S(TAPI::enuForgotPassLinkVia::Type), QFV,        TAPI::enuForgotPassLinkVia::Email, UPNone },
+            { tblForgotPassRequest::fprRequestedVia, S(Targoman::API::AccountModule::enuForgotPassLinkVia::Type), QFV,        Targoman::API::AccountModule::enuForgotPassLinkVia::Email, UPNone },
             { tblForgotPassRequest::fprRequestDate,  ORM_CREATED_ON },
             { tblForgotPassRequest::fprApplyDate,    S(TAPI::DateTime_t), QFV,                        QNull,     UPNone },
-            { tblForgotPassRequest::fprStatus,       ORM_STATUS_FIELD(TAPI::enuFPRStatus, TAPI::enuFPRStatus::New) },
+            { tblForgotPassRequest::fprStatus,       ORM_STATUS_FIELD(Targoman::API::AccountModule::enuFPRStatus, Targoman::API::AccountModule::enuFPRStatus::New) },
         },
         {///< Col                                Reference Table                 ForeignCol
             { tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID },
@@ -71,6 +67,4 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
 }
 
-}
-}
-}
+} //namespace Targoman::API::AccountModule::ORM

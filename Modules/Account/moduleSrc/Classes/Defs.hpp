@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_CLASSES_DEFS_HPP
@@ -25,6 +26,8 @@
 
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "libTargomanCommon/Macros.h"
+
+namespace Targoman::API::AccountModule {
 
 //namespace TAPI {
 
@@ -64,8 +67,10 @@
 
 //}
 
-//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
-//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
-//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
+} //namespace Targoman::API::AccountModule
+
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuVoucherType);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuPaymentStatus);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuPaymentGateway);
 
 #endif //TARGOMAN_API_MODULES_ACCOUNT_CLASSES_DEFS_HPP

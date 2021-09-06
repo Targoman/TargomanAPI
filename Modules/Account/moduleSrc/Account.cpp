@@ -57,16 +57,21 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    TAPI,
+    Targoman::API::AccountModule,
     stuMultiJWT,
-    [](const TAPI::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 );
 
-namespace Targoman::API {
+//namespace Targoman::API {
 
-using namespace DBManager;
-using namespace Common;
-using namespace Common::Configuration;
+//using namespace DBManager;
+using namespace Targoman::Common;
+using namespace Targoman::Common::Configuration;
+
+namespace Targoman::API::AccountModule {
+
+using namespace Classes;
+using namespace ORM;
 
 ///TODO: move this to config file
 static QSet<QString> InvalidPasswords = {
@@ -147,7 +152,7 @@ Account::Account() :
     this->addSubModule(&Voucher::instance());
     this->addSubModule(&IPBin::instance());
     this->addSubModule(&IPStats::instance());
-    this->addSubModule(&PaymentGateways::instance());
+    this->addSubModule(&ORM::PaymentGateways::instance());
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&OfflinePayments::instance());
     this->addSubModule(&Roles::instance());
@@ -197,7 +202,7 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-TAPI::stuMultiJWT Account::apilogin(
+Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _login,
         TAPI::MD5_t _pass,
@@ -222,7 +227,7 @@ TAPI::stuMultiJWT Account::apilogin(
                                            _sessionInfo.object(),
                                            _fingerprint);
 
-    return TAPI::stuMultiJWT({
+    return Targoman::API::AccountModule::stuMultiJWT({
                                  this->createLoginJWT(_rememberMe, _login, LoginInfo.Privs["ssnKey"].toString(), _services),
                                  this->createJWT(_login, LoginInfo, _services)
                              });
@@ -231,7 +236,7 @@ TAPI::stuMultiJWT Account::apilogin(
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
-TAPI::stuMultiJWT Account::apiloginByOAuth(
+Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::enuOAuthType::Type _type,
         QString _oAuthToken,
@@ -263,13 +268,13 @@ TAPI::stuMultiJWT Account::apiloginByOAuth(
     }
 
     auto LoginInfo = Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _services.split(","), true, _sessionInfo.object(), _fingerprint);
-    return TAPI::stuMultiJWT({
+    return Targoman::API::AccountModule::stuMultiJWT({
                                  this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
                                  this->createJWT(OAuthInfo.Email, LoginInfo, _services)
                              });
 }
 
-TAPI::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
+Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
 {
     QJsonObject Obj;
 
@@ -281,7 +286,7 @@ TAPI::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_
         Services = LoginJWT.privatePart().value("svc").toString();
 
     auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
-    return TAPI::stuMultiJWT({
+    return Targoman::API::AccountModule::stuMultiJWT({
                                  this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
                                  this->createJWT(LoginJWT.login(), NewPrivs, Services)
                              });
@@ -653,7 +658,7 @@ DELIMITER ;
 Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
         Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         QString _domain,
         qint64 _walletID,
         QString _paymentVerifyCallback
@@ -665,7 +670,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
     ///2.1: process voucher
     ///2.2: create online/offline payment
 
-    if (_gatewayType != TAPI::enuPaymentGatewayType::COD)
+    if (_gatewayType != Targoman::API::AccountModule::enuPaymentGatewayType::COD)
     {
         if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
@@ -693,7 +698,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
                      TAPI::ORMFields_t({
                                            { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
                                            { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
-                                           { tblVoucher::vchType, TAPI::enuVoucherType::Expense },
+                                           { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
                                            { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
                                            { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::New },
                                        })
@@ -719,7 +724,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
             return Account::processVoucher(_JWT, Voucher.ID);
 
         //2.2: create online/offline payment
-        if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
+        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
         {
             //Do nothing as it will be created after information upload.
         }
@@ -764,7 +769,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
  */
 Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
         TAPI::JWT_t _JWT,
-//        TAPI::enuPaymentGatewayType::Type _gatewayType,
+//        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         const QString _paymentMD5,
         const QString _domain,
         TAPI::JSON_t _pgResponse
@@ -883,7 +888,7 @@ bool Account::apiPOSTaddPrizeTo(
     this->callSP("sp_CREATE_increaseWallet", {
                      {"iWalletID", 0},
                      {"iToUsrID", _targetUsrID},
-                     {"iType", QString(static_cast<char>(TAPI::enuVoucherType::Prize))},
+                     {"iType", QString(static_cast<char>(Targoman::API::AccountModule::enuVoucherType::Prize))},
                      {"iAmount", _amount},
                      {"iDesc", _desc.toJson()},
                  });
@@ -909,11 +914,11 @@ bool Account::apiPOSTaddIncomeTo(
     this->callSP("sp_CREATE_increaseWallet", {
                      {"iWalletID", 0},
                      {"iToUsrID", _targetUsrID},
-                     {"iType", QString(static_cast<char>(TAPI::enuVoucherType::Income))},
+                     {"iType", QString(static_cast<char>(Targoman::API::AccountModule::enuVoucherType::Income))},
                      {"iAmount", _amount},
                      {"iDesc", _desc.toJson()},
                  });
     return true;
 }
 
-} //namespace Targoman::API
+} //namespace Targoman::API::AccountModule

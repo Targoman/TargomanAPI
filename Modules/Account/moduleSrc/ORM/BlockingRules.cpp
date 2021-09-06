@@ -26,11 +26,7 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 BlockingRules::BlockingRules() :
     clsTable(
@@ -88,6 +84,4 @@ bool BlockingRules::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-}
-}
-}
+} //namespace Targoman::API::AccountModule::ORM

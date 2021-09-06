@@ -142,6 +142,6 @@ public:
 } //namespace ORM
 } //namespace Targoman::API::AdvertModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuProductType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuProductType);
 
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

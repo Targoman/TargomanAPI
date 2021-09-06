@@ -26,13 +26,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuIPBinStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuIPBinStatus);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 IPBin::IPBin() :
     clsTable(
@@ -46,7 +42,7 @@ IPBin::IPBin() :
             { tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
             { tblIPBin::ipbBlockedBy_usrID,  S(quint64),          QFV.integer().minValue(1), QNull,     UPNone },
             { tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                       QNull,     UPNone },
-            { tblIPBin::ipbStatus,           ORM_STATUS_FIELD(TAPI::enuIPBinStatus, TAPI::enuIPBinStatus::Active) },
+            { tblIPBin::ipbStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuIPBinStatus, Targoman::API::AccountModule::enuIPBinStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
         },
         {///< Col                            Reference Table             ForeignCol      Rename      LeftJoin
@@ -72,7 +68,4 @@ QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-}
-}
-}
-
+} //namespace Targoman::API::AccountModule::ORM

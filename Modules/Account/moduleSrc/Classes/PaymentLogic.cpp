@@ -32,8 +32,9 @@ using namespace Targoman::API::Helpers;
 
 using namespace Targoman::DBManager;
 
-namespace Targoman::API::AAA {
+using namespace Targoman::API::AccountModule::ORM;
 
+namespace Targoman::API::AccountModule::Classes {
 
 void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {
@@ -70,11 +71,11 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 //    return InstanceFunc();
 //}
 
-//static inline QString enuPaymentGatewayTypeToCSV(const TAPI::enuPaymentGatewayType::Types &_values, const char* _itemSurrounder="") {
+//static inline QString enuPaymentGatewayTypeToCSV(const Targoman::API::AccountModule::enuPaymentGatewayType::Types &_values, const char* _itemSurrounder="") {
 //    QStringList out;
 
 //    foreach (auto _value, _values) {
-//        out.append(QString("%1%2%1").arg(_itemSurrounder).arg(TAPI::enuPaymentGatewayType::toStr(_value)));
+//        out.append(QString("%1%2%1").arg(_itemSurrounder).arg(Targoman::API::AccountModule::enuPaymentGatewayType::toStr(_value)));
 //    }
 
 //    return out.join(",");
@@ -82,7 +83,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 
 const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         quint32 _amount,
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         const QString& _domain
     )
 {
@@ -90,7 +91,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 
     QString Domain = URLHelper::domain(_domain);
 
-    SelectQuery qry = SelectQuery(PaymentGateways::instance())
+    SelectQuery qry = SelectQuery(Targoman::API::AccountModule::ORM::PaymentGateways::instance())
         .addCol(tblPaymentGateways::pgwID)
         .addCol(tblPaymentGateways::pgwName)
         .addCol(tblPaymentGateways::pgwType)
@@ -98,10 +99,10 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         .addCol(tblPaymentGateways::pgwMetaInfo)
         .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
         .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
-        .leftJoin(SelectQuery(PaymentGateways::instance())
+        .leftJoin(SelectQuery(Targoman::API::AccountModule::ORM::PaymentGateways::instance())
             .addCol(tblPaymentGateways::pgwID)
             .addCol(enuConditionalAggregation::IF,
-                    { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, TAPI::enuPaymentGatewayTransactionFeeType::Percent }
+                    { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
                     , DBExpression::VALUE(QString("%1 * %2 / 100").arg(tblPaymentGateways::pgwTransactionFeeValue).arg(_amount))
                     , DBExpression::VALUE(tblPaymentGateways::pgwTransactionFeeValue)
                     , "inner_pgwTransactionFeeAmount"
@@ -154,7 +155,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         const QString& _domain,
         quint64 _vchID,
         const QString& _invDesc,
@@ -170,7 +171,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     ///4: call driver::request
     ///5: return result for client redirecting
 
-    if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
+    if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
         throw exPayment("COD not allowed for online payment");
 
     QFV.url().validate(_paymentVerifyCallback, "callBack");
@@ -230,7 +231,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                         {},
                         TAPI::ORMFields_t({
                            { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
-                           { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                           { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                         }),
                         {
                            { tblOnlinePayments::onpMD5, onpMD5 }
@@ -245,7 +246,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                     TAPI::ORMFields_t({
                        { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
                        { tblOnlinePayments::onpResult, PaymentResponse.Result },
-                       { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Pending },
+                       { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending },
                     }),
                     {
                        { tblOnlinePayments::onpMD5, onpMD5 }
@@ -254,7 +255,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         //increase pgwSumRequestCount and pgwSumRequestAmount
         try
         {
-            PaymentGateways::instance()
+            Targoman::API::AccountModule::ORM::PaymentGateways::instance()
                      .callSP("sp_UPDATE_paymentGateway_RequestCounters", {
                                  { "iPgwID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
@@ -284,7 +285,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::onpResult, e.what() },
-                        { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                        { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                     }),
                     {
                         { tblOnlinePayments::onpMD5, onpMD5 }
@@ -343,14 +344,14 @@ quint64 PaymentLogic::approveOnlinePayment(
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
-                        { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Error },
+                        { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                     }),
                     {
                         { tblOnlinePayments::onpMD5, _paymentMD5 }
                     });
 
         //increase pgwSumFailedCount
-        PaymentGateways::instance()
+        Targoman::API::AccountModule::ORM::PaymentGateways::instance()
                  .callSP("sp_UPDATE_paymentGateway_FailedCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
@@ -367,7 +368,7 @@ quint64 PaymentLogic::approveOnlinePayment(
                 TAPI::ORMFields_t({
 //                    { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
                     { tblOnlinePayments::onpResult, PaymentResponse.Result },
-                    { tblOnlinePayments::onpStatus, TAPI::enuPaymentStatus::Payed },
+                    { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
                 }),
                 {
                     { tblOnlinePayments::onpMD5, _paymentMD5 }
@@ -377,7 +378,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     //increase pgwSumOkCount and pgwSumPaidAmount
     try
     {
-        PaymentGateways::instance()
+        Targoman::API::AccountModule::ORM::PaymentGateways::instance()
                  .callSP("sp_UPDATE_paymentGateway_OkCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
@@ -389,7 +390,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     }
 
     Targoman::API::Query::Update(
-                PaymentGateways::instance(),
+                Targoman::API::AccountModule::ORM::PaymentGateways::instance(),
                 SYSTEM_USER_ID,
                 {},
                 TAPI::ORMFields_t({
@@ -403,4 +404,4 @@ quint64 PaymentLogic::approveOnlinePayment(
     return OnlinePayment.onp_vchID;
 }
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::Classes

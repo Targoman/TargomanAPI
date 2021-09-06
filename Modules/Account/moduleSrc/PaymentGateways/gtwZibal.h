@@ -32,12 +32,12 @@
  * place #include "PaymentGateways/gtwZibal.h" in PaymentLogic.cpp for proper driver registration
  */
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::PaymentGateways {
 
 class gtwZibal : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        TAPI::enuPaymentGatewayType::IranIntermediateGateway,
+        Targoman::API::AccountModule::enuPaymentGatewayType::IranIntermediateGateway,
         gtwZibal)
 
 public:
@@ -52,6 +52,6 @@ private:
     virtual QString errorString(int _errCode);
 };
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::PaymentGateways
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H

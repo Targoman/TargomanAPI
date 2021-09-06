@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
@@ -26,9 +27,13 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -45,7 +50,7 @@ TARGOMAN_CREATE_CONSTEXPR(tviStatus);
 }
 #pragma GCC diagnostic pop
 
-class APITokenValidIPs : public ORM::clsTable
+class APITokenValidIPs : public clsTable
 {
     Q_OBJECT
 private slots:
@@ -54,12 +59,11 @@ private slots:
     bool ORMUPDATE("Update token valid IP info")
     quint64 ORMCREATE("Create a new APITokenValidIP")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,APITokenValidIPs)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokenValidIPs)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H

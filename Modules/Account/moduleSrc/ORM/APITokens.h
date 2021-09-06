@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
@@ -26,18 +27,19 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI{
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuAPITokensStatus,
                      Active   = 'A',
                      Pending  = 'P',
                      CreditFinished    = 'C',
                      Removed  = 'R'
                                 )
-}
-
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -60,23 +62,22 @@ TARGOMAN_CREATE_CONSTEXPR(aptStatus);
 }
 #pragma GCC diagnostic pop
 
-class APITokens : public ORM::clsTable
+class APITokens : public clsTable
 {
     Q_OBJECT
 private slots:
     QVariant ORMGET("Get APITokens information")
-    bool ORMDELETE("Delete an APIToken")
-    bool ORMUPDATE("Update token info by priviledged user")
     quint64 ORMCREATE("Create a new APITokens by priviledged user")
+    bool ORMUPDATE("Update token info by priviledged user")
+    bool ORMDELETE("Delete an APIToken")
 
     private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,APITokens)
+        TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokens)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAPITokensStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H

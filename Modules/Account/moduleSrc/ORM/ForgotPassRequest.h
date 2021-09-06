@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
@@ -26,7 +27,12 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuFPRStatus,
                      New      = 'N',
                      Sent     = 'S',
@@ -37,11 +43,8 @@ TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
                      Email    = 'E',
                      Mobile   = 'M',
                                 )
-}
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -56,22 +59,22 @@ TARGOMAN_CREATE_CONSTEXPR(fprStatus);
 }
 #pragma GCC diagnostic pop
 
-class ForgotPassRequest : public ORM::clsTable
+class ForgotPassRequest : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get ForgotPassRequest information")
     bool ORMDELETE("Delete a ForgotPassRequest")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,ForgotPassRequest)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ForgotPassRequest)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuFPRStatus);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuForgotPassLinkVia);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuFPRStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H

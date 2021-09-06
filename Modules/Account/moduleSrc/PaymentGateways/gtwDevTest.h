@@ -32,7 +32,7 @@
  * place #include "PaymentGateways/gtwDevTest.h" in PaymentLogic.cpp for proper driver registration
  */
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::PaymentGateways {
 
 /**
  * @brief *********** THE gtwDevTest CLASS IS JUST FOR DEVELOPERS IN DEBUG MODE. NOT FOR PRODUCTION ***********
@@ -40,7 +40,7 @@ namespace Targoman::API::AAA {
 class gtwDevTest : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        TAPI::enuPaymentGatewayType::_DeveloperTest,
+        Targoman::API::AccountModule::enuPaymentGatewayType::_DeveloperTest,
         gtwDevTest)
 
 public:
@@ -50,6 +50,6 @@ private:
     constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
 };
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::PaymentGateways
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H

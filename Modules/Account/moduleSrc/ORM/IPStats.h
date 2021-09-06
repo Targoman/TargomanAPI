@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
@@ -26,9 +27,13 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -40,18 +45,18 @@ TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
 }
 #pragma GCC diagnostic pop
 
-class IPStats : public ORM::clsTable
+class IPStats : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get IPStats information")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,IPStats)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPStats)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H

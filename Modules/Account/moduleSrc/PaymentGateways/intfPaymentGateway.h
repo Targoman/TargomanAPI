@@ -34,18 +34,24 @@
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
 #include "Classes/Defs.hpp"
-
 #include "ORM/PaymentGateways.h"
 
 using namespace qhttp;
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule {
+
+namespace Classes {
 class PaymentLogic;
+}
+
+namespace PaymentGateways {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment);
 #pragma clang diagnostic pop
+
+} //namespace PaymentGateways
 
 struct stuPaymentResponse {
     int     ErrorCode;
@@ -75,6 +81,8 @@ struct stuPaymentResponse {
     {}
 };
 
+namespace PaymentGateways {
+
 #define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
     struct _##_className##_static_constructor { \
         _##_className##_static_constructor() {
@@ -92,25 +100,25 @@ struct stuPaymentResponse {
 public: \
     instanceGetterPtr(_gatewayClassName); \
 protected: \
-    virtual TAPI::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
-    virtual stuPaymentResponse request( \
-            const stuPaymentGateway& _paymentGateway, \
+    virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
+    virtual Targoman::API::AccountModule::stuPaymentResponse request( \
+            const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
             TAPI::MD5_t _orderMD5, \
             qint64 _amount, \
             const QString& _callback, \
             const QString& _desc \
             ); \
-    virtual stuPaymentResponse verify( \
-            const stuPaymentGateway& _paymentGateway, \
+    virtual Targoman::API::AccountModule::stuPaymentResponse verify( \
+            const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
             const TAPI::JSON_t& _pgResponse, \
             const QString& _domain \
             ); \
-    friend Targoman::API::AAA::PaymentLogic; \
+    friend Targoman::API::AccountModule::Classes::PaymentLogic; \
 private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::AccountModule::Classes::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
 //PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
@@ -124,10 +132,10 @@ private: \
  */
 class intfPaymentGateway
 {
-    friend Targoman::API::AAA::PaymentLogic;
+    friend Targoman::API::AccountModule::Classes::PaymentLogic;
 
 protected:
-    virtual TAPI::enuPaymentGatewayType::Type getType() = 0;
+    virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
 //    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
     virtual stuPaymentResponse request(
             const stuPaymentGateway& _paymentGateway,
@@ -218,6 +226,7 @@ protected:
     */
 };
 
-} //namespace Targoman::API::AAA
+} //namespace PaymentGateways
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H

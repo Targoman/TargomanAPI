@@ -27,9 +27,7 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman::API::AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 Service::Service() :
     clsTable(
@@ -85,4 +83,4 @@ bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::ORM

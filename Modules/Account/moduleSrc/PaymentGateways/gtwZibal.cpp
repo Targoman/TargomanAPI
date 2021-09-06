@@ -23,7 +23,9 @@
 
 #include "gtwZibal.h"
 
-namespace Targoman::API::AAA {
+using namespace Targoman::API::AccountModule::Classes;
+
+namespace Targoman::API::AccountModule::PaymentGateways {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
@@ -159,4 +161,4 @@ QString gtwZibal::errorString(int _errCode)
     }
 }
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::PaymentGateways

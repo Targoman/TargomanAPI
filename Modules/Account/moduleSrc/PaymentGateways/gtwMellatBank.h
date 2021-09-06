@@ -32,7 +32,7 @@
  * place #include "PaymentGateways/gtwMellatBank.h" in PaymentLogic.cpp for proper driver registration
  */
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::PaymentGateways {
 
 class gtwMellatBank : public intfPaymentGateway
 {
@@ -40,13 +40,13 @@ public:
     constexpr static char Name[] = "MellatBank";
 
 TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-    TAPI::enuPaymentGatewayType::IranBank,
+    Targoman::API::AccountModule::enuPaymentGatewayType::IranBank,
     gtwMellatBank)
 
 private:
     virtual QString errorString(int _errCode);
 };
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::PaymentGateways
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H

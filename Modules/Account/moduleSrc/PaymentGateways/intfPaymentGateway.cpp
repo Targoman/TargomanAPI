@@ -27,6 +27,6 @@
 //#include "ORM/PaymentGateways.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::PaymentGateways {
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::PaymentGateways

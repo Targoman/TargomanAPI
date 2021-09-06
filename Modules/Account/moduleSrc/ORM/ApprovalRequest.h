@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
@@ -26,7 +27,12 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuAPRStatus,
                      New      = 'N',
                      Sent     = 'S',
@@ -41,11 +47,7 @@ TARGOMAN_DEFINE_ENUM(enuApprovalType,
                      Email      = 'E',
                      Mobile     = 'M',
                      )
-}
-
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -62,22 +64,22 @@ TARGOMAN_CREATE_CONSTEXPR(aprStatus);
 }
 #pragma GCC diagnostic pop
 
-class ApprovalRequest : public ORM::clsTable
+class ApprovalRequest : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get ApprovalRequest information.")
     bool ORMDELETE("Delete an ApprovalRequest")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,ApprovalRequest)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuAPRStatus);
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuApprovalType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuAPRStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuApprovalType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H

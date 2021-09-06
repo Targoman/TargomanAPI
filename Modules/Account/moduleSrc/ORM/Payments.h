@@ -28,8 +28,12 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "PaymentGateways.h"
 
-//-----------------------------------------------------
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      New      = 'N',
                      Pending  = 'P',
@@ -38,11 +42,24 @@ TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      Error    = 'E',
                      Removed  = 'R'
                      )
-}
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentStatus);
 
-//-----------------------------------------------------
-namespace Targoman::API::AAA {
+struct stuOnlinePayment
+{
+    quint64 onpID;
+    TAPI::MD5_t onpMD5;
+    quint64 onp_vchID;
+    quint32 onp_pgwID;
+    QString onpPGTrnID;
+    quint64 onpAmount;
+    QString onpResult;
+    Targoman::API::AccountModule::enuPaymentStatus::Type onpStatus;
+
+    stuPaymentGateway PaymentGateway;
+
+    void readFromVariantMap(const QVariantMap& _info);
+};
+
+namespace ORM {
 
 /*****************************************************************\
 |* OnlinePayments ************************************************|
@@ -64,35 +81,7 @@ TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 }
 #pragma GCC diagnostic pop
 
-struct stuOnlinePayment
-{
-    quint64 onpID;
-    TAPI::MD5_t onpMD5;
-    quint64 onp_vchID;
-    quint32 onp_pgwID;
-    QString onpPGTrnID;
-    quint64 onpAmount;
-    QString onpResult;
-    TAPI::enuPaymentStatus::Type onpStatus;
-
-    stuPaymentGateway PaymentGateway;
-
-    void readFromVariantMap(const QVariantMap& _info)
-    {
-        SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, tblOnlinePayments, onpID);
-        SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, tblOnlinePayments, onpMD5);
-        SET_FIELD_FROM_VARIANT_MAP(this->onp_vchID,  _info, tblOnlinePayments, onp_vchID);
-        SET_FIELD_FROM_VARIANT_MAP(this->onp_pgwID,  _info, tblOnlinePayments, onp_pgwID);
-        SET_FIELD_FROM_VARIANT_MAP(this->onpPGTrnID, _info, tblOnlinePayments, onpPGTrnID);
-        SET_FIELD_FROM_VARIANT_MAP(this->onpAmount,  _info, tblOnlinePayments, onpAmount);
-        SET_FIELD_FROM_VARIANT_MAP(this->onpResult,  _info, tblOnlinePayments, onpResult);
-        SET_FIELD_FROM_VARIANT_MAP(this->onpStatus,  _info, tblOnlinePayments, onpStatus);
-
-        this->PaymentGateway.readFromVariantMap(_info);
-    }
-};
-
-class OnlinePayments : public ORM::clsTable
+class OnlinePayments : public clsTable
 {
     Q_OBJECT
 private slots:
@@ -123,17 +112,21 @@ TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class OfflinePayments : public ORM::clsTable
+class OfflinePayments : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get OfflinePayment information.")
     bool ORMUPDATE("Update OfflinePayment info by priviledged user")
 
 private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account,OfflinePayments)
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePayments)
 };
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H

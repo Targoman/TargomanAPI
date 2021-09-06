@@ -28,13 +28,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuWalletTransactionStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 WalletTransactions::WalletTransactions() :
     clsTable(
@@ -44,9 +40,9 @@ WalletTransactions::WalletTransactions() :
             { tblWalletsTransactions::wltID,       ORM_PRIMARYKEY_64 },
             { tblWalletsTransactions::wlt_walID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
             { tblWalletsTransactions::wlt_vchID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
-            { tblWalletsTransactions::wlt_vchType, S(TAPI::enuVoucherType::Type), QFV,                       TAPI::enuVoucherType::Expense, UPNone },
+            { tblWalletsTransactions::wlt_vchType, S(Targoman::API::AccountModule::enuVoucherType::Type), QFV,                       Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
             { tblWalletsTransactions::wltAmount,   S(qint64),                     QFV,                       QInvalid,  UPNone, false, false },
-            { tblWalletsTransactions::wltStatus,   ORM_STATUS_FIELD(TAPI::enuWalletTransactionStatus, TAPI::enuWalletTransactionStatus::New) },
+            { tblWalletsTransactions::wltStatus,   ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
             { tblWalletsTransactions::wltDateTime, ORM_CREATED_ON },
         },
         {///< Col                                Reference Table                         ForeignCol     Rename   LeftJoin
@@ -84,6 +80,4 @@ WalletBalances::WalletBalances() :
     )
 {}
 
-}
-}
-}
+} //namespace Targoman::API::AccountModule::ORM

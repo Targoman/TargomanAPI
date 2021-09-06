@@ -374,7 +374,7 @@ TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuPreVoucher)          //
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA::Accounting::enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA::Accounting::enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA::Accounting, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA::Accounting, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

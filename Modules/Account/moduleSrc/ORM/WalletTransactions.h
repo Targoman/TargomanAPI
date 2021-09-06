@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
@@ -26,17 +27,19 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      New = 'A',
                      Processed = 'P',
                      Removed = 'R'
-                               )
-}
+                     )
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -63,7 +66,7 @@ TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
 #pragma GCC diagnostic pop
 
 
-class WalletTransactions : public ORM::clsTable
+class WalletTransactions : public clsTable
 {
     Q_OBJECT
 private slots:
@@ -73,17 +76,17 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account,WalletTransactions)
 };
 
-class WalletBalances : public ORM::clsTable
+class WalletBalances : public clsTable
 {
     Q_OBJECT
+
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuWalletTransactionStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

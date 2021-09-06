@@ -24,14 +24,27 @@
 #include "Payments.h"
 #include "Voucher.h"
 #include "Classes/PaymentLogic.h"
-
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule {
 
-using namespace ORM;
+void stuOnlinePayment::readFromVariantMap(const QVariantMap& _info)
+{
+    SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, ORM::tblOnlinePayments, onpID);
+    SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, ORM::tblOnlinePayments, onpMD5);
+    SET_FIELD_FROM_VARIANT_MAP(this->onp_vchID,  _info, ORM::tblOnlinePayments, onp_vchID);
+    SET_FIELD_FROM_VARIANT_MAP(this->onp_pgwID,  _info, ORM::tblOnlinePayments, onp_pgwID);
+    SET_FIELD_FROM_VARIANT_MAP(this->onpPGTrnID, _info, ORM::tblOnlinePayments, onpPGTrnID);
+    SET_FIELD_FROM_VARIANT_MAP(this->onpAmount,  _info, ORM::tblOnlinePayments, onpAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->onpResult,  _info, ORM::tblOnlinePayments, onpResult);
+    SET_FIELD_FROM_VARIANT_MAP(this->onpStatus,  _info, ORM::tblOnlinePayments, onpStatus);
+
+    this->PaymentGateway.readFromVariantMap(_info);
+}
+
+namespace ORM {
 
 /*****************************************************************\
 |* OnlinePayments ************************************************|
@@ -48,7 +61,7 @@ OnlinePayments::OnlinePayments() :
             { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),    QNull,     UPAdmin },
             { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPAdmin },
             { tblOnlinePayments::onpResult,             S(QString),             QFV,                                 QNull,     UPAdmin, false, false },
-            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
+            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
             { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
             { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
         },
@@ -82,7 +95,7 @@ OfflinePayments::OfflinePayments() :
             { tblOfflinePayments::ofpReceiptDate,      S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
             { tblOfflinePayments::ofpAmount,           S(quint32),             QFV,                                QRequired,  UPOwner},
             { tblOfflinePayments::ofpNotes,            S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-            { tblOfflinePayments::ofpStatus,           ORM_STATUS_FIELD(TAPI::enuPaymentStatus, TAPI::enuPaymentStatus::Pending) },
+            { tblOfflinePayments::ofpStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
             { tblOfflinePayments::ofpCreationDateTime, ORM_CREATED_ON},
             { tblOfflinePayments::ofpCreatedBy_usrID,  ORM_CREATED_BY},
             { tblOfflinePayments::ofpUpdatedBy_usrID,  ORM_UPDATED_BY},
@@ -109,4 +122,5 @@ bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule

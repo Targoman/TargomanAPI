@@ -26,13 +26,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuRoleStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuRoleStatus);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 Roles::Roles() :
     clsTable(
@@ -44,7 +40,7 @@ Roles::Roles() :
             { tblRoles::rolParent_rolID,      S(quint32),            QFV.integer().minValue(1),        QNull,     UPAdmin },
             { tblRoles::rolPrivileges,        S(TAPI::PrivObject_t), QFV,                              QRequired, UPAdmin, false, false },
             { tblRoles::rolSignupAllowedIPs,  S(QString),            QFV,                              QNull,     UPAdmin, false, false }, //OJO This must be validated after splitting by comma
-            { tblRoles::rolStatus,            ORM_STATUS_FIELD(TAPI::enuRoleStatus, TAPI::enuRoleStatus::Active) },
+            { tblRoles::rolStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuRoleStatus, Targoman::API::AccountModule::enuRoleStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { tblRoles::rolCreationDateTime,  ORM_CREATED_ON },
             { tblRoles::rolCreatedBy_usrID,   ORM_CREATED_BY_NULLABLE },
@@ -96,7 +92,4 @@ bool Roles::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-}
-}
-}
-
+} //namespace Targoman::API::AccountModule::ORM

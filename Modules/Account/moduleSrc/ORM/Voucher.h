@@ -29,8 +29,12 @@
 #include "Classes/Defs.hpp"
 #include "ORM/PaymentGateways.h"
 
-//-----------------------------------------------------
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
                      Expense        = 'E',
@@ -40,11 +44,8 @@ TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      TransferTo     = 'T',
                      TransferFrom   = 'F',
                      )
-}
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuVoucherType);
 
-//-----------------------------------------------------
-namespace Targoman::API::AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -60,7 +61,7 @@ namespace tblVoucher {
 }
 #pragma GCC diagnostic pop
 
-class Voucher : public ORM::clsTable
+class Voucher : public clsTable
 {
     Q_OBJECT
 
@@ -74,7 +75,7 @@ private slots:
         (
             TAPI::JWT_t _JWT,
             quint32 _amount,
-            TAPI::enuPaymentGatewayType::Type _gatewayType,
+            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
             quint64 _walletID = 0,
             QString _paymentVerifyCallback = {}
@@ -114,6 +115,9 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 };
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuVoucherType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H

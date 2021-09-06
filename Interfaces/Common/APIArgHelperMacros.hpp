@@ -43,8 +43,8 @@
     Q_DECLARE_METATYPE(NULLABLE_TYPE(_type))
 
 /************************************************************/
-#define TAPI_DECLARE_METATYPE_ENUM(_enum) \
-    INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_enum)
+#define TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum) \
+    INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum)
 
 /************************************************************/
 #define TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, ...) \

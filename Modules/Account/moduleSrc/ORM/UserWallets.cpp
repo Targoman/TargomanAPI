@@ -26,12 +26,11 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserWalletStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule::ORM {
 
-using namespace ORM;
-using namespace DBManager;
+//using namespace DBManager;
 
 UserWallets::UserWallets() :
     clsTable(
@@ -50,7 +49,7 @@ UserWallets::UserWallets() :
             { tblUserWallets::walSumExpenses,           S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
             { tblUserWallets::walSumCredit,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
             { tblUserWallets::walSumDebit,              S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walStatus,                ORM_STATUS_FIELD(TAPI::enuUserWalletStatus, TAPI::enuUserWalletStatus::Active) },
+            { tblUserWallets::walStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active) },
             {  ORM_INVALIDATED_AT_FIELD },
             { tblUserWallets::walCreationDateTime,      ORM_CREATED_ON },
             { tblUserWallets::walCreatedBy_usrID,       ORM_CREATED_BY },
@@ -188,4 +187,4 @@ bool UserWallets::apiCREATEtransfer(
     return true;
 }
 
-} //namespace Targoman::API::AAA
+} //namespace Targoman::API::AccountModule::ORM

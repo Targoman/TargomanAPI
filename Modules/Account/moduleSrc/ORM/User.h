@@ -27,12 +27,18 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman::API::AAA {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
+namespace ORM {
 
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-class User : public ORM::clsTable
+class User : public clsTable
 {
     Q_OBJECT
 
@@ -92,7 +98,7 @@ TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class UserExtraInfo : public ORM::clsTable
+class UserExtraInfo : public clsTable
 {
     Q_OBJECT
 
@@ -131,6 +137,7 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
 };
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H

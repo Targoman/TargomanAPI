@@ -30,13 +30,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuVoucherType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuVoucherType);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 Voucher::Voucher() :
     clsTable(
@@ -46,7 +42,7 @@ Voucher::Voucher() :
             { tblVoucher::vchID,               ORM_PRIMARYKEY_64 },
             { tblVoucher::vch_usrID,           S(quint64),              QFV.integer().minValue(1),  QRequired, UPNone },
             { tblVoucher::vchDesc,             S(TAPI::JSON_t),         QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
-            { tblVoucher::vchType,             S(TAPI::enuVoucherType::Type), QFV,                  TAPI::enuVoucherType::Expense, UPNone },
+            { tblVoucher::vchType,             S(Targoman::API::AccountModule::enuVoucherType::Type), QFV,                  Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
             { tblVoucher::vchTotalAmount,      S(quint64),              QFV,                        0,         UPNone },
             { tblVoucher::vchStatus,           ORM_STATUS_FIELD(Targoman::API::AAA::Accounting::enuVoucherStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::New) },
             { tblVoucher::vchCreationDateTime, ORM_CREATED_ON },
@@ -70,7 +66,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false){
-        ExtraFilters.insert(tblVoucher::vchType, TAPI::enuVoucherType::toStr(TAPI::enuVoucherType::Withdrawal));
+        ExtraFilters.insert(tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::toStr(Targoman::API::AccountModule::enuVoucherType::Withdrawal));
 
         ExtraFilters.insert(tblVoucher::vch_usrID, clsJWT(_JWT).usrID());
 //        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
@@ -82,7 +78,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 Targoman::API::AAA::Accounting::stuVoucher Voucher::apiCREATErequestIncrease(
         TAPI::JWT_t _JWT,
         quint32 _amount,
-        TAPI::enuPaymentGatewayType::Type _gatewayType,
+        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         QString _domain,
         quint64 _walletID,
         QString _paymentVerifyCallback
@@ -104,14 +100,14 @@ Targoman::API::AAA::Accounting::stuVoucher Voucher::apiCREATErequestIncrease(
 
     try
     {
-        if (_gatewayType == TAPI::enuPaymentGatewayType::COD)
+        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
         {
             //Do nothing as it will be created after information upload.
         }
         else
         {
             TAPI::MD5_t PaymentMD5;
-            Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
+            Voucher.PaymentLink = Targoman::API::AccountModule::Classes::PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
                                       _domain,
                                       Voucher.ID,
@@ -164,6 +160,4 @@ quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUs
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-}
-}
-}
+} //namespace Targoman::API::AccountModule::ORM

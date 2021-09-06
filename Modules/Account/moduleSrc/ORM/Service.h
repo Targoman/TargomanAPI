@@ -27,7 +27,13 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman::API::AAA {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -46,7 +52,7 @@ TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class Service : public ORM::clsTable
+class Service : public clsTable
 {
     Q_OBJECT
 
@@ -60,6 +66,7 @@ private:
     TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
 };
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H

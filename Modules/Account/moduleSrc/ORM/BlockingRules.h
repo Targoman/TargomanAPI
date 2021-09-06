@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
@@ -26,9 +27,13 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -47,21 +52,21 @@ TARGOMAN_CREATE_CONSTEXPR(blrStatus);
 }
 #pragma GCC diagnostic pop
 
-class BlockingRules : public ORM::clsTable
+class BlockingRules : public clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get BlockingRules information")
-    bool ORMDELETE("Delete a BlockingRules")
-    bool ORMUPDATE("Update blocking rule info by priviledged user")
     quint64 ORMCREATE("Create a new BlockingRule by priviledged user")
+    bool ORMUPDATE("Update blocking rule info by priviledged user")
+    bool ORMDELETE("Delete a BlockingRules")
 
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account,BlockingRules)
+private:
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, BlockingRules)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H

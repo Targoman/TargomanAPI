@@ -23,19 +23,40 @@
 
 #include "PaymentGateways.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
-
 #include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
 
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayTransactionFeeType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
 
-namespace Targoman::API::AAA {
+namespace Targoman::API::AccountModule {
 
-using namespace ORM;
+void stuPaymentGateway::readFromVariantMap(const QVariantMap& _info)
+{
+    SET_FIELD_FROM_VARIANT_MAP(this->pgwID,                  _info, ORM::tblPaymentGateways, pgwID);
+    SET_FIELD_FROM_VARIANT_MAP(this->pgwName,                _info, ORM::tblPaymentGateways, pgwName);
+    SET_FIELD_FROM_VARIANT_MAP(this->pgwType,                _info, ORM::tblPaymentGateways, pgwType);
+    SET_FIELD_FROM_VARIANT_MAP(this->pgwDriver,              _info, ORM::tblPaymentGateways, pgwDriver);
+    SET_FIELD_FROM_VARIANT_MAP(this->pgwMetaInfo,            _info, ORM::tblPaymentGateways, pgwMetaInfo);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeValue, _info, ORM::tblPaymentGateways, pgwTransactionFeeValue);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeType,  _info, ORM::tblPaymentGateways, pgwTransactionFeeType);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMinRequestAmount,    _info, ORM::tblPaymentGateways, pgwMinRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxRequestAmount,    _info, ORM::tblPaymentGateways, pgwMaxRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxPerDayAmount,     _info, ORM::tblPaymentGateways, pgwMaxPerDayAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwLastPaymentDateTime, _info, ORM::tblPaymentGateways, pgwLastPaymentDateTime);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumTodayPaidAmount,  _info, ORM::tblPaymentGateways, pgwSumTodayPaidAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestCount,     _info, ORM::tblPaymentGateways, pgwSumRequestCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestAmount,    _info, ORM::tblPaymentGateways, pgwSumRequestAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumFailedCount,      _info, ORM::tblPaymentGateways, pgwSumFailedCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumOkCount,          _info, ORM::tblPaymentGateways, pgwSumOkCount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumPaidAmount,       _info, ORM::tblPaymentGateways, pgwSumPaidAmount);
+//        SET_FIELD_FROM_VARIANT_MAP(this->pgwStatus,              _info, ORM::tblPaymentGateways, pgwStatus);
+}
+
+namespace ORM {
 
 PaymentGateways::PaymentGateways() :
     clsTable(
@@ -44,13 +65,13 @@ PaymentGateways::PaymentGateways() :
         {///< ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
             { tblPaymentGateways::pgwID,                    ORM_PRIMARYKEY_32 },
             { tblPaymentGateways::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwType,                  S(TAPI::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
+            { tblPaymentGateways::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
             { tblPaymentGateways::pgwAllowedDomainName,     S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             //------------------
             { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwTransactionFeeType,    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
+            { tblPaymentGateways::pgwTransactionFeeType,    S(Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Type), QFV, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
             //------------------
             { tblPaymentGateways::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    1,          UPAdmin },
             { tblPaymentGateways::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
@@ -65,7 +86,7 @@ PaymentGateways::PaymentGateways() :
             { tblPaymentGateways::pgwSumOkCount,            S(quint32),                                         QFV,                                0,          UPAdmin },
             { tblPaymentGateways::pgwSumPaidAmount,         S(quint64),                                         QFV,                                0,          UPAdmin },
             //------------------
-            { tblPaymentGateways::pgwStatus,                ORM_STATUS_FIELD(TAPI::enuPaymentGatewayStatus, TAPI::enuPaymentGatewayStatus::Active) },
+            { tblPaymentGateways::pgwStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayStatus, Targoman::API::AccountModule::enuPaymentGatewayStatus::Active) },
             { tblPaymentGateways::pgwCreationDateTime,      ORM_CREATED_ON },
             { tblPaymentGateways::pgwCreatedBy_usrID,       ORM_CREATED_BY },
             { tblPaymentGateways::pgwUpdatedBy_usrID,       ORM_UPDATED_BY },
@@ -105,4 +126,5 @@ bool PaymentGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-} //namespace Targoman::API::AAA
+} //namespace ORM
+} //namespace Targoman::API::AccountModule

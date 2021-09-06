@@ -25,29 +25,27 @@
 #define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Payments.h"
+#include "ORM/Voucher.h"
 #include "Classes/Defs.hpp"
 #include "Classes/PaymentLogic.h"
 
-namespace TAPI {
+using namespace Targoman::API::ORM;
+
+namespace Targoman::API::AccountModule {
 
 struct stuMultiJWT {
     TAPI::EncodedJWT_t Login;
     TAPI::EncodedJWT_t Session;
 };
 
-}
+//namespace AAA {
+//class Voucher;
+//}
 
-namespace Targoman::API {
-
-namespace AAA {
-class Voucher;
-}
-
-class Account : public ORM::clsRESTAPIWithActionLogs
+class Account : public clsRESTAPIWithActionLogs
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
@@ -72,7 +70,7 @@ private slots:
     /*****************************************************************\
     |* User **********************************************************|
     \*****************************************************************/
-    TAPI::stuMultiJWT REST(
+    Targoman::API::AccountModule::stuMultiJWT REST(
         ,
         login,
         (
@@ -88,7 +86,7 @@ private slots:
         "Login user and return an encoded JWT if services are provided (as coma separated list) then user must have access to specified services"
     )
 
-    TAPI::stuMultiJWT REST(
+    Targoman::API::AccountModule::stuMultiJWT REST(
         ,
         loginByOAuth,
         (
@@ -102,7 +100,7 @@ private slots:
         "Login by Open Authentication and return an encoded JWT"
     )
 
-    TAPI::stuMultiJWT REST(
+    Targoman::API::AccountModule::stuMultiJWT REST(
         ,
         refreshJWT,
         (
@@ -201,7 +199,7 @@ private slots:
         (
             TAPI::JWT_t _JWT,
             Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
-            TAPI::enuPaymentGatewayType::Type _gatewayType,
+            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
             qint64 _walletID = -1,
             QString _paymentVerifyCallback = {}
@@ -217,7 +215,7 @@ private slots:
         approveOnlinePayment,
         (
             TAPI::JWT_t _JWT,
-//            TAPI::enuPaymentGatewayType::Type _gatewayType,
+//            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,
             TAPI::JSON_t _pgResponse
@@ -270,9 +268,9 @@ private slots:
     )
 };
 
-} //namespace Targoman::API
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuOAuthType);
-TAPI_DECLARE_METATYPE(TAPI::stuMultiJWT);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuOAuthType);
+TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::stuMultiJWT);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

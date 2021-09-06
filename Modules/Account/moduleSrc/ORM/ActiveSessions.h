@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
@@ -27,7 +28,10 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Account.h"
 
-namespace TAPI{
+namespace Targoman::API::AccountModule {
+
+//structures and enumes goes here
+
 TARGOMAN_DEFINE_ENUM(enuSessionStatus,
                      Active    = 'A',
                      LoggedOut = 'G',
@@ -35,11 +39,8 @@ TARGOMAN_DEFINE_ENUM(enuSessionStatus,
                      Expired   = 'E',
                      Removed   = 'R'
                                  )
-}
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -59,7 +60,7 @@ TARGOMAN_CREATE_CONSTEXPR(ssnStatus);
 }
 #pragma GCC diagnostic pop
 
-class ActiveSessions : public ORM::clsTable
+class ActiveSessions : public clsTable
 {
     Q_OBJECT
 
@@ -67,13 +68,12 @@ private slots:
     QVariant ORMGET("Get ActiveSessions information.")
     bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")
 
-    TARGOMAN_DEFINE_API_SUBMODULE(Account,ActiveSessions)
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ActiveSessions)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuSessionStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H

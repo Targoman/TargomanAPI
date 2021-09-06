@@ -26,13 +26,9 @@
 
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSessionStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-
-using namespace ORM;
+namespace Targoman::API::AccountModule::ORM {
 
 ActiveSessions::ActiveSessions() :
     clsTable(
@@ -47,7 +43,7 @@ ActiveSessions::ActiveSessions() :
             { tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),      QFV.allwaysInvalid(),        QNull,     UPNone, false, false },
             { tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
             { tblActiveSessions::ssnRemember,         S(bool),             QFV,                         false,     UPNone },
-            { tblActiveSessions::ssnStatus,           ORM_STATUS_FIELD(TAPI::enuSessionStatus, TAPI::enuSessionStatus::Active) },
+            { tblActiveSessions::ssnStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
             { tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON },
             { tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY },
         },
@@ -87,7 +83,4 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 
-}
-}
-}
-
+} //namespace Targoman::API::AccountModule::ORM

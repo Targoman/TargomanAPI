@@ -434,15 +434,15 @@ inline QString toCammel(const QString& _name)
 //        qDebug() << "INTERNAL_ (1)" << v.toDouble();
 
 /************************************************************/
-#define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_enum) \
-    TAPI_DECLARE_METATYPE(_enum::Type); \
+#define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum) \
+    TAPI_DECLARE_METATYPE(_namespace::_enum::Type); \
 namespace TAPI { \
-    inline void setFromVariant(_enum::Type& _storage, const QVariant& _val) { \
-        _storage = _enum::toEnum(_val.toString()); \
+    inline void setFromVariant(_namespace::_enum::Type& _storage, const QVariant& _val) { \
+        _storage = _namespace::_enum::toEnum(_val.toString()); \
     } \
-    inline void setFromVariant(NULLABLE_TYPE(_enum::Type)& _storage, const QVariant& _val) { \
+    inline void setFromVariant(NULLABLE_TYPE(_namespace::_enum::Type)& _storage, const QVariant& _val) { \
         if (_val.isValid() && _val.isNull() == false) \
-            _storage = _enum::toEnum(_val.toString()); \
+            _storage = _namespace::_enum::toEnum(_val.toString()); \
     } \
 }
 
