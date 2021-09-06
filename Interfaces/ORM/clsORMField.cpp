@@ -164,7 +164,8 @@ void clsORMField::validate(const QVariant _value)
 
 const intfAPIArgManipulator& clsORMField::argSpecs()
 {
-//    qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
+    if (this->Data->ParameterType == QMetaType::UnknownType)
+        qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
 
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType))
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));

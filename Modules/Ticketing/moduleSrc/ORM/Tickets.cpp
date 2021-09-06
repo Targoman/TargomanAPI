@@ -45,7 +45,7 @@ Tickets::Tickets() :
             { tblTickets::tkt_svcID,           S(quint32),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tktInReply_tktID,    S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
             { tblTickets::tktBase_tktID,       S(quint64),             QFV.integer().minValue(1), QNull,     UPNone },
-            { tblTickets::tktType,             S(TAPI::enuTicketType::Type), QFV,                 Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
+            { tblTickets::tktType,             S(Targoman::API::TicketingModule::enuTicketType::Type), QFV,                 Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
             { tblTickets::tktTitle,            S(TAPI::JSON_t),        QFV,                       QRequired, UPNone, false, false },
             { tblTickets::tktBodyMarkdown,     S(QString),             QFV.allwaysValid(),        QRequired, UPNone, false, false },
             { tblTickets::tktHasAttachment,    S(TAPI::DateTime_t),    QFV,                       false,     UPNone },
@@ -72,7 +72,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
 //                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
 //                       .arg(tblTickets::tktTarget_usrID)
-//                       .arg(tblTickets::tktType).arg((TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast)));
+//                       .arg(tblTickets::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -94,7 +94,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //            .orWhere({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
 //            .orWhere(//clsCondition::scope(
 //                clsCondition(tblTickets::tktTarget_usrID, enuConditionOperator::Null)
-//                .orCond({ tblTickets::tktType, enuConditionOperator::Equal, TAPI::enuTicketType::toStr(TAPI::enuTicketType::Broadcast) })
+//                .orCond({ tblTickets::tktType, enuConditionOperator::Equal, Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
 //            )//)
 //        ;
 
