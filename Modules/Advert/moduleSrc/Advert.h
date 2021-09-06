@@ -33,7 +33,7 @@
 using namespace Targoman::API::AAA::Accounting;
 
 //namespace TAPI {
-namespace Targoman::API::Advertisement {
+namespace Targoman::API::AdvertModule {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
     SF_quint64(ID),
@@ -105,24 +105,24 @@ private slots:
 //        "Cancel voucher item"
 //    )
 
-    Targoman::API::Advertisement::stuAdvert REST(
+    Targoman::API::AdvertModule::stuAdvert REST(
         GET,
         newBanner,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             QString _location,
-            Targoman::API::Advertisement::enuAdvertOrder::Type _order
+            Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
         "Get new banner based on location and order info"
     )
 
-    Targoman::API::Advertisement::stuAdvert REST(
+    Targoman::API::AdvertModule::stuAdvert REST(
         GET,
         newText,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             QString _location,
-            Targoman::API::Advertisement::enuAdvertOrder::Type _order,
+            Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
         ),
         "Get new text advertisement"
@@ -144,6 +144,6 @@ private slots:
 
 } //namespace Targoman::API
 
-TAPI_DECLARE_METATYPE(Targoman::API::Advertisement::stuAdvert);
+TAPI_DECLARE_METATYPE(Targoman::API::AdvertModule::stuAdvert);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H

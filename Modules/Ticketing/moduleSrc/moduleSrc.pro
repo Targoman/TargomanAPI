@@ -6,7 +6,20 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-include($$QBUILD_PATH/templates/projectConfigs.pri)
+ModuleName=Ticketing
 
-addSubdirs(moduleSrc, Dependencies)
-addSubdirs(functionalTest, Dependencies)
+HEADERS += \
+    Ticketing.h \
+    ORM/Tickets.h \
+    ORM/Defs.hpp \
+
+SOURCES += \
+    Ticketing.cpp \
+    ORM/Tickets.cpp \
+
+OTHER_FILES += \
+    dumpDBSchema.sh \
+    ORM/Schema.my.sql \
+
+################################################################################
+include($$QBUILD_PATH/templates/moduleConfigs.pri)

@@ -18,20 +18,21 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TICKETING_TICKETING_H
 #define TARGOMAN_API_MODULES_TICKETING_TICKETING_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-
 #include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 #include "ORM/Defs.hpp"
 
-namespace Targoman {
-namespace API {
+using namespace Targoman::API::ORM;
 
-class Ticketing : public ORM::clsRESTAPIWithActionLogs
+namespace Targoman::API::TicketingModule {
+
+class Ticketing : public clsRESTAPIWithActionLogs
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
@@ -43,7 +44,7 @@ private:
     quint64 insertTicket(quint64 _targetUserID,
                          quint32 _serviceID,
                          quint64 _inReplyTo,
-                         TAPI::enuTicketType::Type _ticketType,
+                         Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
                          const QString& _title,
                          const QString& _body,
                          bool _hasAttachemnt,
@@ -70,7 +71,7 @@ private slots:
             TAPI::JWT_t _JWT,
             const QString& _title,
             const QString& _text,
-            TAPI::enuTicketType::Type _ticketType,
+            Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
             quint64 _inReplyTo = 0,
             TAPI::stuFileInfo _file = {}
@@ -80,8 +81,6 @@ private slots:
 
 };
 
-}
-}
-
+} //namespace Targoman::API::TicketingModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_TICKETING_H

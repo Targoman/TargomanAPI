@@ -29,7 +29,7 @@
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace AdvertModule {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"

@@ -27,7 +27,7 @@
 #include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
-namespace Targoman::API::Advertisement {
+namespace Targoman::API::AdvertModule {
 
 TARGOMAN_DEFINE_ENUM (enuProductType,
                       Advertise = 'A',
@@ -135,8 +135,8 @@ public:
 };
 */
 
-} // namespace Targoman::API::Advertisement
+} // namespace Targoman::API::AdvertModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuProductType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuProductType);
 
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

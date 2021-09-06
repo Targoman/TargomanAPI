@@ -6,30 +6,22 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=Advert
+TEST_NAME = ticketingFunctionalTest
 
 HEADERS += \
-    Advert.h \
-    ORM/ActiveAds.h \
-    ORM/Defs.hpp \
-    ORM/Bin.h \
-    ORM/Clicks.h \
-    ORM/Props.h \
-    ORM/Accounting.h \
-    ORM/Locations.h \
+    ORM/actionLogs.hpp \
+    testTicketing.hpp
 
 SOURCES += \
-    Advert.cpp \
-    ORM/ActiveAds.cpp \
-    ORM/Bin.cpp \
-    ORM/Clicks.cpp \
-    ORM/Props.cpp \
-    ORM/Accounting.cpp \
-    ORM/Locations.cpp \
+    $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
+    main.cpp \
 
-OTHER_FILES += \
-    dumpDBSchema.sh \
-    ORM/Schema.my.sql \
+LIBS += -lcurl
+
+BASE_TEST_PATH = $$BASE_PROJECT_PATH/Interfaces/Test
+INCLUDEPATH += $$BASE_TEST_PATH
+include($$BASE_TEST_PATH/Test.pri)
 
 ################################################################################
-include($$QBUILD_PATH/templates/moduleConfigs.pri)
+include($$QBUILD_PATH/templates/unitTestConfigs.pri)
+LIBS -= -lTargomanAPI

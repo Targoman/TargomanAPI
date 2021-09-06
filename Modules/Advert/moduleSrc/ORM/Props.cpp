@@ -30,7 +30,7 @@
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace AdvertModule {
 using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
@@ -81,7 +81,7 @@ Props::Props() :
               { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
                 {tblProps::prp_binID,           ORM_PRIMARYKEY_32},
                 {tblProps::prp_locID,           ORM_PRIMARYKEY_32},
-                {tblProps::prpOrder,            S(Targoman::API::Advertisement::enuAdvertOrder::Type), QFV,                       Targoman::API::Advertisement::enuAdvertOrder::Normal,  UPOwner},
+                {tblProps::prpOrder,            S(Targoman::API::AdvertModule::enuAdvertOrder::Type), QFV,                       Targoman::API::AdvertModule::enuAdvertOrder::Normal,  UPOwner},
                 {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QRequired,  UPOwner},
                 {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},
                 {tblProps::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},

@@ -31,7 +31,7 @@
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace AdvertModule {
 using namespace ORM;
 
 QVariant ActiveAds::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
@@ -58,7 +58,7 @@ ActiveAds::ActiveAds() :
               { ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
                 {tblActiveAds::act_binID,    ORM_PRIMARYKEY_32},
                 {tblActiveAds::act_locID,    ORM_PRIMARYKEY_32},
-                {tblActiveAds::actOrder,     S(Targoman::API::Advertisement::enuAdvertOrder::Type),QFV,               Targoman::API::Advertisement::enuAdvertOrder::Normal, UPNone},
+                {tblActiveAds::actOrder,     S(Targoman::API::AdvertModule::enuAdvertOrder::Type),QFV,               Targoman::API::AdvertModule::enuAdvertOrder::Normal, UPNone},
                 {tblActiveAds::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
               },
               { ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin

@@ -18,32 +18,45 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Ticketing.h"
+#include "ORM/Defs.hpp"
+#include "ORM/Tickets.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "QFieldValidator.h"
 
-#include "ORM/Defs.hpp"
-#include "ORM/Tickets.h"
+//using namespace Targoman::API::ORM;
 
-TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTicketType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API::TicketingModule {
+
+using namespace TicketingModule;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 
-quint64 Ticketing::insertTicket(quint64 _targetUserID,
-                                quint32 _serviceID,
-                                quint64 _inReplyTo,
-                                TAPI::enuTicketType::Type _ticketType,
-                                const QString& _title,
-                                const QString& _body,
-                                bool _hasAttachemnt,
-                                quint64 _createdBy) {
+Ticketing::Ticketing() :
+    clsRESTAPIWithActionLogs(TicketingSchema, TicketingDomain)
+{
+    this->addSubModule(&ORM::Tickets::instance());
+    this->addSubModule(&ORM::TicketRead::instance());
+}
+
+quint64 Ticketing::insertTicket(
+        quint64 _targetUserID,
+        quint32 _serviceID,
+        quint64 _inReplyTo,
+        Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+        const QString& _title,
+        const QString& _body,
+        bool _hasAttachemnt,
+        quint64 _createdBy
+    )
+{
   return this->execQuery(
           "INSERT INTO tblTickets "
           "   SET tblTickets.tktTarget_usrID =?,"
@@ -62,42 +75,54 @@ quint64 Ticketing::insertTicket(quint64 _targetUserID,
       .toULongLong();
 }
 
-bool Ticketing::apiPUTnewMessage(TAPI::JWT_t _JWT,
-                                 const QString& _title,
-                                 const QString& _bodyMarkdown,
-                                 quint32 _serviceID,
-                                 quint64 _targetUserID) {
-  Authorization::checkPriv(_JWT,
-                           {this->moduleBaseName() + ":canPUTNewMessage"});
+bool Ticketing::apiPUTnewMessage(
+        TAPI::JWT_t _JWT,
+        const QString& _title,
+        const QString& _bodyMarkdown,
+        quint32 _serviceID,
+        quint64 _targetUserID
+    )
+{
+  Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
 
   return this->insertTicket(
              _targetUserID, _serviceID, 0,
-             _targetUserID ? TAPI::enuTicketType::Message : TAPI::enuTicketType::Broadcast,
+             _targetUserID ? Targoman::API::TicketingModule::enuTicketType::Message : Targoman::API::TicketingModule::enuTicketType::Broadcast,
              _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
 }
 
-bool Ticketing::apiPUTnewFeedback(TAPI::JWT_t _JWT,
-                                  const QString& _title,
-                                  const QString& _text,
-                                  TAPI::enuTicketType::Type _ticketType,
-                                  quint32 _serviceID,
-                                  quint64 _inReplyTo,
-                                  TAPI::stuFileInfo _file) {
+bool Ticketing::apiPUTnewFeedback(
+        TAPI::JWT_t _JWT,
+        const QString& _title,
+        const QString& _text,
+        Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+        quint32 _serviceID,
+        quint64 _inReplyTo,
+        TAPI::stuFileInfo _file
+    )
+{
   Authorization::checkPriv(_JWT, {});
 
-  if (_inReplyTo && (_ticketType != TAPI::enuTicketType::Reply))
+  if (_inReplyTo && (_ticketType != Targoman::API::TicketingModule::enuTicketType::Reply))
     throw exHTTPBadRequest("Reply tickets must have reply type");
 
-  if (_ticketType == TAPI::enuTicketType::Message ||
-      _ticketType == TAPI::enuTicketType::Broadcast)
+  if (_ticketType == Targoman::API::TicketingModule::enuTicketType::Message ||
+      _ticketType == Targoman::API::TicketingModule::enuTicketType::Broadcast)
     throw exHTTPBadRequest(
         "Message and Broadcast tickets must be sent via newMessage method");
 
-  quint64 TicketID =
-      this->insertTicket(_inReplyTo, _serviceID, 0, _ticketType, _title, _text,
-                         _file.Size > 0, clsJWT(_JWT).usrID());
+  quint64 TicketID = this->insertTicket(
+                         _inReplyTo,
+                         _serviceID,
+                         0,
+                         _ticketType,
+                         _title,
+                         _text,
+                         _file.Size > 0,
+                         clsJWT(_JWT).usrID());
 
-  if (_file.Size > 0) {
+  if (_file.Size > 0)
+  {
     ///TODO: move to tickt attachemnts with ID
     // QFile::rename(_file.TempName, )
   }
@@ -106,11 +131,4 @@ bool Ticketing::apiPUTnewFeedback(TAPI::JWT_t _JWT,
   return true;
 }
 
-Ticketing::Ticketing()
-    : ORM::clsRESTAPIWithActionLogs("Ticketing", "Ticketing") {
-  this->addSubModule(&ORM::Tickets::instance());
-  this->addSubModule(&ORM::TicketRead::instance());
-}
-
-}  // namespace API
-}  // namespace Targoman
+}  // namespace Targoman::API::TicketingModule

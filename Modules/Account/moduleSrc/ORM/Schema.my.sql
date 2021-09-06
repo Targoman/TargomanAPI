@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=43487 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=52374 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -271,7 +271,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprRequestDate` (`aprRequestDate`),
   KEY `aprApplyDate` (`aprApplyDate`),
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=407 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=445 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -497,7 +497,7 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
   CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -571,7 +571,7 @@ CREATE TABLE `tblRoles` (
   CONSTRAINT `FK_tblRoles_tblRoles` FOREIGN KEY (`rolParent_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser` FOREIGN KEY (`rolCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser_2` FOREIGN KEY (`rolUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=871 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=891 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -641,7 +641,7 @@ CREATE TABLE `tblUser` (
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1755 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1793 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -757,7 +757,7 @@ CREATE TABLE `tblUserWallets` (
   CONSTRAINT `FK_tblUserWallets_tblUser` FOREIGN KEY (`wal_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_2` FOREIGN KEY (`walCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_3` FOREIGN KEY (`walUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1578 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1616 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -776,7 +776,7 @@ CREATE TABLE `tblVoucher` (
   KEY `vchCreationDateTime` (`vchCreationDateTime`),
   KEY `FK_tblVoucher_tblUser` (`vch_usrID`),
   CONSTRAINT `FK_tblVoucher_tblUser` FOREIGN KEY (`vch_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=280 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=310 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -836,7 +836,7 @@ CREATE TABLE `tblWalletsTransactions` (
   KEY `wltType` (`wlt_vchType`),
   CONSTRAINT `FK_tblWalletsTransactions_tblInvoice` FOREIGN KEY (`wlt_vchID`) REFERENCES `tblVoucher` (`vchID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblWalletsTransactions_tblUserWallets` FOREIGN KEY (`wlt_walID`) REFERENCES `tblUserWallets` (`walID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
+) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;

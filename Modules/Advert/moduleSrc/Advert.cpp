@@ -26,11 +26,7 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
-
 #include "Interfaces/ORM/APIQueryBuilders.h"
-
-using namespace Targoman::API::AAA::Accounting;
-
 #include "ORM/Accounting.h"
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
@@ -39,23 +35,25 @@ using namespace Targoman::API::AAA::Accounting;
 #include "ORM/Props.h"
 #include "ORM/Locations.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAdvertType);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAdvertOrder);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuBannerSize);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuAccountOrdersStatus);
+using namespace Targoman::API::AAA::Accounting;
+
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuBannerSize);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    Targoman::API::Advertisement,
+    Targoman::API::AdvertModule,
     stuAdvert,
-    [](const Targoman::API::Advertisement::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
-//    [](const Targoman::API::Advertisement::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
+    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant{ return _value.toJson(); }
+//    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant{ return _value.toVariant(); }
 );
 
 namespace Targoman::API {
 
 using namespace AAA;
-using namespace Advertisement;
+using namespace AdvertModule;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
@@ -144,17 +142,17 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 //    return true;
 //}
 
-Targoman::API::Advertisement::stuAdvert Advert::apiGETnewBanner(
+Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
-        Targoman::API::Advertisement::enuAdvertOrder::Type _order
+        Targoman::API::AdvertModule::enuAdvertOrder::Type _order
     )
 {}
 
-Targoman::API::Advertisement::stuAdvert Advert::apiGETnewText(
+Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
-        Targoman::API::Advertisement::enuAdvertOrder::Type _order,
+        Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
         const QString _keywords
     )
 {}

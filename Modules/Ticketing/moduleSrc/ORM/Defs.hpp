@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
@@ -26,7 +27,10 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace TAPI {
+constexpr char TicketingDomain[] = "Ticketing";
+constexpr char TicketingSchema[] = "Ticketing";
+
+namespace Targoman::API::TicketingModule {
 
 TARGOMAN_DEFINE_ENUM (enuTicketType,
                        Bug        = 'B',
@@ -37,10 +41,8 @@ TARGOMAN_DEFINE_ENUM (enuTicketType,
                        Broadcast  = 'G'
                        );
 
-}
-constexpr char TicketingSchema[] = "Ticketing";
+} //namespace Targoman::API::TicketingModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuTicketType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule::enuTicketType);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP
-

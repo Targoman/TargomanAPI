@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
@@ -25,16 +26,17 @@
 
 #include "Interfaces/ORM/clsTable.h"
 
-namespace TAPI{
+namespace Targoman::API::TicketingModule {
+
 TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      New       = 'N',
                      Removed   = 'R'
                      )
-}
 
-namespace Targoman {
-namespace API {
 namespace ORM {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblTickets {
 constexpr char Name[] = "tblTickets";
@@ -60,28 +62,30 @@ TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
 TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
 }
 
-class Tickets : public ORM::clsTable
+#pragma GCC diagnostic pop
+
+class Tickets : public Targoman::API::ORM::clsTable
 {
     Q_OBJECT
+
 private slots:
     QVariant ORMGET("Get Tickets")
-
 
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 };
 
-class TicketRead : public ORM::clsTable
+class TicketRead : public Targoman::API::ORM::clsTable
 {
     Q_OBJECT
+
 private:
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
 };
 
-}
-}
-}
+} //namespace ORM
+} //namespace Targoman::API::TicketingModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI::enuTicketStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule::enuTicketStatus);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H

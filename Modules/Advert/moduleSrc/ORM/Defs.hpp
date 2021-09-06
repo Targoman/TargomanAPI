@@ -27,8 +27,10 @@
 #include "libTargomanCommon/Macros.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-//namespace TAPI {
-namespace Targoman::API::Advertisement {
+constexpr char AdvertDomain[] = "Advert";
+constexpr char AdvertSchema[] = "Advert";
+
+namespace Targoman::API::AdvertModule {
 
 TARGOMAN_DEFINE_ENUM (enuAdvertOrder,
                       First  = '1',
@@ -71,14 +73,11 @@ TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
                       Removed   = 'R',
                       );
 
-} //namespace Targoman::API::Advertisement
+} //namespace Targoman::API::AdvertModule
 
-constexpr char AdvertSchema[] = "Advert";
-constexpr char AdvertDomain[] = "Advert";
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAdvertOrder);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAdvertType);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuBannerSize);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Advertisement::enuAccountOrdersStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuAdvertOrder);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuAdvertType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuBannerSize);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule::enuAccountOrdersStatus);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP

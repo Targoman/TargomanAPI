@@ -25,9 +25,9 @@
 #include "Defs.hpp"
 #include "Locations.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Advertisement, enuProductType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
-namespace Targoman::API::Advertisement {
+namespace Targoman::API::AdvertModule {
 
 using namespace ORM;
 using namespace AAA;
@@ -38,7 +38,7 @@ using namespace Targoman::API::AAA::Accounting;
 AccountProducts::AccountProducts()
     : intfAccountProducts(AdvertSchema,
         {///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
-            { tblAccountProducts::prdType,               S(Targoman::API::Advertisement::enuProductType::Type), QFV, QRequired, UPOwner },
+            { tblAccountProducts::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
             { tblAccountProducts::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
             { tblAccountProducts::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
             { tblAccountProducts::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
@@ -87,4 +87,4 @@ AccountCoupons::AccountCoupons()
     : intfAccountCoupons(AdvertSchema)
 {}
 
-} // namespace Targoman::API::Advertisement
+} // namespace Targoman::API::AdvertModule

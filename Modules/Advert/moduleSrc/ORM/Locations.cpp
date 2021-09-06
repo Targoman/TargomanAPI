@@ -29,7 +29,7 @@
 
 namespace Targoman {
 namespace API {
-namespace Advertisement {
+namespace AdvertModule {
 
 using namespace ORM;
 

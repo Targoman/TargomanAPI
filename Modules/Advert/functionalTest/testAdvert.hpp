@@ -42,7 +42,7 @@ using namespace Targoman::API::AAA::Accounting;
 
 #include "../moduleSrc/ORM/Accounting.h"
 #include "../moduleSrc/ORM/Locations.h"
-using namespace Targoman::API::Advertisement;
+using namespace Targoman::API::AdvertModule;
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
@@ -205,7 +205,7 @@ private slots:
                     { tblAccountProductsBase::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::prdName,          "test product 123" },
                     { tblAccountProductsBase::prdInStockCount,  1 },
-                    { tblAccountProducts::prdType,              Targoman::API::Advertisement::enuProductType::toStr(Targoman::API::Advertisement::enuProductType::Advertise) },
+                    { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
                     { tblAccountProducts::prd_locID,            this->LocationID },
                 }
             );
