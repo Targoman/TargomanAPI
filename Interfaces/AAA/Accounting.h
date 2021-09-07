@@ -94,7 +94,10 @@ protected:
     virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
     virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool cancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool cancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem,
+            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
     virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
 private:
@@ -137,8 +140,30 @@ private slots:
         "add a package to basket and return updated pre-Voucher"
     )
 
-    ///TODO: removeFromBasket
-    ///TODO: updateItemInBasket
+    Targoman::API::AAA::Accounting::stuPreVoucher REST(
+        POST,
+        removeBasketItem,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::MD5_t _itemUUID,
+            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+        ),
+        "Remove a package from basket and return updated pre-Voucher."
+        "Only Pending items can be removed."
+    )
+
+//    Targoman::API::AAA::Accounting::stuPreVoucher REST(
+//        POST,
+//        updateBasketItem,
+//        (
+//            TAPI::JWT_t _JWT,
+//            TAPI::MD5_t _itemUUID,
+//            quint16 _new_qty,
+//            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+//        ),
+//        "Update a package from basket and return updated pre-Voucher."
+//        "Only Pending items can be modify."
+//    )
 
 private:
     QString ServiceName;

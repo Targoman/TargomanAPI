@@ -36,7 +36,6 @@
 
 namespace Targoman::API::AAA::Accounting {
 
-//namespace TAPI {
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      New      = 'N',
                      Canceled = 'C',
@@ -48,25 +47,44 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Percent = '%',
                      Currency  = '$',
                      );
-//}
-
-//namespace Targoman::API::AAA::Accounting {
 
 //inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Common::Configuration::tmplConfigurable<QString> Secret;
-
-//}
-
-//namespace Targoman::API::AAA::Accounting {
-//namespace TAPI {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     QString,      Desc      , QString()    , v.size(), v, v.toString(),
     QJsonObject,  PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
 );
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
+    SF_QString(SaleableCode),
+    SF_qreal(Multiplier),
+    SF_NULLABLE_quint32(MinCount)
+);
+
+struct stuFullDiscount
+{
+    quint32                         cpnID;
+    TAPI::CouponCode_t              cpnCode;
+    quint32                         cpnPrimaryCount;
+    quint32                         cpnTotalMaxAmount;
+    NULLABLE_TYPE(quint32)          cpnPerUserMaxCount;
+    NULLABLE_TYPE(quint32)          cpnPerUserMaxAmount;
+    TAPI::DateTime_t                cpnValidFrom;
+    NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
+    quint32                         cpnAmount;
+    enuDiscountType::Type           cpnAmountType;
+    NULLABLE_TYPE(quint32)          cpnMaxAmount;
+    TAPI::JSON_t                    cpnSaleableBasedMultiplier;
+    quint32                         cpnTotalUsedCount;
+    quint32                         cpnTotalUsedAmount;
+    TAPI::enuGenericStatus::Type    cpnStatus;
+
+    void fromVariantMap(const QVariantMap& _info);
+};
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
     SF_quint64(ID),
     SF_QString(Code),
     SF_qreal(Amount)
@@ -74,18 +92,18 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount,
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    QString     , Service    , QString()     , v.size() , v          , v.toString()                         ,
-    quint64     , OrderID    , 0             , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())   ,
-    QString     , Desc       , QString()     , v.size() , v          , v.toString()                         ,
-    quint32     , UnitPrice  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
-    qint16      , Qty        , 0             , v        , v          , static_cast<qint16>(v.toDouble())    ,
-    quint32     , SubTotal   , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
-    stuDiscount , Discount   , stuDiscount() , v.ID>0   , v.toJson() , stuDiscount().fromJson(v.toObject()) ,
-    quint32     , DisAmount  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
-    quint8      , VATPercent , 0             , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())       ,
-    quint32     , VATAmount  , 0             , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())   ,
-    TAPI::MD5_t , UUID       , QString()     , v.size() , v          , v.toString()                         ,
-    QString     , Sign       , QString()     , v.size() , v          , v.toString()
+    QString      , Service    , QString()      , v.size() , v          , v.toString()                          ,
+    quint64      , OrderID    , 0              , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())    ,
+    TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
+    QString      , Desc       , QString()      , v.size() , v          , v.toString()                          ,
+    quint32      , UnitPrice  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    qint16       , Qty        , 0              , v        , v          , static_cast<qint16>(v.toDouble())     ,
+    quint32      , SubTotal   , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    stuDiscount3 , Discount   , stuDiscount3() , v.ID>0   , v.toJson() , stuDiscount3().fromJson(v.toObject()) ,
+    quint32      , DisAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    quint8       , VATPercent , 0              , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())        ,
+    quint32      , VATAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    QString      , Sign       , QString()      , v.size() , v          , v.toString()
 );
 
 /*****************************************************************************/
@@ -145,7 +163,7 @@ struct stuAssetItem {
     TAPI::enuGenericStatus::Type    slbStatus;
 
     qreal                           SubTotal;
-    NULLABLE_TYPE(stuDiscount)      Discount;
+    NULLABLE_TYPE(stuDiscount3)      Discount;
     qreal                           TotalPrice;
 
     struct {
@@ -156,6 +174,7 @@ struct stuAssetItem {
 
     QJsonObject toJson(bool _full);
     stuAssetItem& fromJson(const QJsonObject& _obj);
+    void fromVariantMap(const QVariantMap& _info);
 };
 
 typedef QMap<QString, stuAssetItem> ActiveCredits_t;
@@ -188,14 +207,6 @@ struct stuActiveCredit {
     stuActiveCredit& fromJson(const QJsonObject _obj);
 };
 
-//} //namespace Targoman::API::AAA::Accounting
-//} //namespace TAPI
-
-//namespace TAPI {
-
-//using namespace Targoman::API;
-//using namespace Targoman::API::AAA::Accounting;
-
 typedef QList<stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
@@ -223,18 +234,6 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
 );
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
-    SF_QString(SaleableCode),
-    SF_qreal(Multiplier),
-    SF_NULLABLE_quint32(MinCount)
-);
-
-//} //namespace TAPI
-
-//TAPI_DECLARE_METATYPE(TAPI::stuDiscountSaleableBasedMultiplier)
-
-//namespace Targoman::API::AAA::Accounting {
 
 typedef QMap<QString, qint32> ServiceUsage_t;
 
@@ -366,7 +365,7 @@ namespace tblAccountReferalsBase {
 } //namespace Targoman::API::AAA::Accounting
 
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuPrize)
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuDiscount)
+TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuDiscount3)
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::Accounting::stuUsage)
 

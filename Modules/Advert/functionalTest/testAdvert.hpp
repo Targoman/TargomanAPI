@@ -418,7 +418,7 @@ private slots:
                     { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
                     { tblAccountCouponsBase::cpnMaxAmount,                  250000 },
                     { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
-//                        QList<TAPI::stuDiscountSaleableBasedMultiplier>({
+//                        QList<Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier>({
 //                            { this->BannerSaleableCode, 1.5, 0 },
 //                            { this->BannerSaleableCode, 1.8, 5 },
 //                            { "other",     2.0 },
@@ -472,7 +472,42 @@ private slots:
         }
     }
 
+    ///TODO: removeBasketItem
+
     void addToBasket_valid_coupon_code_2()
+    {
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode",       this->BannerSaleableCode },
+                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                1 },
+                    { "discountCode",       this->CouponCode },
+                    { "referrer",           "" },
+                    { "extraReferrerParams", {} },
+                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            qDebug() << "--------- addToBasket" << Result;
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    ///TODO: updateBasketItem
+
+    void addToBasket_valid_coupon_code_3()
     {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();

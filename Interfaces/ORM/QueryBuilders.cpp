@@ -1019,6 +1019,16 @@ QString clsCondition::buildConditionString(
                 CondStr += conditionData.Value.value<QString>();
                 CondStr += ")";
             }
+            else if (conditionData.Operator == enuConditionOperator::NotIn)
+            {
+                if (conditionData.Value.isValid() == false)
+                    throw exQueryBuilder("Value of IN condition is empty");
+
+                CondStr += " NOT IN (";
+                //makeValueAsSQL(
+                CondStr += conditionData.Value.value<QString>();
+                CondStr += ")";
+            }
             else
             {
                 if (SQLPrettyLen)

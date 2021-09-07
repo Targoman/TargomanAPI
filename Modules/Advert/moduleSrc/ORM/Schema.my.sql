@@ -57,7 +57,7 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=122 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -143,7 +143,7 @@ CREATE TABLE `tblAccountSaleables` (
   KEY `slbType` (`slbType`) USING BTREE,
   KEY `slbAvailableToDate` (`slbAvailableToDate`),
   KEY `slbAvailableFromDate` (`slbAvailableFromDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=448 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=454 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -188,7 +188,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=208 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=211 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=227 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -481,6 +481,74 @@ BEGIN
        SET tblAccountCoupons.cpnTotalUsedCount = tblAccountCoupons.cpnTotalUsedCount + iTotalUsedCount
          , tblAccountCoupons.cpnTotalUsedAmount = tblAccountCoupons.cpnTotalUsedAmount + iTotalUsedAmount
      WHERE tblAccountCoupons.cpnID = iDiscountID
+    ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_saleable_reserve` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_reserve`(
+	IN `iSaleableID` INT UNSIGNED,
+	IN `iUserID` BIGINT UNSIGNED
+)
+BEGIN
+        UPDATE tblAccountSaleables
+           SET slbOrderedCount = slbOrderedCount + 1
+             , slbUpdatedBy_usrID = iUserID
+         WHERE slbID = iSaleableID
+    ;
+
+        UPDATE tblAccountProducts
+    INNER JOIN tblAccountSaleables
+            ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
+           SET prdOrderedCount = prdOrderedCount + 1
+             , prdUpdatedBy_usrID = iUserID
+         WHERE slbID = iSaleableID
+    ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_saleable_un_reserve` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_un_reserve`(
+	IN `iSaleableID` INT UNSIGNED,
+	IN `iUserID` BIGINT UNSIGNED
+)
+BEGIN
+        UPDATE tblAccountSaleables
+           SET slbReturnedCount = slbReturnedCount + 1
+             , slbUpdatedBy_usrID = iUserID
+         WHERE slbID = iSaleableID
+    ;
+
+        UPDATE tblAccountProducts
+    INNER JOIN tblAccountSaleables
+            ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
+           SET prdReturnedCount = prdReturnedCount + 1
+             , prdUpdatedBy_usrID = iUserID
+         WHERE slbID = iSaleableID
     ;
 END ;;
 DELIMITER ;

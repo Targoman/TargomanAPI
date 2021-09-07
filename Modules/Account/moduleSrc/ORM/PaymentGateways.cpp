@@ -34,7 +34,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTrans
 
 namespace Targoman::API::AccountModule {
 
-void stuPaymentGateway::readFromVariantMap(const QVariantMap& _info)
+void stuPaymentGateway::fromVariantMap(const QVariantMap& _info)
 {
     SET_FIELD_FROM_VARIANT_MAP(this->pgwID,                  _info, ORM::tblPaymentGateways, pgwID);
     SET_FIELD_FROM_VARIANT_MAP(this->pgwName,                _info, ORM::tblPaymentGateways, pgwName);

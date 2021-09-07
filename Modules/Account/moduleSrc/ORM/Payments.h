@@ -56,7 +56,7 @@ struct stuOnlinePayment
 
     stuPaymentGateway PaymentGateway;
 
-    void readFromVariantMap(const QVariantMap& _info);
+    void fromVariantMap(const QVariantMap& _info);
 };
 
 namespace ORM {

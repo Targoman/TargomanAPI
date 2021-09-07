@@ -149,7 +149,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 //    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
     QVariantMap PaymentGatewayInfo = qry.one();
     stuPaymentGateway PaymentGateway;
-    PaymentGateway.readFromVariantMap(PaymentGatewayInfo);
+    PaymentGateway.fromVariantMap(PaymentGatewayInfo);
 
     return PaymentGateway;
 }
@@ -325,7 +325,7 @@ quint64 PaymentLogic::approveOnlinePayment(
             .where({ tblOnlinePayments::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
             .one();
     stuOnlinePayment OnlinePayment;
-    OnlinePayment.readFromVariantMap(OnlinePaymentInfo);
+    OnlinePayment.fromVariantMap(OnlinePaymentInfo);
 
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
 

@@ -336,6 +336,8 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
     )
 {
+    checkPreVoucherSanity(_lastPreVoucher);
+
     clsJWT JWT(_JWT);
     quint64 currentUserID = JWT.usrID();
 
@@ -393,32 +395,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdID,                  SaleableInfo, tblAccountProductsBase,  prdID);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdCode,                SaleableInfo, tblAccountProductsBase,  prdCode);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdName,                SaleableInfo, tblAccountProductsBase,  prdName);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidFromDate,       SaleableInfo, tblAccountProductsBase,  prdValidFromDate);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidToDate,         SaleableInfo, tblAccountProductsBase,  prdValidToDate);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidFromHour,       SaleableInfo, tblAccountProductsBase,  prdValidFromHour);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdValidToHour,         SaleableInfo, tblAccountProductsBase,  prdValidToHour);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdPrivs,               SaleableInfo, tblAccountProductsBase,  prdPrivs);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdVAT,                 SaleableInfo, tblAccountProductsBase,  prdVAT);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdInStockCount,        SaleableInfo, tblAccountProductsBase,  prdInStockCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdOrderedCount,        SaleableInfo, tblAccountProductsBase,  prdOrderedCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdReturnedCount,       SaleableInfo, tblAccountProductsBase,  prdReturnedCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.prdStatus,              SaleableInfo, tblAccountProductsBase,  prdStatus);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbID,                  SaleableInfo, tblAccountSaleablesBase, slbID);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbCode,                SaleableInfo, tblAccountSaleablesBase, slbCode);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbName,                SaleableInfo, tblAccountSaleablesBase, slbName);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbPrivs,               SaleableInfo, tblAccountSaleablesBase, slbPrivs);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbBasePrice,           SaleableInfo, tblAccountSaleablesBase, slbBasePrice);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbAdditives,           SaleableInfo, tblAccountSaleablesBase, slbAdditives);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbProductCount,        SaleableInfo, tblAccountSaleablesBase, slbProductCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbMaxSaleCountPerUser, SaleableInfo, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbInStockCount,        SaleableInfo, tblAccountSaleablesBase, slbInStockCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbOrderedCount,        SaleableInfo, tblAccountSaleablesBase, slbOrderedCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbReturnedCount,       SaleableInfo, tblAccountSaleablesBase, slbReturnedCount);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbVoucherTemplate,     SaleableInfo, tblAccountSaleablesBase, slbVoucherTemplate);
-    SET_FIELD_FROM_VARIANT_MAP(AssetItem.slbStatus,              SaleableInfo, tblAccountSaleablesBase, slbStatus);
+    AssetItem.fromVariantMap(SaleableInfo);
 
     //-- check available count --------------------------------
     qint64 AvailableProductCount = AssetItem.prdInStockCount - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedCount, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedCount, 0));
@@ -470,12 +447,12 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
     //-- discount --------------------------------
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
-    stuDiscount Discount;
+    stuDiscount3 Discount3;
     if (_discountCode.size()) {
         QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
             .addCols(QStringList({
                 tblAccountCouponsBase::cpnID,
-                //tblAccountCouponsBase::cpnCode,
+                tblAccountCouponsBase::cpnCode,
                 tblAccountCouponsBase::cpnPrimaryCount,
                 tblAccountCouponsBase::cpnTotalMaxAmount,
                 tblAccountCouponsBase::cpnPerUserMaxCount,
@@ -495,12 +472,13 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
                 Targoman::API::CURRENT_TIMESTAMP,
             }))
 
-            ///TODO: use WHERE uasStatus != TAPI::enuAuditableStatus::Pending ?
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(tblAccountUserAssetsBase::uas_vchID)
                       .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::uasID, "_discountUsedCount")
                       .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, currentUserID })
+                      .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                                  .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
                       .groupBy(tblAccountUserAssetsBase::uas_vchID)
                 , "tmp_cpn_count"
@@ -510,11 +488,12 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
             )
             .addCol("tmp_cpn_count._discountUsedCount")
 
-            ///TODO: use WHERE uasStatus != TAPI::enuAuditableStatus::Pending ?
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::uasDiscountAmount, "_discountUsedAmount")
                       .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, currentUserID })
+                      .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                                  .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
                 , "tmp_cpn_amount"
                 , { "tmp_cpn_amount", tblAccountUserAssetsBase::uas_cpnID,
@@ -537,35 +516,33 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
         QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
 
-        SET_FIELD_FROM_VARIANT_MAP(Discount.ID,                     DiscountInfo, tblAccountCouponsBase, cpnID);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.Code,                   DiscountInfo, tblAccountCouponsBase, cpnCode);
-        quint32 cpnPrimaryCount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnPrimaryCount,                 DiscountInfo, tblAccountCouponsBase, cpnPrimaryCount);
-        quint32 cpnTotalMaxAmount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnTotalMaxAmount,               DiscountInfo, tblAccountCouponsBase, cpnTotalMaxAmount);
-        NULLABLE_TYPE(quint32) cpnPerUserMaxCount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxCount,              DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxCount);
-        NULLABLE_TYPE(quint32) cpnPerUserMaxAmount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxAmount,             DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.ValidFrom,              DiscountInfo, tblAccountCouponsBase, cpnValidFrom);
-        NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
-        SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                   DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
-        SET_FIELD_FROM_VARIANT_MAP(Discount.Amount,                 DiscountInfo, tblAccountCouponsBase, cpnAmount);
-        enuDiscountType::Type cpnAmountType;
-        SET_FIELD_FROM_VARIANT_MAP(cpnAmountType,                   DiscountInfo, tblAccountCouponsBase, cpnAmountType);
-        NULLABLE_TYPE(quint32) cpnMaxAmount;
-//        TAPI::setFromVariant(cpnMaxAmount, DiscountInfo.value("cpnMaxAmount"));
-        SET_FIELD_FROM_VARIANT_MAP(cpnMaxAmount,                    DiscountInfo, tblAccountCouponsBase, cpnMaxAmount);
-        TAPI::JSON_t cpnSaleableBasedMultiplier;
-        SET_FIELD_FROM_VARIANT_MAP(cpnSaleableBasedMultiplier,      DiscountInfo, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
-        quint32 cpnTotalUsedCount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedCount,               DiscountInfo, tblAccountCouponsBase, cpnTotalUsedCount);
-        quint32 cpnTotalUsedAmount;
-        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedAmount,              DiscountInfo, tblAccountCouponsBase, cpnTotalUsedAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.Status,                 DiscountInfo, tblAccountCouponsBase, cpnStatus);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.CreatedBy_usrID,        DiscountInfo, tblAccountCouponsBase, cpnCreatedBy_usrID);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.CreationDateTime,       DiscountInfo, tblAccountCouponsBase, cpnCreationDateTime);
-//        SET_FIELD_FROM_VARIANT_MAP(Discount.UpdatedBy_usrID,        DiscountInfo, tblAccountCouponsBase, cpnUpdatedBy_usrID);
+        stuFullDiscount FullDiscount;
+        FullDiscount.fromVariantMap(DiscountInfo);
+
+        SET_FIELD_FROM_VARIANT_MAP(Discount3.ID,                     DiscountInfo, tblAccountCouponsBase, cpnID);
+        SET_FIELD_FROM_VARIANT_MAP(Discount3.Code,                   DiscountInfo, tblAccountCouponsBase, cpnCode);
+        SET_FIELD_FROM_VARIANT_MAP(Discount3.Amount,                 DiscountInfo, tblAccountCouponsBase, cpnAmount);
+
+//        quint32 cpnPrimaryCount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnPrimaryCount,                 DiscountInfo, tblAccountCouponsBase, cpnPrimaryCount);
+//        quint32 cpnTotalMaxAmount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalMaxAmount,               DiscountInfo, tblAccountCouponsBase, cpnTotalMaxAmount);
+//        NULLABLE_TYPE(quint32) cpnPerUserMaxCount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxCount,              DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxCount);
+//        NULLABLE_TYPE(quint32) cpnPerUserMaxAmount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxAmount,             DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxAmount);
+//        NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                   DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
+//        enuDiscountType::Type cpnAmountType;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnAmountType,                   DiscountInfo, tblAccountCouponsBase, cpnAmountType);
+//        NULLABLE_TYPE(quint32) cpnMaxAmount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnMaxAmount,                    DiscountInfo, tblAccountCouponsBase, cpnMaxAmount);
+//        TAPI::JSON_t cpnSaleableBasedMultiplier;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnSaleableBasedMultiplier,      DiscountInfo, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
+//        quint32 cpnTotalUsedCount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedCount,               DiscountInfo, tblAccountCouponsBase, cpnTotalUsedCount);
+//        quint32 cpnTotalUsedAmount;
+//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedAmount,              DiscountInfo, tblAccountCouponsBase, cpnTotalUsedAmount);
 
         NULLABLE_TYPE(quint32) _discountUsedCount;
         TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
@@ -575,18 +552,18 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 //        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_GET(cpnExpiryTime).toDateTime() < Now)
 //            throw exHTTPBadRequest("Discount code has been expired");
 
-        if (cpnTotalUsedCount >= cpnPrimaryCount)
+        if (FullDiscount.cpnTotalUsedCount >= FullDiscount.cpnPrimaryCount)
             throw exHTTPBadRequest("Discount code has been finished");
 
-        if ((NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxCount, 0) > 0)
-                && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxCount, 0)))
+        if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0) > 0)
+                && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0)))
             throw exHTTPBadRequest("Discount usage per user has been reached");
 
-        if (cpnTotalUsedAmount >= cpnTotalMaxAmount)
+        if (FullDiscount.cpnTotalUsedAmount >= FullDiscount.cpnTotalMaxAmount)
             throw exHTTPBadRequest("Discount usage amount has been reached");
 
-        if ((NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) > 0)
-                && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0)))
+        if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0)
+                && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
             throw exHTTPBadRequest("Discount usage amount per user has been reached");
 
 //        qDebug() << "-- DiscountInfo" << DiscountInfo;
@@ -598,7 +575,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toInt(-1);
 
-        QJsonArray arr = cpnSaleableBasedMultiplier.array();
+        QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
 //        qDebug() << "arr" << arr;
         if (arr.size())
         {
@@ -634,62 +611,62 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 
             if (multiplier.Multiplier > 0) //found
             {
-                auto m = Discount.Amount;
-                Discount.Amount = Discount.Amount * multiplier.Multiplier;
-                qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount.Amount << ")";
+                auto m = Discount3.Amount;
+                Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
+                qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
             }
         } //if (arr.size())
 
-        Discount.Code = _discountCode;
+//        Discount.Code = _discountCode;
 
-        qDebug() << "1 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+        qDebug() << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
-        if (cpnAmountType == enuDiscountType::Percent)
-            Discount.Amount = AssetItem.SubTotal * Discount.Amount / 100.0;
+        if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
+            Discount3.Amount = AssetItem.SubTotal * Discount3.Amount / 100.0;
 
-        qDebug() << "2 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+        qDebug() << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
         //check cpnMaxAmount
-        if (NULLABLE_HAS_VALUE(cpnMaxAmount))
+        if (NULLABLE_HAS_VALUE(FullDiscount.cpnMaxAmount))
         {
             //note: cpnMaxAmount type is opposite to cpnAmountType
-            if (cpnAmountType == enuDiscountType::Percent)
-                Discount.Amount = fmin(Discount.Amount, NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0));
+            if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
+                Discount3.Amount = fmin(Discount3.Amount, NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0));
             else
             {
-                quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(cpnMaxAmount, 0) / 100.0);
-                Discount.Amount = fmin(Discount.Amount, _max);
+                quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0) / 100.0);
+                Discount3.Amount = fmin(Discount3.Amount, _max);
             }
-            qDebug() << "3 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+            qDebug() << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //check total - used amount
-        qint32 remainDiscountAmount = cpnTotalMaxAmount - cpnTotalUsedAmount;
-        if (remainDiscountAmount < Discount.Amount)
+        qint32 remainDiscountAmount = FullDiscount.cpnTotalMaxAmount - FullDiscount.cpnTotalUsedAmount;
+        if (remainDiscountAmount < Discount3.Amount)
         {
-            Discount.Amount = remainDiscountAmount;
-            qDebug() << "4 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+            Discount3.Amount = remainDiscountAmount;
+            qDebug() << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //check per user - used amount
-        if (NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) > 0)
+        if (NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0)
         {
-            remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
+            remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
             if (remainDiscountAmount <= 0)
-                Discount.Amount = 0;
-            else if (remainDiscountAmount < Discount.Amount)
-                Discount.Amount = remainDiscountAmount;
-            qDebug() << "5 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+                Discount3.Amount = 0;
+            else if (remainDiscountAmount < Discount3.Amount)
+                Discount3.Amount = remainDiscountAmount;
+            qDebug() << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //----------
-        Discount.Amount = ceil(Discount.Amount);
-        qDebug() << "Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
+        Discount3.Amount = ceil(Discount3.Amount);
+        qDebug() << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
-        if (Discount.Amount > 0)
+        if (Discount3.Amount > 0)
         {
-            AssetItem.Discount = Discount;
-            AssetItem.TotalPrice = AssetItem.SubTotal - Discount.Amount;
+            AssetItem.Discount = Discount3;
+            AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
 
             TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
 
@@ -708,17 +685,11 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         }
     } //if discount
 
-    //-- reserve saleable ------------------------------------
-    UpdateQuery(*this->AccountSaleables)
-        .increament(tblAccountSaleablesBase::slbOrderedCount, _qty)
-        .where({ tblAccountSaleablesBase::slbID, enuConditionOperator::Equal, AssetItem.slbID })
-        .execute(currentUserID);
-
-    //-- reserve product ------------------------------------
-    UpdateQuery(*this->AccountProducts)
-        .increament(tblAccountProductsBase::prdOrderedCount, _qty)
-        .where({ tblAccountProductsBase::prdID, enuConditionOperator::Equal, AssetItem.prdID })
-        .execute(currentUserID);
+    //-- reserve saleable & product ------------------------------------
+    this->AccountCoupons->callSP("sp_UPDATE_saleable_reserve", {
+        { "iSaleableID", AssetItem.slbID },
+        { "iUserID", currentUserID },
+    });
 
     //-- new pre voucher item --------------------------------
     ///TODO: add ttl for order item
@@ -726,15 +697,16 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     stuVoucherItem PreVoucherItem;
 
     PreVoucherItem.Service = this->ServiceName;
+    //PreVoucherItem.OrderID
+    PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
     PreVoucherItem.Desc = AssetItem.slbName;
     PreVoucherItem.UnitPrice = AssetItem.slbBasePrice;
     PreVoucherItem.Qty = _qty;
     PreVoucherItem.SubTotal = AssetItem.SubTotal;
-    PreVoucherItem.Discount = Discount;
-    PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
+    PreVoucherItem.Discount = Discount3;
+    PreVoucherItem.DisAmount = (Discount3.ID > 0 ? Discount3.Amount : 0);
     PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
     PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
-    PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
     //PreVoucherItem.Sign
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
@@ -758,15 +730,15 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
 //            { tblAccountUserAssetsBase::uasStatus, },
     };
 
-    if (Discount.ID > 0)
+    if (Discount3.ID > 0)
     {
         qry
             .addCol(tblAccountUserAssetsBase::uas_cpnID)
             .addCol(tblAccountUserAssetsBase::uasDiscountAmount)
         ;
 
-        values.insert(tblAccountUserAssetsBase::uas_cpnID, Discount.ID);
-        values.insert(tblAccountUserAssetsBase::uasDiscountAmount, Discount.Amount);
+        values.insert(tblAccountUserAssetsBase::uas_cpnID, Discount3.ID);
+        values.insert(tblAccountUserAssetsBase::uasDiscountAmount, Discount3.Amount);
     }
 
     qry.values(values);
@@ -797,6 +769,204 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     return _lastPreVoucher;
 }
 
+Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTremoveBasketItem(
+        TAPI::JWT_t _JWT,
+//        quint64 _orderID, //it is uasID
+        TAPI::MD5_t _itemUUID,
+        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+    )
+{
+    checkPreVoucherSanity(_lastPreVoucher);
+
+    if (_lastPreVoucher.Items.isEmpty())
+        throw exHTTPInternalServerError("pre-voucher items is empty.");
+
+    clsJWT JWT(_JWT);
+    quint64 currentUserID = JWT.usrID();
+
+    bool Found = false;
+    qint64 FinalPrice = 0;
+
+    auto iter = _lastPreVoucher.Items.begin();
+    while (iter != _lastPreVoucher.Items.end())
+    {
+        stuVoucherItem PreVoucherItem = *iter;
+
+        if (PreVoucherItem.UUID == _itemUUID)
+        {
+            Found = true;
+
+            //delete voucher item
+            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
+                {
+                    TAPI::enuAuditableStatus::Type UserAssetStatus = _userAssetInfo
+                                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                                     .value<TAPI::enuAuditableStatus::Type>();
+
+                    if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
+                        return false;
+
+                    return true;
+                }) == false) //not pending
+            {
+                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
+            }
+
+            //remove item
+            iter = _lastPreVoucher.Items.erase(iter);
+
+            //preventing ++iter
+            continue;
+        }
+        else
+            FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
+
+        ++iter;
+    }
+
+    if (Found)
+    {
+        if (_lastPreVoucher.Items.isEmpty())
+            _lastPreVoucher.Summary = "";
+        else if (_lastPreVoucher.Items.size() > 1)
+            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
+        else
+        {
+            auto item = _lastPreVoucher.Items.first();
+            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
+        }
+
+        _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
+        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+        _lastPreVoucher.Sign.clear();
+        _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+
+        return _lastPreVoucher;
+    }
+
+    throw exHTTPInternalServerError("item not found in pre-voucher items.");
+}
+/*
+Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTupdateBasketItem(
+        TAPI::JWT_t _JWT,
+        TAPI::MD5_t _itemUUID,
+        quint16 _new_qty, ///TODO: float
+        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+    )
+{
+    checkPreVoucherSanity(_lastPreVoucher);
+
+    if (_lastPreVoucher.Items.isEmpty())
+        throw exHTTPInternalServerError("pre-voucher items is empty.");
+
+    if (_new_qty == 0)
+        throw exHTTPInternalServerError("Qty must be greater than zero.");
+
+    clsJWT JWT(_JWT);
+    quint64 currentUserID = JWT.usrID();
+
+    bool Found = false;
+    qint64 FinalPrice = 0;
+
+    auto iter = _lastPreVoucher.Items.begin();
+    while (iter != _lastPreVoucher.Items.end())
+    {
+        stuVoucherItem &PreVoucherItem = *iter;
+
+        if (PreVoucherItem.UUID == _itemUUID)
+        {
+            Found = true;
+
+            if (_new_qty == PreVoucherItem.Qty)
+                throw exHTTPInternalServerError("Current Qty and new Qty can not be equal.");
+
+            //check uasStatus
+            QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+                                        .addCol(tblAccountUserAssetsBase::uasID)
+                                        .addCol(tblAccountUserAssetsBase::uas_slbID)
+                                        .addCol(tblAccountUserAssetsBase::uasStatus)
+                                        .where({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
+                                        .one();
+            TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
+                                                             .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                             .value<TAPI::enuAuditableStatus::Type>();
+            if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
+                throw exHTTPInternalServerError("only Pending items of pre-voucher can be modify.");
+
+            //
+            if (_new_qty < PreVoucherItem.Qty)
+            {
+
+            }
+            else //_new_qty > PreVoucherItem.Qty
+            {
+
+            }
+
+            //update voucher item in _lastPreVoucher.Items
+            ///TODO: re-apply additives
+            PreVoucherItem.Qty = _new_qty;
+
+            PreVoucherItem.SubTotal = AssetItem.SubTotal;
+            PreVoucherItem.Discount = Discount;
+            PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
+            PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
+            PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
+
+
+
+            //update voucher item in Module/UsetAssets
+            UpdateQuery(*this->AccountUserAssets)
+                    .set(tblAccountUserAssetsBase::
+                        tblAccountUserAssetsBase::uasID)
+                                        .addCol(tblAccountUserAssetsBase::uas_slbID)
+                                        .addCol(tblAccountUserAssetsBase::uasStatus)
+                                        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
+                                        .one();
+
+            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
+                {
+                    TAPI::enuAuditableStatus::Type UserAssetStatus = _userAssetInfo
+                                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                                     .value<TAPI::enuAuditableStatus::Type>();
+
+                    if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
+                        return false;
+
+                    return true;
+                }) == false) //not pending
+            {
+                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
+            }
+        }
+
+        //compute FinalPrice for all items
+        FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
+
+        ++iter;
+    }
+
+    if (Found)
+    {
+        if (_lastPreVoucher.Items.size() > 1)
+            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
+        else
+        {
+            auto item = _lastPreVoucher.Items.first();
+            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
+        }
+
+        _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
+        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+        _lastPreVoucher.Sign.clear();
+        _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+
+        return _lastPreVoucher;
+    }
+
+    throw exHTTPInternalServerError("item not found in pre-voucher items.");
+}
+*/
 bool intfRESTAPIWithAccounting::increaseDiscountUsage(
         const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem)
 {
@@ -879,7 +1049,8 @@ bool intfRESTAPIWithAccounting::processVoucherItem(
 
 bool intfRESTAPIWithAccounting::cancelVoucherItem(
         quint64 _userID,
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem,
+        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
     )
 {
     if (!this->preCancelVoucherItem(_userID, _voucherItem))
@@ -887,9 +1058,13 @@ bool intfRESTAPIWithAccounting::cancelVoucherItem(
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
                                 .addCol(tblAccountUserAssetsBase::uasID)
+                                .addCol(tblAccountUserAssetsBase::uas_slbID)
                                 .addCol(tblAccountUserAssetsBase::uasStatus)
                                 .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                                 .one();
+
+    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
+        return false;
 
     TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
                                                      .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
@@ -898,23 +1073,30 @@ bool intfRESTAPIWithAccounting::cancelVoucherItem(
     if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
         this->decreaseDiscountUsage(_voucherItem);
 
+    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
+
+    //-- un-reserve saleable & product ------------------------------------
+    this->AccountCoupons->callSP("sp_UPDATE_saleable_un_reserve", {
+        { "iSaleableID", SaleableID },
+        { "iUserID", _userID },
+    });
 
     //-- un-reserve saleable ------------------------------------
-    UpdateQuery(*this->AccountSaleables)
-        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
-        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
-        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-        .execute(_userID);
+//    UpdateQuery(*this->AccountSaleables)
+//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
 
     //-- un-reserve product -------------------------------------
-    UpdateQuery(*this->AccountProducts)
-        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
-        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
-        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
-        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-        .execute(_userID);
+//    UpdateQuery(*this->AccountProducts)
+//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
+//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
 
     //-----------------------------------------------------------
     this->removeFromUserAssets(_userID, _voucherItem);

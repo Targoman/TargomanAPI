@@ -90,7 +90,7 @@ struct stuPaymentGateway
     QString pgwDriver;
     NULLABLE_TYPE(TAPI::JSON_t) pgwMetaInfo;
 
-    void readFromVariantMap(const QVariantMap& _info);
+    void fromVariantMap(const QVariantMap& _info);
 };
 
 namespace ORM {

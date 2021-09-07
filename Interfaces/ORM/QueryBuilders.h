@@ -72,7 +72,8 @@ TARGOMAN_DEFINE_ENUM(enuConditionOperator,
                      Null,
                      NotNull,
                      Like,
-                     In
+                     In,
+                     NotIn
                      )
 
 TARGOMAN_DEFINE_ENUM(enuAggregation,

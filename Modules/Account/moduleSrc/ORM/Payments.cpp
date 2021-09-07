@@ -30,7 +30,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
 namespace Targoman::API::AccountModule {
 
-void stuOnlinePayment::readFromVariantMap(const QVariantMap& _info)
+void stuOnlinePayment::fromVariantMap(const QVariantMap& _info)
 {
     SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, ORM::tblOnlinePayments, onpID);
     SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, ORM::tblOnlinePayments, onpMD5);
@@ -41,7 +41,7 @@ void stuOnlinePayment::readFromVariantMap(const QVariantMap& _info)
     SET_FIELD_FROM_VARIANT_MAP(this->onpResult,  _info, ORM::tblOnlinePayments, onpResult);
     SET_FIELD_FROM_VARIANT_MAP(this->onpStatus,  _info, ORM::tblOnlinePayments, onpStatus);
 
-    this->PaymentGateway.readFromVariantMap(_info);
+    this->PaymentGateway.fromVariantMap(_info);
 }
 
 namespace ORM {

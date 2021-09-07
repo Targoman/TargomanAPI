@@ -482,7 +482,7 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnAmountType,              S(Targoman::API::AAA::Accounting::enuDiscountType::Type), QFV,              Targoman::API::AAA::Accounting::enuDiscountType::Percent, UPAdmin },
             { tblAccountCouponsBase::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
             { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
-//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<TAPI::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
+//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
             { tblAccountCouponsBase::cpnTotalUsedCount,          S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnTotalUsedAmount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
@@ -686,6 +686,56 @@ stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
     */
   return *this;
 }
+
+void stuAssetItem::fromVariantMap(const QVariantMap& _info)
+{
+    SET_FIELD_FROM_VARIANT_MAP(this->prdID,                  _info, tblAccountProductsBase,  prdID);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdCode,                _info, tblAccountProductsBase,  prdCode);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdName,                _info, tblAccountProductsBase,  prdName);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdValidFromDate,       _info, tblAccountProductsBase,  prdValidFromDate);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdValidToDate,         _info, tblAccountProductsBase,  prdValidToDate);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdValidFromHour,       _info, tblAccountProductsBase,  prdValidFromHour);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdValidToHour,         _info, tblAccountProductsBase,  prdValidToHour);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdPrivs,               _info, tblAccountProductsBase,  prdPrivs);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdVAT,                 _info, tblAccountProductsBase,  prdVAT);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdInStockCount,        _info, tblAccountProductsBase,  prdInStockCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdOrderedCount,        _info, tblAccountProductsBase,  prdOrderedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdReturnedCount,       _info, tblAccountProductsBase,  prdReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdStatus,              _info, tblAccountProductsBase,  prdStatus);
+
+    SET_FIELD_FROM_VARIANT_MAP(this->slbID,                  _info, tblAccountSaleablesBase, slbID);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbCode,                _info, tblAccountSaleablesBase, slbCode);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbName,                _info, tblAccountSaleablesBase, slbName);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbPrivs,               _info, tblAccountSaleablesBase, slbPrivs);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbBasePrice,           _info, tblAccountSaleablesBase, slbBasePrice);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbAdditives,           _info, tblAccountSaleablesBase, slbAdditives);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbProductCount,        _info, tblAccountSaleablesBase, slbProductCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbMaxSaleCountPerUser, _info, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbInStockCount,        _info, tblAccountSaleablesBase, slbInStockCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbOrderedCount,        _info, tblAccountSaleablesBase, slbOrderedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbReturnedCount,       _info, tblAccountSaleablesBase, slbReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbVoucherTemplate,     _info, tblAccountSaleablesBase, slbVoucherTemplate);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbStatus,              _info, tblAccountSaleablesBase, slbStatus);
+}
+
+void stuFullDiscount::fromVariantMap(const QVariantMap& _info)
+{
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnID,                         _info, tblAccountCouponsBase, cpnID);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnCode,                       _info, tblAccountCouponsBase, cpnCode);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnPrimaryCount,               _info, tblAccountCouponsBase, cpnPrimaryCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalMaxAmount,             _info, tblAccountCouponsBase, cpnTotalMaxAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnPerUserMaxCount,            _info, tblAccountCouponsBase, cpnPerUserMaxCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnPerUserMaxAmount,           _info, tblAccountCouponsBase, cpnPerUserMaxAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnValidFrom,                  _info, tblAccountCouponsBase, cpnValidFrom);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnExpiryTime,                 _info, tblAccountCouponsBase, cpnExpiryTime);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnAmount,                     _info, tblAccountCouponsBase, cpnAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnAmountType,                 _info, tblAccountCouponsBase, cpnAmountType);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnMaxAmount,                  _info, tblAccountCouponsBase, cpnMaxAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnSaleableBasedMultiplier,    _info, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalUsedCount,             _info, tblAccountCouponsBase, cpnTotalUsedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalUsedAmount,            _info, tblAccountCouponsBase, cpnTotalUsedAmount);
+    SET_FIELD_FROM_VARIANT_MAP(this->cpnStatus,                     _info, tblAccountCouponsBase, cpnStatus);
+};
 
 /******************************************************************/
 /*QVariant stuAssetItemReq_t::toVariant() const{
