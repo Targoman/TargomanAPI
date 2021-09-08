@@ -239,47 +239,48 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             if (ParamIndex >= _method.parameterCount())
                 break;
 
-            if(_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>() ||
+            if (_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>() ||
                _method.parameterType(ParamIndex) == qMetaTypeId<TAPI::Files_t>())
                 ContainsFileInput = true;
 
             intfAPIArgManipulator* ArgSpecs;
-            if(_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
+            if (_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
                 ArgSpecs = gOrderedMetaTypeInfo.at(_method.parameterType(ParamIndex));
             else
                 ArgSpecs = gUserDefinedTypesInfo.at(_method.parameterType(ParamIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 
             Q_ASSERT(ArgSpecs);
 
-            if(Param.contains('=')){
+            if (Param.contains('=')) {
                 QString Value = Param.split('=').last().replace(COMMA_SIGN, ",").trimmed();
-                if(Value.startsWith("(")) Value = Value.mid(1);
-                if(Value.endsWith(")")) Value = Value.mid(0, Value.size() - 1);
-                if(Value.startsWith("'")) Value = Value.mid(1);
-                if(Value.endsWith("'")) Value = Value.mid(0, Value.size() - 1);
-                if(Value.startsWith("\"")) Value = Value.mid(1);
-                if(Value.endsWith("\"")) Value = Value.mid(0, Value.size() - 1);
+                if (Value.startsWith("(")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith(")")) Value = Value.mid(0, Value.size() - 1).trimmed();
+                if (Value.startsWith("'")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith("'")) Value = Value.mid(0, Value.size() - 1).trimmed();
+                if (Value.startsWith("\"")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith("\"")) Value = Value.mid(0, Value.size() - 1).trimmed();
                 Value.replace("\\\"", "\"");
                 Value.replace("\\'", "'");
 
-
-                if(Value == "{}" || Value.contains("()"))
+                if (Value == "{}" || Value.contains("()"))
                     DefaultValues.append(ArgSpecs->defaultVariant());
                 else if (ArgSpecs->complexity() == COMPLEXITY_Enum)
                     DefaultValues.append(Value.mid(Value.indexOf("::") + 2));
                 else
                     DefaultValues.append(Value);
-            }else if (ArgSpecs->isNullable())
+            }
+            else if (ArgSpecs->isNullable())
                 throw exRESTRegistry("Nullable parameter: <"+_method.parameterNames().value(ParamIndex)+"> on method: <" + MethodName + "> must have default value" );
             else
                 DefaultValues.append(QVariant());
+
             ParamIndex++;
         }
 
         QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
 
-        if(MethodName.startsWith("GET")) {
-            if(ContainsFileInput)
+        if (MethodName.startsWith("GET")) {
+            if (ContainsFileInput)
                 throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName(sizeof("GET")));
         }

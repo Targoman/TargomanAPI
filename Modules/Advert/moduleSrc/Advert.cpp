@@ -61,8 +61,8 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
 Advert::Advert() :
     intfRESTAPIWithAccounting(
-        AdvertSchema,
         AdvertDomain,
+        AdvertSchema,
         {
             //           day                week   month                total
             { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },

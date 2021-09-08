@@ -45,7 +45,7 @@ extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
 }
 
 //I used TAPI as namespace in order to make Targoman::API shorter
-namespace TAPI{
+namespace TAPI {
 
 /**
  * @brief The stuStatistics struct holds server statistics about APIs
@@ -200,7 +200,7 @@ TAPI_ADD_TYPE_STRING(DBMediumText_t);
 TAPI_ADD_TYPE_STRING(DBLongText_t);
 TAPI_ADD_TYPE_STRING(String_t);
 
-}
+} //namespace TAPI
 
 /**********************************************************************/
 TAPI_DECLARE_METATYPE(TAPI::stuTable)

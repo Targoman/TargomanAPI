@@ -29,24 +29,36 @@
 
 namespace Targoman::API::ORM {
 
-clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _schema, const QString& _module) :
-    clsTable(
+clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _module, const QString& _schema) :
+    clsRESTAPI(
+        _module,
         _schema,
         "tblActionLogs",
-        {///< ColName               Type                  Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-            {"atlID",               ORM_PRIMARYKEY_64},
-            {"atlBy_usrID",         S(quint64),           QFV.integer().minValue(1),      {},      UPNone},
-            {"atlInsertionDateTime",S(TAPI::DateTime_t),  QFV,                            {},      UPNone},
-            {"atlType",             S(QString),           QFV.asciiAlNum().maxLenght(50), {},      UPNone},
-            {"atlDescription",      S(QString),           QFV.allwaysInvalid(),           {},      UPNone, false,false},
+        {///< ColName                   Type                    Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
+            { "atlID",                  ORM_PRIMARYKEY_64},
+            { "atlBy_usrID",            S(quint64),             QFV.integer().minValue(1),      {},      UPNone},
+            { "atlInsertionDateTime",   S(TAPI::DateTime_t),    QFV,                            {},      UPNone},
+            { "atlType",                S(QString),             QFV.asciiAlNum().maxLenght(50), {},      UPNone},
+            { "atlDescription",         S(QString),             QFV.allwaysInvalid(),           {},      UPNone, false,false},
         },
         {
-            {"atlBy_usrID",        R(AAA::AAASchema,  "tblUser"),      "usrID",     "By_"},
-        }),
-    Module(_module)
+            { "atlBy_usrID",            R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
+        }
+    )
 {}
 
-QVariant clsRESTAPIWithActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+QVariant clsRESTAPIWithActionLogs::apiGETactionLogs(
+        GET_METHOD_ARGS_IMPL_APICALL
+//        TAPI::JWT_t _JWT
+//        , TAPI::PKsByPath_t _pksByPath
+//        , quint64 _offset
+//        , quint16 _limit
+//        , TAPI::Cols_t _cols
+//        , TAPI::Filter_t _filters
+//        , TAPI::OrderBy_t _orderBy
+//        , TAPI::GroupBy_t _groupBy
+//        , bool _reportCount
+        )
 {
     Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
     return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);

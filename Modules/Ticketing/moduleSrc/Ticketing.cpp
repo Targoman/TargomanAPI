@@ -40,7 +40,7 @@ using namespace ORM;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 
 Ticketing::Ticketing() :
-    clsRESTAPIWithActionLogs(TicketingSchema, TicketingDomain)
+    clsRESTAPIWithActionLogs(TicketingDomain, TicketingSchema)
 {
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());

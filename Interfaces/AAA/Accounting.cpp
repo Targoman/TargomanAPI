@@ -74,8 +74,8 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher)
 |** intfRESTAPIWithAccounting **********************************************************************|
 \***************************************************************************************************/
 intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
-        const QString& _schema,
         const QString& _module,
+        const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
         intfAccountProducts* _products,
         intfAccountSaleables* _saleables,
@@ -84,7 +84,7 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
         intfAccountCoupons* _discounts,
         intfAccountPrizes* _prizes
     ) :
-    ORM::clsRESTAPIWithActionLogs(_schema, _module),
+    ORM::clsRESTAPIWithActionLogs(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
     AccountSaleables(_saleables),

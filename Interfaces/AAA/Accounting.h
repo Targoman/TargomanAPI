@@ -36,15 +36,16 @@ class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs
 
 protected:
     intfRESTAPIWithAccounting(
-        const QString& _schema,
-        const QString& _module,
-        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-        intfAccountProducts* _products,
-        intfAccountSaleables* _saleables,
-        intfAccountUserAssets* _userAssets,
-        intfAccountAssetUsage* _assetUsages,
-        intfAccountCoupons* _discounts = nullptr,
-        intfAccountPrizes* _prizes = nullptr);
+            const QString& _module,
+            const QString& _schema,
+            AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+            intfAccountProducts* _products,
+            intfAccountSaleables* _saleables,
+            intfAccountUserAssets* _userAssets,
+            intfAccountAssetUsage* _assetUsages,
+            intfAccountCoupons* _discounts = nullptr,
+            intfAccountPrizes* _prizes = nullptr
+            );
 
     virtual ~intfRESTAPIWithAccounting();
 
@@ -103,7 +104,7 @@ protected:
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
-private slots:
+protected slots:
     bool REST(
         POST,
         processVoucherItem,

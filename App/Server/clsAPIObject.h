@@ -120,7 +120,6 @@ public:
                     QString _extraAPIPath = {}
                 ) const;
 
-
     void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const;
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
@@ -138,7 +137,7 @@ private:
     QList<QString>              ParamTypes;
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
-    intfAPIModule*          Parent;
+    intfAPIModule*              Parent;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

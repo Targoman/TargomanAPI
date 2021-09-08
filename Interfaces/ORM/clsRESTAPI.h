@@ -21,30 +21,36 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
-#define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
+#ifndef TARGOMAN_API_ORM_CLSRESTAPI_HPP
+#define TARGOMAN_API_ORM_CLSRESTAPI_HPP
 
-#include "Interfaces/ORM/clsRESTAPI.h"
+#include "Interfaces/ORM/Defs.hpp"
+#include "Interfaces/ORM/clsTable.h"
 
 namespace Targoman::API::ORM {
 
-class clsRESTAPIWithActionLogs : public clsRESTAPI
+class clsRESTAPI : public ORM::clsTable
 {
     Q_OBJECT
 
 public:
-    clsRESTAPIWithActionLogs(
+    clsRESTAPI(
             const QString& _module,
-            const QString& _schema
+            const QString& _schema,
+            const QString& _name,
+            const QList<clsORMField>& _cols = {},
+            const QList<stuRelation>& _relations = {},
+            const QList<stuDBIndex>& _indexes = {},
+            const QVariantMap& _dbProperties = {}
             );
 
-protected slots:
-    QVariant ORMGETWithName(actionLogs, "Get Action Logs")
+//private slots:
+//    QVariant ORMGET("Get ActionLogs information")
 
-//protected:
-//    QString Module;
+protected:
+    QString Module;
 };
 
 } // namespace Targoman::API::ORM
 
-#endif // TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
+#endif // TARGOMAN_API_ORM_CLSRESTAPI_HPP

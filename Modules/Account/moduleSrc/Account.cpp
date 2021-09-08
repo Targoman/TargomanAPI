@@ -141,7 +141,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
 /*****************************************************************/
 /*****************************************************************/
 Account::Account() :
-    clsRESTAPIWithActionLogs("AAA", "Account")
+    clsRESTAPIWithActionLogs("Account", "AAA")
 {
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());

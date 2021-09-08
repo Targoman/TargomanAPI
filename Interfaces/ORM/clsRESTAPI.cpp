@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -17,18 +17,32 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "NGTv1.h"
+#include "clsRESTAPI.h"
 
-using namespace Targoman::DBManager;
-using namespace Targoman::API;
+namespace Targoman::API::ORM {
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1, NGTv1Schema);
+clsRESTAPI::clsRESTAPI(
+        const QString& _module,
+        const QString& _schema,
+        const QString& _name,
+        const QList<clsORMField>& _cols,
+        const QList<stuRelation>& _relations,
+        const QList<stuDBIndex>& _indexes,
+        const QVariantMap& _dbProperties
+    ) :
+    ORM::clsTable(
+        _schema,
+        _name,
+        _cols,
+        _relations,
+        _indexes,
+        _dbProperties
+    ),
+    Module(_module)
+{}
 
-NGTv1::NGTv1() :
-    ORM::clsRESTAPIWithActionLogs("Targoman", "NGT") {
-}
-
-
+} // namespace Targoman::API::ORM
