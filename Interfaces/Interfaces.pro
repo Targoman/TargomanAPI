@@ -42,7 +42,8 @@ HEADERS += \
     ORM/APIQueryBuilders.h \
     ORM/Defs.hpp \
     ORM/QueryBuilders.h \
-    ORM/clsRESTAPI.h
+    ORM/clsRESTAPI.h \
+    ORM/clsRESTAPIWithDatabase.h
 
 SOURCES += \
     AAA/Accounting.cpp \
@@ -59,6 +60,7 @@ SOURCES += \
     ORM/clsORMField.cpp \
     ORM/clsRESTAPI.cpp \
     ORM/clsRESTAPIWithActionLogs.cpp \
+    ORM/clsRESTAPIWithDatabase.cpp \
     ORM/clsTable.cpp \
     Common/intf_impl.cpp \
     AAA/Accounting_Interfaces.cpp

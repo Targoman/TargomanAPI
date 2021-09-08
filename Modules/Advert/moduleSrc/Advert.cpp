@@ -167,4 +167,20 @@ QString Advert::apiGETretrieveURL(
     )
 {}
 
+#ifdef QT_DEBUG
+bool Advert::fixtureSetUp()
+{
+    ///TODO: complete this
+
+    return true;
+}
+
+bool Advert::fixtureCleanUp()
+{
+    ///TODO: complete this
+
+    return true;
+}
+#endif
+
 } //namespace Targoman::API::AdvertModule

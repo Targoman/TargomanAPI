@@ -23,14 +23,12 @@
 
 #include "clsRESTAPIWithActionLogs.h"
 #include "Interfaces/AAA/AAA.hpp"
-//#include "Interfaces/Common/QtTypes.hpp"
-//#include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::ORM {
 
 clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _module, const QString& _schema) :
-    clsRESTAPI(
+    clsRESTAPIWithDatabase(
         _module,
         _schema,
         "tblActionLogs",

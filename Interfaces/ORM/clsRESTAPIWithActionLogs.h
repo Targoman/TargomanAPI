@@ -21,14 +21,14 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
-#define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
+#ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_H
+#define TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_H
 
-#include "Interfaces/ORM/clsRESTAPI.h"
+#include "Interfaces/ORM/clsRESTAPIWithDatabase.h"
 
 namespace Targoman::API::ORM {
 
-class clsRESTAPIWithActionLogs : public clsRESTAPI
+class clsRESTAPIWithActionLogs : public clsRESTAPIWithDatabase
 {
     Q_OBJECT
 
@@ -47,4 +47,4 @@ protected slots:
 
 } // namespace Targoman::API::ORM
 
-#endif // TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_HPP
+#endif // TARGOMAN_API_ORM_CLSRESTAPIWITHACTIONLOGS_H

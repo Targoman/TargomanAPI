@@ -21,36 +21,40 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSRESTAPI_H
-#define TARGOMAN_API_ORM_CLSRESTAPI_H
-
-#include "Interfaces/ORM/Defs.hpp"
-#include "Interfaces/ORM/clsTable.h"
+#include "clsRESTAPIWithDatabase.h"
 
 namespace Targoman::API::ORM {
 
-class clsRESTAPI : public ORM::clsTable
-{
-    Q_OBJECT
-
-public:
+clsRESTAPIWithDatabase::clsRESTAPIWithDatabase(
+        const QString& _module,
+        const QString& _schema,
+        const QString& _name,
+        const QList<clsORMField>& _cols,
+        const QList<stuRelation>& _relations,
+        const QList<stuDBIndex>& _indexes,
+        const QVariantMap& _dbProperties
+    ) :
     clsRESTAPI(
-            const QString& _module,
-            const QString& _schema,
-            const QString& _name,
-            const QList<clsORMField>& _cols = {},
-            const QList<stuRelation>& _relations = {},
-            const QList<stuDBIndex>& _indexes = {},
-            const QVariantMap& _dbProperties = {}
-            );
+        _module,
+        _schema,
+        _name,
+        _cols,
+        _relations,
+        _indexes,
+        _dbProperties
+    )
+{}
 
-//private slots:
-//    QVariant ORMGET("Get ActionLogs information")
+#ifdef QT_DEBUG
+bool clsRESTAPIWithDatabase::apiPOSTfixtureSetUp()
+{
+    return fixtureSetUp();
+}
 
-protected:
-    QString Module;
-};
+bool clsRESTAPIWithDatabase::apiPOSTfixtureCleanUp()
+{
+    return fixtureCleanUp();
+}
+#endif
 
 } // namespace Targoman::API::ORM
-
-#endif // TARGOMAN_API_ORM_CLSRESTAPI_H

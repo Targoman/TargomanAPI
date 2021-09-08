@@ -133,6 +133,12 @@ private slots:
         "Retrieve URL of the specified Advertisement"
     )
 
+#ifdef QT_DEBUG
+protected:
+    virtual bool fixtureSetUp();
+    virtual bool fixtureCleanUp();
+#endif
+
 };
 
 } //namespace Targoman::API::AdvertModule

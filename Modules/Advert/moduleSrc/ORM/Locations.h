@@ -59,7 +59,7 @@ private slots:
     bool ORMDELETE("Delete a Locations")
 
 private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Locations)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Locations)
 };
 
 } //namespace ORM

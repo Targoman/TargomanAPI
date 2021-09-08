@@ -21,20 +21,19 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSRESTAPI_H
-#define TARGOMAN_API_ORM_CLSRESTAPI_H
+#ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
+#define TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
 
-#include "Interfaces/ORM/Defs.hpp"
-#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/ORM/clsRESTAPI.h"
 
 namespace Targoman::API::ORM {
 
-class clsRESTAPI : public ORM::clsTable
+class clsRESTAPIWithDatabase : public clsRESTAPI
 {
     Q_OBJECT
 
 public:
-    clsRESTAPI(
+    clsRESTAPIWithDatabase(
             const QString& _module,
             const QString& _schema,
             const QString& _name,
@@ -44,13 +43,29 @@ public:
             const QVariantMap& _dbProperties = {}
             );
 
-//private slots:
-//    QVariant ORMGET("Get ActionLogs information")
+#ifdef QT_DEBUG
+protected slots:
+    bool REST(
+        POST,
+        fixtureSetUp,
+        (
+        ),
+        "Create sample data"
+    )
 
+    bool REST(
+        POST,
+        fixtureCleanUp,
+        (
+        ),
+        "Cleanup sample data"
+    )
 protected:
-    QString Module;
+    virtual bool fixtureSetUp() { return true; }
+    virtual bool fixtureCleanUp() { return true; }
+#endif
 };
 
 } // namespace Targoman::API::ORM
 
-#endif // TARGOMAN_API_ORM_CLSRESTAPI_H
+#endif // TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
