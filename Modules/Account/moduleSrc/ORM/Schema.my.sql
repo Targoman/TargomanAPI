@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=54365 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=66317 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -271,7 +271,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprRequestDate` (`aprRequestDate`),
   KEY `aprApplyDate` (`aprApplyDate`),
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=451 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=503 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -497,7 +497,7 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
   CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -571,7 +571,7 @@ CREATE TABLE `tblRoles` (
   CONSTRAINT `FK_tblRoles_tblRoles` FOREIGN KEY (`rolParent_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser` FOREIGN KEY (`rolCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser_2` FOREIGN KEY (`rolUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=895 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=923 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -604,11 +604,11 @@ DROP TABLE IF EXISTS `tblUser`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblUser` (
   `usrID` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `usrEmail` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `usrName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `usrFamily` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usrEmail` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usrName` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usrFamily` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `usrGender` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'F: Female, M:Male, N: Not expressed',
-  `usrMobile` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usrMobile` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `usrApprovalState` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'N: Not Approved, M: JustMobile, E:JustEmail, A: All',
   `usrPass` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `usr_rolID` int unsigned NOT NULL,
@@ -641,7 +641,7 @@ CREATE TABLE `tblUser` (
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1799 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1851 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -757,7 +757,7 @@ CREATE TABLE `tblUserWallets` (
   CONSTRAINT `FK_tblUserWallets_tblUser` FOREIGN KEY (`wal_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_2` FOREIGN KEY (`walCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_3` FOREIGN KEY (`walUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1622 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1674 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -776,7 +776,7 @@ CREATE TABLE `tblVoucher` (
   KEY `vchCreationDateTime` (`vchCreationDateTime`),
   KEY `FK_tblVoucher_tblUser` (`vch_usrID`),
   CONSTRAINT `FK_tblVoucher_tblUser` FOREIGN KEY (`vch_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=316 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=320 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -836,7 +836,7 @@ CREATE TABLE `tblWalletsTransactions` (
   KEY `wltType` (`wlt_vchType`),
   CONSTRAINT `FK_tblWalletsTransactions_tblInvoice` FOREIGN KEY (`wlt_vchID`) REFERENCES `tblVoucher` (`vchID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblWalletsTransactions_tblUserWallets` FOREIGN KEY (`wlt_walID`) REFERENCES `tblUserWallets` (`walID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
+) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1174,7 +1174,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_approvalRequest`(
 	IN `iWhat2Approve` CHAR(1),
@@ -1198,16 +1198,19 @@ BEGIN
        		SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = '401:User Not Found';
     END IF;
+
     SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err'), 
            tblUser.usrName,
            tblUser.usrFamily
       INTO ApprovalCode, UserName, UserFamily
       FROM tblUser
      WHERE tblUser.usrID = iUserID;
+
      IF ISNULL(ApprovalCode) THEN 
      		SIGNAL SQLSTATE '45000'
           SET MESSAGE_TEXT = '401:Invalid userID';
      END IF;
+
      IF ApprovalCode = 'Err' THEN 
      		SIGNAL SQLSTATE '45000'
           SET MESSAGE_TEXT = '401:Invalid password';
