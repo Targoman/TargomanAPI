@@ -271,8 +271,8 @@ namespace tblAccountProductsBase {
 namespace tblAccountSaleablesBase {
     constexpr char Name[] = "tblAccountSaleables";
     TARGOMAN_CREATE_CONSTEXPR(slbID);
-    TARGOMAN_CREATE_CONSTEXPR(slbCode);
     TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
+    TARGOMAN_CREATE_CONSTEXPR(slbCode);
     TARGOMAN_CREATE_CONSTEXPR(slbName);
     TARGOMAN_CREATE_CONSTEXPR(slbDesc);
     TARGOMAN_CREATE_CONSTEXPR(slbType);

@@ -52,6 +52,9 @@ class testAdvert : public clsBaseTest
 {
     Q_OBJECT
 
+    QString CreatedUserEmail;
+    QString CreatedAdminEmail;
+
     QVariant LocationID;
     QVariant BannerProductID;
     QVariant BannerSaleableID;
@@ -80,7 +83,7 @@ private slots:
     {
         cleanupUnitTestData();
     }
-
+/*
     void Signup_user()
     {
         QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
@@ -165,10 +168,88 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
+*/
+    /***************************************************************************************/
+    /***************************************************************************************/
+    /***************************************************************************************/
+    void setupAccountFixture()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureSetUp",
+                {},
+                {}
+            );
 
-    /***************************************************************************************/
-    /***************************************************************************************/
-    /***************************************************************************************/
+            qDebug() << "--------- Account fixtureSetUp: " << Result;
+
+            QVERIFY(Result.isValid());
+
+            this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
+            gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
+
+            this->CreatedAdminEmail = Result.toMap().value("Admin").toMap().value("email").toString();
+            gAdminUserID = Result.toMap().value("Admin").toMap().value("usrID").toULongLong();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void login_user()
+    {
+        QJsonObject MultiJWT;
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+                                "Account/login",{},{
+                                    { "login", this->CreatedUserEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", "1234" },
+                                }).toJsonObject()).size());
+
+        gEncodedJWT = MultiJWT.value("ssn").toString();
+        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
+        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+    void login_admin()
+    {
+        QJsonObject MultiJWT;
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+                                "Account/login",{},{
+                                    { "login", this->CreatedAdminEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", "1234" },
+                                }).toJsonObject()).size());
+
+        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
+        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
+        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+//    void setupAdvertFixture()
+//    {
+//        QT_TRY {
+//            QVariant Result = callAdminAPI(
+//                RESTClientHelper::POST,
+//                "Advert/fixtureSetUp",
+//                {},
+//                {}
+//            );
+
+//            qDebug() << "--------- Advert fixtureSetUp: " << Result;
+
+//            QVERIFY(Result.isValid());
+
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
     void createLocation()
     {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
@@ -426,7 +507,7 @@ private slots:
                         QVariantList({
                             QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.5 }, { "minCount", 0 } }),
                             QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.8 }, { "minCount", 5 } }),
-                            QVariantMap({ { "saleableCode", "other" },     { "multiplier", 2.0 }                    }),
+                            QVariantMap({ { "saleableCode", "other" },                  { "multiplier", 2.0 }                    }),
                         })
                     },
                 }
@@ -746,43 +827,41 @@ private slots:
     }
 
     /***************************************************************************************/
-    void deleteAdminUser()
+//    void cleanupAdvertFixture()
+//    {
+//        QT_TRY {
+//            QVariant Result = callAdminAPI(
+//                RESTClientHelper::POST,
+//                "Advert/fixtureCleanUp",
+//                {},
+//                {}
+//            );
+
+//            qDebug() << "--------- Advert fixtureCleanUp: " << Result;
+
+//            QVERIFY(Result.isValid());
+
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
+    void cleanupAccountFixture()
     {
-        if (gAdminUserID > 0)
-        {
-            QT_TRY {
-                QVariant Result = callAdminAPI(
-                    RESTClientHelper::DELETE,
-                    QString("Account/User/%1").arg(gAdminUserID)
-                );
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureCleanUp",
+                {},
+                {}
+            );
 
-//                qDebug() << "--------- DELETE result: " << Result;
+            qDebug() << "--------- Account fixtureCleanUp: " << Result;
 
-                QVERIFY(Result == true);
+            QVERIFY(Result.isValid());
 
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
-        }
-    }
-
-    void deleteUser()
-    {
-        if (gUserID > 0)
-        {
-            QT_TRY {
-                QVariant Result = callAdminAPI(
-                    RESTClientHelper::DELETE,
-                    QString("Account/User/%1").arg(gUserID)
-                );
-
-//                qDebug() << "--------- DELETE result: " << Result;
-
-                QVERIFY(Result == true);
-
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 

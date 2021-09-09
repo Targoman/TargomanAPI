@@ -45,24 +45,26 @@ public:
 
 #ifdef QT_DEBUG
 protected slots:
-    bool REST(
+    QVariant REST(
         POST,
         fixtureSetUp,
         (
+                TAPI::RemoteIP_t _REMOTE_IP
         ),
         "Create sample data"
     )
 
-    bool REST(
+    QVariant REST(
         POST,
         fixtureCleanUp,
         (
+                TAPI::RemoteIP_t _REMOTE_IP
         ),
         "Cleanup sample data"
     )
 protected:
-    virtual bool fixtureSetUp() { return true; }
-    virtual bool fixtureCleanUp() { return true; }
+    virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
+    virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
 #endif
 };
 

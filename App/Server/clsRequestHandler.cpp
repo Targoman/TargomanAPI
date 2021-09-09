@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QJsonObject>
@@ -451,7 +452,9 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code, QVariant _response)
 {
     gServerStats.Success.inc();
-    if(strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
+    if (_response.isValid() == false)
+        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue(QJsonValue::Undefined) }}));
+    else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
         TargomanLogInfo(7, "Response ["<<
                         this->Request->connection()->tcpSocket()->peerAddress().toString()<<
@@ -465,7 +468,8 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code, QVariant _respons
         this->Response->addHeaderValue("Connection", QString("keep-alive"));
         this->Response->end(RawData.data());
         this->deleteLater();
-    } else
+    }
+    else
         this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}));
 }
 

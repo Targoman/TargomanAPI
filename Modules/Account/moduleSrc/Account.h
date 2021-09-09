@@ -266,6 +266,13 @@ private slots:
         "add income to a user by priviledged user. "
         "Description object must contain at least an string field named 'desc'"
     )
+
+#ifdef QT_DEBUG
+protected:
+    virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP);
+    virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP);
+#endif
+
 };
 
 } //namespace Targoman::API::AccountModule

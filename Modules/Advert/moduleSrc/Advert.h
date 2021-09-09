@@ -135,8 +135,8 @@ private slots:
 
 #ifdef QT_DEBUG
 protected:
-    virtual bool fixtureSetUp();
-    virtual bool fixtureCleanUp();
+    virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP);
+    virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP);
 #endif
 
 };

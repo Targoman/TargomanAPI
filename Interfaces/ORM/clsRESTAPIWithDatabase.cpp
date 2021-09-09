@@ -46,14 +46,14 @@ clsRESTAPIWithDatabase::clsRESTAPIWithDatabase(
 {}
 
 #ifdef QT_DEBUG
-bool clsRESTAPIWithDatabase::apiPOSTfixtureSetUp()
+QVariant clsRESTAPIWithDatabase::apiPOSTfixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
 {
-    return fixtureSetUp();
+    return fixtureSetUp(_REMOTE_IP);
 }
 
-bool clsRESTAPIWithDatabase::apiPOSTfixtureCleanUp()
+QVariant clsRESTAPIWithDatabase::apiPOSTfixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
 {
-    return fixtureCleanUp();
+    return fixtureCleanUp(_REMOTE_IP);
 }
 #endif
 

@@ -44,6 +44,9 @@
 #include "PaymentGateways/intfPaymentGateway.h"
 #include "Interfaces/ORM/APIQueryBuilders.h"
 
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
 using namespace Targoman::API::AAA;
@@ -306,7 +309,7 @@ QVariantMap Account::apiPUTsignup(
     QString Type;
 
     if (QFV.email().isValid(_emailOrMobile)) {
-        if(QFV.emailNotFake().isValid(_emailOrMobile))
+        if (QFV.emailNotFake().isValid(_emailOrMobile))
             Type = 'E';
         else
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
@@ -920,5 +923,116 @@ bool Account::apiPOSTaddIncomeTo(
                  });
     return true;
 }
+
+#ifdef QT_DEBUG
+QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
+{
+    QVariantMap Result;
+
+    constexpr char UT_RoleName[] = "UnitTest_Role";
+    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
+    constexpr quint32 UT_AdminRoleID = 3;
+
+    //-- create user --------------------------------------
+    QString UserEmail = QString("fixture.%1.unit_test@unittest.test").arg(QRandomGenerator::global()->generate()); //SecurityHelper::UUIDtoMD5());
+
+    QVariantMap SignupUserResult = this->apiPUTsignup(
+                                    _REMOTE_IP,
+                                    UserEmail,
+                                    { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                    UT_RoleName,
+                                    "fixture unit",
+                                    "fixture test"
+                                   );
+
+    SignupUserResult.insert("email", UserEmail);
+
+    Result.insert("User", SignupUserResult);
+
+    quint64 UserID = SignupUserResult["usrID"].toUInt();
+
+    //-- approve user email --------------------------------------
+    clsDAC DAC;
+    QString Code = DAC.execQuery("",
+                                 "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
+                                 { UserID }
+                                 )
+                   .toJson(true).object().value("aprApprovalCode").toString();
+
+    // 'S' : Sent
+    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { UserID });
+
+    this->apiPOSTapproveEmail(_REMOTE_IP, Code);
+
+    //-- create admin user --------------------------------------
+    QString AdminUserEmail = QString("fixture.%1.unit_test_admin@unittest.test").arg(QRandomGenerator::global()->generate()); //SecurityHelper::UUIDtoMD5());
+
+    QVariantMap SignupAdminUserResult = this->apiPUTsignup(
+                                            _REMOTE_IP,
+                                            AdminUserEmail,
+                                            { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                            UT_RoleName,
+                                            "fixture admin unit",
+                                            "fixture admin test"
+                                            );
+
+    SignupAdminUserResult.insert("email", AdminUserEmail);
+
+    Result.insert("Admin", SignupAdminUserResult);
+
+    quint64 AdminUserID = SignupAdminUserResult["usrID"].toUInt();
+
+    DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, AdminUserID });
+
+    //-- approve admin user email --------------------------------------
+    Code = DAC.execQuery("",
+                         "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
+                         { AdminUserID }
+                         )
+           .toJson(true).object().value("aprApprovalCode").toString();
+
+    // 'S' : Sent
+    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { AdminUserID });
+
+    this->apiPOSTapproveEmail(_REMOTE_IP, Code);
+
+    //----------------------------------------
+//    PaymentGateway
+
+    //----------------------------------------
+    return Result;
+}
+
+QVariant Account::fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
+{
+    Q_UNUSED(_REMOTE_IP);
+
+    QVariantMap Result;
+
+    clsDAC DAC;
+
+    try
+    {
+        QString QueryString = "DELETE tblApprovalRequest FROM tblApprovalRequest INNER JOIN tblUser ON tblUser.usrID = tblApprovalRequest.apr_usrID WHERE usrEmail LIKE 'fixture.%'";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("ApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = "DELETE FROM tblUser WHERE usrEmail LIKE 'fixture.%'";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("User", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    return Result;
+}
+#endif
 
 } //namespace Targoman::API::AccountModule

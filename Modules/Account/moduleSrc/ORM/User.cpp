@@ -42,8 +42,8 @@ User::User() :
             //ORM_PRIMARYKEY_64 with self:true
             { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
             { tblUser::usrGender,           S(TAPI::enuUserGender::Type),   QFV,                                   TAPI::enuUserGender::NotExpressed, UPOwner },
-            { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
-            { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(100),     QNull,     UPOwner },
+            { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
+            { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
             { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
             { tblUser::usrMobile,           S(TAPI::Mobile_t),              QFV,                                   QNull,     UPOwner },
             { tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type), QFV,                                   TAPI::enuUserApproval::None },

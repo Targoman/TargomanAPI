@@ -27,6 +27,9 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "ORM/Accounting.h"
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
@@ -168,18 +171,224 @@ QString Advert::apiGETretrieveURL(
 {}
 
 #ifdef QT_DEBUG
-bool Advert::fixtureSetUp()
+QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
 {
-    ///TODO: complete this
+    Q_UNUSED(_REMOTE_IP);
 
-    return true;
+    QVariantMap Result;
+
+    //-- location --------------------------------------
+    QString LocationUrl = QString("http://fixture.%1.com").arg(SecurityHelper::UUIDtoMD5());
+
+    QVariantMap LocationValues = {
+        { tblLocations::locURL,        LocationUrl },
+        { tblLocations::locPlaceCode,  "FIX" },
+    };
+
+    quint32 LocationID = CreateQuery(Locations::instance())
+                         .addCol(tblLocations::locURL)
+                         .addCol(tblLocations::locPlaceCode)
+//                         .addCol(tblLocations::locStatus)
+                         .values(LocationValues)
+                         .execute(1);
+
+    LocationValues.insert(tblLocations::locID, LocationID);
+    Result.insert("Location", LocationValues);
+
+    //-- product --------------------------------------
+    QString ProductCode = QString("fixture-%1").arg(QRandomGenerator::global()->generate());
+
+    QVariantMap ProductValues = {
+        { tblAccountProductsBase::prdCode,          ProductCode },
+        { tblAccountProductsBase::prdName,          "test product 123" },
+        { tblAccountProductsBase::prdInStockCount,  1 },
+        { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::prd_locID,            LocationID },
+    };
+
+    quint32 ProductID = CreateQuery(*this->AccountProducts)
+//                        .addCol(tblAccountProductsBase::prdID)
+                        .addCol(tblAccountProductsBase::prdCode)
+                        .addCol(tblAccountProductsBase::prdName)
+//                        .addCol(tblAccountProductsBase::prdDesc)
+//                        .addCol(tblAccountProductsBase::prdValidFromDate)
+//                        .addCol(tblAccountProductsBase::prdValidToDate)
+//                        .addCol(tblAccountProductsBase::prdValidFromHour)
+//                        .addCol(tblAccountProductsBase::prdValidToHour)
+//                        .addCol(tblAccountProductsBase::prdPrivs)
+//                        .addCol(tblAccountProductsBase::prdVAT)
+                        .addCol(tblAccountProductsBase::prdInStockCount)
+//                        .addCol(tblAccountProductsBase::prdOrderedCount)
+//                        .addCol(tblAccountProductsBase::prdReturnedCount)
+//                        .addCol(tblAccountProductsBase::prdStatus)
+                        .addCol(tblAccountProducts::prdType)
+                        .addCol(tblAccountProducts::prd_locID)
+//                        .addCol(tblAccountProducts::prdShowPerDay)
+//                        .addCol(tblAccountProducts::prdShowTotal)
+//                        .addCol(tblAccountProducts::prdClicksPerDay)
+//                        .addCol(tblAccountProducts::prdClicksPerMonth)
+//                        .addCol(tblAccountProducts::prdClicksTotal)
+                        .values(ProductValues)
+                        .execute(1);
+
+    ProductValues.insert(tblAccountProductsBase::prdID, ProductID);
+    Result.insert("Product", ProductValues);
+
+    //-- saleable --------------------------------------
+    QString SaleableCode = QString("%1-%2").arg(ProductCode).arg(QRandomGenerator::global()->generate());
+
+    QVariantMap SaleableValues = {
+        { tblAccountSaleablesBase::slb_prdID,           ProductID },
+        { tblAccountSaleablesBase::slbCode,             SaleableCode },
+        { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
+        { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
+        { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+        { tblAccountSaleablesBase::slbBasePrice,        12'000 },
+        { tblAccountSaleablesBase::slbProductCount,     900 },
+        { tblAccountSaleablesBase::slbInStockCount,     1 },
+        { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
+    };
+
+    quint32 SaleableID = CreateQuery(*this->AccountSaleables)
+//                         .addCol(tblAccountSaleablesBase::slbID)
+                         .addCol(tblAccountSaleablesBase::slb_prdID)
+                         .addCol(tblAccountSaleablesBase::slbCode)
+                         .addCol(tblAccountSaleablesBase::slbName)
+                         .addCol(tblAccountSaleablesBase::slbDesc)
+                         .addCol(tblAccountSaleablesBase::slbType)
+//                         .addCol(tblAccountSaleablesBase::slbAvailableFromDate)
+//                         .addCol(tblAccountSaleablesBase::slbAvailableToDate)
+//                         .addCol(tblAccountSaleablesBase::slbPrivs)
+                         .addCol(tblAccountSaleablesBase::slbBasePrice)
+//                         .addCol(tblAccountSaleablesBase::slbAdditives)
+                         .addCol(tblAccountSaleablesBase::slbProductCount)
+//                         .addCol(tblAccountSaleablesBase::slbMaxSaleCountPerUser)
+                         .addCol(tblAccountSaleablesBase::slbInStockCount)
+//                         .addCol(tblAccountSaleablesBase::slbOrderedCount)
+//                         .addCol(tblAccountSaleablesBase::slbReturnedCount)
+                         .addCol(tblAccountSaleablesBase::slbVoucherTemplate)
+//                         .addCol(tblAccountSaleablesBase::slbStatus)
+//                         .addCol(tblAccountSaleablesBase::slbCreatedBy_usrID)
+//                         .addCol(tblAccountSaleablesBase::slbCreationDateTime)
+//                         .addCol(tblAccountSaleablesBase::slbUpdatedBy_usrID)
+//                         .addCol(tblAccountSaleables::slbShowPerDay)
+//                         .addCol(tblAccountSaleables::slbShowTotal)
+//                         .addCol(tblAccountSaleables::slbClicksPerDay)
+//                         .addCol(tblAccountSaleables::slbClicksPerMonth)
+//                         .addCol(tblAccountSaleables::slbClicksTotal)
+                         .values(SaleableValues)
+                         .execute(1);
+
+     SaleableValues.insert(tblAccountSaleablesBase::slbID, SaleableID);
+     Result.insert("Saleable", SaleableValues);
+
+    //-- coupon  --------------------------------------
+    QString CouponCode = QString("fixture-%1").arg(QRandomGenerator::global()->generate());
+
+    QVariantMap CouponValues = {
+        { tblAccountCouponsBase::cpnCode, CouponCode },
+        { tblAccountCouponsBase::cpnPrimaryCount, 100 },
+        { tblAccountCouponsBase::cpnTotalMaxAmount, 100'000'000 },
+        { tblAccountCouponsBase::cpnPerUserMaxCount, 2 },
+        { tblAccountCouponsBase::cpnPerUserMaxAmount, 10'000'000 },
+        { tblAccountCouponsBase::cpnValidFrom, "2020/1/1 1:2:3" },
+//        { tblAccountCouponsBase::cpnExpiryTime,  },
+        { tblAccountCouponsBase::cpnAmount, 10 },
+        { tblAccountCouponsBase::cpnAmountType, Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
+//        { tblAccountCouponsBase::cpnMaxAmount,  },
+        { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+          QVariantList({
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.5 }, { "minCount", 0 } }),
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.8 }, { "minCount", 5 } }),
+              QVariantMap({ { "saleableCode", "other" },      { "multiplier", 2.0 }                    }),
+          })
+        },
+//        { tblAccountCouponsBase::cpnTotalUsedCount,  },
+//        { tblAccountCouponsBase::cpnTotalUsedAmount,  },
+//        { tblAccountCouponsBase::cpnStatus,  },
+    };
+
+    quint32 CouponID = CreateQuery(*this->AccountCoupons)
+//                       .addCol(tblAccountCouponsBase::cpnID)
+                       .addCol(tblAccountCouponsBase::cpnCode)
+                       .addCol(tblAccountCouponsBase::cpnPrimaryCount)
+                       .addCol(tblAccountCouponsBase::cpnTotalMaxAmount)
+                       .addCol(tblAccountCouponsBase::cpnPerUserMaxCount)
+                       .addCol(tblAccountCouponsBase::cpnPerUserMaxAmount)
+                       .addCol(tblAccountCouponsBase::cpnValidFrom)
+//                       .addCol(tblAccountCouponsBase::cpnExpiryTime)
+                       .addCol(tblAccountCouponsBase::cpnAmount)
+                       .addCol(tblAccountCouponsBase::cpnAmountType)
+//                       .addCol(tblAccountCouponsBase::cpnMaxAmount)
+                       .addCol(tblAccountCouponsBase::cpnSaleableBasedMultiplier)
+//                       .addCol(tblAccountCouponsBase::cpnTotalUsedCount)
+//                       .addCol(tblAccountCouponsBase::cpnTotalUsedAmount)
+//                       .addCol(tblAccountCouponsBase::cpnStatus)
+                       .values(CouponValues)
+                       .execute(1);
+
+    CouponValues.insert(tblAccountCouponsBase::cpnID, CouponID);
+    Result.insert("Coupon", CouponValues);
+
+    //----------------------------------------
+    return Result;
 }
 
-bool Advert::fixtureCleanUp()
+QVariant Advert::fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
 {
-    ///TODO: complete this
+    Q_UNUSED(_REMOTE_IP);
 
-    return true;
+    QVariantMap Result;
+
+    try
+    {
+        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
+                              .arg(tblAccountCouponsBase::Name)
+                              .arg(tblAccountCouponsBase::cpnCode);
+        clsDACResult DACResult = this->AccountCoupons->execQuery(QueryString);
+        Result.insert("Coupon", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
+                              .arg(tblAccountSaleablesBase::Name)
+                              .arg(tblAccountSaleablesBase::slbCode);
+        clsDACResult DACResult = this->AccountSaleables->execQuery(QueryString);
+        Result.insert("Saleable", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
+                              .arg(tblAccountProductsBase::Name)
+                              .arg(tblAccountProductsBase::prdCode);
+        clsDACResult DACResult = this->AccountProducts->execQuery(QueryString);
+        Result.insert("Product", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'http://fixture.%'")
+                              .arg(tblLocations::Name)
+                              .arg(tblLocations::locURL);
+        clsDACResult DACResult = Locations::instance().execQuery(QueryString);
+        Result.insert("Location", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    return Result;
 }
 #endif
 
