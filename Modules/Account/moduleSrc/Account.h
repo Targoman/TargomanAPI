@@ -271,6 +271,26 @@ private slots:
 protected:
     virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP);
     virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP);
+
+protected slots:
+    bool REST(
+        POST,
+        fixtureApproveEmail,
+        (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _email
+        ),
+        "Approve Email Address directly"
+    )
+    bool REST(
+        POST,
+        fixtureApproveMobile,
+        (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                TAPI::Mobile_t _mobile
+        ),
+        "Approve Mobile directly"
+    )
 #endif
 
 };

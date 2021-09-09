@@ -1033,6 +1033,48 @@ QVariant Account::fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
 
     return Result;
 }
+
+///TODO: not tested
+bool Account::apiPOSTfixtureApproveEmail(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _email
+    )
+{
+    clsDAC DAC;
+    QString Code = DAC.execQuery("",
+                                 "SELECT aprApprovalCode FROM tblApprovalRequest "
+                                 "INNER JOIN tblUser ON tblUser.usrID = tblApprovalRequest.apr_usrID "
+                                 "WHERE usrEmail=?",
+                                 { _email }
+                                 )
+                   .toJson(true).object().value("aprApprovalCode").toString();
+
+    if (Code.isEmpty())
+        return false;
+
+    return apiPOSTapproveEmail(_REMOTE_IP, Code);
+}
+
+///TODO: not tested
+bool Account::apiPOSTfixtureApproveMobile(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile
+    )
+{
+    clsDAC DAC;
+    QString Code = DAC.execQuery("",
+                                 "SELECT aprApprovalCode FROM tblApprovalRequest "
+                                 "WHERE aprApprovalValue=?",
+                                 { _mobile }
+                                 )
+                   .toJson(true).object().value("aprApprovalCode").toString();
+
+    if (Code.isEmpty())
+        return false;
+
+    return apiPOSTapproveMobile(_REMOTE_IP, _mobile, Code.toUInt());
+}
+
 #endif
 
 } //namespace Targoman::API::AccountModule
