@@ -746,7 +746,9 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
             Voucher.PaymentMD5 = PaymentMD5;
         }
     }
-    catch (...) {
+    catch (std::exception &exp) {
+        qDebug() << "**********************************" << exp.what();
+
         Account::tryCancelVoucher(_JWT, Voucher.ID, true);
 //        Targoman::API::Query::Update(Voucher::instance(),
 //                                     SYSTEM_USER_ID,
@@ -925,24 +927,30 @@ bool Account::apiPOSTaddIncomeTo(
 }
 
 #ifdef QT_DEBUG
-QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
+QVariant Account::apiPOSTfixtureSetup(
+        TAPI::RemoteIP_t _REMOTE_IP
+    )
 {
     QVariantMap Result;
+    quint32 Random;
 
     constexpr char UT_RoleName[] = "UnitTest_Role";
 //    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
     constexpr quint32 UT_AdminRoleID = 3;
 
+    clsDAC DAC;
+
     //-- create user --------------------------------------
-    QString UserEmail = QString("fixture.%1.unit_test@unittest.test").arg(QRandomGenerator::global()->generate()); //SecurityHelper::UUIDtoMD5());
+    Random = QRandomGenerator::global()->generate();
+    QString UserEmail = QString("fixture.%1.user@dev.test").arg(Random);
 
     QVariantMap SignupUserResult = this->apiPUTsignup(
                                     _REMOTE_IP,
                                     UserEmail,
                                     { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                     UT_RoleName,
-                                    "fixture unit",
-                                    "fixture test"
+                                    "fixture test",
+                                    "user"
                                    );
 
     SignupUserResult.insert("email", UserEmail);
@@ -952,28 +960,30 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     quint64 UserID = SignupUserResult["usrID"].toUInt();
 
     //-- approve user email --------------------------------------
-    clsDAC DAC;
     QString Code = DAC.execQuery("",
                                  "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
                                  { UserID }
                                  )
                    .toJson(true).object().value("aprApprovalCode").toString();
 
-    // 'S' : Sent
-    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { UserID });
+    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus=? WHERE apr_usrID=?", {
+                      QChar(enuAPRStatus::Sent),
+                      UserID
+                  });
 
     this->apiPOSTapproveEmail(_REMOTE_IP, Code);
 
-    //-- create admin user --------------------------------------
-    QString AdminUserEmail = QString("fixture.%1.unit_test_admin@unittest.test").arg(QRandomGenerator::global()->generate()); //SecurityHelper::UUIDtoMD5());
+    //-- create admin --------------------------------------
+    Random = QRandomGenerator::global()->generate();
+    QString AdminUserEmail = QString("fixture.%1.admin@dev.test").arg(Random);
 
     QVariantMap SignupAdminUserResult = this->apiPUTsignup(
                                             _REMOTE_IP,
                                             AdminUserEmail,
                                             { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                             UT_RoleName,
-                                            "fixture admin unit",
-                                            "fixture admin test"
+                                            "fixture test",
+                                            "admin"
                                             );
 
     SignupAdminUserResult.insert("email", AdminUserEmail);
@@ -984,7 +994,7 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
 
     DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, AdminUserID });
 
-    //-- approve admin user email --------------------------------------
+    //-- approve admin email --------------------------------------
     Code = DAC.execQuery("",
                          "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
                          {
@@ -992,8 +1002,10 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
                          })
            .toJson(true).object().value("aprApprovalCode").toString();
 
-    // 'S' : Sent
-    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?", { AdminUserID });
+    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus=? WHERE apr_usrID=?", {
+                      QChar(enuAPRStatus::Sent),
+                      AdminUserID
+                  });
 
     this->apiPOSTapproveEmail(_REMOTE_IP, Code);
 
@@ -1001,9 +1013,12 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     quint32 pgwTotalRows = DAC.execQuery("",
                                          "SELECT COUNT(*) AS cnt"
                                          " FROM tblPaymentGateways"
-                                         " WHERE pgwType=?",
+                                         " WHERE pgwType=?"
+                                         " AND pgwAllowedDomainName=?"
+                                         ,
                                          {
-                                             QChar(enuPaymentGatewayType::_DeveloperTest)
+                                             QChar(enuPaymentGatewayType::_DeveloperTest),
+                                             "dev.test"
                                          })
                            .toJson(true)
 //                           .toVariant()
@@ -1033,7 +1048,7 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
                           { "password", "123" },
                       })
                     },
-                    { tblPaymentGateways::pgwAllowedDomainName, "devtest.com" },
+                    { tblPaymentGateways::pgwAllowedDomainName, "dev.test" },
                 };
                 quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
 //                                           .addCol(tblPaymentGateways::pgwID)
@@ -1076,7 +1091,9 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     return Result;
 }
 
-QVariant Account::fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
+QVariant Account::apiPOSTfixtureCleanup(
+        TAPI::RemoteIP_t _REMOTE_IP
+    )
 {
     Q_UNUSED(_REMOTE_IP);
 

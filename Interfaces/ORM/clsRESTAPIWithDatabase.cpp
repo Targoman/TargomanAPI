@@ -45,16 +45,16 @@ clsRESTAPIWithDatabase::clsRESTAPIWithDatabase(
     )
 {}
 
-#ifdef QT_DEBUG
-QVariant clsRESTAPIWithDatabase::apiPOSTfixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
-{
-    return fixtureSetUp(_REMOTE_IP);
-}
+//#ifdef QT_DEBUG
+//QVariant clsRESTAPIWithDatabase::apiPOSTfixtureSetup(TAPI::RemoteIP_t _REMOTE_IP)
+//{
+//    return fixtureSetup(_REMOTE_IP);
+//}
 
-QVariant clsRESTAPIWithDatabase::apiPOSTfixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
-{
-    return fixtureCleanUp(_REMOTE_IP);
-}
-#endif
+//QVariant clsRESTAPIWithDatabase::apiPOSTfixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP)
+//{
+//    return fixtureCleanup(_REMOTE_IP);
+//}
+//#endif
 
 } // namespace Targoman::API::ORM

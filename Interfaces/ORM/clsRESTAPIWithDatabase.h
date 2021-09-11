@@ -43,29 +43,29 @@ public:
             const QVariantMap& _dbProperties = {}
             );
 
-#ifdef QT_DEBUG
-protected slots:
-    QVariant REST(
-        POST,
-        fixtureSetUp,
-        (
-                TAPI::RemoteIP_t _REMOTE_IP
-        ),
-        "Create sample data"
-    )
+//#ifdef QT_DEBUG
+//protected slots:
+//    QVariant REST(
+//        POST,
+//        fixtureSetup,
+//        (
+//                TAPI::RemoteIP_t _REMOTE_IP
+//        ),
+//        "Create sample data"
+//    )
 
-    QVariant REST(
-        POST,
-        fixtureCleanUp,
-        (
-                TAPI::RemoteIP_t _REMOTE_IP
-        ),
-        "Cleanup sample data"
-    )
-protected:
-    virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-    virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-#endif
+//    QVariant REST(
+//        POST,
+//        fixtureCleanup,
+//        (
+//                TAPI::RemoteIP_t _REMOTE_IP
+//        ),
+//        "Cleanup sample data"
+//    )
+//protected:
+//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
+//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
+//#endif
 };
 
 } // namespace Targoman::API::ORM

@@ -38,6 +38,9 @@ using namespace Targoman::API::Helpers;
 #include "ORM/Props.h"
 #include "ORM/Locations.h"
 
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
+
 using namespace Targoman::API::AAA::Accounting;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
@@ -171,11 +174,15 @@ QString Advert::apiGETretrieveURL(
 {}
 
 #ifdef QT_DEBUG
-QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
+QVariant Advert::apiPOSTfixtureSetup(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::JWT_t _JWT
+    )
 {
     Q_UNUSED(_REMOTE_IP);
 
     QVariantMap Result;
+    quint32 Random;
 
     //-- location --------------------------------------
     QString LocationUrl = QString("http://fixture.%1.com").arg(SecurityHelper::UUIDtoMD5());
@@ -196,11 +203,12 @@ QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     Result.insert("Location", LocationValues);
 
     //-- product --------------------------------------
-    QString ProductCode = QString("fixture-%1").arg(QRandomGenerator::global()->generate());
+    Random = QRandomGenerator::global()->generate();
+    QString ProductCode = QString("fixture-%1").arg(Random);
 
     QVariantMap ProductValues = {
         { tblAccountProductsBase::prdCode,          ProductCode },
-        { tblAccountProductsBase::prdName,          "test product 123" },
+        { tblAccountProductsBase::prdName,          QString("fixture product %1").arg(Random) },
         { tblAccountProductsBase::prdInStockCount,  1 },
         { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
         { tblAccountProducts::prd_locID,            LocationID },
@@ -235,18 +243,19 @@ QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     Result.insert("Product", ProductValues);
 
     //-- saleable --------------------------------------
-    QString SaleableCode = QString("%1-%2").arg(ProductCode).arg(QRandomGenerator::global()->generate());
+    Random = QRandomGenerator::global()->generate();
+    QString SaleableCode = QString("%1-%2").arg(ProductCode).arg(Random);
 
     QVariantMap SaleableValues = {
         { tblAccountSaleablesBase::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::slbCode,             SaleableCode },
-        { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
-        { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
+        { tblAccountSaleablesBase::slbName,             QString("fixture saleable %1 name").arg(Random) },
+        { tblAccountSaleablesBase::slbDesc,             QString("fixture saleable %1 desc").arg(Random) },
         { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
         { tblAccountSaleablesBase::slbBasePrice,        12'000 },
         { tblAccountSaleablesBase::slbProductCount,     900 },
         { tblAccountSaleablesBase::slbInStockCount,     1 },
-        { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
+        { tblAccountSaleablesBase::slbVoucherTemplate,  QString("fixture saleable %1 vt").arg(Random) },
     };
 
     quint32 SaleableID = CreateQuery(*this->AccountSaleables)
@@ -282,8 +291,9 @@ QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
      SaleableValues.insert(tblAccountSaleablesBase::slbID, SaleableID);
      Result.insert("Saleable", SaleableValues);
 
-    //-- coupon  --------------------------------------
-    QString CouponCode = QString("fixture-%1").arg(QRandomGenerator::global()->generate());
+    //-- coupon --------------------------------------
+    Random = QRandomGenerator::global()->generate();
+    QString CouponCode = QString("fixture-%1").arg(Random);
 
     QVariantMap CouponValues = {
         { tblAccountCouponsBase::cpnCode, CouponCode },
@@ -331,10 +341,73 @@ QVariant Advert::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     Result.insert("Coupon", CouponValues);
 
     //----------------------------------------
+    stuPreVoucher LastPreVoucher;
+    stuVoucher Voucher;
+    stuVoucher ApproveOnlinePaymentVoucher;
+
+    //-- add to basket --------------------------------------
+    LastPreVoucher = this->apiPOSTaddToBasket(
+                _JWT,
+                /* saleableCode        */ SaleableCode,
+                /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
+                /* qty                 */ 1,
+                /* discountCode        */ CouponCode,
+                /* referrer            */ "",
+                /* extraReferrerParams */ {},
+                /* lastPreVoucher      */ LastPreVoucher
+    );
+
+    //-- finalize basket --------------------------------------
+    QVariant res = RESTClientHelper::callAPI(
+        _JWT,
+        RESTClientHelper::POST,
+        "Account/finalizeBasket",
+        {},
+        {
+            { "preVoucher",             LastPreVoucher.toJson().toVariantMap() },
+            { "gatewayType",            "_DeveloperTest" },
+            { "domain",                 "dev.test" },
+            { "walletID",               9988 },
+            { "paymentVerifyCallback",  "http://www.a.com" },
+        }
+    );
+    Voucher.fromJson(res.toJsonObject());
+
+    //-- approve online payment --------------------------------------
+    if (Voucher.PaymentMD5.isEmpty() == false)
+    {
+        QVariant res = RESTClientHelper::callAPI(
+            _JWT,
+            RESTClientHelper::POST,
+            "Account/approveOnlinePayment",
+            {},
+            {
+                { "paymentMD5",     Voucher.PaymentMD5 },
+                { "domain",         "this.is.domain" },
+                { "pgResponse",     QVariantMap({
+                      { "resp_1", 1 },
+                      { "resp_2", 2 },
+                      { "resp_3", 3 },
+                  }) },
+            }
+        );
+        ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());
+    }
+
+    //----------------------------------------
     return Result;
 }
 
-QVariant Advert::fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP)
+//bool Advert::apiPOSTfixtureSetupVoucher(
+//        TAPI::RemoteIP_t _REMOTE_IP,
+//        TAPI::JWT_t _JWT
+//    )
+//{
+//}
+
+QVariant Advert::apiPOSTfixtureCleanup(
+        TAPI::RemoteIP_t _REMOTE_IP
+    )
 {
     Q_UNUSED(_REMOTE_IP);
 

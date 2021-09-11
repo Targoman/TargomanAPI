@@ -177,12 +177,10 @@ private slots:
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
-                "Account/fixtureSetUp",
-                {},
-                {}
+                "Account/fixtureSetup"
             );
 
-            qDebug() << "--------- Account fixtureSetUp: " << Result;
+            qDebug() << "--------- Account fixtureSetup: " << Result;
 
             QVERIFY(Result.isValid());
 
@@ -231,25 +229,23 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-//    void setupAdvertFixture()
-//    {
-//        QT_TRY {
-//            QVariant Result = callAdminAPI(
-//                RESTClientHelper::POST,
-//                "Advert/fixtureSetUp",
-//                {},
-//                {}
-//            );
+    void setupAdvertFixture()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Advert/fixtureSetup"
+            );
 
-//            qDebug() << "--------- Advert fixtureSetUp: " << Result;
+            qDebug() << "--------- Advert fixtureSetup: " << Result;
 
-//            QVERIFY(Result.isValid());
+            QVERIFY(Result.isValid());
 
-//        } QT_CATCH (const std::exception &exp) {
-//            QTest::qFail(exp.what(), __FILE__, __LINE__);
-//        }
-//    }
-
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+private:
     void createLocation()
     {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
@@ -367,7 +363,7 @@ private slots:
                                                             { "password", "123" },
                                                           })
                             },
-                            { "pgwAllowedDomainName",     "devtest.com" },
+                            { "pgwAllowedDomainName",     "dev.test" },
                             //"
             //                { "pgwTransactionFeeValue",   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             //                { "pgwTransactionFeeType",    S(TAPI::enuPaymentGatewayTransactionFeeType::Type), QFV,                                TAPI::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
@@ -629,7 +625,7 @@ private slots:
                 {
                     { "preVoucher",             {} },
                     { "gatewayType",            "_DeveloperTest" },
-                    { "domain",                 "devtest.com" },
+                    { "domain",                 "dev.test" },
                     { "walletID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
                 }
@@ -652,7 +648,7 @@ private slots:
                 {
                     { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
                     { "gatewayType",            "_DeveloperTest" },
-                    { "domain",                 "devtest.com" },
+                    { "domain",                 "dev.test" },
                     { "walletID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
                 }
@@ -832,12 +828,12 @@ private slots:
 //        QT_TRY {
 //            QVariant Result = callAdminAPI(
 //                RESTClientHelper::POST,
-//                "Advert/fixtureCleanUp",
+//                "Advert/fixtureCleanup",
 //                {},
 //                {}
 //            );
 
-//            qDebug() << "--------- Advert fixtureCleanUp: " << Result;
+//            qDebug() << "--------- Advert fixtureCleanup: " << Result;
 
 //            QVERIFY(Result.isValid());
 
@@ -851,12 +847,12 @@ private slots:
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
-                "Account/fixtureCleanUp",
+                "Account/fixtureCleanup",
                 {},
                 {}
             );
 
-            qDebug() << "--------- Account fixtureCleanUp: " << Result;
+            qDebug() << "--------- Account fixtureCleanup: " << Result;
 
             QVERIFY(Result.isValid());
 

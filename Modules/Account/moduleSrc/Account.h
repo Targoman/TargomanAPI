@@ -268,11 +268,28 @@ private slots:
     )
 
 #ifdef QT_DEBUG
-protected:
-    virtual QVariant fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP);
-    virtual QVariant fixtureCleanUp(TAPI::RemoteIP_t _REMOTE_IP);
+//protected:
+//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP);
+//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP);
 
 protected slots:
+    QVariant REST(
+        POST,
+        fixtureSetup,
+        (
+                TAPI::RemoteIP_t _REMOTE_IP
+        ),
+        "Create sample data"
+    )
+
+    QVariant REST(
+        POST,
+        fixtureCleanup,
+        (
+                TAPI::RemoteIP_t _REMOTE_IP
+        ),
+        "Cleanup sample data"
+    )
     bool REST(
         POST,
         fixtureApproveEmail,
