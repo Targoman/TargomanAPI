@@ -930,7 +930,7 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     QVariantMap Result;
 
     constexpr char UT_RoleName[] = "UnitTest_Role";
-    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
+//    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
     constexpr quint32 UT_AdminRoleID = 3;
 
     //-- create user --------------------------------------
@@ -987,8 +987,9 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
     //-- approve admin user email --------------------------------------
     Code = DAC.execQuery("",
                          "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
-                         { AdminUserID }
-                         )
+                         {
+                             AdminUserID
+                         })
            .toJson(true).object().value("aprApprovalCode").toString();
 
     // 'S' : Sent
@@ -996,8 +997,80 @@ QVariant Account::fixtureSetUp(TAPI::RemoteIP_t _REMOTE_IP)
 
     this->apiPOSTapproveEmail(_REMOTE_IP, Code);
 
-    //----------------------------------------
-//    PaymentGateway
+    //-- payment gateway --------------------------------------
+    quint32 pgwTotalRows = DAC.execQuery("",
+                                         "SELECT COUNT(*) AS cnt"
+                                         " FROM tblPaymentGateways"
+                                         " WHERE pgwType=?",
+                                         {
+                                             QChar(enuPaymentGatewayType::_DeveloperTest)
+                                         })
+                           .toJson(true)
+//                           .toVariant()
+//                           .toMap()
+                           .object()
+                           .value("cnt")
+                           .toInt();
+
+    QVariantMap PaymentGatewayReport = {
+        { "RowsCount", pgwTotalRows }
+    };
+
+    if (pgwTotalRows < 3)
+    {
+//        QVariantMap CreatedPaymentGateways;
+
+        for (int i=pgwTotalRows; i<3; ++i)
+        {
+            try
+            {
+                QVariantMap PaymentGatewayValues = {
+                    { tblPaymentGateways::pgwName,     QString("fixture.devtest %1").arg(QRandomGenerator::global()->generate()) },
+                    { tblPaymentGateways::pgwType,     enuPaymentGatewayType::toStr(enuPaymentGatewayType::_DeveloperTest) },
+                    { tblPaymentGateways::pgwDriver,   "DevTest" },
+                    { tblPaymentGateways::pgwMetaInfo, QVariantMap({
+                          { "username", "hello" },
+                          { "password", "123" },
+                      })
+                    },
+                    { tblPaymentGateways::pgwAllowedDomainName, "devtest.com" },
+                };
+                quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
+//                                           .addCol(tblPaymentGateways::pgwID)
+                                           .addCol(tblPaymentGateways::pgwName)
+                                           .addCol(tblPaymentGateways::pgwType)
+                                           .addCol(tblPaymentGateways::pgwDriver)
+                                           .addCol(tblPaymentGateways::pgwMetaInfo)
+                                           .addCol(tblPaymentGateways::pgwAllowedDomainName)
+//                                           .addCol(tblPaymentGateways::pgwTransactionFeeValue)
+//                                           .addCol(tblPaymentGateways::pgwTransactionFeeType)
+//                                           .addCol(tblPaymentGateways::pgwMinRequestAmount)
+//                                           .addCol(tblPaymentGateways::pgwMaxRequestAmount)
+//                                           .addCol(tblPaymentGateways::pgwMaxPerDayAmount)
+//                                           .addCol(tblPaymentGateways::pgwLastPaymentDateTime)
+//                                           .addCol(tblPaymentGateways::pgwSumTodayPaidAmount)
+//                                           .addCol(tblPaymentGateways::pgwSumRequestCount)
+//                                           .addCol(tblPaymentGateways::pgwSumRequestAmount)
+//                                           .addCol(tblPaymentGateways::pgwSumFailedCount)
+//                                           .addCol(tblPaymentGateways::pgwSumOkCount)
+//                                           .addCol(tblPaymentGateways::pgwSumPaidAmount)
+//                                           .addCol(tblPaymentGateways::pgwStatus)
+                                           .values(PaymentGatewayValues)
+                                           .execute(1);
+
+                PaymentGatewayValues.insert(tblPaymentGateways::pgwID, PaymentGatewayID);
+//                CreatedPaymentGateways.in(PaymentGatewayValues);
+            }
+            catch(std::exception &exp)
+            {
+                qDebug() << exp.what();
+            }
+        }
+//        qDebug() << CreatedPaymentGateways;
+//        PaymentGatewayReport.insert("PaymentGateways", QVariant::fromValue(CreatedPaymentGateways));
+    }
+
+    Result.insert("PaymentGateway", PaymentGatewayReport);
 
     //----------------------------------------
     return Result;

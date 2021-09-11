@@ -331,7 +331,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-
+/*
     void createPaymentGateway_devtest()
     {
         auto ret = callAdminAPI(
@@ -397,7 +397,7 @@ private slots:
             }
         }
     }
-
+*/
     void addToBasket_invalid_saleable_code()
     {
         QT_TRY {
