@@ -30,7 +30,7 @@
 #include "QFieldValidator.h"
 #include "clsRequestHandler.h"
 #include "libTargomanCommon/CmdIO.h"
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 #include "ServerConfigs.h"
 #include "QJWT.h"
 #include "APICache.hpp"

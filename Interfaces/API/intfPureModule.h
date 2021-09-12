@@ -21,24 +21,86 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_INTFAPIMODULE_HPP
-#define TARGOMAN_API_INTFAPIMODULE_HPP
+#ifndef TARGOMAN_API_INTFPUREMODULE_H
+#define TARGOMAN_API_INTFPUREMODULE_H
 
 #include <QObject>
 #include <QtPlugin>
 #include <QMap>
-
 #include "libTargomanCommon/Configuration/intfConfigurableModule.hpp"
 #include "libTargomanCommon/exTargomanBase.h"
-
 #include "QHttp/qhttpfwd.hpp"
-
 #include "Interfaces/Common/base.h"
-#include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/GenericTypes.h"
-#include "Interfaces/ORM/clsORMField.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include "Interfaces/DBM/clsORMField.h"
 
-namespace Targoman::API {
+//used by Api call methods
+#define GET_METHOD_ARGS_HEADER_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, quint64 _offset = 0, quint16 _limit = 10, TAPI::Cols_t _cols = {}, TAPI::Filter_t _filters = {}, TAPI::OrderBy_t _orderBy = {}, TAPI::GroupBy_t _groupBy = {}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL_APICALL     TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, quint64 _offset, quint16 _limit, TAPI::Cols_t _cols, TAPI::Filter_t _filters, TAPI::OrderBy_t _orderBy, TAPI::GroupBy_t _groupBy, bool _reportCount
+//#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define ORMGET(_doc)                     apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfGET() { return _doc; }
+#define ORMGETWithName(_name, _doc)      apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfGET##_name(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfGET##_name() { return _doc; }
+//used by ApiQuery
+#define GET_METHOD_ARGS_HEADER_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, quint64 _offset = 0, quint16 _limit = 10, TAPI::Cols_t _cols = {}, TAPI::Filter_t _filters = {}, TAPI::OrderBy_t _orderBy = {}, TAPI::GroupBy_t _groupBy = {}, bool _reportCount = true
+#define GET_METHOD_ARGS_IMPL_INTERNAL_CALL     quint64 _userID, TAPI::PKsByPath_t _pksByPath, quint64 _offset, quint16 _limit, TAPI::Cols_t _cols, TAPI::Filter_t _filters, TAPI::OrderBy_t _orderBy, TAPI::GroupBy_t _groupBy, bool _reportCount
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL     clsJWT(_JWT).usrID(), _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW _userID, _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+
+//used by Api call methods
+#define CREATE_METHOD_ARGS_HEADER_APICALL   TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_APICALL     TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo
+//#define CREATE_METHOD_CALL_ARGS_APICALL     _JWT, _createInfo
+#define ORMCREATE(_doc)                     apiCREATE(CREATE_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfCREATE() { return _doc; }
+//used by ApiQuery
+#define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _createInfo
+
+//used by Api call methods
+#define UPDATE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+//#define UPDATE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
+#define ORMUPDATE(_doc)                   apiUPDATE(UPDATE_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfUPDATE() { return _doc; }
+//used by ApiQuery
+#define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
+
+//used by Api call methods
+#define DELETE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath
+//#define DELETE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath
+#define ORMDELETE(_doc)                   apiDELETE(DELETE_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfDELETE() { return _doc; }
+//used by ApiQuery
+#define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _pksByPath
+
+namespace TAPI {
+TAPI_ADD_TYPE_STRING(Cols_t);
+TAPI_ADD_TYPE_STRING(Filter_t);
+TAPI_ADD_TYPE_STRING(OrderBy_t);
+TAPI_ADD_TYPE_STRING(GroupBy_t);
+}
+
+TAPI_DECLARE_METATYPE(TAPI::Cols_t);
+TAPI_DECLARE_METATYPE(TAPI::Filter_t);
+TAPI_DECLARE_METATYPE(TAPI::OrderBy_t);
+TAPI_DECLARE_METATYPE(TAPI::GroupBy_t);
+
+namespace Targoman::API::API {
 
 /**********************************************************************/
 /**  document QT_NO_CAST_FROM_ASCII */
@@ -99,9 +161,9 @@ namespace Targoman::API {
 #define REST(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 #define ASYNC_REST(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 
-#define INTFAPIMODULE_IID "TARGOMAN.API.INTFAPIMODULE/1.0.0"
+#define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"
 
-class intfAPIModule : public Common::Configuration::intfModule
+class intfPureModule : public Targoman::Common::Configuration::intfModule
 {
 public:
     struct stuDBInfo {
@@ -116,9 +178,10 @@ public:
     };
 
     struct stuModuleMethod {
-        intfAPIModule* Module;
+        intfPureModule* Module;
         QMetaMethod Method;
-        stuModuleMethod(intfAPIModule* _module, const QMetaMethod& _method) :
+
+        stuModuleMethod(intfPureModule* _module, const QMetaMethod& _method) :
             Module(_module),
             Method(_method)
         {}
@@ -127,9 +190,12 @@ public:
     typedef QList<stuModuleMethod> ModuleMethods_t;
 
 public:
-    intfAPIModule(Targoman::Common::Configuration::intfModule *_parent = nullptr);
-    virtual ~intfAPIModule();
-    virtual QList<ORM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) { Q_UNUSED(_method) return {}; }
+    intfPureModule(
+            const QString& _moduleName,
+            Targoman::Common::Configuration::intfModule *_parent = nullptr
+    );
+    virtual ~intfPureModule();
+    virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) { Q_UNUSED(_method) return {}; }
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) { Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID) }
     virtual ModuleMethods_t listOfMethods() = 0;
     virtual stuDBInfo requiredDB() const { return {}; }
@@ -138,11 +204,12 @@ public:
 
 protected:
     ModuleMethods_t Methods;
+    QString ModuleName;
 };
 
-} //namespace Targoman::API
+} //namespace Targoman::API::API
 
-Q_DECLARE_INTERFACE(Targoman::API::intfAPIModule, INTFAPIMODULE_IID)
+Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
@@ -155,10 +222,10 @@ public: \
             this->Methods.append({ this, this->metaObject()->method(i) }); \
         return this->Methods; \
     } \
-    void addSubModule(intfAPIModule* _submodule) { \
+    void addSubModule(intfPureModule* _submodule) { \
         if (this->Methods.isEmpty()) listOfMethods(); \
         if (_submodule->parentModuleName() != this->moduleBaseName()) \
-            throw Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
+            throw Targoman::Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
         for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
         _submodule->init(); \
@@ -172,7 +239,7 @@ public: \
     QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); }\
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module,_name))); } \
     ModuleMethods_t listOfMethods() final { \
-        throw Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
+        throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
@@ -184,11 +251,11 @@ private: \
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
     struct DB { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); } \
-        static Common::Configuration::tmplConfigurable<QString>       Host;   \
-        static Common::Configuration::tmplRangedConfigurable<quint16> Port;   \
-        static Common::Configuration::tmplConfigurable<QString>       User;   \
-        static Common::Configuration::tmplConfigurable<QString>       Pass;   \
-        static Common::Configuration::tmplConfigurable<QString>       Schema; \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>       Host;   \
+        static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> Port;   \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>       User;   \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>       Pass;   \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>       Schema; \
     }; \
 public: \
     stuDBInfo requiredDB() const { \
@@ -233,4 +300,4 @@ public: \
         _schema                                             \
     );                                                      \
 
-#endif // TARGOMAN_API_INTFAPIMODULE_HPP
+#endif // TARGOMAN_API_INTFPUREMODULE_H

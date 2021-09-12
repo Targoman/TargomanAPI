@@ -24,7 +24,7 @@
 #include "ForgotPassRequest.h"
 #include "User.h"
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuFPRStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
@@ -32,7 +32,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
 namespace Targoman::API::AccountModule::ORM {
 
 ForgotPassRequest::ForgotPassRequest() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblForgotPassRequest::Name,
         {///< ColName                                Type                 Validation                  Default    UpBy   Sort  Filter Self  Virt   PK
@@ -53,7 +53,7 @@ QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
@@ -64,7 +64,7 @@ bool ForgotPassRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
+    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

@@ -28,8 +28,8 @@ namespace Targoman {
 namespace API {
 namespace Server {
 
-using namespace Common;
-using namespace Common::Configuration;
+using namespace Targoman::Common;
+using namespace Targoman::Common::Configuration;
 
 QString ServerConfigs::BasePathWithVersion;
 TAPI::stuStatistics gServerStats;

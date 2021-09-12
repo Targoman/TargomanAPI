@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -59,18 +57,16 @@ TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
 
 #pragma GCC diagnostic pop
 
-class Roles : public clsTable
+class Roles : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, Roles)
 
 private slots:
     QVariant ORMGET("Get roles information")
     quint32 ORMCREATE("Create a new Role by priviledged user")
     bool ORMUPDATE("Update role info by priviledged user")
     bool ORMDELETE("Delete a Role")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Roles)
 };
 
 } //namespace ORM

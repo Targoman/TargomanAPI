@@ -26,7 +26,7 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
@@ -41,7 +41,7 @@ using namespace Targoman::API::Helpers;
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
 
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
@@ -66,7 +66,7 @@ using namespace ORM;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
 Advert::Advert() :
-    intfRESTAPIWithAccounting(
+    intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
         {
@@ -124,7 +124,7 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 /***************************************************************************************************/
 //bool Advert::apiPOSTprocessVoucher(
 //        TAPI::JWT_t _JWT,
-//        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
 //    clsJWT JWT(_JWT);
@@ -138,7 +138,7 @@ void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
 
 //bool Advert::apiPOSTcancelVoucher(
 //        TAPI::JWT_t _JWT,
-//        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
 //    clsJWT JWT(_JWT);
@@ -304,7 +304,7 @@ QVariant Advert::apiPOSTfixtureSetup(
         { tblAccountCouponsBase::cpnValidFrom, "2020/1/1 1:2:3" },
 //        { tblAccountCouponsBase::cpnExpiryTime,  },
         { tblAccountCouponsBase::cpnAmount, 10 },
-        { tblAccountCouponsBase::cpnAmountType, Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
+        { tblAccountCouponsBase::cpnAmountType, Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
 //        { tblAccountCouponsBase::cpnMaxAmount,  },
         { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
           QVariantList({

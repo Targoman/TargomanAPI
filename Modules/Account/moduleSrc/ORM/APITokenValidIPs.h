@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENVALIDIPS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -50,17 +48,16 @@ TARGOMAN_CREATE_CONSTEXPR(tviStatus);
 }
 #pragma GCC diagnostic pop
 
-class APITokenValidIPs : public clsTable
+class APITokenValidIPs : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokenValidIPs)
+
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")
     bool ORMDELETE("Delete an APITokenValidIP")
     bool ORMUPDATE("Update token valid IP info")
     quint64 ORMCREATE("Create a new APITokenValidIP")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokenValidIPs)
 };
 
 } //namespace ORM

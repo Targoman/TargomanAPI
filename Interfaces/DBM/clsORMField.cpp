@@ -21,15 +21,17 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Interfaces/Common/base.h"
 #include "clsORMField.h"
+#include "Interfaces/Common/base.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 #include "Server/ServerConfigs.h"
 #include "Server/RESTAPIRegistry.h"
-#include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace Targoman::API::ORM {
-
+using namespace Targoman::API::Common;
+using namespace Targoman::API::API;
 using namespace Targoman::API::Server;
+
+namespace Targoman::API::DBM {
 
 clsORMFieldData::clsORMFieldData() :
     ParameterType(QMetaType::UnknownType)
@@ -142,7 +144,7 @@ clsORMField::clsORMField(
     )
 {}
 
-void clsORMField::registerTypeIfNotRegisterd(intfAPIModule* _module)
+void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module)
 {
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)) {
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toLatin1()));
@@ -201,4 +203,4 @@ QVariant clsORMField::fromDB(const QString& _value)
     return this->argSpecs().toORMValue(_value);
 }
 
-} //namespace Targoman::API::ORM
+} //namespace Targoman::API::DBM

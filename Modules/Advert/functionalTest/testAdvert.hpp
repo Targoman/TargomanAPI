@@ -34,11 +34,11 @@
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::DBM;
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
 #include "../moduleSrc/ORM/Accounting.h"
 #include "../moduleSrc/ORM/Locations.h"
@@ -63,9 +63,9 @@ class testAdvert : public clsBaseTest
     //    QVariant PaymentGatewayID;
     QString CouponCode;
     QVariant CouponID;
-    Targoman::API::AAA::Accounting::stuPreVoucher LastPreVoucher;
-    Targoman::API::AAA::Accounting::stuVoucher Voucher;
-    Targoman::API::AAA::Accounting::stuVoucher ApproveOnlinePaymentVoucher;
+    Targoman::API::AAA::stuPreVoucher LastPreVoucher;
+    Targoman::API::AAA::stuVoucher Voucher;
+    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
 
     void cleanupUnitTestData()
     {
@@ -393,7 +393,7 @@ private:
             }
         }
     }
-*/
+//*/
     void addToBasket_invalid_saleable_code()
     {
         QT_TRY {
@@ -492,10 +492,10 @@ private:
                     { tblAccountCouponsBase::cpnValidFrom,                  "2020/1/1 1:2:3" },
 //                    { tblAccountCouponsBase::cpnExpiryTime,               S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
                     { tblAccountCouponsBase::cpnAmount,                     10 },
-                    { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::Accounting::enuDiscountType::toStr(Targoman::API::AAA::Accounting::enuDiscountType::Percent) },
+                    { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
                     { tblAccountCouponsBase::cpnMaxAmount,                  250000 },
                     { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
-//                        QList<Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier>({
+//                        QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>({
 //                            { this->BannerSaleableCode, 1.5, 0 },
 //                            { this->BannerSaleableCode, 1.8, 5 },
 //                            { "other",     2.0 },
@@ -700,7 +700,7 @@ private:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-//    Targoman::API::AAA::Accounting::stuVoucher approveOnlinePaymentVoucher;
+//    Targoman::API::AAA::stuVoucher approveOnlinePaymentVoucher;
 //    void deleteOnlinePayment()
 //    {
 //        QT_TRY {
@@ -722,8 +722,8 @@ private:
 //        }
 //    }
 
-//    Targoman::API::AAA::Accounting::stuVoucher voucher;
-//    Targoman::API::AAA::Accounting::stuPreVoucher lastPreVoucher;
+//    Targoman::API::AAA::stuVoucher voucher;
+//    Targoman::API::AAA::stuPreVoucher lastPreVoucher;
 
     void deleteDiscount()
     {

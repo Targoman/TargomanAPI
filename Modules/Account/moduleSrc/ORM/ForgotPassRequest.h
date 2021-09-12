@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -59,16 +57,14 @@ TARGOMAN_CREATE_CONSTEXPR(fprStatus);
 }
 #pragma GCC diagnostic pop
 
-class ForgotPassRequest : public clsTable
+class ForgotPassRequest : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ForgotPassRequest)
 
 private slots:
     QVariant ORMGET("Get ForgotPassRequest information")
     bool ORMDELETE("Delete a ForgotPassRequest")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ForgotPassRequest)
 };
 
 } //namespace ORM

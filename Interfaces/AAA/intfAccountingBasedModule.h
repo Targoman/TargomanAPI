@@ -26,16 +26,18 @@
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
 
+#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+
 using namespace TAPI;
 
-namespace Targoman::API::AAA::Accounting {
+namespace Targoman::API::AAA {
 
-class intfRESTAPIWithAccounting : public ORM::clsRESTAPIWithActionLogs
+class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
 
 protected:
-    intfRESTAPIWithAccounting(
+    intfAccountingBasedModule(
             const QString& _module,
             const QString& _schema,
             AssetUsageLimitsCols_t _AssetUsageLimitsCols,
@@ -47,7 +49,7 @@ protected:
             intfAccountPrizes* _prizes = nullptr
             );
 
-    virtual ~intfRESTAPIWithAccounting();
+    virtual ~intfAccountingBasedModule();
 
 public:
     stuActiveCredit activeAccountObject(quint64 _usrID);
@@ -85,32 +87,73 @@ protected:
 
     void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
 
-    virtual bool increaseDiscountUsage(const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
-    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
-    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
-    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
+    virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
 
-    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem);
-    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
-    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
     virtual bool cancelVoucherItem(
             quint64 _userID,
-            const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
             std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
-    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 protected slots:
+    Targoman::API::AAA::stuPreVoucher REST(
+        POST,
+        addToBasket,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::SaleableCode_t _saleableCode,
+            Targoman::API::AAA::OrderAdditives_t _orderAdditives = {},
+            quint16 _qty = 1,
+            TAPI::CouponCode_t _discountCode = {},
+            QString _referrer = {},
+            TAPI::JSON_t _extraReferrerParams = {},
+            Targoman::API::AAA::stuPreVoucher _lastPreVoucher = {}
+        ),
+        "add a package to basket and return updated pre-Voucher"
+    )
+
+    Targoman::API::AAA::stuPreVoucher REST(
+        POST,
+        removeBasketItem,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::MD5_t _itemUUID,
+            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+        ),
+        "Remove a package from basket and return updated pre-Voucher."
+        "Only Pending items can be removed."
+    )
+
+//    Targoman::API::AAA::stuPreVoucher REST(
+//        POST,
+//        updateBasketItem,
+//        (
+//            TAPI::JWT_t _JWT,
+//            TAPI::MD5_t _itemUUID,
+//            quint16 _new_qty,
+//            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+//        ),
+//        "Update a package from basket and return updated pre-Voucher."
+//        "Only Pending items can be modify."
+//    )
+
     bool REST(
         POST,
         processVoucherItem,
         (
             TAPI::JWT_t _JWT,
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+            Targoman::API::AAA::stuVoucherItem _voucherItem
         ),
         "Process voucher item"
     )
@@ -120,51 +163,10 @@ protected slots:
         cancelVoucherItem,
         (
             TAPI::JWT_t _JWT,
-            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+            Targoman::API::AAA::stuVoucherItem _voucherItem
         ),
         "Cancel voucher item"
     )
-
-    Targoman::API::AAA::Accounting::stuPreVoucher REST(
-        POST,
-        addToBasket,
-        (
-            TAPI::JWT_t _JWT,
-            TAPI::SaleableCode_t _saleableCode,
-            Targoman::API::AAA::Accounting::OrderAdditives_t _orderAdditives = {},
-            quint16 _qty = 1,
-            TAPI::CouponCode_t _discountCode = {},
-            QString _referrer = {},
-            TAPI::JSON_t _extraReferrerParams = {},
-            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher = {}
-        ),
-        "add a package to basket and return updated pre-Voucher"
-    )
-
-    Targoman::API::AAA::Accounting::stuPreVoucher REST(
-        POST,
-        removeBasketItem,
-        (
-            TAPI::JWT_t _JWT,
-            TAPI::MD5_t _itemUUID,
-            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
-        ),
-        "Remove a package from basket and return updated pre-Voucher."
-        "Only Pending items can be removed."
-    )
-
-//    Targoman::API::AAA::Accounting::stuPreVoucher REST(
-//        POST,
-//        updateBasketItem,
-//        (
-//            TAPI::JWT_t _JWT,
-//            TAPI::MD5_t _itemUUID,
-//            quint16 _new_qty,
-//            Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
-//        ),
-//        "Update a package from basket and return updated pre-Voucher."
-//        "Only Pending items can be modify."
-//    )
 
 private:
     QString ServiceName;
@@ -182,8 +184,8 @@ private:
     QStringList AssetUsageLimitsColsName;
 };
 
-extern intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName);
+extern intfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
 
-} //namespace Targoman::API::AAA::Accounting
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_H

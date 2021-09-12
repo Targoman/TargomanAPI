@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_BLOCKINGRULES_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -52,18 +50,16 @@ TARGOMAN_CREATE_CONSTEXPR(blrStatus);
 }
 #pragma GCC diagnostic pop
 
-class BlockingRules : public clsTable
+class BlockingRules : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, BlockingRules)
 
 private slots:
     QVariant ORMGET("Get BlockingRules information")
     quint64 ORMCREATE("Create a new BlockingRule by priviledged user")
     bool ORMUPDATE("Update blocking rule info by priviledged user")
     bool ORMDELETE("Delete a BlockingRules")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, BlockingRules)
 };
 
 } //namespace ORM

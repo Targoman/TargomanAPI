@@ -33,10 +33,10 @@ namespace Apps {
 struct gConfigs{
     struct Classifier{
         static inline QString makeConfig(const QString& _name);
-        static Common::Configuration::tmplConfigurable<double>       Threshold;
-        static Common::Configuration::tmplConfigurable<FilePath_t>   ModelPath;
-        static Common::Configuration::tmplConfigurable<QString>      ModelPattern;
-        static Common::Configuration::tmplConfigurable<bool>         SupportsIXML;
+        static Targoman::Common::Configuration::tmplConfigurable<double>       Threshold;
+        static Targoman::Common::Configuration::tmplConfigurable<FilePath_t>   ModelPath;
+        static Targoman::Common::Configuration::tmplConfigurable<QString>      ModelPattern;
+        static Targoman::Common::Configuration::tmplConfigurable<bool>         SupportsIXML;
     };
 };
 }

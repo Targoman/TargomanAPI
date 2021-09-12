@@ -25,7 +25,7 @@
 #include "User.h"
 #include "APITokens.h"
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
 
@@ -34,7 +34,7 @@ QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
@@ -45,7 +45,7 @@ quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
@@ -55,7 +55,7 @@ bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
         ExtraFilters.insert(tblAPITokens::apt_usrID, clsJWT(_JWT).usrID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
@@ -66,12 +66,12 @@ bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
         ExtraFilters.insert(tblAPITokens::apt_usrID, clsJWT(_JWT).usrID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 
 APITokenValidIPs::APITokenValidIPs() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblAPITokenValidIPs::Name,
         {///< ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK

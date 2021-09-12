@@ -13,22 +13,23 @@ DIST_HEADERS += \
     Common/tmplAPIArg.h \
     Common/intfAPIArgManipulator.h \
     Common/HTTPExceptions.hpp \
-    Common/intfAPIModule.h \
     Common/GenericEnums.hpp \
     Common/APIArgHelperMacros.hpp \
     Common/QtTypes.hpp \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
-    AAA/Accounting.h \
     AAA/Authentication.h \
     AAA/Authorization.h \
     AAA/clsJWT.hpp \
     AAA/PrivHelpers.h \
     AAA/Accounting_Interfaces.h \
     AAA/Accounting_Defs.hpp \
-    ORM/clsORMField.h \
-    ORM/clsRESTAPIWithActionLogs.h \
-    ORM/clsTable.h \
+    AAA/intfAccountingBasedModule.h \
+    DBM/clsORMField.h \
+    DBM/clsTable.h \
+    API/intfPureModule.h \
+    API/intfSQLBasedModule.h \
+    API/intfSQLBasedWithActionLogsModule.h \
 
 PRIVATE_HEADERS += \
 
@@ -39,31 +40,27 @@ HEADERS += \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
-    ORM/APIQueryBuilders.h \
-    ORM/Defs.hpp \
-    ORM/QueryBuilders.h \
-    ORM/clsRESTAPI.h \
-    ORM/clsRESTAPIWithDatabase.h
+    DBM/Defs.hpp \
+    DBM/QueryBuilders.h \
 
 SOURCES += \
-    AAA/Accounting.cpp \
-    AAA/Authentication.cpp \
-    AAA/Authorization.cpp \
-    AAA/PrivHelpers.cpp \
-    Common/GenericTypes.cpp \
     Common/base.cpp \
+    Common/GenericTypes.cpp \
+    Common/intfAPIArgManipulator.cpp \
     Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
     Helpers/URLHelper.cpp \
-    ORM/APIQueryBuilders.cpp \
-    ORM/QueryBuilders.cpp \
-    ORM/clsORMField.cpp \
-    ORM/clsRESTAPI.cpp \
-    ORM/clsRESTAPIWithActionLogs.cpp \
-    ORM/clsRESTAPIWithDatabase.cpp \
-    ORM/clsTable.cpp \
-    Common/intf_impl.cpp \
-    AAA/Accounting_Interfaces.cpp
+    AAA/Authentication.cpp \
+    AAA/Authorization.cpp \
+    AAA/PrivHelpers.cpp \
+    AAA/Accounting_Interfaces.cpp \
+    AAA/intfAccountingBasedModule.cpp \
+    DBM/QueryBuilders.cpp \
+    DBM/clsORMField.cpp \
+    DBM/clsTable.cpp \
+    API/intfPureModule.cpp \
+    API/intfSQLBasedModule.cpp \
+    API/intfSQLBasedWithActionLogsModule.cpp \
 
 OTHER_FILES += \
     Test/testBase.hpp \

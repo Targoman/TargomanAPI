@@ -37,7 +37,7 @@ namespace Server {
     gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
     gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
 
-clsAPIObject::clsAPIObject(intfAPIModule* _module,
+clsAPIObject::clsAPIObject(intfPureModule* _module,
                            QMetaMethodExtended _method,
                            bool _async,
                            qint32 _cache4Internal,

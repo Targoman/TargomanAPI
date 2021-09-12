@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -64,9 +62,10 @@ TARGOMAN_CREATE_CONSTEXPR(walStatus);
 }
 #pragma GCC diagnostic pop
 
-class UserWallets : public clsTable
+class UserWallets : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserWallets)
 
 private slots:
     QVariant ORMGET("Get UserWallets information")
@@ -97,9 +96,6 @@ private slots:
         ),
         "Transfer money to other user's default wallet. Default wallet will be used if not specified"
     )
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserWallets)
 };
 
 } //namespace ORM

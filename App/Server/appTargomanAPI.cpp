@@ -27,7 +27,7 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 //#include "Interfaces/NLP/FormalityChecker.h"
 //#include "Interfaces/NLP/TextProcessor.hpp"
 
@@ -37,9 +37,9 @@
 #include "ServerConfigs.h"
 #include "OpenAPIGenerator.h"
 
-namespace Targoman::API::Server {
+using namespace Targoman::Common;
 
-using namespace Common;
+namespace Targoman::API::Server {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -56,14 +56,14 @@ void appTargomanAPI::slotExecute()
 {
     try {
         // Load modules
-        QMap<QString, intfAPIModule::stuDBInfo> RequiredDBs;
+        QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
         auto LoadedModules = Configuration::ConfigManager::instance().loadedPlugins();
         if (LoadedModules.isEmpty())
             throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
         foreach (auto Plugin, LoadedModules) {
-            intfAPIModule* Module = qobject_cast<intfAPIModule*>(Plugin.Instance);
+            intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
@@ -90,7 +90,7 @@ void appTargomanAPI::slotExecute()
             if (ServerConfigs::MasterDB::Host.value().size()
                     && ServerConfigs::MasterDB::Schema.value().size())
             {
-                intfAPIModule::stuDBInfo MasterDBInfo = {
+                intfPureModule::stuDBInfo MasterDBInfo = {
                                                             ServerConfigs::MasterDB::Schema.value(),
                                                             ServerConfigs::MasterDB::Port.value(),
                                                             ServerConfigs::MasterDB::Host.value(),
@@ -130,7 +130,7 @@ void appTargomanAPI::slotExecute()
 
         TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
     }
-    catch(Common::exTargomanBase& e) {
+    catch(Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);
     }

@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Accounting.h"
+#include "intfAccountingBasedModule.h"
 #include "PrivHelpers.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "App/Server/ServerConfigs.h"
@@ -30,24 +30,23 @@
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::DBM;
 
-namespace Targoman::API::AAA::Accounting {
+using namespace Targoman::API::Common;
 
-using namespace Common;
-using namespace Common::Configuration;
+namespace Targoman::API::AAA {
 
-static QMap<QString, intfRESTAPIWithAccounting*> ServiceRegistry;
+static QMap<QString, intfAccountingBasedModule*> ServiceRegistry;
 
-Common::Configuration::tmplConfigurable<QString> Secret(
+Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
         makeConfig("Secret"),
         "Secret to be used for signing voucher and prevoucher",
         "fcy^E?a*4<;auY?>^6s@");
 
 QByteArray hash(const QByteArray& _data)
 {
-   return QMessageAuthenticationCode::hash(_data, Accounting::Secret.value().toUtf8(), QCryptographicHash::Sha256);
+   return QMessageAuthenticationCode::hash(_data, Secret.value().toUtf8(), QCryptographicHash::Sha256);
 }
 
 void checkPreVoucherSanity(stuPreVoucher _preVoucher)
@@ -57,7 +56,7 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher)
 
     QString Sign = _preVoucher.Sign;
     _preVoucher.Sign.clear();
-    if (Sign != QString(Accounting::hash(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
+    if (Sign != QString(hash(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
         throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
 
     foreach (auto VoucherItem, _preVoucher.Items)
@@ -65,15 +64,15 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher)
         QString Sign = VoucherItem.Sign;
         VoucherItem.Sign.clear();
 
-        if (Sign != QString(Accounting::hash(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
+        if (Sign != QString(hash(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
 }
 
 /***************************************************************************************************\
-|** intfRESTAPIWithAccounting **********************************************************************|
+|** intfAccountingBasedModule **********************************************************************|
 \***************************************************************************************************/
-intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
+intfAccountingBasedModule::intfAccountingBasedModule(
         const QString& _module,
         const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
@@ -84,7 +83,7 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
         intfAccountCoupons* _discounts,
         intfAccountPrizes* _prizes
     ) :
-    ORM::clsRESTAPIWithActionLogs(_module, _schema),
+    API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
     AccountSaleables(_saleables),
@@ -112,21 +111,21 @@ intfRESTAPIWithAccounting::intfRESTAPIWithAccounting(
     }
 }
 
-intfRESTAPIWithAccounting::~intfRESTAPIWithAccounting()
+intfAccountingBasedModule::~intfAccountingBasedModule()
 {}
 
-intfRESTAPIWithAccounting* serviceAccounting(const QString& _serviceName)
+intfAccountingBasedModule* serviceAccounting(const QString& _serviceName)
 {
     Q_UNUSED(serviceAccounting);
     return ServiceRegistry.value(_serviceName);
 }
 
-stuActiveCredit intfRESTAPIWithAccounting::activeAccountObject(quint64 _usrID)
+stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID)
 {
     return this->findBestMatchedCredit(_usrID);
 }
 
-void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
 {
     QJsonObject Privs = _jwt.privsObject();
 
@@ -186,7 +185,7 @@ void intfRESTAPIWithAccounting::checkUsageIsAllowed(const clsJWT& _jwt, const Se
     }
 }
 
-stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
+stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
 {
     stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
     if (ServiceCreditsInfo.ActiveCredits.isEmpty())
@@ -325,15 +324,15 @@ stuActiveCredit intfRESTAPIWithAccounting::findBestMatchedCredit(quint64 _usrID,
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTaddToBasket(
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
         TAPI::JWT_t _JWT,
         TAPI::SaleableCode_t _saleableCode,
-        Targoman::API::AAA::Accounting::OrderAdditives_t _orderAdditives,
+        Targoman::API::AAA::OrderAdditives_t _orderAdditives,
         quint16 _qty, ///TODO: use float for qty
         TAPI::CouponCode_t _discountCode,
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams,
-        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
     )
 {
     checkPreVoucherSanity(_lastPreVoucher);
@@ -392,7 +391,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         )
         .one();
 
-    qDebug() << "-- intfRESTAPIWithAccounting::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
+    qDebug() << "-- intfAccountingBasedModule::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
     AssetItem.fromVariantMap(SaleableInfo);
@@ -744,7 +743,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     qry.values(values);
 
     PreVoucherItem.OrderID = qry.execute(currentUserID);
-    PreVoucherItem.Sign = QString(Accounting::hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
+    PreVoucherItem.Sign = QString(hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
     ///TODO: PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
@@ -764,16 +763,16 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    _lastPreVoucher.Sign = QString(hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
     return _lastPreVoucher;
 }
 
-Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTremoveBasketItem(
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
         TAPI::JWT_t _JWT,
 //        quint64 _orderID, //it is uasID
         TAPI::MD5_t _itemUUID,
-        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
     )
 {
     checkPreVoucherSanity(_lastPreVoucher);
@@ -839,7 +838,7 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
         _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
         _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
         _lastPreVoucher.Sign.clear();
-        _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+        _lastPreVoucher.Sign = QString(hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
         return _lastPreVoucher;
     }
@@ -847,11 +846,11 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     throw exHTTPInternalServerError("item not found in pre-voucher items.");
 }
 /*
-Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOSTupdateBasketItem(
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
         TAPI::JWT_t _JWT,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
-        Targoman::API::AAA::Accounting::stuPreVoucher _lastPreVoucher
+        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
     )
 {
     checkPreVoucherSanity(_lastPreVoucher);
@@ -967,8 +966,8 @@ Targoman::API::AAA::Accounting::stuPreVoucher intfRESTAPIWithAccounting::apiPOST
     throw exHTTPInternalServerError("item not found in pre-voucher items.");
 }
 */
-bool intfRESTAPIWithAccounting::increaseDiscountUsage(
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem)
+bool intfAccountingBasedModule::increaseDiscountUsage(
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
 {
     if (_voucherItem.DisAmount > 0)
     {
@@ -981,8 +980,8 @@ bool intfRESTAPIWithAccounting::increaseDiscountUsage(
     return true;
 }
 
-bool intfRESTAPIWithAccounting::decreaseDiscountUsage(
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem)
+bool intfAccountingBasedModule::decreaseDiscountUsage(
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
 {
     if (_voucherItem.DisAmount > 0)
     {
@@ -995,12 +994,12 @@ bool intfRESTAPIWithAccounting::decreaseDiscountUsage(
     return true;
 }
 
-bool intfRESTAPIWithAccounting::activateUserAsset(
+bool intfAccountingBasedModule::activateUserAsset(
         quint64 _userID,
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
     )
 {
-    return Targoman::API::Query::Update(
+    return /*Targoman::API::Query::*/this->Update(
         *this->AccountUserAssets,
         _userID,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
@@ -1013,12 +1012,12 @@ bool intfRESTAPIWithAccounting::activateUserAsset(
         });
 }
 
-bool intfRESTAPIWithAccounting::removeFromUserAssets(
+bool intfAccountingBasedModule::removeFromUserAssets(
         quint64 _userID,
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
     )
 {
-    return Targoman::API::Query::DeleteByPks(
+    return /*Targoman::API::Query::*/this->DeleteByPks(
         *this->AccountUserAssets,
         _userID,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
@@ -1029,9 +1028,9 @@ bool intfRESTAPIWithAccounting::removeFromUserAssets(
     );
 }
 
-bool intfRESTAPIWithAccounting::processVoucherItem(
+bool intfAccountingBasedModule::processVoucherItem(
         quint64 _userID,
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
     )
 {
     if (!this->preProcessVoucherItem(_userID, _voucherItem))
@@ -1047,9 +1046,9 @@ bool intfRESTAPIWithAccounting::processVoucherItem(
     return true;
 }
 
-bool intfRESTAPIWithAccounting::cancelVoucherItem(
+bool intfAccountingBasedModule::cancelVoucherItem(
         quint64 _userID,
-        const Targoman::API::AAA::Accounting::stuVoucherItem &_voucherItem,
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
     )
 {
@@ -1106,9 +1105,9 @@ bool intfRESTAPIWithAccounting::cancelVoucherItem(
     return true;
 }
 
-bool intfRESTAPIWithAccounting::apiPOSTprocessVoucherItem(
+bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
         TAPI::JWT_t _JWT,
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        Targoman::API::AAA::stuVoucherItem _voucherItem
     )
 {
     clsJWT JWT(_JWT);
@@ -1117,9 +1116,9 @@ bool intfRESTAPIWithAccounting::apiPOSTprocessVoucherItem(
     return this->processVoucherItem(CurrentUserID, _voucherItem);
 }
 
-bool intfRESTAPIWithAccounting::apiPOSTcancelVoucherItem(
+bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
         TAPI::JWT_t _JWT,
-        Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+        Targoman::API::AAA::stuVoucherItem _voucherItem
     )
 {
     clsJWT JWT(_JWT);
@@ -1128,4 +1127,4 @@ bool intfRESTAPIWithAccounting::apiPOSTcancelVoucherItem(
     return this->cancelVoucherItem(CurrentUserID, _voucherItem);
 }
 
-} //namespace Targoman::API::AAA::Accounting
+} //namespace Targoman::API::AAA

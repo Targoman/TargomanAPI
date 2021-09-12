@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPBIN_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -57,15 +55,13 @@ TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
 #pragma GCC diagnostic pop
 
 
-class IPBin : public clsTable
+class IPBin : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPBin)
 
 private slots:
     QVariant ORMGET("Get IPBin information")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPBin)
 };
 
 } //namespace ORM

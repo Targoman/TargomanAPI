@@ -36,9 +36,11 @@
 
 #include "Interfaces/Common/GenericTypes.h"
 
+#include "Interfaces/Common/intfAPIArgManipulator.h"
+
 namespace Targoman::API {
 
-class intfAPIArgManipulator;
+//class intfAPIArgManipulator;
 
 namespace Server {
 
@@ -90,7 +92,7 @@ public:
      * @return a list of all APIs registered in the server
      */
     QStringList registeredAPIs(bool _showParams = true, bool _showTypes = true, bool _prettifyTypes = true);
-    void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator);
+    void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator);
 
 private:
     bool validateConnection(const QHostAddress& _peerAddress, quint16 _peerPort);

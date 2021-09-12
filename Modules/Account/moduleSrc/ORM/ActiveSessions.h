@@ -24,9 +24,9 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H
 
-#include "Interfaces/ORM/clsTable.h"
-#include "Interfaces/AAA/AAA.hpp"
 #include "Account.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -60,15 +60,14 @@ TARGOMAN_CREATE_CONSTEXPR(ssnStatus);
 }
 #pragma GCC diagnostic pop
 
-class ActiveSessions : public clsTable
+class ActiveSessions : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ActiveSessions)
 
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")
     bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")
-
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ActiveSessions)
 };
 
 } //namespace ORM

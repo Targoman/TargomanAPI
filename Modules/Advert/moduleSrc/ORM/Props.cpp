@@ -25,7 +25,7 @@
 #include "Defs.hpp"
 #include "Locations.h"
 #include "Bin.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
@@ -36,7 +36,7 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
@@ -49,7 +49,7 @@ quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
         _createInfo.insert(tblBin::binID, clsJWT(_JWT).usrID());
 //    this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _createInfo);
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
@@ -60,7 +60,7 @@ bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
         ExtraFilters.insert(tblBin::binID, clsJWT(_JWT).usrID());
 //    this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
@@ -70,11 +70,11 @@ bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
         ExtraFilters.insert(tblBin::binID, clsJWT(_JWT).usrID());
 //    this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 Props::Props() :
-    clsTable(AdvertSchema,
+    intfSQLBasedModule(AdvertSchema,
               tblProps::Name,
               { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
                 {tblProps::prp_binID,           ORM_PRIMARYKEY_32},

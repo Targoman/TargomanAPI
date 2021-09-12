@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_PROPS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_PROPS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -49,17 +49,16 @@ TARGOMAN_CREATE_CONSTEXPR(prpUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class Props : public Targoman::API::ORM::clsTable
+class Props : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Props)
+
 private slots:
     QVariant ORMGET("Get Props information")
     bool ORMDELETE("Delete a Prop")
     bool ORMUPDATE("Update Prop info by priviledged user")
     quint64 ORMCREATE("Create a new Prop by priviledged user")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Props)
 };
 
 } //namespace ORM

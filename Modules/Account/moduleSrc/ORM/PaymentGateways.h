@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTGATEWAYS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTGATEWAYS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -131,18 +129,16 @@ TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
 
 #pragma GCC diagnostic pop
 
-class PaymentGateways : public clsTable
+class PaymentGateways : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGateways)
 
 private slots:
     QVariant ORMGET("Get payment gateway information")
     quint32 ORMCREATE("Create a new payment gateway by priviledged user")
     bool ORMUPDATE("Update payment gateway info by priviledged user")
     bool ORMDELETE("Delete a payment gateway")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGateways)
 };
 
 } //namespace ORM

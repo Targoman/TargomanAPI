@@ -32,87 +32,34 @@
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 
+using namespace Targoman::DBManager;
 using namespace Targoman::API;
-using namespace Targoman::API::ORM;
 
-bool operator == (const Targoman::API::ORM::stuRelation& _first, const Targoman::API::ORM::stuRelation& _second) {
+bool operator == (const Targoman::API::DBM::stuRelation& _first, const Targoman::API::DBM::stuRelation& _second) {
     return _first.ReferenceTable == _second.ReferenceTable && _first.Column == _second.Column && _first.ForeignColumn == _second.ForeignColumn;
 }
 
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Cols_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isVirtual() == false)
-            Cols.append(clsTable::finalColName(Col));
-    return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
-                   "you can also use aggregation functions: (ex. COUNT(%3))\n"
-                   "* COUNT\n"
-                   "* COUNT_DISTINCT\n"
-                   "* SUM\n"
-                   "* AVG\n"
-                   "* MAX\n"
-                   "* MIN\n\n"
-                   "Available Cols are: \n"
-                   "* %4").arg(Cols.first()).arg(Cols.last()).arg(Cols.first()).arg(Cols.join("\n* "));
-});
-
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
-           "Equality/Inequality operators are\n"
-           "* =: equal\n"
-           "* !=: not equal\n"
-           "* <, <=, >, >=: inequal\n"
-           "* ~=: LIKE on strings\n"
-           "Take note that just columns listed in GroupBy field can be filtered\n"
-           "example: \n"
-           "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
-});
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, OrderBy_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isSortable() && Col.isVirtual() == false)
-            Cols.append(clsTable::finalColName(Col));
-    return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
-    //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
-});
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isFilterable())
-            Cols.append(clsTable::finalColName(Col));
-    return "Comma separated columns: \n* " + Cols.join(",\n* ");
-    //                                               return "Comma separated columns" ;
-});
-
-namespace Targoman::API::ORM {
-
-using namespace Targoman::DBManager;
+namespace Targoman::API::DBM {
 
 QString COLS_KEY = "cols";
 
-uint qHash(const Targoman::API::ORM::stuRelation& _relation){
+uint qHash(const Targoman::API::DBM::stuRelation& _relation){
     return qHash(_relation.Column + _relation.ForeignColumn + _relation.ReferenceTable + _relation.RenamingPrefix);
 }
 
 QHash<QString, clsTable*> clsTable::Registry;
 
-clsTable::clsTable(const QString& _schema,
+clsTable::clsTable(const QString& _domain,
+                   const QString& _schema,
                    const QString& _name,
                    const QList<clsORMField>& _cols,
                    const QList<stuRelation>& _relations,
                    const QList<stuDBIndex>& _indexes,
                    const QVariantMap& _dbProperties) :
+    BaseCols(_cols),
     Schema(_schema),
     Name(_name),
-    BaseCols(_cols),
+    Domain(_domain),
     Relations(_relations),
     Indexes(_indexes),
     DBProperties(_dbProperties),
@@ -135,6 +82,23 @@ clsTable::clsTable(const QString& _schema,
 
     clsTable::Registry.insert(Schema + "." + Name, this);
 }
+
+clsTable::clsTable(const QString& _schema,
+                   const QString& _name,
+                   const QList<clsORMField>& _cols,
+                   const QList<stuRelation>& _relations,
+                   const QList<stuDBIndex>& _indexes,
+                   const QVariantMap& _dbProperties) :
+    clsTable(
+        "",
+        _schema,
+        _name,
+        _cols,
+        _relations,
+        _indexes,
+        _dbProperties
+    )
+{}
 
 clsTable* clsTable::addDBProperty(const QString& _key, const QVariant& _value)
 {
@@ -229,8 +193,9 @@ void clsTable::prepareFiltersList()
 
     foreach (stuRelatedORMField baseCol, this->AllCols)
     {
-        if (baseCol.Col.argSpecs().toORMValueConverter() && !this->Converters.contains(this->finalColName(baseCol.Col)))
-            this->Converters.insert(this->finalColName(baseCol.Col), baseCol.Col.argSpecs().toORMValueConverter());
+        const intfAPIArgManipulator& argSpecs = baseCol.Col.argSpecs();
+        if (argSpecs.toORMValueConverter() && !this->Converters.contains(this->finalColName(baseCol.Col)))
+            this->Converters.insert(this->finalColName(baseCol.Col), argSpecs.toORMValueConverter());
     }
 }
 
@@ -284,9 +249,10 @@ void clsTable::prepareRelationsFiltersList(const QList<stuRelation> &_relations,
 
 inline const QString clsTable::domain()
 {
-    return Q_LIKELY(this->Domain.size())
-            ? this->Domain
-            : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
+    return this->Domain;
+//    return Q_LIKELY(this->Domain.size())
+//            ? this->Domain
+//            : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
 }
 
 const QString clsTable::getStatusColumnName()
@@ -330,7 +296,8 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
-void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters)
+//TAPI::Filter_t -> QString
+void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters)
 {
     QStringList Filters;
 
@@ -364,7 +331,7 @@ QStringList clsTable::privOn(qhttp::THttpMethod _method, QString _moduleName)
 }
 
 QString clsTable::finalColName(const clsORMField &_col, const QString &_prefix) {
-    return Targoman::API::ORM::finalColName(_col, _prefix);
+    return Targoman::API::DBM::finalColName(_col, _prefix);
 }
 /*
 clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols, const QStringList& _extraJoins, QString _filters, const QString& _orderBy, const QString _groupBy) const
@@ -889,4 +856,4 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
 }
 */
 
-} //namespace Targoman::API::ORM
+} //namespace Targoman::API::DBM

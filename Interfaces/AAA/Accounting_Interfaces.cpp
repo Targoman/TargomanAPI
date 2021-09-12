@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Accounting.h"
+#include "intfAccountingBasedModule.h"
 #include "PrivHelpers.h"
 #include "Accounting_Interfaces.h"
 #include "Server/ServerConfigs.h"
@@ -30,13 +30,13 @@
 
 using namespace Targoman::API;
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ Targoman::API::AAA::Accounting,
+    /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItem,
     /* toVariantLambda    */ [](const stuVoucherItem& _value) -> QVariant {
 //        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
@@ -81,7 +81,7 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ Targoman::API::AAA::Accounting,
+    /* namespace          */ Targoman::API::AAA,
     /* type               */ stuPreVoucher,
     /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant {
 //        qDebug() << "stuPreVoucher(1) ================================= round:" << _value.Round;
@@ -126,14 +126,14 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    Targoman::API::AAA::Accounting,
+    Targoman::API::AAA,
     stuVoucher,
     [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 TAPI_REGISTER_METATYPE(
     COMPLEXITY_Complex,
-    Targoman::API::AAA::Accounting,
+    Targoman::API::AAA,
     OrderAdditives_t,
     [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
     [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
@@ -145,10 +145,10 @@ TAPI_REGISTER_METATYPE(
     }
 );
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA::Accounting, enuVoucherStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA::Accounting, enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
 
-namespace Targoman::API::AAA::Accounting {
+namespace Targoman::API::AAA {
 
 //constexpr char PKG_ID[] = "ID";
 //constexpr char PKG_CODE[] = "CD";
@@ -169,14 +169,14 @@ constexpr char ASA_LIMITSONPARENT[] = "LP";
 /******************************************************************/
 intfAccountProducts::intfAccountProducts(
         const QString& _schema,
-        const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveRelations,
-        const QList<ORM::stuDBIndex>& _exclusiveIndexes
+        const QList<DBM::clsORMField>& _exclusiveCols,
+        const QList<DBM::stuRelation>& _exclusiveRelations,
+        const QList<DBM::stuDBIndex>& _exclusiveIndexes
     ) :
-    clsTable(
+    intfSQLBasedModule(
         _schema,
         tblAccountProductsBase::Name,
-        QList<ORM::clsORMField>({
+        QList<DBM::clsORMField>({
         ///<  ColName                                      Type                      Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
             { tblAccountProductsBase::prdID,               ORM_PRIMARYKEY_32 },
             { tblAccountProductsBase::prdCode,             S(TAPI::ProductCode_t),    QFV,                                     QRequired,  UPOwner },
@@ -197,13 +197,13 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
             { tblAccountProductsBase::prdUpdatedBy_usrID,  ORM_UPDATED_BY },
         }) + _exclusiveCols,
-        QList<ORM::stuRelation>({
+        QList<DBM::stuRelation>({
         ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
             { "saleable",  { tblAccountProductsBase::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slb_prdID } },
             ORM_RELATION_OF_CREATOR(tblAccountProductsBase::prdCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
         }) + _exclusiveRelations,
-        QList<ORM::stuDBIndex>({
+        QList<DBM::stuDBIndex>({
             { {
                 tblAccountProductsBase::prdCode,
                 ORM_INVALIDATED_AT_FIELD_NAME,
@@ -227,39 +227,41 @@ QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
 }
 
 quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
 intfAccountSaleables::intfAccountSaleables(
         const QString& _schema,
-        const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveRelations,
-        const QList<ORM::stuDBIndex>& _exclusiveIndexes)
-    : clsTable(_schema,
+        const QList<DBM::clsORMField>& _exclusiveCols,
+        const QList<DBM::stuRelation>& _exclusiveRelations,
+        const QList<DBM::stuDBIndex>& _exclusiveIndexes
+    ) :
+    intfSQLBasedModule(
+        _schema,
         tblAccountSaleablesBase::Name,
-        QList<ORM::clsORMField>({
+        QList<DBM::clsORMField>({
         ///<  ColName                                          Type                             Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
             { tblAccountSaleablesBase::slbID,                  ORM_PRIMARYKEY_32 },
             { tblAccountSaleablesBase::slb_prdID,              S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner },
@@ -284,14 +286,14 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
         }) + _exclusiveCols,
-        QList<ORM::stuRelation>({
+        QList<DBM::stuRelation>({
         ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
             { "product",  { tblAccountSaleablesBase::slb_prdID, R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID } },
             { "userAsset", { tblAccountSaleablesBase::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uas_slbID } },
             ORM_RELATION_OF_CREATOR(tblAccountSaleablesBase::slbCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountSaleablesBase::slbUpdatedBy_usrID),
         }) + _exclusiveRelations,
-        QList<ORM::stuDBIndex>({
+        QList<DBM::stuDBIndex>({
             { {
                 tblAccountSaleablesBase::slbCode,
                 ORM_INVALIDATED_AT_FIELD_NAME,
@@ -325,40 +327,41 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
             );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
 }
 
 quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
 intfAccountUserAssets::intfAccountUserAssets(
         const QString& _schema,
-        const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveRelations,
-        const QList<stuDBIndex>& _exclusiveIndexes)
-    : clsTable(
+        const QList<DBM::clsORMField>& _exclusiveCols,
+        const QList<DBM::stuRelation>& _exclusiveRelations,
+        const QList<stuDBIndex>& _exclusiveIndexes
+    ) :
+    intfSQLBasedModule(
         _schema,
         tblAccountUserAssetsBase::Name,
-        QList<ORM::clsORMField>({
+        QList<DBM::clsORMField>({
         ///<  ColName                                       Type                       Validation                 Default     UpBy   Sort  Filter Self  Virt   PK
             { tblAccountUserAssetsBase::uasID,              ORM_PRIMARYKEY_64 },
             { tblAccountUserAssetsBase::uas_usrID,          S(quint64),                QFV.integer().minValue(1), QRequired,  UPAdmin },
@@ -373,7 +376,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             { ORM_INVALIDATED_AT_FIELD },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
         }) + _exclusiveCols,
-        QList<ORM::stuRelation>({
+        QList<DBM::stuRelation>({
         ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
             { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::usrID,                 "Owner_" },
             { tblAccountUserAssetsBase::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slbID, "",       true },
@@ -381,7 +384,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             //Voucher is not accessible as it is in another schema
             //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
         }) + _exclusiveRelations,
-        QList<ORM::stuDBIndex>({
+        QList<DBM::stuDBIndex>({
             { {
                   tblAccountUserAssetsBase::uas_usrID,
                   tblAccountUserAssetsBase::uasVoucherItemUUID,
@@ -404,7 +407,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
@@ -432,23 +435,25 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
                         }, {
                             {tblAccountUserAssets::uasStatus, TAPI::enuAuditableStatus::Banned},
                         });*/
-  throw Common::exTargomanMustBeImplemented(__FUNCTION__);
+  throw Targoman::Common::exTargomanMustBeImplemented(__FUNCTION__);
   return Ok;
 }
 
 /******************************************************************/
 intfAccountAssetUsage::intfAccountAssetUsage(
         const QString& _schema,
-        const QList<ORM::clsORMField>& _exclusiveCols,
-        const QList<ORM::stuRelation>& _exclusiveRelations,
-        const QList<stuDBIndex>& _exclusiveIndexes)
-    : clsTable(_schema,
+        const QList<DBM::clsORMField>& _exclusiveCols,
+        const QList<DBM::stuRelation>& _exclusiveRelations,
+        const QList<stuDBIndex>& _exclusiveIndexes
+    ) :
+    intfSQLBasedModule(
+        _schema,
         tblAccountAssetUsageBase::Name,
-        QList<ORM::clsORMField>({
+        QList<DBM::clsORMField>({
         ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
             { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARYKEY_64},
         }) + _exclusiveCols,
-        QList<ORM::stuRelation>({
+        QList<DBM::stuRelation>({
         ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
             { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
         }) + _exclusiveRelations,
@@ -461,12 +466,14 @@ QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
-intfAccountCoupons::intfAccountCoupons(const QString& _schema)
-    : clsTable(
+intfAccountCoupons::intfAccountCoupons(
+        const QString& _schema
+    ) :
+    intfSQLBasedModule(
         _schema,
         tblAccountCouponsBase::Name,
         {///< ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
@@ -479,10 +486,10 @@ intfAccountCoupons::intfAccountCoupons(const QString& _schema)
             { tblAccountCouponsBase::cpnValidFrom,               S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin },
             { tblAccountCouponsBase::cpnExpiryTime,              S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin },
             { tblAccountCouponsBase::cpnAmount,                  S(quint32),                        QFV,                                     QRequired, UPAdmin }, //, false, false },
-            { tblAccountCouponsBase::cpnAmountType,              S(Targoman::API::AAA::Accounting::enuDiscountType::Type), QFV,              Targoman::API::AAA::Accounting::enuDiscountType::Percent, UPAdmin },
+            { tblAccountCouponsBase::cpnAmountType,              S(Targoman::API::AAA::enuDiscountType::Type), QFV,              Targoman::API::AAA::enuDiscountType::Percent, UPAdmin },
             { tblAccountCouponsBase::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
             { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
-//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<Targoman::API::AAA::Accounting::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
+//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
             { tblAccountCouponsBase::cpnTotalUsedCount,          S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnTotalUsedAmount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
             { tblAccountCouponsBase::cpnStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
@@ -516,7 +523,7 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 
@@ -527,36 +534,43 @@ quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /******************************************************************/
-intfAccountPrizes::intfAccountPrizes(const QString& _schema,
-                                     const QString& _name,
-                                     const QList<ORM::clsORMField>& _cols,
-                                     const QList<ORM::stuRelation>& _relations) :
-  clsTable(_schema, _name, _cols, _relations)
+intfAccountPrizes::intfAccountPrizes(
+        const QString& _schema,
+        const QString& _name,
+        const QList<DBM::clsORMField>& _cols,
+        const QList<DBM::stuRelation>& _relations
+    ) :
+    intfSQLBasedModule(
+        _schema,
+        _name,
+        _cols,
+        _relations
+    )
 {}
 
 QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 
@@ -567,29 +581,29 @@ quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-//} //namespace Targoman::API::AAA::Accounting {
+//} //namespace Targoman::API::AAA {
 
 /******************************************************************/
 //namespace TAPI {
 
-//using namespace Targoman::API::AAA::Accounting;
+//using namespace Targoman::API::AAA;
 
 stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
   Credit(_credit),

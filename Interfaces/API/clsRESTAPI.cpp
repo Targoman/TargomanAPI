@@ -34,7 +34,7 @@ clsRESTAPI::clsRESTAPI(
         const QList<stuDBIndex>& _indexes,
         const QVariantMap& _dbProperties
     ) :
-    ORM::clsTable(
+    DBM::clsTable(
         _schema,
         _name,
         _cols,

@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_APITOKENS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -62,17 +60,16 @@ TARGOMAN_CREATE_CONSTEXPR(aptStatus);
 }
 #pragma GCC diagnostic pop
 
-class APITokens : public clsTable
+class APITokens : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokens)
+
 private slots:
     QVariant ORMGET("Get APITokens information")
     quint64 ORMCREATE("Create a new APITokens by priviledged user")
     bool ORMUPDATE("Update token info by priviledged user")
     bool ORMDELETE("Delete an APIToken")
-
-    private:
-        TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokens)
 };
 
 } //namespace ORM

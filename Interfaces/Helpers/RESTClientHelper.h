@@ -35,7 +35,7 @@ namespace Targoman::API::Helpers {
 struct ClientConfigs
 {
     static inline QString makeConfig(const QString& _name) { return "/Client/" + _name; }
-    static Common::Configuration::tmplConfigurable<QString> RESTServerAddress;
+    static Targoman::Common::Configuration::tmplConfigurable<QString> RESTServerAddress;
 };
 
 class RESTClientHelper

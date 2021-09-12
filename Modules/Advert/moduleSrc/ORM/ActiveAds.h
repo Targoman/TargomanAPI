@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_ACTIVEADS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_ACTIVEADS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -44,16 +44,14 @@ TARGOMAN_CREATE_CONSTEXPR(actOnKeyword);
 }
 #pragma GCC diagnostic pop
 
-class ActiveAds : public Targoman::API::ORM::clsTable
+class ActiveAds : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, ActiveAds)
 
 private slots:
     QVariant ORMGET("Get Active Adveritsements")
     bool ORMDELETE("Delete an Active Advertisement")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, ActiveAds)
 };
 
 } //namespace ORM

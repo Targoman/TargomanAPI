@@ -21,40 +21,30 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsRESTAPIWithDatabase.h"
+#ifndef TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
+#define TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
 
-namespace Targoman::API::ORM {
+#include "Interfaces/API/intfSQLBasedModule.h"
 
-clsRESTAPIWithDatabase::clsRESTAPIWithDatabase(
-        const QString& _module,
-        const QString& _schema,
-        const QString& _name,
-        const QList<clsORMField>& _cols,
-        const QList<stuRelation>& _relations,
-        const QList<stuDBIndex>& _indexes,
-        const QVariantMap& _dbProperties
-    ) :
-    clsRESTAPI(
-        _module,
-        _schema,
-        _name,
-        _cols,
-        _relations,
-        _indexes,
-        _dbProperties
-    )
-{}
+namespace Targoman::API::API {
 
-//#ifdef QT_DEBUG
-//QVariant clsRESTAPIWithDatabase::apiPOSTfixtureSetup(TAPI::RemoteIP_t _REMOTE_IP)
-//{
-//    return fixtureSetup(_REMOTE_IP);
-//}
+class intfSQLBasedWithActionLogsModule : public intfSQLBasedModule
+{
+    Q_OBJECT
 
-//QVariant clsRESTAPIWithDatabase::apiPOSTfixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP)
-//{
-//    return fixtureCleanup(_REMOTE_IP);
-//}
-//#endif
+public:
+    intfSQLBasedWithActionLogsModule(
+            const QString& _module,
+            const QString& _schema
+            );
 
-} // namespace Targoman::API::ORM
+protected slots:
+    QVariant ORMGETWithName(actionLogs, "Get Action Logs")
+
+//protected:
+//    QString Module;
+};
+
+} // namespace Targoman::API::API
+
+#endif // TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H

@@ -23,7 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
 #define TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 
 namespace Targoman {
 namespace API {
@@ -32,11 +32,11 @@ namespace API {
 #define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
 #endif
 
-class FormalityChecker : public intfAPIModule
+class FormalityChecker : public intfPureModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_DEFINE_API_MODULE(FormalityChecker);
 
 public:

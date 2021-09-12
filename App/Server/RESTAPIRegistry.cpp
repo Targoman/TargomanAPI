@@ -26,7 +26,7 @@
 #include "RESTAPIRegistry.h"
 #include "APICache.hpp"
 
-#include "Interfaces/ORM/clsORMField.h"
+#include "Interfaces/DBM/clsORMField.h"
 
 namespace Targoman {
 namespace API {
@@ -69,7 +69,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 #define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fromVariantLambda, _toORMValueLambda, _descriptionLambda) \
     template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
     template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
+    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
@@ -86,7 +86,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
     static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
 //NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
 
@@ -122,12 +122,12 @@ DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
                                   throw exHTTPBadRequest(_paramName + " is not a valid bool");
                           },
                           [](const QVariant& _val) -> QVariant {return !(_val == "false" || _val == "0");},
-                          [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
+                          [](const QList<DBM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
 )
 
 namespace Server {
 
-using namespace ORM;
+//using namespace DBM;
 
 struct stuNullableQtType {
     std::function<void()>  registerInMetaTypes;
@@ -154,7 +154,7 @@ void RESTAPIRegistry::registerMetaTypeInfoMap() {
         }
     }
 }
-void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method) {
+void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method) {
     if ((_method.name().startsWith("api") == false &&
          _method.name().startsWith("asyncApi") == false)||
         _method.typeName() == nullptr)
@@ -467,7 +467,7 @@ constexpr char CACHE_CENTRAL[]  = "CENTRALCACHE_";
 constexpr char API_TIMEOUT[]  = "CENTRALCACHE_";
 
 void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry,
-                                       intfAPIModule* _module,
+                                       intfPureModule* _module,
                                        const QMetaMethodExtended& _method,
                                        const QString& _httpMethod,
                                        const QString& _methodName){

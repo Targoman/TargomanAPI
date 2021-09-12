@@ -21,12 +21,14 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
+#include <QRegularExpression>
 #include "QueryBuilders.h"
 #include "clsTable.h"
-#include "Interfaces/AAA/clsJWT.hpp"
-using namespace Targoman::API::AAA;
+//#include "Interfaces/AAA/clsJWT.hpp"
+//using namespace Targoman::API::AAA;
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::DBM {
 
 stuRelation InvalidRelation("", "", "");
 
@@ -2369,7 +2371,8 @@ SelectQuery& SelectQuery::addCol(const clsColSpecs& _colSpecs)
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-SelectQuery& SelectQuery::addCSVCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator)
+//TAPI::Cols_t -> QString
+SelectQuery& SelectQuery::addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator)
 {
     QString sCols = _commaSeperatedCols.trimmed();
 
@@ -3964,6 +3967,6 @@ template class tmplBaseQuery<DeleteQuery, clsDeleteQueryData>;
 template class tmplQueryJoinTrait<DeleteQuery>;
 template class tmplQueryWhereTrait<DeleteQuery>;
 
-} //namespace Targoman::API::ORM
+} //namespace Targoman::API::DBM
 
 //Q_DECLARE_METATYPE(Targoman::API::ORM::clsColSpecs::unnAggregation);

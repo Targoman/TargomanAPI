@@ -25,12 +25,11 @@
 #define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-using namespace Targoman::API::AAA::Accounting;
-//using namespace Targoman::API::ORM;
+using namespace Targoman::API::AAA;
 
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
@@ -61,11 +60,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 struct stuAdvertBill {
 };
 
-class Advert : public intfRESTAPIWithAccounting
+class Advert : public Targoman::API::AAA::intfAccountingBasedModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
     TARGOMAN_DEFINE_API_MODULE(Advert);
 
@@ -83,7 +82,7 @@ private slots:
 //        processVoucher,
 //        (
 //            TAPI::JWT_t _JWT,
-//            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
 //    )
@@ -93,7 +92,7 @@ private slots:
 //        cancelVoucher,
 //        (
 //            TAPI::JWT_t _JWT,
-//            Targoman::API::AAA::Accounting::stuVoucherItem _voucherItem
+//            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
 //    )

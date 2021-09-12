@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_BIN_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -60,21 +60,19 @@ TARGOMAN_CREATE_CONSTEXPR(bnrUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class Bin : public Targoman::API::ORM::clsTable
+class Bin : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Bin)
+
 private slots:
     QVariant ORMGET("Get Bin information")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Bin)
 };
 
-class Banners : public Targoman::API::ORM::clsTable
+class Banners : public intfSQLBasedModule
 {
     Q_OBJECT
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Banners)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Banners)
 };
 
 } //namespace ORM

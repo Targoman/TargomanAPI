@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
 #define TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
 
-#include "Interfaces/ORM/clsTable.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::TicketingModule {
 
@@ -66,22 +66,18 @@ TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
 
 #pragma GCC diagnostic pop
 
-class Tickets : public Targoman::API::ORM::clsTable
+class Tickets : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 
 private slots:
     QVariant ORMGET("Get Tickets")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 };
 
-class TicketRead : public Targoman::API::ORM::clsTable
+class TicketRead : public intfSQLBasedModule
 {
     Q_OBJECT
-
-private:
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
 };
 

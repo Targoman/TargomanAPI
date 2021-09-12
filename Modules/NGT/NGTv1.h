@@ -24,7 +24,7 @@
 #define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 
@@ -37,11 +37,11 @@ struct stuNGTPriceInfo{
 namespace Targoman {
 namespace API {
 
-class NGTv1 : public ORM::clsRESTAPIWithActionLogs
+class NGTv1 : public ORM::intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
 
 private slots:

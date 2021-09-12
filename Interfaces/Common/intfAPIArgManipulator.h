@@ -26,12 +26,13 @@
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
-namespace ORM {
+namespace DBM {
 class clsORMField;
 }
+
+namespace Common {
 
 enum enuVarComplexity {
     COMPLEXITY_Integral,
@@ -49,7 +50,7 @@ class intfCacheConnector;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
 
-class intfAPIObject{
+class intfAPIObject {
 public:
     virtual ~intfAPIObject();
     virtual void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const = 0;
@@ -71,7 +72,7 @@ public:
     virtual bool isPrimitiveType() const  = 0;
     virtual enuVarComplexity complexity() const = 0;
     virtual QStringList options() const = 0;
-    virtual QString description(const QList<ORM::clsORMField>& _allFields) const = 0;
+    virtual QString description(const QList<DBM::clsORMField>& _allFields) const = 0;
     virtual void validate(const QVariant& _val, const QByteArray& _paramName) const = 0;
     virtual QVariant toORMValue(const QString& _val) const = 0;
     virtual std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const = 0;
@@ -82,10 +83,11 @@ public:
     char*       RealTypeName;
 };
 
-extern void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator);
 #pragma clang diagnostic pop
 
-}
-}
+} //namespace Common
+
+extern void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator);
+} //namespace Targoman::API
 
 #endif // TAPI_INTFAPIARGMANIPULATOR_H

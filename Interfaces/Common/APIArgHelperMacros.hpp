@@ -98,7 +98,7 @@
                 throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString()); \
             return Doc; \
         }, \
-        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) { return "A valid JSON object"; }, \
+        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
         /* toORMValueLambda   */ [](const QVariant& _value) { \
             /*qDebug() << "JSON_t(3) =================================" << _value;*/  \
             if (_value.isValid() == false) { \
@@ -152,7 +152,7 @@
         [](const _namespace::_type& _value) -> QVariant {return _toVariant;}, \
         [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_type { \
             static QFieldValidator Validator = QFieldValidator()._validationRule; \
-            if(Validator.isValid(_value, _paramName) == false) throw exHTTPBadRequest(Validator.errorMessage()); \
+            if (Validator.isValid(_value, _paramName) == false) throw exHTTPBadRequest(Validator.errorMessage()); \
             _namespace::_type Value; Value=_value.toString();  return  Value; \
         }, __VA_ARGS__ \
     )

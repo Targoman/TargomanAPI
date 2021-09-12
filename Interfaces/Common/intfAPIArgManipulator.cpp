@@ -21,16 +21,9 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "APIArgHelperMacrosPrivate.h"
-///*extern */QString toCammel(const QString& _name)
-//{
-//    return _name.mid(0,1).toLower() + _name.mid(1);
-//}
-
 #include "intfAPIArgManipulator.h"
-#include "intfAPIModule.h"
 
-namespace Targoman::API {
+namespace Targoman::API::Common {
 
 intfAPIObject::~intfAPIObject() {}
 
@@ -48,28 +41,4 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName) {
 
 intfAPIArgManipulator::~intfAPIArgManipulator() {}
 
-/******************************************************************************/
-intfAPIModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
-    Host(_host),
-    Port(_port),
-    User(_user),
-    Pass(_pass),
-    Schema(_schema)
-{}
-
-QString intfAPIModule::stuDBInfo::toConnStr(bool _noSchema) {
-    return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
-                this->Host).arg(
-                this->Port).arg(
-                this->User).arg(
-                this->Pass).arg(
-                _noSchema ? "" : this->Schema);
-}
-
-intfAPIModule::intfAPIModule(Common::Configuration::intfModule *_parent) :
-    Targoman::Common::Configuration::intfModule(_parent)
-{}
-
-intfAPIModule::~intfAPIModule(){}
-
-} //namespace Targoman::API
+} //namespace Targoman::API::Common

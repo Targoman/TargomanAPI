@@ -24,11 +24,9 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
 
-#include "Interfaces/ORM/clsTable.h"
-#include "Interfaces/AAA/AAA.hpp"
 #include "PaymentGateways.h"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -81,14 +79,13 @@ TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 }
 #pragma GCC diagnostic pop
 
-class OnlinePayments : public clsTable
+class OnlinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
+
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
 };
 
 /*****************************************************************\
@@ -112,16 +109,14 @@ TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class OfflinePayments : public clsTable
+class OfflinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePayments)
 
 private slots:
     QVariant ORMGET("Get OfflinePayment information.")
     bool ORMUPDATE("Update OfflinePayment info by priviledged user")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePayments)
 };
 
 } //namespace ORM

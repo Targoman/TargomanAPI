@@ -8,10 +8,10 @@
 using namespace std;
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::DBM;
 
 using namespace Targoman;
 

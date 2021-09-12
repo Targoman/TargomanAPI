@@ -69,7 +69,7 @@ namespace TAPI { \
 }
 
 #define TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(_numericType, _convertor) \
-namespace Targoman { namespace API { \
+namespace Targoman::API::Common { \
 template<> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral, false, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage){ \
     bool Result; *_argStorage = new _numericType; *(reinterpret_cast<_numericType*>(*_argStorage)) = static_cast<_numericType>(_val._convertor(&Result)); \
     if (!Result) throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
@@ -81,7 +81,7 @@ template<> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPL
     if (!Result) throw exHTTPBadRequest("Invalid value specified for parameter:: " + _paramName); \
     return QGenericArgument(this->RealTypeName, *_argStorage); \
 } \
-}} \
+} \
 namespace TAPI { \
 inline void setFromVariant(_numericType& _storage, const QVariant& _val){ \
     bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \

@@ -30,15 +30,14 @@
 
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/clsCountAndSpeed.h"
-
 #include "Interfaces/Common/tmplAPIArg.h"
 
 namespace Targoman {
 namespace API {
 namespace Server {
 
-extern QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
-extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gUserDefinedTypesInfo;
 
 }
 }

@@ -25,14 +25,14 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 #include "Locations.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
 //using namespace ORM;
 //using namespace AAA;
 //using namespace AAA::Accounting;
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
 namespace Targoman::API::AdvertModule::ORM {
 

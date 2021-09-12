@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_SERVICES_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -52,18 +50,16 @@ TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class Service : public clsTable
+class Service : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
 
 private slots:
     QVariant ORMGET("Get Service information")
     quint64 ORMCREATE("Create a new Service by priviledged user")
     bool ORMUPDATE("Update Service info by priviledged user")
     bool ORMDELETE("Delete a Service")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
 };
 
 } //namespace ORM

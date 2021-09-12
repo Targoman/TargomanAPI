@@ -41,10 +41,10 @@ namespace Server {
 class WebSocketServer : public QObject{
     Q_OBJECT
     static inline QString makeConfig(const QString& _name){return "/WebSocketServer/" + _name;}
-    static Common::Configuration::tmplConfigurable<QString>      Name;
-    static Common::Configuration::tmplRangedConfigurable<quint16>Port;
-    static Common::Configuration::tmplConfigurable<bool>         JustLocal;
-    static Common::Configuration::tmplConfigurable<bool>         Secure;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>      Name;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<quint16>Port;
+    static Targoman::Common::Configuration::tmplConfigurable<bool>         JustLocal;
+    static Targoman::Common::Configuration::tmplConfigurable<bool>         Secure;
 
 public:
     void start();

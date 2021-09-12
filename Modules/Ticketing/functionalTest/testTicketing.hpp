@@ -34,11 +34,11 @@
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
 
-#include "Interfaces/ORM/QueryBuilders.h"
-using namespace Targoman::API::ORM;
+#include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::DBM;
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-using namespace Targoman::API::AAA::Accounting;
+using namespace Targoman::API::AAA;
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;

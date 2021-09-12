@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_CLICKS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_CLICKS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -49,14 +49,13 @@ TARGOMAN_CREATE_CONSTEXPR(clkBrowser);
 }
 #pragma GCC diagnostic pop
 
-class Clicks : public Targoman::API::ORM::clsTable
+class Clicks : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Clicks)
+
 private slots:
     QVariant ORMGET("Get Clicks information")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Clicks)
 };
 
 } //namespace ORM

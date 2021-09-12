@@ -24,14 +24,14 @@
 #include "ActiveSessions.h"
 #include "User.h"
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
 ActiveSessions::ActiveSessions() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblActiveSessions::Name,
         {///< ColName                                 Type                 Validation                   Default    UpBy    Sort   Filter Self  Virt   PK
@@ -61,7 +61,7 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 
@@ -79,7 +79,7 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
       ExtraFilters.insert(tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID());
 //  this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
 
-  return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

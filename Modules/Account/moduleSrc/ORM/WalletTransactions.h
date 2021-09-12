@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -66,22 +64,21 @@ TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
 #pragma GCC diagnostic pop
 
 
-class WalletTransactions : public clsTable
+class WalletTransactions : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletTransactions)
+
 private slots:
     QVariant ORMGET("Get WalletTransactions information.")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account,WalletTransactions)
 };
 
-class WalletBalances : public clsTable
+class WalletBalances : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
 
 private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
 };
 
 } //namespace ORM

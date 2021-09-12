@@ -211,7 +211,7 @@ inline QString toCammel(const QString& _name)
     namespace Targoman::API { \
         template<> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toVariantLambda = _toVariantLambda; \
         template<> std::function<_namespace::_type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_type, _complexity, false>::fromVariantLambda = _fromVariantLambda; \
-        template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _descriptionLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
@@ -228,7 +228,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -264,7 +264,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
         template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toVariantLambda = \
             [](NULLABLE_TYPE(_namespace::_enum::Type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
         template<> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
@@ -277,7 +277,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -329,7 +329,7 @@ inline QString toCammel(const QString& _name)
                     ); \
                 } \
         }, \
-        /* descriptionLambda  */ [](const QList<ORM::clsORMField>&) -> QString { \
+        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) -> QString { \
             return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); \
         }, \
         /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \

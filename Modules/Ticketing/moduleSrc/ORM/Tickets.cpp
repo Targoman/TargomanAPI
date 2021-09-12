@@ -24,7 +24,7 @@
 #include "Tickets.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
@@ -36,7 +36,7 @@ namespace Targoman::API::TicketingModule::ORM {
 /******************************************************************************/
 /******************************************************************************/
 Tickets::Tickets() :
-    clsTable(
+    intfSQLBasedModule(
         TicketingSchema,
         tblTickets::Name,
         {///< ColName                          Type                    Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
@@ -94,7 +94,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //            )
     };
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
 
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        query
@@ -115,7 +115,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 /******************************************************************************/
 /******************************************************************************/
 TicketRead::TicketRead() :
-    clsTable(
+    intfSQLBasedModule(
         TicketingSchema,
         tblTicketRead::Name,
         { ///<ColName                       Type                   Validation                       Default    UpBy   Sort  Filter Self  Virt   PK

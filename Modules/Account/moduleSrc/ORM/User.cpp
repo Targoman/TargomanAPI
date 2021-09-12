@@ -24,7 +24,7 @@
 #include "User.h"
 #include "Roles.h"
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
 
@@ -35,7 +35,7 @@ namespace Targoman::API::AccountModule::ORM {
 \*****************************************************************/
 ///TODO: BAD Gender causes assert
 User::User() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblUser::Name,
         {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
@@ -97,7 +97,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
@@ -110,21 +110,21 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiUPDATEprofile(
@@ -195,7 +195,7 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID) {
 |* UserExtraInfo *************************************************|
 \*****************************************************************/
 UserExtraInfo::UserExtraInfo() :
-    clsTable (
+    intfSQLBasedModule (
         AAASchema,
         tblUserExtraInfo::Name,
         {///< ColName                               Type                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK

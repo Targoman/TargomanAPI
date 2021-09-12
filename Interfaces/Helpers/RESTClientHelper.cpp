@@ -29,12 +29,12 @@
 //#include "Interfaces/AAA/clsJWT.hpp"
 #include "App/Server/QJWT.h"
 
+using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::AAA;
 
 namespace Targoman::API::Helpers {
 
-using namespace Common;
-using namespace Common::Configuration;
+//using namespace Common;
 
 tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
     ClientConfigs::makeConfig("RESTServerAddress"),

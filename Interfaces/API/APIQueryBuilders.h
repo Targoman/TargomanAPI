@@ -23,9 +23,9 @@
 #ifndef TARGOMAN_API_QUERYBUILDERS_H
 #define TARGOMAN_API_QUERYBUILDERS_H
 
-#include "QueryBuilders.h"
+#include "Interfaces/DBM/QueryBuilders.h"
 
-using namespace Targoman::API::ORM;
+using namespace Targoman::API::DBM;
 
 namespace Targoman::API::Query {
 
@@ -36,7 +36,7 @@ extern QVariant Select(clsTable& _table,
                        GET_METHOD_ARGS_HEADER_INTERNAL_CALL,
                        const clsCondition& _extraFilters = {},
                        quint16 _cacheTime = 0,
-                       std::function<void(SelectQuery &_query)> _queryLambda = nullptr
+                       std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
                        );
 
 extern quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL);

@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_LOCATIONS_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_LOCATIONS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -49,17 +49,16 @@ TARGOMAN_CREATE_CONSTEXPR(locStatus);
 
 #pragma GCC diagnostic pop
 
-class Locations : public Targoman::API::ORM::clsTable
+class Locations : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Locations)
+
 private slots:
     QVariant ORMGET("Get Locations information")
     quint32 ORMCREATE("Create a new Location by priviledged user")
     bool ORMUPDATE("Update Location info by priviledged user")
     bool ORMDELETE("Delete a Locations")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Locations)
 };
 
 } //namespace ORM

@@ -27,7 +27,7 @@
 #include <QGenericArgument>
 #include <QMetaMethod>
 #include "Interfaces/Common/QtTypes.hpp"
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 #include "clsAPIObject.h"
 
 namespace Targoman {
@@ -61,13 +61,13 @@ public:
 #endif
 
     static void registerMetaTypeInfoMap();
-    static void registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method);
+    static void registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
 
 private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
-    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfAPIModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
+    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfPureModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
     static int  getTagSeconds(const QMetaMethod& _method, const char* _type);
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 

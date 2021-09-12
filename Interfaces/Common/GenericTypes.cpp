@@ -34,9 +34,12 @@
 #include "GenericTypes.h"
 #include "HTTPExceptions.hpp"
 
+#include "Interfaces/DBM/clsORMField.h"
+using namespace Targoman::API::DBM;
+
 using namespace TAPI;
 using namespace Targoman::API;
-using namespace Targoman::API::ORM;
+using namespace Targoman::API::Common;
 
 QList<intfAPIArgManipulator*> Server::gOrderedMetaTypeInfo;
 QList<intfAPIArgManipulator*> Server::gUserDefinedTypesInfo;
@@ -155,7 +158,7 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 
         return  Doc;
     },
-    [](const QList<ORM::clsORMField>&){ return "A valid Privilege JSON object"; },
+    [](const QList<DBM::clsORMField>&){ return "A valid Privilege JSON object"; },
     [](const QVariant& _value) {
         if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
             return QJsonDocument();
@@ -222,11 +225,11 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 
 
 
-throw Common::exTargomanMustBeImplemented("SaleableAdditive_t not implemented yet!");
+throw Targoman::Common::exTargomanMustBeImplemented("SaleableAdditive_t not implemented yet!");
 
                 return  Doc;
             },
-            [](const QList<ORM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
+            [](const QList<DBM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
             [](const QVariant& _value) {
 
 
@@ -266,7 +269,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ EncodedJWT_t,
     /* toVariantLambda    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
     /* fromVariantLambda  */ nullptr,
-    [](const QList<ORM::clsORMField>&){ return "A signed JsonWebToken string"; }
+    [](const QList<DBM::clsORMField>&){ return "A signed JsonWebToken string"; }
 );
 
 TAPI_REGISTER_METATYPE(

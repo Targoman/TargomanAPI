@@ -29,7 +29,7 @@ namespace Targoman {
 namespace API {
 namespace Server {
 
-using namespace Common::Configuration;
+using namespace Targoman::Common::Configuration;
 
 tmplConfigurable<QString> WebSocketServer::Name(
         WebSocketServer::makeConfig("Name"),

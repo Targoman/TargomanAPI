@@ -25,18 +25,16 @@
 #define TARGOMAN_API_MODULES_TICKETING_TICKETING_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "ORM/Defs.hpp"
-
-using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule {
 
-class Ticketing : public clsRESTAPIWithActionLogs
+class Ticketing : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
 

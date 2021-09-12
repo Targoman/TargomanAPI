@@ -21,18 +21,26 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSORMFIELD_H
-#define TARGOMAN_API_ORM_CLSORMFIELD_H
+#ifndef TARGOMAN_API_DBM_CLSORMFIELD_H
+#define TARGOMAN_API_DBM_CLSORMFIELD_H
 
 #include "QFieldValidator.h"
 #include "libTargomanCommon/Macros.h"
 
 namespace Targoman::API {
 
-class intfAPIModule;
+namespace Common {
 class intfAPIArgManipulator;
+}
 
-namespace ORM {
+namespace API {
+class intfPureModule;
+}
+
+using namespace Common;
+using namespace API;
+
+namespace DBM {
 
 #define S(_type) #_type
 #define R(_schema, _table) QString("%1.%2").arg(_schema, _table)
@@ -105,7 +113,7 @@ public:
                 bool _isSelectable = true,
                 const QString& _renameAs = {});
 
-    void registerTypeIfNotRegisterd(intfAPIModule* _module);
+    void registerTypeIfNotRegisterd(intfPureModule* _module);
     void updateTypeID(QMetaType::Type _type);
     void validate(const QVariant _value);
 
@@ -175,7 +183,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME          "StatusFieldName"
 #define ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME   "InvalidatedAtFieldName"
 
-} //namespace ORM
+} //namespace DBM
 } //namespace Targoman::API
 
-#endif // TARGOMAN_API_ORM_CLSORMFIELD_H
+#endif // TARGOMAN_API_DBM_CLSORMFIELD_H

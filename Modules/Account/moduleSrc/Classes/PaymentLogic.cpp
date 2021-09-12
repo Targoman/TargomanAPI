@@ -25,7 +25,7 @@
 #include "PaymentGateways/gtwDevTest.h"
 #include "PaymentGateways/gtwMellatBank.h"
 #include "PaymentGateways/gtwZibal.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 #include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
@@ -39,7 +39,7 @@ namespace Targoman::API::AccountModule::Classes {
 void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName))
-        throw Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
+        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
 
     qDebug() << "registering payment gateway driver:" << _driverName;
     PaymentLogic::RegisteredDrivers.insert(_driverName,  _driver);
@@ -47,7 +47,7 @@ void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway
 intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
-        throw Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
+        throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
 
     return PaymentLogic::RegisteredDrivers[_driverName];
 }
@@ -56,7 +56,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 //void PaymentLogic::registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)())
 //{
 //    if (PaymentLogic::RegisteredDrivers.contains(_driverName))
-//        throw Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
+//        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
 
 //    qDebug() << "registering payment gateway driver:" << _driverName;
 //    PaymentLogic::RegisteredDrivers.insert(_driverName, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
@@ -64,7 +64,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 //intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
 //{
 //    if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
-//        throw Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
+//        throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
 
 //    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driverName];
 
@@ -225,7 +225,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         if (PaymentResponse.ErrorCode)
         {
-            Targoman::API::Query::Update(
+            /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                         OnlinePayments::instance(),
                         SYSTEM_USER_ID,
                         {},
@@ -239,7 +239,7 @@ QString PaymentLogic::createOnlinePaymentLink(
             throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
         }
 
-        Targoman::API::Query::Update(
+        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
                     {},
@@ -279,7 +279,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     }
     catch(std::exception &e)
     {
-        Targoman::API::Query::Update(
+        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
                     {},
@@ -338,7 +338,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     //PaymentResponse.OrderMD5 =?= _paymentMD5
 
     if (PaymentResponse.ErrorCode) {
-        Targoman::API::Query::Update(
+        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
                     {},
@@ -361,7 +361,7 @@ quint64 PaymentLogic::approveOnlinePayment(
         throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
     }
 
-    Targoman::API::Query::Update(
+    /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                 OnlinePayments::instance(),
                 SYSTEM_USER_ID,
                 {},
@@ -389,7 +389,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     {
     }
 
-    Targoman::API::Query::Update(
+    /*Targoman::API::Query::*/Targoman::API::AccountModule::ORM::PaymentGateways::instance().Update(
                 Targoman::API::AccountModule::ORM::PaymentGateways::instance(),
                 SYSTEM_USER_ID,
                 {},

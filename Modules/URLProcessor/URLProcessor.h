@@ -23,16 +23,16 @@
 #ifndef TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 #define TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 
 namespace Targoman {
 namespace API {
 
-class URLProcessor : public intfAPIModule
+class URLProcessor : public intfPureModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_DEFINE_API_MODULE(URLProcessor);
 
 private slots:

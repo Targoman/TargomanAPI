@@ -42,7 +42,7 @@
 #include "ORM/WalletTransactions.h"
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
@@ -115,7 +115,7 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 //        );
 
 Targoman::Common::Configuration::tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile (
-        AAA::Accounting::makeConfig("TransactionLogFile"),
+        AAA::makeConfig("TransactionLogFile"),
         "File to store transaction logs",
         "",
         Validators::tmplPathAccessValidator<
@@ -128,7 +128,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> PaymentLogic::Tran
         );
 
 Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
-        AAA::Accounting::makeConfig("InvalidPasswordsFile"),
+        AAA::makeConfig("InvalidPasswordsFile"),
         "File where invalid pasword MD5s are stored",
         "",
         Validators::tmplPathAccessValidator<
@@ -144,7 +144,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
 /*****************************************************************/
 /*****************************************************************/
 Account::Account() :
-    clsRESTAPIWithActionLogs("Account", "AAA")
+    intfSQLBasedWithActionLogsModule("Account", "AAA")
 {
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());
@@ -431,7 +431,7 @@ bool Account::apiPOSTapproveMobile(
 /*****************************************************************\
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
-Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
+Targoman::API::AAA::stuVoucher Account::processVoucher(
         TAPI::JWT_t _JWT,
         quint64 _voucherID
     )
@@ -444,7 +444,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
                                .one()
                                .value(tblVoucher::vchDesc);
 
-        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
+        Targoman::API::AAA::stuPreVoucher PreVoucher;
 
         if (VoucherDesc.canConvert<QJsonObject>())
             PreVoucher.fromJson(VoucherDesc.toJsonObject());
@@ -465,7 +465,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError("There is no services registered.");
 
         //1: process voucher items
-        foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
+        foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
         {
             //lookup services
             foreach (QVariant Service, Services)
@@ -499,24 +499,25 @@ Targoman::API::AAA::Accounting::stuVoucher Account::processVoucher(
             } //foreach (QVariant Service, Services)
         }
 
-        //2: change voucher status to Targoman::API::AAA::Accounting::enuVoucherStatus::Finished
-        Targoman::API::Query::Update(Voucher::instance(),
+        //2: change voucher status to Targoman::API::AAA::enuVoucherStatus::Finished
+        /*Targoman::API::Query::*/Voucher::instance().Update(
+                                     Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Finished }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Finished }
                                      }),
                                      {
                                         { tblVoucher::vchID, _voucherID }
                                      });
 
         //--------------------------
-        return Targoman::API::AAA::Accounting::stuVoucher(
+        return Targoman::API::AAA::stuVoucher(
                     _voucherID,
                     PreVoucher,
                     QString(),
                     QString(),
-                    Targoman::API::AAA::Accounting::enuVoucherStatus::Finished
+                    Targoman::API::AAA::enuVoucherStatus::Finished
                     );
     }
     catch (...)
@@ -541,7 +542,7 @@ void Account::tryCancelVoucher(
                                .tryOne()
                                .value(tblVoucher::vchDesc);
 
-        Targoman::API::AAA::Accounting::stuPreVoucher PreVoucher;
+        Targoman::API::AAA::stuPreVoucher PreVoucher;
 
         if (VoucherDesc.canConvert<QJsonObject>())
             PreVoucher.fromJson(VoucherDesc.toJsonObject());
@@ -558,7 +559,7 @@ void Account::tryCancelVoucher(
 
             if (Services.isEmpty() == false)
             {
-                foreach(Targoman::API::AAA::Accounting::stuVoucherItem VoucherItem, PreVoucher.Items)
+                foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
                 {
                     //lookup services
                     foreach (QVariant Service, Services)
@@ -645,7 +646,7 @@ END;;
 DELIMITER ;
 */
 
-//    Targoman::API::Query::Update(Voucher::instance(),
+//    /*Targoman::API::Query::*/this->Update(Voucher::instance(),
 //                                 SYSTEM_USER_ID,
 //                                 {},
 //                                 TAPI::ORMFields_t({
@@ -658,9 +659,9 @@ DELIMITER ;
 
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
-Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
+Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
         TAPI::JWT_t _JWT,
-        Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
+        Targoman::API::AAA::stuPreVoucher _preVoucher,
         Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         QString _domain,
         qint64 _walletID,
@@ -683,10 +684,10 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
     if (_preVoucher.Items.isEmpty())
         throw exHTTPBadRequest("seems that pre-Voucher is empty");
 
-    Accounting::checkPreVoucherSanity(_preVoucher);
+    checkPreVoucherSanity(_preVoucher);
 
     //1: create voucher
-    Targoman::API::AAA::Accounting::stuVoucher Voucher;
+    Targoman::API::AAA::stuVoucher Voucher;
 
     Voucher.Info = _preVoucher;
 
@@ -695,7 +696,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
     ///TODO: reserve saleables before returning voucher
     ///TODO: implement overall coupon at the end of checkout steps
 
-    Voucher.ID = Targoman::API::Query::Create(
+    Voucher.ID = /*Targoman::API::Query::*/this->Create(
                      Voucher::instance(),
                      clsJWT(_JWT).usrID(),
                      TAPI::ORMFields_t({
@@ -703,7 +704,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
                                            { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
                                            { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
                                            { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
-                                           { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::New },
+                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                        })
                      );
 
@@ -750,11 +751,11 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
         qDebug() << "**********************************" << exp.what();
 
         Account::tryCancelVoucher(_JWT, Voucher.ID, true);
-//        Targoman::API::Query::Update(Voucher::instance(),
+//        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
 //                                     SYSTEM_USER_ID,
 //                                     {},
 //                                     TAPI::ORMFields_t({
-//                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
+//                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
 //                                     }),
 //                                     {
 //                                        { tblVoucher::vchID, Voucher.ID }
@@ -772,7 +773,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTfinalizeBasket(
  * @param _pgResponse: ... voucherID ...
  * @return
  */
-Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
+Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
         TAPI::JWT_t _JWT,
 //        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         const QString _paymentMD5,
@@ -792,11 +793,11 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
     }
     catch(...)
     {
-        Targoman::API::Query::Update(Voucher::instance(),
+        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, VoucherID }
@@ -807,7 +808,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
-Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment(
+Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
         TAPI::JWT_t _JWT,
         quint64 _vchID,
         const QString& _bank,
@@ -835,7 +836,7 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    Targoman::API::Query::Create(OfflinePayments::instance(),
+    /*Targoman::API::Query::*/this->Create(OfflinePayments::instance(),
                                  clsJWT(_JWT).usrID(),
                                  TAPI::ORMFields_t({
                                     { "ofp_vchID",_vchID },
@@ -861,11 +862,11 @@ Targoman::API::AAA::Accounting::stuVoucher Account::apiPOSTapproveOfflinePayment
                      });
         return Account::processVoucher(_JWT, _vchID);
     }  catch (...) {
-        Targoman::API::Query::Update(Voucher::instance(),
+        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::Accounting::enuVoucherStatus::Error }
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
                                      }),
                                      {
                                         { tblVoucher::vchID, _vchID }
@@ -908,10 +909,10 @@ bool Account::apiPOSTaddIncomeTo(
     )
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addIncomeTo:maxAmount").toLongLong();
-    if(Limit == 0)
+    if (Limit == 0)
         throw exAuthorization("Not enough access to add income");
 
-    if(Limit > 0 && _amount > static_cast<quint64>(Limit))
+    if (Limit > 0 && _amount > static_cast<quint64>(Limit))
         throw exAuthorization("Amount is greater than your limits");
 
     QFV.hasKey("desc").validate(_desc, "desc");
@@ -924,6 +925,14 @@ bool Account::apiPOSTaddIncomeTo(
                      {"iDesc", _desc.toJson()},
                  });
     return true;
+}
+
+bool Account::apiPOSTcheckVoucherTTL(
+        TAPI::JWT_t _JWT,
+        quint64 _voucherID
+    )
+{
+
 }
 
 #ifdef QT_DEBUG

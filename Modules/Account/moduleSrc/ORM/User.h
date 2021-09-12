@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -38,9 +36,10 @@ namespace ORM {
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-class User : public clsTable
+class User : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
 
 private slots:
     QVariant ORMGET("Get user information")
@@ -75,9 +74,6 @@ private slots:
         "Update User profile. Take note that this method does not change password "
         "Password and Salt are required to change email or mobile"
     )
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
 };
 
 /*****************************************************************\
@@ -98,9 +94,10 @@ TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 
-class UserExtraInfo : public clsTable
+class UserExtraInfo : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
 
 private slots:
     bool REST(
@@ -132,9 +129,6 @@ private slots:
         ),
         "Updates user ethercoin address"
     )
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
 };
 
 } //namespace ORM

@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -64,16 +62,14 @@ TARGOMAN_CREATE_CONSTEXPR(aprStatus);
 }
 #pragma GCC diagnostic pop
 
-class ApprovalRequest : public clsTable
+class ApprovalRequest : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
 
 private slots:
     QVariant ORMGET("Get ApprovalRequest information.")
     bool ORMDELETE("Delete an ApprovalRequest")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
 };
 
 } //namespace ORM

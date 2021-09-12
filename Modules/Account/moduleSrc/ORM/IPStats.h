@@ -24,10 +24,8 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_IPSTATS_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -45,15 +43,13 @@ TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
 }
 #pragma GCC diagnostic pop
 
-class IPStats : public clsTable
+class IPStats : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPStats)
 
 private slots:
     QVariant ORMGET("Get IPStats information")
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPStats)
 };
 
 } //namespace ORM

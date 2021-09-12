@@ -24,7 +24,6 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
 
-#include "Interfaces/ORM/clsTable.h"
 #include "Interfaces/AAA/AAA.hpp"
 
 namespace Targoman::API::AdvertModule {
@@ -84,48 +83,48 @@ namespace tblAccountUserAsset {
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class AccountProducts : public Accounting::intfAccountProducts
+class AccountProducts : public intfAccountProducts
 {
     Q_OBJECT
-
-public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
+
+public:
 };
 
 /******************************************************/
-class AccountSaleables : public Accounting::intfAccountSaleables
+class AccountSaleables : public intfAccountSaleables
 {
     Q_OBJECT
-
-public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
+
+public:
 };
 
 /******************************************************/
-class AccountUserAssets : public Accounting::intfAccountUserAssets
+class AccountUserAssets : public intfAccountUserAssets
 {
     Q_OBJECT
-
-public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssets)
+
+public:
 };
 
 /******************************************************/
-class AccountAssetUsage : public Accounting::intfAccountAssetUsage
+class AccountAssetUsage : public intfAccountAssetUsage
 {
     Q_OBJECT
-
-public:
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountAssetUsage)
+
+public:
 };
 
 /******************************************************/
-class AccountCoupons : public Accounting::intfAccountCoupons
+class AccountCoupons : public intfAccountCoupons
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountCoupons)
 
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountCoupons)
 };
 
 /******************************************************/
@@ -133,9 +132,10 @@ public:
 /*class clsAccountPrizes: public Accounting::intfAccountPrizes
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPrizes)
+
 private slots:
 public:
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPrizes)
 };
 */
 

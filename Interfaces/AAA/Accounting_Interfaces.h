@@ -25,22 +25,22 @@
 #define TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting {
+#include "Interfaces/API/intfSQLBasedModule.h"
+using namespace Targoman::API::API;
+
+namespace Targoman::API::AAA {
 
 /******************************************************/
-class intfAccountProducts: public ORM::clsTable
+class intfAccountProducts : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountProducts(const QString& _schema,
-                        const QList<ORM::clsORMField>& _exclusiveCols = {},
-                        const QList<ORM::stuRelation>& _exclusiveRelations = {},
-                        const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+                        const QList<DBM::clsORMField>& _exclusiveCols = {},
+                        const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                        const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
     QVariant ORMGET("Get Available Products")
@@ -50,14 +50,15 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountSaleables: public ORM::clsTable
+class intfAccountSaleables : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountSaleables(const QString& _schema,
-                         const QList<ORM::clsORMField>& _exclusiveCols = {},
-                         const QList<ORM::stuRelation>& _exclusiveRelations = {},
-                         const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+                         const QList<DBM::clsORMField>& _exclusiveCols = {},
+                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
     QVariant ORMGET("Get Available Saleables")
@@ -67,14 +68,15 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUserAssets: public ORM::clsTable
+class intfAccountUserAssets : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountUserAssets(const QString& _schema,
-                          const QList<ORM::clsORMField>& _exclusiveCols = {},
-                          const QList<ORM::stuRelation>& _exclusiveRelations = {},
-                          const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
     QVariant ORMGET("Get User Assets")
@@ -100,22 +102,24 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountAssetUsage: public ORM::clsTable
+class intfAccountAssetUsage : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountAssetUsage(const QString& _schema,
-                          const QList<ORM::clsORMField>& _exclusiveCols = {},
-                          const QList<ORM::stuRelation>& _exclusiveRelations = {},
-                          const QList<ORM::stuDBIndex>& _exclusiveIndexes = {});
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
     QVariant ORMGET("Get user Usage on each Asset")
 };
 
 /******************************************************/
-class intfAccountCoupons: public ORM::clsTable
+class intfAccountCoupons : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountCoupons(const QString& _schema);
 
@@ -127,14 +131,15 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountPrizes: public ORM::clsTable
+class intfAccountPrizes : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountPrizes(const QString& _schema,
                          const QString& _name,
-                         const QList<ORM::clsORMField>& _cols,
-                         const QList<ORM::stuRelation>& _relations);
+                         const QList<DBM::clsORMField>& _cols,
+                         const QList<DBM::stuRelation>& _relations);
 private slots:
     QVariant ORMGET("Get Active Prizes")
     bool ORMDELETE("Delete a Prizes")
@@ -142,9 +147,6 @@ private slots:
     quint32 ORMCREATE("Create a new Prizes by priviledged user")
 };
 
-}
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H

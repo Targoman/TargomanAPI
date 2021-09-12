@@ -27,7 +27,7 @@ namespace Targoman {
 namespace Apps {
 
 using namespace Common;
-using namespace Common::Configuration;
+using namespace Targoman::Common::Configuration;
 
 QString gConfigs::Classifier::makeConfig(const QString& _name)
 {

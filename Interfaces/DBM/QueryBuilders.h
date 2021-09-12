@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_QUERYBUILDERS_H
-#define TARGOMAN_API_ORM_QUERYBUILDERS_H
+#ifndef TARGOMAN_API_DBM_QUERYBUILDERS_H
+#define TARGOMAN_API_DBM_QUERYBUILDERS_H
 
 #include <qglobal.h>
 
@@ -39,11 +39,11 @@ using namespace Targoman::DBManager;
 
 class testQueryBuilders;
 
-#include "Interfaces/ORM/Defs.hpp"
-#include "libTargomanCommon/exTargomanBase.h"
+#include "Interfaces/DBM/Defs.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "libTargomanCommon/exTargomanBase.h"
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::DBM {
 
 class clsTable;
 class clsCreateQueryData;
@@ -51,11 +51,11 @@ class clsSelectQueryData;
 
 //extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
 
-TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Common::exTargomanBase);
-TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotFound, Common::exTargomanBase);
-TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotProvided, Common::exTargomanBase);
-TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderValueNotProvided, Common::exTargomanBase);
-TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderWhereClauseNotProvided, Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilder, Targoman::Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotFound, Targoman::Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderColumnNotProvided, Targoman::Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderValueNotProvided, Targoman::Common::exTargomanBase);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exQueryBuilderWhereClauseNotProvided, Targoman::Common::exTargomanBase);
 
 TARGOMAN_DEFINE_ENUM(enuPreConditionOperator,
                      AND,
@@ -447,7 +447,8 @@ public:
     virtual ~SelectQuery();
 
     SelectQuery& addCol(const clsColSpecs& _colSpecs);
-    SelectQuery& addCSVCols(const TAPI::Cols_t& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    //TAPI::Cols_t -> QString
+    SelectQuery& addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& addCols(const QStringList& _cols);
     SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
     SelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});
@@ -580,9 +581,9 @@ private:
 
 /***************************************************************************************/
 
-} //namespace Targoman::API::ORM
+} //namespace Targoman::API::DBM
 
-Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpression);
-//Q_DECLARE_METATYPE(Targoman::API::ORM::DBExpressionWithValue);
+Q_DECLARE_METATYPE(Targoman::API::DBM::DBExpression);
+//Q_DECLARE_METATYPE(Targoman::API::DBM::DBExpressionWithValue);
 
-#endif // TARGOMAN_API_ORM_QUERYBUILDERS_H
+#endif // TARGOMAN_API_DBM_QUERYBUILDERS_H

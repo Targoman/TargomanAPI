@@ -25,14 +25,12 @@
 #define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
+#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Payments.h"
 #include "ORM/Voucher.h"
 #include "Classes/Defs.hpp"
 #include "Classes/PaymentLogic.h"
-
-using namespace Targoman::API::ORM;
 
 namespace Targoman::API::AccountModule {
 
@@ -45,11 +43,11 @@ struct stuMultiJWT {
 //class Voucher;
 //}
 
-class Account : public clsRESTAPIWithActionLogs
+class Account : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Account);
     TARGOMAN_DEFINE_API_MODULE(Account);
 
@@ -59,7 +57,7 @@ public:
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:
-    static Targoman::API::AAA::Accounting::stuVoucher processVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
+    static Targoman::API::AAA::stuVoucher processVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
     static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID, bool _setAsError = false);
 
 private:
@@ -193,12 +191,12 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-    Targoman::API::AAA::Accounting::stuVoucher REST(
+    Targoman::API::AAA::stuVoucher REST(
         POST,
         finalizeBasket,
         (
             TAPI::JWT_t _JWT,
-            Targoman::API::AAA::Accounting::stuPreVoucher _preVoucher,
+            Targoman::API::AAA::stuPreVoucher _preVoucher,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
             qint64 _walletID = -1,
@@ -210,7 +208,7 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    Targoman::API::AAA::Accounting::stuVoucher REST(
+    Targoman::API::AAA::stuVoucher REST(
         POST,
         approveOnlinePayment,
         (
@@ -223,7 +221,7 @@ private slots:
         "approve payment back from payment gateway"
     )
 
-    Targoman::API::AAA::Accounting::stuVoucher REST(
+    Targoman::API::AAA::stuVoucher REST(
         POST,
         approveOfflinePayment,
         (
@@ -265,6 +263,16 @@ private slots:
         ),
         "add income to a user by priviledged user. "
         "Description object must contain at least an string field named 'desc'"
+    )
+
+    bool REST(
+        POST,
+        checkVoucherTTL,
+        (
+            TAPI::JWT_t _JWT,
+            quint64 _voucherID
+        ),
+        "Check voucher and items for ttl"
     )
 
 #ifdef QT_DEBUG

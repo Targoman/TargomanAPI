@@ -22,13 +22,14 @@
 
 #include "OpenAPIGenerator.h"
 #include "ServerConfigs.h"
-#include "Interfaces/ORM/clsORMField.h"
+#include "Interfaces/DBM/clsORMField.h"
 
 namespace Targoman {
 namespace API {
 namespace Server {
 
-using namespace ORM;
+using namespace DBM;
+
 QJsonObject OpenAPIGenerator::CachedJson;
 
 QJsonObject initializeObject()

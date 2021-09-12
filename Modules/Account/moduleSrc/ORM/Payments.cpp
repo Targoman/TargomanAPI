@@ -24,7 +24,7 @@
 #include "Payments.h"
 #include "Voucher.h"
 #include "Classes/PaymentLogic.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
@@ -50,7 +50,7 @@ namespace ORM {
 |* OnlinePayments ************************************************|
 \*****************************************************************/
 OnlinePayments::OnlinePayments() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblOnlinePayments::Name,
         {///< ColName                                   Type                    Validation                           Default    UpBy   Sort  Filter Self  Virt   PK
@@ -77,14 +77,14 @@ QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 /*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
 OfflinePayments::OfflinePayments() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblOnlinePayments::Name,
         {///< ColName                                  Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
@@ -113,13 +113,13 @@ QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 } //namespace ORM

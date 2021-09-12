@@ -36,7 +36,7 @@ namespace API {
 namespace Server {
 
 using namespace Common;
-using namespace Common::Configuration;
+using namespace Targoman::Common::Configuration;
 
 tmplConfigurable<QString> QJWT::Secret(
         QJWT::makeConfig("JWTSecret"),

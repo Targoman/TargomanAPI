@@ -26,14 +26,14 @@
 #include "Voucher.h"
 #include "Classes/PaymentLogic.h"
 
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
 WalletTransactions::WalletTransactions() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblWalletsTransactions::Name,
         {///< ColName                              Type                           Validation                 Default    UpBy    Sort   Filter Self  Virt   PK
@@ -58,7 +58,7 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //    return query.one();
 
@@ -66,7 +66,7 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 }
 
 WalletBalances::WalletBalances() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblWalletBalances::Name,
         {///< ColName                           Type       Validation            Default   UpBy    Sort   Filter Self  Virt   PK

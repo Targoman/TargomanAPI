@@ -22,7 +22,7 @@
  */
 
 #include "PaymentGateways.h"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
 
@@ -59,7 +59,7 @@ void stuPaymentGateway::fromVariantMap(const QVariantMap& _info)
 namespace ORM {
 
 PaymentGateways::PaymentGateways() :
-    clsTable(
+    intfSQLBasedModule(
         AAASchema,
         tblPaymentGateways::Name,
         {///< ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
@@ -101,7 +101,7 @@ PaymentGateways::PaymentGateways() :
 QVariant PaymentGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 quint32 PaymentGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
@@ -111,19 +111,19 @@ quint32 PaymentGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
     if (_createInfo.contains(tblPaymentGateways::pgwAllowedDomainName))
         _createInfo[tblPaymentGateways::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::pgwAllowedDomainName].toString());
 
-    return Targoman::API::Query::Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool PaymentGateways::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return Targoman::API::Query::Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool PaymentGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return Targoman::API::Query::DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 } //namespace ORM

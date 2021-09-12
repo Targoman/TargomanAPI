@@ -21,14 +21,14 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsRESTAPIWithActionLogs.h"
+#include "intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
-#include "Interfaces/ORM/APIQueryBuilders.h"
+//#include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::API {
 
-clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _module, const QString& _schema) :
-    clsRESTAPIWithDatabase(
+intfSQLBasedWithActionLogsModule::intfSQLBasedWithActionLogsModule(const QString& _module, const QString& _schema) :
+    intfSQLBasedModule(
         _module,
         _schema,
         "tblActionLogs",
@@ -45,7 +45,7 @@ clsRESTAPIWithActionLogs::clsRESTAPIWithActionLogs(const QString& _module, const
     )
 {}
 
-QVariant clsRESTAPIWithActionLogs::apiGETactionLogs(
+QVariant intfSQLBasedWithActionLogsModule::apiGETactionLogs(
         GET_METHOD_ARGS_IMPL_APICALL
 //        TAPI::JWT_t _JWT
 //        , TAPI::PKsByPath_t _pksByPath
@@ -58,8 +58,8 @@ QVariant clsRESTAPIWithActionLogs::apiGETactionLogs(
 //        , bool _reportCount
         )
 {
-    Authorization::checkPriv(_JWT, { this->Module + ":ActionLogs:CRUD~0100" });
-    return Targoman::API::Query::Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    Authorization::checkPriv(_JWT, { this->ModuleName + ":ActionLogs:CRUD~0100" });
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-} // namespace Targoman::API::ORM
+} // namespace Targoman::API::API

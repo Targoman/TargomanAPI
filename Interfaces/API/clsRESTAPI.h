@@ -21,19 +21,20 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
-#define TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
+#ifndef TARGOMAN_API_ORM_CLSRESTAPI_H
+#define TARGOMAN_API_ORM_CLSRESTAPI_H
 
-#include "Interfaces/ORM/clsRESTAPI.h"
+#include "Interfaces/DBM/Defs.hpp"
+#include "Interfaces/DBM/clsTable.h"
 
 namespace Targoman::API::ORM {
 
-class clsRESTAPIWithDatabase : public clsRESTAPI
+class clsRESTAPI : public DBM::clsTable
 {
     Q_OBJECT
 
 public:
-    clsRESTAPIWithDatabase(
+    clsRESTAPI(
             const QString& _module,
             const QString& _schema,
             const QString& _name,
@@ -43,31 +44,13 @@ public:
             const QVariantMap& _dbProperties = {}
             );
 
-//#ifdef QT_DEBUG
-//protected slots:
-//    QVariant REST(
-//        POST,
-//        fixtureSetup,
-//        (
-//                TAPI::RemoteIP_t _REMOTE_IP
-//        ),
-//        "Create sample data"
-//    )
+//private slots:
+//    QVariant ORMGET("Get ActionLogs information")
 
-//    QVariant REST(
-//        POST,
-//        fixtureCleanup,
-//        (
-//                TAPI::RemoteIP_t _REMOTE_IP
-//        ),
-//        "Cleanup sample data"
-//    )
-//protected:
-//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-//#endif
+protected:
+    QString Module;
 };
 
 } // namespace Targoman::API::ORM
 
-#endif // TARGOMAN_API_ORM_CLSRESTAPIWITHDATABASE_H
+#endif // TARGOMAN_API_ORM_CLSRESTAPI_H

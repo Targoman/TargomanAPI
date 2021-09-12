@@ -29,8 +29,6 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "QFieldValidator.h"
 
-//using namespace Targoman::API::ORM;
-
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
 namespace Targoman::API::TicketingModule {
@@ -40,7 +38,7 @@ using namespace ORM;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 
 Ticketing::Ticketing() :
-    clsRESTAPIWithActionLogs(TicketingDomain, TicketingSchema)
+    intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema)
 {
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());

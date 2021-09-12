@@ -24,12 +24,10 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H
 
-#include "Interfaces/ORM/clsTable.h"
-#include "Interfaces/AAA/AAA.hpp"
 #include "Classes/Defs.hpp"
 #include "ORM/PaymentGateways.h"
-
-using namespace Targoman::API::ORM;
+#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -61,15 +59,16 @@ namespace tblVoucher {
 }
 #pragma GCC diagnostic pop
 
-class Voucher : public clsTable
+class Voucher : public intfSQLBasedModule
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 
 private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete an Voucher. Take note that User can just delete Vouchers with Payoff type")
 
-    Targoman::API::AAA::Accounting::stuVoucher REST(
+    Targoman::API::AAA::stuVoucher REST(
         CREATE,
         requestIncrease,
         (
@@ -110,9 +109,6 @@ private slots:
         "Create a new withdraw request for another user by priviledged user. "
         "Description object must contain at least an string field named 'desc'"
     )
-
-private:
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 };
 
 } //namespace ORM

@@ -28,23 +28,23 @@
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
-#include "Interfaces/Common/intfAPIModule.h"
-#include "Interfaces/ORM/Defs.hpp"
+//#include "Interfaces/Common/intfPureModule.h"
+#include "Interfaces/DBM/Defs.hpp"
 
 class testQueryBuilders;
 
 namespace Targoman::API {
 
-namespace ORM {
+namespace DBM {
 class clsTable;
 }
 
-namespace Query {
-extern bool Update(Targoman::API::ORM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-extern bool DeleteByPks(Targoman::API::ORM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
-}
+//namespace Query {
+//extern bool Update(Targoman::API::DBM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
+//extern bool DeleteByPks(Targoman::API::DBM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+//}
 
-namespace ORM {
+namespace DBM {
 
 class clsCondition;
 
@@ -74,7 +74,7 @@ class DeleteQuery;
 
 extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true, bool _lookupFromRegistryFirst = true);
 
-class clsTable : public intfAPIModule
+class clsTable // : public intfPureModule
 {
 protected:
     struct stuSelectItems {
@@ -86,6 +86,13 @@ protected:
     };
 
 public:
+    clsTable(const QString& _domain,
+             const QString& _schema,
+             const QString& _name,
+             const QList<clsORMField>& _cols,
+             const QList<stuRelation>& _relations = {},
+             const QList<stuDBIndex>& _indexes = {},
+             const QVariantMap& _dbProperties = {});
     clsTable(const QString& _schema,
              const QString& _name,
              const QList<clsORMField>& _cols,
@@ -161,7 +168,8 @@ public:
                                                quint64* _executionTime = nullptr);
 
 
-    void setSelfFilters(const QVariantMap& _requiredFilters, TAPI::Filter_t& _providedFilters);
+    //TAPI::Filter_t -> QString
+    void setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters);
 
 //    void setSelfFilters(const QVariantMap& _requiredFilters, QVariantMap& _extraFilters);
 
@@ -196,11 +204,13 @@ protected:
 
     QList<stuRelatedORMField> AllCols;
     QMap<QString, stuRelatedORMField /*clsORMField*/> HasMasterNameColsMap;
+public: //for accessing by intfSQLBasedModule
     QMap<QString, stuRelatedORMField /*clsORMField*/> SelectableColsMap;
+protected:
     QMap<QString, stuRelatedORMField>                 FilterableColsMap;
     QMap<QString, stuRelatedORMField /*clsORMField*/> SortableColsMap;
 
-    quint8  CountOfPKs;
+    quint8 CountOfPKs;
     QMap<QString, std::function<QVariant(const QVariant& _value)>> Converters;
 
     static QHash<QString, clsTable*> Registry;
@@ -226,12 +236,11 @@ protected:
 
     friend testQueryBuilders;
 
-    friend bool Targoman::API::Query::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-    friend bool Targoman::API::Query::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+//    friend bool /*Targoman::API::Query::*/this->Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
+//    friend bool /*Targoman::API::Query::*/this->DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
-} //namespace Targoman::ORM
-
+} //namespace DBM
 } //namespace Targoman::API
 
 #endif // TARGOMAN_API_ORM_CLSTABLE_H
