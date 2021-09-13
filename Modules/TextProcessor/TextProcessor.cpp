@@ -32,6 +32,10 @@ using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::ModuleHelpers;
 
+TextProcessor::TextProcessor() :
+    intfPureModule("Targoman")
+{}
+
 QString TextProcessor::apinormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector)
 {
     return NLP::TextProcessor::instance().normalizeText(_text, _useSpellCorrector ? _lang : TAPI::ISO639_2_t());
@@ -99,9 +103,6 @@ bool TextProcessor::init()
 
     return true;
 }
-
-TextProcessor::TextProcessor()
-{}
 
 }
 }

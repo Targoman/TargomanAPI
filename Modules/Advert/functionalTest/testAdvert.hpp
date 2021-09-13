@@ -229,23 +229,23 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void setupAdvertFixture()
-    {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::POST,
-                "Advert/fixtureSetup"
-            );
+//    void setupAdvertFixture()
+//    {
+//        QT_TRY {
+//            QVariant Result = callAdminAPI(
+//                RESTClientHelper::POST,
+//                "Advert/fixtureSetup"
+//            );
 
-            qDebug() << "--------- Advert fixtureSetup: " << Result;
+//            qDebug() << "--------- Advert fixtureSetup: " << Result;
 
-            QVERIFY(Result.isValid());
+//            QVERIFY(Result.isValid());
 
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-private:
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
     void createLocation()
     {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());

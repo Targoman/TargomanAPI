@@ -34,7 +34,7 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfPureModule)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
 

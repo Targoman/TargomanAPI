@@ -25,12 +25,12 @@
 #include <QRegularExpressionMatch>
 #include "clsTable.h"
 #include <QRegularExpression>
-
 #include "QFieldValidator.h"
-
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"
+//#include "libTargomanCommon/Configuration/intfConfigurableModule.hpp"
+#include "Interfaces/API/intfPureModule.h"
 
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
@@ -247,12 +247,21 @@ void clsTable::prepareRelationsFiltersList(const QList<stuRelation> &_relations,
     }
 }
 
-inline const QString clsTable::domain()
+const QString clsTable::domain()
 {
-    return this->Domain;
+    if (this->Domain.length())
+        return this->Domain;
+
+//    Targoman::Common::Configuration::intfModule* PModule = dynamic_cast<Targoman::Common::Configuration::intfModule*>(this);
+    Targoman::API::API::intfPureModule* PModule = dynamic_cast<Targoman::API::API::intfPureModule*>(this);
+    if (PModule != nullptr)
+        return (this->Domain = (PModule->parentModuleName().length() ? PModule->parentModuleName() : PModule->moduleBaseName()));
+
 //    return Q_LIKELY(this->Domain.size())
 //            ? this->Domain
 //            : this->Domain = (this->parentModuleName().size() ? this->parentModuleName() : this->moduleBaseName());
+
+    return "";
 }
 
 const QString clsTable::getStatusColumnName()

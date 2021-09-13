@@ -37,18 +37,16 @@ struct stuNGTPriceInfo{
 namespace Targoman {
 namespace API {
 
-class NGTv1 : public ORM::intfSQLBasedWithActionLogsModule
+class NGTv1 : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfPureModule)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
+    TARGOMAN_DEFINE_API_MODULE(NGTv1)
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
-
-private:
-    TARGOMAN_DEFINE_API_MODULE(NGTv1)
 };
 
 }

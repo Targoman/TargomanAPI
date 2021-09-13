@@ -657,8 +657,9 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
 
 QJsonObject stuAssetItem::toJson(bool _full)
 {
-    ///TODO: Complete me
-  QJsonObject Info;/*
+    ///TODO: very important: Complete this
+  QJsonObject Info;
+/*
   if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
   if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
   if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
@@ -681,8 +682,8 @@ QJsonObject stuAssetItem::toJson(bool _full)
 
 stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
 {
+    ///TODO: very important: Complete this
     /*
-    ///TODO: COMPLETE ME
   this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
   this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
   this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);

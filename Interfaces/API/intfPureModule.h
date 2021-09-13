@@ -35,6 +35,7 @@
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/DBM/clsORMField.h"
+#include "Interfaces/DBM/clsTable.h"
 
 //used by Api call methods
 #define GET_METHOD_ARGS_HEADER_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, quint64 _offset = 0, quint16 _limit = 10, TAPI::Cols_t _cols = {}, TAPI::Filter_t _filters = {}, TAPI::OrderBy_t _orderBy = {}, TAPI::GroupBy_t _groupBy = {}, bool _reportCount = true
@@ -195,12 +196,33 @@ public:
             Targoman::Common::Configuration::intfModule *_parent = nullptr
     );
     virtual ~intfPureModule();
-    virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) { Q_UNUSED(_method) return {}; }
-    virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) { Q_UNUSED(_fieldTypeName) Q_UNUSED(_typeID) }
-    virtual ModuleMethods_t listOfMethods() = 0;
+
+    virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
     virtual stuDBInfo requiredDB() const { return {}; }
-    virtual QString parentModuleName() const = 0;
+
     virtual bool init() { return true; }
+
+    virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL)
+    {
+//        Q_UNUSED(_method)
+
+        Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
+        if (PTHIS != nullptr)
+            return PTHIS->filterItems(_method);
+
+        return {};
+    }
+    virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID)
+    {
+//        Q_UNUSED(_fieldTypeName)
+//        Q_UNUSED(_typeID)
+
+        Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
+        if (PTHIS != nullptr)
+            PTHIS->updateFilterParamType(_fieldTypeName, _typeID);
+    }
+
+    virtual ModuleMethods_t listOfMethods() = 0;
 
 protected:
     ModuleMethods_t Methods;
@@ -214,8 +236,8 @@ Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
     QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
-    QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }  \
     QString parentModuleName() const final { return QString(); } \
+    QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }  \
     ModuleMethods_t listOfMethods() final { \
         if (this->Methods.size()) return this->Methods; \
         for (int i=0; i<this->metaObject()->methodCount(); ++i) \
@@ -236,12 +258,12 @@ public: _name();
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \
-    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); }\
-    QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module,_name))); } \
+    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
+    QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
+    QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module, _name))); } \
     ModuleMethods_t listOfMethods() final { \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
-    QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
 private: \
     _name(); \

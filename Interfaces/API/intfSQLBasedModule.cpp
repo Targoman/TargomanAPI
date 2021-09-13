@@ -42,9 +42,10 @@ intfSQLBasedModule::intfSQLBasedModule(
         _module
     ),
     clsTable(
-        this->parentModuleName().size()
-            ? this->parentModuleName()
-            : this->moduleBaseName(),
+//        this->parentModuleName().length()
+//            ? this->parentModuleName()
+//        _module.length() ? _module
+//            : moduleBaseName(),
         _schema,
         _name,
         _cols,

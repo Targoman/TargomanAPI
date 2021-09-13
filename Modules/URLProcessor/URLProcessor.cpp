@@ -28,6 +28,10 @@ using namespace Targoman::Common;
 namespace Targoman {
 namespace API {
 
+URLProcessor::URLProcessor() :
+    intfPureModule("Targoman")
+{}
+
 QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW)
 {
     char Normalized[MAX_URL_SIZE+1];
@@ -41,9 +45,6 @@ QString URLProcessor::apiGETconvertHexCodes(const QString _url, bool _convertAll
     strncpy(Normalized, _url.toLatin1().constData(), MAX_URL_SIZE);
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);
 }
-
-URLProcessor::URLProcessor()
-{}
 
 }
 }

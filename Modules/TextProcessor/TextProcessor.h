@@ -32,7 +32,7 @@ class TextProcessor : public intfPureModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfPureModule)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_DEFINE_API_MODULE(TextProcessor);
 
 public:

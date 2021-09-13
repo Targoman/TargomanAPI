@@ -27,8 +27,8 @@ namespace TAPI {
 
 }
 
-constexpr char NGTv1Schema[] = "NGTv1";
 constexpr char NGTv1Domain[] = "NGTv1";
+constexpr char NGTv1Schema[] = "NGTv1";
 
 #endif // TARGOMAN_API_MODULES_NGT_ORM_DEFS_HPP
 

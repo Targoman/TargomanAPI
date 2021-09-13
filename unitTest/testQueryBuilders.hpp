@@ -13,15 +13,21 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/DBM/QueryBuilders.h"
 using namespace Targoman::API::DBM;
 
+#include "Interfaces/API/intfSQLBasedModule.h"
+
 using namespace Targoman;
+
+//namespace A::B {
+//class CCC
+//{
+//};
+//}
 
 class TestTable1 : public clsTable
 {
-    Q_OBJECT
-
 public:
-    TestTable1()
-        : clsTable(
+    TestTable1() :
+        clsTable(
             "test",
             "t1",
             {///< ColName    Type                             Validation                 Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
@@ -48,27 +54,23 @@ public:
         )
     {}
 
-//    TARGOMAN_DEFINE_API_SUBMODULE(Test, TestTable)
+//    ModuleMethods_t listOfMethods() final
+//    {
+//        return this->Methods;
+//    }
 
-    ModuleMethods_t listOfMethods() final
-    {
-        return this->Methods;
-    }
-
-    QString parentModuleName() const
-    {
-        return "aaa";
-    }
+//    QString parentModuleName() const
+//    {
+//        return "aaa";
+//    }
 
 };
 
 class TestTable2 : public clsTable
 {
-    Q_OBJECT
-
 public:
-    TestTable2()
-        : clsTable(
+    TestTable2() :
+        clsTable(
             "test",
             "t2",
             {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
@@ -85,17 +87,15 @@ public:
         )
     {}
 
-//    TARGOMAN_DEFINE_API_SUBMODULE(Test, TestTable)
+//    ModuleMethods_t listOfMethods() final
+//    {
+//        return this->Methods;
+//    }
 
-    ModuleMethods_t listOfMethods() final
-    {
-        return this->Methods;
-    }
-
-    QString parentModuleName() const
-    {
-        return "aaa";
-    }
+//    QString parentModuleName() const
+//    {
+//        return "aaa";
+//    }
 
 };
 
@@ -988,7 +988,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                     "colA1",
                     "colB1",
                 }))
-                .addFilters("( CreationDateTime>=NOW() | colE1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
+                .addFilters("( colC1<123 + CreationDateTime>=NOW() | colE1<DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACE$Min) )")
             ;
 
             QString qry = query.buildQueryString({}, true, false, true);
@@ -1004,7 +1004,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                AND alias_t1._InvalidatedAt = 0
                AND (
                    (
-                   alias_t1.CreationDateTime >= NOW()
+                   alias_t1.colC1 < 123
+               AND alias_t1.CreationDateTime >= NOW()
                 OR alias_t1.colE1 < DATE_ADD(NOW(),INTERVAL 15 Min)
                    )
                    )
@@ -1110,7 +1111,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     /***************************************************************************************/
     /* CreateQuery *************************************************************************/
     /***************************************************************************************/
@@ -1721,6 +1722,13 @@ private:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
+
+//    void testDemangle()
+//    {
+//        QString Name = typeid(A::B::CCC).name();
+//        QString Demangled = Targoman::Common::demangle(Name.toStdString().c_str());
+//        qDebug() << Name << Demangled;
+//    }
 
 };
 

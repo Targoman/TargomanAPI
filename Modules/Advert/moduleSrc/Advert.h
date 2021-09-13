@@ -60,11 +60,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 struct stuAdvertBill {
 };
 
-class Advert : public Targoman::API::AAA::intfAccountingBasedModule
+class Advert : public intfAccountingBasedModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfPureModule)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
     TARGOMAN_DEFINE_API_MODULE(Advert);
 

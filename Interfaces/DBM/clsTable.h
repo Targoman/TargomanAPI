@@ -74,7 +74,7 @@ class DeleteQuery;
 
 extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true, bool _lookupFromRegistryFirst = true);
 
-class clsTable // : public intfPureModule
+class clsTable //: public intfPureModule
 {
 protected:
     struct stuSelectItems {
@@ -99,6 +99,8 @@ public:
              const QList<stuRelation>& _relations = {},
              const QList<stuDBIndex>& _indexes = {},
              const QVariantMap& _dbProperties = {});
+
+    virtual ~clsTable() = default; //for make class polymorphic
 
     QList<clsORMField> filterItems(qhttp::THttpMethod _method);
     void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID);
@@ -181,7 +183,7 @@ public:
     const QString getStatusColumnName();
 
 protected:
-    inline const QString domain();
+    /*inline */const QString domain();
 
 private:
 //    stuSelectItems makeListingQuery(const QString& _requiredCols = {},

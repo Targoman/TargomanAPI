@@ -90,11 +90,11 @@ TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 }
 #pragma GCC diagnostic pop
 
+constexpr char AccountDomain[] = "Account";
 constexpr char AAASchema[] = "AAA";
-constexpr char AAADomain[] = "Account";
 
 constexpr quint64 SYSTEM_USER_ID = 1;
-#define makeAAADAC(_varName) DBManager::clsDAC _varName(AAADomain, AAASchema)
+#define makeAAADAC(_varName) DBManager::clsDAC _varName(AccountDomain, AAASchema)
 }
 }
 }

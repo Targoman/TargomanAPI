@@ -1719,18 +1719,20 @@ public:
                     else if (PatternMatches.captured(2) == "=") Rule += " = ";
                     else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
 
-                    Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
                     QString Value = PatternMatches.captured(3);
-                    if (Value == "NOW()"
-                            || Value.startsWith("DATE_ADD(")
-                            || Value.startsWith("DATE_SUB(")
-                        )
+                    ///TODO: @kambizzandi: very important: check if value is not simple (e.g. function) instead of isDateType
+                    bool isDateType = (Value == "NOW()"
+                                       || Value.startsWith("DATE_ADD(")
+                                       || Value.startsWith("DATE_SUB(")
+                                       );
+                    Rule += (isDateType || relatedORMField.Col.argSpecs().isPrimitiveType()) ? "" : "'";
+                    if (isDateType)
                         Rule += Value.replace("$SPACE$", " ");
                     else {
                         relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
                         Rule += relatedORMField.Col.toDB(Value).toString();
                     }
-                    Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
+                    Rule += (isDateType || relatedORMField.Col.argSpecs().isPrimitiveType()) ? "" : "'";
 
                     CanStartWithLogical = true;
                     LastLogical.clear();
@@ -2495,6 +2497,8 @@ SelectQuery& SelectQuery::limit(quint16 _limit)
 
 SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime)
 {
+    Q_UNUSED(_cacheTime);
+
     ///BUG: enabling cache affectes on WasSP and rows count (damages dac result data)
 //    this->Data->CahceTime = _cacheTime;
 

@@ -40,6 +40,7 @@ class intfSQLBasedModule : public intfPureModule, public clsTable
 public:
 //    using intfPureModule::parentModuleName;
 //    using intfPureModule::moduleBaseName;
+//    virtual QString moduleBaseName() = 0;
 
     intfSQLBasedModule(
             const QString& _module,
