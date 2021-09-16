@@ -29,8 +29,8 @@
 #include <cxxabi.h>
 
 #define TAPI_DISABLE_COPY(Class) \
-    Q_DISABLE_COPY(Class) \
-    Class &operator=(const Class) Q_DECL_EQ_DELETE;
+    Q_DISABLE_COPY(Class)
+//    Class &operator=(const Class) Q_DECL_EQ_DELETE;
 
 void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63);
 

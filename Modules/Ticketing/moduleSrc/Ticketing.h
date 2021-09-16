@@ -30,7 +30,7 @@
 
 namespace Targoman::API::TicketingModule {
 
-class Ticketing : public intfSQLBasedWithActionLogsModule
+class Ticketing : public intfSQLBasedWithActionLogsModule<Ticketing, TicketingSchema>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)

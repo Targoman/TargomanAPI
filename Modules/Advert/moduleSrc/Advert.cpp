@@ -66,7 +66,7 @@ using namespace ORM;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
 Advert::Advert() :
-    intfAccountingBasedModule(
+    intfAccountingBasedModule<Advert, AdvertSchema>(
         AdvertDomain,
         AdvertSchema,
         {

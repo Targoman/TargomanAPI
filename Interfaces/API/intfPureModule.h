@@ -44,6 +44,9 @@
 #define ORMGET(_doc)                     apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET() { return _doc; }
+#define ORMGETPureVirtual(_doc)          apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
+    virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    virtual QString docOfGET() { return _doc; }
 #define ORMGETWithName(_name, _doc)      apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET##_name(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET##_name() { return _doc; }
@@ -164,6 +167,20 @@ namespace Targoman::API::API {
 
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"
 
+//class intfBaseModule
+//{
+//public:
+//    intfBaseModule(intfBaseModule* _parent = nullptr) { Q_UNUSED(_parent) }
+
+//    virtual QString moduleFullName() {
+//        throw exTargomanMustBeImplemented("Seems that you forgot to use TARGOMAN_DEFINE_MODULE_SCOPE macro");
+//    }
+
+//    virtual QString moduleBaseName(){
+//        throw exTargomanMustBeImplemented("Seems that you forgot to use TARGOMAN_DEFINE_MODULE_SCOPE macro");
+//    }
+//};
+
 class intfPureModule : public Targoman::Common::Configuration::intfModule
 {
 public:
@@ -192,10 +209,10 @@ public:
 
 public:
     intfPureModule(
-            const QString& _moduleName,
-            Targoman::Common::Configuration::intfModule *_parent = nullptr
+        const QString& _moduleName,
+        Targoman::Common::Configuration::intfModule *_parent = nullptr
     );
-    virtual ~intfPureModule();
+    virtual ~intfPureModule() = default;
 
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
     virtual stuDBInfo requiredDB() const { return {}; }
@@ -235,9 +252,9 @@ Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
-    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
     QString parentModuleName() const final { return QString(); } \
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }  \
+    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
     ModuleMethods_t listOfMethods() final { \
         if (this->Methods.size()) return this->Methods; \
         for (int i=0; i<this->metaObject()->methodCount(); ++i) \
@@ -254,13 +271,14 @@ public: \
     } \
 private: \
     TAPI_DISABLE_COPY(_name); \
-public: _name();
+public: \
+    _name();
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
 public: \
-    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module, _name))); } \
+    QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
     ModuleMethods_t listOfMethods() final { \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \

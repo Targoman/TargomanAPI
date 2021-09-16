@@ -37,7 +37,7 @@ struct stuNGTPriceInfo{
 namespace Targoman {
 namespace API {
 
-class NGTv1 : public intfSQLBasedWithActionLogsModule
+class NGTv1 : public intfSQLBasedWithActionLogsModule<NGTv1, NGTv1Schema>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)

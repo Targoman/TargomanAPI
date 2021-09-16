@@ -82,7 +82,7 @@ TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 class OnlinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account,OnlinePayments)
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, OnlinePayments)
 
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")

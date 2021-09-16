@@ -93,9 +93,10 @@ intfPureModule::intfPureModule(
     ) :
     intfModule(_parent),
     ModuleName(_moduleName)
-{}
+{
+}
 
-intfPureModule::~intfPureModule(){}
+//intfPureModule::~intfPureModule(){}
 
 /***************************************************************/
 intfPureModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :

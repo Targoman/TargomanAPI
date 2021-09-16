@@ -43,7 +43,19 @@ struct stuMultiJWT {
 //class Voucher;
 //}
 
-class Account : public intfSQLBasedWithActionLogsModule
+/*
+    Targoman::API::API::intfSQLBasedWithActionLogsModule
+    <
+        Targoman::API::AccountModule::Account,
+        &Targoman::API::AAA::AAASchema
+    >
+    ::intfSQLBasedWithActionLogsModule(
+        QString const&,
+        QString const&
+    )
+*/
+
+class Account : public intfSQLBasedWithActionLogsModule<Account, AAASchema>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -68,6 +80,22 @@ private slots:
     /*****************************************************************\
     |* User **********************************************************|
     \*****************************************************************/
+    QVariantMap REST(
+        PUT,
+        signup,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _emailOrMobile,
+            TAPI::MD5_t _pass, //= {},
+            QString _role = "BaseUser",
+            QString _name = "",
+            QString _family = "",
+            TAPI::JSON_t _specialPrivs = {},
+            qint8 _maxSessions = -1
+        ),
+        "Base method for signup with email address. this method can be called just by predefined IPs"
+    )
+
     Targoman::API::AccountModule::stuMultiJWT REST(
         ,
         login,
@@ -107,22 +135,6 @@ private slots:
             QString _services = {}
         ),
         "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT"
-    )
-
-    QVariantMap REST(
-        PUT,
-        signup,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            QString _emailOrMobile,
-            TAPI::MD5_t _pass,
-            QString _role = "BaseUser",
-            QString _name = "",
-            QString _family = "",
-            TAPI::JSON_t _specialPrivs = {},
-            qint8 _maxSessions = -1
-        ),
-        "Base method for signup with email address. this method can be called just by predefined IPs"
     )
 
     bool REST(

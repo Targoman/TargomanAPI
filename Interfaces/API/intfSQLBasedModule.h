@@ -35,7 +35,7 @@ namespace Targoman::API::API {
 
 class intfSQLBasedModule : public intfPureModule, public clsTable
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
 //    using intfPureModule::parentModuleName;

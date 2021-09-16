@@ -60,7 +60,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 struct stuAdvertBill {
 };
 
-class Advert : public intfAccountingBasedModule
+class Advert : public intfAccountingBasedModule<Advert, AdvertSchema>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -76,7 +76,7 @@ protected:
     virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
-private slots:
+private /*slots*/:
 //    bool REST(
 //        POST,
 //        processVoucher,

@@ -247,7 +247,7 @@
 #define NULLABLE_RESET(_var) (_var = NULLABLE_NULL_VALUE)
 #define NULLABLE_IS_NULL(_nullable) (_nullable.has_value() == false)
 #define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
-#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.value<_type>()))
+#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
 
 /************************************************************/
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)

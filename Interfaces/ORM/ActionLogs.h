@@ -17,48 +17,55 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
-#define TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
+#ifndef TARGOMAN_API_ACTIONLOGS_H
+#define TARGOMAN_API_ACTIONLOGS_H
 
+#include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
-#include "Interfaces/ORM/ActionLogs.h"
 
-namespace Targoman::API::API {
+using namespace Targoman::API::DBM;
+using namespace Targoman::API::API;
 
-template <class itmplDerivedClass, const char* itmplSchema>
-class intfSQLBasedWithActionLogsModule : public /*intfPureModule*/ intfSQLBasedModule
+namespace Targoman::API::ORM {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+namespace tblActionLogs {
+constexpr char Name[] = "tblActionLogs";
+TARGOMAN_CREATE_CONSTEXPR(atlID);
+TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
+TARGOMAN_CREATE_CONSTEXPR(atlType);
+TARGOMAN_CREATE_CONSTEXPR(atlDescription);
+}
+
+#pragma GCC diagnostic pop
+/*
+class baseActionLogs //: private QObject
 {
 //    Q_OBJECT
 
-public:
-    intfSQLBasedWithActionLogsModule(
-        const QString& _module,
-        const QString& _schema
-    ) :
-        intfSQLBasedModule(
-            _module,
-            _schema,
-            ""
-        )
-    {
-        ///TODO: complete this
-//        this->ActionLogs = &ORM::ActionLogs<itmplDerivedClass, itmplSchema>::instance();
-//        this->addSubModule(this->ActionLogs);
-    }
+protected slots:
+//    virtual QVariant ORMGETPureVirtual("Get Action Logs.")
+    virtual void aaaaa() = 0;
+};
+*/
 
-//protected slots:
-//    QVariant ORMGETWithName(actionLogs, "Get Action Logs")
+template <class itmplDerivedClass, const char* itmplSchema>
+class ActionLogs : /*public baseActionLogs, */public intfSQLBasedModule
+{
+//    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(itmplDerivedClassName, ActionLogs)
 
-protected:
-    QScopedPointer<ORM::ActionLogs<itmplDerivedClass, itmplSchema>> ActionLogs;
-
-//    QString Module;
+protected /*slots*/:
+    QVariant ORMGET("Get Action Logs.")
 };
 
-} // namespace Targoman::API::API
+} //namespace Targoman::API::ORM
 
-#endif // TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
+#endif // TARGOMAN_API_ACTIONLOGS_H

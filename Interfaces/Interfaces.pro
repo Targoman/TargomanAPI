@@ -27,21 +27,27 @@ DIST_HEADERS += \
     AAA/intfAccountingBasedModule.h \
     DBM/clsORMField.h \
     DBM/clsTable.h \
+    ORM/ActionLogs.h \
+    ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
-    API/intfSQLBasedWithActionLogsModule.h \
+    API/intfSQLBasedWithActionLogsModule.h
 
 PRIVATE_HEADERS += \
 
 HEADERS += \
-    Common/APIArgHelperMacrosPrivate.h \
     Common/base.h \
     Common/tmplNullable.hpp \
+    Common/APIArgHelperMacrosPrivate.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
     DBM/Defs.hpp \
+    DBM/clsORMField.h \
+    DBM/clsTable.h \
     DBM/QueryBuilders.h \
+    ORM/ActionLogs.h \
+    ORM/Alerts.h
 
 SOURCES += \
     Common/base.cpp \
@@ -52,19 +58,21 @@ SOURCES += \
     Helpers/URLHelper.cpp \
     AAA/Authentication.cpp \
     AAA/Authorization.cpp \
-    AAA/PrivHelpers.cpp \
     AAA/Accounting_Interfaces.cpp \
+    AAA/PrivHelpers.cpp \
     AAA/intfAccountingBasedModule.cpp \
-    DBM/QueryBuilders.cpp \
     DBM/clsORMField.cpp \
     DBM/clsTable.cpp \
+    DBM/QueryBuilders.cpp \
+    ORM/ActionLogs.cpp \
+    ORM/Alerts.cpp \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
-    API/intfSQLBasedWithActionLogsModule.cpp \
+    API/intfSQLBasedWithActionLogsModule.cpp
 
 OTHER_FILES += \
     Test/testBase.hpp \
-    Test/testCommon.hpp \
+    Test/testCommon.hpp
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/

@@ -25,88 +25,33 @@
 #define TARGOMAN_API_AAA_ACCOUNTING_H
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
-
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 
 using namespace TAPI;
 
 namespace Targoman::API::AAA {
 
-class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
+/***************************************************************************************************\
+|** baseintfAccountingBasedModule ******************************************************************|
+\***************************************************************************************************/
+class baseintfAccountingBasedModule //: public QObject
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 protected:
-    intfAccountingBasedModule(
-            const QString& _module,
-            const QString& _schema,
-            AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-            intfAccountProducts* _products,
-            intfAccountSaleables* _saleables,
-            intfAccountUserAssets* _userAssets,
-            intfAccountAssetUsage* _assetUsages,
-            intfAccountCoupons* _discounts = nullptr,
-            intfAccountPrizes* _prizes = nullptr
-            );
+    baseintfAccountingBasedModule(
+        const QString& _module,
+        const QString& _schema,
+        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+        intfAccountProducts* _products,
+        intfAccountSaleables* _saleables,
+        intfAccountUserAssets* _userAssets,
+        intfAccountAssetUsage* _assetUsages,
+        intfAccountCoupons* _discounts = nullptr,
+        intfAccountPrizes* _prizes = nullptr
+    );
 
-    virtual ~intfAccountingBasedModule();
-
-public:
-    stuActiveCredit activeAccountObject(quint64 _usrID);
-
-protected:
-    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
-    virtual void breakCredit(quint64 _slbID) = 0;
-    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
-    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
-
-    virtual void digestPrivs(TAPI::JWT_t _JWT,
-                             INOUT stuAssetItem& _assetItem)
-    {
-        Q_UNUSED(_JWT);
-        Q_UNUSED(_assetItem)
-    };
-    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
-                                     INOUT stuAssetItem& _assetItem,
-                                     const OrderAdditives_t& _orderAdditives)
-    {
-        Q_UNUSED(_JWT);
-        Q_UNUSED(_assetItem)
-        Q_UNUSED(_orderAdditives)
-    };
-    virtual void applyReferrer(TAPI::JWT_t _JWT,
-                               INOUT stuAssetItem& AssetItem,
-                               QString _referrer,
-                               TAPI::JSON_t _extraReferrerParams)
-    {
-        Q_UNUSED(_JWT);
-        Q_UNUSED(AssetItem);
-        Q_UNUSED(_referrer);
-        Q_UNUSED(_extraReferrerParams);
-    };
-
-    void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
-
-    virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-
-    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-
-    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool cancelVoucherItem(
-            quint64 _userID,
-            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
-    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-
-private:
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
-
-protected slots:
+protected /*slots*/:
     Targoman::API::AAA::stuPreVoucher REST(
         POST,
         addToBasket,
@@ -168,7 +113,42 @@ protected slots:
         "Cancel voucher item"
     )
 
-private:
+public:
+    virtual stuActiveCredit activeAccountObject(quint64 _usrID) = 0;
+
+protected:
+    virtual void digestPrivs(TAPI::JWT_t _JWT,
+                             INOUT stuAssetItem& _assetItem)
+    {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(_assetItem)
+    };
+    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
+                                     INOUT stuAssetItem& _assetItem,
+                                     const OrderAdditives_t& _orderAdditives)
+    {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(_assetItem)
+        Q_UNUSED(_orderAdditives)
+    };
+    virtual void applyReferrer(TAPI::JWT_t _JWT,
+                               INOUT stuAssetItem& AssetItem,
+                               QString _referrer,
+                               TAPI::JSON_t _extraReferrerParams)
+    {
+        Q_UNUSED(_JWT);
+        Q_UNUSED(AssetItem);
+        Q_UNUSED(_referrer);
+        Q_UNUSED(_extraReferrerParams);
+    };
+
+    virtual bool cancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr) = 0;
+    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) = 0;
+
+protected:
     QString ServiceName;
 
 protected:
@@ -179,12 +159,68 @@ protected:
     QScopedPointer<intfAccountCoupons> AccountCoupons;
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
-private:
+protected:
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
     QStringList AssetUsageLimitsColsName;
 };
 
-extern intfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
+/***************************************************************************************************\
+|** intfAccountingBasedModule **********************************************************************|
+\***************************************************************************************************/
+template <class itmplDerivedClass, const char* itmplSchema>
+class intfAccountingBasedModule :
+    public baseintfAccountingBasedModule,
+    public API::intfSQLBasedWithActionLogsModule<itmplDerivedClass, itmplSchema>
+{
+//    Q_OBJECT
+
+protected:
+    intfAccountingBasedModule(
+        const QString& _module,
+        const QString& _schema,
+        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+        intfAccountProducts* _products,
+        intfAccountSaleables* _saleables,
+        intfAccountUserAssets* _userAssets,
+        intfAccountAssetUsage* _assetUsages,
+        intfAccountCoupons* _discounts = nullptr,
+        intfAccountPrizes* _prizes = nullptr
+    );
+
+    virtual ~intfAccountingBasedModule() = default;
+
+public:
+    stuActiveCredit activeAccountObject(quint64 _usrID);
+
+protected:
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
+    virtual void breakCredit(quint64 _slbID) = 0;
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
+
+    void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
+
+    virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+
+    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+
+    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool cancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
+    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+
+private:
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+};
+
+extern baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
 
 } //namespace Targoman::API::AAA
 

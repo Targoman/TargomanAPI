@@ -43,6 +43,7 @@
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Interfaces/ORM/Alerts.h"
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
@@ -144,7 +145,7 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
 /*****************************************************************/
 /*****************************************************************/
 Account::Account() :
-    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
+    intfSQLBasedWithActionLogsModule<Account, AAASchema>(AccountDomain, AAASchema)
 {
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());
@@ -205,6 +206,65 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
+QVariantMap Account::apiPUTsignup(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile,
+        TAPI::MD5_t _pass,
+        QString _role,
+        QString _name,
+        QString _family,
+        TAPI::JSON_t _specialPrivs,
+        qint8 _maxSessions
+    )
+{
+    QString Type;
+
+    if (QFV.email().isValid(_emailOrMobile)) {
+        if (QFV.emailNotFake().isValid(_emailOrMobile))
+            Type = 'E';
+        else
+            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+    }
+    else if(QFV.mobile().isValid(_emailOrMobile))
+        Type = 'M';
+    else
+        throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
+
+    QFV.asciiAlNum().maxLenght(50).validate(_role);
+
+    if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
+        throw exHTTPForbidden("Selected role is not allowed to signup");
+
+//    if ((Type == 'E') && _pass.isEmpty())
+//        throw exHTTPBadRequest("Password must be provided in case of signup by email.");
+
+    if (InvalidPasswords.contains(_pass))
+        throw exHTTPBadRequest("Invalid simple password");
+
+    quint32 UserID = this->callSP("AAA.sp_CREATE_signup", {
+            { "iBy", Type },
+            { "iLogin", _emailOrMobile },
+            { "iPass", _pass },
+            { "iRole", _role },
+            { "iIP", _REMOTE_IP },
+            { "iName", _name.isEmpty()? QVariant() : _name },
+            { "iFamily", _family.isEmpty()? QVariant() : _family },
+            { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+            { "iMaxSessions", _maxSessions },
+            { "iCreatorUserID", QVariant() },
+        })
+        .spDirectOutputs()
+        .value("oUserID")
+        .toDouble();
+
+//    Targoman::API::ORM::Alerts::createNewAlert()
+
+    return {
+        { "type", Type == 'E' ? "email" : "mobile" },
+        { "usrID", UserID },
+    };
+}
+
 Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _login,
@@ -293,56 +353,6 @@ Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_
                                  this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
                                  this->createJWT(LoginJWT.login(), NewPrivs, Services)
                              });
-}
-
-QVariantMap Account::apiPUTsignup(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile,
-        TAPI::MD5_t _pass,
-        QString _role,
-        QString _name,
-        QString _family,
-        TAPI::JSON_t _specialPrivs,
-        qint8 _maxSessions
-    )
-{
-    QString Type;
-
-    if (QFV.email().isValid(_emailOrMobile)) {
-        if (QFV.emailNotFake().isValid(_emailOrMobile))
-            Type = 'E';
-        else
-            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }
-    else if(QFV.mobile().isValid(_emailOrMobile))
-        Type = 'M';
-    else
-        throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
-
-    QFV.asciiAlNum().maxLenght(50).validate(_role);
-
-    if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
-        throw exHTTPForbidden("Selected role is not allowed to signup");
-
-    if (InvalidPasswords.contains(_pass))
-        throw exHTTPBadRequest("Invalid simple password");
-
-    return {
-        { "type", Type == 'E' ? "email" : "mobile" },
-        { "usrID", this->callSP("AAA.sp_CREATE_signup", {
-                                    { "iBy", Type },
-                                    { "iLogin", _emailOrMobile },
-                                    { "iPass", _pass },
-                                    { "iRole", _role },
-                                    { "iIP", _REMOTE_IP },
-                                    { "iName", _name.isEmpty()? QVariant() : _name },
-                                    { "iFamily", _family.isEmpty()? QVariant() : _family },
-                                    { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
-                                    { "iMaxSessions", _maxSessions },
-                                    { "iCreatorUserID", QVariant() },
-                                }).spDirectOutputs().value("oUserID").toDouble()
-        }
-    };
 }
 
 bool Account::apilogout(TAPI::JWT_t _JWT)
