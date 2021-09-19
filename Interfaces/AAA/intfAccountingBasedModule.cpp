@@ -37,7 +37,7 @@ using namespace Targoman::API::Common;
 
 namespace Targoman::API::AAA {
 
-static QMap<QString, baseintfAccountingBasedModule*> ServiceRegistry;
+static QMap<QString, intfAccountingBasedModule*> ServiceRegistry;
 
 Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
         makeConfig("Secret"),
@@ -69,16 +69,16 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher)
     }
 }
 
-baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName)
+intfAccountingBasedModule* serviceAccounting(const QString& _serviceName)
 {
-    Q_UNUSED(serviceAccounting);
+//    Q_UNUSED(serviceAccounting);
     return ServiceRegistry.value(_serviceName);
 }
 
 /***************************************************************************************************\
-|** baseintfAccountingBasedModule ******************************************************************|
+|** intfAccountingBasedModule **********************************************************************|
 \***************************************************************************************************/
-baseintfAccountingBasedModule::baseintfAccountingBasedModule(
+intfAccountingBasedModule::intfAccountingBasedModule(
         const QString& _module,
         const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
@@ -89,6 +89,7 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
         intfAccountCoupons* _discounts,
         intfAccountPrizes* _prizes
     ) :
+    API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
     AccountSaleables(_saleables),
@@ -112,9 +113,356 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
         if (Col.Total.size())
             this->AssetUsageLimitsColsName.append(Col.Total);
     }
+
+    ServiceRegistry.insert(this->ServiceName, this);
 }
 
-Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTaddToBasket(
+//intfAccountingBasedModule::~intfAccountingBasedModule() {}
+
+stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID)
+{
+    return this->findBestMatchedCredit(_usrID);
+}
+
+void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
+{
+    QJsonObject Privs = _jwt.privsObject();
+
+    if (Privs.contains(this->ServiceName) == false)
+        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
+
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+
+    if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
+        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
+
+    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
+
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
+    };
+
+    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
+
+    if (BestMatchedCredit.IsFromParent)
+    {
+        for(auto UsageIter = _requestedUsage.begin();
+            UsageIter != _requestedUsage.end();
+            UsageIter++)
+        {
+            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+                continue;
+
+            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
+                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
+
+            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+        }
+
+        return;
+    }
+
+    if (this->isUnlimited(ActiveCredit.Digested.Limits))
+        return;
+
+    for (auto UsageIter = _requestedUsage.begin();
+        UsageIter != _requestedUsage.end();
+        UsageIter++)
+    {
+        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+            continue;
+
+        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+    }
+}
+
+stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
+{
+    stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
+    if (ServiceCreditsInfo.ActiveCredits.isEmpty())
+        return stuActiveCredit();
+
+    QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
+
+    auto effectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+        return _assetItem.prdValidFromHour //.isNull() == fasle
+            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidFromHour * 3600)
+            : QDateTime(Now.date());
+    };
+
+    auto effectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+        if (NULLABLE_IS_NULL(_assetItem.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.prdValidToHour))
+            QDateTime(Now.date().addDays(1));
+
+        return _assetItem.prdValidFromHour < _assetItem.prdValidToHour
+            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidToHour * 3600)
+            : _assetItem.prdValidToDate == Now.date()
+                ? QDateTime(Now.date().addDays(1))
+                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.prdValidToHour * 3600);
+    };
+
+    auto isInvalidPackage = [this, Now, effectiveStartDateTime, effectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
+        if ((_assetItem.prdValidFromDate.isValid() && _assetItem.prdValidFromDate > Now.date())
+               || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
+               || (NULLABLE_HAS_VALUE(_assetItem.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
+               || this->isEmpty(_assetItem.Digested.Limits)
+            )
+            return false;
+
+        if (_requestedUsage.size())
+        {
+            for (auto UsageIter = _requestedUsage.begin();
+                UsageIter != _requestedUsage.end();
+                UsageIter++)
+            {
+                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
+                    continue;
+
+                if (this->isUnlimited(_assetItem.Digested.Limits) == false){
+                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - UsageIter.value() <= 0)
+                        )
+                        return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
+        return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
+                               NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
+                               ServiceCreditsInfo.MyLimitsOnParent,
+                               -1);
+
+    auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
+        if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
+        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
+        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
+        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_IS_NULL(b.prdValidToHour)) return -1;
+        if (NULLABLE_IS_NULL(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) return 1;
+        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) {
+            if(effectiveEndDateTime(a) < effectiveEndDateTime(b)) return -1;
+            if(effectiveEndDateTime(a) > effectiveEndDateTime(b)) return 1;
+        }
+        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() && a.prdValidToDate != b.prdValidToDate)
+            return b.prdValidToDate > a.prdValidToDate ? -1 : 1;
+        return 0;
+    };
+
+    QList<stuAssetItem> CandidateCredit;
+
+    for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
+        AccountIter != ServiceCreditsInfo.ActiveCredits.end();
+        AccountIter++)
+    {
+        const stuAssetItem& Item = AccountIter.value();
+
+        if (isInvalidPackage(Item))
+            continue;
+
+        if (CandidateCredit.isEmpty())
+        {
+            CandidateCredit.append(Item);
+            continue;
+        }
+
+        bool Inserted = false;
+        for (auto CandidateIter = CandidateCredit.begin();
+            CandidateIter != CandidateCredit.end();
+            CandidateIter++)
+        {
+            if (comparePackages(Item, *CandidateIter) <0)
+            {
+                this->breakCredit(CandidateIter->slbID);
+                CandidateCredit.insert(CandidateIter, Item);
+                Inserted = true;
+                break;
+            }
+        }
+        if (Inserted == false)
+            CandidateCredit.append(Item);
+    }
+
+    if (CandidateCredit.isEmpty())
+    {
+        if (_requestedUsage.size())
+            throw exPaymentRequired("You don't have any active account");
+
+        return stuActiveCredit();
+    }
+
+    const stuAssetItem& ActivePackage = CandidateCredit.first();
+    QDateTime NextDigestTime;
+    if (ActivePackage.prdValidToDate.isNull() == false)
+    {
+        if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
+            NextDigestTime = effectiveEndDateTime(ActivePackage);
+        else
+            NextDigestTime = QDateTime(ActivePackage.prdValidToDate.addDays(1));
+    }
+    else if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
+        NextDigestTime = effectiveEndDateTime(ActivePackage);
+
+    return stuActiveCredit(ActivePackage,
+                           NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
+                           ServiceCreditsInfo.MyLimitsOnParent,
+                           NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
+}
+
+bool intfAccountingBasedModule::increaseDiscountUsage(
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
+{
+    if (_voucherItem.DisAmount > 0)
+    {
+        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_increaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+    return true;
+}
+
+bool intfAccountingBasedModule::decreaseDiscountUsage(
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
+{
+    if (_voucherItem.DisAmount > 0)
+    {
+        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+    return true;
+}
+
+bool intfAccountingBasedModule::activateUserAsset(
+        quint64 _userID,
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+    )
+{
+    return /*Targoman::API::Query::*/this->Update(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        TAPI::ORMFields_t({
+           { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active }
+        }),
+        {
+            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        });
+}
+
+bool intfAccountingBasedModule::removeFromUserAssets(
+        quint64 _userID,
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+    )
+{
+    return /*Targoman::API::Query::*/this->DeleteByPks(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        {
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        },
+        false
+    );
+}
+
+bool intfAccountingBasedModule::processVoucherItem(
+        quint64 _userID,
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+    )
+{
+    if (!this->preProcessVoucherItem(_userID, _voucherItem))
+        return false;
+
+    if (this->activateUserAsset(_userID, _voucherItem) == false)
+        return false;
+
+    this->increaseDiscountUsage(_voucherItem);
+
+    this->postProcessVoucherItem(_userID, _voucherItem);
+
+    return true;
+}
+
+bool intfAccountingBasedModule::cancelVoucherItem(
+        quint64 _userID,
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
+    )
+{
+    if (!this->preCancelVoucherItem(_userID, _voucherItem))
+        return false;
+
+    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+                                .addCol(tblAccountUserAssetsBase::uasID)
+                                .addCol(tblAccountUserAssetsBase::uas_slbID)
+                                .addCol(tblAccountUserAssetsBase::uasStatus)
+                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+                                .one();
+
+    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
+        return false;
+
+    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
+                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                     .value<TAPI::enuAuditableStatus::Type>();
+
+    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
+        this->decreaseDiscountUsage(_voucherItem);
+
+    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
+
+    //-- un-reserve saleable & product ------------------------------------
+    this->AccountCoupons->callSP("sp_UPDATE_saleable_un_reserve", {
+        { "iSaleableID", SaleableID },
+        { "iUserID", _userID },
+    });
+
+    //-- un-reserve saleable ------------------------------------
+//    UpdateQuery(*this->AccountSaleables)
+//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
+
+    //-- un-reserve product -------------------------------------
+//    UpdateQuery(*this->AccountProducts)
+//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
+//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
+
+    //-----------------------------------------------------------
+    this->removeFromUserAssets(_userID, _voucherItem);
+
+    this->postCancelVoucherItem(_userID, _voucherItem);
+
+    return true;
+}
+
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
         TAPI::JWT_t _JWT,
         TAPI::SaleableCode_t _saleableCode,
         Targoman::API::AAA::OrderAdditives_t _orderAdditives,
@@ -558,7 +906,7 @@ Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTaddToBas
     return _lastPreVoucher;
 }
 
-Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTremoveBasketItem(
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
         TAPI::JWT_t _JWT,
 //        quint64 _orderID, //it is uasID
         TAPI::MD5_t _itemUUID,
@@ -636,7 +984,7 @@ Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTremoveBa
     throw exHTTPInternalServerError("item not found in pre-voucher items.");
 }
 /*
-Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTupdateBasketItem(
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
         TAPI::JWT_t _JWT,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
@@ -757,7 +1105,7 @@ Targoman::API::AAA::stuPreVoucher baseintfAccountingBasedModule::apiPOSTupdateBa
 }
 */
 
-bool baseintfAccountingBasedModule::apiPOSTprocessVoucherItem(
+bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
         TAPI::JWT_t _JWT,
         Targoman::API::AAA::stuVoucherItem _voucherItem
     )
@@ -768,7 +1116,7 @@ bool baseintfAccountingBasedModule::apiPOSTprocessVoucherItem(
     return this->processVoucherItem(CurrentUserID, _voucherItem);
 }
 
-bool baseintfAccountingBasedModule::apiPOSTcancelVoucherItem(
+bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
         TAPI::JWT_t _JWT,
         Targoman::API::AAA::stuVoucherItem _voucherItem
     )
@@ -777,389 +1125,6 @@ bool baseintfAccountingBasedModule::apiPOSTcancelVoucherItem(
     quint64 CurrentUserID = JWT.usrID();
 
     return this->cancelVoucherItem(CurrentUserID, _voucherItem);
-}
-
-/***************************************************************************************************\
-|** intfAccountingBasedModule **********************************************************************|
-\***************************************************************************************************/
-template <class itmplDerivedClass, const char* itmplSchema>
-intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::intfAccountingBasedModule(
-        const QString& _module,
-        const QString& _schema,
-        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-        intfAccountProducts* _products,
-        intfAccountSaleables* _saleables,
-        intfAccountUserAssets* _userAssets,
-        intfAccountAssetUsage* _assetUsages,
-        intfAccountCoupons* _discounts,
-        intfAccountPrizes* _prizes
-    ) :
-    baseintfAccountingBasedModule(
-        _module,
-        _schema,
-        _AssetUsageLimitsCols,
-        _products,
-        _saleables,
-        _userAssets,
-        _assetUsages,
-        _discounts,
-        _prizes
-    ),
-    API::intfSQLBasedWithActionLogsModule<itmplDerivedClass, itmplSchema>(_module, _schema)
-{
-    ServiceRegistry.insert(this->ServiceName, this);
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-stuActiveCredit intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::activeAccountObject(quint64 _usrID)
-{
-    return this->findBestMatchedCredit(_usrID);
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-void intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage)
-{
-    QJsonObject Privs = _jwt.privsObject();
-
-    if (Privs.contains(this->ServiceName) == false)
-        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
-
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
-
-    if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
-        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
-
-    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
-        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
-
-        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
-    };
-
-    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
-
-    if (BestMatchedCredit.IsFromParent)
-    {
-        for(auto UsageIter = _requestedUsage.begin();
-            UsageIter != _requestedUsage.end();
-            UsageIter++)
-        {
-            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-                continue;
-
-            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
-                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
-
-            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
-        }
-
-        return;
-    }
-
-    if (this->isUnlimited(ActiveCredit.Digested.Limits))
-        return;
-
-    for (auto UsageIter = _requestedUsage.begin();
-        UsageIter != _requestedUsage.end();
-        UsageIter++)
-    {
-        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-            continue;
-
-        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
-    }
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-stuActiveCredit intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage)
-{
-    stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
-    if (ServiceCreditsInfo.ActiveCredits.isEmpty())
-        return stuActiveCredit();
-
-    QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
-
-    auto effectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        return _assetItem.prdValidFromHour //.isNull() == fasle
-            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidFromHour * 3600)
-            : QDateTime(Now.date());
-    };
-
-    auto effectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        if (NULLABLE_IS_NULL(_assetItem.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.prdValidToHour))
-            QDateTime(Now.date().addDays(1));
-
-        return _assetItem.prdValidFromHour < _assetItem.prdValidToHour
-            ? QDateTime(Now.date()).addSecs(*_assetItem.prdValidToHour * 3600)
-            : _assetItem.prdValidToDate == Now.date()
-                ? QDateTime(Now.date().addDays(1))
-                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.prdValidToHour * 3600);
-    };
-
-    auto isInvalidPackage = [this, Now, effectiveStartDateTime, effectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
-        if ((_assetItem.prdValidFromDate.isValid() && _assetItem.prdValidFromDate > Now.date())
-               || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
-               || (NULLABLE_HAS_VALUE(_assetItem.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
-               || (NULLABLE_HAS_VALUE(_assetItem.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
-               || this->isEmpty(_assetItem.Digested.Limits)
-            )
-            return false;
-
-        if (_requestedUsage.size())
-        {
-            for (auto UsageIter = _requestedUsage.begin();
-                UsageIter != _requestedUsage.end();
-                UsageIter++)
-            {
-                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
-                    continue;
-
-                if (this->isUnlimited(_assetItem.Digested.Limits) == false){
-                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
-                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - UsageIter.value() <= 0)
-                        )
-                        return false;
-                }
-            }
-        }
-        return true;
-    };
-
-    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
-        return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
-                               NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
-                               ServiceCreditsInfo.MyLimitsOnParent,
-                               -1);
-
-    auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
-        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
-        if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
-        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
-        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
-        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_IS_NULL(b.prdValidToHour)) return -1;
-        if (NULLABLE_IS_NULL(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) return 1;
-        if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) {
-            if(effectiveEndDateTime(a) < effectiveEndDateTime(b)) return -1;
-            if(effectiveEndDateTime(a) > effectiveEndDateTime(b)) return 1;
-        }
-        if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() && a.prdValidToDate != b.prdValidToDate)
-            return b.prdValidToDate > a.prdValidToDate ? -1 : 1;
-        return 0;
-    };
-
-    QList<stuAssetItem> CandidateCredit;
-
-    for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
-        AccountIter != ServiceCreditsInfo.ActiveCredits.end();
-        AccountIter++)
-    {
-        const stuAssetItem& Item = AccountIter.value();
-
-        if (isInvalidPackage(Item))
-            continue;
-
-        if (CandidateCredit.isEmpty())
-        {
-            CandidateCredit.append(Item);
-            continue;
-        }
-
-        bool Inserted = false;
-        for (auto CandidateIter = CandidateCredit.begin();
-            CandidateIter != CandidateCredit.end();
-            CandidateIter++)
-        {
-            if (comparePackages(Item, *CandidateIter) <0)
-            {
-                this->breakCredit(CandidateIter->slbID);
-                CandidateCredit.insert(CandidateIter, Item);
-                Inserted = true;
-                break;
-            }
-        }
-        if (Inserted == false)
-            CandidateCredit.append(Item);
-    }
-
-    if (CandidateCredit.isEmpty())
-    {
-        if (_requestedUsage.size())
-            throw exPaymentRequired("You don't have any active account");
-
-        return stuActiveCredit();
-    }
-
-    const stuAssetItem& ActivePackage = CandidateCredit.first();
-    QDateTime NextDigestTime;
-    if (ActivePackage.prdValidToDate.isNull() == false)
-    {
-        if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
-            NextDigestTime = effectiveEndDateTime(ActivePackage);
-        else
-            NextDigestTime = QDateTime(ActivePackage.prdValidToDate.addDays(1));
-    }
-    else if (NULLABLE_HAS_VALUE(ActivePackage.prdValidToHour))
-        NextDigestTime = effectiveEndDateTime(ActivePackage);
-
-    return stuActiveCredit(ActivePackage,
-                           NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
-                           ServiceCreditsInfo.MyLimitsOnParent,
-                           NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::increaseDiscountUsage(
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
-{
-    if (_voucherItem.DisAmount > 0)
-    {
-        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_increaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
-    }
-    return true;
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::decreaseDiscountUsage(
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
-{
-    if (_voucherItem.DisAmount > 0)
-    {
-        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
-    }
-    return true;
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::activateUserAsset(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
-    return /*Targoman::API::Query::*/this->Update(
-        *this->AccountUserAssets,
-        _userID,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
-        TAPI::ORMFields_t({
-           { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active }
-        }),
-        {
-            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
-        });
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::removeFromUserAssets(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
-    return /*Targoman::API::Query::*/this->DeleteByPks(
-        *this->AccountUserAssets,
-        _userID,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
-        {
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
-        },
-        false
-    );
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::processVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
-    if (!this->preProcessVoucherItem(_userID, _voucherItem))
-        return false;
-
-    if (this->activateUserAsset(_userID, _voucherItem) == false)
-        return false;
-
-    this->increaseDiscountUsage(_voucherItem);
-
-    this->postProcessVoucherItem(_userID, _voucherItem);
-
-    return true;
-}
-
-template <class itmplDerivedClass, const char* itmplSchema>
-bool intfAccountingBasedModule<itmplDerivedClass, itmplSchema>::cancelVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
-    )
-{
-    if (!this->preCancelVoucherItem(_userID, _voucherItem))
-        return false;
-
-    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
-                                .addCol(tblAccountUserAssetsBase::uasID)
-                                .addCol(tblAccountUserAssetsBase::uas_slbID)
-                                .addCol(tblAccountUserAssetsBase::uasStatus)
-                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-                                .one();
-
-    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
-        return false;
-
-    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
-                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                     .value<TAPI::enuAuditableStatus::Type>();
-
-    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
-        this->decreaseDiscountUsage(_voucherItem);
-
-    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
-
-    //-- un-reserve saleable & product ------------------------------------
-    this->AccountCoupons->callSP("sp_UPDATE_saleable_un_reserve", {
-        { "iSaleableID", SaleableID },
-        { "iUserID", _userID },
-    });
-
-    //-- un-reserve saleable ------------------------------------
-//    UpdateQuery(*this->AccountSaleables)
-//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-//        .execute(_userID);
-
-    //-- un-reserve product -------------------------------------
-//    UpdateQuery(*this->AccountProducts)
-//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
-//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-//        .execute(_userID);
-
-    //-----------------------------------------------------------
-    this->removeFromUserAssets(_userID, _voucherItem);
-
-    this->postCancelVoucherItem(_userID, _voucherItem);
-
-    return true;
 }
 
 } //namespace Targoman::API::AAA

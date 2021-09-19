@@ -45,24 +45,18 @@ TARGOMAN_CREATE_CONSTEXPR(atlDescription);
 }
 
 #pragma GCC diagnostic pop
-/*
-class baseActionLogs //: private QObject
+
+class intfActionLogs : public intfSQLBasedModule
 {
-//    Q_OBJECT
+    Q_OBJECT
+
+public:
+    intfActionLogs(
+            const QString& _schema,
+            const QString& _name
+        );
 
 protected slots:
-//    virtual QVariant ORMGETPureVirtual("Get Action Logs.")
-    virtual void aaaaa() = 0;
-};
-*/
-
-template <class itmplDerivedClass, const char* itmplSchema>
-class ActionLogs : /*public baseActionLogs, */public intfSQLBasedModule
-{
-//    Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(itmplDerivedClassName, ActionLogs)
-
-protected /*slots*/:
     QVariant ORMGET("Get Action Logs.")
 };
 

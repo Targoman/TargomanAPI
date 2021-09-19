@@ -40,6 +40,8 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 Ticketing::Ticketing() :
     intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema)
 {
+    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());
 }

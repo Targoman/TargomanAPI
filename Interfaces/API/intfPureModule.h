@@ -47,7 +47,10 @@
 #define ORMGETPureVirtual(_doc)          apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
     virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     virtual QString docOfGET() { return _doc; }
-#define ORMGETWithName(_name, _doc)      apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
+#define ORMGETWithBody(_doc, _body)          apiGET(GET_METHOD_ARGS_HEADER_APICALL) _body \
+    virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    virtual QString docOfGET() { return _doc; }
+#define ORMGETByName(_name, _doc)      apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET##_name(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET##_name() { return _doc; }
 //used by ApiQuery
@@ -167,20 +170,6 @@ namespace Targoman::API::API {
 
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"
 
-//class intfBaseModule
-//{
-//public:
-//    intfBaseModule(intfBaseModule* _parent = nullptr) { Q_UNUSED(_parent) }
-
-//    virtual QString moduleFullName() {
-//        throw exTargomanMustBeImplemented("Seems that you forgot to use TARGOMAN_DEFINE_MODULE_SCOPE macro");
-//    }
-
-//    virtual QString moduleBaseName(){
-//        throw exTargomanMustBeImplemented("Seems that you forgot to use TARGOMAN_DEFINE_MODULE_SCOPE macro");
-//    }
-//};
-
 class intfPureModule : public Targoman::Common::Configuration::intfModule
 {
 public:
@@ -212,7 +201,7 @@ public:
         const QString& _moduleName,
         Targoman::Common::Configuration::intfModule *_parent = nullptr
     );
-    virtual ~intfPureModule() = default;
+//    virtual ~intfPureModule(); //= default;
 
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
     virtual stuDBInfo requiredDB() const { return {}; }
@@ -274,7 +263,7 @@ private: \
 public: \
     _name();
 
-#define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
+#define TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
 public: \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module, _name))); } \
@@ -284,8 +273,12 @@ public: \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
 private: \
-    _name(); \
     TAPI_DISABLE_COPY(_name)
+
+#define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
+    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
+private: \
+    _name();
 
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }
 #define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \

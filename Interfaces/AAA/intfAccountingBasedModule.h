@@ -31,15 +31,12 @@ using namespace TAPI;
 
 namespace Targoman::API::AAA {
 
-/***************************************************************************************************\
-|** baseintfAccountingBasedModule ******************************************************************|
-\***************************************************************************************************/
-class baseintfAccountingBasedModule //: public QObject
+class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
 {
-//    Q_OBJECT
+    Q_OBJECT
 
 protected:
-    baseintfAccountingBasedModule(
+    intfAccountingBasedModule(
         const QString& _module,
         const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
@@ -51,7 +48,39 @@ protected:
         intfAccountPrizes* _prizes = nullptr
     );
 
-protected /*slots*/:
+//    virtual ~intfAccountingBasedModule();
+
+public:
+    virtual stuActiveCredit activeAccountObject(quint64 _usrID);
+
+protected:
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
+    virtual void breakCredit(quint64 _slbID) = 0;
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
+
+    void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
+
+    virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+
+    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+
+    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool cancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
+    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+
+private:
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+
+protected slots:
     Targoman::API::AAA::stuPreVoucher REST(
         POST,
         addToBasket,
@@ -113,9 +142,6 @@ protected /*slots*/:
         "Cancel voucher item"
     )
 
-public:
-    virtual stuActiveCredit activeAccountObject(quint64 _usrID) = 0;
-
 protected:
     virtual void digestPrivs(TAPI::JWT_t _JWT,
                              INOUT stuAssetItem& _assetItem)
@@ -142,12 +168,6 @@ protected:
         Q_UNUSED(_extraReferrerParams);
     };
 
-    virtual bool cancelVoucherItem(
-            quint64 _userID,
-            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr) = 0;
-    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) = 0;
-
 protected:
     QString ServiceName;
 
@@ -164,63 +184,7 @@ protected:
     QStringList AssetUsageLimitsColsName;
 };
 
-/***************************************************************************************************\
-|** intfAccountingBasedModule **********************************************************************|
-\***************************************************************************************************/
-template <class itmplDerivedClass, const char* itmplSchema>
-class intfAccountingBasedModule :
-    public baseintfAccountingBasedModule,
-    public API::intfSQLBasedWithActionLogsModule<itmplDerivedClass, itmplSchema>
-{
-//    Q_OBJECT
-
-protected:
-    intfAccountingBasedModule(
-        const QString& _module,
-        const QString& _schema,
-        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-        intfAccountProducts* _products,
-        intfAccountSaleables* _saleables,
-        intfAccountUserAssets* _userAssets,
-        intfAccountAssetUsage* _assetUsages,
-        intfAccountCoupons* _discounts = nullptr,
-        intfAccountPrizes* _prizes = nullptr
-    );
-
-    virtual ~intfAccountingBasedModule() = default;
-
-public:
-    stuActiveCredit activeAccountObject(quint64 _usrID);
-
-protected:
-    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
-    virtual void breakCredit(quint64 _slbID) = 0;
-    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
-    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
-
-    void checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage);
-
-    virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-
-    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-
-    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool cancelVoucherItem(
-            quint64 _userID,
-            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
-    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-
-private:
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
-};
-
-extern baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
+extern intfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
 
 } //namespace Targoman::API::AAA
 

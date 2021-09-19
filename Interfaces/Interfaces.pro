@@ -27,7 +27,7 @@ DIST_HEADERS += \
     AAA/intfAccountingBasedModule.h \
     DBM/clsORMField.h \
     DBM/clsTable.h \
-    ORM/ActionLogs.h \
+    ORM/intfActionLogs.h \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
@@ -46,8 +46,8 @@ HEADERS += \
     DBM/clsORMField.h \
     DBM/clsTable.h \
     DBM/QueryBuilders.h \
-    ORM/ActionLogs.h \
-    ORM/Alerts.h
+    ORM/Alerts.h \
+    ORM/intfActionLogs.h
 
 SOURCES += \
     Common/base.cpp \
@@ -64,11 +64,11 @@ SOURCES += \
     DBM/clsORMField.cpp \
     DBM/clsTable.cpp \
     DBM/QueryBuilders.cpp \
-    ORM/ActionLogs.cpp \
     ORM/Alerts.cpp \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
-    API/intfSQLBasedWithActionLogsModule.cpp
+    API/intfSQLBasedWithActionLogsModule.cpp \
+    ORM/intfActionLogs.cpp
 
 OTHER_FILES += \
     Test/testBase.hpp \

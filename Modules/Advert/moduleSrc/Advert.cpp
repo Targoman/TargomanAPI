@@ -66,7 +66,7 @@ using namespace ORM;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema);
 
 Advert::Advert() :
-    intfAccountingBasedModule<Advert, AdvertSchema>(
+    intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
         {
@@ -81,6 +81,8 @@ Advert::Advert() :
         &AccountCoupons::instance()
     )
 {
+    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
+
     this->addSubModule(AccountProducts.data());
     this->addSubModule(AccountSaleables.data());
     this->addSubModule(AccountUserAssets.data());

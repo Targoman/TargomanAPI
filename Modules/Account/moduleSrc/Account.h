@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 #define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
+#include "Interfaces/ORM/intfActionLogs.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -55,13 +56,16 @@ struct stuMultiJWT {
     )
 */
 
-class Account : public intfSQLBasedWithActionLogsModule<Account, AAASchema>
+TARGOMAN_ACTIONLOG_PREPARENT;
+
+class Account : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Account);
     TARGOMAN_DEFINE_API_MODULE(Account);
+    TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
@@ -331,6 +335,8 @@ protected slots:
 #endif
 
 };
+
+TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 
 } //namespace Targoman::API::AccountModule
 

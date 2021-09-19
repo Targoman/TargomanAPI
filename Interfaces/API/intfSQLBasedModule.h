@@ -26,7 +26,6 @@
 
 #include "Interfaces/API/intfPureModule.h"
 //#include "Interfaces/DBM/Defs.hpp"
-
 #include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/DBM/QueryBuilders.h"
 using namespace Targoman::API::DBM;
@@ -35,13 +34,7 @@ namespace Targoman::API::API {
 
 class intfSQLBasedModule : public intfPureModule, public clsTable
 {
-//    Q_OBJECT
-
 public:
-//    using intfPureModule::parentModuleName;
-//    using intfPureModule::moduleBaseName;
-//    virtual QString moduleBaseName() = 0;
-
     intfSQLBasedModule(
             const QString& _module,
             const QString& _schema,
@@ -50,7 +43,7 @@ public:
             const QList<stuRelation>& _relations = {},
             const QList<stuDBIndex>& _indexes = {},
             const QVariantMap& _dbProperties = {}
-            );
+        );
     intfSQLBasedModule(
             const QString& _schema,
             const QString& _name,
@@ -58,7 +51,7 @@ public:
             const QList<stuRelation>& _relations = {},
             const QList<stuDBIndex>& _indexes = {},
             const QVariantMap& _dbProperties = {}
-            );
+        );
 
 private:
     QVariantMap SelectOne(
@@ -67,21 +60,22 @@ private:
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
-    );
+        );
     QVariantList SelectAll(
             clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
-    );
+        );
     TAPI::stuTable SelectAllWithCount(
             clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
-    );
+        );
+
 public:
     QVariant Select(
             clsTable& _table,
@@ -89,25 +83,25 @@ public:
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
-            );
+        );
 
     quint64 Create(
             clsTable& _table,
             CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL
-            );
+        );
 
     bool Update(
             clsTable& _table,
             UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL,
             const QVariantMap& _extraFilters = {}
-            );
+        );
 
     bool DeleteByPks(
             clsTable& _table,
             DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
-            );
+        );
 
 //#ifdef QT_DEBUG
 //protected slots:

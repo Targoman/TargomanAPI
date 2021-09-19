@@ -145,8 +145,10 @@ Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPa
 /*****************************************************************/
 /*****************************************************************/
 Account::Account() :
-    intfSQLBasedWithActionLogsModule<Account, AAASchema>(AccountDomain, AAASchema)
+    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
 {
+    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
+
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());
     this->addSubModule(&APITokenValidIPs::instance());

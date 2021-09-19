@@ -23,6 +23,7 @@
 #ifndef TARGOMAN_API_MODULES_NGT_NGTV1_H
 #define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
+#include "Interfaces/ORM/intfActionLogs.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -34,23 +35,27 @@ struct stuNGTPriceInfo{
     TAPI::MD5_t FileMD5;
 };
 }
-namespace Targoman {
-namespace API {
 
-class NGTv1 : public intfSQLBasedWithActionLogsModule<NGTv1, NGTv1Schema>
+namespace Targoman::API {
+
+TARGOMAN_ACTIONLOG_PREPARENT;
+
+class NGTv1 : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
     TARGOMAN_DEFINE_API_MODULE(NGTv1)
+    TARGOMAN_API_DEFINE_ACTIONLOG(NGTv1, NGTv1Schema);
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
 };
 
-}
-}
+TARGOMAN_ACTIONLOG_POSTPARENT(NGTv1, NGTv1Schema);
+
+} //namespace Targoman::API
 
 Q_DECLARE_METATYPE(TAPI::stuNGTPriceInfo);
 

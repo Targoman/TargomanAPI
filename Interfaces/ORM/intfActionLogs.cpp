@@ -21,16 +21,23 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "ActionLogs.h"
-#include "Interfaces/AAA/AAA.hpp"
+#include "intfActionLogs.h"
+#include "Interfaces/AAA/Authorization.h"
+#include "Interfaces/AAA/AAADefs.hpp"
+#include "Interfaces/AAA/clsJWT.hpp"
+
+using namespace Targoman::API::AAA;
 
 namespace Targoman::API::ORM {
 
-template <class itmplDerivedClass, const char* itmplSchema>
-ActionLogs<itmplDerivedClass, itmplSchema>::ActionLogs() :
+//template <class itmplDerivedClass, const char* itmplSchema>
+intfActionLogs::intfActionLogs(
+        const QString& _schema,
+        const QString& _name
+    ) :
     intfSQLBasedModule(
-        Targoman::Common::demangle(typeid(itmplDerivedClass).name()).split("::").last(), //_module,
-        itmplSchema, //_schema,
+        _schema,
+        _name,
         tblActionLogs::Name,
         {///< ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
             { tblActionLogs::atlID,                 ORM_PRIMARYKEY_64},
@@ -45,8 +52,7 @@ ActionLogs<itmplDerivedClass, itmplSchema>::ActionLogs() :
     )
 {}
 
-template <class itmplDerivedClass, const char* itmplSchema>
-QVariant ActionLogs<itmplDerivedClass, itmplSchema>::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+QVariant intfActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
 //    Authorization::checkPriv(_JWT, { this->ModuleName + ":ActionLogs:CRUD~0100" });
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

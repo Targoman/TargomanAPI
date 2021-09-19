@@ -23,13 +23,10 @@
 
 #include "intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::API {
 
-/*
-template <class itmplDerivedClass, const char* itmplSchema>
-intfSQLBasedWithActionLogsModule<itmplDerivedClass, itmplSchema>::intfSQLBasedWithActionLogsModule(
+intfSQLBasedWithActionLogsModule::intfSQLBasedWithActionLogsModule(
         const QString& _module,
         const QString& _schema
     )
@@ -38,28 +35,7 @@ intfSQLBasedWithActionLogsModule<itmplDerivedClass, itmplSchema>::intfSQLBasedWi
         _module,
         _schema,
         ""
-//        "tblActionLogs",
-//        {///< ColName                   Type                    Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-//            { "atlID",                  ORM_PRIMARYKEY_64},
-//            { "atlBy_usrID",            S(quint64),             QFV.integer().minValue(1),      {},      UPNone},
-//            { "atlInsertionDateTime",   S(TAPI::DateTime_t),    QFV,                            {},      UPNone},
-//            { "atlType",                S(QString),             QFV.asciiAlNum().maxLenght(50), {},      UPNone},
-//            { "atlDescription",         S(QString),             QFV.allwaysInvalid(),           {},      UPNone, false,false},
-//        },
-//        {
-//            { "atlBy_usrID",            R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
-//        }
     )
-{
-    this->ActionLogs = ORM::ActionLogs<itmplDerivedClass, itmplSchema>::instance();
-    this->addSubModule(&this->ActionLogs);
-}
-*/
-
-//QVariant intfSQLBasedWithActionLogsModule::apiGETactionLogs(GET_METHOD_ARGS_IMPL_APICALL)
-//{
-//    Authorization::checkPriv(_JWT, { this->ModuleName + ":ActionLogs:CRUD~0100" });
-//    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-//}
+{}
 
 } // namespace Targoman::API::API

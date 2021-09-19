@@ -25,38 +25,41 @@
 #define TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
 
 #include "Interfaces/API/intfSQLBasedModule.h"
-#include "Interfaces/ORM/ActionLogs.h"
+#include "Interfaces/ORM/intfActionLogs.h"
+
+#define TARGOMAN_ACTIONLOG_PREPARENT class ActionLogs;
+
+#define TARGOMAN_ACTIONLOG_POSTPARENT(_derivedClass, _schema) \
+class ActionLogs : public Targoman::API::ORM::intfActionLogs \
+{ \
+    Q_OBJECT \
+    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_derivedClass, ActionLogs) \
+public: \
+    ActionLogs() : \
+        intfActionLogs( \
+            Targoman::Common::demangle(typeid(_derivedClass).name()).split("::").last(), \
+            _schema \
+        ) \
+    {} \
+};
+
+#define TARGOMAN_API_DEFINE_ACTIONLOG(_derivedClass, _schema) \
+protected: \
+    QScopedPointer<ActionLogs> _ActionLogs;
+
+#define TARGOMAN_API_IMPLEMENT_ACTIONLOG(_derivedClass, _schema) \
+    this->_ActionLogs.reset(&ActionLogs::instance()); \
+    this->addSubModule(this->_ActionLogs.data());
 
 namespace Targoman::API::API {
 
-template <class itmplDerivedClass, const char* itmplSchema>
-class intfSQLBasedWithActionLogsModule : public /*intfPureModule*/ intfSQLBasedModule
+class intfSQLBasedWithActionLogsModule : public intfSQLBasedModule
 {
-//    Q_OBJECT
-
 public:
     intfSQLBasedWithActionLogsModule(
         const QString& _module,
         const QString& _schema
-    ) :
-        intfSQLBasedModule(
-            _module,
-            _schema,
-            ""
-        )
-    {
-        ///TODO: complete this
-//        this->ActionLogs = &ORM::ActionLogs<itmplDerivedClass, itmplSchema>::instance();
-//        this->addSubModule(this->ActionLogs);
-    }
-
-//protected slots:
-//    QVariant ORMGETWithName(actionLogs, "Get Action Logs")
-
-protected:
-    QScopedPointer<ORM::ActionLogs<itmplDerivedClass, itmplSchema>> ActionLogs;
-
-//    QString Module;
+    );
 };
 
 } // namespace Targoman::API::API
