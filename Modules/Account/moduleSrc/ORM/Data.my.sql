@@ -14,7 +14,7 @@ INSERT INTO `tblRoles` (`rolID`, `rolName`, `rolParent_rolID`, `rolPrivileges`, 
 -- Dumping data for table AAA.tblUser: ~18 rows (approximately)
 /*!40000 ALTER TABLE `tblUser` DISABLE KEYS */;
 INSERT INTO `tblUser` (`usrID`, `usrEmail`, `usrName`, `usrFamily`, `usrGender`, `usrMobile`, `usrApprovalState`, `usrPass`, `usr_rolID`, `usrSpecialPrivs`, `usrLanguage`, `usrMaxSessions`, `usrActiveSessions`, `usrLastLogin`, `usrStatus`, `_InvalidatedAt`, `usrCreationDateTime`, `usrCreatedBy_usrID`, `usrUpdatedBy_usrID`) VALUES
-    (1, 'system@local.host', 'System', 'System', 'N', '', 'N', NULL, 1, NULL, 'fa', -1, 0, NULL, 'B', 0, CURRENT_TIMESTAMP, NULL, NULL),
+    (1, 'system@local.host', 'System', 'System', 'N', '', 'N', 'NOT_SET', 1, NULL, 'fa', -1, 0, NULL, 'B', 0, CURRENT_TIMESTAMP, NULL, NULL),
     (100, 'mehran@gmail.com', 'مهران', 'ضیابری', 'M', '09126174250', 'A', '81dc9bdb52d04dc20036dbd8313ed055', 3, NULL, 'fa', -1, 0, NULL, 'A', 0, CURRENT_TIMESTAMP, 1, NULL);
 /*!40000 ALTER TABLE `tblUser` ENABLE KEYS */;
 

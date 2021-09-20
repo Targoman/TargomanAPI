@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     try {
         FailedTests += QTest::qExec(new testBase, argc, argv);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
     } catch(std::exception &e) {
         qDebug()<<e.what();
     }

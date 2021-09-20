@@ -31,7 +31,7 @@ DIST_HEADERS += \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
-    API/intfSQLBasedWithActionLogsModule.h
+    API/intfSQLBasedWithActionLogsModule.h \
 
 PRIVATE_HEADERS += \
 
@@ -46,8 +46,8 @@ HEADERS += \
     DBM/clsORMField.h \
     DBM/clsTable.h \
     DBM/QueryBuilders.h \
-    ORM/Alerts.h \
-    ORM/intfActionLogs.h
+    ORM/intfActionLogs.h \
+    ORM/intfAlerts.h
 
 SOURCES += \
     Common/base.cpp \
@@ -64,11 +64,11 @@ SOURCES += \
     DBM/clsORMField.cpp \
     DBM/clsTable.cpp \
     DBM/QueryBuilders.cpp \
-    ORM/Alerts.cpp \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
     API/intfSQLBasedWithActionLogsModule.cpp \
-    ORM/intfActionLogs.cpp
+    ORM/intfActionLogs.cpp \
+    ORM/intfAlerts.cpp
 
 OTHER_FILES += \
     Test/testBase.hpp \

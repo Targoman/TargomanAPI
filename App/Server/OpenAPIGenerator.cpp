@@ -291,7 +291,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
         };
 
         QStringList PathStringParts = PathString.split("/", QString::SkipEmptyParts);
-        if(APIObject->HasExtraMethodName)
+        if (APIObject->HasExtraMethodName)
             PathStringParts.pop_back();
         QString TagName  =  PathStringParts.join("_");
 
@@ -300,18 +300,18 @@ QJsonObject OpenAPIGenerator::retrieveJson()
 
             PathInfo["tags"] = QJsonArray({TagName});
             PathInfo["produces"] = QJsonArray({"application/json"});
-            if(HTTPMethod != "get" && HTTPMethod != "delete"){
+            if (HTTPMethod != "get" && HTTPMethod != "delete"){
                 quint8 RequiredFiles = 0;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
-                    if(QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILE))
+                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
+                    if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILE))
                         RequiredFiles++;
                     else if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILES))
                         RequiredFiles += 2;
 
                 QJsonObject Properties;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
+                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
                     QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(i));
-                    if (   ParamType == PARAM_HEADERS
+                    if (     ParamType == PARAM_HEADERS
                           || ParamType == PARAM_REMOTE_IP
                           || ParamType == PARAM_COOKIES
                           || ParamType == PARAM_JWT
@@ -319,7 +319,7 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                           )
                         continue;
 
-                    if(ParamType == PARAM_ORMFIELDS){
+                    if (ParamType == PARAM_ORMFIELDS){
                         auto Items = APIObject->Parent->filterItems(HTTPMethod == "put"
                                                                     ? qhttp::EHTTP_PUT
                                                                     : HTTPMethod == "patch"
@@ -366,7 +366,8 @@ QJsonObject OpenAPIGenerator::retrieveJson()
                                               );
                             Properties[Item.name()] = ParamSpecs;
                         }
-                    }else{
+                    }
+                    else {
                         QJsonObject ParamSpecs;
                         fillParamTypeSpec(APIObject->argSpecs(i),
                                           APIObject->Parent->filterItems(),

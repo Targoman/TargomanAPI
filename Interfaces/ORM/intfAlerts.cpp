@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Alerts.h"
+#include "intfAlerts.h"
 #include "Interfaces/Common/tmplAPIArg.h"
 #include "Interfaces/DBM/QueryBuilders.h"
 
@@ -30,17 +30,17 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuAlertStatus);
 
 namespace Targoman::API::ORM {
 
-Alerts::Alerts() :
+intfAlerts::intfAlerts() :
     clsTable(
         "Common",
         "Alert",
         {///< ColName                           Type                                        Validation                  Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
             { tblAlerts::alrID,                 ORM_PRIMARYKEY_64 },
-            { tblAlerts::alrType,               S(Targoman::API::DBM::enuAlertType::Type),  QFV,                        QRequired,  UPOwner },
+            { tblAlerts::alrType,               S(Targoman::API::ORM::enuAlertType::Type),  QFV,                        QRequired,  UPOwner },
             { tblAlerts::alr_usrID,             S(quint64),                                 QFV.integer().minValue(1),  QRequired,  UPOwner },
             { tblAlerts::alrReplacedContactInfo,S(TAPI::String_t),                          QFV.maxLenght(50),          QNull,      UPAdmin },
             { tblAlerts::alr_altCode,           S(TAPI::String_t),                          QFV.maxLenght(50),          QRequired,  UPAdmin },
-            { tblAlerts::alrReplacements,       S(TAPI::Text_t),                            QFV,                        QRequired,  UPAdmin },
+            { tblAlerts::alrReplacements,       S(TAPI::DBText_t),                          QFV,                        QRequired,  UPAdmin },
             { tblAlerts::alrCreateDate,         ORM_CREATED_ON },
             { tblAlerts::alrSentDate,           S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrStatus,             ORM_STATUS_FIELD(Targoman::API::ORM::enuAlertStatus,                    Targoman::API::ORM::enuAlertStatus::New) },
@@ -48,14 +48,14 @@ Alerts::Alerts() :
     )
 {}
 
-/*STATIC*/ bool Alerts::createNewAlert(
-    quint64 _currentUserID,
-    enuAlertType::Type _type,
-    quint64 _usrID,
-    QString _replacedContactInfo,
-    QString _altCode,
-    QString _replacements
-)
+/*STATIC*/ bool intfAlerts::createNewAlert(
+        quint64 _currentUserID,
+        enuAlertType::Type _type,
+        quint64 _usrID,
+        QString _replacedContactInfo,
+        QString _altCode,
+        QString _replacements
+    )
 {
     ///TODO: complete this
 

@@ -210,22 +210,21 @@ public:
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL)
     {
-//        Q_UNUSED(_method)
-
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
-        if (PTHIS != nullptr)
-            return PTHIS->filterItems(_method);
+        if (PTHIS == nullptr)
+            return {};
 
-        return {};
+        PTHIS->prepareFiltersList();
+        return PTHIS->filterItems(_method);
     }
     virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID)
     {
-//        Q_UNUSED(_fieldTypeName)
-//        Q_UNUSED(_typeID)
-
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
-        if (PTHIS != nullptr)
-            PTHIS->updateFilterParamType(_fieldTypeName, _typeID);
+        if (PTHIS == nullptr)
+            return;
+
+        PTHIS->prepareFiltersList();
+        PTHIS->updateFilterParamType(_fieldTypeName, _typeID);
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;

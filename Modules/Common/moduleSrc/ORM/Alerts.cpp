@@ -21,45 +21,31 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ACTIONLOGS_H
-#define TARGOMAN_API_ACTIONLOGS_H
+#include "Alerts.h"
+#include "Interfaces/AAA/Authorization.h"
+//#include "Interfaces/AAA/AAADefs.hpp"
+//#include "Interfaces/AAA/clsJWT.hpp"
+#include "ORM/Defs.hpp"
 
-//#include "Interfaces/DBM/clsTable.h"
-#include "Interfaces/API/intfSQLBasedModule.h"
+using namespace Targoman::API::AAA;
 
-using namespace Targoman::API::DBM;
-using namespace Targoman::API::API;
+namespace Targoman::API::CommonModule::ORM {
 
-namespace Targoman::API::ORM {
+Alerts::Alerts() :
+    intfPureModule(
+        "Common"
+//        CommonSchema,
+//        ""
+    ),
+    intfAlerts()
+{}
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+QVariant Alerts::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+{
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-namespace tblActionLogs {
-constexpr char Name[] = "tblActionLogs";
-TARGOMAN_CREATE_CONSTEXPR(atlID);
-TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
-TARGOMAN_CREATE_CONSTEXPR(atlType);
-TARGOMAN_CREATE_CONSTEXPR(atlDescription);
+//    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return QVariant();
 }
 
-#pragma GCC diagnostic pop
-
-class intfActionLogs : public intfSQLBasedModule
-{
-    Q_OBJECT
-
-public:
-    intfActionLogs(
-            const QString& _schema,
-            const QString& _name
-        );
-
-protected slots:
-    QVariant ORMGET("Get Action Logs.")
-};
-
-} //namespace Targoman::API::ORM
-
-#endif // TARGOMAN_API_ACTIONLOGS_H
+} //namespace Targoman::API::CommonModule::ORM

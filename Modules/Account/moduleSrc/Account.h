@@ -44,18 +44,6 @@ struct stuMultiJWT {
 //class Voucher;
 //}
 
-/*
-    Targoman::API::API::intfSQLBasedWithActionLogsModule
-    <
-        Targoman::API::AccountModule::Account,
-        &Targoman::API::AAA::AAASchema
-    >
-    ::intfSQLBasedWithActionLogsModule(
-        QString const&,
-        QString const&
-    )
-*/
-
 TARGOMAN_ACTIONLOG_PREPARENT;
 
 class Account : public intfSQLBasedWithActionLogsModule

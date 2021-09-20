@@ -43,7 +43,7 @@
 #include "Classes/PaymentLogic.h"
 #include "PaymentGateways/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
-#include "Interfaces/ORM/Alerts.h"
+#include "Interfaces/ORM/intfAlerts.h"
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
@@ -259,7 +259,7 @@ QVariantMap Account::apiPUTsignup(
         .value("oUserID")
         .toDouble();
 
-//    Targoman::API::ORM::Alerts::createNewAlert()
+//    Targoman::API::ORM::intfAlerts::createNewAlert()
 
     return {
         { "type", Type == 'E' ? "email" : "mobile" },

@@ -21,45 +21,31 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ACTIONLOGS_H
-#define TARGOMAN_API_ACTIONLOGS_H
+#ifndef TARGOMAN_API_MODULES_COMMON_ORM_ALERTS_H
+#define TARGOMAN_API_MODULES_COMMON_ORM_ALERTS_H
 
-//#include "Interfaces/DBM/clsTable.h"
-#include "Interfaces/API/intfSQLBasedModule.h"
+//#include "Interfaces/AAA/AAA.hpp"
+#include "Interfaces/ORM/intfAlerts.h"
+#include "Interfaces/API/intfPureModule.h"
 
-using namespace Targoman::API::DBM;
-using namespace Targoman::API::API;
+using namespace Targoman::API::ORM;
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::CommonModule {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+//structures and enumes goes here
 
-namespace tblActionLogs {
-constexpr char Name[] = "tblActionLogs";
-TARGOMAN_CREATE_CONSTEXPR(atlID);
-TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
-TARGOMAN_CREATE_CONSTEXPR(atlType);
-TARGOMAN_CREATE_CONSTEXPR(atlDescription);
-}
+namespace ORM {
 
-#pragma GCC diagnostic pop
-
-class intfActionLogs : public intfSQLBasedModule
+class Alerts : public intfPureModule, public intfAlerts
 {
     Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Common, Alerts)
 
-public:
-    intfActionLogs(
-            const QString& _schema,
-            const QString& _name
-        );
-
-protected slots:
-    QVariant ORMGET("Get Action Logs.")
+private slots:
+    QVariant ORMGET("Get Alerts")
 };
 
-} //namespace Targoman::API::ORM
+} //namespace ORM
+} //namespace Targoman::API::CommonModule
 
-#endif // TARGOMAN_API_ACTIONLOGS_H
+#endif // TARGOMAN_API_MODULES_COMMON_ORM_ALERTS_H

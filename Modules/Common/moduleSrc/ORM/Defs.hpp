@@ -21,45 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_ACTIONLOGS_H
-#define TARGOMAN_API_ACTIONLOGS_H
+#ifndef TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP
+#define TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP
 
-//#include "Interfaces/DBM/clsTable.h"
-#include "Interfaces/API/intfSQLBasedModule.h"
+constexpr char CommonDomain[] = "CommonDomain";
+constexpr char CommonSchema[] = "CommonSchema";
 
-using namespace Targoman::API::DBM;
-using namespace Targoman::API::API;
-
-namespace Targoman::API::ORM {
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
-namespace tblActionLogs {
-constexpr char Name[] = "tblActionLogs";
-TARGOMAN_CREATE_CONSTEXPR(atlID);
-TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
-TARGOMAN_CREATE_CONSTEXPR(atlType);
-TARGOMAN_CREATE_CONSTEXPR(atlDescription);
-}
-
-#pragma GCC diagnostic pop
-
-class intfActionLogs : public intfSQLBasedModule
-{
-    Q_OBJECT
-
-public:
-    intfActionLogs(
-            const QString& _schema,
-            const QString& _name
-        );
-
-protected slots:
-    QVariant ORMGET("Get Action Logs.")
-};
-
-} //namespace Targoman::API::ORM
-
-#endif // TARGOMAN_API_ACTIONLOGS_H
+#endif // TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP

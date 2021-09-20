@@ -59,11 +59,11 @@ TARGOMAN_CREATE_CONSTEXPR(alrStatus);
 
 #pragma GCC diagnostic pop
 
-class Alerts : public clsTable
+class intfAlerts : public clsTable
 {
 public:
-    Alerts();
-    instanceGetter(Alerts)
+    intfAlerts();
+//    instanceGetter(intfAlerts)
 
 public:
     static bool createNewAlert(

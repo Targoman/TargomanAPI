@@ -36,6 +36,9 @@ private slots:
     void unprivActionLogs(){
         QVERIFY(callAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
     }
+    void privActionLogs(){
+        QVERIFY(callAdminAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
+    }
 };
 
 #endif // TEST_ADVERT_ORM_ACTIVELOGS_HPP
