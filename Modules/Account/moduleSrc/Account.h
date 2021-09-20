@@ -78,7 +78,7 @@ private slots:
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             QString _emailOrMobile,
-            TAPI::MD5_t _pass, //= {},
+            TAPI::MD5_t _pass = {},
             QString _role = "BaseUser",
             QString _name = "",
             QString _family = "",
@@ -90,10 +90,10 @@ private slots:
 
     Targoman::API::AccountModule::stuMultiJWT REST(
         ,
-        login,
+        loginByEmail,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
-            QString _login,
+            QString _email,
             TAPI::MD5_t _pass,
             QString _salt,
             TAPI::CommaSeparatedStringList_t _services = {},
@@ -101,7 +101,27 @@ private slots:
             TAPI::JSON_t _sessionInfo = {},
             TAPI::MD5_t _fingerprint = {}
         ),
-        "Login user and return an encoded JWT if services are provided (as coma separated list) then user must have access to specified services"
+        "Login user and return an encoded JWT if services are provided (as comma separated list) then user must have access to specified services"
+    )
+
+    Targoman::API::AccountModule::stuMultiJWT REST(
+        ,
+        loginByMobile,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _mobile,
+            TAPI::MD5_t _pass = {},
+            QString _salt = {},
+            QString _verifyCode = {},
+            TAPI::CommaSeparatedStringList_t _services = {},
+            bool _rememberMe = false,
+            TAPI::JSON_t _sessionInfo = {},
+            TAPI::MD5_t _fingerprint = {}
+        ),
+        "Login user and return an encoded JWT."
+        "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
+        "After the user submits this code, loginByMobile must be called again with verifyCode."
+        "If services are provided (as comma separated list) then user must have access to specified services."
     )
 
     Targoman::API::AccountModule::stuMultiJWT REST(

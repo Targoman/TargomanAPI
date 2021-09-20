@@ -237,10 +237,14 @@ QVariantMap Account::apiPUTsignup(
     if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
         throw exHTTPForbidden("Selected role is not allowed to signup");
 
-//    if ((Type == 'E') && _pass.isEmpty())
-//        throw exHTTPBadRequest("Password must be provided in case of signup by email.");
+    if (_pass.isEmpty())
+    {
+        if (Type == 'E')
+            throw exHTTPBadRequest("Password must be provided in case of signup by email.");
 
-    if (InvalidPasswords.contains(_pass))
+//        _pass = "NOT_SET";
+    }
+    else if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
     quint32 UserID = this->callSP("AAA.sp_CREATE_signup", {
@@ -259,7 +263,13 @@ QVariantMap Account::apiPUTsignup(
         .value("oUserID")
         .toDouble();
 
-//    Targoman::API::ORM::intfAlerts::createNewAlert()
+    if ((UserID > 0) && (Type == 'M'))
+    {
+        ///TODO: complete this
+        //send mobile verification sms
+        //Targoman::API::ORM::intfAlerts::createNewAlert()
+
+    }
 
     return {
         { "type", Type == 'E' ? "email" : "mobile" },
@@ -267,9 +277,9 @@ QVariantMap Account::apiPUTsignup(
     };
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
+Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
         TAPI::RemoteIP_t _REMOTE_IP,
-        QString _login,
+        QString _email,
         TAPI::MD5_t _pass,
         QString _salt,
         TAPI::CommaSeparatedStringList_t _services,
@@ -278,13 +288,13 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
         TAPI::MD5_t _fingerprint
     )
 {
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_email, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     Authorization::validateIPAddress(_REMOTE_IP);
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
-                                           _login,
+                                           _email,
                                            _pass,
                                            _salt,
                                            _services.split(",", QString::SkipEmptyParts),
@@ -293,8 +303,50 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
                                            _fingerprint);
 
     return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(_rememberMe, _login, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                 this->createJWT(_login, LoginInfo, _services)
+                                 this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
+                                 this->createJWT(_email, LoginInfo, _services)
+                             });
+}
+
+Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _mobile,
+        TAPI::MD5_t _pass,
+        QString _salt,
+        QString _verifyCode,
+        TAPI::CommaSeparatedStringList_t _services,
+        bool _rememberMe,
+        TAPI::JSON_t _sessionInfo,
+        TAPI::MD5_t _fingerprint
+    )
+{
+    ///TODO: complete this
+    ///
+    /// if _verifyCode is empty
+    ///     then send new verifyCode
+    ///     else check _verifyCode
+
+
+
+
+
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_mobile, "login");
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    auto LoginInfo = Authentication::login(_REMOTE_IP,
+                                           _mobile,
+                                           _pass,
+                                           _salt,
+                                           _services.split(",", QString::SkipEmptyParts),
+                                           _rememberMe,
+                                           _sessionInfo.object(),
+                                           _fingerprint);
+
+    return Targoman::API::AccountModule::stuMultiJWT({
+                                 this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
+                                 this->createJWT(_mobile, LoginInfo, _services)
                              });
 }
 
