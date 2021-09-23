@@ -133,7 +133,8 @@ private slots:
 
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {}, {
-                            { "uuid", Code }
+                            { "email", UT_UserEmail },
+                            { "uuid", Code },
                         }).toBool());
     }
 
@@ -148,7 +149,8 @@ private slots:
 
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
-                            {"uuid", Code}
+                            { "email", UT_AdminUserEmail },
+                            { "uuid", Code },
                         }).toBool());
     }
 
@@ -156,8 +158,8 @@ private slots:
     {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    { "login", UT_AdminUserEmail },
+                                "Account/loginByEmail",{},{
+                                    { "email", UT_AdminUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 }).toJsonObject()).size());
@@ -199,8 +201,8 @@ private slots:
     {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    { "login", this->CreatedUserEmail },
+                                "Account/loginByEmail",{},{
+                                    { "email", this->CreatedUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 }).toJsonObject()).size());
@@ -216,8 +218,8 @@ private slots:
     {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    { "login", this->CreatedAdminEmail },
+                                "Account/loginByEmail",{},{
+                                    { "email", this->CreatedAdminEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 }).toJsonObject()).size());

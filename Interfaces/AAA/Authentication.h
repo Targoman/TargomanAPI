@@ -50,14 +50,16 @@ struct stuOAuthInfo{
     QString ID;
 };
 
-extern Targoman::API::AAA::stuActiveAccount login(const QString& _ip,
-                         const QString& _login,
-                         const QString& _pass,
-                         const QString& _salt,
-                         const QStringList& _requiredServices,
-                         bool _rememberMe,
-                         const QJsonObject& _info,
-                         const QString& _fingerPrint);
+extern Targoman::API::AAA::stuActiveAccount login(
+        const QString& _ip,
+        const QString& _login,
+        const QString& _pass,
+        const QString& _salt,
+        const QStringList& _requiredServices,
+        bool _rememberMe,
+        const QJsonObject& _info,
+        const QString& _fingerPrint
+    );
 
 extern Targoman::API::AAA::stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices);
 extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);

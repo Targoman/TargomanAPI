@@ -208,7 +208,7 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-QVariantMap Account::apiPUTsignup(
+QVariantMap Account::signup(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _emailOrMobile,
         TAPI::MD5_t _pass,
@@ -219,6 +219,8 @@ QVariantMap Account::apiPUTsignup(
         qint8 _maxSessions
     )
 {
+    Authorization::validateIPAddress(_REMOTE_IP);
+
     QString Type;
 
     if (QFV.email().isValid(_emailOrMobile)) {
@@ -227,7 +229,7 @@ QVariantMap Account::apiPUTsignup(
         else
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
     }
-    else if(QFV.mobile().isValid(_emailOrMobile))
+    else if (QFV.mobile().isValid(_emailOrMobile))
         Type = 'M';
     else
         throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
@@ -263,18 +265,133 @@ QVariantMap Account::apiPUTsignup(
         .value("oUserID")
         .toDouble();
 
-    if ((UserID > 0) && (Type == 'M'))
-    {
-        ///TODO: complete this
-        //send mobile verification sms
-        //Targoman::API::ORM::intfAlerts::createNewAlert()
-
-    }
-
     return {
         { "type", Type == 'E' ? "email" : "mobile" },
         { "usrID", UserID },
     };
+}
+
+QVariantMap Account::apiPUTsignupByEmail(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _email,
+        TAPI::MD5_t _pass,
+        QString _role,
+        QString _name,
+        QString _family,
+        TAPI::JSON_t _specialPrivs,
+        qint8 _maxSessions
+    )
+{
+    if (QFV.email().isValid(_email) == false)
+        throw exHTTPBadRequest("Incorrect email.");
+
+    if (QFV.emailNotFake().isValid(_email) == false)
+        throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+
+    return this->signup(
+        _REMOTE_IP,
+        _email,
+        _pass,
+        _role,
+        _name,
+        _family,
+        _specialPrivs,
+        _maxSessions
+    );
+}
+
+QVariantMap Account::apiPUTsignupByMobile(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile,
+//        quint32 _verifyCode,
+        TAPI::MD5_t _pass,
+        QString _role,
+        QString _name,
+        QString _family,
+        TAPI::JSON_t _specialPrivs,
+        qint8 _maxSessions
+    )
+{
+    if (QFV.mobile().isValid(_mobile) == false)
+        throw exHTTPBadRequest("Incorrect mobile.");
+
+    return this->signup(
+        _REMOTE_IP,
+        _mobile,
+        _pass,
+        _role,
+        _name,
+        _family,
+        _specialPrivs,
+        _maxSessions
+    );
+}
+
+bool Account::apiPOSTapproveEmail(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _email,
+        TAPI::MD5_t _uuid
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    this->callSP("AAA.sp_UPDATE_acceptApproval", {
+                     { "iBy", "E" },
+                     { "iKey", _email.toLower().trimmed() },
+                     { "iCode", _uuid },
+                 });
+
+    return true;
+}
+
+bool Account::apiPOSTapproveMobile(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile,
+        quint32 _code
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    this->callSP("AAA.sp_UPDATE_acceptApproval", {
+                     { "iBy", "M" },
+                     { "iKey", _mobile }, ///TODO: normalize mobile
+                     { "iCode", _code },
+                 });
+
+    return true;
+}
+
+bool Account::apiPUTrequestMobileVerifyCode(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
+                                     { "iMobile", _mobile }, ///TODO: normalize mobile
+                                 })
+                    .spDirectOutputs()
+                    .value("oAprID")
+                    .toDouble();
+
+    return (aprID > 0);
+}
+
+bool Account::apiPUTcheckMobileVerifyCode(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile,
+        quint32 _code
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
+                     { "iMobile", _mobile }, ///TODO: normalize mobile
+                     { "iCode", _code },
+                 });
+
+    return true;
 }
 
 Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
@@ -288,10 +405,10 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
         TAPI::MD5_t _fingerprint
     )
 {
+    Authorization::validateIPAddress(_REMOTE_IP);
+
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_email, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-
-    Authorization::validateIPAddress(_REMOTE_IP);
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _email,
@@ -310,30 +427,37 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
 
 Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
         TAPI::RemoteIP_t _REMOTE_IP,
-        QString _mobile,
+        TAPI::Mobile_t _mobile,
+        quint32 _verifyCode,
         TAPI::MD5_t _pass,
         QString _salt,
-        QString _verifyCode,
         TAPI::CommaSeparatedStringList_t _services,
         bool _rememberMe,
         TAPI::JSON_t _sessionInfo,
         TAPI::MD5_t _fingerprint
     )
 {
-    ///TODO: complete this
-    ///
-    /// if _verifyCode is empty
-    ///     then send new verifyCode
-    ///     else check _verifyCode
-
-
-
-
-
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_mobile, "login");
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-
     Authorization::validateIPAddress(_REMOTE_IP);
+
+    if (_verifyCode == 0)
+    {
+        throw exHTTPBadRequest("Obtain a verifyCode by calling requestMobileVerifyCode and send it here");
+//        return this->apiPUTrequestMobileVerifyCode(
+//            _REMOTE_IP,
+//            _mobile
+//        );
+    }
+
+    QFV.mobile().validate(_mobile, "login");
+
+    if (this->apiPUTcheckMobileVerifyCode(
+                _REMOTE_IP,
+                _mobile,
+                _verifyCode
+                ) == false)
+        throw exHTTPBadRequest("incorrect verifyCode");
+
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _mobile,
@@ -363,7 +487,9 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
     )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
+
     QString Login;
+
     Authentication::stuOAuthInfo OAuthInfo;
     ///TODO: validate _oAuthToken
 
@@ -391,11 +517,15 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
                              });
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(TAPI::RemoteIP_t _REMOTE_IP, TAPI::JWT_t _loginJWT, QString _services)
+Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::JWT_t _loginJWT,
+        QString _services
+    )
 {
-    QJsonObject Obj;
-
     Authorization::validateIPAddress(_REMOTE_IP);
+
+    QJsonObject Obj;
 
     clsJWT LoginJWT(_loginJWT);
     QString Services = _services;
@@ -421,11 +551,14 @@ bool Account::apilogout(TAPI::JWT_t _JWT)
     return true;
 }
 
-QString Account::apicreateForgotPasswordLink(TAPI::RemoteIP_t _REMOTE_IP, QString _login)
+QString Account::apicreateForgotPasswordLink(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _login
+    )
 {
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
-
     Authorization::validateIPAddress(_REMOTE_IP);
+
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
 
     this->callSP("AAA.sp_CREATE_forgotPassRequest", {
                      { "iLogin", _login },
@@ -449,44 +582,17 @@ bool Account::apichangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _old
     return true;
 }
 
-bool Account::apichangePassByUUID(TAPI::RemoteIP_t _REMOTE_IP, TAPI::MD5_t _uuid, TAPI::MD5_t _newPass)
+bool Account::apichangePassByUUID(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::MD5_t _uuid,
+        TAPI::MD5_t _newPass
+    )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
     this->callSP("AAA.sp_UPDATE_changePassByUUID", {
                      { "iUUID", _uuid },
                      { "iNewPass", _newPass },
-                 });
-
-    return true;
-}
-
-bool Account::apiPOSTapproveEmail(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::MD5_t _uuid
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
-
-    this->callSP("AAA.sp_UPDATE_acceptApproval", {
-                     { "iUUID", _uuid },
-                     { "iMobile", {} },
-                 });
-
-    return true;
-}
-
-bool Account::apiPOSTapproveMobile(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile,
-        quint32 _code
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
-
-    this->callSP("AAA.sp_UPDATE_acceptApproval", {
-                     { "iUUID", _code },
-                     { "iMobile", _mobile },
                  });
 
     return true;
@@ -1017,7 +1123,7 @@ QVariant Account::apiPOSTfixtureSetup(
     Random = QRandomGenerator::global()->generate();
     QString UserEmail = QString("fixture.%1.user@dev.test").arg(Random);
 
-    QVariantMap SignupUserResult = this->apiPUTsignup(
+    QVariantMap SignupUserResult = this->apiPUTsignupByEmail(
                                     _REMOTE_IP,
                                     UserEmail,
                                     { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
@@ -1034,23 +1140,30 @@ QVariant Account::apiPOSTfixtureSetup(
 
     //-- approve user email --------------------------------------
     QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
-                                 { UserID }
-                                 )
+                                 "SELECT aprApprovalCode"
+                                 "  FROM tblApprovalRequest"
+                                 " WHERE apr_usrID=?",
+                                 {
+                                     UserID
+                                 })
                    .toJson(true).object().value("aprApprovalCode").toString();
 
-    DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus=? WHERE apr_usrID=?", {
+    DAC.execQuery("",
+                  "UPDATE tblApprovalRequest"
+                  "   SET aprStatus=?"
+                  " WHERE apr_usrID=?",
+                  {
                       QChar(enuAPRStatus::Sent),
                       UserID
                   });
 
-    this->apiPOSTapproveEmail(_REMOTE_IP, Code);
+    this->apiPOSTapproveEmail(_REMOTE_IP, UserEmail, Code);
 
     //-- create admin --------------------------------------
     Random = QRandomGenerator::global()->generate();
     QString AdminUserEmail = QString("fixture.%1.admin@dev.test").arg(Random);
 
-    QVariantMap SignupAdminUserResult = this->apiPUTsignup(
+    QVariantMap SignupAdminUserResult = this->apiPUTsignupByEmail(
                                             _REMOTE_IP,
                                             AdminUserEmail,
                                             { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
@@ -1065,11 +1178,20 @@ QVariant Account::apiPOSTfixtureSetup(
 
     quint64 AdminUserID = SignupAdminUserResult["usrID"].toUInt();
 
-    DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, AdminUserID });
+    DAC.execQuery("",
+                  "UPDATE tblUser"
+                  "   SET tblUser.usr_rolID=?"
+                  " WHERE tblUser.usrID=?",
+                  {
+                      UT_AdminRoleID,
+                      AdminUserID
+                  });
 
     //-- approve admin email --------------------------------------
     Code = DAC.execQuery("",
-                         "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
+                         "SELECT aprApprovalCode"
+                         "  FROM tblApprovalRequest"
+                         " WHERE apr_usrID=?",
                          {
                              AdminUserID
                          })
@@ -1080,7 +1202,7 @@ QVariant Account::apiPOSTfixtureSetup(
                       AdminUserID
                   });
 
-    this->apiPOSTapproveEmail(_REMOTE_IP, Code);
+    this->apiPOSTapproveEmail(_REMOTE_IP, AdminUserEmail, Code);
 
     //-- payment gateway --------------------------------------
     quint32 pgwTotalRows = DAC.execQuery("",
@@ -1176,7 +1298,11 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = "DELETE tblApprovalRequest FROM tblApprovalRequest INNER JOIN tblUser ON tblUser.usrID = tblApprovalRequest.apr_usrID WHERE usrEmail LIKE 'fixture.%'";
+        QString QueryString = "DELETE tblApprovalRequest"
+                              "  FROM tblApprovalRequest"
+                              " INNER JOIN tblUser"
+                              "    ON tblUser.usrID = tblApprovalRequest.apr_usrID"
+                              " WHERE usrEmail LIKE 'fixture.%'";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
         Result.insert("ApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
@@ -1186,7 +1312,9 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = "DELETE FROM tblUser WHERE usrEmail LIKE 'fixture.%'";
+        QString QueryString = "DELETE"
+                              "  FROM tblUser"
+                              " WHERE usrEmail LIKE 'fixture.%'";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
         Result.insert("User", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
@@ -1205,17 +1333,20 @@ bool Account::apiPOSTfixtureApproveEmail(
 {
     clsDAC DAC;
     QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode FROM tblApprovalRequest "
-                                 "INNER JOIN tblUser ON tblUser.usrID = tblApprovalRequest.apr_usrID "
-                                 "WHERE usrEmail=?",
-                                 { _email }
-                                 )
+                                 "SELECT aprApprovalCode"
+                                 "  FROM tblApprovalRequest "
+                                 " INNER JOIN tblUser"
+                                 "    ON tblUser.usrID = tblApprovalRequest.apr_usrID "
+                                 " WHERE usrEmail=?",
+                                 {
+                                     _email
+                                 })
                    .toJson(true).object().value("aprApprovalCode").toString();
 
     if (Code.isEmpty())
         return false;
 
-    return apiPOSTapproveEmail(_REMOTE_IP, Code);
+    return this->apiPOSTapproveEmail(_REMOTE_IP, _email, Code);
 }
 
 ///TODO: not tested
@@ -1226,16 +1357,18 @@ bool Account::apiPOSTfixtureApproveMobile(
 {
     clsDAC DAC;
     QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode FROM tblApprovalRequest "
-                                 "WHERE aprApprovalValue=?",
-                                 { _mobile }
-                                 )
+                                 "SELECT aprApprovalCode"
+                                 "  FROM tblApprovalRequest "
+                                 " WHERE aprApprovalKey=?",
+                                 {
+                                     _mobile
+                                 })
                    .toJson(true).object().value("aprApprovalCode").toString();
 
     if (Code.isEmpty())
         return false;
 
-    return apiPOSTapproveMobile(_REMOTE_IP, _mobile, Code.toUInt());
+    return this->apiPOSTapproveMobile(_REMOTE_IP, _mobile, Code.toUInt());
 }
 
 #endif

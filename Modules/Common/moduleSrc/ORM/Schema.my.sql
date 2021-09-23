@@ -32,7 +32,9 @@ DROP TABLE IF EXISTS `tblAlerts`;
 CREATE TABLE `tblAlerts` (
   `alrID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `alrType` char(1) NOT NULL DEFAULT 'I' COMMENT 'I: Informational, C: Critical, W:Warning',
-  `alr_usrID` bigint unsigned NOT NULL,
+  `alr_usrID` bigint unsigned DEFAULT NULL,
+  `alrEmail` varchar(50) DEFAULT NULL,
+  `alrMobile` varchar(50) DEFAULT NULL,
   `alrReplacedContactInfo` varchar(50) DEFAULT NULL,
   `alr_altCode` varchar(50) NOT NULL,
   `alrReplacements` text NOT NULL,
@@ -46,7 +48,7 @@ CREATE TABLE `tblAlerts` (
   KEY `alr_altCode` (`alr_altCode`),
   KEY `alrCreateDate` (`alrCreateDate`),
   KEY `alrSentDate` (`alrSentDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=1733 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1737 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDBG`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -59,7 +61,7 @@ CREATE TABLE `tblDBG` (
   PRIMARY KEY (`dbgID`),
   KEY `dbgTimestamp` (`dbgTimestamp`),
   KEY `dbgFrom` (`dbgFrom`)
-) ENGINE=MyISAM AUTO_INCREMENT=1926 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1931 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDownloadRequests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

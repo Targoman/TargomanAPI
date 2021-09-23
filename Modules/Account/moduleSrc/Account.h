@@ -68,17 +68,28 @@ private:
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
     TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
 
+    QVariantMap signup(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile,
+        TAPI::MD5_t _pass = {},
+        QString _role = "BaseUser",
+        QString _name = "",
+        QString _family = "",
+        TAPI::JSON_t _specialPrivs = {},
+        qint8 _maxSessions = -1
+    );
+
 private slots:
     /*****************************************************************\
     |* User **********************************************************|
     \*****************************************************************/
     QVariantMap REST(
         PUT,
-        signup,
+        signupByEmail,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
-            QString _emailOrMobile,
-            TAPI::MD5_t _pass = {},
+            QString _email,
+            TAPI::MD5_t _pass,
             QString _role = "BaseUser",
             QString _name = "",
             QString _family = "",
@@ -86,6 +97,67 @@ private slots:
             qint8 _maxSessions = -1
         ),
         "Base method for signup with email address. this method can be called just by predefined IPs"
+    )
+    QVariantMap REST(
+        PUT,
+        signupByMobile,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            TAPI::Mobile_t _mobile,
+//            quint32 _verifyCode /*= {}*/,
+            TAPI::MD5_t _pass = {},
+            QString _role = "BaseUser",
+            QString _name = "",
+            QString _family = "",
+            TAPI::JSON_t _specialPrivs = {},
+            qint8 _maxSessions = -1
+        ),
+        "Base method for signup with mobile. this method can be called just by predefined IPs"
+    )
+//    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
+//    "After the user submits this code, signupByMobile must be called again with verifyCode."
+
+    bool REST(
+        POST,
+        approveEmail,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _email,
+            TAPI::MD5_t _uuid
+        ),
+        "Approves Email by provided UUID"
+    )
+
+    bool REST(
+        POST,
+        approveMobile,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            TAPI::Mobile_t _mobile,
+            quint32 _code
+        ),
+        "Approves Mobile by provided mobile and verify code"
+    )
+
+    bool REST(
+        PUT,
+        requestMobileVerifyCode,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            TAPI::Mobile_t _mobile
+        ),
+        "Send verification code for provided mobile."
+    )
+
+    bool REST(
+        PUT,
+        checkMobileVerifyCode,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            TAPI::Mobile_t _mobile,
+            quint32 _code
+        ),
+        "check verification code for provided mobile."
     )
 
     Targoman::API::AccountModule::stuMultiJWT REST(
@@ -109,20 +181,20 @@ private slots:
         loginByMobile,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
-            QString _mobile,
+            TAPI::Mobile_t _mobile,
+            quint32 _verifyCode = 0/* = {}*/,
             TAPI::MD5_t _pass = {},
             QString _salt = {},
-            QString _verifyCode = {},
             TAPI::CommaSeparatedStringList_t _services = {},
             bool _rememberMe = false,
             TAPI::JSON_t _sessionInfo = {},
             TAPI::MD5_t _fingerprint = {}
         ),
         "Login user and return an encoded JWT."
-        "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
-        "After the user submits this code, loginByMobile must be called again with verifyCode."
         "If services are provided (as comma separated list) then user must have access to specified services."
     )
+//    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
+//    "After the user submits this code, loginByMobile must be called again with verifyCode."
 
     Targoman::API::AccountModule::stuMultiJWT REST(
         ,
@@ -189,27 +261,6 @@ private slots:
             TAPI::MD5_t _newPass
         ),
         "Changes password based on a UUID provided by "
-    )
-
-    bool REST(
-        POST,
-        approveEmail,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::MD5_t _uuid
-        ),
-        "Approves Email by provided UUID"
-    )
-
-    bool REST(
-        POST,
-        approveMobile,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::Mobile_t _mobile,
-            quint32 _code
-        ),
-        "Approves Mobile by provided mobile no and code"
     )
 
     /*****************************************************************\

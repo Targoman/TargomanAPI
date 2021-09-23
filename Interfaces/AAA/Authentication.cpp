@@ -18,48 +18,52 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Authentication.h"
 #include "PrivHelpers.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Authentication{
+namespace Targoman::API::AAA::Authentication {
 
-stuActiveAccount login(const QString&     _ip,
-                  const QString&     _login,
-                  const QString&     _pass,
-                  const QString&     _salt,
-                  const QStringList& _requiredServices,
-                  bool               _rememberMe,
-                  const QJsonObject& _info,
-                  const QString&     _fingerPrint)
+stuActiveAccount login(
+        const QString&     _ip,
+        const QString&     _login,
+        const QString&     _pass,
+        const QString&     _salt,
+        const QStringList& _requiredServices,
+        bool               _rememberMe,
+        const QJsonObject& _info,
+        const QString&     _fingerPrint
+    )
 {
     makeAAADAC(DAC);
-    QJsonObject UserInfo =  DAC.callSP({},
-                                       "AAA.sp_UPDATE_login", {
-                                           {"iLogin", _login},
-                                           {"iIP", _ip},
-                                           {"iPass", _pass},
-                                           {"iSalt", _salt},
-                                           {"iInfo", _info},
-                                           {"iFingerPrint", _fingerPrint.isEmpty() ? QVariant() : _fingerPrint},
-                                           {"iRemember", _rememberMe ? "1" : "0"},
-                                           {"iOAuthInfo", QVariant()}
-                                       }).toJson(true).object();
+
+    QJsonObject UserInfo = DAC.callSP({},
+                                      "AAA.sp_UPDATE_login", {
+                                          { "iLogin", _login },
+                                          { "iIP", _ip },
+                                          { "iPass", _pass },
+                                          { "iSalt", _salt },
+                                          { "iInfo", _info },
+                                          { "iRemember", _rememberMe ? "1" : "0" },
+                                          { "iOAuthInfo", QVariant() },
+                                          { "iFingerPrint", _fingerPrint.isEmpty() ? QVariant() : _fingerPrint },
+                                      })
+                           .toJson(true)
+                           .object();
+
     return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices);
 }
 
 stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices)
 {
     makeAAADAC(DAC);
-    QJsonObject UserInfo =  DAC.callSP({},
-                                       "AAA.sp_UPDATE_sessionActivity", {
-                                           {"iIP", _ip},
-                                           {"iSSID", _ssid},
-                                       }).toJson(true).object();
+    QJsonObject UserInfo = DAC.callSP({},
+                                      "AAA.sp_UPDATE_sessionActivity", {
+                                          {"iIP", _ip},
+                                          {"iSSID", _ssid},
+                                      }).toJson(true).object();
     return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices.split(',', QString::SkipEmptyParts));
 }
 
@@ -135,8 +139,4 @@ stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken)
     throw exAuthentication("Authentication by Github is not implemented yet");
 }
 
-}
-}
-}
-}
-
+} //namespace Targoman::API::AAA::Authentication

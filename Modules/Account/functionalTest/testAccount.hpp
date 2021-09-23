@@ -86,7 +86,8 @@ private slots:
 
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
-                            {"uuid", Code}
+                            { "email", UT_UserEmail },
+                            { "uuid", Code },
                         }).toBool());
     }
 
@@ -100,15 +101,16 @@ private slots:
 
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/approveEmail", {},{
-                            {"uuid", Code}
+                            { "email", UT_AdminUserEmail },
+                            { "uuid", Code },
                         }).toBool());
     }
 
     void Login(){
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    {"login", UT_UserEmail},
+                                "Account/loginByEmail",{},{
+                                    {"email", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -135,8 +137,8 @@ private slots:
     void LoginAgain(){
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    {"login", UT_UserEmail},
+                                "Account/loginByEmail",{},{
+                                    {"email", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -145,8 +147,8 @@ private slots:
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    {"login", UT_AdminUserEmail},
+                                "Account/loginByEmail",{},{
+                                    {"email", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -187,9 +189,9 @@ private slots:
     void ChangePass(){
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePass", {},{
-                            {"oldPass", "d769dd673f86addfe039dc2d2dab4f73"},
-                            {"oldPassSalt", 1234},
-                            {"newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0"}
+                            { "oldPass", "d769dd673f86addfe039dc2d2dab4f73" },
+                            { "oldPassSalt", 1234 },
+                            { "newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0" }
                         }).toBool());
     }
 
@@ -198,11 +200,11 @@ private slots:
 
         try{
             DAC.callSP("", "sp_CREATE_approvalRequest", {
-                           {"iWhat2Approve", "M"},
-                           {"iUserID", gUserID},
-                           {"iValue", "09121234567"},
-                           {"iPass","5d12d36cd5f66fe3e72f7b03cbb75333"},
-                           {"iSalt", 1234}
+                           { "iWhat2Approve", "M" },
+                           { "iUserID", gUserID },
+                           { "iKey", "09121234567" },
+                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                           { "iSalt", 1234 }
                        });
 
             QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
