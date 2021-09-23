@@ -49,10 +49,10 @@ private slots:
 //        cleanupUnitTestData();
     }
 
-    void Signup(){
+    void SignupByEmail(){
         QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
-                                        "Account/signup", {}, {
-                                            {"emailOrMobile", UT_UserEmail},
+                                        "Account/signupByEmail", {}, {
+                                            {"email", UT_UserEmail},
                                             {"name", "unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
@@ -60,8 +60,8 @@ private slots:
                                         }).toMap().value("usrID").toULongLong()) > 0);
 
         QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
-                                        "Account/signup", {}, {
-                                            {"emailOrMobile", UT_AdminUserEmail},
+                                        "Account/signupByEmail", {}, {
+                                            {"email", UT_AdminUserEmail},
                                             {"name", "admin unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
@@ -217,8 +217,8 @@ private slots:
 
             QVERIFY(callAPI(RESTClientHelper::POST,
                             "Account/approveMobile", {},{
-                                {"mobile", "09121234567"},
-                                {"code", Code}
+                                { "mobile", "09121234567" },
+                                { "code", Code }
                             }).toBool());
             QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
             {gUserID}).toJson(true).object().value("usrMobile").toString();
@@ -228,6 +228,9 @@ private slots:
             QFAIL (e.what());
         }
     }
+
+    ///TODO: test signup by mobile + verify code
+    ///TODO: test login by mobile + verify code
 };
 
 #endif // TEST_ACCOUNT_HPP

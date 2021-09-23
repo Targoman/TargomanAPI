@@ -174,8 +174,21 @@ private:
         DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", { UT_ServiceName });
 
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
-        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+//        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
+//        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+
+        /*
+DELETE FROM tblWalletsTransactions;
+DELETE FROM tblWalletBalances;
+DELETE FROM tblUserWallets;
+DELETE FROM tblOnlinePayments;
+DELETE FROM tblOfflinePayments;
+DELETE FROM tblVoucher;
+DELETE FROM tblApprovalRequest;
+DELETE FROM tblActiveSessions;
+DELETE FROM tblUser WHERE usrID > 100;
+DELETE FROM tblRoles WHERE LOWER(rolName) LIKE '%test%'
+        */
     }
 };
 
