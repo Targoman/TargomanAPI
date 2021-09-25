@@ -104,7 +104,7 @@ private slots:
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             TAPI::Mobile_t _mobile,
-//            quint32 _verifyCode /*= {}*/,
+//            quint32 _verifyCode = 0/*= {}*/,
             TAPI::MD5_t _pass = {},
             QString _role = "BaseUser",
             QString _name = "",
@@ -149,16 +149,16 @@ private slots:
         "Send verification code for provided mobile."
     )
 
-    bool REST(
-        PUT,
-        checkMobileVerifyCode,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::Mobile_t _mobile,
-            quint32 _code
-        ),
-        "check verification code for provided mobile."
-    )
+//    bool REST(
+//        PUT,
+//        checkMobileVerifyCode,
+//        (
+//            TAPI::RemoteIP_t _REMOTE_IP,
+//            TAPI::Mobile_t _mobile,
+//            quint32 _code
+//        ),
+//        "check verification code for provided mobile."
+//    )
 
     Targoman::API::AccountModule::stuMultiJWT REST(
         ,

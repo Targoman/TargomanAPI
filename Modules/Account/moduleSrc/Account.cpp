@@ -378,21 +378,21 @@ bool Account::apiPUTrequestMobileVerifyCode(
     return (aprID > 0);
 }
 
-bool Account::apiPUTcheckMobileVerifyCode(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile,
-        quint32 _code
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
+//bool Account::apiPUTcheckMobileVerifyCode(
+//        TAPI::RemoteIP_t _REMOTE_IP,
+//        TAPI::Mobile_t _mobile,
+//        quint32 _code
+//    )
+//{
+//    Authorization::validateIPAddress(_REMOTE_IP);
 
-    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
-                     { "iMobile", _mobile }, ///TODO: normalize mobile
-                     { "iCode", _code },
-                 });
+//    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
+//                     { "iMobile", _mobile }, ///TODO: normalize mobile
+//                     { "iCode", _code },
+//                 });
 
-    return true;
-}
+//    return true;
+//}
 
 Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -450,12 +450,17 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
 
     QFV.mobile().validate(_mobile, "login");
 
-    if (this->apiPUTcheckMobileVerifyCode(
-                _REMOTE_IP,
-                _mobile,
-                _verifyCode
-                ) == false)
-        throw exHTTPBadRequest("incorrect verifyCode");
+//    if (this->apiPUTcheckMobileVerifyCode(
+//                _REMOTE_IP,
+//                _mobile,
+//                _verifyCode
+//                ) == false)
+//        throw exHTTPBadRequest("incorrect verifyCode");
+
+    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
+                     { "iMobile", _mobile }, ///TODO: normalize mobile
+                     { "iCode", _verifyCode },
+                 });
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
