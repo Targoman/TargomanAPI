@@ -449,6 +449,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
     }
 
     QFV.mobile().validate(_mobile, "login");
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
 //    if (this->apiPUTcheckMobileVerifyCode(
 //                _REMOTE_IP,
@@ -462,7 +463,6 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
                      { "iCode", _verifyCode },
                  });
 
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _mobile,
