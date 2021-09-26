@@ -114,8 +114,8 @@ private slots:
     {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/loginByEmail",{},{
-                                    { "email", this->CreatedUserEmail },
+                                "Account/login",{},{
+                                    { "emailOrMobile", this->CreatedUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 }).toJsonObject()).size());
@@ -131,8 +131,8 @@ private slots:
     {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/loginByEmail",{},{
-                                    { "email", this->CreatedAdminEmail },
+                                "Account/login",{},{
+                                    { "emailOrMobile", this->CreatedAdminEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 }).toJsonObject()).size());

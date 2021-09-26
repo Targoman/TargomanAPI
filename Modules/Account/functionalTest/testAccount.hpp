@@ -49,10 +49,10 @@ private slots:
 //        cleanupUnitTestData();
     }
 
-    void SignupByEmail(){
+    void Signup(){
         QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
-                                        "Account/signupByEmail", {}, {
-                                            {"email", UT_UserEmail},
+                                        "Account/signup", {}, {
+                                            {"emailOrMobile", UT_UserEmail},
                                             {"name", "unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
@@ -60,8 +60,8 @@ private slots:
                                         }).toMap().value("usrID").toULongLong()) > 0);
 
         QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
-                                        "Account/signupByEmail", {}, {
-                                            {"email", UT_AdminUserEmail},
+                                        "Account/signup", {}, {
+                                            {"emailOrMobile", UT_AdminUserEmail},
                                             {"name", "admin unit"},
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
@@ -109,8 +109,8 @@ private slots:
     void Login(){
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/loginByEmail",{},{
-                                    {"email", UT_UserEmail},
+                                "Account/login",{},{
+                                    {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -137,8 +137,8 @@ private slots:
     void LoginAgain(){
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/loginByEmail",{},{
-                                    {"email", UT_UserEmail},
+                                "Account/login",{},{
+                                    {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());
@@ -147,8 +147,8 @@ private slots:
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/loginByEmail",{},{
-                                    {"email", UT_AdminUserEmail},
+                                "Account/login",{},{
+                                    {"emailOrMobile", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 }).toJsonObject()).size());

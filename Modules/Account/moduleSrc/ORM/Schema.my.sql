@@ -255,9 +255,9 @@ DROP TABLE IF EXISTS `tblApprovalRequest`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblApprovalRequest` (
   `aprID` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `apr_usrID` bigint unsigned DEFAULT NULL,
+  `apr_usrID` bigint unsigned NOT NULL,
   `aprRequestedFor` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'E' COMMENT 'E: Email, M: Mobile',
-  `aprIsTemporary` bit(1) NOT NULL DEFAULT b'0' COMMENT '0: (signup, edit profile), 1: (login)',
+  `aprIsForLogin` bit(1) NOT NULL DEFAULT b'0',
   `aprApprovalKey` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'Email Address or Mobile Number',
   `aprApprovalCode` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `aprRequestDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1186,61 +1186,68 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_approvalRequest`(
 	IN `iSalt` VARCHAR(100)
 )
 BEGIN
-  DECLARE ApprovalCode VARCHAR(50);
-  DECLARE UserName VARCHAR(100);
-  DECLARE UserFamily VARCHAR(100);
-  
-  SELECT 1 INTO ApprovalCode
-    FROM tblUser
-   WHERE tblUser.usrID = iUserID;
+    DECLARE ApprovalCode VARCHAR(50);
+    DECLARE UserName VARCHAR(100);
+    DECLARE UserFamily VARCHAR(100);
 
-  IF (NOT ISNULL(iPass)) THEN 
-    IF ISNULL(ApprovalCode) THEN
-       		SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = '401:User Not Found';
-    END IF;
-
-    SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err'), 
-           tblUser.usrName,
-           tblUser.usrFamily
-      INTO ApprovalCode, UserName, UserFamily
+    SELECT 1
+      INTO ApprovalCode
       FROM tblUser
-     WHERE tblUser.usrID = iUserID;
+     WHERE tblUser.usrID = iUserID
+    ;
 
-     IF ISNULL(ApprovalCode) THEN 
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '401:Invalid userID';
-     END IF;
+    IF (NOT ISNULL(iPass)) THEN 
+        IF ISNULL(ApprovalCode) THEN
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:User Not Found';
+        END IF;
 
-     IF ApprovalCode = 'Err' THEN 
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '401:Invalid password';
-     END IF;
-  END IF;
+        SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err'), 
+               tblUser.usrName,
+               tblUser.usrFamily
+          INTO ApprovalCode,
+               UserName,
+               UserFamily
+          FROM tblUser
+         WHERE tblUser.usrID = iUserID
+        ;
+
+        IF ISNULL(ApprovalCode) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid userID';
+        END IF;
+
+        IF ApprovalCode = 'Err' THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid password';
+        END IF;
+    END IF;
   
-  IF iWhat2Approve = 'E' THEN
-    SET ApprovalCode = Common.fnCreateRandomMD5();
-  ELSE 
-    SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
-  END IF;
+    IF iWhat2Approve = 'E' THEN
+        SET ApprovalCode = Common.fnCreateRandomMD5();
+    ELSE 
+        SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
+    END IF;
   
-  INSERT INTO tblApprovalRequest
-     SET tblApprovalRequest.apr_usrID = iUserID,
-         tblApprovalRequest.aprRequestedFor = iWhat2Approve,
-         aprIsTemporary = 0,
-         tblApprovalRequest.aprApprovalKey = iKey,
-         tblApprovalRequest.aprApprovalCode = ApprovalCode
-         ;
-  
-  INSERT INTO Common.tblAlerts
-     SET Common.tblAlerts.alr_usrID = iUserID,
-         Common.tblAlerts.alr_altCode = IF(iWhat2Approve = 'E', 'approveEmail', 'approveMobile'),
-         Common.tblAlerts.alrReplacedContactInfo = iKey,
-         Common.tblAlerts.alrReplacements = JSON_OBJECT(
-  			 	'usrName',UserName,
-	    		'usrFamily',UserFamily,
-			    'ApprovalCode',ApprovalCode
-        ); 	  
+    INSERT
+      INTO tblApprovalRequest
+       SET tblApprovalRequest.apr_usrID = iUserID,
+           tblApprovalRequest.aprRequestedFor = iWhat2Approve,
+           aprIsForLogin = 0,
+           tblApprovalRequest.aprApprovalKey = iKey,
+           tblApprovalRequest.aprApprovalCode = ApprovalCode
+    ;
+
+    INSERT
+      INTO Common.tblAlerts
+       SET Common.tblAlerts.alr_usrID = iUserID,
+           Common.tblAlerts.alr_altCode = IF(iWhat2Approve = 'E', 'approveEmail', 'approveMobile'),
+           Common.tblAlerts.alrReplacedContactInfo = iKey,
+           Common.tblAlerts.alrReplacements = JSON_OBJECT(
+              'usrName', UserName,
+              'usrFamily', UserFamily,
+              'ApprovalCode', ApprovalCode
+           );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1376,31 +1383,60 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_requestMobileVerifyCode`(
-	IN `iMobile` VARCHAR(50)
+	IN `iMobile` VARCHAR(50),
+	IN `iSignupIfNotExists` BIT,
+	IN `iSignupRole` VARCHAR(50)
 )
 BEGIN
     DECLARE UserID BIGINT UNSIGNED;
     DECLARE ApprovalCode VARCHAR(50);
-  
+
+    IF ISNULL(iMobile) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Invalid mobile';
+    END IF;
+
     SELECT usrID
       INTO UserID
       FROM tblUser
-     WHERE usrMobile = iMobile;
+     WHERE usrMobile = iMobile
+    ;
+
+    IF ISNULL(UserID) THEN
+        IF iSignupIfNotExists = 1 THEN
+            INSERT
+              INTO tblUser
+               SET tblUser.usrMobile = iMobile,
+                   tblUser.usr_rolID = (
+            SELECT tblRoles.rolID
+              FROM tblRoles
+             WHERE LOWER(tblRoles.rolName) = LOWER(iSignupRole)
+--               AND (tblRoles.rolSignupAllowedIPs IS NULL
+--                OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
+                   )
+            ;
+                   
+            SET UserID = LAST_INSERT_ID();
+        ELSE
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:User Not Found';
+        END IF;
+    END IF;
 
     SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
   
     INSERT
       INTO tblApprovalRequest
-       SET apr_usrID = iUserID,
+       SET apr_usrID = UserID,
            aprRequestedFor = 'M',
-           aprIsTemporary = 1,
+           aprIsForLogin = 1,
            aprApprovalKey = iMobile,
            aprApprovalCode = ApprovalCode
     ;
 
     INSERT
       INTO Common.tblAlerts
-       SET alr_usrID = iUserID,
+       SET alr_usrID = UserID,
            alrMobile = iMobile,
            alr_altCode = 'approveMobile',
            alrReplacedContactInfo = iMobile,
@@ -2212,7 +2248,7 @@ BEGIN
    LEFT JOIN tblUser
           ON tblUser.usrID = tblApprovalRequest.apr_usrID
        WHERE aprApprovalKey = iKey
-         AND aprIsTemporary = 0
+         AND aprIsForLogin = 0
          AND aprApprovalCode = iCode
          AND aprStatus IN ('S', '1', '2', 'E')
              ;
@@ -2223,7 +2259,7 @@ BEGIN
                SET aprStatus = IF(aprStatus = 'S', '1', 
                                    IF(aprStatus = '1', '2', 'E'))
              WHERE aprApprovalKey = iKey
-               AND aprIsTemporary = 0
+               AND aprIsForLogin = 0
                AND aprStatus IN ('S', '1', '2')
             ;
         END IF;
@@ -2349,71 +2385,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_checkMobileVerifyCode` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_checkMobileVerifyCode`(
-	IN `iMobile` VARCHAR(50),
-	IN `iCode` INT UNSIGNED
-)
-BEGIN
-    DECLARE AprID BIGINT UNSIGNED;
---    DECLARE UserID BIGINT UNSIGNED;
-    DECLARE IsExpired BOOL;
-
-    IF ISNULL(iMobile) THEN 
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Invalid mobile';
-    END IF;
-
-    SELECT aprID
---         , apr_usrID
-         , (aprStatus = 'E' OR TIMEDIFF(NOW(), aprSentDate) > "00:02:00")
-      INTO AprID
---         , UserID
-         , IsExpired
-      FROM tblApprovalRequest
-     WHERE aprApprovalKey = iMobile
-       AND aprIsTemporary = 1
-       AND aprApprovalCode = iCode
-       AND aprStatus IN ('S', '1', '2', 'E')
-           ;
-
-    IF ISNULL(AprID) THEN 
-        UPDATE tblApprovalRequest
-           SET aprStatus = IF(aprStatus = 'S', '1', 
-                               IF(aprStatus = '1', '2', 'E'))
-         WHERE aprApprovalKey = iMobile
-           AND aprIsTemporary = 1
-           AND aprStatus IN ('S', '1', '2')
-        ;
-
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Invalid mobile or code';
-    END IF;
-
-    IF IsExpired THEN 
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Code expired';
-    END IF;
-
-    UPDATE tblApprovalRequest
-       SET aprApplyDate = NOW(),
-           aprStatus = 'A'
-     WHERE aprID = AprID;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_login` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2439,6 +2410,9 @@ BEGIN
     DECLARE InnerRolID BIGINT;
     DECLARE SessionGUID CHAR(32);
     DECLARE LastOAuthInfo JSON;
+    DECLARE UserApprovalState CHAR(1);
+    DECLARE UserEmail CHAR(50);
+    DECLARE Message CHAR(128);
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -2448,14 +2422,20 @@ BEGIN
 
     START TRANSACTION;
 
-    SELECT IF(tblUser.usrMaxSessions > 0 AND tblUser.usrMaxSessions - tblUser.usrActiveSessions <= 0, 
-              'O', 
+    SELECT IF(tblUser.usrMaxSessions > 0 AND tblUser.usrMaxSessions - tblUser.usrActiveSessions <= 0,
+              'O',
               IF ((ISNULL(iPass) AND tblUser.usrPass = 'NOT_SET') OR fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass),
                   tblUser.usrStatus,
-                  'I')), 
+                  'I')),
            tblUser.usrID,
-           tblUserExtraInfo.ueiUpdatedBy_usrID 
-      INTO LoginStatus, UserID, LastOAuthInfo
+           tblUserExtraInfo.ueiUpdatedBy_usrID,
+           usrApprovalState,
+           usrEmail
+      INTO LoginStatus,
+           UserID,
+           LastOAuthInfo,
+           UserApprovalState,
+           UserEmail
       FROM tblUser
  LEFT JOIN tblUserExtraInfo
         ON tblUserExtraInfo.uei_usrID = tblUser.usrID
@@ -2469,15 +2449,23 @@ BEGIN
            )
            )
        AND tblUser.usrStatus IN ('A','V');
+
+    IF NOT ISNULL(UserApprovalState) AND UserApprovalState NOT IN ('A', IF(UserEmail = iLogin, 'E', 'M')) THEN
+        SET Message = CONCAT('401:', IF(UserEmail = iLogin, 'Email', 'Mobile'), ' not approved');
+
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = Message;
+    END IF;
     
     IF ISNULL(LoginStatus) THEN
       IF ISNULL(iOAuthInfo) THEN
-    		SIGNAL SQLSTATE '45000'
+        SIGNAL SQLSTATE '45000'
            SET MESSAGE_TEXT = '401:Invalid User or Password';
       ELSE 
 --        CALL sp_CREATE_signup(iBy, iLogin, iPass, iRole, iIP, iName, iFamily, iSpecialPrivs, iMaxSessions, oUserID);
 -- TODO create wallet
-        INSERT INTO tblUser
+        INSERT
+          INTO tblUser
            SET tblUser.usrName   = JSON_EXTRACT(iOAuthInfo, "$.name"),
                tblUser.usrFamily = JSON_EXTRACT(iOAuthInfo, "$.family"),
                tblUser.usrEmail  = JSON_EXTRACT(iOAuthInfo, "$.email"),
@@ -2485,7 +2473,8 @@ BEGIN
                
         SET UserID = LAST_INSERT_ID();
 
-        INSERT INTO tblUserExtraInfo
+        INSERT
+          INTO tblUserExtraInfo
            SET tblUserExtraInfo.uei_usrID = UserID,
                tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
                tblUserExtraInfo.ueiOAuthAccounts = JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"));
@@ -2495,78 +2484,83 @@ BEGIN
     END IF;
 
     CASE LoginStatus
-      WHEN 'O' THEN
-        INSERT INTO tblActionLogs 
-           SET tblActionLogs.atlType = 'OverSession',
-               tblActionLogs.atlBy_usrID = UserID;
-        COMMIT;
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '405:Max sessions used close old sessions';
+        WHEN 'O' THEN
+            INSERT
+              INTO tblActionLogs 
+               SET tblActionLogs.atlType = 'OverSession',
+                   tblActionLogs.atlBy_usrID = UserID;
+            COMMIT;
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '405:Max sessions used close old sessions';
 
-      WHEN 'I' THEN
-        INSERT INTO tblActionLogs 
-           SET tblActionLogs.atlType = 'InvalidPass',
-               tblActionLogs.atlBy_usrID = UserID;
-        COMMIT;
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '401:Invalid user or Password';
+        WHEN 'I' THEN
+            INSERT
+              INTO tblActionLogs 
+               SET tblActionLogs.atlType = 'InvalidPass',
+                   tblActionLogs.atlBy_usrID = UserID;
+            COMMIT;
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid user or Password';
 
-      WHEN 'R' THEN
-        INSERT INTO tblActionLogs 
-           SET tblActionLogs.atlType = 'UserRemoved',
-               tblActionLogs.atlBy_usrID = UserID;
-        COMMIT;
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '405:User Removed. Ask administrator';
+        WHEN 'R' THEN
+            INSERT
+              INTO tblActionLogs 
+               SET tblActionLogs.atlType = 'UserRemoved',
+                   tblActionLogs.atlBy_usrID = UserID;
+            COMMIT;
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '405:User Removed. Ask administrator';
 
-      WHEN 'B' THEN
-        INSERT INTO tblActionLogs 
-           SET tblActionLogs.atlType = 'UserBlocked',
-               tblActionLogs.atlBy_usrID = UserID;
-        COMMIT;
-     		SIGNAL SQLSTATE '45000'
-          SET MESSAGE_TEXT = '405:User Blocked. Ask administrator';
+        WHEN 'B' THEN
+            INSERT
+              INTO tblActionLogs 
+               SET tblActionLogs.atlType = 'UserBlocked',
+                   tblActionLogs.atlBy_usrID = UserID;
+            COMMIT;
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '405:User Blocked. Ask administrator';
 
-      WHEN 'V' THEN
-        IF ISNULL(iOAuthInfo) THEN 
-          INSERT INTO tblActionLogs 
-             SET tblActionLogs.atlType = 'UserNotApprovedYet',
-                 tblActionLogs.atlBy_usrID = UserID;
-          COMMIT;
-       		SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = '405:You must approve either email or mobile';
-        END IF;
+        WHEN 'V' THEN
+            IF ISNULL(iOAuthInfo) THEN 
+                INSERT
+                  INTO tblActionLogs 
+                   SET tblActionLogs.atlType = 'UserNotApprovedYet',
+                       tblActionLogs.atlBy_usrID = UserID;
+                COMMIT;
+                SIGNAL SQLSTATE '45000'
+                   SET MESSAGE_TEXT = '405:You must approve either email or mobile';
+            END IF;
 
-      WHEN 'A' THEN
-      	SET @a = 1;
+        WHEN 'A' THEN
+            SET @a = 1;
     END CASE;
 
     IF NOT ISNULL(iOAuthInfo) AND LoginStatus != 'H' THEN 
-       IF ISNULL(LastOAuthInfo) THEN 
-         INSERT
-           INTO tblUserExtraInfo
-            SET tblUserExtraInfo.uei_usrID = UserID,
-                tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
-                tblUserExtraInfo.ueiOAuthAccounts = JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"))
-             ON DUPLICATE KEY UPDATE 
-                tblUserExtraInfo.uei_usrID = UserID,
-                tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
-                tblUserExtraInfo.ueiOAuthAccounts = JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"));
-       ELSE
-         UPDATE tblUserExtraInfo
-            SET tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
-                tblUserExtraInfo.ueiOAuthAccounts = JSON_MERGE(
-                      LastOAuthInfo,
-                      JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"))
-                      ),
-                tblUserExtraInfo.ueiUpdatedBy_usrID = UserID
-          WHERE tblUserExtraInfo.uei_usrID = UserID;    
-              
-         INSERT
-           INTO tblActionLogs
-            SET tblActionLogs.atlBy_usrID = UserID,
-                tblActionLogs.atlType = 'UserOAuthUpdated';
-       END IF;
+        IF ISNULL(LastOAuthInfo) THEN 
+            INSERT
+              INTO tblUserExtraInfo
+               SET tblUserExtraInfo.uei_usrID = UserID,
+                   tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
+                   tblUserExtraInfo.ueiOAuthAccounts = JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"))
+                ON DUPLICATE KEY UPDATE 
+                   tblUserExtraInfo.uei_usrID = UserID,
+                   tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
+                   tblUserExtraInfo.ueiOAuthAccounts = JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"));
+        ELSE
+            UPDATE tblUserExtraInfo
+               SET tblUserExtraInfo.ueiPhoto = JSON_EXTRACT(iOAuthInfo, "$.photo"),
+                   tblUserExtraInfo.ueiOAuthAccounts = JSON_MERGE(
+                       astOAuthInfo,
+                       JSON_OBJECT(JSON_EXTRACT(iOAuthInfo, "$.type"), JSON_EXTRACT(iOAuthInfo, "$.id"))
+                   ),
+                   tblUserExtraInfo.ueiUpdatedBy_usrID = UserID
+             WHERE tblUserExtraInfo.uei_usrID = UserID;    
+                
+            INSERT
+              INTO tblActionLogs
+               SET tblActionLogs.atlBy_usrID = UserID,
+                   tblActionLogs.atlType = 'UserOAuthUpdated';
+        END IF;
     END IF;
 
     SET SessionGUID = SUBSTRING(CommonFuncs.guid(NULL), 1, 32);
@@ -2574,11 +2568,11 @@ BEGIN
     INSERT
       INTO tblActiveSessions
        SET tblActiveSessions.ssnKey          = SessionGUID,
-		   tblActiveSessions.ssn_usrID       = UserID,
+           tblActiveSessions.ssn_usrID       = UserID,
            tblActiveSessions.ssnIP           = INET_ATON(iIP),
            tblActiveSessions.ssnRemember     = iRemember,
            tblActiveSessions.ssnLastActivity = NOW(),
-		   tblActiveSessions.ssnInfo         = iInfo;
+           tblActiveSessions.ssnInfo         = iInfo;
 
     UPDATE tblUser
        SET tblUser.usrLastLogin = NOW(),
@@ -2607,7 +2601,6 @@ BEGIN
       JOIN tblRoles
         ON tblRoles.rolID = tblUser.usr_rolID
      WHERE tblUser.usrID = UserID; 
-/**/
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3070,6 +3063,125 @@ BEGIN
     UPDATE tblActiveSessions
        SET ssnStatus = 'E'
      WHERE ssnKey = iSessionGUID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_verifyLoginByMobileCode` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_verifyLoginByMobileCode`(
+	IN `iMobile` VARCHAR(50),
+	IN `iCode` INT UNSIGNED,
+	IN `iIP` VARCHAR(50),
+	IN `iInfo` JSON,
+	IN `iRemember` TINYINT
+)
+BEGIN
+    DECLARE AprID BIGINT UNSIGNED;
+    DECLARE UserID BIGINT UNSIGNED;
+    DECLARE IsExpired BOOL;
+    DECLARE SessionGUID CHAR(32);
+
+    IF ISNULL(iMobile) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Invalid mobile';
+    END IF;
+
+    SELECT tblApprovalRequest.aprID
+         , tblApprovalRequest.apr_usrID
+         , (tblApprovalRequest.aprStatus = 'E' OR TIMEDIFF(NOW(), tblApprovalRequest.aprSentDate) > "00:30:00")
+      INTO AprID
+         , UserID
+         , IsExpired
+      FROM tblApprovalRequest
+     WHERE tblApprovalRequest.aprApprovalKey = iMobile
+       AND tblApprovalRequest.aprIsForLogin = 1
+       AND tblApprovalRequest.aprApprovalCode = iCode
+       AND tblApprovalRequest.aprStatus IN ('S', '1', '2', 'E')
+    ;
+
+    IF ISNULL(AprID) THEN
+        UPDATE tblApprovalRequest
+           SET tblApprovalRequest.aprStatus = IF(tblApprovalRequest.aprStatus = 'S', '1', 
+                                                  IF(tblApprovalRequest.aprStatus = '1', '2', 'E'))
+         WHERE tblApprovalRequest.aprApprovalKey = iMobile
+           AND tblApprovalRequest.aprIsForLogin = 1
+           AND tblApprovalRequest.aprStatus IN ('S', '1', '2')
+        ;
+
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Invalid mobile or code';
+    END IF;
+
+    IF IsExpired THEN 
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Code expired';
+    END IF;
+
+    START TRANSACTION;
+
+    UPDATE tblApprovalRequest
+       SET tblApprovalRequest.aprApplyDate = NOW(),
+           tblApprovalRequest.aprStatus = 'A'
+     WHERE tblApprovalRequest.aprID = AprID
+    ;
+
+    SET SessionGUID = SUBSTRING(CommonFuncs.guid(NULL), 1, 32);
+
+    INSERT
+      INTO tblActiveSessions
+       SET tblActiveSessions.ssnKey          = SessionGUID,
+           tblActiveSessions.ssn_usrID       = UserID,
+           tblActiveSessions.ssnIP           = INET_ATON(iIP),
+           tblActiveSessions.ssnRemember     = iRemember,
+           tblActiveSessions.ssnLastActivity = NOW(),
+           tblActiveSessions.ssnInfo         = iInfo;
+
+    UPDATE tblUser
+       SET /*tblUser.usrMobile = NewKey,*/
+           tblUser.usrApprovalState = IF(tblUser.usrApprovalState IN ('N','M'), 'M', 'A'),
+           tblUser.usrStatus = IF(tblUser.usrStatus IN('A','V'), 'A', tblUser.usrStatus),
+           tblUser.usrUpdatedBy_usrID = UserID,
+
+           tblUser.usrLastLogin = NOW(),
+           tblUser.usrActiveSessions = tblUser.usrActiveSessions + 1
+     WHERE tblUser.usrID = UserID
+    ;
+
+    INSERT
+      INTO tblActionLogs
+       SET tblActionLogs.atlBy_usrID = UserID,
+           tblActionLogs.atlType = 'UserLoggedIn'
+    ;
+
+    COMMIT;
+
+    SELECT tblUser.usrID,
+           tblUser.usrName,
+           tblUser.usrFamily,
+           tblUser.usrEmail,
+           tblUser.usr_rolID,
+           tblUser.usrApprovalState,
+           tblRoles.rolName,
+           fnGetAllPrivs(tblUser.usr_rolID, tblUser.usrSpecialPrivs) AS privs,
+           NOT ISNULL(tblUser.usrPass) AS hasPass,
+           tblUser.usrStatus,
+           SessionGUID AS ssnKey
+      FROM tblUser
+      JOIN tblRoles
+        ON tblRoles.rolID = tblUser.usr_rolID
+     WHERE tblUser.usrID = UserID
+    ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

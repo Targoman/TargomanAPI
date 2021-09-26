@@ -39,7 +39,7 @@ ApprovalRequest::ApprovalRequest() :
             { tblApprovalRequest::aprID,            ORM_PRIMARYKEY_64 },
             { tblApprovalRequest::apr_usrID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QInvalid,   UPNone },
             { tblApprovalRequest::aprRequestedFor,  S(Targoman::API::AccountModule::enuApprovalType::Type), QFV,    Targoman::API::AccountModule::enuApprovalType::Email, UPNone },
-            { tblApprovalRequest::aprIsTemporary,   S(bool),                    QFV,                                false,      UPNone },
+            { tblApprovalRequest::aprIsForLogin,   S(bool),                    QFV,                                false,      UPNone },
             { tblApprovalRequest::aprApprovalKey,   S(QString),                 QFV.allwaysInvalid(),               QRequired,  UPNone, false, false },
             { tblApprovalRequest::aprApprovalCode,  S(QString),                 QFV.asciiAlNum().maxLenght(32),     QRequired,  UPNone },
             { tblApprovalRequest::aprRequestDate,   ORM_CREATED_ON },

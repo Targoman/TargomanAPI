@@ -67,32 +67,38 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
     return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices.split(',', QString::SkipEmptyParts));
 }
 
-QString retrievePhoto(const QString _url){
-    try{
+QString retrievePhoto(const QString _url)
+{
+    try
+    {
         QByteArray Photo = PrivHelpers::getURL(_url);
-        if(_url.endsWith(".jpg") || _url.endsWith(".jpeg"))
+
+        if (_url.endsWith(".jpg") || _url.endsWith(".jpeg"))
             return  "data:image/jpeg;base64," + Photo.toBase64();
-        if(_url.endsWith(".png"))
+
+        if (_url.endsWith(".png"))
             return  "data:image/png;base64," + Photo.toBase64();
-    }catch(...)
+    }
+    catch(...)
     {}
+
     return QByteArray();
 }
 
 stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
 {
     stuOAuthInfo Info;
-    QByteArray Json = PrivHelpers::getURL("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="+_authToken);
+    QByteArray Json = PrivHelpers::getURL("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + _authToken);
     QJsonParseError JsonError;
     QJsonDocument Doc = QJsonDocument::fromJson(Json,& JsonError);
-    if(JsonError.error != QJsonParseError::NoError || Doc.isObject() == false)
+    if (JsonError.error != QJsonParseError::NoError || Doc.isObject() == false)
         throw exAuthentication("Invalid Google Token");
 
     QJsonObject Obj = Doc.object();
 
-    if(Obj.contains("email") == false
-       || Obj.contains("email_verified") == false
-       || Obj.value("email_verified").toBool() == false )
+    if (Obj.contains("email") == false
+            || Obj.contains("email_verified") == false
+            || Obj.value("email_verified").toBool() == false )
         throw exAuthentication("Invalid Google Token: " + Doc.toJson());
 
     Info.Type   = TAPI::enuOAuthType::Google;
@@ -101,21 +107,23 @@ stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
     Info.Photo  = (Obj.contains("") ? retrievePhoto(Obj.value("picture").toString()) : QString());
     Info.Name   = Obj.value("given_name").toString();
     Info.Family = Obj.value("family_name").toString();
+
     return Info;
 }
 
 stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
 {
     stuOAuthInfo Info;
-    QByteArray Json = PrivHelpers::getURL("https://api.linkedin.com/v1/people/~?format=json&oauth_token="+_authToken);
+    QByteArray Json = PrivHelpers::getURL("https://api.linkedin.com/v1/people/~?format=json&oauth_token=" + _authToken);
     QJsonParseError JsonError;
     QJsonDocument Doc = QJsonDocument::fromJson(Json,& JsonError);
-    if(JsonError.error != QJsonParseError::NoError || Doc.isObject() == false)
+
+    if (JsonError.error != QJsonParseError::NoError || Doc.isObject() == false)
         throw exAuthentication("Invalid Linkedin Token");
 
     QJsonObject Obj = Doc.object();
 
-    if(Obj.contains("id") == false)
+    if (Obj.contains("id") == false)
         throw exAuthentication("Invalid Linkedin Token: " + Doc.toJson());
 
     Info.Type   = TAPI::enuOAuthType::Linkedin;

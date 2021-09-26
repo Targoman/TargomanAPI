@@ -18,8 +18,8 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_AAA_AUTHENTICATION_H
 #define TARGOMAN_API_AAA_AUTHENTICATION_H
@@ -28,20 +28,17 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 
 namespace TAPI {
-TARGOMAN_DEFINE_ENUM (enuOAuthType,
-                       Google   = 'G',
-                       Yahoo    = 'Y',
-                       Github   = 'H',
-                       Linkedin = 'L'
-                       );
+TARGOMAN_DEFINE_ENUM(enuOAuthType,
+                     Google   = 'G',
+                     Yahoo    = 'Y',
+                     Github   = 'H',
+                     Linkedin = 'L'
+                     );
 }
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Authentication{
+namespace Targoman::API::AAA::Authentication {
 
-struct stuOAuthInfo{
+struct stuOAuthInfo {
     QString Type;
     QString Name;
     QString Family;
@@ -67,8 +64,6 @@ extern stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken);
 extern stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken);
 
-}
-}
-}
-}
+} //namespace Targoman::API::AAA::Authentication
+
 #endif // TARGOMAN_API_AAA_AUTHENTICATION_H

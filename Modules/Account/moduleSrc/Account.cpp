@@ -208,7 +208,7 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-QVariantMap Account::signup(
+QVariantMap Account::apiPUTsignup(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _emailOrMobile,
         TAPI::MD5_t _pass,
@@ -240,16 +240,12 @@ QVariantMap Account::signup(
         throw exHTTPForbidden("Selected role is not allowed to signup");
 
     if (_pass.isEmpty())
-    {
-        if (Type == 'E')
-            throw exHTTPBadRequest("Password must be provided in case of signup by email.");
+        throw exHTTPBadRequest("Password must be provided.");
 
-//        _pass = "NOT_SET";
-    }
-    else if (InvalidPasswords.contains(_pass))
+    if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
-    quint32 UserID = this->callSP("AAA.sp_CREATE_signup", {
+    quint64 UserID = this->callSP("AAA.sp_CREATE_signup", {
             { "iBy", Type },
             { "iLogin", _emailOrMobile },
             { "iPass", _pass },
@@ -271,40 +267,11 @@ QVariantMap Account::signup(
     };
 }
 
-QVariantMap Account::apiPUTsignupByEmail(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _email,
-        TAPI::MD5_t _pass,
-        QString _role,
-        QString _name,
-        QString _family,
-        TAPI::JSON_t _specialPrivs,
-        qint8 _maxSessions
-    )
-{
-    if (QFV.email().isValid(_email) == false)
-        throw exHTTPBadRequest("Incorrect email.");
-
-    if (QFV.emailNotFake().isValid(_email) == false)
-        throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-
-    return this->signup(
-        _REMOTE_IP,
-        _email,
-        _pass,
-        _role,
-        _name,
-        _family,
-        _specialPrivs,
-        _maxSessions
-    );
-}
-
-QVariantMap Account::apiPUTsignupByMobile(
+QVariantMap Account::apiPUTsignupByMobileOnly(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::Mobile_t _mobile,
 //        quint32 _verifyCode,
-        TAPI::MD5_t _pass,
+//        TAPI::MD5_t _pass,
         QString _role,
         QString _name,
         QString _family,
@@ -312,19 +279,36 @@ QVariantMap Account::apiPUTsignupByMobile(
         qint8 _maxSessions
     )
 {
+    Authorization::validateIPAddress(_REMOTE_IP);
+
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Incorrect mobile.");
 
-    return this->signup(
-        _REMOTE_IP,
-        _mobile,
-        _pass,
-        _role,
-        _name,
-        _family,
-        _specialPrivs,
-        _maxSessions
-    );
+    QFV.asciiAlNum().maxLenght(50).validate(_role);
+
+    if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
+        throw exHTTPForbidden("Selected role is not allowed to signup");
+
+    quint64 UserID = this->callSP("AAA.sp_CREATE_signup", {
+            { "iBy", "M" },
+            { "iLogin", _mobile },
+            { "iPass", "" },
+            { "iRole", _role },
+            { "iIP", _REMOTE_IP },
+            { "iName", _name.isEmpty()? QVariant() : _name },
+            { "iFamily", _family.isEmpty()? QVariant() : _family },
+            { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+            { "iMaxSessions", _maxSessions },
+            { "iCreatorUserID", QVariant() },
+        })
+        .spDirectOutputs()
+        .value("oUserID")
+        .toDouble();
+
+    return {
+        { "type", "mobile" },
+        { "usrID", UserID },
+    };
 }
 
 bool Account::apiPOSTapproveEmail(
@@ -361,42 +345,9 @@ bool Account::apiPOSTapproveMobile(
     return true;
 }
 
-bool Account::apiPUTrequestMobileVerifyCode(
+Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
         TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
-
-    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
-                                     { "iMobile", _mobile }, ///TODO: normalize mobile
-                                 })
-                    .spDirectOutputs()
-                    .value("oAprID")
-                    .toDouble();
-
-    return (aprID > 0);
-}
-
-//bool Account::apiPUTcheckMobileVerifyCode(
-//        TAPI::RemoteIP_t _REMOTE_IP,
-//        TAPI::Mobile_t _mobile,
-//        quint32 _code
-//    )
-//{
-//    Authorization::validateIPAddress(_REMOTE_IP);
-
-//    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
-//                     { "iMobile", _mobile }, ///TODO: normalize mobile
-//                     { "iCode", _code },
-//                 });
-
-//    return true;
-//}
-
-Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _email,
+        QString _emailOrMobile,
         TAPI::MD5_t _pass,
         QString _salt,
         TAPI::CommaSeparatedStringList_t _services,
@@ -407,11 +358,11 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_email, "login");
+    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
-                                           _email,
+                                           _emailOrMobile,
                                            _pass,
                                            _salt,
                                            _services.split(",", QString::SkipEmptyParts),
@@ -420,17 +371,66 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByEmail(
                                            _fingerprint);
 
     return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                 this->createJWT(_email, LoginInfo, _services)
+                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
+                                 this->createJWT(_emailOrMobile, LoginInfo, _services)
                              });
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
+bool Account::apiloginByMobileOnly(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::Mobile_t _mobile,
-        quint32 _verifyCode,
-        TAPI::MD5_t _pass,
-        QString _salt,
+//        quint32 _verifyCode,
+//        TAPI::MD5_t _pass,
+//        QString _salt,
+//        TAPI::CommaSeparatedStringList_t _services,
+//        bool _rememberMe,
+//        TAPI::JSON_t _sessionInfo,
+//        TAPI::MD5_t _fingerprint,
+        bool _signupIfNotExists,
+        QString _signupRole
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    QFV.mobile().validate(_mobile, "mobile");
+
+    if (_signupIfNotExists
+            && (_signupRole.toLower() == "administrator"
+                || _signupRole.toLower() == "system"
+                || _signupRole.toLower() == "baseuser")
+        )
+        throw exHTTPForbidden("Selected role is not allowed to signup");
+
+    this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
+                     { "iMobile", _mobile }, ///TODO: normalize mobile
+                     { "iSignupIfNotExists", _signupIfNotExists },
+                     { "iSignupRole", _signupRole },
+                 });
+
+    return true;
+}
+
+//bool Account::apiPUTrequestMobileVerifyCode(
+//        TAPI::RemoteIP_t _REMOTE_IP,
+//        TAPI::Mobile_t _mobile
+//    )
+//{
+//    Authorization::validateIPAddress(_REMOTE_IP);
+
+//    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
+//                                     { "iMobile", _mobile }, ///TODO: normalize mobile
+//                                 })
+//                    .spDirectOutputs()
+//                    .value("oAprID")
+//                    .toDouble();
+
+//    return (aprID > 0);
+//}
+
+Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        TAPI::Mobile_t _mobile,
+        quint32 _code,
         TAPI::CommaSeparatedStringList_t _services,
         bool _rememberMe,
         TAPI::JSON_t _sessionInfo,
@@ -439,39 +439,18 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByMobile(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    if (_verifyCode == 0)
-    {
-        throw exHTTPBadRequest("Obtain a verifyCode by calling requestMobileVerifyCode and send it here");
-//        return this->apiPUTrequestMobileVerifyCode(
-//            _REMOTE_IP,
-//            _mobile
-//        );
-    }
+    QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_verifyLoginByMobileCode", {
+                                            { "iMobile", _mobile }, ///TODO: normalize mobile
+                                            { "iCode", _code },
+                                            { "iIP", _REMOTE_IP },
+                                            { "iInfo", _sessionInfo.object() },
+                                            { "iRemember", _rememberMe ? "1" : "0" },
+                                            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
+                                        })
+                           .toJson(true)
+                           .object();
 
-    QFV.mobile().validate(_mobile, "login");
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-
-//    if (this->apiPUTcheckMobileVerifyCode(
-//                _REMOTE_IP,
-//                _mobile,
-//                _verifyCode
-//                ) == false)
-//        throw exHTTPBadRequest("incorrect verifyCode");
-
-    this->callSP("AAA.sp_UPDATE_checkMobileVerifyCode", {
-                     { "iMobile", _mobile }, ///TODO: normalize mobile
-                     { "iCode", _verifyCode },
-                 });
-
-
-    auto LoginInfo = Authentication::login(_REMOTE_IP,
-                                           _mobile,
-                                           _pass,
-                                           _salt,
-                                           _services.split(",", QString::SkipEmptyParts),
-                                           _rememberMe,
-                                           _sessionInfo.object(),
-                                           _fingerprint);
+    auto LoginInfo = PrivHelpers::processUserObject(UserInfo, {}, _services.split(",", QString::SkipEmptyParts));
 
     return Targoman::API::AccountModule::stuMultiJWT({
                                  this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
@@ -498,24 +477,39 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
     Authentication::stuOAuthInfo OAuthInfo;
     ///TODO: validate _oAuthToken
 
-    switch(_type){
-    case TAPI::enuOAuthType::Google:
-        OAuthInfo = Authentication::retrieveGoogleUserInfo(_oAuthToken);
-        break;
-    case TAPI::enuOAuthType::Linkedin:
-        OAuthInfo = Authentication::retrieveLinkedinUserInfo(_oAuthToken);
-        break;
-    case TAPI::enuOAuthType::Yahoo:
-        OAuthInfo = Authentication::retrieveYahooUserInfo(_oAuthToken);
-        break;
-    case TAPI::enuOAuthType::Github:
-        OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
-        break;
-        /*    default:
-        throw exHTTPNotImplemented("Invalid oAuth type");*/
+    switch(_type)
+    {
+        case TAPI::enuOAuthType::Google:
+            OAuthInfo = Authentication::retrieveGoogleUserInfo(_oAuthToken);
+            break;
+
+        case TAPI::enuOAuthType::Linkedin:
+            OAuthInfo = Authentication::retrieveLinkedinUserInfo(_oAuthToken);
+            break;
+
+        case TAPI::enuOAuthType::Yahoo:
+            OAuthInfo = Authentication::retrieveYahooUserInfo(_oAuthToken);
+            break;
+
+        case TAPI::enuOAuthType::Github:
+            OAuthInfo = Authentication::retrieveGitHubUserInfo(_oAuthToken);
+            break;
+
+//        default:
+//            throw exHTTPNotImplemented("Invalid oAuth type");
     }
 
-    auto LoginInfo = Authentication::login(_REMOTE_IP, OAuthInfo.Email, nullptr, nullptr, _services.split(","), true, _sessionInfo.object(), _fingerprint);
+    auto LoginInfo = Authentication::login(
+                         _REMOTE_IP,
+                         OAuthInfo.Email,
+                         nullptr,
+                         nullptr,
+                         _services.split(","),
+                         true,
+                         _sessionInfo.object(),
+                         _fingerprint
+                         );
+
     return Targoman::API::AccountModule::stuMultiJWT({
                                  this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
                                  this->createJWT(OAuthInfo.Email, LoginInfo, _services)
@@ -1128,7 +1122,7 @@ QVariant Account::apiPOSTfixtureSetup(
     Random = QRandomGenerator::global()->generate();
     QString UserEmail = QString("fixture.%1.user@dev.test").arg(Random);
 
-    QVariantMap SignupUserResult = this->apiPUTsignupByEmail(
+    QVariantMap SignupUserResult = this->apiPUTsignup(
                                     _REMOTE_IP,
                                     UserEmail,
                                     { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
@@ -1168,7 +1162,7 @@ QVariant Account::apiPOSTfixtureSetup(
     Random = QRandomGenerator::global()->generate();
     QString AdminUserEmail = QString("fixture.%1.admin@dev.test").arg(Random);
 
-    QVariantMap SignupAdminUserResult = this->apiPUTsignupByEmail(
+    QVariantMap SignupAdminUserResult = this->apiPUTsignup(
                                             _REMOTE_IP,
                                             AdminUserEmail,
                                             { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
