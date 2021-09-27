@@ -1199,11 +1199,24 @@ QVariant Account::apiPOSTfixtureSetup(
     QVariantMap Result;
     quint32 Random;
 
-    constexpr char UT_RoleName[] = "UnitTest_Role";
+    constexpr char UT_RoleName[] = "fixture_role";
 //    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
+    constexpr quint64 UT_SystemUserID = 1;
     constexpr quint32 UT_AdminRoleID = 3;
 
     clsDAC DAC;
+
+    //-- create role --------------------------------------
+    DAC.execQuery("",
+                  "INSERT IGNORE"
+                  "  INTO tblRoles"
+                  "   SET rolName=?"
+                  "     , rolCreatedBy_usrID=?",
+                  {
+                      UT_RoleName,
+                      UT_SystemUserID
+                  });
+//    Result.insert("Role", );
 
     //-- create user --------------------------------------
     Random = QRandomGenerator::global()->generate();
@@ -1299,10 +1312,9 @@ QVariant Account::apiPOSTfixtureSetup(
     //-- payment gateway --------------------------------------
     quint32 pgwTotalRows = DAC.execQuery("",
                                          "SELECT COUNT(*) AS cnt"
-                                         " FROM tblPaymentGateways"
+                                         "  FROM tblPaymentGateways"
                                          " WHERE pgwType=?"
-                                         " AND pgwAllowedDomainName=?"
-                                         ,
+                                         "   AND pgwAllowedDomainName=?",
                                          {
                                              QChar(enuPaymentGatewayType::_DeveloperTest),
                                              "dev.test"
@@ -1409,6 +1421,18 @@ QVariant Account::apiPOSTfixtureCleanup(
                               " WHERE usrEmail LIKE 'fixture.%'";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
         Result.insert("User", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = "DELETE"
+                              "  FROM tblRoles"
+                              " WHERE rolName LIKE 'fixture%'";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("Role", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
     catch(...)
     {
