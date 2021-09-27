@@ -87,14 +87,14 @@ private slots:
         ),
         "Base method for signup with email or mobile. this method can be called just by predefined IPs"
     )
+
+    /*
     QVariantMap REST(
         PUT,
         signupByMobileOnly,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             TAPI::Mobile_t _mobile,
-//            quint32 _verifyCode = 0/*= {}*/,
-//            TAPI::MD5_t _pass = {},
             QString _role = "BaseUser",
             QString _name = "",
             QString _family = "",
@@ -103,29 +103,40 @@ private slots:
         ),
         "Base method for signup with mobile only. this method can be called just by predefined IPs"
     )
+    */
 //    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
 //    "After the user submits this code, signupByMobile must be called again with verifyCode."
 
-    bool REST(
+    Targoman::API::AccountModule::stuMultiJWT REST(
         POST,
         approveEmail,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             QString _email,
-            TAPI::MD5_t _uuid
+            TAPI::MD5_t _uuid,
+            bool _autoLogin = false,
+            TAPI::CommaSeparatedStringList_t _services = {},
+            bool _rememberMe = false,
+            TAPI::JSON_t _sessionInfo = {},
+            TAPI::MD5_t _fingerprint = {}
         ),
-        "Approves Email by provided UUID"
+        "Approves Email by provided UUID, then login if needed"
     )
 
-    bool REST(
+    Targoman::API::AccountModule::stuMultiJWT REST(
         POST,
         approveMobile,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             TAPI::Mobile_t _mobile,
-            quint32 _code
+            quint32 _code,
+            bool _autoLogin = false,
+            TAPI::CommaSeparatedStringList_t _services = {},
+            bool _rememberMe = false,
+            TAPI::JSON_t _sessionInfo = {},
+            TAPI::MD5_t _fingerprint = {}
         ),
-        "Approves Mobile by provided mobile and verify code"
+        "Approves Mobile by provided mobile and verify code, then login if needed"
     )
 
     Targoman::API::AccountModule::stuMultiJWT REST(
@@ -151,19 +162,19 @@ private slots:
         (
             TAPI::RemoteIP_t _REMOTE_IP,
             TAPI::Mobile_t _mobile,
+            bool _signupIfNotExists = false,
+            QString _signupRole = "BaseUser"
 //            quint32 _verifyCode = 0/* = {}*/,
 //            TAPI::MD5_t _pass = {},
 //            QString _salt = {},
 //            TAPI::CommaSeparatedStringList_t _services = {},
 //            bool _rememberMe = false,
 //            TAPI::JSON_t _sessionInfo = {},
-//            TAPI::MD5_t _fingerprint = {},
-            bool _signupIfNotExists = false,
-            QString _signupRole = "BaseUser"
+//            TAPI::MD5_t _fingerprint = {}
         ),
         "Login user by mobile only and return an encoded JWT."
         "A new random code is generated and sent to the user via SMS."
-        "After the user submits this code, verifyLoginByMobileCode must be called with verifyCode."
+        "After the user submits this code, approveMobile must be called with verifyCode."
         "If services are provided (as comma separated list) then user must have access to specified services."
     )
 
@@ -177,20 +188,20 @@ private slots:
 //        "Send verification code for provided mobile."
 //    )
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        PUT,
-        verifyLoginByMobileCode,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::Mobile_t _mobile,
-            quint32 _code,
-            TAPI::CommaSeparatedStringList_t _services = {},
-            bool _rememberMe = false,
-            TAPI::JSON_t _sessionInfo = {},
-            TAPI::MD5_t _fingerprint = {}
-        ),
-        "check verification code for provided mobile."
-    )
+//    Targoman::API::AccountModule::stuMultiJWT REST(
+//        PUT,
+//        verifyLoginByMobileCode,
+//        (
+//            TAPI::RemoteIP_t _REMOTE_IP,
+//            TAPI::Mobile_t _mobile,
+//            quint32 _code,
+//            TAPI::CommaSeparatedStringList_t _services = {},
+//            bool _rememberMe = false,
+//            TAPI::JSON_t _sessionInfo = {},
+//            TAPI::MD5_t _fingerprint = {}
+//        ),
+//        "check verification code for provided mobile."
+//    )
 
     Targoman::API::AccountModule::stuMultiJWT REST(
         ,

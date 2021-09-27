@@ -177,7 +177,7 @@ private:
 //        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
 //        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
 
-        /*
+/*
 DELETE FROM tblWalletsTransactions;
 DELETE FROM tblWalletBalances;
 DELETE FROM tblUserWallets;
@@ -188,7 +188,7 @@ DELETE FROM tblApprovalRequest;
 DELETE FROM tblActiveSessions;
 DELETE FROM tblUser WHERE usrID > 100;
 DELETE FROM tblRoles WHERE LOWER(rolName) LIKE '%test%'
-        */
+*/
     }
 };
 

@@ -49,7 +49,98 @@ private slots:
 //        cleanupUnitTestData();
     }
 
-    void Signup(){
+    //-------------------------------------------------------
+    void SignupByMobileOnly_0999_100_1010()
+    {
+        QVariant Result = callAPI(
+                              RESTClientHelper::POST,
+                              "Account/loginByMobileOnly",
+                              {},
+                              {
+                                  { "mobile", "0999-100-1010" },
+                                  { "signupIfNotExists", true },
+                                  { "signupRole", UT_RoleName },
+                               })
+                          ;
+
+//        qDebug() << Result;
+//        QVERIFY(UserID > 0);
+
+//        clsDAC DAC;
+//        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
+    }
+
+    void ApproveMobile_And_Login_0999_100_1010()
+    {
+        clsDAC DAC;
+        QJsonObject AprInfo = DAC.execQuery("",
+                                            "SELECT aprID"
+                                            "     , apr_usrID"
+                                            "     , aprApprovalCode"
+                                            "  FROM tblApprovalRequest"
+                                            " WHERE aprApprovalKey = '+989991001010'"
+                                            " ORDER BY aprID DESC"
+                                            )
+                              .toJson(true)
+                              .object()
+                              ;
+
+        quint64 AprID = AprInfo
+                       .value("aprID")
+                       .toDouble();
+        QVERIFY(AprID > 0);
+
+        quint64 UserID = AprInfo
+                       .value("apr_usrID")
+                       .toDouble();
+        QVERIFY(AprID > 0);
+
+        QString Code = AprInfo
+                       .value("aprApprovalCode")
+                       .toString();
+        QVERIFY(Code.isEmpty() == false);
+
+        DAC.execQuery("",
+                      "UPDATE tblApprovalRequest"
+                      "   SET aprStatus = 'S'"
+                      "     , aprSentDate = NOW()"
+                      " WHERE aprID=?",
+                      {
+                          AprID
+                      });
+
+        QJsonObject MultiJWT;
+        QVERIFY((MultiJWT = callAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveMobile",
+                    {},
+                    {
+                        { "mobile", "0999-100-1010" },
+                        { "code", Code },
+                        { "autoLogin", true },
+//                        { "services",  },
+//                        { "rememberMe",  },
+//                        { "sessionInfo",  },
+//                        { "fingerprint",  },
+                    })
+                .toJsonObject()).size());
+
+        gEncodedJWT = MultiJWT.value("ssn").toString();
+        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY(clsJWT(gJWT).usrID() == UserID);
+        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+    void Logout__0999_100_1010()
+    {
+        QVERIFY(callAPI(RESTClientHelper::POST, "Account/logout").toBool());
+        QVERIFY((gEncodedJWT = callAPI(RESTClientHelper::POST, "Account/refreshJWT").toString()).isEmpty());
+    }
+
+    //-------------------------------------------------------
+    void Signup()
+    {
         QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_UserEmail},
@@ -57,7 +148,11 @@ private slots:
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", UT_RoleName}
-                                        }).toMap().value("usrID").toULongLong()) > 0);
+                                        })
+                           .toMap()
+                           .value("usrID")
+                           .toULongLong()) > 0)
+                ;
 
         QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
@@ -66,47 +161,64 @@ private slots:
                                             {"family", "test"},
                                             {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
                                             {"role", UT_RoleName}
-                                        }).toMap().value("usrID").toULongLong()) > 0);
+                                        })
+                                .toMap()
+                                .value("usrID")
+                                .toULongLong()) > 0)
+                ;
 
         clsDAC DAC;
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
-    void ApproveEmail(){
+    void ApproveEmail()
+    {
         clsDAC DAC;
         QString Code = DAC.execQuery("",
                                      "SELECT aprApprovalCode"
                                      "  FROM tblApprovalRequest"
                                      " WHERE apr_usrID=?",
-                                     {gUserID}
-                                     ).toJson(true).object().value("aprApprovalCode").toString();
+                                     {
+                                         gUserID
+                                     })
+                       .toJson(true)
+                       .object()
+                       .value("aprApprovalCode")
+                       .toString()
+                       ;
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
+        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
         {gUserID});
 
-        QVERIFY(callAPI(RESTClientHelper::POST,
-                        "Account/approveEmail", {},{
-                            { "email", UT_UserEmail },
-                            { "uuid", Code },
-                        }).toBool());
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/approveEmail",
+                                  {},
+                                  {
+                                      { "email", UT_UserEmail },
+                                      { "uuid", Code },
+                                  });
     }
 
-    void ApproveAdminEmail(){
+    void ApproveAdminEmail()
+    {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
+        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
         {gAdminUserID});
 
-        QVERIFY(callAPI(RESTClientHelper::POST,
-                        "Account/approveEmail", {},{
-                            { "email", UT_AdminUserEmail },
-                            { "uuid", Code },
-                        }).toBool());
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/approveEmail",
+                                  {},
+                                  {
+                                      { "email", UT_AdminUserEmail },
+                                      { "uuid", Code },
+                                  });
     }
 
-    void Login(){
+    void Login()
+    {
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -202,7 +314,7 @@ private slots:
             DAC.callSP("", "sp_CREATE_approvalRequest", {
                            { "iWhat2Approve", "M" },
                            { "iUserID", gUserID },
-                           { "iKey", "09121234567" },
+                           { "iKey", "+989991234567" },
                            { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                            { "iSalt", 1234 }
                        });
@@ -212,25 +324,40 @@ private slots:
 
             QString Code = Obj.value("aprApprovalCode").toString();
 
-            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S' WHERE apr_usrID=?",
+            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
             {gUserID});
 
-            QVERIFY(callAPI(RESTClientHelper::POST,
+            QVariant Result = callAPI(RESTClientHelper::POST,
                             "Account/approveMobile", {},{
-                                { "mobile", "09121234567" },
+                                { "mobile", "09991234567" },
                                 { "code", Code }
-                            }).toBool());
+                            });
+
             QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
             {gUserID}).toJson(true).object().value("usrMobile").toString();
 
-            QVERIFY(Mobile == "09121234567");
+            QVERIFY(Mobile == "+989991234567");
         }catch(std::exception &e){
             QFAIL (e.what());
         }
     }
 
-    ///TODO: test signup by mobile + verify code
-    ///TODO: test login by mobile + verify code
+    /***************************************************************************************/
+    /* cleanup *****************************************************************************/
+    /***************************************************************************************/
+/*
+DELETE FROM tblWalletsTransactions;
+DELETE FROM tblWalletBalances;
+DELETE FROM tblUserWallets;
+DELETE FROM tblOnlinePayments;
+DELETE FROM tblOfflinePayments;
+DELETE FROM tblVoucher;
+DELETE FROM tblApprovalRequest;
+DELETE FROM tblActiveSessions;
+DELETE FROM tblUser WHERE usrID > 100;
+DELETE FROM tblRoles WHERE LOWER(rolName) LIKE '%test%'
+*/
+
 };
 
 #endif // TEST_ACCOUNT_HPP
