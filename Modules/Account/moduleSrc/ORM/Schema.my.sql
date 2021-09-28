@@ -3269,6 +3269,55 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_voucher_cancel` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_voucher_cancel`(
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iVoucherID` BIGINT UNSIGNED,
+	IN `iSetAsError` BOOL
+)
+BEGIN
+    DECLARE vErr VARCHAR(500);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 vErr = MESSAGE_TEXT;
+        
+        INSERT
+          INTO tblActionLogs
+           SET tblActionLogs.atlBy_usrID = iUserID,
+               tblActionLogs.atlType = 'reserveWallet.Error',
+               tblActionLogs.atlDescription = JSON_OBJECT(
+                   "err", vErr,
+                   "iVoucherID", iVoucherID
+               )
+        ;
+        
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    UPDATE tblVoucher
+       SET vchStatus = IF(iSetAsError, 'E', 'C')
+     WHERE vchID = iVoucherID
+    ;
+
+    -- ///TODO: cancel voucher and credit to wallet
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

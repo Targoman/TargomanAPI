@@ -861,47 +861,13 @@ void Account::tryCancelVoucher(
 
     //2: cancel voucher
 
-    ///TODO: create cancel voucher and credit to wallet
+    ///TODO: complete sp_UPDATE_voucher_cancel: create cancel voucher and credit to wallet
 
     clsDACResult Result = Voucher::instance().callSP("sp_UPDATE_voucher_cancel", {
         { "iUserID", SYSTEM_USER_ID },
         { "iVoucherID", _voucherID },
         { "iSetAsError", _setAsError },
     });
-
-    ///TODO: complete sp_UPDATE_voucher_cancel
-/*
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_voucher_cancel`(
-    IN `iUserID` BIGINT UNSIGNED,
-    IN `iVoucherID` BIGINT UNSIGNED,
-    IN `iSetAsError` BOOL
-)
-BEGIN
-    DECLARE Err VARCHAR(500);
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-        INSERT INTO tblActionLogs
-            SET tblActionLogs.atlBy_usrID = iUserID,
-            tblActionLogs.atlType = 'reserveWallet.Error',
-            tblActionLogs.atlDescription = JSON_OBJECT(
-                "err", Err,
-                "iVoucherID", iVoucherID
-            );
-        ROLLBACK;
-        RESIGNAL;
-    END;
-
-    UPDATE tblVoucher
-       SET vchStatus = IF(iSetAsError, 'E', 'C')
-     WHERE vchID = iVoucherID
-    ;
-
-END;;
-DELIMITER ;
-*/
 
 //    /*Targoman::API::Query::*/this->Update(Voucher::instance(),
 //                                 SYSTEM_USER_ID,
