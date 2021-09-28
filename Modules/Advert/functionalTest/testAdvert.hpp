@@ -197,7 +197,7 @@ private slots:
                 {
                     { tblAccountProductsBase::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::prdName,          "test product 123" },
-                    { tblAccountProductsBase::prdInStockQty,  1 },
+                    { tblAccountProductsBase::prdInStockQty,    1'000 },
                     { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
                     { tblAccountProducts::prd_locID,            this->LocationID },
                 }
@@ -227,9 +227,9 @@ private slots:
                     { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
                     { tblAccountSaleablesBase::slb_prdID,           this->BannerProductID },
                     { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
-                    { tblAccountSaleablesBase::slbBasePrice,        12000 },
-                    { tblAccountSaleablesBase::slbProductCount,     900 },
-                    { tblAccountSaleablesBase::slbInStockQty,       1 },
+                    { tblAccountSaleablesBase::slbBasePrice,        12'000 },
+//                    { tblAccountSaleablesBase::slbProductCount,     900 },
+                    { tblAccountSaleablesBase::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
                 }
             );
@@ -401,14 +401,14 @@ private slots:
                 {
                     { tblAccountCouponsBase::cpnCode,                       this->CouponCode },
                     { tblAccountCouponsBase::cpnPrimaryCount,               500 },
-                    { tblAccountCouponsBase::cpnTotalMaxAmount,             15000000 },
+                    { tblAccountCouponsBase::cpnTotalMaxAmount,             15'000'000 },
                     { tblAccountCouponsBase::cpnPerUserMaxCount,            2 },
-                    { tblAccountCouponsBase::cpnPerUserMaxAmount,           1000000 },
+                    { tblAccountCouponsBase::cpnPerUserMaxAmount,           1'000'000 },
                     { tblAccountCouponsBase::cpnValidFrom,                  "2020/1/1 1:2:3" },
 //                    { tblAccountCouponsBase::cpnExpiryTime,               S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
                     { tblAccountCouponsBase::cpnAmount,                     10 },
                     { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
-                    { tblAccountCouponsBase::cpnMaxAmount,                  250000 },
+                    { tblAccountCouponsBase::cpnMaxAmount,                  250'000 },
                     { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
 //                        QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>({
 //                            { this->BannerSaleableCode, 1.5, 0 },
@@ -443,13 +443,13 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode",       this->BannerSaleableCode },
-                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                1 },
-                    { "discountCode",       this->CouponCode },
-                    { "referrer",           "" },
-                    { "extraReferrerParams", {} },
-                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    10 },
+                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
@@ -476,13 +476,13 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode",       this->BannerSaleableCode },
-                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                1 },
-                    { "discountCode",       this->CouponCode },
-                    { "referrer",           "" },
-                    { "extraReferrerParams", {} },
-                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    20 },
+                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 
@@ -509,13 +509,13 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode",       this->BannerSaleableCode },
-                    { "orderAdditives",     QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                1 },
-                    { "discountCode",       this->CouponCode },
-                    { "referrer",           "" },
-                    { "extraReferrerParams", {} },
-                    { "lastPreVoucher",     this->LastPreVoucher.toJson().toVariantMap() },
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    30 },
+                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
 

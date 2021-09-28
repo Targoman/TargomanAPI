@@ -432,7 +432,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
 
     //-- un-reserve saleable & product ------------------------------------
-    this->AccountCoupons->callSP("sp_UPDATE_saleable_un_reserve", {
+    this->AccountSaleables->callSP("sp_UPDATE_saleable_un_reserve", {
         { "iSaleableID", SaleableID },
         { "iUserID", _userID },
         { "iQty", _voucherItem.Qty },
@@ -492,7 +492,8 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
             //tblAccountSaleablesBase::slbPrivs,
             tblAccountSaleablesBase::slbBasePrice,
             tblAccountSaleablesBase::slbAdditives,
-            tblAccountSaleablesBase::slbProductCount,
+//            tblAccountSaleablesBase::slbProductCount,
+            tblAccountSaleablesBase::slbMaxSaleCountPerUser,
             tblAccountSaleablesBase::slbInStockQty,
             tblAccountSaleablesBase::slbOrderedQty,
             tblAccountSaleablesBase::slbReturnedQty,
@@ -824,7 +825,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     } //if discount
 
     //-- reserve saleable & product ------------------------------------
-    this->AccountCoupons->callSP("sp_UPDATE_saleable_reserve", {
+    this->AccountSaleables->callSP("sp_UPDATE_saleable_reserve", {
         { "iSaleableID", AssetItem.slbID },
         { "iUserID", currentUserID },
         { "iQty", _qty },

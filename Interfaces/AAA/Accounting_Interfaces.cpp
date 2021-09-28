@@ -188,9 +188,9 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdValidToHour,       S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
             { tblAccountProductsBase::prdPrivs,             S(TAPI::PrivObject_t),       QFV,                                     QNull,      UPOwner },
             { tblAccountProductsBase::prdVAT,               S(NULLABLE_TYPE(double)),    QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
-            { tblAccountProductsBase::prdInStockQty,        S(qreal),                    QFV.integer().minValue(0),               QRequired,  UPAdmin },
-            { tblAccountProductsBase::prdOrderedQty,        S(NULLABLE_TYPE(qreal)),     QFV,                                     QNull,      UPAdmin },
-            { tblAccountProductsBase::prdReturnedQty,       S(NULLABLE_TYPE(qreal)),     QFV,                                     QNull,      UPAdmin },
+            { tblAccountProductsBase::prdInStockQty,        S(double),                   QFV.integer().minValue(0),               QRequired,  UPAdmin },
+            { tblAccountProductsBase::prdOrderedQty,        S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
+            { tblAccountProductsBase::prdReturnedQty,       S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
             { tblAccountProductsBase::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { tblAccountProductsBase::prdCreationDateTime,  ORM_CREATED_ON },
@@ -272,11 +272,11 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbPrivs,                S(TAPI::JSON_t),                 QFV,                             QNull,      UPOwner },
             { tblAccountSaleablesBase::slbBasePrice,            S(qreal),                        QFV.real().minValue(0),          QRequired,  UPOwner },
             { tblAccountSaleablesBase::slbAdditives,            S(TAPI::SaleableAdditive_t),     QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbProductCount,         S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
+//            { tblAccountSaleablesBase::slbProductCount,         S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
             { tblAccountSaleablesBase::slbMaxSaleCountPerUser,  S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPOwner},
-            { tblAccountSaleablesBase::slbInStockQty,           S(qreal),                        QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { tblAccountSaleablesBase::slbOrderedQty,           S(NULLABLE_TYPE(qreal)),         QFV,                             QNull,      UPAdmin },
-            { tblAccountSaleablesBase::slbReturnedQty,          S(NULLABLE_TYPE(qreal)),         QFV,                             QNull,      UPAdmin },
+            { tblAccountSaleablesBase::slbInStockQty,           S(double),                       QFV.integer().minValue(0),       QRequired,  UPAdmin },
+            { tblAccountSaleablesBase::slbOrderedQty,           S(NULLABLE_TYPE(double)),        QFV,                             QNull,      UPAdmin },
+            { tblAccountSaleablesBase::slbReturnedQty,          S(NULLABLE_TYPE(double)),        QFV,                             QNull,      UPAdmin },
             { tblAccountSaleablesBase::slbVoucherTemplate,      S(QString),                      QFV,                             QNull,      UPOwner },
             { tblAccountSaleablesBase::slbStatus,               ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
@@ -722,7 +722,7 @@ void stuAssetItem::fromVariantMap(const QVariantMap& _info)
     SET_FIELD_FROM_VARIANT_MAP(this->slbPrivs,               _info, tblAccountSaleablesBase, slbPrivs);
     SET_FIELD_FROM_VARIANT_MAP(this->slbBasePrice,           _info, tblAccountSaleablesBase, slbBasePrice);
     SET_FIELD_FROM_VARIANT_MAP(this->slbAdditives,           _info, tblAccountSaleablesBase, slbAdditives);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbProductCount,        _info, tblAccountSaleablesBase, slbProductCount);
+//    SET_FIELD_FROM_VARIANT_MAP(this->slbProductCount,        _info, tblAccountSaleablesBase, slbProductCount);
     SET_FIELD_FROM_VARIANT_MAP(this->slbMaxSaleCountPerUser, _info, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
     SET_FIELD_FROM_VARIANT_MAP(this->slbInStockQty,          _info, tblAccountSaleablesBase, slbInStockQty);
     SET_FIELD_FROM_VARIANT_MAP(this->slbOrderedQty,          _info, tblAccountSaleablesBase, slbOrderedQty);

@@ -57,7 +57,7 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -118,7 +118,7 @@ CREATE TABLE `tblAccountSaleables` (
   `slbPrivs` json DEFAULT NULL,
   `slbBasePrice` int unsigned NOT NULL,
   `slbAdditives` json DEFAULT NULL,
-  `slbProductCount` int NOT NULL,
+  `slbProductCount` int DEFAULT NULL COMMENT 'what is this?',
   `slbMaxSaleCountPerUser` int DEFAULT NULL,
   `slbInStockQty` double DEFAULT NULL,
   `slbOrderedQty` double DEFAULT NULL,
@@ -143,7 +143,7 @@ CREATE TABLE `tblAccountSaleables` (
   KEY `slbType` (`slbType`) USING BTREE,
   KEY `slbAvailableToDate` (`slbAvailableToDate`),
   KEY `slbAvailableFromDate` (`slbAvailableFromDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=517 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=536 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -188,7 +188,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=229 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=236 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=271 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=278 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -451,9 +451,9 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_decreaseStats`(
 )
 BEGIN
     UPDATE tblAccountCoupons
-       SET tblAccountCoupons.cpnTotalUsedCount = tblAccountCoupons.cpnTotalUsedCount - iTotalUsedCount
-         , tblAccountCoupons.cpnTotalUsedAmount = tblAccountCoupons.cpnTotalUsedAmount - iTotalUsedAmount
-     WHERE tblAccountCoupons.cpnID = iDiscountID
+       SET cpnTotalUsedCount = IFNULL(cpnTotalUsedCount, 0) - iTotalUsedCount
+         , cpnTotalUsedAmount = IFNULL(cpnTotalUsedAmount, 0) - iTotalUsedAmount
+     WHERE cpnID = iDiscountID
     ;
 END ;;
 DELIMITER ;
@@ -478,9 +478,9 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_increaseStats`(
 )
 BEGIN
     UPDATE tblAccountCoupons
-       SET tblAccountCoupons.cpnTotalUsedCount = tblAccountCoupons.cpnTotalUsedCount + iTotalUsedCount
-         , tblAccountCoupons.cpnTotalUsedAmount = tblAccountCoupons.cpnTotalUsedAmount + iTotalUsedAmount
-     WHERE tblAccountCoupons.cpnID = iDiscountID
+       SET cpnTotalUsedCount = IFNULL(cpnTotalUsedCount, 0) + iTotalUsedCount
+         , cpnTotalUsedAmount = IFNULL(cpnTotalUsedAmount, 0) + iTotalUsedAmount
+     WHERE cpnID = iDiscountID
     ;
 END ;;
 DELIMITER ;
@@ -505,7 +505,7 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_reserve`(
 )
 BEGIN
         UPDATE tblAccountSaleables
-           SET slbOrderedQty = slbOrderedQty + iQty
+           SET slbOrderedQty = IFNULL(slbOrderedQty, 0) + iQty
              , slbUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -513,7 +513,7 @@ BEGIN
         UPDATE tblAccountProducts
     INNER JOIN tblAccountSaleables
             ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
-           SET prdOrderedQty = prdOrderedQty + iQty
+           SET prdOrderedQty = IFNULL(prdOrderedQty, 0) + iQty
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -540,7 +540,7 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_un_reserve`(
 )
 BEGIN
         UPDATE tblAccountSaleables
-           SET slbReturnedQty = slbReturnedQty + iQty
+           SET slbReturnedQty = IFNULL(slbReturnedQty, 0) + iQty
              , slbUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -548,7 +548,7 @@ BEGIN
         UPDATE tblAccountProducts
     INNER JOIN tblAccountSaleables
             ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
-           SET prdReturnedQty = prdReturnedQty + iQty
+           SET prdReturnedQty = IFNULL(prdReturnedQty, 0) + iQty
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;

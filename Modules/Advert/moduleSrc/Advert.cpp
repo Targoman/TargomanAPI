@@ -211,7 +211,7 @@ QVariant Advert::apiPOSTfixtureSetup(
     QVariantMap ProductValues = {
         { tblAccountProductsBase::prdCode,          ProductCode },
         { tblAccountProductsBase::prdName,          QString("fixture product %1").arg(Random) },
-        { tblAccountProductsBase::prdInStockQty,  1 },
+        { tblAccountProductsBase::prdInStockQty,    1'000 },
         { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
         { tblAccountProducts::prd_locID,            LocationID },
     };
@@ -255,8 +255,9 @@ QVariant Advert::apiPOSTfixtureSetup(
         { tblAccountSaleablesBase::slbDesc,             QString("fixture saleable %1 desc").arg(Random) },
         { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
         { tblAccountSaleablesBase::slbBasePrice,        12'000 },
-        { tblAccountSaleablesBase::slbProductCount,     900 },
-        { tblAccountSaleablesBase::slbInStockQty,       1 },
+//        { tblAccountSaleablesBase::slbProductCount,     900 },
+//        { tblAccountSaleablesBase::slbMaxSaleCountPerUser,  },
+        { tblAccountSaleablesBase::slbInStockQty,       150 },
         { tblAccountSaleablesBase::slbVoucherTemplate,  QString("fixture saleable %1 vt").arg(Random) },
     };
 
@@ -272,7 +273,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 //                         .addCol(tblAccountSaleablesBase::slbPrivs)
                          .addCol(tblAccountSaleablesBase::slbBasePrice)
 //                         .addCol(tblAccountSaleablesBase::slbAdditives)
-                         .addCol(tblAccountSaleablesBase::slbProductCount)
+//                         .addCol(tblAccountSaleablesBase::slbProductCount)
 //                         .addCol(tblAccountSaleablesBase::slbMaxSaleCountPerUser)
                          .addCol(tblAccountSaleablesBase::slbInStockQty)
 //                         .addCol(tblAccountSaleablesBase::slbOrderedQty)

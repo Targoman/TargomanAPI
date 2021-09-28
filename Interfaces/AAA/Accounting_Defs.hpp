@@ -92,18 +92,25 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    QString      , Service    , QString()      , v.size() , v          , v.toString()                          ,
-    quint64      , OrderID    , 0              , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())    ,
-    TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
-    QString      , Desc       , QString()      , v.size() , v          , v.toString()                          ,
-    quint32      , UnitPrice  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    qreal        , Qty        , 0              , v        , C2DBL(v)   , v.toDouble()                          ,
-    quint32      , SubTotal   , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    stuDiscount3 , Discount   , stuDiscount3() , v.ID>0   , v.toJson() , stuDiscount3().fromJson(v.toObject()) ,
-    quint32      , DisAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    quint8       , VATPercent , 0              , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())        ,
-    quint32      , VATAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    QString      , Sign       , QString()      , v.size() , v          , v.toString()
+    SF_QString(Service),    //QString      , Service    , QString()      , v.size() , v          , v.toString()                          ,
+    SF_quint64(OrderID),    //quint64      , OrderID    , 0              , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())    ,
+    SF_MD5_t(UUID),         //TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
+    SF_QString(Desc),       //QString      , Desc       , QString()      , v.size() , v          , v.toString()                          ,
+    SF_quint32(UnitPrice),  //quint32      , UnitPrice  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    SF_qreal(Qty),          //qreal        , Qty        , 0              , v        , C2DBL(v)   , v.toDouble()                          ,
+    SF_quint32(SubTotal),   //quint32      , SubTotal   , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    SF_Generic(             //stuDiscount3 , Discount   , stuDiscount3() , v.ID>0   , v.toJson() , stuDiscount3().fromJson(v.toObject()) ,
+        /* type        */ stuDiscount3,
+        /* name        */ Discount,
+        /* def         */ stuDiscount3(),
+        /* validator   */ v.ID > 0,
+        /* fromVariant */ v.toJson(),
+        /* toVariant   */ stuDiscount3().fromJson(v.toObject())
+    ),
+    SF_quint32(DisAmount),  //quint32      , DisAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    SF_quint8(VATPercent),  //quint8       , VATPercent , 0              , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())        ,
+    SF_quint32(VATAmount),  //quint32      , VATAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
+    SF_QString(Sign)        //QString      , Sign       , QString()      , v.size() , v          , v.toString()
 );
 
 /*****************************************************************************/
@@ -154,7 +161,7 @@ struct stuAssetItem {
     TAPI::JSON_t                    slbPrivs;
     qreal                           slbBasePrice;
     TAPI::SaleableAdditive_t        slbAdditives;
-    quint32                         slbProductCount;
+//    quint32                         slbProductCount;
     NULLABLE_TYPE(quint32)          slbMaxSaleCountPerUser;
     quint32                         slbInStockQty;
     NULLABLE_TYPE(quint32)          slbOrderedQty;
@@ -281,7 +288,7 @@ namespace tblAccountSaleablesBase {
     TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
     TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
     TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
-    TARGOMAN_CREATE_CONSTEXPR(slbProductCount);
+//    TARGOMAN_CREATE_CONSTEXPR(slbProductCount); //what is this?
     TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
 
     ///TODO: create trigger for this 3 fields and make changes to prd Count fields

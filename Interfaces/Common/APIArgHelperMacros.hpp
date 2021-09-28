@@ -177,7 +177,10 @@
 //)
 
 //                                                  _type,                  _name, _typeGroup,        _fromVariant,      _toVariant,           _def, _validator
-#define SF_QString(_name, ...)          INTERNAL_SF(QString,                _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
+#define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
+#define SF_QString(_name, ...)          SF_String(_name,    QString,      __VA_ARGS__)
+#define SF_MD5_t(_name, ...)            SF_String(_name,    TAPI::MD5_t,  __VA_ARGS__)
+
 #define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
 #define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
 #define SF_quint16(_name, ...)          INTERNAL_SF(quint16,                _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint16(v), __VA_ARGS__)
