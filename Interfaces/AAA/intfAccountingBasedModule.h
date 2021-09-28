@@ -63,19 +63,38 @@ protected:
 
     virtual bool increaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
     virtual bool decreaseDiscountUsage(const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
+    virtual bool activateUserAsset(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem, quint64 _voucherID);
     virtual bool removeFromUserAssets(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
 
-    virtual bool preProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
-    virtual bool processVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem);
-    virtual bool postProcessVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool preProcessVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            quint64 _voucherID
+        ) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); Q_UNUSED(_voucherID); return true; };
+    virtual bool processVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            quint64 _voucherID
+        );
+    virtual bool postProcessVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+            quint64 _voucherID
+        ) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); Q_UNUSED(_voucherID); return true; };
 
-    virtual bool preCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+    virtual bool preCancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem
+        ) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
     virtual bool cancelVoucherItem(
             quint64 _userID,
             const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr);
-    virtual bool postCancelVoucherItem(quint64 _userID, const Targoman::API::AAA::stuVoucherItem &_voucherItem) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
+            std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr
+        );
+    virtual bool postCancelVoucherItem(
+            quint64 _userID,
+            const Targoman::API::AAA::stuVoucherItem &_voucherItem
+        ) { Q_UNUSED(_userID); Q_UNUSED(_voucherItem); return true; };
 
 private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
@@ -127,7 +146,8 @@ protected slots:
         processVoucherItem,
         (
             TAPI::JWT_t _JWT,
-            Targoman::API::AAA::stuVoucherItem _voucherItem
+            Targoman::API::AAA::stuVoucherItem _voucherItem,
+            quint64 _voucherID
         ),
         "Process voucher item"
     )

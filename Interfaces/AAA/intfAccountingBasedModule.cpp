@@ -353,7 +353,8 @@ bool intfAccountingBasedModule::decreaseDiscountUsage(
 
 bool intfAccountingBasedModule::activateUserAsset(
         quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        quint64 _voucherID
     )
 {
     return /*Targoman::API::Query::*/this->Update(
@@ -361,7 +362,8 @@ bool intfAccountingBasedModule::activateUserAsset(
         _userID,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         TAPI::ORMFields_t({
-           { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active }
+            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
+            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
         }),
         {
             { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
@@ -387,18 +389,19 @@ bool intfAccountingBasedModule::removeFromUserAssets(
 
 bool intfAccountingBasedModule::processVoucherItem(
         quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        quint64 _voucherID
     )
 {
-    if (!this->preProcessVoucherItem(_userID, _voucherItem))
+    if (!this->preProcessVoucherItem(_userID, _voucherItem, _voucherID))
         return false;
 
-    if (this->activateUserAsset(_userID, _voucherItem) == false)
+    if (this->activateUserAsset(_userID, _voucherItem, _voucherID) == false)
         return false;
 
     this->increaseDiscountUsage(_voucherItem);
 
-    this->postProcessVoucherItem(_userID, _voucherItem);
+    this->postProcessVoucherItem(_userID, _voucherItem, _voucherID);
 
     return true;
 }
@@ -852,6 +855,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
         .addCol(tblAccountUserAssetsBase::uas_usrID)
         .addCol(tblAccountUserAssetsBase::uas_slbID)
+        .addCol(tblAccountUserAssetsBase::uasQty)
 //        .addCol(tblAccountUserAssetsBase::uas_vchID)
         .addCol(tblAccountUserAssetsBase::uasVoucherItemUUID)
 //        .addCol(tblAccountUserAssetsBase::uasPrefered)
@@ -863,6 +867,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     values = {
         { tblAccountUserAssetsBase::uas_usrID, currentUserID },
         { tblAccountUserAssetsBase::uas_slbID, AssetItem.slbID },
+        { tblAccountUserAssetsBase::uasQty, _qty },
 //        { tblAccountUserAssetsBase::uas_vchID, ??? },
         { tblAccountUserAssetsBase::uasVoucherItemUUID, PreVoucherItem.UUID },
 //            { tblAccountUserAssetsBase::uasPrefered, ??? },
@@ -1110,13 +1115,14 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
 
 bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
         TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuVoucherItem _voucherItem
+        Targoman::API::AAA::stuVoucherItem _voucherItem,
+        quint64 _voucherID
     )
 {
     clsJWT JWT(_JWT);
     quint64 CurrentUserID = JWT.usrID();
 
-    return this->processVoucherItem(CurrentUserID, _voucherItem);
+    return this->processVoucherItem(CurrentUserID, _voucherItem, _voucherID);
 }
 
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
