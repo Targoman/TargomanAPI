@@ -1199,10 +1199,9 @@ QVariant Account::apiPOSTfixtureSetup(
     QVariantMap Result;
     quint32 Random;
 
-    constexpr char UT_RoleName[] = "fixture_role";
-//    constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
     constexpr quint64 UT_SystemUserID = 1;
     constexpr quint32 UT_AdminRoleID = 3;
+    constexpr char UT_RoleName[] = "fixture_role";
 
     clsDAC DAC;
 
@@ -1402,13 +1401,20 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = "DELETE tblApprovalRequest"
-                              "  FROM tblApprovalRequest"
-                              " INNER JOIN tblUser"
-                              "    ON tblUser.usrID = tblApprovalRequest.apr_usrID"
-                              " WHERE usrEmail LIKE 'fixture.%'";
+        QString QueryString = R"(
+            DELETE wb
+                FROM tblWalletBalances wb
+                INNER JOIN tblWalletsTransactions wt
+                ON wt.wltID = wb.wbl_wltID
+                INNER JOIN tblUserWallets uw
+                ON uw.walID = wt.wlt_walID
+                INNER JOIN tblUser u
+                ON u.usrID = uw.wal_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("ApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
     catch(...)
     {
@@ -1416,11 +1422,18 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = "DELETE"
-                              "  FROM tblUser"
-                              " WHERE usrEmail LIKE 'fixture.%'";
+        QString QueryString = R"(
+            DELETE wt
+                FROM tblWalletsTransactions wt
+                INNER JOIN tblUserWallets uw
+                ON uw.walID = wt.wlt_walID
+                INNER JOIN tblUser u
+                ON u.usrID = uw.wal_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("User", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
     catch(...)
     {
@@ -1428,11 +1441,134 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = "DELETE"
-                              "  FROM tblRoles"
-                              " WHERE rolName LIKE 'fixture%'";
+        QString QueryString = R"(
+            DELETE uw
+                FROM tblUserWallets uw
+                INNER JOIN tblUser u
+                ON u.usrID = uw.wal_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
         clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("Role", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE op
+                FROM tblOnlinePayments op
+                INNER JOIN tblVoucher vch
+                ON vch.vchID = op.onp_vchID
+                INNER JOIN tblUser u
+                ON u.usrID = vch.vch_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE fp
+                FROM tblOfflinePayments fp
+                INNER JOIN tblVoucher vch
+                ON vch.vchID = fp.ofp_vchID
+                INNER JOIN tblUser u
+                ON u.usrID = vch.vch_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE vch
+                FROM tblVoucher vch
+                INNER JOIN tblUser u
+                ON u.usrID = vch.vch_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE apr
+                FROM tblApprovalRequest apr
+                INNER JOIN tblUser u
+                ON u.usrID = apr.apr_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE sn
+                FROM tblActiveSessions sn
+                INNER JOIN tblUser u
+                ON u.usrID = sn.ssn_usrID
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE u
+                FROM tblUser u
+                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
+                OR u.usrMobile LIKE '+98999887%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+    }
+    catch(...)
+    {
+    }
+
+    try
+    {
+        QString QueryString = R"(
+            DELETE r
+                FROM tblRoles r
+                WHERE LOWER(r.rolName) LIKE 'fixture%'
+            ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString);
+        Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
     }
     catch(...)
     {

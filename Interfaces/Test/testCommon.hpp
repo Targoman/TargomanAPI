@@ -32,16 +32,16 @@ using namespace Targoman::DBManager;
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
 
-constexpr char UT_UserEmail[] = "unit_test@unittest.test";
-constexpr char UT_AdminUserEmail[] = "unit_test_admin@unittest.test";
-constexpr quint32 UT_AdminRoleID = 3;
-constexpr quint64 UT_SystemUserID = 1;
-
-constexpr char UT_RoleName[] = "UnitTest_Role";
-constexpr char UT_ServiceRoleName[] = "UnitTest_Service_Role";
-constexpr char UT_ServiceName[] = "UnitTest_Service";
-constexpr char UT_AdminToken[] = "Sample_UnitTest_Admin_Token";
-constexpr char UT_NormalToken[] = "Sample_UnitTest_Token";
+constexpr quint64 UT_SystemUserID       = 1;
+constexpr quint32 UT_AdminRoleID        = 3;
+//all this constants must be begin with unit_test:
+constexpr char UT_UserEmail[]           = "unit_test@unittest.test";
+constexpr char UT_AdminUserEmail[]      = "unit_test_admin@unittest.test";
+constexpr char UT_RoleName[]            = "unit_test_Role";
+constexpr char UT_ServiceRoleName[]     = "unit_test_Service_Role";
+constexpr char UT_ServiceName[]         = "unit_test_Service";
+constexpr char UT_AdminToken[]          = "unit_test_Admin_Token";
+constexpr char UT_NormalToken[]         = "unit_test_Token";
 
 extern unsigned int gServiceRoleID;
 extern unsigned int gServiceID;
