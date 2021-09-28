@@ -177,28 +177,28 @@ intfAccountProducts::intfAccountProducts(
         _schema,
         tblAccountProductsBase::Name,
         QList<DBM::clsORMField>({
-        ///<  ColName                                      Type                      Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountProductsBase::prdID,               ORM_PRIMARYKEY_32 },
-            { tblAccountProductsBase::prdCode,             S(TAPI::ProductCode_t),    QFV,                                     QRequired,  UPOwner },
-            { tblAccountProductsBase::prdName,             S(QString),                QFV,                                     QRequired,  UPOwner },
-            { tblAccountProductsBase::prdDesc,             S(QString),                QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidFromDate,    S(TAPI::Date_t),           QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidToDate,      S(TAPI::Date_t),           QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidFromHour,    S(NULLABLE_TYPE(quint8)),  QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidToHour,      S(NULLABLE_TYPE(quint8)),  QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { tblAccountProductsBase::prdPrivs,            S(TAPI::PrivObject_t),     QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdVAT,              S(NULLABLE_TYPE(double)),  QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
-            { tblAccountProductsBase::prdInStockCount,     S(quint32),                QFV.integer().minValue(0),               QRequired,  UPAdmin },
-            { tblAccountProductsBase::prdOrderedCount,     S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPAdmin },
-            { tblAccountProductsBase::prdReturnedCount,    S(NULLABLE_TYPE(quint32)), QFV,                                     QNull,      UPAdmin },
-            { tblAccountProductsBase::prdStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+        ///<  ColName                                       Type                         Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblAccountProductsBase::prdID,                ORM_PRIMARYKEY_32 },
+            { tblAccountProductsBase::prdCode,              S(TAPI::ProductCode_t),      QFV,                                     QRequired,  UPOwner },
+            { tblAccountProductsBase::prdName,              S(QString),                  QFV,                                     QRequired,  UPOwner },
+            { tblAccountProductsBase::prdDesc,              S(QString),                  QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidFromDate,     S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidToDate,       S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdValidToHour,       S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
+            { tblAccountProductsBase::prdPrivs,             S(TAPI::PrivObject_t),       QFV,                                     QNull,      UPOwner },
+            { tblAccountProductsBase::prdVAT,               S(NULLABLE_TYPE(double)),    QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
+            { tblAccountProductsBase::prdInStockQty,        S(qreal),                    QFV.integer().minValue(0),               QRequired,  UPAdmin },
+            { tblAccountProductsBase::prdOrderedQty,        S(NULLABLE_TYPE(qreal)),     QFV,                                     QNull,      UPAdmin },
+            { tblAccountProductsBase::prdReturnedQty,       S(NULLABLE_TYPE(qreal)),     QFV,                                     QNull,      UPAdmin },
+            { tblAccountProductsBase::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountProductsBase::prdCreationDateTime, ORM_CREATED_ON },
-            { tblAccountProductsBase::prdCreatedBy_usrID,  ORM_CREATED_BY },
-            { tblAccountProductsBase::prdUpdatedBy_usrID,  ORM_UPDATED_BY },
+            { tblAccountProductsBase::prdCreationDateTime,  ORM_CREATED_ON },
+            { tblAccountProductsBase::prdCreatedBy_usrID,   ORM_CREATED_BY },
+            { tblAccountProductsBase::prdUpdatedBy_usrID,   ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<DBM::stuRelation>({
-        ///<  Col                                         Reference Table    ForeignCol          Rename     LeftJoin
+        ///<  Col                                           Reference Table    ForeignCol          Rename     LeftJoin
             { "saleable",  { tblAccountProductsBase::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slb_prdID } },
             ORM_RELATION_OF_CREATOR(tblAccountProductsBase::prdCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
@@ -222,8 +222,6 @@ intfAccountProducts::intfAccountProducts(
 
 QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
-    ///TODO: get just by priv. users
-
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
@@ -262,29 +260,29 @@ intfAccountSaleables::intfAccountSaleables(
         _schema,
         tblAccountSaleablesBase::Name,
         QList<DBM::clsORMField>({
-        ///<  ColName                                          Type                             Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
-            { tblAccountSaleablesBase::slbID,                  ORM_PRIMARYKEY_32 },
-            { tblAccountSaleablesBase::slb_prdID,              S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbCode,                S(TAPI::SaleableCode_t),         QFV,                             QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbName,                S(QString),                      QFV,                             QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbDesc,                S(QString),                      QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbType,                S(TAPI::enuSaleableType::Type),  QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-            { tblAccountSaleablesBase::slbAvailableFromDate,   S(TAPI::DateTime_t),             QFV,                             QNow,       UPOwner },
-            { tblAccountSaleablesBase::slbAvailableToDate,     S(TAPI::DateTime_t),             QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbPrivs,               S(TAPI::JSON_t),                 QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbBasePrice,           S(qreal),                        QFV.real().minValue(0),          QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbAdditives,           S(TAPI::SaleableAdditive_t),     QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbProductCount,        S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
-            { tblAccountSaleablesBase::slbMaxSaleCountPerUser, S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPOwner},
-            { tblAccountSaleablesBase::slbInStockCount,        S(quint32),                      QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { tblAccountSaleablesBase::slbOrderedCount,        S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPAdmin },
-            { tblAccountSaleablesBase::slbReturnedCount,       S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPAdmin },
-            { tblAccountSaleablesBase::slbVoucherTemplate,     S(QString),                      QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbStatus,              ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+        ///<  ColName                                           Type                             Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
+            { tblAccountSaleablesBase::slbID,                   ORM_PRIMARYKEY_32 },
+            { tblAccountSaleablesBase::slb_prdID,               S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbCode,                 S(TAPI::SaleableCode_t),         QFV,                             QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbName,                 S(QString),                      QFV,                             QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbDesc,                 S(QString),                      QFV,                             QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbType,                 S(TAPI::enuSaleableType::Type),  QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
+            { tblAccountSaleablesBase::slbAvailableFromDate,    S(TAPI::DateTime_t),             QFV,                             QNow,       UPOwner },
+            { tblAccountSaleablesBase::slbAvailableToDate,      S(TAPI::DateTime_t),             QFV,                             QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbPrivs,                S(TAPI::JSON_t),                 QFV,                             QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbBasePrice,            S(qreal),                        QFV.real().minValue(0),          QRequired,  UPOwner },
+            { tblAccountSaleablesBase::slbAdditives,            S(TAPI::SaleableAdditive_t),     QFV,                             QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbProductCount,         S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
+            { tblAccountSaleablesBase::slbMaxSaleCountPerUser,  S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPOwner},
+            { tblAccountSaleablesBase::slbInStockQty,           S(qreal),                        QFV.integer().minValue(0),       QRequired,  UPAdmin },
+            { tblAccountSaleablesBase::slbOrderedQty,           S(NULLABLE_TYPE(qreal)),         QFV,                             QNull,      UPAdmin },
+            { tblAccountSaleablesBase::slbReturnedQty,          S(NULLABLE_TYPE(qreal)),         QFV,                             QNull,      UPAdmin },
+            { tblAccountSaleablesBase::slbVoucherTemplate,      S(QString),                      QFV,                             QNull,      UPOwner },
+            { tblAccountSaleablesBase::slbStatus,               ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountSaleablesBase::slbCreationDateTime,    ORM_CREATED_ON },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID,     ORM_CREATED_BY },
-            { tblAccountSaleablesBase::slbUpdatedBy_usrID,     ORM_UPDATED_BY },
+            { tblAccountSaleablesBase::slbCreationDateTime,     ORM_CREATED_ON },
+            { tblAccountSaleablesBase::slbCreatedBy_usrID,      ORM_CREATED_BY },
+            { tblAccountSaleablesBase::slbUpdatedBy_usrID,      ORM_UPDATED_BY },
         }) + _exclusiveCols,
         QList<DBM::stuRelation>({
         ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
@@ -713,9 +711,9 @@ void stuAssetItem::fromVariantMap(const QVariantMap& _info)
     SET_FIELD_FROM_VARIANT_MAP(this->prdValidToHour,         _info, tblAccountProductsBase,  prdValidToHour);
     SET_FIELD_FROM_VARIANT_MAP(this->prdPrivs,               _info, tblAccountProductsBase,  prdPrivs);
     SET_FIELD_FROM_VARIANT_MAP(this->prdVAT,                 _info, tblAccountProductsBase,  prdVAT);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdInStockCount,        _info, tblAccountProductsBase,  prdInStockCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdOrderedCount,        _info, tblAccountProductsBase,  prdOrderedCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdReturnedCount,       _info, tblAccountProductsBase,  prdReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdInStockQty,          _info, tblAccountProductsBase,  prdInStockQty);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdOrderedQty,          _info, tblAccountProductsBase,  prdOrderedQty);
+    SET_FIELD_FROM_VARIANT_MAP(this->prdReturnedQty,         _info, tblAccountProductsBase,  prdReturnedQty);
     SET_FIELD_FROM_VARIANT_MAP(this->prdStatus,              _info, tblAccountProductsBase,  prdStatus);
 
     SET_FIELD_FROM_VARIANT_MAP(this->slbID,                  _info, tblAccountSaleablesBase, slbID);
@@ -726,9 +724,9 @@ void stuAssetItem::fromVariantMap(const QVariantMap& _info)
     SET_FIELD_FROM_VARIANT_MAP(this->slbAdditives,           _info, tblAccountSaleablesBase, slbAdditives);
     SET_FIELD_FROM_VARIANT_MAP(this->slbProductCount,        _info, tblAccountSaleablesBase, slbProductCount);
     SET_FIELD_FROM_VARIANT_MAP(this->slbMaxSaleCountPerUser, _info, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbInStockCount,        _info, tblAccountSaleablesBase, slbInStockCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbOrderedCount,        _info, tblAccountSaleablesBase, slbOrderedCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbReturnedCount,       _info, tblAccountSaleablesBase, slbReturnedCount);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbInStockQty,          _info, tblAccountSaleablesBase, slbInStockQty);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbOrderedQty,          _info, tblAccountSaleablesBase, slbOrderedQty);
+    SET_FIELD_FROM_VARIANT_MAP(this->slbReturnedQty,         _info, tblAccountSaleablesBase, slbReturnedQty);
     SET_FIELD_FROM_VARIANT_MAP(this->slbVoucherTemplate,     _info, tblAccountSaleablesBase, slbVoucherTemplate);
     SET_FIELD_FROM_VARIANT_MAP(this->slbStatus,              _info, tblAccountSaleablesBase, slbStatus);
 }

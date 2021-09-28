@@ -60,7 +60,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_QString(SaleableCode),
     SF_qreal(Multiplier),
-    SF_NULLABLE_quint32(MinCount)
+    SF_NULLABLE_qreal(MinQty)
 );
 
 struct stuFullDiscount
@@ -97,7 +97,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
     QString      , Desc       , QString()      , v.size() , v          , v.toString()                          ,
     quint32      , UnitPrice  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    qint16       , Qty        , 0              , v        , v          , static_cast<qint16>(v.toDouble())     ,
+    qreal        , Qty        , 0              , v        , C2DBL(v)   , v.toDouble()                          ,
     quint32      , SubTotal   , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
     stuDiscount3 , Discount   , stuDiscount3() , v.ID>0   , v.toJson() , stuDiscount3().fromJson(v.toObject()) ,
     quint32      , DisAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
@@ -142,9 +142,9 @@ struct stuAssetItem {
     NULLABLE_TYPE(quint8)           prdValidToHour;
     TAPI::PrivObject_t              prdPrivs;
     NULLABLE_TYPE(double)           prdVAT;
-    quint32                         prdInStockCount;
-    NULLABLE_TYPE(quint32)          prdOrderedCount;
-    NULLABLE_TYPE(quint32)          prdReturnedCount;
+    quint32                         prdInStockQty;
+    NULLABLE_TYPE(quint32)          prdOrderedQty;
+    NULLABLE_TYPE(quint32)          prdReturnedQty;
     TAPI::enuGenericStatus::Type    prdStatus;
 
     //saleable
@@ -156,14 +156,14 @@ struct stuAssetItem {
     TAPI::SaleableAdditive_t        slbAdditives;
     quint32                         slbProductCount;
     NULLABLE_TYPE(quint32)          slbMaxSaleCountPerUser;
-    quint32                         slbInStockCount;
-    NULLABLE_TYPE(quint32)          slbOrderedCount;
-    NULLABLE_TYPE(quint32)          slbReturnedCount;
+    quint32                         slbInStockQty;
+    NULLABLE_TYPE(quint32)          slbOrderedQty;
+    NULLABLE_TYPE(quint32)          slbReturnedQty;
     QString                         slbVoucherTemplate;
     TAPI::enuGenericStatus::Type    slbStatus;
 
     qreal                           SubTotal;
-    NULLABLE_TYPE(stuDiscount3)      Discount;
+    NULLABLE_TYPE(stuDiscount3)     Discount;
     qreal                           TotalPrice;
 
     struct {
@@ -257,10 +257,10 @@ namespace tblAccountProductsBase {
     TARGOMAN_CREATE_CONSTEXPR(prdVAT);
 
     ///TODO: create trigger for this 3 fields
-    TARGOMAN_CREATE_CONSTEXPR(prdInStockCount);
-    TARGOMAN_CREATE_CONSTEXPR(prdOrderedCount);
-    TARGOMAN_CREATE_CONSTEXPR(prdReturnedCount);
-    // prdRemainingCount = prdInStockCount - (prdOrderedCount - prdReturnedCount)
+    TARGOMAN_CREATE_CONSTEXPR(prdInStockQty);
+    TARGOMAN_CREATE_CONSTEXPR(prdOrderedQty);
+    TARGOMAN_CREATE_CONSTEXPR(prdReturnedQty);
+    // prdRemainingCount = prdInStockQty - (prdOrderedQty - prdReturnedQty)
 
     TARGOMAN_CREATE_CONSTEXPR(prdStatus);
     TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
@@ -285,10 +285,10 @@ namespace tblAccountSaleablesBase {
     TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
 
     ///TODO: create trigger for this 3 fields and make changes to prd Count fields
-    TARGOMAN_CREATE_CONSTEXPR(slbInStockCount);
-    TARGOMAN_CREATE_CONSTEXPR(slbOrderedCount);
-    TARGOMAN_CREATE_CONSTEXPR(slbReturnedCount);
-    // slbRemainingCount = slbInStockCount - (slbOrderedCount - slbReturnedCount)
+    TARGOMAN_CREATE_CONSTEXPR(slbInStockQty);
+    TARGOMAN_CREATE_CONSTEXPR(slbOrderedQty);
+    TARGOMAN_CREATE_CONSTEXPR(slbReturnedQty);
+    // slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
 
     TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
     TARGOMAN_CREATE_CONSTEXPR(slbStatus);

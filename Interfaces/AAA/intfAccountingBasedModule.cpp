@@ -435,12 +435,13 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     this->AccountCoupons->callSP("sp_UPDATE_saleable_un_reserve", {
         { "iSaleableID", SaleableID },
         { "iUserID", _userID },
+        { "iQty", _voucherItem.Qty },
     });
 
     //-- un-reserve saleable ------------------------------------
 //    UpdateQuery(*this->AccountSaleables)
 //        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountSaleablesBase::slbReturnedCount, _voucherItem.Qty)
+//        .increament(tblAccountSaleablesBase::slbReturnedQty, _voucherItem.Qty)
 //        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 //        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
@@ -449,7 +450,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 //    UpdateQuery(*this->AccountProducts)
 //        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
 //        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountProductsBase::prdReturnedCount, _voucherItem.Qty)
+//        .increament(tblAccountProductsBase::prdReturnedQty, _voucherItem.Qty)
 //        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 //        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
@@ -466,7 +467,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
         TAPI::JWT_t _JWT,
         TAPI::SaleableCode_t _saleableCode,
         Targoman::API::AAA::OrderAdditives_t _orderAdditives,
-        quint16 _qty, ///TODO: use float for qty
+        qreal _qty,
         TAPI::CouponCode_t _discountCode,
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams,
@@ -492,9 +493,9 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
             tblAccountSaleablesBase::slbBasePrice,
             tblAccountSaleablesBase::slbAdditives,
             tblAccountSaleablesBase::slbProductCount,
-            tblAccountSaleablesBase::slbInStockCount,
-            tblAccountSaleablesBase::slbOrderedCount,
-            tblAccountSaleablesBase::slbReturnedCount,
+            tblAccountSaleablesBase::slbInStockQty,
+            tblAccountSaleablesBase::slbOrderedQty,
+            tblAccountSaleablesBase::slbReturnedQty,
             tblAccountSaleablesBase::slbVoucherTemplate,
             tblAccountSaleablesBase::slbStatus,
             //tblAccountSaleablesBase::slbCreatedBy_usrID,
@@ -511,9 +512,9 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
             tblAccountProductsBase::prdValidToHour,
             //tblAccountProductsBase::prdPrivs,
             tblAccountProductsBase::prdVAT,
-            tblAccountProductsBase::prdInStockCount,
-            tblAccountProductsBase::prdOrderedCount,
-            tblAccountProductsBase::prdReturnedCount,
+            tblAccountProductsBase::prdInStockQty,
+            tblAccountProductsBase::prdOrderedQty,
+            tblAccountProductsBase::prdReturnedQty,
             tblAccountProductsBase::prdStatus,
             //tblAccountProductsBase::prdCreatedBy_usrID,
             //tblAccountProductsBase::prdCreationDateTime,
@@ -535,17 +536,17 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     AssetItem.fromVariantMap(SaleableInfo);
 
     //-- check available count --------------------------------
-    qint64 AvailableProductCount = AssetItem.prdInStockCount - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedCount, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedCount, 0));
-    qint64 AvailableSaleableCount = AssetItem.slbInStockCount - (NULLABLE_GET_OR_DEFAULT(AssetItem.slbOrderedCount, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.slbReturnedCount, 0));
+    qreal AvailableProductQty = AssetItem.prdInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedQty, 0));
+    qreal AvailableSaleableQty = AssetItem.slbInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.slbOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.slbReturnedQty, 0));
 
-    if ((AvailableSaleableCount < 0) || (AvailableProductCount < 0))
-        throw exHTTPInternalServerError(QString("AvailableSaleableCount(%1) or AvailableProductCount(%2) < 0").arg(AvailableSaleableCount).arg(AvailableProductCount));
+    if ((AvailableSaleableQty < 0) || (AvailableProductQty < 0))
+        throw exHTTPInternalServerError(QString("AvailableSaleableQty(%1) or AvailableProductQty(%2) < 0").arg(AvailableSaleableQty).arg(AvailableProductQty));
 
-    if (AvailableSaleableCount > AvailableProductCount)
-        throw exHTTPInternalServerError(QString("AvailableSaleableCount(%1) > AvailableProductCount(%2)").arg(AvailableSaleableCount).arg(AvailableProductCount));
+    if (AvailableSaleableQty > AvailableProductQty)
+        throw exHTTPInternalServerError(QString("AvailableSaleableQty(%1) > AvailableProductQty(%2)").arg(AvailableSaleableQty).arg(AvailableProductQty));
 
-    if (AvailableSaleableCount < _qty)
-        throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableCount).arg(_qty));
+    if (AvailableSaleableQty < _qty)
+        throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableQty).arg(_qty));
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -730,15 +731,15 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
                 stuDiscountSaleableBasedMultiplier cur;
                 cur.fromJson(elm.toObject());
 
-                qint32 MinCount = NULLABLE_GET_OR_DEFAULT(cur.MinCount, -1);
-//                qDebug() << "********" << cur.SaleableCode << MinCount << cur.Multiplier;
+                qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
+//                qDebug() << "********" << cur.SaleableCode << MinValue << cur.Multiplier;
 
                 if ((cur.SaleableCode == _saleableCode)
-                        && (NULLABLE_GET_OR_DEFAULT(cur.MinCount, 0) <= _qty)
+                        && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _qty)
                     )
                 {
                     if ((multiplier.Multiplier == 0)
-                            || (NULLABLE_GET_OR_DEFAULT(multiplier.MinCount, 0) < MinCount))
+                            || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
                         multiplier = cur;
                 }
             }
@@ -826,6 +827,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     this->AccountCoupons->callSP("sp_UPDATE_saleable_reserve", {
         { "iSaleableID", AssetItem.slbID },
         { "iUserID", currentUserID },
+        { "iQty", _qty },
     });
 
     //-- new pre voucher item --------------------------------

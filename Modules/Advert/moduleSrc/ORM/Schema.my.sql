@@ -57,7 +57,7 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=155 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -81,9 +81,9 @@ CREATE TABLE `tblAccountProducts` (
   `prdClicksTotal` bigint DEFAULT '-1',
   `prdPrivs` json DEFAULT NULL,
   `prdVAT` double DEFAULT NULL,
-  `prdInStockCount` int DEFAULT NULL,
-  `prdOrderedCount` int DEFAULT NULL,
-  `prdReturnedCount` int DEFAULT NULL,
+  `prdInStockQty` double DEFAULT NULL,
+  `prdOrderedQty` double DEFAULT NULL,
+  `prdReturnedQty` double DEFAULT NULL,
   `prdStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A: Active, R: Removed',
   `_InvalidatedAt` int unsigned NOT NULL DEFAULT '0',
   `prdCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -120,9 +120,9 @@ CREATE TABLE `tblAccountSaleables` (
   `slbAdditives` json DEFAULT NULL,
   `slbProductCount` int NOT NULL,
   `slbMaxSaleCountPerUser` int DEFAULT NULL,
-  `slbInStockCount` int DEFAULT NULL,
-  `slbOrderedCount` int DEFAULT NULL,
-  `slbReturnedCount` int DEFAULT NULL,
+  `slbInStockQty` double DEFAULT NULL,
+  `slbOrderedQty` double DEFAULT NULL,
+  `slbReturnedQty` double DEFAULT NULL,
   `slbVoucherTemplate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `slbShowPerDay` int NOT NULL DEFAULT '0',
   `slbShowTotal` int NOT NULL DEFAULT '0',
@@ -143,7 +143,7 @@ CREATE TABLE `tblAccountSaleables` (
   KEY `slbType` (`slbType`) USING BTREE,
   KEY `slbAvailableToDate` (`slbAvailableToDate`),
   KEY `slbAvailableFromDate` (`slbAvailableFromDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -174,7 +174,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=505 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=517 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -188,7 +188,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=225 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=229 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -348,7 +348,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=267 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=271 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -500,11 +500,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_reserve`(
 	IN `iSaleableID` INT UNSIGNED,
-	IN `iUserID` BIGINT UNSIGNED
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iQty` DOUBLE
 )
 BEGIN
         UPDATE tblAccountSaleables
-           SET slbOrderedCount = slbOrderedCount + 1
+           SET slbOrderedQty = slbOrderedQty + iQty
              , slbUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -512,7 +513,7 @@ BEGIN
         UPDATE tblAccountProducts
     INNER JOIN tblAccountSaleables
             ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
-           SET prdOrderedCount = prdOrderedCount + 1
+           SET prdOrderedQty = prdOrderedQty + iQty
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -534,11 +535,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_un_reserve`(
 	IN `iSaleableID` INT UNSIGNED,
-	IN `iUserID` BIGINT UNSIGNED
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iQty` DOUBLE
 )
 BEGIN
         UPDATE tblAccountSaleables
-           SET slbReturnedCount = slbReturnedCount + 1
+           SET slbReturnedQty = slbReturnedQty + iQty
              , slbUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
@@ -546,7 +548,7 @@ BEGIN
         UPDATE tblAccountProducts
     INNER JOIN tblAccountSaleables
             ON tblAccountSaleables.slb_prdID = tblAccountProducts.prdID
-           SET prdReturnedCount = prdReturnedCount + 1
+           SET prdReturnedQty = prdReturnedQty + iQty
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;

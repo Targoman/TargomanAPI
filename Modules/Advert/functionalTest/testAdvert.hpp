@@ -197,7 +197,7 @@ private slots:
                 {
                     { tblAccountProductsBase::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::prdName,          "test product 123" },
-                    { tblAccountProductsBase::prdInStockCount,  1 },
+                    { tblAccountProductsBase::prdInStockQty,  1 },
                     { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
                     { tblAccountProducts::prd_locID,            this->LocationID },
                 }
@@ -229,7 +229,7 @@ private slots:
                     { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
                     { tblAccountSaleablesBase::slbBasePrice,        12000 },
                     { tblAccountSaleablesBase::slbProductCount,     900 },
-                    { tblAccountSaleablesBase::slbInStockCount,     1 },
+                    { tblAccountSaleablesBase::slbInStockQty,       1 },
                     { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
                 }
             );
@@ -416,9 +416,9 @@ private slots:
 //                            { "other",     2.0 },
 //                        })
                         QVariantList({
-                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.5 }, { "minCount", 0 } }),
-                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.8 }, { "minCount", 5 } }),
-                            QVariantMap({ { "saleableCode", "other" },                  { "multiplier", 2.0 }                    }),
+                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.5 }, { "minQty", 0 } }),
+                            QVariantMap({ { "saleableCode", this->BannerSaleableCode }, { "multiplier", 1.8 }, { "minQty", 5 } }),
+                            QVariantMap({ { "saleableCode", "other" },                  { "multiplier", 2.0 }                  }),
                         })
                     },
                 }

@@ -351,7 +351,7 @@ inline QString toCammel(const QString& _name)
 #define INTERNAL_C2DBL(v) static_cast<double>(v)
 
 #define INTERNAL_V2DBL(v) v.toDouble()
-#define INTERNAL_V2double(v) INTERNAL_V2DBL(v)
+//#define INTERNAL_V2double(v) INTERNAL_V2DBL(v)
 
 #define INTERNAL_V2U8(v) static_cast<quint8>(v.toDouble())
 #define INTERNAL_V2uint8(v) INTERNAL_V2U8(v)

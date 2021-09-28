@@ -211,7 +211,7 @@ QVariant Advert::apiPOSTfixtureSetup(
     QVariantMap ProductValues = {
         { tblAccountProductsBase::prdCode,          ProductCode },
         { tblAccountProductsBase::prdName,          QString("fixture product %1").arg(Random) },
-        { tblAccountProductsBase::prdInStockCount,  1 },
+        { tblAccountProductsBase::prdInStockQty,  1 },
         { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
         { tblAccountProducts::prd_locID,            LocationID },
     };
@@ -227,9 +227,9 @@ QVariant Advert::apiPOSTfixtureSetup(
 //                        .addCol(tblAccountProductsBase::prdValidToHour)
 //                        .addCol(tblAccountProductsBase::prdPrivs)
 //                        .addCol(tblAccountProductsBase::prdVAT)
-                        .addCol(tblAccountProductsBase::prdInStockCount)
-//                        .addCol(tblAccountProductsBase::prdOrderedCount)
-//                        .addCol(tblAccountProductsBase::prdReturnedCount)
+                        .addCol(tblAccountProductsBase::prdInStockQty)
+//                        .addCol(tblAccountProductsBase::prdOrderedQty)
+//                        .addCol(tblAccountProductsBase::prdReturnedQty)
 //                        .addCol(tblAccountProductsBase::prdStatus)
                         .addCol(tblAccountProducts::prdType)
                         .addCol(tblAccountProducts::prd_locID)
@@ -256,7 +256,7 @@ QVariant Advert::apiPOSTfixtureSetup(
         { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
         { tblAccountSaleablesBase::slbBasePrice,        12'000 },
         { tblAccountSaleablesBase::slbProductCount,     900 },
-        { tblAccountSaleablesBase::slbInStockCount,     1 },
+        { tblAccountSaleablesBase::slbInStockQty,       1 },
         { tblAccountSaleablesBase::slbVoucherTemplate,  QString("fixture saleable %1 vt").arg(Random) },
     };
 
@@ -274,9 +274,9 @@ QVariant Advert::apiPOSTfixtureSetup(
 //                         .addCol(tblAccountSaleablesBase::slbAdditives)
                          .addCol(tblAccountSaleablesBase::slbProductCount)
 //                         .addCol(tblAccountSaleablesBase::slbMaxSaleCountPerUser)
-                         .addCol(tblAccountSaleablesBase::slbInStockCount)
-//                         .addCol(tblAccountSaleablesBase::slbOrderedCount)
-//                         .addCol(tblAccountSaleablesBase::slbReturnedCount)
+                         .addCol(tblAccountSaleablesBase::slbInStockQty)
+//                         .addCol(tblAccountSaleablesBase::slbOrderedQty)
+//                         .addCol(tblAccountSaleablesBase::slbReturnedQty)
                          .addCol(tblAccountSaleablesBase::slbVoucherTemplate)
 //                         .addCol(tblAccountSaleablesBase::slbStatus)
 //                         .addCol(tblAccountSaleablesBase::slbCreatedBy_usrID)
@@ -310,9 +310,9 @@ QVariant Advert::apiPOSTfixtureSetup(
 //        { tblAccountCouponsBase::cpnMaxAmount,  },
         { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
           QVariantList({
-              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.5 }, { "minCount", 0 } }),
-              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.8 }, { "minCount", 5 } }),
-              QVariantMap({ { "saleableCode", "other" },      { "multiplier", 2.0 }                    }),
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.5 }, { "minQty", 0 } }),
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.8 }, { "minQty", 5 } }),
+              QVariantMap({ { "saleableCode", "other" },      { "multiplier", 2.0 }                  }),
           })
         },
 //        { tblAccountCouponsBase::cpnTotalUsedCount,  },
@@ -349,14 +349,14 @@ QVariant Advert::apiPOSTfixtureSetup(
 
     //-- add to basket --------------------------------------
     LastPreVoucher = this->apiPOSTaddToBasket(
-                _JWT,
-                /* saleableCode        */ SaleableCode,
-                /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
-                /* qty                 */ 1,
-                /* discountCode        */ CouponCode,
-                /* referrer            */ "",
-                /* extraReferrerParams */ {},
-                /* lastPreVoucher      */ LastPreVoucher
+        _JWT,
+        /* saleableCode        */ SaleableCode,
+        /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
+        /* qty                 */ 1,
+        /* discountCode        */ CouponCode,
+        /* referrer            */ "",
+        /* extraReferrerParams */ {},
+        /* lastPreVoucher      */ LastPreVoucher
     );
 
     //-- finalize basket --------------------------------------

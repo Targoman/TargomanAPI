@@ -88,7 +88,7 @@ protected slots:
             TAPI::JWT_t _JWT,
             TAPI::SaleableCode_t _saleableCode,
             Targoman::API::AAA::OrderAdditives_t _orderAdditives = {},
-            quint16 _qty = 1,
+            qreal _qty = 1,
             TAPI::CouponCode_t _discountCode = {},
             QString _referrer = {},
             TAPI::JSON_t _extraReferrerParams = {},
