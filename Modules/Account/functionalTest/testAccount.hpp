@@ -342,6 +342,46 @@ private slots:
         }
     }
 
+    ///TODO: test [GET]     Account/User/photo
+    ///TODO: test [PATCH]   Account/User/photo
+    ///TODO: test [PATCH]   Account/User/email
+    ///TODO: test [PATCH]   Account/User/mobile
+
+    void UpdateUserPersonalInfo() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/personalInfo",
+                        {},
+                        {
+                            { "name", "hassan" },
+                            { "family", "taghi" },
+                            { "language", "fa" },
+                            { "gender", "Male" },
+                        })
+                .toBool());
+    }
+
+    void UpdateUserFinancialInfo() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/financialInfo",
+                        {},
+                        {
+                            { "iban", "IR112222222222" },
+                            { "ether", "zzzzzzzzzzzz" },
+                        })
+                .toBool());
+    }
+
+    void UpdateUserExtraInfo() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/extraInfo",
+                        {},
+                        {
+                            { "job", "1234" },
+                            { "education", "" },
+                        })
+                .toBool());
+    }
+
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/

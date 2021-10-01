@@ -338,7 +338,8 @@ bool intfAccountingBasedModule::increaseDiscountUsage(
 }
 
 bool intfAccountingBasedModule::decreaseDiscountUsage(
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem)
+        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+    )
 {
     if (_voucherItem.DisAmount > 0)
     {

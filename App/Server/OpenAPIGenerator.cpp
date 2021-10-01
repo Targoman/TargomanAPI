@@ -18,15 +18,14 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "OpenAPIGenerator.h"
 #include "ServerConfigs.h"
 #include "Interfaces/DBM/clsORMField.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 using namespace DBM;
 
@@ -77,7 +76,7 @@ QJsonObject initializeObject()
 
 QJsonObject OpenAPIGenerator::retrieveJson()
 {
-    if(OpenAPIGenerator::CachedJson.isEmpty() == false)
+    if (OpenAPIGenerator::CachedJson.isEmpty() == false)
         return OpenAPIGenerator::CachedJson;
     /**/
     OpenAPIGenerator::CachedJson = initializeObject();
@@ -104,28 +103,29 @@ QJsonObject OpenAPIGenerator::retrieveJson()
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
-            switch(_complexity){
-            case COMPLEXITY_Number:
-            case COMPLEXITY_Boolean:
-            case COMPLEXITY_Integral:
-                if(_typeName == "bool")
-                    return "boolean";
-                else if(_typeName.endsWith("int8") || _typeName.endsWith("int16") || _typeName.endsWith("int32") || _typeName.endsWith("int64") || _typeName.endsWith("long"))
-                    return "integer";
-                else if(_typeName.endsWith("char"))
-                    return "string";
-                else
-                    return  "number";
-            case COMPLEXITY_String:
-            case COMPLEXITY_Complex:
-            case COMPLEXITY_Enum:
-                return  "string";
-            case COMPLEXITY_Object:
-                return "object";
-            case COMPLEXITY_File:
-                if(_typeName == "TAPI::Files_t")
-                    return "string";
-                return  "file";
+            switch(_complexity)
+            {
+                case COMPLEXITY_Number:
+                case COMPLEXITY_Boolean:
+                case COMPLEXITY_Integral:
+                    if (_typeName == "bool")
+                        return "boolean";
+                    else if (_typeName.endsWith("int8") || _typeName.endsWith("int16") || _typeName.endsWith("int32") || _typeName.endsWith("int64") || _typeName.endsWith("long"))
+                        return "integer";
+                    else if (_typeName.endsWith("char"))
+                        return "string";
+                    else
+                        return "number";
+                case COMPLEXITY_String:
+                case COMPLEXITY_Complex:
+                case COMPLEXITY_Enum:
+                    return  "string";
+                case COMPLEXITY_Object:
+                    return "object";
+                case COMPLEXITY_File:
+                    if(_typeName == "TAPI::Files_t")
+                        return "string";
+                    return "file";
             }
             return "ERROR";
         };
@@ -134,49 +134,57 @@ QJsonObject OpenAPIGenerator::retrieveJson()
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
-            switch(_complexity){
-            case COMPLEXITY_Number:
-            case COMPLEXITY_Integral:
-                if(_typeName.endsWith("int8")){
-                    _paramSpecs["format"] = "int32";
-                    _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -128;
-                    _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 255 : 127;
-                } else if(_typeName.endsWith("int16")){
-                    _paramSpecs["format"] = "int32";
-                    _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -32768 ;
-                    _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 65535 : 32767;
-                } else if(_typeName.endsWith("int32")){
-                    _paramSpecs["format"] = "int32";
-                    if(_typeName.startsWith("uint"))
-                        _paramSpecs["minimum"] = 0;
-                } else if(_typeName.endsWith("int64")){
-                    _paramSpecs["format"] = "int64";
-                    if(_typeName.startsWith("uint"))
-                        _paramSpecs["minimum"] = 0;
-                }
-                else if(_typeName.endsWith("float")) _paramSpecs["format"] = "int64";
-                else if(_typeName.endsWith("double")) _paramSpecs["format"] = "double";
-                break;
-            case COMPLEXITY_Complex:
-            case COMPLEXITY_String:
-                if(_typeName != "string"){
-                    QString Format = _typeName.split("::").last().toLower();
-                    if(Format.endsWith("_t")) Format = Format.mid(0, Format.size() - 2);
-                    if(Format.startsWith('q')) Format = Format.mid(1);
-                    _paramSpecs["format"] = Format;
-                }
-                //ParamSpecs["pattern"] = ;
-                break;
-            default: break;
+            switch(_complexity)
+            {
+                case COMPLEXITY_Number:
+                case COMPLEXITY_Integral:
+                    if (_typeName.endsWith("int8")) {
+                        _paramSpecs["format"] = "int32";
+                        _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -128;
+                        _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 255 : 127;
+                    }
+                    else if (_typeName.endsWith("int16")) {
+                        _paramSpecs["format"] = "int32";
+                        _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -32768 ;
+                        _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 65535 : 32767;
+                    }
+                    else if (_typeName.endsWith("int32")) {
+                        _paramSpecs["format"] = "int32";
+                        if (_typeName.startsWith("uint"))
+                            _paramSpecs["minimum"] = 0;
+                    }
+                    else if (_typeName.endsWith("int64")) {
+                        _paramSpecs["format"] = "int64";
+                        if (_typeName.startsWith("uint"))
+                            _paramSpecs["minimum"] = 0;
+                    }
+                    else if (_typeName.endsWith("float")) _paramSpecs["format"] = "int64";
+                    else if (_typeName.endsWith("double")) _paramSpecs["format"] = "double";
+                    break;
+                case COMPLEXITY_Complex:
+                case COMPLEXITY_String:
+                    if (_typeName != "string") {
+                        QString Format = _typeName.split("::").last().toLower();
+                        if (Format.endsWith("_t")) Format = Format.mid(0, Format.size() - 2);
+                        if (Format.startsWith('q')) Format = Format.mid(1);
+                        _paramSpecs["format"] = Format;
+                    }
+                    //ParamSpecs["pattern"] = ;
+                    break;
+                default:
+                    break;
             }
         };
 
-        auto fillParamTypeSpec = [mapTypeToValidOpenAPIType, addExtraParamsByType](intfAPIArgManipulator* _argMan,
+        auto fillParamTypeSpec = [mapTypeToValidOpenAPIType, addExtraParamsByType](
+                intfAPIArgManipulator* _argMan,
                 const QList<clsORMField>& _fields,
                 QString _typeName,
                 QJsonObject& ParamSpecs,
                 QVariant _defaultValue = {},
-                bool addExample = false) -> void{
+                bool addExample = false
+            ) -> void
+        {
             ParamSpecs["description"] = (_argMan->isNullable() ? "Null to keep as is or "  : "") + _argMan->description(_fields);
             ParamSpecs["type"] = mapTypeToValidOpenAPIType(_argMan->complexity(), _typeName);
             addExtraParamsByType(ParamSpecs, _argMan->complexity(), _typeName);
@@ -536,6 +544,4 @@ QJsonObject OpenAPIGenerator::retrieveJson()
     return OpenAPIGenerator::CachedJson;
 }
 
-}
-}
-}
+} //namespace Targoman::API::Server

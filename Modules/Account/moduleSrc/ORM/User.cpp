@@ -26,6 +26,8 @@
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
+
 namespace Targoman::API::AccountModule::ORM {
 
 //using namespace DBManager;
@@ -41,10 +43,10 @@ User::User() :
         {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
             //ORM_PRIMARYKEY_64 with self:true
             { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
-            { tblUser::usrGender,           S(TAPI::enuUserGender::Type),   QFV,                                   TAPI::enuUserGender::NotExpressed, UPOwner },
+            { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
             { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
             { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
-            { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
+            { tblUser::usrGender,           S(TAPI::enuGender::Type),   QFV,                                   TAPI::enuGender::NotExpressed, UPOwner },
             { tblUser::usrMobile,           S(TAPI::Mobile_t),              QFV,                                   QNull,     UPOwner },
             { tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type), QFV,                                   TAPI::enuUserApproval::None },
             //{ tblUser::usrPass,
@@ -113,6 +115,9 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
+/*
+ * this method only can call by admin user
+ */
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
@@ -125,51 +130,6 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-
-bool User::apiUPDATEprofile(
-        TAPI::JWT_t _JWT,
-        NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender,
-        NULLABLE_TYPE(QString) _name,
-        NULLABLE_TYPE(QString) _family,
-        NULLABLE_TYPE(TAPI::ISO639_2_t) _lang,
-        NULLABLE_TYPE(TAPI::Email_t) _email,
-        NULLABLE_TYPE(TAPI::Mobile_t) _mobile,
-        NULLABLE_TYPE(TAPI::MD5_t) _pass,
-        NULLABLE_TYPE(QString) _salt
-    )
-{
-    if (NULLABLE_HAS_VALUE(_email) || NULLABLE_HAS_VALUE(_mobile)){
-        if (NULLABLE_IS_NULL(_pass) || _pass->isEmpty() || NULLABLE_IS_NULL(_salt))
-            throw exHTTPBadRequest("Password and salt are required to change email");
-        QFV.asciiAlNum().maxLenght(20).validate(*_salt, "salt");
-    }
-    if (NULLABLE_HAS_VALUE(_email) && _email->size())
-        this->callSP("AAA.sp_CREATE_approvalRequest",{
-                         { "iWhat2Approve", "E" },
-                         { "iUserID", clsJWT(_JWT).usrID() },
-                         { "iKey", *_email },
-                         { "iPass", *_pass },
-                         { "iSalt", *_salt },
-                     });
-    if (NULLABLE_HAS_VALUE(_mobile) && _mobile->size())
-        this->callSP("AAA.sp_CREATE_approvalRequest",{
-                         { "iWhat2Approve", "E" },
-                         { "iUserID", clsJWT(_JWT).usrID() },
-                         { "iKey", *_mobile },
-                         { "iPass", *_pass },
-                         { "iSalt", *_salt },
-                     });
-
-    QVariantMap ToUpdate;
-    if (NULLABLE_HAS_VALUE(_name)) ToUpdate.insert(tblUser::usrName, *_name);
-    if (NULLABLE_HAS_VALUE(_family)) ToUpdate.insert(tblUser::usrFamily, *_family);
-    if (NULLABLE_HAS_VALUE(_lang)) ToUpdate.insert(tblUser::usrLanguage, *_lang);
-    if (NULLABLE_HAS_VALUE(_gender)) ToUpdate.insert(tblUser::usrGender, *_gender);
-
-    /*if(ToUpdate.size())
-        return this->update(clsJWT(_JWT).usrID(), {{tblUser::usrID, clsJWT(_JWT).usrID()}}, ToUpdate );*/
-    return true;
 }
 
 TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
@@ -186,7 +146,8 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
 
     QString Mime = "image/png";
     QByteArray Image;
-    if (Photo.size() && Photo.startsWith("data:image/")){
+    if (Photo.size() && Photo.startsWith("data:image/"))
+    {
         Mime = Photo.split(';').first().mid(sizeof("data"));
         Image = QByteArray::fromBase64(Photo.mid(Photo.indexOf("base64,") + sizeof ("base64,") - 1));
     }
@@ -194,32 +155,9 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
     return TAPI::RawData_t(Image, Mime);
 }
 
-/*****************************************************************\
-|* UserExtraInfo *************************************************|
-\*****************************************************************/
-UserExtraInfo::UserExtraInfo() :
-    intfSQLBasedModule (
-        AAASchema,
-        tblUserExtraInfo::Name,
-        {///< ColName                               Type                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblUserExtraInfo::uei_usrID,          ORM_PRIMARYKEY_64 },
-            { tblUserExtraInfo::ueiGender,          S(TAPI::enuUserGender::Type),   QFV,            TAPI::enuUserGender::NotExpressed,  UPOwner,false,false },
-            { tblUserExtraInfo::ueiExtraInfo,       S(QString),                     QFV,            QNull,  UPOwner, false, false },
-            { tblUserExtraInfo::ueiPhoto,           S(TAPI::Base64Image_t),         QFV,            QNull,  UPOwner, false, false },
-            { tblUserExtraInfo::ueiIBAN,            S(TAPI::Sheba_t),               QFV.iban("IR"), QNull,  UPOwner, false, false },
-            { tblUserExtraInfo::ueiEther,           S(TAPI::Ether_t),               QFV,            QNull,  UPOwner, false, false },
-            { tblUserExtraInfo::ueiOAuthAccounts,   S(TAPI::JSON_t),                QFV,            QNull,  UPNone },
-            { tblUserExtraInfo::ueiUpdatedBy_usrID, ORM_UPDATED_BY },
-        },
-        {///< Col                                   Reference Table                        ForeignCol           Rename          LeftJoin
-            ORM_RELATION_OF_UPDATER(tblUserExtraInfo::ueiUpdatedBy_usrID),
-        }
-    )
+bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
 {
-}
-
-bool UserExtraInfo::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image){
-    clsDACResult Result = this->execQuery(
+    clsDACResult Result = UserExtraInfo::instance().execQuery(
                               "UPDATE " + this->Name
                               + QUERY_SEPARATOR
                               + "SET " + tblUserExtraInfo::ueiPhoto +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
@@ -231,30 +169,242 @@ bool UserExtraInfo::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
     return Result.numRowsAffected() > 0;
 }
 
-bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba){
-    clsDACResult Result = this->execQuery(
-                              "UPDATE " + this->Name
-                              + QUERY_SEPARATOR
-                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
-                              + QUERY_SEPARATOR
-                              + "WHERE uei_usrID = ?",
-                              { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
-        );
+bool User::apiUPDATEemail(
+        TAPI::JWT_t     _JWT,
+        TAPI::Email_t   _email,
+        TAPI::MD5_t     _psw,
+        QString         _salt
+    )
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-    return Result.numRowsAffected() > 0;
+    _email = _email.toLower().trimmed();
+
+    if (_email.isEmpty())
+        throw exHTTPBadRequest("Email is empty");
+
+    if ((QFV.email().isValid(_email) == false) || (QFV.emailNotFake().isValid(_email) == false))
+        throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+
+    if (_psw.isEmpty() || _salt.isEmpty())
+        throw exHTTPBadRequest("Password and salt are required to change email");
+
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+
+    this->callSP("AAA.sp_CREATE_approvalRequest", {
+                     { "iWhat2Approve", "E" },
+                     { "iUserID", CurrentUserID },
+                     { "iKey", _email },
+                     { "iPass", _psw },
+                     { "iSalt", _salt },
+                 });
+
+    return true;
 }
 
-bool UserExtraInfo::apiUPDATEetherAdress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress){
-    clsDACResult Result = this->execQuery(
-                              "UPDATE " + this->Name
-                              + QUERY_SEPARATOR
-                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
-                              + QUERY_SEPARATOR
-                              + "WHERE uei_usrID = ?",
-                              { _etherAddress, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
-        );
+bool User::apiUPDATEmobile(
+        TAPI::JWT_t     _JWT,
+        TAPI::Mobile_t  _mobile,
+        TAPI::MD5_t     _psw,
+        QString         _salt
+    )
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-    return Result.numRowsAffected() > 0;
+//    _mobile = normalizePhoneNumber(_mobile);
+
+    if (_mobile.isEmpty())
+        throw exHTTPBadRequest("Mobile is empty");
+
+    if (QFV.mobile().isValid(_mobile) == false)
+        throw exHTTPBadRequest("Invalid mobile.");
+
+    if (_psw.isEmpty() || _salt.isEmpty())
+        throw exHTTPBadRequest("Password and salt are required to change email");
+
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+
+    this->callSP("AAA.sp_CREATE_approvalRequest", {
+                     { "iWhat2Approve", "M" },
+                     { "iUserID", CurrentUserID },
+                     { "iKey", _mobile },
+                     { "iPass", _psw },
+                     { "iSalt", _salt },
+                 });
+
+    return true;
 }
+
+bool User::apiUPDATEpersonalInfo(
+        TAPI::JWT_t         _JWT,
+        QString             _name,
+        QString             _family,
+        TAPI::ISO639_2_t    _language,
+        NULLABLE_TYPE(TAPI::enuGender::Type) _gender
+    )
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+
+    QVariantMap ToUpdate;
+
+    if (_name.isNull() == false)        ToUpdate.insert(tblUser::usrName, _name);
+    if (_family.isNull() == false)      ToUpdate.insert(tblUser::usrFamily, _family);
+    if (_language.isNull() == false)    ToUpdate.insert(tblUser::usrLanguage, _language);
+    if (NULLABLE_HAS_VALUE(_gender))    ToUpdate.insert(tblUser::usrGender, *_gender);
+    //    if (NULLABLE_HAS_VALUE(_birthDate)) ToUpdate.insert(tblUserExtraInfo::ueiBirthDate, *_birthDate);
+    //    if (_birthDate.isNull() == false) ToUpdate.insert(tblUserExtraInfo::ueiBirthDate, _birthDate);
+    if (ToUpdate.size())
+        this->Update(*this,
+                     CurrentUserID,
+                     QString("%1").arg(CurrentUserID),
+                     ToUpdate
+                     );
+
+    return true;
+}
+
+bool User::apiUPDATEfinancialInfo(
+        TAPI::JWT_t     _JWT,
+        TAPI::Sheba_t   _iban,
+        TAPI::Ether_t   _ether
+    )
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+
+    QVariantMap ToUpdate;
+
+    if (_iban.isNull() == false)    ToUpdate.insert(tblUserExtraInfo::ueiIBAN, _iban);
+    if (_ether.isNull() == false)   ToUpdate.insert(tblUserExtraInfo::ueiEther, _ether);
+
+    if (ToUpdate.size())
+        UserExtraInfo::instance().Update(UserExtraInfo::instance(),
+                     CurrentUserID,
+                     QString("%1").arg(CurrentUserID),
+                     ToUpdate
+                     );
+
+    return true;
+}
+
+bool User::apiUPDATEextraInfo(
+        TAPI::JWT_t     _JWT,
+        QString         _job,
+        QString         _education,
+        QString         _fieldOfStudy
+    )
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+
+    QVariantMap ToUpdate;
+    QStringList ToRemove;
+
+    //userExtra info json field
+    if (_job.isNull() == false)
+    {
+        if (_job.isEmpty())
+            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job));
+        else
+            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job), _job);
+    }
+    if (_education.isNull() == false)
+    {
+        if (_education.isEmpty())
+            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education));
+        else
+            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education), _education);
+    }
+    if (_fieldOfStudy.isNull() == false)
+    {
+        if (_fieldOfStudy.isEmpty())
+            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy));
+        else
+            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy), _fieldOfStudy);
+    }
+
+    QString qry;
+    if (ToRemove.length())
+    {
+        if (ToUpdate.size())
+        {
+            qry = "JSON_MERGE_PATCH("
+                  "JSON_REMOVE(ueiExtraInfo, '$." + ToRemove.join("', '$.") + "'),"
+                  "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'"
+                  ")";
+        }
+        else
+        {
+            qry = "JSON_REMOVE(ueiExtraInfo, '$." + ToRemove.join("', '$.") + "')";
+        }
+
+    }
+    else if (ToUpdate.size())
+    {
+        qry = "JSON_MERGE_PATCH(ueiExtraInfo,"
+              "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'"
+              ")";
+    }
+    if (qry.isEmpty() == false)
+    {
+        qry = QString("UPDATE %1").arg(tblUserExtraInfo::Name)
+              + " SET ueiExtraInfo=" + qry
+              + " WHERE uei_usrID=" + CurrentUserID;
+        clsDACResult Result = UserExtraInfo::instance().execQuery(qry);
+    }
+
+    //------------------------
+    return true;
+}
+
+/*****************************************************************\
+|* UserExtraInfo *************************************************|
+\*****************************************************************/
+UserExtraInfo::UserExtraInfo() :
+    intfSQLBasedModule (
+        AAASchema,
+        tblUserExtraInfo::Name,
+        {///< ColName                               Type                                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK
+            { tblUserExtraInfo::uei_usrID,          ORM_PRIMARYKEY_64 },
+//            { tblUserExtraInfo::ueiGender,          S(NULLABLE_TYPE(TAPI::enuGender::Type)),    QFV,            TAPI::enuGender::NotExpressed,  UPOwner,false,false },
+            { tblUserExtraInfo::ueiBirthDate,       S(NULLABLE_TYPE(TAPI::Date_t)),                 QFV,            QNull,  UPOwner },
+            { tblUserExtraInfo::ueiPhoto,           S(NULLABLE_TYPE(TAPI::Base64Image_t)),          QFV,            QNull,  UPOwner, false, false },
+            { tblUserExtraInfo::ueiOAuthAccounts,   S(NULLABLE_TYPE(TAPI::JSON_t)),                 QFV,            QNull,  UPNone },
+            { tblUserExtraInfo::ueiIBAN,            S(NULLABLE_TYPE(TAPI::Sheba_t)),                QFV.iban("IR"), QNull,  UPOwner, false, false },
+            { tblUserExtraInfo::ueiEther,           S(NULLABLE_TYPE(TAPI::Ether_t)),                QFV,            QNull,  UPOwner, false, false },
+            { tblUserExtraInfo::ueiExtraInfo,       S(NULLABLE_TYPE(TAPI::JSON_t)),                 QFV,            QNull,  UPOwner, false, false },
+            { tblUserExtraInfo::ueiUpdatedBy_usrID, ORM_UPDATED_BY },
+        },
+        {///< Col                                   Reference Table                 ForeignCol      Rename  LeftJoin
+            ORM_RELATION_OF_UPDATER(tblUserExtraInfo::ueiUpdatedBy_usrID),
+        }
+    )
+{}
+
+//bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba)
+//{
+//    clsDACResult Result = UserExtraInfo::instance().execQuery(
+//                              "UPDATE " + this->Name
+//                              + QUERY_SEPARATOR
+//                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
+//                              + QUERY_SEPARATOR
+//                              + "WHERE uei_usrID = ?",
+//                              { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+//        );
+
+//    return Result.numRowsAffected() > 0;
+//}
+
+//bool UserExtraInfo::apiUPDATEetherAddress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress)
+//{
+//    clsDACResult Result = UserExtraInfo::instance().execQuery(
+//                              "UPDATE " + this->Name
+//                              + QUERY_SEPARATOR
+//                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
+//                              + QUERY_SEPARATOR
+//                              + "WHERE uei_usrID = ?",
+//                              { _etherAddress, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+//        );
+
+//    return Result.numRowsAffected() > 0;
+//}
 
 } //namespace Targoman::API::AccountModule::ORM

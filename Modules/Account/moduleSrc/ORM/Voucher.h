@@ -66,7 +66,7 @@ class Voucher : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get Voucher information")
-    bool ORMDELETE("Delete an Voucher. Take note that User can just delete Vouchers with Payoff type")
+    bool ORMDELETE("Delete a Voucher. Take note that User can just delete Vouchers with Payoff type")
 
     Targoman::API::AAA::stuVoucher REST(
         CREATE,

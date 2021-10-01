@@ -29,13 +29,14 @@
 
 namespace Targoman::API::AccountModule {
 
+/*****************************************************************\
+|* User **********************************************************|
+\*****************************************************************/
+
 //structures and enumes goes here
 
 namespace ORM {
 
-/*****************************************************************\
-|* User **********************************************************|
-\*****************************************************************/
 class User : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -59,49 +60,6 @@ private slots:
 
     bool REST(
         UPDATE,
-        profile,
-        (
-            TAPI::JWT_t _JWT,
-            NULLABLE_TYPE(TAPI::enuUserGender::Type) _gender = {},
-            NULLABLE_TYPE(QString) _name = {},
-            NULLABLE_TYPE(QString) _family = {},
-            NULLABLE_TYPE(TAPI::ISO639_2_t) _lang = {},
-            NULLABLE_TYPE(TAPI::Email_t) _email = {},
-            NULLABLE_TYPE(TAPI::Mobile_t) _mobile = {},
-            NULLABLE_TYPE(TAPI::MD5_t) _pass = {},
-            NULLABLE_TYPE(QString) _salt = {}
-        ),
-        "Update User profile. Take note that this method does not change password "
-        "Password and Salt are required to change email or mobile"
-    )
-};
-
-/*****************************************************************\
-|* UserExtraInfo *************************************************|
-\*****************************************************************/
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblUserExtraInfo {
-constexpr char Name[] = "tblUserExtraInfo";
-TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
-TARGOMAN_CREATE_CONSTEXPR(ueiGender);
-TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
-TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
-TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
-TARGOMAN_CREATE_CONSTEXPR(ueiEther);
-TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
-TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
-}
-#pragma GCC diagnostic pop
-
-class UserExtraInfo : public intfSQLBasedModule
-{
-    Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
-
-private slots:
-    bool REST(
-        UPDATE,
         photo,
         (
             TAPI::JWT_t _JWT,
@@ -112,26 +70,148 @@ private slots:
 
     bool REST(
         UPDATE,
-        sheba,
+        email,
         (
-            TAPI::JWT_t _JWT,
-            TAPI::Sheba_t _sheba
+            TAPI::JWT_t     _JWT,
+            TAPI::Email_t   _email,
+            TAPI::MD5_t     _psw,
+            QString         _salt
         ),
-        "Updates user Sheba address"
+        "Update user email"
     )
 
     bool REST(
         UPDATE,
-        etherAdress,
+        mobile,
         (
-            TAPI::JWT_t _JWT,
-            TAPI::Ether_t _etherAddress
+            TAPI::JWT_t     _JWT,
+            TAPI::Mobile_t  _mobile,
+            TAPI::MD5_t     _pass,
+            QString         _salt
         ),
-        "Updates user ethercoin address"
+        "Update user mobile"
     )
+
+    bool REST(
+        UPDATE,
+        personalInfo,
+        (
+            TAPI::JWT_t         _JWT,
+            QString             _name = {},
+            QString             _family = {},
+            TAPI::ISO639_2_t    _language = {},
+            NULLABLE_TYPE(TAPI::enuGender::Type) _gender = {}
+        ),
+        "Update User personal info"
+    )
+
+    bool REST(
+        UPDATE,
+        financialInfo,
+        (
+            TAPI::JWT_t     _JWT,
+            TAPI::Sheba_t   _iban = {},
+            TAPI::Ether_t   _ether = {}
+        ),
+        "Update User financial info"
+    )
+
+    bool REST(
+        UPDATE,
+        extraInfo,
+        (
+            TAPI::JWT_t   _JWT,
+            QString       _job = {},
+            QString       _education = {},
+            QString       _fieldOfStudy = {}
+        ),
+        "Update User extra info"
+    )
+
+};
+
+} //namespace ORM
+
+/*****************************************************************\
+|* UserExtraInfo *************************************************|
+\*****************************************************************/
+
+//structures and enumes goes here
+
+TARGOMAN_DEFINE_ENUM(enuUserExtraInfoJsonKey,
+                     Job,
+                     Education,
+                     FieldOfStudy,
+                     );
+
+namespace ORM {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblUserExtraInfo {
+constexpr char Name[] = "tblUserExtraInfo";
+TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
+//TARGOMAN_CREATE_CONSTEXPR(ueiGender);
+TARGOMAN_CREATE_CONSTEXPR(ueiBirthDate);
+TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
+TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
+TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
+TARGOMAN_CREATE_CONSTEXPR(ueiEther);
+TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
+TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
+}
+#pragma GCC diagnostic pop
+
+class UserExtraInfo : public intfSQLBasedModule
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
+
+private slots:
+//    bool REST(
+//        UPDATE,
+//        birthDate,
+//        (
+//            TAPI::JWT_t _JWT,
+//            QString _birthDate
+//        ),
+//        "Updates users birth date"
+//    )
+
+//    bool REST(
+//        UPDATE,
+//        photo,
+//        (
+//            TAPI::JWT_t _JWT,
+//            TAPI::Base64Image_t _image
+//        ),
+//        "Updates user image based using a base64 encoded image"
+//    )
+
+//    bool REST(
+//        UPDATE,
+//        sheba,
+//        (
+//            TAPI::JWT_t _JWT,
+//            TAPI::Sheba_t _sheba
+//        ),
+//        "Updates user Sheba address"
+//    )
+
+//    bool REST(
+//        UPDATE,
+//        etherAddress,
+//        (
+//            TAPI::JWT_t _JWT,
+//            TAPI::Ether_t _etherAddress
+//        ),
+//        "Updates user ethercoin address"
+//    )
 };
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H
