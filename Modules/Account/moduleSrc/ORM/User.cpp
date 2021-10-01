@@ -157,14 +157,35 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
 
 bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
 {
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+
+    QString qry = QString()
+          + "INSERT INTO"
+          + " " + tblUserExtraInfo::Name
+          + " SET ueiPhoto=?"
+          + "   , uei_usrID=?"
+          + " ON DUPLICATE KEY UPDATE"
+          + "     ueiPhoto=?"
+          + "   , ueiUpdatedBy_usrID=?"
+          ;
+
     clsDACResult Result = UserExtraInfo::instance().execQuery(
-                              "UPDATE " + this->Name
-                              + QUERY_SEPARATOR
-                              + "SET " + tblUserExtraInfo::ueiPhoto +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
-                              + QUERY_SEPARATOR
-                              + "WHERE " + tblUserExtraInfo::uei_usrID + " = ?",
-                              { _image, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
-        );
+                              qry,
+                              {
+                                  _image,
+                                  CurrentUserID,
+                                  _image,
+                                  CurrentUserID,
+                              });
+
+//    clsDACResult Result = UserExtraInfo::instance().execQuery(
+//                              "UPDATE " + this->Name
+//                              + QUERY_SEPARATOR
+//                              + "SET " + tblUserExtraInfo::ueiPhoto +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
+//                              + QUERY_SEPARATOR
+//                              + "WHERE " + tblUserExtraInfo::uei_usrID + " = ?",
+//                              { _image, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+//        );
 
     return Result.numRowsAffected() > 0;
 }
@@ -271,17 +292,42 @@ bool User::apiUPDATEfinancialInfo(
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-    QVariantMap ToUpdate;
+    QStringList ToUpdate;
+    QVariantList Params;
 
-    if (_iban.isNull() == false)    ToUpdate.insert(tblUserExtraInfo::ueiIBAN, _iban);
-    if (_ether.isNull() == false)   ToUpdate.insert(tblUserExtraInfo::ueiEther, _ether);
+    if (_iban.isNull() == false)
+    {
+        ToUpdate.append(tblUserExtraInfo::ueiIBAN);
+        Params.append(_iban);
+    }
+
+    if (_ether.isNull() == false)
+    {
+        ToUpdate.append(tblUserExtraInfo::ueiEther);
+        Params.append(_ether);
+    }
 
     if (ToUpdate.size())
-        UserExtraInfo::instance().Update(UserExtraInfo::instance(),
-                     CurrentUserID,
-                     QString("%1").arg(CurrentUserID),
-                     ToUpdate
-                     );
+    {
+        QString qry = QString()
+              + "INSERT INTO"
+              + " " + tblUserExtraInfo::Name
+              + " SET"
+              + " " + ToUpdate.join("=? ,") + "=?"
+              + "   , uei_usrID=?"
+              + " ON DUPLICATE KEY UPDATE"
+              + " " + ToUpdate.join("=? ,") + "=?"
+              + "   , ueiUpdatedBy_usrID=?"
+              ;
+
+        Params.append(CurrentUserID);
+
+        clsDACResult Result = UserExtraInfo::instance().execQuery(
+                                  qry,
+                                  Params
+                                  + Params
+                              );
+    }
 
     return true;
 }
@@ -321,34 +367,52 @@ bool User::apiUPDATEextraInfo(
             ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy), _fieldOfStudy);
     }
 
-    QString qry;
+    QString qry, updateQuery;
+
+    if (ToUpdate.size())
+        updateQuery = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'";
+
     if (ToRemove.length())
     {
         if (ToUpdate.size())
         {
-            qry = "JSON_MERGE_PATCH("
-                  "JSON_REMOVE(ueiExtraInfo, '$." + ToRemove.join("', '$.") + "'),"
-                  "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'"
-                  ")";
+            qry = QString()
+                  + "JSON_MERGE_PATCH("
+                  + "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemove.join("', '$.") + "'),"
+                  + updateQuery
+                  + ")";
         }
         else
         {
-            qry = "JSON_REMOVE(ueiExtraInfo, '$." + ToRemove.join("', '$.") + "')";
+            qry = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemove.join("', '$.") + "')";
         }
 
     }
     else if (ToUpdate.size())
     {
-        qry = "JSON_MERGE_PATCH(ueiExtraInfo,"
-              "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'"
-              ")";
+        qry = QString()
+              + "JSON_MERGE_PATCH(COALESCE(ueiExtraInfo, '{}'),"
+              + updateQuery
+              + ")";
     }
     if (qry.isEmpty() == false)
     {
-        qry = QString("UPDATE %1").arg(tblUserExtraInfo::Name)
-              + " SET ueiExtraInfo=" + qry
-              + " WHERE uei_usrID=" + CurrentUserID;
-        clsDACResult Result = UserExtraInfo::instance().execQuery(qry);
+        qry = QString()
+              + "INSERT INTO"
+              + " " + tblUserExtraInfo::Name
+              + " SET"
+              + "     ueiExtraInfo=" + (ToUpdate.size() ? updateQuery : "NULL")
+              + "   , uei_usrID=?"
+              + " ON DUPLICATE KEY UPDATE"
+              + "     ueiExtraInfo=" + qry
+              + "   , ueiUpdatedBy_usrID=?"
+              ;
+        clsDACResult Result = UserExtraInfo::instance().execQuery(
+                                  qry,
+                                  {
+                                      CurrentUserID,
+                                      CurrentUserID,
+                                  });
     }
 
     //------------------------
