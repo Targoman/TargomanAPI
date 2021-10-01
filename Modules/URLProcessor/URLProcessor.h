@@ -17,30 +17,44 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 #define TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 
 namespace Targoman {
 namespace API {
 
-class URLProcessor : public intfAPIModule
+class URLProcessor : public intfPureModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_DEFINE_API_MODULE(URLProcessor);
 
 private slots:
-    QString REST(GET, canonicalize, (const QString _url, bool _removeWWW = true),
-                "normalizes url in a common format to be canonical")
+    QString REST(
+        GET,
+        canonicalize,
+        (
+            const QString _url,
+            bool _removeWWW = true
+        ),
+        "normalizes url in a common format to be canonical"
+    )
 
-    QString REST(GET, convertHexCodes, (const QString _url, bool _convertAll = false),
-                "helper method which converts URL encoded strings to normal strings")
+    QString REST(
+        GET,
+        convertHexCodes,
+        (
+            const QString _url,
+            bool _convertAll = false
+        ),
+        "helper method which converts URL encoded strings to normal strings"
+    )
 };
 
 }

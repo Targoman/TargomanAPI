@@ -40,13 +40,13 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
 class QJWT
 {
     static inline QString makeConfig(const QString& _name){return "/JWT/" + _name;}
-    static Common::Configuration::tmplConfigurable<QString>                 Secret;
-    static Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
-    static Common::Configuration::tmplConfigurable<quint16>                 TTL;
-    static Common::Configuration::tmplConfigurable<quint32>                 NormalLoginTTL;
-    static Common::Configuration::tmplConfigurable<quint32>                 RememberLoginTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>                 Secret;
+    static Targoman::Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
+    static Targoman::Common::Configuration::tmplConfigurable<quint16>                 TTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32>                 NormalLoginTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32>                 RememberLoginTTL;
 public:
-    static Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
+    static Targoman::Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 
 public:
     static QString createSigned(QJsonObject _payload,

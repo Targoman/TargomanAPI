@@ -16,6 +16,7 @@ SOURCES += \
     NGTv1.cpp
 
 OTHER_FILES += \
+    ORM/Schema.my.sql \
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)

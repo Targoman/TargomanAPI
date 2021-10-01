@@ -17,7 +17,8 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TAPI_GENERICTYPES_H
@@ -29,20 +30,21 @@
 
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/clsCountAndSpeed.h"
-
 #include "Interfaces/Common/tmplAPIArg.h"
 
 namespace Targoman {
 namespace API {
 namespace Server {
-extern QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
-extern QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
 }
 }
 }
 
 //I used TAPI as namespace in order to make Targoman::API shorter
-namespace TAPI{
+namespace TAPI {
 
 /**
  * @brief The stuStatistics struct holds server statistics about APIs
@@ -92,7 +94,7 @@ struct stuStatistics {
 /**
  * @brief The stuTable struct
  */
-struct stuTable{
+struct stuTable {
     qint64 TotalRows;
     QVariantList Rows;
     stuTable(qint64 _totalRows = -1, const QVariantList& _rows = QVariantList()):
@@ -107,7 +109,7 @@ struct stuTable{
     }
 };
 
-struct stuFileInfo{
+struct stuFileInfo {
   QString Name;
   QString TempName;
   quint64 Size;
@@ -162,33 +164,42 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
 
 /**********************************************************************/
 
-TAPI_ADD_COMPLEX_TYPE(qhttp::THeaderHash, HEADERS_t);
-TAPI_ADD_COMPLEX_TYPE(qhttp::THeaderHash, COOKIES_t);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonObject, JWT_t,       this->fromVariantMap(_value.toMap()));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QVariantMap, ORMFields_t, _value.toMap());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDate,       Date_t,      _value.toDate());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QTime,       Time_t,      _value.toTime());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
 
-TAPI_ADD_SIMPLE_TYPE(QJsonObject, JWT_t);
-TAPI_ADD_SIMPLE_TYPE(QJsonDocument, PrivObject_t);
-TAPI_ADD_SIMPLE_TYPE(QJsonDocument, JSON_t);
+//TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(QList, T, JSONLIST_t, *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t,             *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, PrivObject_t,       *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, SaleableAdditive_t, *this = QJsonDocument::fromVariant(_value));
 
-TAPI_ADD_SIMPLE_TYPE(QVariantMap, ORMFields_t);
-TAPI_ADD_SIMPLE_TYPE(QString, EncodedJWT_t);
-TAPI_ADD_SIMPLE_TYPE(QString, CommaSeparatedStringList_t);
-TAPI_ADD_SIMPLE_TYPE(QString, PKsByPath_t);
-TAPI_ADD_SIMPLE_TYPE(QString, RemoteIP_t);
-TAPI_ADD_SIMPLE_TYPE(QString, MD5_t);
-TAPI_ADD_SIMPLE_TYPE(QString, IPv4_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Email_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Mobile_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Sheba_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Ether_t);
-TAPI_ADD_SIMPLE_TYPE(QString, ISO639_2_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Base64Image_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Date_t);
-TAPI_ADD_SIMPLE_TYPE(QString, Time_t);
-TAPI_ADD_SIMPLE_TYPE(QString, DateTime_t);
-TAPI_ADD_SIMPLE_TYPE(QString, URL_t);
-TAPI_ADD_SIMPLE_TYPE(QString, PackageCode_t);
-TAPI_ADD_SIMPLE_TYPE(QString, DiscountCode_t);
-}
+TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
+TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
+TAPI_ADD_TYPE_STRING(EncodedJWT_t);
+TAPI_ADD_TYPE_STRING(CommaSeparatedStringList_t);
+TAPI_ADD_TYPE_STRING(RemoteIP_t);
+TAPI_ADD_TYPE_STRING(PKsByPath_t);
+TAPI_ADD_TYPE_STRING(MD5_t);
+TAPI_ADD_TYPE_STRING(IPv4_t);
+TAPI_ADD_TYPE_STRING(Email_t);
+TAPI_ADD_TYPE_STRING(Mobile_t);
+TAPI_ADD_TYPE_STRING(Sheba_t);
+TAPI_ADD_TYPE_STRING(Ether_t);
+TAPI_ADD_TYPE_STRING(ISO639_2_t);
+TAPI_ADD_TYPE_STRING(Base64Image_t);
+TAPI_ADD_TYPE_STRING(URL_t);
+TAPI_ADD_TYPE_STRING(ProductCode_t);
+TAPI_ADD_TYPE_STRING(SaleableCode_t);
+TAPI_ADD_TYPE_STRING(CouponCode_t);
+TAPI_ADD_TYPE_STRING(DBTinyText_t);
+TAPI_ADD_TYPE_STRING(DBText_t);
+TAPI_ADD_TYPE_STRING(DBMediumText_t);
+TAPI_ADD_TYPE_STRING(DBLongText_t);
+TAPI_ADD_TYPE_STRING(String_t);
+
+} //namespace TAPI
 
 /**********************************************************************/
 TAPI_DECLARE_METATYPE(TAPI::stuTable)
@@ -202,6 +213,7 @@ TAPI_DECLARE_METATYPE(TAPI::PrivObject_t)
 TAPI_DECLARE_METATYPE(TAPI::EncodedJWT_t)
 TAPI_DECLARE_METATYPE(TAPI::CommaSeparatedStringList_t)
 TAPI_DECLARE_METATYPE(TAPI::JSON_t)
+TAPI_DECLARE_METATYPE(TAPI::SaleableAdditive_t)
 TAPI_DECLARE_METATYPE(TAPI::PKsByPath_t)
 TAPI_DECLARE_METATYPE(TAPI::ORMFields_t)
 TAPI_DECLARE_METATYPE(TAPI::RemoteIP_t)
@@ -217,9 +229,15 @@ TAPI_DECLARE_METATYPE(TAPI::Time_t)
 TAPI_DECLARE_METATYPE(TAPI::DateTime_t)
 TAPI_DECLARE_METATYPE(TAPI::Base64Image_t)
 TAPI_DECLARE_METATYPE(TAPI::URL_t)
-TAPI_DECLARE_METATYPE(TAPI::PackageCode_t)
-TAPI_DECLARE_METATYPE(TAPI::DiscountCode_t)
-TAPI_DECLARE_METATYPE(TAPI::enuGenericStatus::Type);
+TAPI_DECLARE_METATYPE(TAPI::ProductCode_t)
+TAPI_DECLARE_METATYPE(TAPI::SaleableCode_t)
+TAPI_DECLARE_METATYPE(TAPI::CouponCode_t)
+TAPI_DECLARE_METATYPE(TAPI::DBTinyText_t)
+TAPI_DECLARE_METATYPE(TAPI::DBText_t)
+TAPI_DECLARE_METATYPE(TAPI::DBMediumText_t)
+TAPI_DECLARE_METATYPE(TAPI::DBLongText_t)
+TAPI_DECLARE_METATYPE(TAPI::String_t)
 
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuGenericStatus);
 
 #endif // TAPI_GENERICTYPES_H

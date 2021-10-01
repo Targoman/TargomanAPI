@@ -17,49 +17,75 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
 #define TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 
 namespace Targoman {
 namespace API {
 
-class TextProcessor : public intfAPIModule
+class TextProcessor : public intfPureModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_DEFINE_API_MODULE(TextProcessor);
 
 public:
-    bool requiresTextProcessor() const {return true;}
+    bool init();
 
 private slots:
-    QString REST(, Normalize, (const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector = true),
-                 "Normalizes input text")
-    QString REST(, Text2IXML, (
-                     const QString& _text,
-                     const TAPI::ISO639_2_t& _lang,
-                     bool _useSpellCorrector = true),
-                 "Normalizes and tokenizes text and tags special fields in an inline-XML format")
-    QString REST(, Ixml2Text, (const QString& _ixml,
-                               bool _detokenize = true,
-                               bool _hinidiDigits = false,
-                               bool _arabicPunctuations = false,
-                               bool _breakSentences = false),
-                 "Removes IXML tags injected by text2IXML API")
+    QString REST(
+        ,
+        normalize,
+        (
+            const QString _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true
+        ),
+        "Normalizes input text"
+    )
 
-    QString REST(, Tokenize, (
-                     const QString& _text,
-                     const TAPI::ISO639_2_t& _lang,
-                     bool _useSpellCorrector = true,
-                     bool _hindiNumerals = false,
-                     bool _arabicPunctuations = false),
-                 "Tokenizes string without tagging special fields")
+    QString REST(
+        ,
+        text2IXML,
+        (
+            const QString& _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true
+        ),
+        "Normalizes and tokenizes text and tags special fields in an inline-XML format"
+    )
+
+    QString REST(
+        ,
+        ixml2Text,
+        (
+            const QString& _ixml,
+            bool _detokenize = true,
+            bool _hinidiDigits = false,
+            bool _arabicPunctuations = false,
+            bool _breakSentences = false
+        ),
+        "Removes IXML tags injected by text2IXML API"
+    )
+
+    QString REST(
+        ,
+        tokenize,
+        (
+            const QString& _text,
+            const TAPI::ISO639_2_t& _lang,
+            bool _useSpellCorrector = true,
+            bool _hindiNumerals = false,
+            bool _arabicPunctuations = false
+        ),
+        "Tokenizes string without tagging special fields"
+    )
 };
 
 }

@@ -28,8 +28,8 @@ namespace Targoman {
 namespace API {
 namespace Server {
 
-using namespace Common;
-using namespace Common::Configuration;
+using namespace Targoman::Common;
+using namespace Targoman::Common::Configuration;
 
 QString ServerConfigs::BasePathWithVersion;
 TAPI::stuStatistics gServerStats;
@@ -232,7 +232,7 @@ tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
 tmplRangedConfigurable<quint16> ServerConfigs::MasterDB::Port(
         ServerConfigs::MasterDB::makeConfig("Port"),
         "Database port",
-        10,65000,
+        10, 65000,
         3306,
         ReturnTrueCrossValidator(),
         "",
@@ -352,4 +352,3 @@ tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
 }
 }
 }
-

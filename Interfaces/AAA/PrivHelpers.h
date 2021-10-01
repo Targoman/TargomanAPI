@@ -53,7 +53,7 @@ public:
     static QByteArray getURL(const QString& _url);
 
 private:
-    static stuActiveAccount digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services);
+    static stuActiveAccount digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services);
 };
 
 }

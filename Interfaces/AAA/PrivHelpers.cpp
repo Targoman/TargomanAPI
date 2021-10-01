@@ -23,40 +23,40 @@
 #include "PrivHelpers.h"
 #include "App/Server/QJWT.h"
 #include "libTargomanCommon/Helpers.hpp"
+#include "Interfaces/Common/QtTypes.hpp"
 #include "QtCUrl.h"
 #include "clsJWT.hpp"
-#include "Accounting.h"
+#include "intfAccountingBasedModule.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 using namespace DBManager;
 
-stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint32 _usrID, const QStringList& _services) {
+stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services) {
     QJsonObject Privs;
 
     foreach(auto Service, _services)
-        if(Accounting::serviceAccounting(Service) == nullptr)
+        if (serviceAccounting(Service) == nullptr)
             throw exHTTPBadRequest("Service " + Service + " was not registered.");
 
     qint64 MinTTL = LLONG_MAX;
     foreach(auto Priv, _privs){
         QJsonObject PrivObj = Priv.toObject();
-        for(auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            if(PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())){
-                Privs = Common::mergeJsonObjects(Privs, PrivIter);
-                if(PrivIter.key() != "ALL"){
-                    Accounting::stuActiveServiceAccount ActiveAccount = Accounting::serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
-                    if(ActiveAccount.TTL){
-                        Privs = Common::mergeJsonObjects(Privs, QJsonObject({ {PrivIter.key(), ActiveAccount.toJson(false)}}).begin());
-                        if(ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)
+        for (auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
+            if (PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())) {
+                Privs = Targoman::Common::mergeJsonObjects(Privs, PrivIter);
+                if (PrivIter.key() != "ALL") {
+                    Targoman::API::AAA::stuActiveCredit ActiveAccount = serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
+                    if (ActiveAccount.TTL) {
+                        Privs = Targoman::Common::mergeJsonObjects(Privs, QJsonObject({ {PrivIter.key(), ActiveAccount.toJson(false)}}).begin());
+                        if (ActiveAccount.TTL > 0 && ActiveAccount.TTL < MinTTL)
                             MinTTL = ActiveAccount.TTL;
                     }
                 }
             }
     }
-    if(Privs.contains("ALL") == false)
+
+    if (Privs.contains("ALL") == false)
         foreach (auto Service, _services)
             if(Privs.contains(Service) == false)
                 throw exAuthorization("Not enough priviledges to access <"+Service+">");
@@ -144,7 +144,7 @@ stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QSt
         stuActiveAccount ActiveAccount =
                 PrivHelpers::digestPrivileges(
                     _userObj[AAACommonItems::privs].toArray(),
-                    static_cast<quint32>(_userObj[AAACommonItems::usrID].toDouble()),
+                    static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble()),
                     _services);
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
         return { ActiveAccount.TTL, _userObj };
@@ -188,8 +188,4 @@ TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payloa
                                       _sessionID);
 }
 
-}
-}
-}
-
-
+} //namespace Targoman::API::AAA

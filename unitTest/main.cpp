@@ -17,46 +17,24 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include <QtTest>
-#include "testBase.hpp"
-#include "Account/test.h"
-
-QString APIURL = "http://127.0.0.1:10000/rest/v1";
-
-QString gEncodedJWT;
-QString gLoginJWT;
-QString gEncodedAdminJWT;
-QJsonObject gJWT;
-QJsonObject gAdminJWT;
-quint32 gUserID;
-quint32 gAdminUserID;
-QVariant gInvalid;
+#include "testQueryBuilders.hpp"
+#include "App/Server/RESTAPIRegistry.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
-    clsDAC::addDBEngine(enuDBEngines::MySQL);
-    clsDAC::setConnectionString("HOST=192.168.0.240;"
-                                "PORT=3306;"
-                                "USER=root;"
-                                "PASSWORD=targoman1234;"
-                                "SCHEMA=AAA");
+    Targoman::API::Server::RESTAPIRegistry::registerMetaTypeInfoMap();
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try{
-        FailedTests += QTest::qExec(new testBase, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
+        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
     }catch(std::exception &e){
         qDebug()<<e.what();
     }
@@ -66,9 +44,6 @@ int main(int argc, char *argv[])
         qDebug() << "all tests passed :)";
     }
 
-    clsDAC::shutdown();
-
     return FailedTests;
     /**/
 }
-

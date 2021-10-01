@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TAPI_TMPLAPIARG_HPP
@@ -26,21 +27,25 @@
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 
-namespace Targoman {
-namespace API {
+using namespace Targoman::Common;
+
+namespace Targoman::API {
+
 namespace Server {
 class intfCacheConnector;
 }
 
+namespace Common {
+
 template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
-class tmplAPIArg : public intfAPIArgManipulator{
+class tmplAPIArg : public intfAPIArgManipulator {
 public:
-    virtual ~tmplAPIArg(){;}
+    virtual ~tmplAPIArg(){}
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final{
         *_argStorage = nullptr;
         if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
-                throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName);
+                throw exHTTPBadRequest("Invalid value specified for parameter.: " + _paramName);
         *_argStorage = new _itmplType;
         *(reinterpret_cast<_itmplType*>(*_argStorage)) =
                 this->fromVariantLambda == nullptr ? _val.value<_itmplType>() : this->fromVariantLambda(_val, _paramName);
@@ -55,7 +60,7 @@ public:
 
     inline void validate(const QVariant& _val, const QByteArray& _paramName) const final {
         if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
-                throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName);
+                throw exHTTPBadRequest("Invalid value specified for parameter.:: " + _paramName);
         if(this->fromVariantLambda)
             this->fromVariantLambda(_val, _paramName);
     }
@@ -72,7 +77,7 @@ public:
     inline QStringList options() const final { return this->optionsLambda ? this->optionsLambda() : QStringList() ;}
     inline enuVarComplexity complexity() const final { return _itmplVarType;}
     inline bool isNullable() const final {return _itmplNullable;}
-    inline QString description(const QList<ORM::clsORMField>& _allFields) const final { 
+    inline QString description(const QList<DBM::clsORMField>& _allFields) const final { 
         return this->descriptionLambda ? this->descriptionLambda(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);
     }
     inline QString toString(const QVariant _val) const final {
@@ -82,7 +87,7 @@ public:
     }
 
     inline QVariant toORMValue(const QString& _val) const final {
-        return this->toORMValueLambda  == nullptr ?
+        return this->toORMValueLambda == nullptr ?
                     _val :
                     this->toORMValueLambda(_val);
     }
@@ -108,7 +113,7 @@ public:
 private:
     tmplAPIArg(const char* _typeStr) : intfAPIArgManipulator(_typeStr) {
         qRegisterMetaType<_itmplType>();
-        if(!_isQtType)
+        if (!_isQtType)
             registerUserDefinedType(_typeStr, this);
     }
 
@@ -118,11 +123,12 @@ private:
     static std::function<QVariant(const QVariant& _val)> toORMValueLambda;
     static std::function<QVariant(const QVariant& _val)> fromORMValueLambda;
     static std::function<QStringList()> optionsLambda;
-    static std::function<QString(const QList<ORM::clsORMField>& _allFields)> descriptionLambda;
+    static std::function<QString(const QList<DBM::clsORMField>& _allFields)> descriptionLambda;
 
     friend class intfCacheConnector;
 };
 
-}
-}
+} //namespace Common
+} //namespace Targoman::API
+
 #endif // TARGOMAN_API_TMPLAPIARG_HPP

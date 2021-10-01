@@ -18,74 +18,111 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H
 #define TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-#include "Interfaces/ORM/clsRESTAPIWithActionLogs.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Accounting{
+#include "Interfaces/API/intfSQLBasedModule.h"
+using namespace Targoman::API::API;
 
-class intfAccountPackages: public ORM::clsTable
+namespace Targoman::API::AAA {
+
+/******************************************************/
+class intfAccountProducts : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
-    intfAccountPackages(const QString& _schema,
-                        const QString& _name,
-                        const QList<ORM::clsORMField>& _cols,
-                        const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountProducts(const QString& _schema,
+                        const QList<DBM::clsORMField>& _exclusiveCols = {},
+                        const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                        const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
-    QVariant ORMGET("Get Available Packages")
-    bool ORMDELETE("Delete a package")
-    bool ORMUPDATE("Update a package info by priviledged user")
-    quint32 ORMCREATE("Create a new package by priviledged user")
+    QVariant ORMGET("Get Available Products")
+    bool ORMDELETE("Delete a Product")
+    bool ORMUPDATE("Update a Product info by priviledged user")
+    quint32 ORMCREATE("Create a new Product by priviledged user")
 };
 
 /******************************************************/
-class intfAccountUsage: public ORM::clsTable
+class intfAccountSaleables : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
-    intfAccountUsage(const QString& _schema,
-                     const QString& _name,
-                     const QList<ORM::clsORMField>& _cols,
-                     const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountSaleables(const QString& _schema,
+                         const QList<DBM::clsORMField>& _exclusiveCols = {},
+                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
 private slots:
-    QVariant ORMGET("Get User Usage on each package")
+    QVariant ORMGET("Get Available Saleables")
+    bool ORMDELETE("Delete a Saleable")
+    bool ORMUPDATE("Update a Saleable info by priviledged user")
+    quint32 ORMCREATE("Create a new Saleable by priviledged user")
 };
 
 /******************************************************/
-class intfAccountUserPackages: public ORM::clsTable
+class intfAccountUserAssets : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
-    intfAccountUserPackages(const QString& _schema,
-                            const QString& _name,
-                            const QList<ORM::clsORMField>& _cols,
-                            const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountUserAssets(const QString& _schema,
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
 private slots:
-    QVariant ORMGET("Get User Packages")
-    bool REST(UPDATE, disablePackage, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
-              "Mark a user package banned by priviledged user")
-    bool REST(UPDATE, setAsPrefered, (TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath),
-              "Mark a user package as prefered")
+    QVariant ORMGET("Get User Assets")
+    bool REST(
+        UPDATE,
+        disablePackage,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::PKsByPath_t _pksByPath
+        ),
+        "Mark a user Asset banned by priviledged user"
+    )
+
+    bool REST(
+        UPDATE,
+        setAsPrefered,
+        (
+            TAPI::JWT_t _JWT,
+            TAPI::PKsByPath_t _pksByPath
+        ),
+        "Mark a user Asset as prefered"
+    )
 };
 
 /******************************************************/
-class intfAccountDiscounts: public ORM::clsTable
+class intfAccountAssetUsage : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
-    intfAccountDiscounts(const QString& _schema,
-                         const QString& _name,
-                         const QList<ORM::clsORMField>& _cols,
-                         const QList<ORM::stuRelation>& _foreignKeys);
+    intfAccountAssetUsage(const QString& _schema,
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+private slots:
+    QVariant ORMGET("Get user Usage on each Asset")
+};
+
+/******************************************************/
+class intfAccountCoupons : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountCoupons(const QString& _schema);
+
 private slots:
     QVariant ORMGET("Get Active Discounts")
     bool ORMDELETE("Delete a Discount")
@@ -93,14 +130,16 @@ private slots:
     quint32 ORMCREATE("Create a new Discount by priviledged user")
 };
 
-class intfAccountPrizes: public ORM::clsTable
+/******************************************************/
+class intfAccountPrizes : public intfSQLBasedModule
 {
     Q_OBJECT
+
 public:
     intfAccountPrizes(const QString& _schema,
                          const QString& _name,
-                         const QList<ORM::clsORMField>& _cols,
-                         const QList<ORM::stuRelation>& _foreignKeys);
+                         const QList<DBM::clsORMField>& _cols,
+                         const QList<DBM::stuRelation>& _relations);
 private slots:
     QVariant ORMGET("Get Active Prizes")
     bool ORMDELETE("Delete a Prizes")
@@ -108,9 +147,6 @@ private slots:
     quint32 ORMCREATE("Create a new Prizes by priviledged user")
 };
 
-}
-}
-}
-}
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H

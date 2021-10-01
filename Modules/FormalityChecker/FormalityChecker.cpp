@@ -17,28 +17,32 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include "FormalityChecker.h"
-#include "Interfaces/NLP/FormalityChecker.h"
-
+#include "ModuleHelpers/NLP/FormalityChecker.h"
 
 namespace Targoman {
 namespace API {
 
-void FormalityChecker::init()
+using namespace Targoman::API::ModuleHelpers;
+
+FormalityChecker::FormalityChecker() :
+    intfPureModule("Targoman")
+{}
+
+bool FormalityChecker::init()
 {
     NLP::FormalityChecker::instance();
+
+    return true;
 }
 
 QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang)
 {
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
-
-FormalityChecker::FormalityChecker()
-{;}
 
 }
 }

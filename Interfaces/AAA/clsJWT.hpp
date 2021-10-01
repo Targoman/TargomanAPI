@@ -29,9 +29,7 @@
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 namespace JWTItems{
 TARGOMAN_CREATE_CONSTEXPR(usrLogin);
@@ -50,7 +48,7 @@ TARGOMAN_CREATE_CONSTEXPR(canChangePass);
 
 class clsJWT{
 public:
-    clsJWT(const QJsonObject& _token) : Token(_token){;}
+    clsJWT(const QJsonObject& _token) : Token(_token){}
     inline QString login() const {return this->Token.value(JWTItems::usrLogin).toString();}
     inline QString name() const {return this->Token.value(JWTItems::usrName).toString();}
     inline QString family() const {return this->Token.value(JWTItems::usrFamily).toString();}
@@ -58,7 +56,7 @@ public:
     inline quint64 rolID() const {return static_cast<quint64>(this->Token.value(JWTItems::rolID).toDouble());}
     inline QVariantMap privs() const {return this->Token.value(JWTItems::privs).toObject().toVariantMap();}
     inline QJsonObject privsObject() const {return this->Token.value(JWTItems::privs).toObject();}
-    inline quint32 usrID() const {return static_cast<quint32>(this->Token.value(JWTItems::usrID).toDouble());}
+    inline quint64 usrID() const {return static_cast<quint64>(this->Token.value(JWTItems::usrID).toDouble());}
     inline TAPI::enuUserApproval::Type usrApproval() const {return TAPI::enuUserApproval::toEnum(this->Token.value(JWTItems::usrApproval).toString().toLatin1().constData());}
     inline TAPI::enuUserStatus::Type usrStatus() const {return TAPI::enuUserStatus::toEnum(this->Token.value(JWTItems::usrStatus).toString().toLatin1().constData());}
     inline QString session() const {return this->Token.value(JWTItems::jti).toString();}
@@ -98,7 +96,6 @@ private:
     const QJsonObject& Token;
 };
 
-}
-}
-}
+} //namespace Targoman::API::AAA
+
 #endif // TARGOMAN_API_AAA_CLSJWT_HPP

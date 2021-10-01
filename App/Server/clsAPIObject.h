@@ -26,7 +26,7 @@
 #include <QGenericArgument>
 #include <QMetaMethod>
 
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/API/intfPureModule.h"
 
 namespace Targoman {
 namespace API {
@@ -56,7 +56,7 @@ public:
 class clsAPIObject : public intfAPIObject, public QObject
 {
 public:
-    clsAPIObject(intfAPIModule* _module,
+    clsAPIObject(intfPureModule* _module,
                  QMetaMethodExtended _method,
                  bool _async,
                  qint32 _cache4Internal,
@@ -120,7 +120,6 @@ public:
                     QString _extraAPIPath = {}
                 ) const;
 
-
     void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const;
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
@@ -138,7 +137,7 @@ private:
     QList<QString>              ParamTypes;
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
-    intfAPIModule*          Parent;
+    intfPureModule*              Parent;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

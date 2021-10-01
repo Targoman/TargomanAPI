@@ -1,4 +1,5 @@
 #!/bin/sh
 
 export LD_LIBRARY_PATH=/targoman/lib64:/targoman/lib
-/targoman/bin/targomanAPI -c /targoman/conf/api.conf --plugins /targoman/modules
+cd /targoman
+./bin/targomanAPI -c ./conf/api.conf --plugins ./modules

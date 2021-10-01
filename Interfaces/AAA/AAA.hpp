@@ -25,7 +25,7 @@
 
 #include "Interfaces/AAA/Authentication.h"
 #include "Interfaces/AAA/Authorization.h"
-#include "Interfaces/AAA/Accounting.h"
+#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/AAA/clsJWT.hpp"

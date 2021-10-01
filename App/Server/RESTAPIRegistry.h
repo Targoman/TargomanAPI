@@ -26,9 +26,9 @@
 
 #include <QGenericArgument>
 #include <QMetaMethod>
-#include "Interfaces/Common/intfAPIModule.h"
+#include "Interfaces/Common/QtTypes.hpp"
+#include "Interfaces/API/intfPureModule.h"
 #include "clsAPIObject.h"
-#include "QtTypes.hpp"
 
 namespace Targoman {
 namespace API {
@@ -42,56 +42,32 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 #pragma clang diagnostic pop
 
 /*****************************************************/
-#define IGNORE_TYPE_Void ,
-#define IGNORE_TYPE_Char ,
-#define IGNORE_TYPE_QByteArray ,
-#define IGNORE_TYPE_QBitArray ,
-#define IGNORE_TYPE_QLocale ,
-#define IGNORE_TYPE_QRect ,
-#define IGNORE_TYPE_QRectF ,
-#define IGNORE_TYPE_QSize ,
-#define IGNORE_TYPE_QSizeF ,
-#define IGNORE_TYPE_QLine ,
-#define IGNORE_TYPE_QLineF ,
-#define IGNORE_TYPE_QPoint ,
-#define IGNORE_TYPE_QPointF ,
-#define IGNORE_TYPE_QEasingCurve ,
-#define IGNORE_TYPE_QModelIndex ,
-#define IGNORE_TYPE_QJsonValue ,
-#define IGNORE_TYPE_QJsonObject ,
-#define IGNORE_TYPE_QJsonArray ,
-#define IGNORE_TYPE_QJsonDocument ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_QPersistentModelIndex ,
-#define IGNORE_TYPE_Nullptr ,
-#define IGNORE_TYPE_QVariantHash ,
-#define IGNORE_TYPE_QByteArrayList ,
-/*****************************************************/
 class OpenAPIGenerator;
 class RESTAPIRegistry
 {
 public:
-    static inline QString makeRESTAPIKey(const QString& _httpMethod, const QString& _path){
-        return  _httpMethod.toUpper() + " " + (_path.endsWith('/') ? _path.mid(0, _path.size() - 1) : _path);
+    static inline QString makeRESTAPIKey(const QString& _httpMethod, const QString& _path) {
+        return _httpMethod.toUpper() + " " + (_path.endsWith('/') ? _path.mid(0, _path.size() - 1) : _path);
     }
 
-    static inline clsAPIObject*
-    getAPIObject(const QString _httpMethod, const QString& _path){
+    static inline clsAPIObject* getAPIObject(const QString _httpMethod, const QString& _path) {
         return RESTAPIRegistry::Registry.value(RESTAPIRegistry::makeRESTAPIKey(_httpMethod, _path));
     }
+
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
     static inline clsAPIObject* getWSAPIObject(const QString& _path){
         return RESTAPIRegistry::WSRegistry.value(RESTAPIRegistry::makeRESTAPIKey("WS", _path));
     }
 #endif
 
-    static void registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method);
+    static void registerMetaTypeInfoMap();
+    static void registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
 
 private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
-    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfAPIModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
+    static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfPureModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
     static int  getTagSeconds(const QMetaMethod& _method, const char* _type);
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 

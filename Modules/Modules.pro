@@ -8,12 +8,13 @@
 ################################################################################
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
+addSubdirs(Common, Dependencies)
 addSubdirs(Account, Dependencies)
-addSubdirs(MT, Dependencies)
 addSubdirs(Advert, Dependencies)
-addSubdirs(NGT, Dependencies)
 addSubdirs(Ticketing, Dependencies)
+#addSubdirs(MT, Dependencies)
+#addSubdirs(DM, Dependencies)
+addSubdirs(NGT, Dependencies)
 addSubdirs(TextProcessor, Dependencies)
 addSubdirs(FormalityChecker, Dependencies)
 addSubdirs(URLProcessor, Dependencies)
-

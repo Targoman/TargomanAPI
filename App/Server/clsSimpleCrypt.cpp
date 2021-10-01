@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QDateTime>
 #include <QDataStream>
 #include <QCryptographicHash>
+#include <QRandomGenerator>
 
 clsSimpleCrypt::clsSimpleCrypt():
     m_key(0),
@@ -111,7 +112,7 @@ QByteArray clsSimpleCrypt::encryptToByteArray(QByteArray _plaintext)
     }
 
     //prepend a random char to the string
-    char randomChar = char(qrand() & 0xFF);
+    char randomChar = char(QRandomGenerator().generate() & 0xFF);
     ba = randomChar + integrityProtection + ba;
 
     int pos(0);

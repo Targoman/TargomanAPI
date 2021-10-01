@@ -18,8 +18,8 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_RESTSERVER_H
 #define TARGOMAN_API_SERVER_RESTSERVER_H
@@ -36,9 +36,12 @@
 
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
-class intfAPIArgManipulator;
+#include "Interfaces/Common/intfAPIArgManipulator.h"
+
+namespace Targoman::API {
+
+//class intfAPIArgManipulator;
+
 namespace Server {
 
 /********************************************************************************/
@@ -89,7 +92,7 @@ public:
      * @return a list of all APIs registered in the server
      */
     QStringList registeredAPIs(bool _showParams = true, bool _showTypes = true, bool _prettifyTypes = true);
-    void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator);
+    void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator);
 
 private:
     bool validateConnection(const QHostAddress& _peerAddress, quint16 _peerPort);
@@ -101,7 +104,7 @@ private:
     bool IsStarted;
 };
 
-}
-}
-}
+} //namespace Server
+} //namespace Targoman::API
+
 #endif // TARGOMAN_API_SERVER_RESTSERVER_H

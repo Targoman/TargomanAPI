@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QCoreApplication>
@@ -37,8 +38,8 @@
 #include "QJWT.h"
 #include "APICache.hpp"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
+
 namespace Server {
 
 using namespace Targoman::Common;
@@ -89,7 +90,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 
 
     QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con){
-        if(!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
+        if (!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
             _con->killConnection();
     });
 
@@ -141,7 +142,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
     if(gWSServer.isActive()){
         QObject::connect(&gWSServer, &WebSocketServer::sigNewConnection, [this](QWebSocket* _con){
-            if(!validateConnection (_con->peerAddress(), _con->peerPort()))
+            if (!validateConnection (_con->peerAddress(), _con->peerPort()))
                 _con->close(QWebSocketProtocol::CloseCodePolicyViolated,"IP banned");
         });
 
@@ -174,7 +175,10 @@ QStringList RESTServer::registeredAPIs(bool _showParams, bool _showTypes, bool _
 
 void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator)
 {
-    Q_ASSERT_X(QMetaType::type(_typeName), "registerUserDefinedType", "Seems that registering syntax is erroneous");
+//    TargomanInfo(9, "registering User Defined Type: (" << _typeName << ")");
+
+    Q_ASSERT_X(QMetaType::type(_typeName), QString("registerUserDefinedType typeName(%1)").arg(_typeName).toStdString().c_str(), "Seems that registering syntax is erroneous");
+
     gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - TAPI_BASE_USER_DEFINED_TYPEID, _argManipulator);
 }
 
@@ -198,7 +202,7 @@ RESTServer::RESTServer() :
     IsStarted(false) {
 }
 
-}
+} //namespace Server
 
 /***********************************************************************************************/
 void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator)
@@ -206,5 +210,4 @@ void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argM
     Server::RESTServer::instance().registerUserDefinedType(_typeName, _argManipulator);
 }
 
-}
-}
+} //namespace Targoman::API

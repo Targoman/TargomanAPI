@@ -10,6 +10,7 @@ include($$QBUILD_PATH/templates/projectConfigs.pri)
 
 addSubdirs(Interfaces, Dependencies)
 addSubdirs(App, Interfaces)
+addSubdirs(ModuleHelpers, Interfaces)
 addSubdirs(Modules, App)
 addSubdirs(unitTest, Modules)
 
@@ -22,6 +23,6 @@ OTHER_FILES += \
     conf/invalidPass.tbl \
     conf/api.server.conf \
     conf/api.conf \
-    Docs/Models/Accounting.scxml
-
-
+    Docs/Models/Accounting.scxml \
+    dumpDBSchema-all.sh \
+    SwaggerUI/*

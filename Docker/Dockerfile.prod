@@ -1,20 +1,48 @@
-FROM    alpine:3.7
+FROM  opensuse/leap:15.3 as builder
 LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
+
+WORKDIR /opt
+
+RUN zypper ref
+RUN zypper --non-interactive in \
+      vim \
+      git \
+      which \
+      zlib-devel \
+      hiredis-devel \
+      libcurl-devel \
+      libQt5Sql-devel \
+      libQt5Sql5-mysql \
+      libQt5Test-devel  \
+      libQt5Network-devel \
+      libQt5Concurrent-devel \
+      libqt5-qtwebsockets-devel  &&
+    git clone --depth 1 --recursive --branch v1.0.2 https://github.com/Targoman/TargomanAPI.git &&
+    cd TargomanAPI &&
+    qmake-qt5 QJsonRPC=0 &&
+    make -j 4
+
+
+ENTRYPOINT [ "/bin/sh"]
+
+FROM  opensuse/leap:15.3
 
 WORKDIR /
 
-RUN apk --no-cache add --update hiredis qt5-qtbase-mysql qt5-websockets
-RUN apk add --no-cache --virtual .build-deps \
-    qt5-qtbase-dev \
-    qt5-websockets-dev \
-    hiredis-dev \
-    bash \
-    vim
-    
-#RUN apk del --no-cache .build-deps 
-    
-#VOLUME . /etc/TargomanAPI
+RUN zypper ref &&
+    zypper --non-interactive in \
+      libhiredis0_13 \
+      libcurl4 \
+      libQt5Sql5-mysql \
+      libQt5Network5 \
+      libQt5Concurrent5 \
+      libQt5WebSockets5 \
+      zlib &&
+      mkdir -p /targoman/bin  &&
+      cd /targoman
 
-#EXPOSE 10000
-#ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/api.server.conf" ]
-ENTRYPOINT [ "/bin/sh"]
+COPY --from=builder /opt/TargomanAPI/out    .
+
+EXPOSE 10000
+ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/api.server.conf" ]
+

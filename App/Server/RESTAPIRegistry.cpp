@@ -26,11 +26,12 @@
 #include "RESTAPIRegistry.h"
 #include "APICache.hpp"
 
-#include "Interfaces/ORM/clsORMField.h"
+#include "Interfaces/DBM/clsORMField.h"
 
 namespace Targoman {
 namespace API {
 
+using namespace TAPI;
 
 /***********************************************************************************************/
 #define DO_ON_TYPE_VALID(_complexity, _baseType)  tmplAPIArg<_baseType, _complexity, false, true>::instance(TARGOMAN_M2STR(_baseType))
@@ -65,33 +66,36 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_METATYPE)
 };
 
-#define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _lambdaFromVariant, _toORMValueLambda, _lambdaDesc) \
+#define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fromVariantLambda, _toORMValueLambda, _descriptionLambda) \
     template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
-    template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _lambdaFromVariant; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _lambdaDesc; \
+    template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
+    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
     \
-    template<> std::function<QVariant(QSharedPointer<_baseType> _value)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toVariantLambda = \
-        [](QSharedPointer<_baseType> _value){return _value.isNull() ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
-    template<> std::function<QSharedPointer<_baseType>(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromVariantLambda = \
-        [](const QVariant& _value, const QByteArray& _paramName) -> QSharedPointer<_baseType> { \
-            if(!_value.isValid() || _value.isNull()) return QSharedPointer<_baseType>(); \
-            QSharedPointer<_baseType> Value(new _baseType); *Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
+    template<> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toVariantLambda = \
+        [](NULLABLE_TYPE(_baseType) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
+    template<> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
+        [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
+            if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
+            NULLABLE_VAR(_baseType, Value); \
+            Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::toORMValueLambda = nullptr; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::fromORMValueLambda = nullptr; \
-    template<> std::function<QStringList()> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<ORM::clsORMField>& _allFields)> tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::descriptionLambda = nullptr; \
-    static tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<QSharedPointer<_baseType>, _complexity, true>::instance(QSP_M2STR(_baseType)); \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
+    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
+    template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
+    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
+//NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
+
 
 #define DO_ON_TYPE_NULLABLE_IGNORED(...)
 #define DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, ...) DO_ON_TYPE_SELECTOR(__VA_ARGS__, DO_ON_TYPE_NULLABLE_IGNORED, DO_ON_TYPE_NULLABLE_VALID)(_complexity, _baseType, nullptr, nullptr, nullptr)
-#define DO_ON_NULLABLE_TYPE(_isIntegral, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_isIntegral, _baseType, IGNORE_TYPE_##_typeName)
+#define DO_ON_NULLABLE_TYPE(_complexity, _typeName, _baseType) DO_ON_TYPE_NULLABLE_PROXY(_complexity, _baseType, IGNORE_TYPE_##_typeName)
 
-#define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral,  _typeName, _baseType)
+#define MAKE_INFO_FOR_VALID_NULLABLE_INTEGRAL_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Integral, _typeName, _baseType)
 #define MAKE_INFO_FOR_VALID_NULLABLE_COMPLEX_METATYPE(_typeName, _id, _baseType) DO_ON_NULLABLE_TYPE(COMPLEXITY_Complex, _typeName, _baseType)
 #define MAKE_INVALID_NULLABLE_METATYPE(_typeName, _id, _baseType)
 
@@ -118,14 +122,14 @@ DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
                                   throw exHTTPBadRequest(_paramName + " is not a valid bool");
                           },
                           [](const QVariant& _val) -> QVariant {return !(_val == "false" || _val == "0");},
-                          [](const QList<ORM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
+                          [](const QList<DBM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
 )
 
 namespace Server {
 
-using namespace ORM;
+//using namespace DBM;
 
-struct stuNullableQtType{
+struct stuNullableQtType {
     std::function<void()>  registerInMetaTypes;
     intfAPIArgManipulator* ArgManipulator;
 
@@ -136,7 +140,21 @@ struct stuNullableQtType{
 };
 
 /***********************************************************************************************/
-void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod& _method){
+void RESTAPIRegistry::registerMetaTypeInfoMap() {
+    if (Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())) {
+        gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
+
+        for (auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
+                MetaTypeInfoMapIter != MetaTypeInfoMap.end();
+                ++MetaTypeInfoMapIter) {
+            int Gap = MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size();
+            for (int i = 0; i< Gap; ++i)
+                gOrderedMetaTypeInfo.append(nullptr);
+            gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
+        }
+    }
+}
+void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method) {
     if ((_method.name().startsWith("api") == false &&
          _method.name().startsWith("asyncApi") == false)||
         _method.typeName() == nullptr)
@@ -145,18 +163,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
     foreach(auto Item, _module->filterItems())
         Item.registerTypeIfNotRegisterd(_module);
 
-    if(Q_UNLIKELY(gOrderedMetaTypeInfo.isEmpty())){
-        gOrderedMetaTypeInfo.reserve(MetaTypeInfoMap.lastKey());
-
-        for(auto MetaTypeInfoMapIter = MetaTypeInfoMap.begin();
-            MetaTypeInfoMapIter != MetaTypeInfoMap.end();
-            ++MetaTypeInfoMapIter){
-            int Gap = MetaTypeInfoMapIter.key() - gOrderedMetaTypeInfo.size();
-            for(int i = 0; i< Gap; ++i)
-                gOrderedMetaTypeInfo.append(nullptr);
-            gOrderedMetaTypeInfo.append(MetaTypeInfoMapIter.value());
-        }
-    }
+    RESTAPIRegistry::registerMetaTypeInfoMap();
 
     try{
         RESTAPIRegistry::validateMethodInputAndOutput(_method);
@@ -175,7 +182,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 break;
             }
 
-        if(!Found)
+        if (!Found)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
         for (int i=0; i<_module->metaObject()->methodCount(); ++i)
@@ -188,7 +195,7 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
                 break;
             }
 
-        if(!Found)
+        if (!Found)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
 
@@ -232,49 +239,52 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             if (ParamIndex >= _method.parameterCount())
                 break;
 
-            if(_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>() ||
+            if (_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>() ||
                _method.parameterType(ParamIndex) == qMetaTypeId<TAPI::Files_t>())
                 ContainsFileInput = true;
 
             intfAPIArgManipulator* ArgSpecs;
-            if(_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
+            if (_method.parameterType(ParamIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
                 ArgSpecs = gOrderedMetaTypeInfo.at(_method.parameterType(ParamIndex));
             else
                 ArgSpecs = gUserDefinedTypesInfo.at(_method.parameterType(ParamIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 
             Q_ASSERT(ArgSpecs);
 
-            if(Param.contains('=')){
+            if (Param.contains('=')) {
                 QString Value = Param.split('=').last().replace(COMMA_SIGN, ",").trimmed();
-                if(Value.startsWith("(")) Value = Value.mid(1);
-                if(Value.endsWith(")")) Value = Value.mid(0, Value.size() - 1);
-                if(Value.startsWith("'")) Value = Value.mid(1);
-                if(Value.endsWith("'")) Value = Value.mid(0, Value.size() - 1);
-                if(Value.startsWith("\"")) Value = Value.mid(1);
-                if(Value.endsWith("\"")) Value = Value.mid(0, Value.size() - 1);
+                if (Value.startsWith("(")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith(")")) Value = Value.mid(0, Value.size() - 1).trimmed();
+                if (Value.startsWith("'")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith("'")) Value = Value.mid(0, Value.size() - 1).trimmed();
+                if (Value.startsWith("\"")) Value = Value.mid(1).trimmed();
+                if (Value.endsWith("\"")) Value = Value.mid(0, Value.size() - 1).trimmed();
                 Value.replace("\\\"", "\"");
                 Value.replace("\\'", "'");
 
-
-                if(Value == "{}" || Value.contains("()"))
+                if (Value == "{}" || Value.contains("()"))
                     DefaultValues.append(ArgSpecs->defaultVariant());
                 else if (ArgSpecs->complexity() == COMPLEXITY_Enum)
                     DefaultValues.append(Value.mid(Value.indexOf("::") + 2));
                 else
                     DefaultValues.append(Value);
-            }else if (ArgSpecs->isNullable())
+            }
+            else if (ArgSpecs->isNullable())
                 throw exRESTRegistry("Nullable parameter: <"+_method.parameterNames().value(ParamIndex)+"> on method: <" + MethodName + "> must have default value" );
             else
                 DefaultValues.append(QVariant());
+
             ParamIndex++;
         }
 
         QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
 
-        if(MethodName.startsWith("GET")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
+        if (MethodName.startsWith("GET")) {
+            if (ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName(sizeof("GET")));
-        }else if(MethodName.startsWith("POST"))
+        }
+        else if(MethodName.startsWith("POST"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", makeMethodName(sizeof("POST")));
         else if(MethodName.startsWith("PUT"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PUT", makeMethodName(sizeof("PUT")));
@@ -282,25 +292,30 @@ void RESTAPIRegistry::registerRESTAPI(intfAPIModule* _module, const QMetaMethod&
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PUT", makeMethodName(sizeof("CREATE")));
         else if(MethodName.startsWith("PATCH"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("PATCH")));
-        else if (MethodName.startsWith("DELETE")){
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with DELETE method: "+ MethodName);
+        else if (MethodName.startsWith("DELETE")) {
+            if (ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with DELETE method: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "DELETE", makeMethodName(sizeof("DELETE")));
-        }else if (MethodName.startsWith("UPDATE"))
+        }
+        else if (MethodName.startsWith("UPDATE"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "PATCH", makeMethodName(sizeof("UPDATE")));
-        else if (MethodName.startsWith("WS")){
+        else if (MethodName.startsWith("WS")) {
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-            if(ContainsFileInput) throw exRESTRegistry("file input can not be used with WebSockets: "+ MethodName);
+            if(ContainsFileInput)
+                throw exRESTRegistry("file input can not be used with WebSockets: "+ MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::WSRegistry, _module, Method, "WS", makeMethodName(sizeof("WS")));
 #else
             throw exRESTRegistry("Websockets are not enabled in this QRestServer please compile with websockets support");
 #endif
-        }else if(ContainsFileInput)
+        }
+        else if(ContainsFileInput)
             throw exRESTRegistry("methods with file input must specifically contain HTTP method: " + MethodName);
-        else{
+        else {
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", MethodName.at(0).toLower() + MethodName.mid(1));
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", MethodName.at(0).toLower() + MethodName.mid(1));
         }
-    }catch(Targoman::Common::exTargomanBase& ex){
+    }
+    catch(Targoman::Common::exTargomanBase& ex) {
         TargomanError("Fatal Error: "<<ex.what());
         throw;
     }
@@ -340,7 +355,7 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObje
                     case COMPLEXITY_Enum:
                         return QString(" = \"%1\"").arg(_apiObject->defaultValue(i).toString().replace("\"", "\\\""));
                     case COMPLEXITY_Object:
-                        return  "null"; //TODO update this
+                        return  "null"; ///TODO: update this
                     case COMPLEXITY_File:
                         return "";
                     }
@@ -391,13 +406,13 @@ QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showPa
 }
 
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input){
-    if(_typeID == 0 || _typeID == QMetaType::User || _typeID == QMetaType::User)
+    if(_typeID == 0 || _typeID == QMetaType::User) // || _typeID == QMetaType::User)
         return  "is not registered with Qt MetaTypes";
     if(_typeID < TAPI_BASE_USER_DEFINED_TYPEID && (_typeID >= gOrderedMetaTypeInfo.size() || gOrderedMetaTypeInfo.at(_typeID) == nullptr))
         return "is complex type and not supported";
 
     if(_typeID >= TAPI_BASE_USER_DEFINED_TYPEID){
-        if((_typeID - TAPI_BASE_USER_DEFINED_TYPEID >= gUserDefinedTypesInfo.size() ||
+        if ((_typeID - TAPI_BASE_USER_DEFINED_TYPEID >= gUserDefinedTypesInfo.size() ||
             gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID) == nullptr))
             return "is user defined but not registered";
 
@@ -409,10 +424,10 @@ QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input){
                         QMetaType::typeName(_typeID));
 
         if(_validate4Input){
-            if(!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasFromVariantMethod())
+            if (!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasFromVariantMethod())
                 return "has no fromVariant lambda so can not be used as input";
         }else{
-            if(!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasToVariantMethod())
+            if (!gUserDefinedTypesInfo.at(_typeID - TAPI_BASE_USER_DEFINED_TYPEID)->hasToVariantMethod())
                 return "has no toVariant lambda so can not be used as output";
         }
     }
@@ -452,7 +467,7 @@ constexpr char CACHE_CENTRAL[]  = "CENTRALCACHE_";
 constexpr char API_TIMEOUT[]  = "CENTRALCACHE_";
 
 void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry,
-                                       intfAPIModule* _module,
+                                       intfPureModule* _module,
                                        const QMetaMethodExtended& _method,
                                        const QString& _httpMethod,
                                        const QString& _methodName){
@@ -513,7 +528,7 @@ QHash<QString, clsAPIObject*>  RESTAPIRegistry::WSRegistry;
 
 /****************************************************/
 intfCacheConnector::~intfCacheConnector()
-{;}
+{}
 
 void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl)
 {
@@ -524,7 +539,6 @@ void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, c
     else
         this->setKeyValImpl(_key, _value.toString(), _ttl);
 }
-
 
 }
 }

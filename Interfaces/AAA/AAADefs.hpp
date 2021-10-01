@@ -18,35 +18,31 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_DEFS_HPP
 #define TARGOMAN_API_AAA_DEFS_HPP
 
 #include <QJsonObject>
-
 #include "libTargomanCommon/exTargomanBase.h"
 #include "libTargomanDBM/clsDAC.h"
-
 #include "Interfaces/Common/HTTPExceptions.hpp"
 
 using namespace qhttp;
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_BAD_REQUEST, exAAA);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_UNAUTHORIZED, exAuthentication);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_FORBIDDEN, exAuthorization);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_METHOD_NOT_ALLOWED, exAccounting);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (499, exNoTokenProvided);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (498, exInvalidToken);
-TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_PAYMENT_REQUIRED, exPaymentRequired);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_BAD_REQUEST, exAAA);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_UNAUTHORIZED, exAuthentication);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_FORBIDDEN, exAuthorization);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_METHOD_NOT_ALLOWED, exAccounting);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(499, exNoTokenProvided);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(498, exInvalidToken);
+TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_PAYMENT_REQUIRED, exPaymentRequired);
 #pragma clang diagnostic pop
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -66,9 +62,9 @@ TARGOMAN_CREATE_CONSTEXPR(acc);
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 }
 
-namespace tblUser{
+namespace tblUser {
 constexpr char Name[] = "tblUser";
-constexpr quint32 MinNormalUserID = 100;
+constexpr quint64 MinNormalUserID = 100;
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 TARGOMAN_CREATE_CONSTEXPR(usrGender);
 TARGOMAN_CREATE_CONSTEXPR(usrName);
@@ -90,13 +86,12 @@ TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 }
 #pragma GCC diagnostic pop
 
+constexpr char AccountDomain[] = "Account";
 constexpr char AAASchema[] = "AAA";
-constexpr char AAADomain[] = "Account";
 
-constexpr quint32 SYSTEM_USER_ID = 1;
-#define makeAAADAC(_varName) DBManager::clsDAC _varName(AAADomain, AAASchema)
-}
-}
-}
+constexpr quint64 SYSTEM_USER_ID = 1;
+#define makeAAADAC(_varName) DBManager::clsDAC _varName(AccountDomain, AAASchema)
+
+} //namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_AAA_DEFS_HPP

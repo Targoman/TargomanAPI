@@ -46,7 +46,7 @@ TARGOMAN_DEFINE_ENUM(enuUserApproval,
                      JustEmail  = 'E'
                      )
 
-TARGOMAN_DEFINE_ENUM(enuUserGender,
+TARGOMAN_DEFINE_ENUM(enuGender,
                      Male         = 'M',
                      Female       = 'F',
                      NotExpressed = 'N'
@@ -59,16 +59,16 @@ TARGOMAN_DEFINE_ENUM(enuAuditableStatus,
                      Removed = 'R'
                      )
 
-TARGOMAN_DEFINE_ENUM (enuPackageType,
+TARGOMAN_DEFINE_ENUM (enuSaleableType,
                       Normal  = 'N',
                       Special = 'S',
                       );
 }
 
-TAPI_DECLARE_METATYPE(TAPI::enuUserStatus::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuUserApproval::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuUserGender::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuAuditableStatus::Type);
-TAPI_DECLARE_METATYPE(TAPI::enuPackageType::Type);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuUserStatus);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuUserApproval);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuGender);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuAuditableStatus);
+TAPI_DECLARE_METATYPE_ENUM(TAPI, enuSaleableType);
 
 #endif // TARGOMAN_API_AAA_GENERICENUMS_HPP

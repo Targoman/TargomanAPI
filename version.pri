@@ -15,7 +15,7 @@ LIBS += -lTargomanCommon \
         -lQFieldValidator \
         -lqhttp \
         -lcurl \
-        -lTextProcessor \
+        -lTargomanTextProcessor \
         -lfasttext
 
 defined(QJsonRPC, var) equals(QJsonRPC, 1) {
@@ -44,8 +44,8 @@ QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 # Qt5.5.1 on OSX needs both c++11 and c++14!! the c++14 is not enough
-QMAKE_CXXFLAGS += -std=c++11 -std=c++14
-CONFIGS += c++11 c++14
+QMAKE_CXXFLAGS += -std=c++11 -std=c++14 -std=c++17
+CONFIGS += c++11 c++14 c++17
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 #following definitions are used on all Targoman projects

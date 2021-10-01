@@ -71,7 +71,7 @@ void clsRedisConnector::setKeyValImpl(const QString& _key, const QString& _value
     if(this->Connection.isNull() || this->Connection->err)
         this->reconnect();
 
-    if(!redisCommand(this->Connection.data(), "SETEX %s %d %s", qPrintable(_key), _ttl, _value.toUtf8().constData()))
+    if (!redisCommand(this->Connection.data(), "SETEX %s %d %s", qPrintable(_key), _ttl, _value.toUtf8().constData()))
         TargomanWarn(1, this->Connection->errstr);
 }
 
@@ -80,7 +80,7 @@ QString clsRedisConnector::getValueImpl(const QString& _key)
     void *Reply = nullptr;
 
     Reply = redisCommand(this->Connection.data(), "GET %s", qPrintable(_key)); // You must define "context" previously
-    if(!Reply){
+    if (!Reply){
         TargomanWarn(1, this->Connection->errstr);
         return "";
     }

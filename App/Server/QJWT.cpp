@@ -36,7 +36,7 @@ namespace API {
 namespace Server {
 
 using namespace Common;
-using namespace Common::Configuration;
+using namespace Targoman::Common::Configuration;
 
 tmplConfigurable<QString> QJWT::Secret(
         QJWT::makeConfig("JWTSecret"),
@@ -122,7 +122,7 @@ QString QJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, co
     else
         _payload.remove("jti");
 
-    if(!_privatePayload.isEmpty())
+    if (!_privatePayload.isEmpty())
         _payload["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
     else
         _payload.remove("prv");

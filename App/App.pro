@@ -24,7 +24,6 @@ HEADERS += \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
-    Server/QtTypes.hpp \
     Server/OpenAPIGenerator.h \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
@@ -42,6 +41,13 @@ SOURCES += \
     Server/appTargomanAPI.cpp \
     Server/OpenAPIGenerator.cpp \
     Server/main.cpp
+
+OTHER_FILES += \
+    dumpDBSchema.sh \
+    Schemas/Common.my.sql \
+    Schemas/CommonFuncs.my.sql \
+    Schemas/I18N.my.sql
+
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \
 

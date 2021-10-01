@@ -17,19 +17,18 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  */
 
 #include "NGTv1.h"
-#include "ORM/Defs.hpp"
 
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1);
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1, NGTv1Schema);
 
 NGTv1::NGTv1() :
-    ORM::clsRESTAPIWithActionLogs("NGT", "Targoman"){
+    intfSQLBasedWithActionLogsModule(NGTv1Domain, NGTv1Schema)
+{
+    TARGOMAN_API_IMPLEMENT_ACTIONLOG(NGTv1, NGTv1Schema)
 }
-
-

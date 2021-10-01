@@ -12,42 +12,67 @@ DIST_HEADERS += \
     Common/GenericTypes.h \
     Common/tmplAPIArg.h \
     Common/intfAPIArgManipulator.h \
+    Common/HTTPExceptions.hpp \
+    Common/GenericEnums.hpp \
+    Common/APIArgHelperMacros.hpp \
+    Common/QtTypes.hpp \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
-    AAA/Accounting.h \
     AAA/Authentication.h \
     AAA/Authorization.h \
     AAA/clsJWT.hpp \
     AAA/PrivHelpers.h \
-    ORM/clsORMField.h \
-    ORM/clsRESTAPIWithActionLogs.h \
-    ORM/clsTable.h \
-    NLP/FormalityChecker.h \
-    NLP/TextProcessor.hpp \
-    Common/HTTPExceptions.hpp \
-    Common/intfAPIModule.h \
-    Common/GenericEnums.hpp \
-    Common/APIArgHelperMacros.hpp \
     AAA/Accounting_Interfaces.h \
-    AAA/Accounting_Defs.hpp
+    AAA/Accounting_Defs.hpp \
+    AAA/intfAccountingBasedModule.h \
+    DBM/clsORMField.h \
+    DBM/clsTable.h \
+    ORM/intfActionLogs.h \
+    ORM/Alerts.h \
+    API/intfPureModule.h \
+    API/intfSQLBasedModule.h \
+    API/intfSQLBasedWithActionLogsModule.h \
 
 PRIVATE_HEADERS += \
 
+HEADERS += \
+    Common/base.h \
+    Common/tmplNullable.hpp \
+    Common/APIArgHelperMacrosPrivate.h \
+    Helpers/RESTClientHelper.h \
+    Helpers/SecurityHelper.h \
+    Helpers/URLHelper.h \
+    DBM/Defs.hpp \
+    DBM/clsORMField.h \
+    DBM/clsTable.h \
+    DBM/QueryBuilders.h \
+    ORM/intfActionLogs.h \
+    ORM/intfAlerts.h
+
 SOURCES += \
-    AAA/Accounting.cpp \
+    Common/base.cpp \
+    Common/GenericTypes.cpp \
+    Common/intfAPIArgManipulator.cpp \
+    Helpers/RESTClientHelper.cpp \
+    Helpers/SecurityHelper.cpp \
+    Helpers/URLHelper.cpp \
     AAA/Authentication.cpp \
     AAA/Authorization.cpp \
+    AAA/Accounting_Interfaces.cpp \
     AAA/PrivHelpers.cpp \
-    Common/GenericTypes.cpp \
-    ORM/clsORMField.cpp \
-    ORM/clsRESTAPIWithActionLogs.cpp \
-    ORM/clsTable.cpp \
-    NLP/FormalityChecker.cpp \
-    $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
-    Common/intf_impl.cpp \
-    AAA/Accounting_Interfaces.cpp
+    AAA/intfAccountingBasedModule.cpp \
+    DBM/clsORMField.cpp \
+    DBM/clsTable.cpp \
+    DBM/QueryBuilders.cpp \
+    API/intfPureModule.cpp \
+    API/intfSQLBasedModule.cpp \
+    API/intfSQLBasedWithActionLogsModule.cpp \
+    ORM/intfActionLogs.cpp \
+    ORM/intfAlerts.cpp
 
 OTHER_FILES += \
+    Test/testBase.hpp \
+    Test/testCommon.hpp
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/

@@ -192,8 +192,8 @@ public:
                     CryptoFlagHash = 0x04
                    };
     Q_DECLARE_FLAGS(CryptoFlags, CryptoFlag)
-private:
 
+private:
     void splitKey();
 
     quint64 m_key;
