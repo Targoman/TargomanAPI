@@ -61,7 +61,7 @@
 #define IGNORE_TYPE_QCborMap ,
 
 #define DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)  \
-namespace /*TA PI*/COMMON { \
+namespace /*TAPI*/COMMON { \
     inline void setFromVariant(_baseType& _storage, const QVariant& _val){ _storage = _val.value<_baseType>(); } \
     inline void setFromVariant(NULLABLE_TYPE(_baseType)& _storage, const QVariant& _val){ \
         if (_val.isValid() && _val.isNull() == false) _storage = _val.value<_baseType>(); \
@@ -82,7 +82,7 @@ namespace Targoman::API::Common { \
         return QGenericArgument(this->RealTypeName, *_argStorage); \
     } \
 } \
-namespace /*TA PI*/COMMON { \
+namespace /*TAPI*/COMMON { \
     inline void setFromVariant(_numericType& _storage, const QVariant& _val){ \
         bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \
         if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: %2").arg(_val.toString()).arg(#_numericType)); \

@@ -166,10 +166,10 @@ class testQueryBuilders: public QObject
         NULLABLE_TYPE(quint32) a;
         a = 1234;
 
-        /*TA PI*/COMMON::setFromVariant(a, QVariant());
+        /*TAPI*/COMMON::setFromVariant(a, QVariant());
 
         TAPI::PrivObject_t p;
-        /*TA PI*/COMMON::setFromVariant(p, QVariant());
+        /*TAPI*/COMMON::setFromVariant(p, QVariant());
     }
 
     TestTable1 t1;

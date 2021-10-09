@@ -34,8 +34,8 @@ Locations::Locations() :
         tblLocations::Name,
         {///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
             { tblLocations::locID,               ORM_PRIMARYKEY_32 },
-            { tblLocations::locURL,              S(COMMON::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
-            { tblLocations::locPlaceCode,        S(COMMON::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
+            { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
+            { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
             { tblLocations::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { tblLocations::locCreationDateTime, ORM_CREATED_ON },

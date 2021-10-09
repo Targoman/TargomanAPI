@@ -731,7 +731,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                 if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
                 {
                     NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                    /*TA PI*/COMMON::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
+                    /*TAPI*/COMMON::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
 
                     //bypass process by end point?
                     if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
@@ -826,7 +826,7 @@ void Account::tryCancelVoucher(
                         if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
                         {
                             NULLABLE_TYPE(QString) CancelVoucherItemEndPoint;
-                            /*TA PI*/COMMON::setFromVariant(CancelVoucherItemEndPoint, ServiceInfo.value(tblService::svcCancelVoucherItemEndPoint));
+                            /*TAPI*/COMMON::setFromVariant(CancelVoucherItemEndPoint, ServiceInfo.value(tblService::svcCancelVoucherItemEndPoint));
 
                             //bypass process by end point?
                             if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint))
