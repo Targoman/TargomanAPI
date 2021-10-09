@@ -101,6 +101,6 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H

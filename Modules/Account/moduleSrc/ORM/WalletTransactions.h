@@ -84,6 +84,6 @@ private:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

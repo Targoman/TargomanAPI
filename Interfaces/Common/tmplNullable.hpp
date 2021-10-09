@@ -30,7 +30,7 @@ using namespace std;
 #include <QSharedPointer>
 #include <QVariant>
 
-namespace TAPI {
+namespace /*TA PI*/COMMON {
 
 /************************************************************/
 //template<class itmplType>

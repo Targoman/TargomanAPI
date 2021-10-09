@@ -212,6 +212,6 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USER_H

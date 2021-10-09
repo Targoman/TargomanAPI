@@ -52,12 +52,12 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     QString,      Desc      , QString()    , v.size(), v, v.toString(),
     QJsonObject,  PrizeInfo , QJsonObject(), v.size(), v, v.toObject()
 );
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_QString(SaleableCode),
     SF_qreal(Multiplier),
     SF_NULLABLE_qreal(MinQty)
@@ -84,14 +84,14 @@ struct stuFullDiscount
     void fromVariantMap(const QVariantMap& _info);
 };
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
     SF_quint64(ID),
     SF_QString(Code),
     SF_qreal(Amount)
 );
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     SF_QString  (Service),   //QString      , Service    , QString()      , v.size() , v          , v.toString()                          ,
     SF_quint64  (OrderID),   //quint64      , OrderID    , 0              , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())    ,
     SF_MD5_t    (UUID),      //TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
@@ -114,7 +114,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
 );
 
 /*****************************************************************************/
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
     SF_NULLABLE_quint32(PerDay),
     SF_NULLABLE_quint32(PerWeek),
     SF_NULLABLE_quint32(PerMonth),
@@ -216,7 +216,7 @@ struct stuActiveCredit {
 
 typedef QList<stuVoucherItem> InvItems_t;
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
     SF_Generic(
         /* type        */ InvItems_t,
         /* name        */ Items,
@@ -232,7 +232,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
     SF_QString(Sign)
 );
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
     SF_quint64(ID, 0, v>0),
     SF_Struct(stuPreVoucher, Info, v.ToPay),
     SF_QString(PaymentLink),
@@ -372,16 +372,16 @@ namespace tblAccountReferalsBase {
 
 } //namespace Targoman::API::AAA
 
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPrize)
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuDiscount3)
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuUsage)
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuPrize)
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuDiscount3)
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuUsage)
 
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPreVoucher)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuPreVoucher)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AAA::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

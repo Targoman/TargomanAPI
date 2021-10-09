@@ -26,10 +26,13 @@
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
+#include "Interfaces/DBM/clsTable.h"
 
 using namespace Targoman::Common;
 
 namespace Targoman::API {
+
+using namespace DBM;
 
 namespace Server {
 class intfCacheConnector;
@@ -77,8 +80,16 @@ public:
     inline QStringList options() const final { return this->optionsLambda ? this->optionsLambda() : QStringList() ;}
     inline enuVarComplexity complexity() const final { return _itmplVarType;}
     inline bool isNullable() const final {return _itmplNullable;}
-    inline QString description(const QList<DBM::clsORMField>& _allFields) const final { 
-        return this->descriptionLambda ? this->descriptionLambda(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);
+    inline QString description(const QList<DBM::clsORMField>& _allFields) const final
+    {
+        if (this->descriptionLambda)
+        {
+            QStringList FieldsNames;
+            foreach (auto Field, _allFields)
+                FieldsNames.append(clsTable::finalColName(Field)/*Field.Name()*/);
+            return this->descriptionLambda(FieldsNames /*_allFields*/);
+        }
+        return QString("A value of type: %1").arg(this->PrettyTypeName);
     }
     inline QString toString(const QVariant _val) const final {
         if(this->hasFromVariantMethod() && this->hasToVariantMethod())
@@ -123,7 +134,7 @@ private:
     static std::function<QVariant(const QVariant& _val)> toORMValueLambda;
     static std::function<QVariant(const QVariant& _val)> fromORMValueLambda;
     static std::function<QStringList()> optionsLambda;
-    static std::function<QString(const QList<DBM::clsORMField>& _allFields)> descriptionLambda;
+    static std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& _fieldsNames)> descriptionLambda;
 
     friend class intfCacheConnector;
 };

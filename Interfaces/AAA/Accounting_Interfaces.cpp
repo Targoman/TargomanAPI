@@ -600,7 +600,7 @@ bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 //} //namespace Targoman::API::AAA {
 
 /******************************************************************/
-//namespace TAPI {
+//namespace TA PI {
 
 //using namespace Targoman::API::AAA;
 

@@ -69,7 +69,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 #define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fromVariantLambda, _toORMValueLambda, _descriptionLambda) \
     template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
     template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
-    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
+    template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& _fieldsNames)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
@@ -86,7 +86,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
     template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
     template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& _fieldsNames)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
     static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
 //NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
 
@@ -117,12 +117,12 @@ DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, float,   nullptr, nullptr, nullpt
 DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, double,  nullptr, nullptr, nullptr)
 DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
                           [](const QVariant& _value, const QByteArray& _paramName) -> bool {
-                              if(_value.toString() == "false" || _value.toString() == "0") return false;
-                              if(_value.toString() == "true" || _value.toString() == "1") return true;
-                                  throw exHTTPBadRequest(_paramName + " is not a valid bool");
+                                if (_value.toString() == "false" || _value.toString() == "0") return false;
+                                if (_value.toString() == "true" || _value.toString() == "1") return true;
+                                    throw exHTTPBadRequest(_paramName + " is not a valid bool");
                           },
-                          [](const QVariant& _val) -> QVariant {return !(_val == "false" || _val == "0");},
-                          [](const QList<DBM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
+                          [](const QVariant& _val) -> QVariant { return !(_val == "false" || _val == "0"); },
+                          [](/*const QList<DBM::clsORMField>&*/ const QStringList& /*_fieldsNames*/) -> QString { return "valid bool as 1|true|0|false"; }
 )
 
 namespace Server {

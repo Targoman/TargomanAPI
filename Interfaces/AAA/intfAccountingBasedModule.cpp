@@ -688,9 +688,9 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 //        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedAmount,              DiscountInfo, tblAccountCouponsBase, cpnTotalUsedAmount);
 
         NULLABLE_TYPE(quint32) _discountUsedCount;
-        TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
+        /*TA PI*/COMMON::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
         NULLABLE_TYPE(quint32) _discountUsedAmount;
-        TAPI::setFromVariant(_discountUsedAmount, DiscountInfo.value("_discountUsedAmount"));
+        /*TA PI*/COMMON::setFromVariant(_discountUsedAmount, DiscountInfo.value("_discountUsedAmount"));
 
 //        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_GET(cpnExpiryTime).toDateTime() < Now)
 //            throw exHTTPBadRequest("Discount code has been expired");

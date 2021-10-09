@@ -406,7 +406,7 @@ TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(TAPI, enuOAuthType);
-TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::stuMultiJWT);
+TARGOMAN_DECLARE_METATYPE_ENUM(TAPI, enuOAuthType);
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AccountModule::stuMultiJWT);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

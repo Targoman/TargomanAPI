@@ -54,7 +54,7 @@ public:
 private:
     FormalityChecker() : FCInstance(new Targoman::Apps::clsFormalityChecker) {}
 
-    TAPI_DISABLE_COPY(FormalityChecker)
+    TARGOMAN_DISABLE_COPY(FormalityChecker)
 private:
     QScopedPointer<Targoman::Apps::clsFormalityChecker> FCInstance;
 };

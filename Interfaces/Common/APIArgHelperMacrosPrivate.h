@@ -25,8 +25,12 @@
 #define APIARGHELPERMACROSPRIVATE_H
 
 #include <QString>
-#include "tmplNullable.hpp"
+//#include "tmplNullable.hpp"
+#include "libTargomanCommon/Macros.h"
 
+/*
+ * moved to common
+ *
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_MACRO_ARG_COUNT( \
     _01,_02,_03,_04,_05,_06,\
     _11,_12,_13,_14,_15,_16,\
@@ -203,15 +207,14 @@ inline QString toCammel(const QString& _name)
 
 #define TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(...) \
     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_MACRO_SELECTOR( TAPI_HELEPER_VARIANTSTRUCT_FROMJSON, __VA_ARGS__)(__VA_ARGS__)
+*/
 
-//#define TARGOMAN_FLATTEN_NAMESPACE(_namespace) _namespace
-
-/**********************************************************/
+//------------------------------------------------------------
 #define TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, _lambdaOptions) \
     namespace Targoman::API { \
         template<> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toVariantLambda = _toVariantLambda; \
         template<> std::function<_namespace::_type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_type, _complexity, false>::fromVariantLambda = _fromVariantLambda; \
-        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& /*_fieldsNames*/)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _descriptionLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
@@ -228,7 +231,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& /*_fieldsNames*/)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -264,7 +267,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& /*_fieldsNames*/)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
         template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toVariantLambda = \
             [](NULLABLE_TYPE(_namespace::_enum::Type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
         template<> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
@@ -277,7 +280,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
-        template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
+        template<> std::function<QString(/*const QList<DBM::clsORMField>& _allFields*/ const QStringList& /*_fieldsNames*/)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -286,7 +289,10 @@ inline QString toCammel(const QString& _name)
     }
 //NULLABLE_TYPE(_namespace::_enum::Type) Value(new _namespace::_enum::Type);
 
-/************************************************************/
+/*
+ * moved to common
+ *
+//------------------------------------------------------------
 #define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
     class _typeName : public _baseType { \
     public: \
@@ -306,8 +312,9 @@ inline QString toCammel(const QString& _name)
         else \
             NULLABLE_RESET(_storage); \
     }
+*/
 
-/************************************************************/
+//------------------------------------------------------------
 #define INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum) \
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
         /* namespace          */ _namespace, \
@@ -329,7 +336,7 @@ inline QString toCammel(const QString& _name)
                     ); \
                 } \
         }, \
-        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) -> QString { \
+        /* descriptionLambda  */ [](/*const QList<Targoman::API::DBM::clsORMField>&*/ const QStringList& /*_fieldsNames*/) -> QString { \
             return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); \
         }, \
         /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \
@@ -347,7 +354,10 @@ inline QString toCammel(const QString& _name)
         /* lambdaOptions      */ []() -> QStringList { return _namespace::_enum::options(); } \
     )
 
-/************************************************************/
+/*
+ * moved to common
+ *
+//------------------------------------------------------------
 #define INTERNAL_C2DBL(v) static_cast<double>(v)
 
 #define INTERNAL_V2DBL(v) v.toDouble()
@@ -371,7 +381,7 @@ inline QString toCammel(const QString& _name)
 #define INTERNAL_V2S64(v) static_cast<qint64>(v.toDouble())
 #define INTERNAL_V2int64(v) INTERNAL_V2S64(v)
 
-#define INTERNAL_N2J(_value)       [](auto v) { return TAPI::toJsonValue(v); } (_value)
+#define INTERNAL_N2J(_value)       [](auto v) { return TA PI::toJsonValue(v); } (_value)
 #define INTERNAL_N2DBL(_value)     INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(double,  _value)
 #define INTERNAL_N2int8(_value)    INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(qint8,   _value)
 #define INTERNAL_N2int16(_value)   INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(qint16,  _value)
@@ -382,9 +392,9 @@ inline QString toCammel(const QString& _name)
 #define INTERNAL_N2uint32(_value)  INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(quint32, _value)
 #define INTERNAL_N2uint64(_value)  INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(quint64, _value)
 
-/************************************************************/
-/************************************************************/
-/************************************************************/
+//------------------------------------------------------------
+//------------------------------------------------------------
+//------------------------------------------------------------
 #define INTERNAL_SF_STRUCT_1(_validator) _validator
 #define INTERNAL_SF_STRUCT_0()           INTERNAL_SF_STRUCT_1(v)
 
@@ -396,12 +406,12 @@ inline QString toCammel(const QString& _name)
     v.toJson(), \
     _type().fromJson(v.toObject())
 
-/************************************************************/
+//------------------------------------------------------------
 #define INTERNAL_SF_STRING_2(_def, _validator) _def, _validator
 #define INTERNAL_SF_STRING_1(_def)             INTERNAL_SF_STRING_2(_def, v.size())
 #define INTERNAL_SF_STRING_0()                 INTERNAL_SF_STRING_1(QString())
 
-/************************************************************/
+//------------------------------------------------------------
 #define INTERNAL_SF_INTEGRAL_2(_def, _validator) _def, _validator
 #define INTERNAL_SF_INTEGRAL_1(_def)             INTERNAL_SF_INTEGRAL_2(_def, v==v)
 #define INTERNAL_SF_INTEGRAL_0()                 INTERNAL_SF_INTEGRAL_1(0)
@@ -410,7 +420,7 @@ inline QString toCammel(const QString& _name)
 #define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v==v)
 #define INTERNAL_SF_NULLABLE_INTEGRAL_0()                 INTERNAL_SF_NULLABLE_INTEGRAL_1(NULLABLE_NULL_VALUE)
 
-/************************************************************/
+//------------------------------------------------------------
 #define INTERNAL_SF(_type, _name, _typeGroup, _fromVariant, _toVariant, ...) \
     _type, \
     _name, \
@@ -418,9 +428,9 @@ inline QString toCammel(const QString& _name)
     _fromVariant, \
     _toVariant
 
-/************************************************************/
-/************************************************************/
-/************************************************************/
+//------------------------------------------------------------
+//------------------------------------------------------------
+//------------------------------------------------------------
 #define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(_type, _value) \
     [](auto v)->NULLABLE_TYPE(_type) { \
         if (v.isNull()) \
@@ -433,10 +443,10 @@ inline QString toCammel(const QString& _name)
 //        qDebug() << "INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE" << #_type << v;
 //        qDebug() << "INTERNAL_ (1)" << v.toDouble();
 
-/************************************************************/
+//------------------------------------------------------------
 #define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum) \
-    TAPI_DECLARE_METATYPE(_namespace::_enum::Type); \
-namespace TAPI { \
+    TARGOMAN_DECLARE_METATYPE(_namespace::_enum::Type); \
+namespace / *TA PI* /COMMON { \
     inline void setFromVariant(_namespace::_enum::Type& _storage, const QVariant& _val) { \
         _storage = _namespace::_enum::toEnum(_val.toString()); \
     } \
@@ -445,5 +455,11 @@ namespace TAPI { \
             _storage = _namespace::_enum::toEnum(_val.toString()); \
     } \
 }
+
+//------------------------------------------------------------
+#define TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum) \
+    INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum)
+*/
+
 
 #endif // APIARGHELPERMACROSPRIVATE_H

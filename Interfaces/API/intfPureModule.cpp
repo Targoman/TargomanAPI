@@ -29,61 +29,84 @@
 using namespace Targoman::API::DBM;
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
-        COMPLEXITY_String,
-        TAPI,
-        Cols_t,
-        QFieldValidator::allwaysValid(),
-        _value,
-        [](const QList<clsORMField>& _fields) {
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isVirtual() == false)
-            Cols.append(clsTable::finalColName(Col));
-    return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
-                   "you can also use aggregation functions: (ex. COUNT(%3))\n"
-                   "* COUNT\n"
-                   "* COUNT_DISTINCT\n"
-                   "* SUM\n"
-                   "* AVG\n"
-                   "* MAX\n"
-                   "* MIN\n\n"
-                   "Available Cols are: \n"
-                   "* %4").arg(Cols.first()).arg(Cols.last()).arg(Cols.first()).arg(Cols.join("\n* "));
-});
+    COMPLEXITY_String,
+    TAPI,
+    Cols_t,
+    QFieldValidator::allwaysValid(),
+    _value,
+    [](/*const QList<clsORMField>& _fields*/ const QStringList& _fieldsNames) {
+//    QStringList Cols;
+//    foreach(auto Col, _fields)
+//        if(Col.isVirtual() == false)
+//            Cols.append(clsTable::finalColName(Col));
+        return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
+                       "you can also use aggregation functions: (ex. COUNT(%3))\n"
+                       "* COUNT\n"
+                       "* COUNT_DISTINCT\n"
+                       "* SUM\n"
+                       "* AVG\n"
+                       "* MAX\n"
+                       "* MIN\n\n"
+                       "Available Cols are: \n"
+                       "* %4").arg(_fieldsNames.first()).arg(_fieldsNames.last()).arg(_fieldsNames.first()).arg(_fieldsNames.join("\n* "));
+    }
+);
 
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
-           "Equality/Inequality operators are\n"
-           "* =: equal\n"
-           "* !=: not equal\n"
-           "* <, <=, >, >=: inequal\n"
-           "* ~=: LIKE on strings\n"
-           "Take note that just columns listed in GroupBy field can be filtered\n"
-           "example: \n"
-           "* ( "+_fields.last().name()+"='1' | "+_fields.last().name()+"!='2' )";
-});
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, OrderBy_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isSortable() && Col.isVirtual() == false)
-            Cols.append(clsTable::finalColName(Col));
-    return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
-    //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
-});
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
-                                   QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
-    QStringList Cols;
-    foreach(auto Col, _fields)
-        if(Col.isFilterable())
-            Cols.append(clsTable::finalColName(Col));
-    return "Comma separated columns: \n* " + Cols.join(",\n* ");
-    //                                               return "Comma separated columns" ;
-});
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
+    COMPLEXITY_String,
+    TAPI,
+    Filter_t,
+    QFieldValidator::allwaysValid(),
+    _value,
+    [](/*const QList<clsORMField>& _fields*/ const QStringList& _fieldsNames) {
+        return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
+               "Equality/Inequality operators are\n"
+               "* =: equal\n"
+               "* !=: not equal\n"
+               "* <, <=, >, >=: inequal\n"
+               "* ~=: LIKE on strings\n"
+               "Take note that just columns listed in GroupBy field can be filtered\n"
+               "example: \n"
+               "* ( " + _fieldsNames.last() + "='1' | " + _fieldsNames.last() + "!='2' )";
+    }
+);
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
+    COMPLEXITY_String,
+    TAPI,
+    OrderBy_t,
+    QFieldValidator::allwaysValid(),
+    _value,
+    [](/*const QList<clsORMField>& _fields*/ const QStringList& _fieldsNames) {
+//        QStringList Cols;
+//        foreach(auto Col, _fields)
+//            if (Col.isSortable() && Col.isVirtual() == false)
+//                Cols.append(clsTable::finalColName(Col));
+        return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"
+                + _fieldsNames.first()
+                + ",-"
+                + _fieldsNames.last()
+                + ")\n* "
+                + _fieldsNames.join("\n* ");
+        //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
+    }
+);
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
+    COMPLEXITY_String,
+    TAPI,
+    GroupBy_t,
+    QFieldValidator::allwaysValid(),
+    _value,
+    [](/*const QList<clsORMField>& _fields*/ const QStringList& _fieldsNames) {
+//        QStringList Cols;
+//        foreach(auto Col, _fields)
+//            if(Col.isFilterable())
+//                Cols.append(clsTable::finalColName(Col));
+        return "Comma separated columns: \n* " + _fieldsNames.join(",\n* ");
+        //return "Comma separated columns" ;
+    }
+);
 
 namespace Targoman::API::API {
 
@@ -93,8 +116,7 @@ intfPureModule::intfPureModule(
     ) :
     intfModule(_parent),
     ModuleName(_moduleName)
-{
-}
+{}
 
 //intfPureModule::~intfPureModule(){}
 

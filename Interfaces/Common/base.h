@@ -28,7 +28,7 @@
 #include <execinfo.h>
 #include <cxxabi.h>
 
-#define TAPI_DISABLE_COPY(Class) \
+#define TARGOMAN_DISABLE_COPY(Class) \
     Q_DISABLE_COPY(Class)
 //    Class &operator=(const Class) Q_DECL_EQ_DELETE;
 

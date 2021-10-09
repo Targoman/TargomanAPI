@@ -69,8 +69,8 @@ namespace Targoman::API::AccountModule {
 
 } //namespace Targoman::API::AccountModule
 
-//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuVoucherType);
-//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuPaymentStatus);
-//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuPaymentGateway);
+//TARGOMAN_DECLARE_METATYPE_ENUM(TAPI, enuVoucherType);
+//TARGOMAN_DECLARE_METATYPE_ENUM(TAPI, enuPaymentStatus);
+//TARGOMAN_DECLARE_METATYPE_ENUM(TAPI, enuPaymentGateway);
 
 #endif //TARGOMAN_API_MODULES_ACCOUNT_CLASSES_DEFS_HPP

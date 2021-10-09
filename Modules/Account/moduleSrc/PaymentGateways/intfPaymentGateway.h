@@ -116,7 +116,7 @@ protected: \
     friend Targoman::API::AccountModule::Classes::PaymentLogic; \
 private: \
     _gatewayClassName(); \
-    TAPI_DISABLE_COPY(_gatewayClassName); \
+    TARGOMAN_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
         Targoman::API::AccountModule::Classes::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)

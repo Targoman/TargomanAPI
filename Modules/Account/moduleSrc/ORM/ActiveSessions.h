@@ -73,6 +73,6 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuSessionStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ACTIVESESSIONS_H

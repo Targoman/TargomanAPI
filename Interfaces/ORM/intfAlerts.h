@@ -80,7 +80,7 @@ public:
 
 } //namespace Targoman::API::ORM
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuAlertType);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuAlertStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuAlertType);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuAlertStatus);
 
 #endif // TARGOMAN_API_ALERTS_H

@@ -43,6 +43,6 @@ TARGOMAN_DEFINE_ENUM(enuTicketType,
 
 } //namespace Targoman::API::TicketingModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketType);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_DEFS_HPP

@@ -75,7 +75,7 @@ public:
 
 private:
     TextProcessor(){}
-    TAPI_DISABLE_COPY(TextProcessor)
+    TARGOMAN_DISABLE_COPY(TextProcessor)
 };
 
 }

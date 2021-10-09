@@ -72,6 +72,6 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuRoleStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuRoleStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

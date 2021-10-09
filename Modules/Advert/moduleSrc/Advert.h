@@ -35,7 +35,7 @@ using namespace Targoman::API::AAA;
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
+TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
     SF_quint64(ID),
     SF_QString(Title),
     SF_QString(Description),
@@ -178,6 +178,6 @@ TARGOMAN_ACTIONLOG_POSTPARENT(Advert, AdvertSchema);
 
 } //namespace Targoman::API::AdvertModule
 
-TAPI_DECLARE_METATYPE(Targoman::API::AdvertModule::stuAdvert);
+TARGOMAN_DECLARE_METATYPE(Targoman::API::AdvertModule::stuAdvert);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ADVERT_H

@@ -114,17 +114,6 @@ TAPI_REGISTER_METATYPE(
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
 );
 
-TAPI_REGISTER_JSON_DERIVED_METATYPE(
-    /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ TAPI,
-    /* type               */ JSON_t
-);
-
-TAPI_REGISTER_JSON_DERIVED_METATYPE(
-    /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ TAPI,
-    /* type               */ PrivObject_t
-);
 /*
     [](const PrivObject_t& _value) -> QVariant {return _value;}
     [](const QVariant& _value, const QByteArray& _paramName) -> PrivObject_t {
@@ -158,7 +147,7 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 
         return  Doc;
     },
-    [](const QList<DBM::clsORMField>&){ return "A valid Privilege JSON object"; },
+    [](/ *const QList<DBM::clsORMField>&* / const QStringList& _fieldsNames){ return "A valid Privilege JSON object"; },
     [](const QVariant& _value) {
         if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
             return QJsonDocument();
@@ -184,8 +173,77 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 TAPI_REGISTER_JSON_DERIVED_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ TAPI,
+    /* type               */ PrivObject_t
+);
+
+TAPI_REGISTER_JSON_DERIVED_METATYPE(
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
     /* type               */ SaleableAdditive_t
 );
+
+TAPI_REGISTER_JSON_DERIVED_METATYPE(
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ TAPI,
+    /* type               */ JSON_t
+);
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ Date_t,
+    /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
+        if(_value.canConvert<QDate>() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
+        return _value.toDate();
+    }
+)
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ Time_t,
+    /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
+        if(_value.canConvert<QDate>() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
+        return _value.toTime();
+    }
+)
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ DateTime_t,
+    /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
+        if (_value.canConvert<QDate>() == false)
+        {
+//            print_stacktrace();
+            throw exHTTPBadRequest(_paramName + " is not a valid DateTime: <" + _value.toString() + ">");
+        }
+        return _value.toDateTime();
+    }
+)
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, MD5_t,                      optional(QFV.md5()),                                                       _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid MD5 string"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, CommaSeparatedStringList_t, optional(QFV.asciiAlNum(false, ",")),                                      _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid comma separated string list"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Email_t,                    optional(QFV.email()),                                                     _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid email"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Mobile_t,                   optional(QFV.mobile()),                                                    _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid mobile number with/without country code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,                     optional(QFV.ipv4()),                                                      _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid IP version 4"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid ISO639 two-letter language code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid base64 encoded png/jpg image"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid Iranian sheba code"; });
+///TODO: Ether/Bitcoin validator
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid ethercoin address"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid URL"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBTinyText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(255)),        _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid tiny text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBText_t,                   optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(65535)),      _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBMediumText_t,             optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(16777215)),   _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid medium text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBLongText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(4294967295)), _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid long text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,                   optional(QFV.matches(QRegularExpression("(?s).*"))),                       _value, [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A valid String"; });
+
 /*
             [](const SaleableAdditive_t& _value) -> QVariant {return _value;}
             [](const QVariant& _value, const QByteArray& _paramName) -> SaleableAdditive_t {
@@ -229,7 +287,7 @@ throw Targoman::Common::exTargomanMustBeImplemented("SaleableAdditive_t not impl
 
                 return  Doc;
             },
-            [](const QList<DBM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
+            [](/ *const QList<DBM::clsORMField>&* /){ return "A valid Saleable Additive JSON object"; },
             [](const QVariant& _value) {
 
 
@@ -269,15 +327,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ EncodedJWT_t,
     /* toVariantLambda    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
     /* fromVariantLambda  */ nullptr,
-    [](const QList<DBM::clsORMField>&){ return "A signed JsonWebToken string"; }
-);
-
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_String,
-    /* namespace          */ TAPI,
-    /* type               */ RemoteIP_t,
-    /* toVariantLambda    */ [](const RemoteIP_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
+    [](/*const QList<DBM::clsORMField>&*/ const QStringList& /*_fieldsNames*/){ return "A signed JsonWebToken string"; }
 );
 
 TAPI_REGISTER_METATYPE(
@@ -291,6 +341,24 @@ TAPI_REGISTER_METATYPE(
         Value=URL.path().remove(0,1);
         return  Value;
     }
+);
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ ProductCode_t,
+    /* toVariantLambda    */ optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),
+    /* fromVariantLambda  */ _value,
+    [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/) { return "A valid ProductCode"; }
+);
+
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
+    /* complexity         */ COMPLEXITY_String,
+    /* namespace          */ TAPI,
+    /* type               */ SaleableCode_t,
+    /* toVariantLambda    */ optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),
+    /* fromVariantLambda  */ _value,
+    [](/*const QList<clsORMField>&*/ const QStringList& /*_fieldsNames*/) { return "A valid SaleableCode"; }
 );
 
 TAPI_REGISTER_METATYPE(
@@ -307,60 +375,10 @@ TAPI_REGISTER_METATYPE(
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
-    /* type               */ Date_t,
-    /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
-        if(_value.canConvert<QDate>() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
-        return _value.toDate();
-    }
-)
-
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_String,
-    /* namespace          */ TAPI,
-    /* type               */ Time_t,
-    /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
-        if(_value.canConvert<QDate>() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
-        return _value.toTime();
-    }
-)
-
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_String,
-    /* namespace          */ TAPI,
-    /* type               */ DateTime_t,
-    /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
-        if (_value.canConvert<QDate>() == false)
-        {
-            print_stacktrace();
-            throw exHTTPBadRequest(_paramName + " is not a valid DateTime: <" + _value.toString() + ">");
-        }
-        return _value.toDateTime();
-    }
-)
-
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, MD5_t,                      optional(QFV.md5()),                                                       _value, [](const QList<clsORMField>&){ return "A valid MD5 string"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, CommaSeparatedStringList_t, optional(QFV.asciiAlNum(false, ",")),                                      _value, [](const QList<clsORMField>&){ return "A valid comma separated string list"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Email_t,                    optional(QFV.email()),                                                     _value, [](const QList<clsORMField>&){ return "A valid email"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Mobile_t,                   optional(QFV.mobile()),                                                    _value, [](const QList<clsORMField>&){ return "A valid mobile number with/without country code"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,                     optional(QFV.ipv4()),                                                      _value, [](const QList<clsORMField>&){ return "A valid IP version 4"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](const QList<clsORMField>&){ return "A valid ISO639 two-letter language code"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](const QList<clsORMField>&){ return "A valid base64 encoded png/jpg image"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
-///TODO: Ether/Bitcoin validator
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](const QList<clsORMField>&){ return "A valid ethercoin address"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](const QList<clsORMField>&){ return "A valid URL"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t,              optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&){ return "A valid ProductCode"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, SaleableCode_t,             optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&){ return "A valid SaleableCode"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBTinyText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(255)),        _value, [](const QList<clsORMField>&){ return "A valid tiny text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBText_t,                   optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(65535)),      _value, [](const QList<clsORMField>&){ return "A valid text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBMediumText_t,             optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(16777215)),   _value, [](const QList<clsORMField>&){ return "A valid medium text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBLongText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(4294967295)), _value, [](const QList<clsORMField>&){ return "A valid long text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,                   optional(QFV.matches(QRegularExpression("(?s).*"))),                       _value, [](const QList<clsORMField>&){ return "A valid String"; });
+    /* type               */ RemoteIP_t,
+    /* toVariantLambda    */ [](const RemoteIP_t& _value) -> QVariant {return _value;},
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
+);
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 

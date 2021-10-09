@@ -59,7 +59,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
                      Currency = '$',
                      );
 
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPaymentGateway,
+//TARGOMAN_DEFINE_VARIANT_ENABLED_STRUCT(stuPaymentGateway,
 //    SF_quint32(pgwID),
 //    SF_QString(pgwName),
 //    SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
@@ -144,12 +144,12 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
+//TARGOMAN_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
-//TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::enuPaymentGatewayType::List);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
+//TARGOMAN_DECLARE_METATYPE(Targoman::API::AccountModule::enuPaymentGatewayType::List);
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTGATEWAYS_H

@@ -77,7 +77,7 @@ private slots:
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuAPRStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuApprovalType);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuAPRStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuApprovalType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_APPROVALREQUEST_H

@@ -95,17 +95,15 @@
 #define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath
 #define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _pksByPath
 
-namespace TAPI {
-TAPI_ADD_TYPE_STRING(Cols_t);
-TAPI_ADD_TYPE_STRING(Filter_t);
-TAPI_ADD_TYPE_STRING(OrderBy_t);
-TAPI_ADD_TYPE_STRING(GroupBy_t);
-}
+TARGOMAN_ADD_TYPE_STRING(TAPI, Cols_t);
+TARGOMAN_ADD_TYPE_STRING(TAPI, Filter_t);
+TARGOMAN_ADD_TYPE_STRING(TAPI, OrderBy_t);
+TARGOMAN_ADD_TYPE_STRING(TAPI, GroupBy_t);
 
-TAPI_DECLARE_METATYPE(TAPI::Cols_t);
-TAPI_DECLARE_METATYPE(TAPI::Filter_t);
-TAPI_DECLARE_METATYPE(TAPI::OrderBy_t);
-TAPI_DECLARE_METATYPE(TAPI::GroupBy_t);
+TARGOMAN_DECLARE_METATYPE(TAPI::Cols_t);
+TARGOMAN_DECLARE_METATYPE(TAPI::Filter_t);
+TARGOMAN_DECLARE_METATYPE(TAPI::OrderBy_t);
+TARGOMAN_DECLARE_METATYPE(TAPI::GroupBy_t);
 
 namespace Targoman::API::API {
 
@@ -258,7 +256,7 @@ public: \
         _submodule->init(); \
     } \
 private: \
-    TAPI_DISABLE_COPY(_name); \
+    TARGOMAN_DISABLE_COPY(_name); \
 public: \
     _name();
 
@@ -272,7 +270,7 @@ public: \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
 private: \
-    TAPI_DISABLE_COPY(_name)
+    TARGOMAN_DISABLE_COPY(_name)
 
 #define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \

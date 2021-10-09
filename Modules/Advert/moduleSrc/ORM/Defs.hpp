@@ -75,9 +75,9 @@ TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
 
 } //namespace Targoman::API::AdvertModule
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertType);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuBannerSize);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertType);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuBannerSize);
+TARGOMAN_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP
