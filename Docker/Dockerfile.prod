@@ -16,33 +16,31 @@ RUN zypper --non-interactive in \
       libQt5Test-devel  \
       libQt5Network-devel \
       libQt5Concurrent-devel \
-      libqt5-qtwebsockets-devel  &&
-    git clone --depth 1 --recursive --branch v1.0.2 https://github.com/Targoman/TargomanAPI.git &&
-    cd TargomanAPI &&
-    qmake-qt5 QJsonRPC=0 &&
-    make -j 4
+      libqt5-qtwebsockets-devel
+      
+      
 
+COPY . .
 
-ENTRYPOINT [ "/bin/sh"]
+RUN qmake-qt5 QJsonRPC=0 && make -j 4
+RUN ls /opt/out -R
+#ENTRYPOINT [ "/bin/sh"]
 
 FROM  opensuse/leap:15.3
 
-WORKDIR /
 
-RUN zypper ref &&
-    zypper --non-interactive in \
+RUN zypper ref && zypper --non-interactive in \
       libhiredis0_13 \
       libcurl4 \
       libQt5Sql5-mysql \
       libQt5Network5 \
       libQt5Concurrent5 \
       libQt5WebSockets5 \
-      zlib &&
-      mkdir -p /targoman/bin  &&
-      cd /targoman
+      zlib && mkdir -p /targoman/bin
 
-COPY --from=builder /opt/TargomanAPI/out    .
-
-EXPOSE 10000
-ENTRYPOINT [ "TargomanAPI", "-c","/etc/TargomanAPI/api.server.conf" ]
-
+WORKDIR /targoman
+COPY conf conf
+COPY Docker/run-targoman.sh .
+COPY --from=builder /opt/out .
+#EXPOSE 10000
+ENTRYPOINT [ "/targoman/run-targoman.sh" ]
