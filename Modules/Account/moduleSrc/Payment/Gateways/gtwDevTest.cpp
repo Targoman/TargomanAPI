@@ -23,7 +23,7 @@
 
 #include "gtwDevTest.h"
 
-namespace Targoman::API::AccountModule::PaymentGateways {
+namespace Targoman::API::AccountModule::Payment::Gateways {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 
@@ -98,4 +98,4 @@ stuPaymentResponse gtwDevTest::verify(
 #endif // QT_DEBUG
 }
 
-} //namespace Targoman::API::AccountModule::PaymentGateways
+} //namespace Targoman::API::AccountModule::Payment::Gateways

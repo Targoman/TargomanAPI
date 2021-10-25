@@ -24,14 +24,15 @@ HEADERS += \
     ORM/WalletTransactions.h \
     ORM/Roles.h \
     ORM/Payments.h \
-    Classes/PaymentLogic.h \
     ORM/Voucher.h \
-    Classes/Defs.hpp \
     ORM/Service.h \
-    PaymentGateways/gtwDevTest.h \
-    PaymentGateways/gtwMellatBank.h \
-    PaymentGateways/gtwZibal.h \
-    PaymentGateways/intfPaymentGateway.h
+    Classes/Defs.hpp \
+    Payment/Gateways/ActiveGateways.h \
+    Payment/PaymentLogic.h \
+    Payment/intfPaymentGateway.h \
+    Payment/Gateways/gtwDevTest.h \
+    Payment/Gateways/gtwMellatBank.h \
+    Payment/Gateways/gtwZibal.h
 
 SOURCES += \
     Account.cpp \
@@ -49,13 +50,13 @@ SOURCES += \
     ORM/WalletTransactions.cpp \
     ORM/Roles.cpp \
     ORM/Payments.cpp \
-    Classes/PaymentLogic.cpp \
     ORM/Voucher.cpp \
     ORM/Service.cpp \
-    PaymentGateways/gtwDevTest.cpp \
-    PaymentGateways/gtwMellatBank.cpp \
-    PaymentGateways/gtwZibal.cpp \
-    PaymentGateways/intfPaymentGateway.cpp
+    Payment/PaymentLogic.cpp \
+    Payment/intfPaymentGateway.cpp \
+    Payment/Gateways/gtwDevTest.cpp \
+    Payment/Gateways/gtwMellatBank.cpp \
+    Payment/Gateways/gtwZibal.cpp
 
 OTHER_FILES += \
     dumpDBSchema.sh \

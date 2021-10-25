@@ -24,7 +24,7 @@
 #include "WalletTransactions.h"
 #include "UserWallets.h"
 #include "Voucher.h"
-#include "Classes/PaymentLogic.h"
+#include "Payment/PaymentLogic.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 

@@ -21,35 +21,11 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
-#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_GATEWAYS_ACTIVEGATEWAYS_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_GATEWAYS_ACTIVEGATEWAYS_H
 
-#include "intfPaymentGateway.h"
-#include "Classes/PaymentLogic.h"
+#include "gtwDevTest.h"
+#include "gtwMellatBank.h"
+#include "gtwZibal.h"
 
-/**
- * CAUTION:
- * place #include "PaymentGateways/gtwDevTest.h" in PaymentLogic.cpp for proper driver registration
- */
-
-namespace Targoman::API::AccountModule::PaymentGateways {
-
-/**
- * @brief *********** THE gtwDevTest CLASS IS JUST FOR DEVELOPERS IN DEBUG MODE. NOT FOR PRODUCTION ***********
- */
-class gtwDevTest : public intfPaymentGateway
-{
-    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        Targoman::API::AccountModule::enuPaymentGatewayType::_DeveloperTest,
-        gtwDevTest)
-
-public:
-    constexpr static char Name[] = "DevTest";
-
-private:
-    constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
-};
-
-} //namespace Targoman::API::AccountModule::PaymentGateways
-
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_GATEWAYS_ACTIVEGATEWAYS_H

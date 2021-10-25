@@ -22,9 +22,7 @@
  */
 
 #include "PaymentLogic.h"
-#include "PaymentGateways/gtwDevTest.h"
-#include "PaymentGateways/gtwMellatBank.h"
-#include "PaymentGateways/gtwZibal.h"
+#include "Payment/Gateways/ActiveGateways.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 #include "Interfaces/Helpers/URLHelper.h"
@@ -34,7 +32,7 @@ using namespace Targoman::DBManager;
 
 using namespace Targoman::API::AccountModule::ORM;
 
-namespace Targoman::API::AccountModule::Classes {
+namespace Targoman::API::AccountModule::Payment {
 
 void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {
@@ -404,4 +402,4 @@ quint64 PaymentLogic::approveOnlinePayment(
     return OnlinePayment.onp_vchID;
 }
 
-} //namespace Targoman::API::AccountModule::Classes
+} //namespace Targoman::API::AccountModule::Payment

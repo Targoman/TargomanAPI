@@ -40,8 +40,8 @@
 #include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
-#include "Classes/PaymentLogic.h"
-#include "PaymentGateways/intfPaymentGateway.h"
+#include "Payment/PaymentLogic.h"
+#include "Payment/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/ORM/intfAlerts.h"
 
@@ -74,7 +74,7 @@ using namespace Targoman::Common::Configuration;
 
 namespace Targoman::API::AccountModule {
 
-using namespace Classes;
+using namespace Payment;
 using namespace ORM;
 
 ///TODO: move this to config file

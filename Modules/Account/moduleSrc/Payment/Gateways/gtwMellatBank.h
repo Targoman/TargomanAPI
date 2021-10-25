@@ -21,48 +21,32 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "gtwMellatBank.h"
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H
 
-namespace Targoman::API::AccountModule::PaymentGateways {
+#include "../intfPaymentGateway.h"
+#include "../PaymentLogic.h"
 
-TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwMellatBank)
+/**
+ * CAUTION:
+ * place #include "gtwMellatBank.h" in ActivePayments.h for proper driver registration
+ */
 
-stuPaymentResponse gtwMellatBank::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    )
+namespace Targoman::API::AccountModule::Payment::Gateways {
+
+class gtwMellatBank : public intfPaymentGateway
 {
-    Q_UNUSED(_paymentGateway);
-    Q_UNUSED(_orderMD5);
-    Q_UNUSED(_amount);
-    Q_UNUSED(_callback);
-    Q_UNUSED(_desc);
+public:
+    constexpr static char Name[] = "MellatBank";
 
-    return stuPaymentResponse(
-        "devtest_track_id",
-        "http://devtest.gateway/pay"
-    );
-}
+TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+    Targoman::API::AccountModule::enuPaymentGatewayType::IranBank,
+    gtwMellatBank)
 
-stuPaymentResponse gtwMellatBank::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    )
-{
-    Q_UNUSED(_paymentGateway);
-    Q_UNUSED(_pgResponse);
-    Q_UNUSED(_domain);
+private:
+    virtual QString errorString(int _errCode);
+};
 
-    return {};
-}
+} //namespace Targoman::API::AccountModule::Payment::Gateways
 
-QString gtwMellatBank::errorString(int _errCode)
-{
-    return "UNKNOWN";
-}
-
-} //namespace Targoman::API::AccountModule::PaymentGateways
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H

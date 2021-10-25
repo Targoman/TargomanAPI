@@ -21,32 +21,35 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H
-#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H
 
-#include "intfPaymentGateway.h"
-#include "Classes/PaymentLogic.h"
+#include "../intfPaymentGateway.h"
+#include "../PaymentLogic.h"
 
 /**
  * CAUTION:
- * place #include "PaymentGateways/gtwMellatBank.h" in PaymentLogic.cpp for proper driver registration
+ * place #include "gtwDevTest.h" in ActivePayments.h for proper driver registration
  */
 
-namespace Targoman::API::AccountModule::PaymentGateways {
+namespace Targoman::API::AccountModule::Payment::Gateways {
 
-class gtwMellatBank : public intfPaymentGateway
+/**
+ * @brief *********** THE gtwDevTest CLASS IS JUST FOR DEVELOPERS IN DEBUG MODE. NOT FOR PRODUCTION ***********
+ */
+class gtwDevTest : public intfPaymentGateway
 {
-public:
-    constexpr static char Name[] = "MellatBank";
+    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+        Targoman::API::AccountModule::enuPaymentGatewayType::_DeveloperTest,
+        gtwDevTest)
 
-TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-    Targoman::API::AccountModule::enuPaymentGatewayType::IranBank,
-    gtwMellatBank)
+public:
+    constexpr static char Name[] = "DevTest";
 
 private:
-    virtual QString errorString(int _errCode);
+    constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
 };
 
-} //namespace Targoman::API::AccountModule::PaymentGateways
+} //namespace Targoman::API::AccountModule::Payment::Gateways
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_MELLATBANK_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_DEVNULL_H

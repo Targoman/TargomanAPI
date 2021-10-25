@@ -21,37 +21,12 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
-#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
-
 #include "intfPaymentGateway.h"
-#include "Classes/PaymentLogic.h"
+//#include "Classes/PaymentLogic.h"
 
-/**
- * CAUTION:
- * place #include "PaymentGateways/gtwZibal.h" in PaymentLogic.cpp for proper driver registration
- */
+//#include "ORM/PaymentGateways.h"
+////#include "Interfaces/ORM/APIQueryBuilders.h"
 
-namespace Targoman::API::AccountModule::PaymentGateways {
+namespace Targoman::API::AccountModule::Payment {
 
-class gtwZibal : public intfPaymentGateway
-{
-    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        Targoman::API::AccountModule::enuPaymentGatewayType::IranIntermediateGateway,
-        gtwZibal)
-
-public:
-    constexpr static char Name[] = "Zibal";
-
-private:
-    constexpr static char URL_GTW_REQUEST[] = "https://gateway.zibal.ir/v1/request";
-    constexpr static char URL_GTW_VERIFY[]  = "https://gateway.zibal.ir/v1/verify";
-    constexpr static char URL_GTW_PAY[]     = "https://gateway.zibal.ir/start/{{track_id}}/direct";
-    constexpr static char METAINFO_KEY_MERCHANT_ID[] = "merchantid";
-
-    virtual QString errorString(int _errCode);
-};
-
-} //namespace Targoman::API::AccountModule::PaymentGateways
-
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
+} //namespace Targoman::API::AccountModule::Payment
