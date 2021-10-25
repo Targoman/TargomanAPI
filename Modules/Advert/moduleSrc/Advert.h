@@ -81,8 +81,7 @@ protected:
                                      INOUT stuAssetItem& _assetItem,
                                      const OrderAdditives_t& _orderAdditives);
 protected slots:
-//    bool REST(
-//        POST,
+//    bool REST_POST(
 //        processVoucher,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -91,8 +90,7 @@ protected slots:
 //        "Process voucher item"
 //    )
 
-//    bool REST(
-//        POST,
+//    bool REST_POST(
 //        cancelVoucher,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -101,8 +99,7 @@ protected slots:
 //        "Cancel voucher item"
 //    )
 
-    Targoman::API::AdvertModule::stuAdvert REST(
-        GET,
+    Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -112,8 +109,7 @@ protected slots:
         "Get new banner based on location and order info"
     )
 
-    Targoman::API::AdvertModule::stuAdvert REST(
-        GET,
+    Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -124,8 +120,7 @@ protected slots:
         "Get new text advertisement"
     )
 
-    QString REST(
-        GET,
+    QString REST_GET(
         retrieveURL,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -138,8 +133,7 @@ protected slots:
 
 #ifdef QT_DEBUG
 protected slots:
-    QVariant REST(
-        POST,
+    QVariant REST_POST(
         fixtureSetup,
         (
                 TAPI::RemoteIP_t _REMOTE_IP,
@@ -148,16 +142,14 @@ protected slots:
         "Create sample data"
     )
 
-    QVariant REST(
-        POST,
+    QVariant REST_POST(
         fixtureCleanup,
         (
                 TAPI::RemoteIP_t _REMOTE_IP
         ),
         "Cleanup sample data"
     )
-//    bool REST(
-//        POST,
+//    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
 //                TAPI::RemoteIP_t _REMOTE_IP,

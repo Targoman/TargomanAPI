@@ -105,8 +105,7 @@ public:
 
 //#ifdef QT_DEBUG
 //protected slots:
-//    QVariant REST(
-//        POST,
+//    QVariant REST_POST(
 //        fixtureSetup,
 //        (
 //                TAPI::RemoteIP_t _REMOTE_IP
@@ -114,8 +113,7 @@ public:
 //        "Create sample data"
 //    )
 
-//    QVariant REST(
-//        POST,
+//    QVariant REST_POST(
 //        fixtureCleanup,
 //        (
 //                TAPI::RemoteIP_t _REMOTE_IP

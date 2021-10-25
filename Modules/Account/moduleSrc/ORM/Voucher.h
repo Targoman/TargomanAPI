@@ -68,8 +68,7 @@ private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete a Voucher. Take note that User can just delete Vouchers with Payoff type")
 
-    Targoman::API::AAA::stuVoucher REST(
-        CREATE,
+    Targoman::API::AAA::stuVoucher REST_CREATE(
         requestIncrease,
         (
             TAPI::JWT_t _JWT,
@@ -85,8 +84,7 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    quint64 REST(
-        CREATE,
+    quint64 REST_CREATE(
         requestWithdraw,
         (
             TAPI::JWT_t _JWT,
@@ -97,8 +95,7 @@ private slots:
         "Create a new withdraw request by user."
     )
 
-    quint64 REST(
-        CREATE,
+    quint64 REST_CREATE(
         requestWithdrawFor,
         (
             TAPI::JWT_t _JWT,

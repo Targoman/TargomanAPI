@@ -53,8 +53,7 @@ private:
                          quint64 _createdBy);
 
 private slots:
-    bool REST(
-        PUT,
+    bool REST_PUT(
         newMessage,
         (
             TAPI::JWT_t _JWT,
@@ -66,8 +65,7 @@ private slots:
         "create new message targeting a user or all users (if target user is 0)"
     )
 
-    bool REST(
-        PUT,
+    bool REST_PUT(
         newFeedback,
         (
             TAPI::JWT_t _JWT,

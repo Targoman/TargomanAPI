@@ -48,8 +48,7 @@ private slots:
     bool ORMUPDATE("Update User info by priviledged user")
     bool ORMDELETE("Delete a User by priviledged user")
 
-    TAPI::RawData_t REST(
-        GET,
+    TAPI::RawData_t REST_GET(
         photo,
         (
             TAPI::JWT_t _JWT,
@@ -58,8 +57,7 @@ private slots:
         "Get user photo as image"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         photo,
         (
             TAPI::JWT_t _JWT,
@@ -68,8 +66,7 @@ private slots:
         "Updates user image based using a base64 encoded image"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         email,
         (
             TAPI::JWT_t     _JWT,
@@ -80,8 +77,7 @@ private slots:
         "Update user email"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         mobile,
         (
             TAPI::JWT_t     _JWT,
@@ -92,8 +88,7 @@ private slots:
         "Update user mobile"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         personalInfo,
         (
             TAPI::JWT_t         _JWT,
@@ -105,8 +100,7 @@ private slots:
         "Update User personal info"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         financialInfo,
         (
             TAPI::JWT_t     _JWT,
@@ -116,8 +110,7 @@ private slots:
         "Update User financial info"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         extraInfo,
         (
             TAPI::JWT_t   _JWT,
@@ -168,8 +161,7 @@ class UserExtraInfo : public intfSQLBasedModule
     TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
 
 private slots:
-//    bool REST(
-//        UPDATE,
+//    bool REST_UPDATE(
 //        birthDate,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -178,8 +170,7 @@ private slots:
 //        "Updates users birth date"
 //    )
 
-//    bool REST(
-//        UPDATE,
+//    bool REST_UPDATE(
 //        photo,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -188,8 +179,7 @@ private slots:
 //        "Updates user image based using a base64 encoded image"
 //    )
 
-//    bool REST(
-//        UPDATE,
+//    bool REST_UPDATE(
 //        sheba,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -198,8 +188,7 @@ private slots:
 //        "Updates user Sheba address"
 //    )
 
-//    bool REST(
-//        UPDATE,
+//    bool REST_UPDATE(
 //        etherAddress,
 //        (
 //            TAPI::JWT_t _JWT,

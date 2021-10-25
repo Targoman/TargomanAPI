@@ -165,8 +165,31 @@ namespace Targoman::API::API {
 #  define APITIMEOUT_30S
 #endif
 
-#define REST(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
-#define ASYNC_REST(_method, _name, _sig, _doc) asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+#define REST(_method, _name, _sig, _doc)            api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+#define ASYNC_REST(_method, _name, _sig, _doc)      asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+
+#define REST_GET_OR_PUT(_name, _sig, _doc)          REST(, _name, _sig, _doc)
+#define ASYNC_REST_GET_OR_PUT(_name, _sig, _doc)    ASYNC_REST(, _name, _sig, _doc)
+
+#define REST_GET(_name, _sig, _doc)                 REST(GET, _name, _sig, _doc)
+#define ASYNC_GET(_name, _sig, _doc)                ASYNC_REST(GET, _name, _sig, _doc)
+
+#define REST_PUT(_name, _sig, _doc)                 REST(PUT, _name, _sig, _doc)
+#define ASYNC_PUT(_name, _sig, _doc)                ASYNC_REST(PUT, _name, _sig, _doc)
+
+#define REST_POST(_name, _sig, _doc)                REST(POST, _name, _sig, _doc)
+#define ASYNC_POST(_name, _sig, _doc)               ASYNC_REST(POST, _name, _sig, _doc)
+
+#define REST_CREATE(_name, _sig, _doc)              REST(CREATE, _name, _sig, _doc)
+#define ASYNC_CREATE(_name, _sig, _doc)             ASYNC_REST(CREATE, _name, _sig, _doc)
+
+#define REST_UPDATE(_name, _sig, _doc)              REST(UPDATE, _name, _sig, _doc)
+#define ASYNC_UPDATE(_name, _sig, _doc)             ASYNC_REST(UPDATE, _name, _sig, _doc)
+#define REST_PATCH(_name, _sig, _doc)               REST_UPDATE(_name, _sig, _doc)
+#define ASYNC_PATCH(_name, _sig, _doc)              ASYNC_REST_UPDATE(_name, _sig, _doc)
+
+#define REST_DELETE(_name, _sig, _doc)              REST(DELETE, _name, _sig, _doc)
+#define ASYNC_DELETE(_name, _sig, _doc)             ASYNC_REST(DELETE, _name, _sig, _doc)
 
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"
 
