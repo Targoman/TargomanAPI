@@ -135,7 +135,7 @@ private slots:
         "Approves Mobile by provided mobile and verify code, then login if needed"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_PUT(
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         login,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -151,7 +151,7 @@ private slots:
         "if services are provided (as comma separated list) then user must have access to specified services"
     )
 
-    bool REST_GET_OR_PUT(
+    bool REST_GET_OR_POST(
         loginByMobileOnly,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -195,7 +195,7 @@ private slots:
 //        "check verification code for provided mobile."
 //    )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_PUT(
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         loginByOAuth,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -208,7 +208,7 @@ private slots:
         "Login by Open Authentication and return an encoded JWT"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_PUT(
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         refreshJWT,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -218,7 +218,7 @@ private slots:
         "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT"
     )
 
-    bool REST_GET_OR_PUT(
+    bool REST_GET_OR_POST(
         logout,
         (
             TAPI::JWT_t _JWT
@@ -226,7 +226,7 @@ private slots:
         "Logout logged in user"
     )
 
-    QString REST_GET_OR_PUT(
+    QString REST_GET_OR_POST(
         createForgotPasswordLink,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -235,7 +235,7 @@ private slots:
         "Create a forgot password request returning a UUID for the requiest"
     )
 
-    bool REST_GET_OR_PUT(
+    bool REST_GET_OR_POST(
         changePass,
         (
             TAPI::JWT_t _JWT,
@@ -246,7 +246,7 @@ private slots:
         "Changes password of the logged-in user"
     )
 
-    bool REST_GET_OR_PUT(
+    bool REST_GET_OR_POST(
         changePassByUUID,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
