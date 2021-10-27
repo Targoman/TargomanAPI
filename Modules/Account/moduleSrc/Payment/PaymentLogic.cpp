@@ -28,11 +28,28 @@
 #include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
 
+#include "libTargomanCommon/Configuration/Validators.hpp"
+//using namespace Targoman::Common;
+using namespace Targoman::Common::Configuration;
+
 using namespace Targoman::DBManager;
 
 using namespace Targoman::API::AccountModule::ORM;
 
 namespace Targoman::API::AccountModule::Payment {
+
+tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile(
+    AAA::makeConfig("TransactionLogFile"),
+    "File to store transaction logs",
+    "",
+    Validators::tmplPathAccessValidator<
+        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Writeatble),
+    false>,
+    "",
+    "FILEPATH",
+    "transacton-log-file",
+    enuConfigSource::Arg | enuConfigSource::File
+);
 
 void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
 {

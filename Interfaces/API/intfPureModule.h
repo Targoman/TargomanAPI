@@ -168,8 +168,8 @@ namespace Targoman::API::API {
 #define REST(_method, _name, _sig, _doc)            api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 #define ASYNC_REST(_method, _name, _sig, _doc)      asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
 
-#define REST_GET_OR_PUT(_name, _sig, _doc)          REST(, _name, _sig, _doc)
-#define ASYNC_REST_GET_OR_PUT(_name, _sig, _doc)    ASYNC_REST(, _name, _sig, _doc)
+#define REST_GET_OR_POST(_name, _sig, _doc)          REST(, _name, _sig, _doc)
+#define ASYNC_REST_GET_OR_POST(_name, _sig, _doc)    ASYNC_REST(, _name, _sig, _doc)
 
 #define REST_GET(_name, _sig, _doc)                 REST(GET, _name, _sig, _doc)
 #define ASYNC_GET(_name, _sig, _doc)                ASYNC_REST(GET, _name, _sig, _doc)

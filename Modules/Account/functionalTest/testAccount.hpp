@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TEST_ACCOUNT_HPP
@@ -171,6 +172,17 @@ private slots:
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
+    void ResendEmailApproveCode()
+    {
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/resendApprovalCode",
+                                  {},
+                                  {
+                                      { "emailOrMobile", UT_UserEmail },
+                                  });
+        QVERIFY(Result.toBool());
+    }
+
     void ApproveEmail()
     {
         clsDAC DAC;
@@ -307,12 +319,45 @@ private slots:
                         }).toBool());
     }
 
+    void ResendMobileApproveCode()
+    {
+        clsDAC DAC;
+
+        try {
+            DAC.callSP("", "sp_CREATE_approvalRequest", {
+                           { "iBy", "M" },
+                           { "iUserID", gUserID },
+                           { "iKey", "+989998882020" },
+                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                           { "iSalt", 1234 }
+                       });
+
+            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
+            { gUserID }).toJson(true).object();
+
+            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
+            { gUserID });
+
+            //----------
+            QVariant Result = callAPI(RESTClientHelper::POST,
+                                      "Account/resendApprovalCode",
+                                      {},
+                                      {
+                                          { "emailOrMobile", "+989998882020" },
+                                      });
+            QVERIFY(Result.toBool());
+        }
+        catch(std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+
     void ApproveMobile(){
         clsDAC DAC;
 
-        try{
+        try {
             DAC.callSP("", "sp_CREATE_approvalRequest", {
-                           { "iWhat2Approve", "M" },
+                           { "iBy", "M" },
                            { "iUserID", gUserID },
                            { "iKey", "+989998882020" },
                            { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
@@ -381,7 +426,8 @@ private slots:
                         })
                 .toBool());
     }
-//private:
+
+//private ://slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
@@ -395,16 +441,16 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE wb
-                    FROM tblWalletBalances wb
-                    INNER JOIN tblWalletsTransactions wt
+                  FROM tblWalletBalances wb
+            INNER JOIN tblWalletsTransactions wt
                     ON wt.wltID = wb.wbl_wltID
-                    INNER JOIN tblUserWallets uw
+            INNER JOIN tblUserWallets uw
                     ON uw.walID = wt.wlt_walID
-                    INNER JOIN tblUser u
+            INNER JOIN tblUser u
                     ON u.usrID = uw.wal_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -416,14 +462,14 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE wt
-                    FROM tblWalletsTransactions wt
-                    INNER JOIN tblUserWallets uw
+                  FROM tblWalletsTransactions wt
+            INNER JOIN tblUserWallets uw
                     ON uw.walID = wt.wlt_walID
-                    INNER JOIN tblUser u
+            INNER JOIN tblUser u
                     ON u.usrID = uw.wal_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -435,12 +481,12 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE uw
-                    FROM tblUserWallets uw
-                    INNER JOIN tblUser u
+                  FROM tblUserWallets uw
+            INNER JOIN tblUser u
                     ON u.usrID = uw.wal_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -452,14 +498,14 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE op
-                    FROM tblOnlinePayments op
-                    INNER JOIN tblVoucher vch
+                  FROM tblOnlinePayments op
+            INNER JOIN tblVoucher vch
                     ON vch.vchID = op.onp_vchID
-                    INNER JOIN tblUser u
+            INNER JOIN tblUser u
                     ON u.usrID = vch.vch_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -471,14 +517,14 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE fp
-                    FROM tblOfflinePayments fp
-                    INNER JOIN tblVoucher vch
+                  FROM tblOfflinePayments fp
+            INNER JOIN tblVoucher vch
                     ON vch.vchID = fp.ofp_vchID
-                    INNER JOIN tblUser u
+            INNER JOIN tblUser u
                     ON u.usrID = vch.vch_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -490,12 +536,12 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE vch
-                    FROM tblVoucher vch
-                    INNER JOIN tblUser u
+                  FROM tblVoucher vch
+            INNER JOIN tblUser u
                     ON u.usrID = vch.vch_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -507,12 +553,12 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE apr
-                    FROM tblApprovalRequest apr
-                    INNER JOIN tblUser u
+                  FROM tblApprovalRequest apr
+            INNER JOIN tblUser u
                     ON u.usrID = apr.apr_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -524,12 +570,12 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE sn
-                    FROM tblActiveSessions sn
-                    INNER JOIN tblUser u
+                  FROM tblActiveSessions sn
+            INNER JOIN tblUser u
                     ON u.usrID = sn.ssn_usrID
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -541,10 +587,10 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE u
-                    FROM tblUser u
-                    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                  FROM tblUser u
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
-                ;)";
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }
@@ -556,9 +602,9 @@ private slots:
         {
             QString QueryString = R"(
                 DELETE r
-                    FROM tblRoles r
-                    WHERE LOWER(r.rolName) LIKE 'unit_test%'
-                ;)";
+                  FROM tblRoles r
+                 WHERE LOWER(r.rolName) LIKE 'unit_test%'
+            ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         }

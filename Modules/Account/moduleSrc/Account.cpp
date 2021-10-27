@@ -69,7 +69,7 @@ TAPI_REGISTER_METATYPE(
 //namespace Targoman::API {
 
 //using namespace DBManager;
-using namespace Targoman::Common;
+//using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 
 namespace Targoman::API::AccountModule {
@@ -109,37 +109,46 @@ TARGOMAN_DEFINE_ENUM(enuPaymentType,
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 
-//Targoman::Common::Configuration::tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
+//tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
 //        AAA::Accounting::makeConfig("GatewayEndPoints"),
 //        "Registered payment gateways",
 //        0
 //        );
 
-Targoman::Common::Configuration::tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile (
-        AAA::makeConfig("TransactionLogFile"),
-        "File to store transaction logs",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Writeatble),
-        false>,
-        "",
-        "FILEPATH",
-        "transacton-log-file",
-        enuConfigSource::Arg | enuConfigSource::File
-        );
-
-Targoman::Common::Configuration::tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
-        AAA::makeConfig("InvalidPasswordsFile"),
-        "File where invalid pasword MD5s are stored",
-        "",
-        Validators::tmplPathAccessValidator<
+tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
+    AAA::makeConfig("InvalidPasswordsFile"),
+    "File where invalid pasword MD5s are stored",
+    "",
+    Validators::tmplPathAccessValidator<
         TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
-        false>,
-        "",
-        "FILEPATH",
-        "invalid-md5-passwords",
-        enuConfigSource::Arg | enuConfigSource::File
-        );
+    false>,
+    "",
+    "FILEPATH",
+    "invalid-md5-passwords",
+    enuConfigSource::Arg | enuConfigSource::File
+);
+
+tmplConfigurable<quint32> Account::EmailApprovalCodeTTL(
+    AAA::makeConfig("EmailApprovalCodeTTL"),
+    "Time to live for the email approval code",
+    static_cast<quint16>(2*24*60*60), //2 days
+    ReturnTrueCrossValidator(),
+    "",
+    "",
+    "email-approval-code-ttl",
+    enuConfigSource::Arg | enuConfigSource::File
+);
+
+tmplConfigurable<quint32> Account::MobileApprovalCodeTTL(
+    AAA::makeConfig("MobileApprovalCodeTTL"),
+    "Time to live for the mobile approval code",
+    static_cast<quint16>(2*60), //2 minutes
+    ReturnTrueCrossValidator(),
+    "",
+    "",
+    "mobile-approval-code-ttl",
+    enuConfigSource::Arg | enuConfigSource::File
+);
 
 QString normalizePhoneNumber(
         QString _phone
@@ -261,7 +270,7 @@ QVariantMap Account::apiPUTsignup(
         _emailOrMobile = normalizePhoneNumber(_emailOrMobile);
     }
     else
-        throw exHTTPBadRequest("emailOrMobile must be by a valid email or mobile");
+        throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
     QFV.asciiAlNum().maxLenght(50).validate(_role);
 
@@ -366,6 +375,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
+            { "iTTL", Account::EmailApprovalCodeTTL.value() },
         })
         .toJson(true)
         .object();
@@ -409,6 +419,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
+            { "iTTL", Account::MobileApprovalCodeTTL.value() },
         })
         .toJson(true)
         .object();
@@ -493,6 +504,51 @@ bool Account::apiloginByMobileOnly(
     return true;
 }
 
+bool Account::apiresendApprovalCode(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    QString Type;
+
+    if (QFV.email().isValid(_emailOrMobile))
+    {
+        if (QFV.emailNotFake().isValid(_emailOrMobile))
+            Type = 'E';
+        else
+            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+    }
+    else if (QFV.mobile().isValid(_emailOrMobile))
+    {
+        Type = 'M';
+        _emailOrMobile = normalizePhoneNumber(_emailOrMobile);
+    }
+    else
+        throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
+
+//    this->callSP("AAA.sp_CREATE_approvalRequestAgain", {
+//                     { "iBy", Type },
+//                     { "iKey", _emailOrMobile },
+//                     { "iIP", _REMOTE_IP },
+//                     { "iRecreateIfExpired", true },
+//                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
+//                 });
+    this->callSP("AAA.sp_CREATE_approvalRequest", {
+                     { "iBy", Type },
+                     { "iKey", _emailOrMobile },
+                     { "iUserID", {} },
+                     { "iPass", {} },
+                     { "iSalt", {} }
+//                     { "iIP", _REMOTE_IP },
+//                     { "iRecreateIfExpired", true },
+//                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
+                 });
+
+    return true;
+}
+
 //bool Account::apiPUTrequestMobileVerifyCode(
 //        TAPI::RemoteIP_t _REMOTE_IP,
 //        TAPI::Mobile_t _mobile
@@ -511,6 +567,7 @@ bool Account::apiloginByMobileOnly(
 
 //    return (aprID > 0);
 //}
+
 /*
 Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -545,6 +602,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
                              });
 }
 */
+
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour

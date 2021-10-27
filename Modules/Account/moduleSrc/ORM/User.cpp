@@ -213,7 +213,7 @@ bool User::apiUPDATEemail(
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     this->callSP("AAA.sp_CREATE_approvalRequest", {
-                     { "iWhat2Approve", "E" },
+                     { "iBy", "E" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _email },
                      { "iPass", _psw },
@@ -246,7 +246,7 @@ bool User::apiUPDATEmobile(
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     this->callSP("AAA.sp_CREATE_approvalRequest", {
-                     { "iWhat2Approve", "M" },
+                     { "iBy", "M" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _mobile },
                      { "iPass", _psw },
