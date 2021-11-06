@@ -57,6 +57,8 @@ class Account : public intfSQLBasedWithActionLogsModule
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
@@ -170,6 +172,15 @@ private slots:
         "A new random code is generated and sent to the user via SMS."
         "After the user submits this code, approveMobile must be called with verifyCode."
         "If services are provided (as comma separated list) then user must have access to specified services."
+    )
+
+    bool REST_GET_OR_POST(
+        resendApprovalCode,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _emailOrMobile
+        ),
+        "Recreate (if expired) approval code and resend last valid code to the email or mobile."
     )
 
 //    bool REST_PUT(

@@ -149,7 +149,7 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=68229 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=68944 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -272,7 +272,7 @@ CREATE TABLE `tblApprovalRequest` (
   KEY `aprApplyDate` (`aprApplyDate`),
   KEY `aprStatus` (`aprStatus`) USING BTREE,
   CONSTRAINT `FK_tblApprovalRequest_tblUser` FOREIGN KEY (`apr_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=781 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=909 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -498,7 +498,7 @@ CREATE TABLE `tblOnlinePayments` (
   KEY `FK_tblOnlinePayments_tblPaymentGateways` (`onp_pgwID`),
   CONSTRAINT `FK_tblBankPaymentOrder_tblInvoice` FOREIGN KEY (`onp_vchID`) REFERENCES `tblVoucher` (`vchID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblOnlinePayments_tblPaymentGateways` FOREIGN KEY (`onp_pgwID`) REFERENCES `tblPaymentGateways` (`pgwID`)
-) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -572,7 +572,7 @@ CREATE TABLE `tblRoles` (
   CONSTRAINT `FK_tblRoles_tblRoles` FOREIGN KEY (`rolParent_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser` FOREIGN KEY (`rolCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblRoles_tblUser_2` FOREIGN KEY (`rolUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1067 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -642,7 +642,7 @@ CREATE TABLE `tblUser` (
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2093 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2172 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -759,7 +759,7 @@ CREATE TABLE `tblUserWallets` (
   CONSTRAINT `FK_tblUserWallets_tblUser` FOREIGN KEY (`wal_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_2` FOREIGN KEY (`walCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUserWallets_tblUser_3` FOREIGN KEY (`walUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1850 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1900 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -778,7 +778,7 @@ CREATE TABLE `tblVoucher` (
   KEY `vchCreationDateTime` (`vchCreationDateTime`),
   KEY `FK_tblVoucher_tblUser` (`vch_usrID`),
   CONSTRAINT `FK_tblVoucher_tblUser` FOREIGN KEY (`vch_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=387 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=395 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -838,7 +838,7 @@ CREATE TABLE `tblWalletsTransactions` (
   KEY `wltType` (`wlt_vchType`),
   CONSTRAINT `FK_tblWalletsTransactions_tblInvoice` FOREIGN KEY (`wlt_vchID`) REFERENCES `tblVoucher` (`vchID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblWalletsTransactions_tblUserWallets` FOREIGN KEY (`wlt_walID`) REFERENCES `tblUserWallets` (`walID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
+) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1179,78 +1179,117 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`%` PROCEDURE `sp_CREATE_approvalRequest`(
-	IN `iWhat2Approve` CHAR(1),
+	IN `iBy` CHAR(1),
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iKey` VARCHAR(128),
 	IN `iPass` VARCHAR(100),
 	IN `iSalt` VARCHAR(100)
 )
 BEGIN
-    DECLARE ApprovalCode VARCHAR(50);
-    DECLARE UserName VARCHAR(100);
-    DECLARE UserFamily VARCHAR(100);
-
-
-    -- ///TODO: check if active approval request not exists
-
+    DECLARE vApprovalCode VARCHAR(50);
+    DECLARE vUserName VARCHAR(100);
+    DECLARE vUserFamily VARCHAR(100);
 
     SELECT 1
-      INTO ApprovalCode
+         , tblUser.usrName
+         , tblUser.usrFamily
+      INTO vApprovalCode
+         , vUserName
+         , vUserFamily
       FROM tblUser
      WHERE tblUser.usrID = iUserID
-    ;
+           ;
 
     IF (NOT ISNULL(iPass)) THEN 
-        IF ISNULL(ApprovalCode) THEN
+        IF ISNULL(vApprovalCode) THEN
             SIGNAL SQLSTATE '45000'
                SET MESSAGE_TEXT = '401:User Not Found';
         END IF;
 
-        SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err'), 
-               tblUser.usrName,
-               tblUser.usrFamily
-          INTO ApprovalCode,
-               UserName,
-               UserFamily
+        SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err')
+             , tblUser.usrName
+             , tblUser.usrFamily
+          INTO vApprovalCode
+             , vUserName
+             , vUserFamily
           FROM tblUser
          WHERE tblUser.usrID = iUserID
         ;
 
-        IF ISNULL(ApprovalCode) THEN 
+        IF ISNULL(vApprovalCode) THEN 
             SIGNAL SQLSTATE '45000'
                SET MESSAGE_TEXT = '401:Invalid userID';
         END IF;
 
-        IF ApprovalCode = 'Err' THEN 
+        IF vApprovalCode = 'Err' THEN 
             SIGNAL SQLSTATE '45000'
                SET MESSAGE_TEXT = '401:Invalid password';
         END IF;
     END IF;
   
-    IF iWhat2Approve = 'E' THEN
-        SET ApprovalCode = Common.fnCreateRandomMD5();
+    -- find user id if not provided
+    IF ISNULL(vApprovalCode) THEN
+        IF (NOT ISNULL(iUserID)) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid userID';
+        END IF;
+
+          SELECT tblApprovalRequest.apr_usrID
+               , tblUser.usrName
+               , tblUser.usrFamily
+            INTO vApprovalCode
+               , vUserName
+               , vUserFamily
+            FROM tblApprovalRequest
+       LEFT JOIN tblUser
+              ON tblUser.usrID = tblApprovalRequest.apr_usrID
+           WHERE tblApprovalRequest.aprApprovalKey = iKey
+             AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2', 'E')
+--               N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
+        ORDER BY aprRequestDate DESC
+           LIMIT 1
+                 ;
+
+        IF ISNULL(vApprovalCode) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Could not find user by key';
+        END IF;
+        
+        SET iUserID = CAST(vApprovalCode AS UNSIGNED);
+    END IF;
+
+    -- check if active approval request exists, expire it
+    UPDATE tblApprovalRequest
+       SET tblApprovalRequest.aprStatus = 'E'
+     WHERE tblApprovalRequest.aprApprovalKey = iKey
+       AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2')
+--         N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
+           ;
+
+    IF iBy = 'E' THEN
+        SET vApprovalCode = Common.fnCreateRandomMD5();
     ELSE 
-        SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
+        SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
     END IF;
   
     INSERT
       INTO tblApprovalRequest
        SET tblApprovalRequest.apr_usrID = iUserID,
-           tblApprovalRequest.aprRequestedFor = iWhat2Approve,
+           tblApprovalRequest.aprRequestedFor = iBy,
 --           aprIsForLogin = 0,
            tblApprovalRequest.aprApprovalKey = iKey,
-           tblApprovalRequest.aprApprovalCode = ApprovalCode
+           tblApprovalRequest.aprApprovalCode = vApprovalCode
     ;
 
     INSERT
       INTO Common.tblAlerts
        SET Common.tblAlerts.alr_usrID = iUserID,
-           Common.tblAlerts.alr_altCode = IF(iWhat2Approve = 'E', 'approveEmail', 'approveMobile'),
+           Common.tblAlerts.alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
            Common.tblAlerts.alrReplacedContactInfo = iKey,
            Common.tblAlerts.alrReplacements = JSON_OBJECT(
-              'usrName', UserName,
-              'usrFamily', UserFamily,
-              'ApprovalCode', ApprovalCode
+              'usrName', vUserName,
+              'usrFamily', vUserFamily,
+              'ApprovalCode', vApprovalCode
            );
 END ;;
 DELIMITER ;
@@ -2228,7 +2267,8 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_acceptApproval`(
 	IN `iLogin` TINYINT,
 	IN `iLoginIP` VARCHAR(50),
 	IN `iLoginInfo` JSON,
-	IN `iLoginRemember` TINYINT
+	IN `iLoginRemember` TINYINT,
+	IN `iTTL` INT
 )
 BEGIN
     DECLARE vAprID BIGINT UNSIGNED;
@@ -2250,12 +2290,22 @@ BEGIN
            SET MESSAGE_TEXT = '401:Invalid key';
     END IF;
 
+    -- 24*60*60
+    -- never expire?
+    IF iTTL = 0 THEN
+        SET iTTL = NULL;
+    END IF;
+
       SELECT tblApprovalRequest.aprID
            , tblApprovalRequest.apr_usrID
            , tblApprovalRequest.aprApprovalKey
            , tblApprovalRequest.aprRequestedFor
            , tblApprovalRequest.aprStatus
-           , (tblApprovalRequest.aprStatus = 'E' OR TIMEDIFF(NOW(), tblApprovalRequest.aprSentDate) > "100:30:00")
+           , (tblApprovalRequest.aprStatus = 'E'
+          OR (iTTL IS NOT NULL
+         AND tblApprovalRequest.aprSentDate IS NOT NULL 
+         AND TIME_TO_SEC(TIMEDIFF(NOW(), tblApprovalRequest.aprSentDate)) > iTTL)
+             )
         INTO vAprID
            , vUserID
            , vNewKey
@@ -2270,6 +2320,8 @@ BEGIN
          AND tblApprovalRequest.aprApprovalCode = iCode
          AND tblApprovalRequest.aprStatus IN ('N', 'S', 'A', '1', '2', 'E')
 --         N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2:SecondTry, E: Expired
+    ORDER BY aprRequestDate DESC
+       LIMIT 1
              ;
 
     IF vAprStatus = 'N' THEN

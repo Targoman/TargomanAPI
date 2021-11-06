@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QtTest>
@@ -47,26 +48,25 @@ int main(int argc, char *argv[])
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
-    try{
+    try {
         FailedTests += QTest::qExec(new testBase, argc, argv);
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
-//        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-//        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
-//        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
-//        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
-//        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
-    }catch(std::exception &e){
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens, argc, argv);
+    }
+    catch(std::exception &e) {
         qDebug()<<e.what();
     }
-    if(FailedTests > 0){
+
+    if (FailedTests > 0)
         qDebug() << "total number of failed tests: " << FailedTests;
-    }else{
+    else
         qDebug() << "all tests passed :)";
-    }
 
     clsDAC::shutdown();
 
     return FailedTests;
-    /**/
 }
-
