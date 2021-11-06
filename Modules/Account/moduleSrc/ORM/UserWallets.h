@@ -73,8 +73,7 @@ private slots:
     bool ORMUPDATE("Update Wallet info by priviledged user")
     bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         setAsDefault, //defaultWallet,
         (
             TAPI::JWT_t _JWT,
@@ -83,8 +82,7 @@ private slots:
         "change default wallet"
     )
 
-    bool REST(
-        CREATE,
+    bool REST_CREATE(
         transfer,
         (
             TAPI::JWT_t _JWT,

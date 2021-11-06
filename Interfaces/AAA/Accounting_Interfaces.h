@@ -80,8 +80,7 @@ public:
 
 private slots:
     QVariant ORMGET("Get User Assets")
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         disablePackage,
         (
             TAPI::JWT_t _JWT,
@@ -90,8 +89,7 @@ private slots:
         "Mark a user Asset banned by priviledged user"
     )
 
-    bool REST(
-        UPDATE,
+    bool REST_UPDATE(
         setAsPrefered,
         (
             TAPI::JWT_t _JWT,

@@ -36,8 +36,7 @@ class URLProcessor : public intfPureModule
     TARGOMAN_DEFINE_API_MODULE(URLProcessor);
 
 private slots:
-    QString REST(
-        GET,
+    QString REST_GET(
         canonicalize,
         (
             const QString _url,
@@ -46,8 +45,7 @@ private slots:
         "normalizes url in a common format to be canonical"
     )
 
-    QString REST(
-        GET,
+    QString REST_GET(
         convertHexCodes,
         (
             const QString _url,

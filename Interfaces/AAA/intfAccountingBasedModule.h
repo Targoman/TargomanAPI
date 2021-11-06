@@ -100,8 +100,7 @@ private:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 protected slots:
-    Targoman::API::AAA::stuPreVoucher REST(
-        POST,
+    Targoman::API::AAA::stuPreVoucher REST_POST(
         addToBasket,
         (
             TAPI::JWT_t _JWT,
@@ -116,8 +115,7 @@ protected slots:
         "add a package to basket and return updated pre-Voucher"
     )
 
-    Targoman::API::AAA::stuPreVoucher REST(
-        POST,
+    Targoman::API::AAA::stuPreVoucher REST_POST(
         removeBasketItem,
         (
             TAPI::JWT_t _JWT,
@@ -128,8 +126,7 @@ protected slots:
         "Only Pending items can be removed."
     )
 
-//    Targoman::API::AAA::stuPreVoucher REST(
-//        POST,
+//    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        updateBasketItem,
 //        (
 //            TAPI::JWT_t _JWT,
@@ -141,8 +138,7 @@ protected slots:
 //        "Only Pending items can be modify."
 //    )
 
-    bool REST(
-        POST,
+    bool REST_POST(
         processVoucherItem,
         (
             TAPI::JWT_t _JWT,
@@ -152,8 +148,7 @@ protected slots:
         "Process voucher item"
     )
 
-    bool REST(
-        POST,
+    bool REST_POST(
         cancelVoucherItem,
         (
             TAPI::JWT_t _JWT,

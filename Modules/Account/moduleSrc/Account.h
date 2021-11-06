@@ -72,8 +72,7 @@ private slots:
     /*****************************************************************\
     |* User **********************************************************|
     \*****************************************************************/
-    QVariantMap REST(
-        PUT,
+    QVariantMap REST_PUT(
         signup,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -89,8 +88,7 @@ private slots:
     )
 
     /*
-    QVariantMap REST(
-        PUT,
+    QVariantMap REST_PUT(
         signupByMobileOnly,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -107,8 +105,7 @@ private slots:
 //    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
 //    "After the user submits this code, signupByMobile must be called again with verifyCode."
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        POST,
+    Targoman::API::AccountModule::stuMultiJWT REST_POST(
         approveEmail,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -123,8 +120,7 @@ private slots:
         "Approves Email by provided UUID, then login if needed"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        POST,
+    Targoman::API::AccountModule::stuMultiJWT REST_POST(
         approveMobile,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -139,8 +135,7 @@ private slots:
         "Approves Mobile by provided mobile and verify code, then login if needed"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        ,
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         login,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -156,8 +151,7 @@ private slots:
         "if services are provided (as comma separated list) then user must have access to specified services"
     )
 
-    bool REST(
-        ,
+    bool REST_GET_OR_POST(
         loginByMobileOnly,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -178,8 +172,7 @@ private slots:
         "If services are provided (as comma separated list) then user must have access to specified services."
     )
 
-//    bool REST(
-//        PUT,
+//    bool REST_PUT(
 //        requestMobileVerifyCode,
 //        (
 //            TAPI::RemoteIP_t _REMOTE_IP,
@@ -188,8 +181,7 @@ private slots:
 //        "Send verification code for provided mobile."
 //    )
 
-//    Targoman::API::AccountModule::stuMultiJWT REST(
-//        PUT,
+//    Targoman::API::AccountModule::stuMultiJWT REST_PUT(
 //        verifyLoginByMobileCode,
 //        (
 //            TAPI::RemoteIP_t _REMOTE_IP,
@@ -203,8 +195,7 @@ private slots:
 //        "check verification code for provided mobile."
 //    )
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        ,
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         loginByOAuth,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -217,8 +208,7 @@ private slots:
         "Login by Open Authentication and return an encoded JWT"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST(
-        ,
+    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
         refreshJWT,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -228,8 +218,7 @@ private slots:
         "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT"
     )
 
-    bool REST(
-        ,
+    bool REST_GET_OR_POST(
         logout,
         (
             TAPI::JWT_t _JWT
@@ -237,8 +226,7 @@ private slots:
         "Logout logged in user"
     )
 
-    QString REST(
-        ,
+    QString REST_GET_OR_POST(
         createForgotPasswordLink,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -247,8 +235,7 @@ private slots:
         "Create a forgot password request returning a UUID for the requiest"
     )
 
-    bool REST(
-        ,
+    bool REST_GET_OR_POST(
         changePass,
         (
             TAPI::JWT_t _JWT,
@@ -259,8 +246,7 @@ private slots:
         "Changes password of the logged-in user"
     )
 
-    bool REST(
-        ,
+    bool REST_GET_OR_POST(
         changePassByUUID,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -273,8 +259,7 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-    Targoman::API::AAA::stuVoucher REST(
-        POST,
+    Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
         (
             TAPI::JWT_t _JWT,
@@ -290,8 +275,7 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    Targoman::API::AAA::stuVoucher REST(
-        POST,
+    Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
         (
             TAPI::JWT_t _JWT,
@@ -303,8 +287,7 @@ private slots:
         "approve payment back from payment gateway"
     )
 
-    Targoman::API::AAA::stuVoucher REST(
-        POST,
+    Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
         (
             TAPI::JWT_t _JWT,
@@ -321,8 +304,7 @@ private slots:
     ///TODO: create API for cancelBasketItem
     ///TODO: create API for returnBasketItem
 
-    bool REST(
-        POST,
+    bool REST_POST(
         addPrizeTo,
         (
             TAPI::JWT_t _JWT,
@@ -334,8 +316,7 @@ private slots:
         "Description object must contain at least an string field named 'desc'"
     )
 
-    bool REST(
-        POST,
+    bool REST_POST(
         addIncomeTo,
         (
             TAPI::JWT_t _JWT,
@@ -347,8 +328,7 @@ private slots:
         "Description object must contain at least an string field named 'desc'"
     )
 
-    bool REST(
-        POST,
+    bool REST_POST(
         checkVoucherTTL,
         (
             TAPI::JWT_t _JWT,
@@ -363,8 +343,7 @@ private slots:
 //    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP);
 
 protected slots:
-    QVariant REST(
-        POST,
+    QVariant REST_POST(
         fixtureSetup,
         (
                 TAPI::RemoteIP_t _REMOTE_IP
@@ -372,16 +351,14 @@ protected slots:
         "Create sample data"
     )
 
-    QVariant REST(
-        POST,
+    QVariant REST_POST(
         fixtureCleanup,
         (
                 TAPI::RemoteIP_t _REMOTE_IP
         ),
         "Cleanup sample data"
     )
-    bool REST(
-        POST,
+    bool REST_POST(
         fixtureApproveEmail,
         (
                 TAPI::RemoteIP_t _REMOTE_IP,
@@ -389,8 +366,7 @@ protected slots:
         ),
         "Approve Email Address directly"
     )
-    bool REST(
-        POST,
+    bool REST_POST(
         fixtureApproveMobile,
         (
                 TAPI::RemoteIP_t _REMOTE_IP,

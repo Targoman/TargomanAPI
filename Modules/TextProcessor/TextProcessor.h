@@ -39,8 +39,7 @@ public:
     bool init();
 
 private slots:
-    QString REST(
-        ,
+    QString REST_GET_OR_POST(
         normalize,
         (
             const QString _text,
@@ -50,8 +49,7 @@ private slots:
         "Normalizes input text"
     )
 
-    QString REST(
-        ,
+    QString REST_GET_OR_POST(
         text2IXML,
         (
             const QString& _text,
@@ -61,8 +59,7 @@ private slots:
         "Normalizes and tokenizes text and tags special fields in an inline-XML format"
     )
 
-    QString REST(
-        ,
+    QString REST_GET_OR_POST(
         ixml2Text,
         (
             const QString& _ixml,
@@ -74,8 +71,7 @@ private slots:
         "Removes IXML tags injected by text2IXML API"
     )
 
-    QString REST(
-        ,
+    QString REST_GET_OR_POST(
         tokenize,
         (
             const QString& _text,
