@@ -25,8 +25,7 @@
 #include "User.h"
 #include "Service.h"
 #include "UserWallets.h"
-
-#include "Classes/PaymentLogic.h"
+#include "Payment/PaymentLogic.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
@@ -107,7 +106,7 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
         else
         {
             TAPI::MD5_t PaymentMD5;
-            Voucher.PaymentLink = Targoman::API::AccountModule::Classes::PaymentLogic::createOnlinePaymentLink(
+            Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
                                       _domain,
                                       Voucher.ID,

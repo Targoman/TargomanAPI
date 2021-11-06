@@ -21,24 +21,24 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
-#define TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_PAYMENTLOGIN_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_PAYMENTLOGIN_H
 
 #include "ORM/Payments.h"
 #include "ORM/Voucher.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
-#include "Defs.hpp"
-#include "PaymentGateways/intfPaymentGateway.h"
+#include "Classes/Defs.hpp"
+#include "intfPaymentGateway.h"
 #include "ORM/PaymentGateways.h"
 
 //typedef intfPaymentGateway* (*PAYMENTGATEWAY_INSTANCE_FUNC)();
 //#define PAYMENTGATEWAY_REGISTERED_DRIVERS_PAIR_TYPES QString,PAYMENTGATEWAY_INSTANCE_FUNC
 
-using namespace Targoman::API::AccountModule;
-using namespace Targoman::API::AccountModule::PaymentGateways;
+//using namespace Targoman::API::AccountModule;
+//using namespace Targoman::API::AccountModule::PaymentGateways;
 
-namespace Targoman::API::AccountModule::Classes {
+namespace Targoman::API::AccountModule::Payment {
 
 /**
  * @brief The PaymentLogic class is central point of managing payments. Such as start payment, handling payment callback, ...
@@ -98,6 +98,6 @@ protected:
     static inline QMap<QString, intfPaymentGateway*> RegisteredDrivers;
 };
 
-} //namespace Targoman::API::AccountModule::Classes
+} //namespace Targoman::API::AccountModule::Payment
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_CLASSES_PAYMENTLOGIN_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_PAYMENTLOGIN_H

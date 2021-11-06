@@ -31,7 +31,7 @@
 #include "ORM/Payments.h"
 #include "ORM/Voucher.h"
 #include "Classes/Defs.hpp"
-#include "Classes/PaymentLogic.h"
+#include "Payment/PaymentLogic.h"
 
 namespace Targoman::API::AccountModule {
 

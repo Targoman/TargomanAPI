@@ -21,12 +21,48 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "intfPaymentGateway.h"
-//#include "Classes/PaymentLogic.h"
+#include "gtwMellatBank.h"
 
-//#include "ORM/PaymentGateways.h"
-////#include "Interfaces/ORM/APIQueryBuilders.h"
+namespace Targoman::API::AccountModule::Payment::Gateways {
 
-namespace Targoman::API::AccountModule::PaymentGateways {
+TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwMellatBank)
 
-} //namespace Targoman::API::AccountModule::PaymentGateways
+stuPaymentResponse gtwMellatBank::request(
+        const stuPaymentGateway& _paymentGateway,
+        TAPI::MD5_t _orderMD5,
+        qint64 _amount,
+        const QString& _callback,
+        const QString& _desc
+    )
+{
+    Q_UNUSED(_paymentGateway);
+    Q_UNUSED(_orderMD5);
+    Q_UNUSED(_amount);
+    Q_UNUSED(_callback);
+    Q_UNUSED(_desc);
+
+    return stuPaymentResponse(
+        "devtest_track_id",
+        "http://devtest.gateway/pay"
+    );
+}
+
+stuPaymentResponse gtwMellatBank::verify(
+        const stuPaymentGateway& _paymentGateway,
+        const TAPI::JSON_t& _pgResponse,
+        const QString& _domain
+    )
+{
+    Q_UNUSED(_paymentGateway);
+    Q_UNUSED(_pgResponse);
+    Q_UNUSED(_domain);
+
+    return {};
+}
+
+QString gtwMellatBank::errorString(int _errCode)
+{
+    return "UNKNOWN";
+}
+
+} //namespace Targoman::API::AccountModule::Payment::Gateways

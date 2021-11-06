@@ -23,7 +23,7 @@
 
 #include "Payments.h"
 #include "Voucher.h"
-#include "Classes/PaymentLogic.h"
+#include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);

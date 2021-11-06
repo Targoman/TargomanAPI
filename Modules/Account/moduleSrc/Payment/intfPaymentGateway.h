@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
-#define TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_INTFPAYMENTGATEWAY_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_INTFPAYMENTGATEWAY_H
 
 #include <qglobal.h>
 #include <QJsonDocument>
@@ -40,18 +40,20 @@ using namespace qhttp;
 
 namespace Targoman::API::AccountModule {
 
-namespace Classes {
-class PaymentLogic;
-}
+//namespace Classes {
+//class PaymentLogic;
+//}
 
-namespace PaymentGateways {
+namespace Payment {
+
+class PaymentLogic;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
 TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment);
 #pragma clang diagnostic pop
 
-} //namespace PaymentGateways
+} //namespace Payment
 
 struct stuPaymentResponse {
     int     ErrorCode;
@@ -81,7 +83,7 @@ struct stuPaymentResponse {
     {}
 };
 
-namespace PaymentGateways {
+namespace Payment {
 
 #define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
     struct _##_className##_static_constructor { \
@@ -113,12 +115,12 @@ protected: \
             const TAPI::JSON_t& _pgResponse, \
             const QString& _domain \
             ); \
-    friend Targoman::API::AccountModule::Classes::PaymentLogic; \
+    friend Targoman::API::AccountModule::Payment::PaymentLogic; \
 private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::AccountModule::Classes::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::AccountModule::Payment::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
 //PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
@@ -132,7 +134,7 @@ private: \
  */
 class intfPaymentGateway
 {
-    friend Targoman::API::AccountModule::Classes::PaymentLogic;
+    friend Targoman::API::AccountModule::Payment::PaymentLogic;
 
 protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
@@ -226,7 +228,7 @@ protected:
     */
 };
 
-} //namespace PaymentGateways
+} //namespace Payment
 } //namespace Targoman::API::AccountModule
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PG_INTFPAYMENTGATEWAY_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_INTFPAYMENTGATEWAY_H
