@@ -27,7 +27,10 @@
 #include <utility>
 #include <QTcpSocket>
 #include <QtConcurrent/QtConcurrent>
-#include "QFieldValidator.h"
+
+#include "libQFieldValidator/QFieldValidator.h"
+#include "libQFieldValidator/Exceptions.h"
+
 #include "clsRequestHandler.h"
 #include "libTargomanCommon/CmdIO.h"
 #include "Interfaces/API/intfPureModule.h"
@@ -187,10 +190,10 @@ void clsRequestHandler::process(const QString& _api) {
         catch(exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }
-        catch(QFieldValidator::exRequiredParam &ex) {
+        catch(exQFVRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(QFieldValidator::exInvalidValue &ex) {
+        catch(exQFVInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
         catch(std::exception &ex) {
@@ -208,10 +211,10 @@ void clsRequestHandler::process(const QString& _api) {
         catch(exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }
-        catch(QFieldValidator::exRequiredParam &ex) {
+        catch(exQFVRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(QFieldValidator::exInvalidValue &ex) {
+        catch(exQFVInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
         catch(std::exception &ex) {
@@ -319,11 +322,11 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
     {
         return stuResult(ex.what(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     }
-    catch(QFieldValidator::exRequiredParam &ex)
+    catch(exQFVRequiredParam &ex)
     {
         return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
     }
-    catch(QFieldValidator::exInvalidValue &ex)
+    catch(exQFVInvalidValue &ex)
     {
         return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
     }

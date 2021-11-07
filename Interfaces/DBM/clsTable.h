@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_ORM_CLSTABLE_H
 #define TARGOMAN_API_ORM_CLSTABLE_H
 
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include <functional>
 #include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"

@@ -27,7 +27,7 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 

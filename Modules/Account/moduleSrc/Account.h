@@ -74,6 +74,15 @@ private slots:
     /*****************************************************************\
     |* User **********************************************************|
     \*****************************************************************/
+    QString REST_GET_OR_POST(
+        normalizePhoneNumber,
+        (
+            QString _phone,
+            QString _country
+        ),
+        "Normalize and format phone number as E164 standard"
+    )
+
     QVariantMap REST_PUT(
         signup,
         (

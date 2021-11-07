@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_DBM_CLSORMFIELD_H
 #define TARGOMAN_API_DBM_CLSORMFIELD_H
 
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Macros.h"
 
 namespace Targoman::API {

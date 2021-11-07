@@ -25,7 +25,7 @@
 #include <QRegularExpressionMatch>
 #include "clsTable.h"
 #include <QRegularExpression>
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"

@@ -172,9 +172,9 @@ void WebSocketServer::processTextMessage(QString _message)
             pSocket->sendTextMessage(Data.data());
         }catch(Targoman::Common::exTargomanBase& ex){
             sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what());
-        }catch(QFieldValidator::exRequiredParam &ex){
+        }catch(exQFVRequiredParam &ex){
             sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what());
-        }catch(QFieldValidator::exInvalidValue &ex){
+        }catch(exQFVInvalidValue &ex){
             sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what());
         }catch(std::exception &ex){
             sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what());

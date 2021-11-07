@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 
 #include "base.h"
 
