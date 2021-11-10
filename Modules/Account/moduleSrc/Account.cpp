@@ -23,7 +23,6 @@
 
 #include "Account.h"
 #include "libQFieldValidator/QFieldValidator.h"
-#include "libQFieldValidator/PhoneNumberUtil.hpp"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
@@ -46,11 +45,11 @@
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/ORM/intfAlerts.h"
 
+#include "Interfaces/Helpers/PhoneHelper.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
-using namespace Targoman::API::Helpers;
-
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
+
 using namespace Targoman::API::AAA;
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
@@ -223,7 +222,7 @@ QString Account::apinormalizePhoneNumber(
         QString _country
     )
 {
-    return PhoneNumberUtil::NormalizePhoneNumber(_phone, _country);
+    return PhoneHelper::NormalizePhoneNumber(_phone, _country);
 }
 
 QVariantMap Account::apiPUTsignup(
@@ -250,7 +249,7 @@ QVariantMap Account::apiPUTsignup(
     else if (QFV.mobile().isValid(_emailOrMobile))
     {
         Type = 'M';
-        _emailOrMobile = PhoneNumberUtil::NormalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
     }
     else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
@@ -305,7 +304,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Incorrect mobile.");
 
-    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QFV.asciiAlNum().maxLenght(50).validate(_role);
 
@@ -391,7 +390,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_acceptApproval", {
             { "iBy", "M" },
@@ -439,7 +438,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     if (QFV.mobile().isValid(_emailOrMobile))
-        _emailOrMobile = PhoneNumberUtil::NormalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _emailOrMobile,
@@ -476,7 +475,7 @@ bool Account::apiloginByMobileOnly(
 
     QFV.mobile().validate(_mobile, "mobile");
 
-    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
                      { "iMobile", _mobile },
@@ -506,7 +505,7 @@ bool Account::apiresendApprovalCode(
     else if (QFV.mobile().isValid(_emailOrMobile))
     {
         Type = 'M';
-        _emailOrMobile = PhoneNumberUtil::NormalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
     }
     else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
@@ -539,7 +538,7 @@ bool Account::apiresendApprovalCode(
 //{
 //    Authorization::validateIPAddress(_REMOTE_IP);
 
-//    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+//    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
 //    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
 //                                     { "iMobile", _mobile },
@@ -564,7 +563,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_verifyLoginByMobileCode", {
                                             { "iMobile", _mobile },

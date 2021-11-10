@@ -24,7 +24,8 @@
 #include "User.h"
 #include "Roles.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
-#include "libQFieldValidator/PhoneNumberUtil.hpp"
+#include "Interfaces/Helpers/PhoneHelper.h"
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
 
@@ -232,7 +233,7 @@ bool User::apiUPDATEmobile(
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-    _mobile = PhoneNumberUtil::NormalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     if (_mobile.isEmpty())
         throw exHTTPBadRequest("Mobile is empty");
