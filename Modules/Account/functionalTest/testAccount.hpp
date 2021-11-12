@@ -51,6 +51,21 @@ private slots:
     }
 
     //-------------------------------------------------------
+    void NormalizePhoneNumber()
+    {
+        QVariant Result = callAPI(
+                              RESTClientHelper::POST,
+                              "Account/normalizePhoneNumber",
+                              {},
+                              {
+                                  { "phone", "0999-888-1010" },
+                                  { "country", "IR" },
+                               })
+                          ;
+
+        QVERIFY(Result.toString() == "+989998881010");
+    }
+
     void SignupByMobileOnly_0999_888_1010()
     {
         QVariant Result = callAPI(
@@ -427,7 +442,7 @@ private slots:
                 .toBool());
     }
 
-//private ://slots:
+private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/

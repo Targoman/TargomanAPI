@@ -28,7 +28,7 @@
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
 
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "libTargomanCommon/Logger.h"
 

@@ -42,6 +42,7 @@ HEADERS += \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
+    Helpers/PhoneHelper.h \
     DBM/Defs.hpp \
     DBM/clsORMField.h \
     DBM/clsTable.h \
@@ -53,6 +54,7 @@ SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
+    Helpers/PhoneHelper.cpp \
     Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
     Helpers/URLHelper.cpp \

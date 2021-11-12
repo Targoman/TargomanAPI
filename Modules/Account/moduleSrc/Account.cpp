@@ -22,7 +22,7 @@
  */
 
 #include "Account.h"
-#include "QFieldValidator.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "ORM/APITokens.h"
@@ -45,11 +45,11 @@
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/ORM/intfAlerts.h"
 
+#include "Interfaces/Helpers/PhoneHelper.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
-using namespace Targoman::API::Helpers;
-
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
+
 using namespace Targoman::API::AAA;
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
@@ -150,32 +150,6 @@ tmplConfigurable<quint32> Account::MobileApprovalCodeTTL(
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-QString normalizePhoneNumber(
-        QString _phone
-    )
-{
-    ///TODO: better using https://github.com/google/libphonenumber
-
-    QRegularExpression rex("[^0-9\\+]+");
-    _phone.replace(rex, "");
-
-    if (_phone.startsWith("00"))
-        _phone = "+" + _phone.mid(2);
-
-    if (_phone.startsWith("+0"))
-        _phone = _phone.mid(1);
-
-    if (_phone.startsWith("+") == false)
-    {
-        if (_phone.startsWith("0"))
-            _phone = _phone.mid(1);
-
-        _phone = "+98" + _phone;
-    }
-
-    return _phone;
-}
-
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
@@ -243,6 +217,14 @@ TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
+QString Account::apinormalizePhoneNumber(
+        QString _phone,
+        QString _country
+    )
+{
+    return PhoneHelper::NormalizePhoneNumber(_phone, _country);
+}
+
 QVariantMap Account::apiPUTsignup(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _emailOrMobile,
@@ -267,7 +249,7 @@ QVariantMap Account::apiPUTsignup(
     else if (QFV.mobile().isValid(_emailOrMobile))
     {
         Type = 'M';
-        _emailOrMobile = normalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
     }
     else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
@@ -322,7 +304,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Incorrect mobile.");
 
-    _mobile = normalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QFV.asciiAlNum().maxLenght(50).validate(_role);
 
@@ -408,7 +390,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    _mobile = normalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_acceptApproval", {
             { "iBy", "M" },
@@ -456,7 +438,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     if (QFV.mobile().isValid(_emailOrMobile))
-        _emailOrMobile = normalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _emailOrMobile,
@@ -493,7 +475,7 @@ bool Account::apiloginByMobileOnly(
 
     QFV.mobile().validate(_mobile, "mobile");
 
-    _mobile = normalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
                      { "iMobile", _mobile },
@@ -523,7 +505,7 @@ bool Account::apiresendApprovalCode(
     else if (QFV.mobile().isValid(_emailOrMobile))
     {
         Type = 'M';
-        _emailOrMobile = normalizePhoneNumber(_emailOrMobile);
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
     }
     else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
@@ -556,7 +538,7 @@ bool Account::apiresendApprovalCode(
 //{
 //    Authorization::validateIPAddress(_REMOTE_IP);
 
-//    _mobile = normalizePhoneNumber(_mobile);
+//    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
 //    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
 //                                     { "iMobile", _mobile },
@@ -581,7 +563,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    _mobile = normalizePhoneNumber(_mobile);
+    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_verifyLoginByMobileCode", {
                                             { "iMobile", _mobile },

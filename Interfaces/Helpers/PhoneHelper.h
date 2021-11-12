@@ -17,38 +17,26 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Common.h"
-//#include "libQFieldValidator/QFieldValidator.h"
-//#include "Interfaces/AAA/PrivHelpers.h"
-//#include "Interfaces/Common/GenericEnums.hpp"
-//#include "Interfaces/Common/HTTPExceptions.hpp"
-//#include "Interfaces/Helpers/SecurityHelper.h"
-//using namespace Targoman::API::Helpers;
+#ifndef TARGOMAN_API_PHONEHELPER_H
+#define TARGOMAN_API_PHONEHELPER_H
 
-//#include "Interfaces/Helpers/RESTClientHelper.h"
-//using namespace Targoman::API::Helpers;
+#include <QString>
+#include "phonenumbers/phonenumberutil.h"
 
-#include "ORM/Defs.hpp"
-#include "ORM/Alerts.h"
+namespace Targoman::API::Helpers {
 
-namespace Targoman::API::CommonModule {
-
-using namespace ORM;
-
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Common, CommonSchema);
-
-Common::Common() :
-    intfSQLBasedModule(
-        CommonDomain,
-        CommonSchema,
-        ""
-    )
+class PhoneHelper
 {
-    this->addSubModule(&Alerts::instance());
-}
+public:
+    static QString GetErrorTypeAsString(const i18n::phonenumbers::PhoneNumberUtil::ErrorType& _errorType);
+    static QString NormalizePhoneNumber(QString _number, const QString& _country="IR");
 
-} //namespace Targoman::API::CommonModule
+};
+
+} //namespace Targoman::API::Helpers
+
+#endif // TARGOMAN_API_PHONEHELPER_H
