@@ -8,10 +8,10 @@ declare -i counter success
 counter=0
 success=0
 
-curl -s "https://$deploy_url/pull?token=$token&project=$project&tag=$tag" > /dev/null 2>&1
+curl -s ""$deploy_url"pull?token=$token&project=$project&tag=$tag" > /dev/null 2>&1
 sleep 6m
 while [ $counter -lt 120 ];do
-    curl -s "https://$deploy_url/check-pull?token=$token&project=$project&tag=$tag" | grep pulled > /dev/null 2>&1
+    curl -s ""$deploy_url"check-pull?token=$token&project=$project&tag=$tag" | grep pulled > /dev/null 2>&1
     if [ $? -eq 0 ]
     then
         success=1
@@ -24,11 +24,11 @@ while [ $counter -lt 120 ];do
 done
 if [ $success -eq 1 ]
 then
-    curl -s "https://$deploy_url/deploy?token=$token&project=$project&tag=$tag" | grep successfully > /dev/null 2>&1
+    curl -s ""$deploy_url"deploy?token=$token&project=$project&tag=$tag" | grep successfully > /dev/null 2>&1
     if [ $? -eq 0 ]
     then
         echo -e "\n------------# $project:$tag has been successfully deployed. #-----------"
-        curl -s "https://$deploy_url/upgrade?token=$token&project=$project&tag=$tag" | grep successfully > /dev/null 2>&1
+        curl -s ""$deploy_url"upgrade?token=$token&project=$project&tag=$tag" | grep successfully > /dev/null 2>&1
         if [ $? -eq 0 ]
         then
             echo -e "\n------------# $project:$tag has been successfully upgrade. #-----------"
