@@ -1,3 +1,5 @@
+[![CI-CD](https://github.com/Targoman/TargomanAPI/actions/workflows/CI-CD.yml/badge.svg)](https://github.com/Targoman/TargomanAPI/actions/workflows/CI-CD.yml)
+
 # TargomanAAA
 
 ### Table of contents
