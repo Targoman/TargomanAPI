@@ -47,7 +47,7 @@ jobs:
         #username: ${{ secrets.DOCKER_USERNAME }}
         #password: ${{ secrets.DOCKER_PASS }}
         username: targoman
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        password: ${{ secrets.TARGOMAN_DOCKER_HUB_TOKEN }}
         logout: true
     - name: push to registry
       #run: docker tag ${{ env.PROJECT_NAME }}:1 ${{ secrets.DOCKER_URL}}/targoman-${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}:1
