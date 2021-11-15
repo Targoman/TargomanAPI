@@ -5,6 +5,7 @@ WORKDIR /opt
 
 RUN zypper ref
 RUN zypper --non-interactive in \
+      curl \
       vim \
       git \
       which \
