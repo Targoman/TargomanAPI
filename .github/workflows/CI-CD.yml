@@ -1,6 +1,8 @@
 name: CI-CD
 on:
   push:
+    branches:
+      - submodule-fix
     tags:
       - 'v*'
   workflow_dispatch:
@@ -65,7 +67,7 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v2
-    - run: ./dep.sh ${{ secrets.DEPLOY_TOKEN }} ${{ env.PROJECT_NAME }} ${{ needs.build.outputs.tag }} ${{ secrets.DEPLOY_URL }}
+    - run: Deploy/deploy-script.sh ${{ secrets.DEPLOY_TOKEN }} ${{ env.PROJECT_NAME }} ${{ needs.build.outputs.tag }} ${{ secrets.DEPLOY_URL }}
 
     
 
