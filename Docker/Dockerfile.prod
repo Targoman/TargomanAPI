@@ -16,7 +16,8 @@ RUN zypper --non-interactive in \
       libQt5Test-devel  \
       libQt5Network-devel \
       libQt5Concurrent-devel \
-      libqt5-qtwebsockets-devel
+      libqt5-qtwebsockets-devel \
+      libphonenumber-devel
       
       
 
@@ -36,6 +37,7 @@ RUN zypper ref && zypper --non-interactive in \
       libQt5Network5 \
       libQt5Concurrent5 \
       libQt5WebSockets5 \
+      libphonenumber8 \
       zlib && mkdir -p /targoman/bin
 
 WORKDIR /targoman
