@@ -4,9 +4,6 @@
 [submodule "3rdParty/QHttp"]
 	path = 3rdParty/QHttp
 	url = https://github.com/Targoman/QHttp.git
-[submodule "3rdParty/QFieldValidator"]
-	path = 3rdParty/QFieldValidator
-	url = https://github.com/Targoman/QFieldValidator.git
 [submodule "3rdParty/TargomanDBM"]
 	path = 3rdParty/TargomanDBM
 	url = https://github.com/Targoman/TargomanDBM.git
@@ -25,3 +22,6 @@
 [submodule "3rdParty/multipart-parser"]
 	path = 3rdParty/multipart-parser
 	url = https://github.com/Targoman/multipart-parser.git
+[submodule "3rdParty/QFieldValidator"]
+	path = 3rdParty/QFieldValidator
+	url = https://github.com/Targoman/QFieldValidator.git
