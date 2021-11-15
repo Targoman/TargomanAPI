@@ -45,6 +45,7 @@ RUN zypper ref && zypper --non-interactive in \
       libQt5WebSockets5 \
       libboost_thread1_75_0 \
       libboost_system1_75_0 \
+      libboost_date_time1_75_0 \
       libprotobuf20 \
       libicu \
       zlib && mkdir -p /targoman/bin

@@ -1,8 +1,6 @@
 name: CI-CD
 on:
   push:
-    branches:
-      - submodule-fix
     tags:
       - 'v*'
   workflow_dispatch:
