@@ -5,7 +5,7 @@ WORKDIR /opt
 
 RUN zypper ref
 RUN zypper --non-interactive in \
-      curl \
+      wget \
       vim \
       git \
       which \
@@ -24,7 +24,7 @@ RUN zypper --non-interactive in \
       gtest \
       protobuf-devel \
       libicu-devel
-RUN curl https://github.com/google/libphonenumber/archive/refs/tags/v8.12.37.zip -o v8.12.37.zip && \
+RUN wget https://github.com/google/libphonenumber/archive/refs/tags/v8.12.37.zip && \
       unzip v8.12.37.zip && \
       mkdir libphonenumber-8.12.37/cpp/build && cd libphonenumber-8.12.37/cpp/build && \
       cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && \
