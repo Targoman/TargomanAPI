@@ -4,16 +4,19 @@ mysqldump \
     --tables --routines --triggers --events \
     --no-data --skip-comments --add-drop-trigger \
     --protocol=tcp --user=root --password=targoman123 \
-    Common > Schemas/Common.my.sql
+    Common \
+    | sed 's/ AUTO_INCREMENT=[0-9]*//g' > Schemas/Common.my.sql
 
 mysqldump \
     --tables --routines --triggers --events \
     --no-data --skip-comments --add-drop-trigger \
     --protocol=tcp --user=root --password=targoman123 \
-    CommonFuncs > Schemas/CommonFuncs.my.sql
+    CommonFuncs \
+    | sed 's/ AUTO_INCREMENT=[0-9]*//g' > Schemas/CommonFuncs.my.sql
 
 mysqldump \
     --tables --routines --triggers --events \
     --no-data --skip-comments --add-drop-trigger \
     --protocol=tcp --user=root --password=targoman123 \
-    I18N > Schemas/I18N.my.sql
+    I18N \
+    | sed 's/ AUTO_INCREMENT=[0-9]*//g' > Schemas/I18N.my.sql
