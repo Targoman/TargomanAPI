@@ -57,7 +57,7 @@ CREATE TABLE `tblAccountCoupons` (
   KEY `cpnStatus` (`cpnStatus`) USING BTREE,
   KEY `cpnValidFrom` (`cpnValidFrom`) USING BTREE,
   KEY `cpnType` (`cpnAmountType`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=175 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -101,7 +101,7 @@ CREATE TABLE `tblAccountProducts` (
   KEY `prdValidFromTime` (`prdValidFromHour`) USING BTREE,
   KEY `prdValidToTime` (`prdValidToHour`) USING BTREE,
   CONSTRAINT `FK_tblAccountProducts_tblLocations` FOREIGN KEY (`prd_locID`) REFERENCES `tblLocations` (`locID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -143,7 +143,7 @@ CREATE TABLE `tblAccountSaleables` (
   KEY `slbType` (`slbType`) USING BTREE,
   KEY `slbAvailableToDate` (`slbAvailableToDate`),
   KEY `slbAvailableFromDate` (`slbAvailableFromDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -175,7 +175,7 @@ CREATE TABLE `tblAccountUserAssets` (
   KEY `uasUpdatedBy_usrID` (`uasUpdatedBy_usrID`) USING BTREE,
   KEY `uas_invID` (`uas_vchID`) USING BTREE,
   KEY `uasPurchaseDate` (`uasOrderDateTime`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=563 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -189,7 +189,7 @@ CREATE TABLE `tblActionLogs` (
   PRIMARY KEY (`atlID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
-) ENGINE=InnoDB AUTO_INCREMENT=245 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -349,7 +349,7 @@ CREATE TABLE `tblLocations` (
   KEY `locCreator_usrID` (`locCreatedBy_usrID`),
   KEY `locCreationDateTime` (`locCreationDateTime`),
   KEY `locUpdater_usrID` (`locUpdatedBy_usrID`)
-) ENGINE=InnoDB AUTO_INCREMENT=287 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
