@@ -6,7 +6,18 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-include($$QBUILD_PATH/templates/projectConfigs.pri)
+ModuleName=NGTv1
 
-addSubdirs(moduleSrc, Dependencies)
-addSubdirs(functionalTest, Dependencies)
+HEADERS += \
+    NGTv1.h \
+    ORM/Defs.hpp
+
+SOURCES += \
+    NGTv1.cpp
+
+OTHER_FILES += \
+    dumpDBSchema.sh \
+    ORM/Schema.my.sql \
+
+################################################################################
+include($$QBUILD_PATH/templates/moduleConfigs.pri)
