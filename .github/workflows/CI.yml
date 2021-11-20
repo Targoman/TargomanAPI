@@ -13,8 +13,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+      - run: echo "TAG=${{ github.head_ref }}" >> $GITHUB_ENV
       - name: Set the TAG value
-        run: TAG=${{ github.head_ref }}
+        id: build-tag
+        run: echo "::set-output name=TAG::$TAG"
       - run: echo "$TAG has been pushed"
       - name: build
         run: mkdir conf/tmp && cp -rL conf/TextProcessor conf/tmp && rm -f conf/TextProcessor && mv conf/tmp/* conf/ && rmdir conf/tmp
