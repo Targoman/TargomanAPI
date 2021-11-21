@@ -5,4 +5,6 @@ mysqldump \
     --no-data --skip-comments --add-drop-trigger \
     --protocol=tcp --user=root --password=targoman123 \
     Ticketing \
-    | sed 's/ AUTO_INCREMENT=[0-9]*//g' > ORM/Schema.my.sql
+    | sed 's/ AUTO_INCREMENT=[0-9]*//g' \
+    | sed 's/ DEFINER=`root`@`%`//g' \
+    > ORM/Schema.my.sql

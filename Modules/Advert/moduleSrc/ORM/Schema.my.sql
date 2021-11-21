@@ -231,7 +231,7 @@ CREATE TABLE `tblBanners` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblBanners_after_update */;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblBanners_after_update` AFTER UPDATE ON `tblBanners` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblBanners_after_update` AFTER UPDATE ON `tblBanners` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
   
   IF NEW.bnrImage           != OLD.bnrImage           THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("bnrImage", OLD.bnrImage)); END IF;
@@ -283,7 +283,7 @@ CREATE TABLE `tblBin` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblBin_after_update */;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblBin_after_update` AFTER UPDATE ON `tblBin` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblBin_after_update` AFTER UPDATE ON `tblBin` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
   
   IF NEW.binType          != OLD.binType         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("binType", OLD.binType)); END IF;
@@ -361,7 +361,7 @@ CREATE TABLE `tblLocations` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblLocations_after_update */;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblLocations_after_update` AFTER UPDATE ON `tblLocations` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblLocations_after_update` AFTER UPDATE ON `tblLocations` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
   
   IF NEW.locURL          != OLD.locURL         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("locURL", OLD.locURL)); END IF;
@@ -415,7 +415,7 @@ CREATE TABLE `tblProps` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblProps_after_update */;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `tblProps_after_update` AFTER UPDATE ON `tblProps` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblProps_after_update` AFTER UPDATE ON `tblProps` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
   
   IF NEW.prp_binID         != OLD.prp_binID         THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("prp_binID", OLD.prp_binID)); END IF;
@@ -445,7 +445,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_decreaseStats`(
+CREATE PROCEDURE `sp_UPDATE_coupon_decreaseStats`(
 	IN `iDiscountID` INT UNSIGNED,
 	IN `iTotalUsedCount` INT UNSIGNED,
 	IN `iTotalUsedAmount` INT UNSIGNED
@@ -472,7 +472,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_coupon_increaseStats`(
+CREATE PROCEDURE `sp_UPDATE_coupon_increaseStats`(
 	IN `iDiscountID` INT UNSIGNED,
 	IN `iTotalUsedCount` INT UNSIGNED,
 	IN `iTotalUsedAmount` INT UNSIGNED
@@ -499,7 +499,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_reserve`(
+CREATE PROCEDURE `sp_UPDATE_saleable_reserve`(
 	IN `iSaleableID` INT UNSIGNED,
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iQty` DOUBLE
@@ -534,7 +534,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_saleable_un_reserve`(
+CREATE PROCEDURE `sp_UPDATE_saleable_un_reserve`(
 	IN `iSaleableID` INT UNSIGNED,
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iQty` DOUBLE
@@ -569,7 +569,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_UPDATE_setAsPrefered`(
+CREATE PROCEDURE `sp_UPDATE_setAsPrefered`(
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iUASID` BIGINT UNSIGNED
 )

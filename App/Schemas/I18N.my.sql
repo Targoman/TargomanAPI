@@ -19,7 +19,7 @@
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `farsiDigit`(
+CREATE FUNCTION `farsiDigit`(
 	`iChar` CHAR(1)
 ) RETURNS varchar(1000) CHARSET utf8
     NO SQL
@@ -54,7 +54,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `farsiMonthName`(
+CREATE FUNCTION `farsiMonthName`(
 	`iMonth` TINYINT
 ) RETURNS varchar(100) CHARSET utf8mb4
     NO SQL
@@ -96,7 +96,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `farsiNumerals`(
+CREATE FUNCTION `farsiNumerals`(
 	`iText` VARCHAR(5000)
 ) RETURNS varchar(5000) CHARSET utf8mb4
     NO SQL
@@ -129,7 +129,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `fromJalali`(
+CREATE FUNCTION `fromJalali`(
 	`iJalaliYear` smallint,
 	`iJalaliMonth` TINYINT,
 	`iJalaliDay` TINYINT
@@ -250,7 +250,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `fromJalaliStr`(
+CREATE FUNCTION `fromJalaliStr`(
 	`iJalaliDate` VARCHAR(50)
 ) RETURNS datetime
     NO SQL
@@ -294,7 +294,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `jalaliDateTime`(
+CREATE FUNCTION `jalaliDateTime`(
 	`iDateTime` DATETIME
 
 ) RETURNS varchar(50) CHARSET utf8mb4
@@ -373,7 +373,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `jalaliDay`(
+CREATE FUNCTION `jalaliDay`(
 	`iDate` DATE
 
 
@@ -446,7 +446,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `jalaliMonth`(
+CREATE FUNCTION `jalaliMonth`(
 	`iDate` DATE
 ) RETURNS tinyint
     NO SQL
@@ -516,7 +516,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `jalaliYear`(
+CREATE FUNCTION `jalaliYear`(
 	`iDate` DATE
 
 ) RETURNS smallint unsigned
@@ -576,7 +576,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `_gdmarray`(
+CREATE FUNCTION `_gdmarray`(
 	`m` smallint
 ) RETURNS smallint
     NO SQL
@@ -617,7 +617,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `_gdmarray2`(
+CREATE FUNCTION `_gdmarray2`(
 	`m` smallint,
 	`k` SMALLINT
 ) RETURNS tinyint
@@ -660,7 +660,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `_intDiv`(
+CREATE FUNCTION `_intDiv`(
 	`a` int,
 	`b` int
 ) RETURNS bigint
@@ -688,7 +688,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `_jdmarray`(
+CREATE FUNCTION `_jdmarray`(
 	`m` smallint
 ) RETURNS smallint
     NO SQL
@@ -729,7 +729,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint
+CREATE FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint
     NO SQL
     DETERMINISTIC
 BEGIN
