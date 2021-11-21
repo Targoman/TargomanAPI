@@ -89,7 +89,7 @@ CREATE TABLE `tblDownloadRequests` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `fnCreateRandomMD5`() RETURNS char(32) CHARSET utf8mb4
+CREATE FUNCTION `fnCreateRandomMD5`() RETURNS char(32) CHARSET utf8mb4
     NO SQL
 BEGIN
   RETURN MD5(CONCAT(RAND(), UUID()));
@@ -109,7 +109,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddDebugLog`(
+CREATE PROCEDURE `sp_AddDebugLog`(
 	IN `iFrom` VARCHAR(50),
 	IN `iInfo` VARCHAR(500)
 
