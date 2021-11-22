@@ -198,6 +198,34 @@ private slots:
         QVERIFY(Result.toBool());
     }
 
+    void ApprovalRequest_timerInfo_before_send()
+    {
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/ApprovalRequest/timerInfo",
+                                  {},
+                                  {
+                                      { "emailOrMobile", UT_UserEmail },
+                                  });
+        qDebug() << Result;
+        QVERIFY(Result.isValid() == false);
+    }
+
+    void ApprovalRequest_timerInfo_after_send()
+    {
+        clsDAC DAC;
+        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = DATE_SUB(NOW(), INTERVAL 10 SECOND) WHERE apr_usrID=?",
+        {gUserID});
+
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/ApprovalRequest/timerInfo",
+                                  {},
+                                  {
+                                      { "emailOrMobile", UT_UserEmail },
+                                  });
+        qDebug() << Result;
+        QVERIFY(Result.isValid());
+    }
+//private:
     void ApproveEmail()
     {
         clsDAC DAC;
