@@ -128,28 +128,6 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-tmplConfigurable<quint32> Account::EmailApprovalCodeTTL(
-    AAA::makeConfig("EmailApprovalCodeTTL"),
-    "Time to live for the email approval code",
-    static_cast<quint16>(2*24*60*60), //2 days
-    ReturnTrueCrossValidator(),
-    "",
-    "",
-    "email-approval-code-ttl",
-    enuConfigSource::Arg | enuConfigSource::File
-);
-
-tmplConfigurable<quint32> Account::MobileApprovalCodeTTL(
-    AAA::makeConfig("MobileApprovalCodeTTL"),
-    "Time to live for the mobile approval code",
-    static_cast<quint16>(2*60), //2 minutes
-    ReturnTrueCrossValidator(),
-    "",
-    "",
-    "mobile-approval-code-ttl",
-    enuConfigSource::Arg | enuConfigSource::File
-);
-
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
@@ -357,7 +335,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-            { "iTTL", Account::EmailApprovalCodeTTL.value() },
+            { "iTTL", ApprovalRequest::EmailApprovalCodeTTL.value() },
         })
         .toJson(true)
         .object();
@@ -401,7 +379,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-            { "iTTL", Account::MobileApprovalCodeTTL.value() },
+            { "iTTL", ApprovalRequest::MobileApprovalCodeTTL.value() },
         })
         .toJson(true)
         .object();

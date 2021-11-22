@@ -57,8 +57,6 @@ class Account : public intfSQLBasedWithActionLogsModule
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
-    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;
-    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 

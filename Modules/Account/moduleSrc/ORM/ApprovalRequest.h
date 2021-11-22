@@ -26,6 +26,7 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -69,9 +70,22 @@ class ApprovalRequest : public intfSQLBasedModule
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
 
+public:
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
+
 private slots:
     QVariant ORMGET("Get ApprovalRequest information.")
     bool ORMDELETE("Delete an ApprovalRequest")
+
+    QVariant REST_GET_OR_POST(
+        timerInfo,
+        (
+          TAPI::RemoteIP_t _REMOTE_IP,
+          QString _emailOrMobile
+        ),
+        "Returns TTL remained for Approval Request based on email or mobile"
+    )
 };
 
 } //namespace ORM
