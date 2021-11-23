@@ -19,7 +19,7 @@
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `guid`(
+CREATE FUNCTION `guid`(
 	`iPrefix` VARCHAR(50)
 ) RETURNS varchar(50) CHARSET utf8mb4
     NO SQL
@@ -41,7 +41,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`%` FUNCTION `randomStr`(
+CREATE FUNCTION `randomStr`(
 	`iPrefix` VARCHAR(10)
 ) RETURNS varchar(50) CHARSET utf8mb4
     NO SQL

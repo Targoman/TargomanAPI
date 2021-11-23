@@ -340,11 +340,13 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
     }
 }
 
-void clsRequestHandler::findAndCallAPI(QString _api)
+bool clsRequestHandler::callStaticAPI(QString _api)
 {
-    if (_api == "/openAPI.json") {
+    if (_api == "/openAPI.json")
+    {
         gServerStats.Success.inc();
-        return this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson());
+        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson());
+        return true;
     }
 
     if (_api == "/openAPI.yaml")
@@ -352,27 +354,56 @@ void clsRequestHandler::findAndCallAPI(QString _api)
 
     _api.replace(QRegularExpression("//+"), "/");
 
-    if (_api.toLower().startsWith("/swaggerui")) {
+    if (_api.toLower().startsWith("/swaggerui"))
+    {
         if (ServerConfigs::SwaggerUI.value().isEmpty())
-            return this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
-
+        {
+            this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
+            return true;
+        }
 
         QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
         if (File.isEmpty())
-            return this->redirect(_api + "/");
+        {
+            this->redirect(_api + "/");
+            return true;
+        }
 
         if (File == "/")
             File = "index.html";
 
-        return this->sendFile(ServerConfigs::SwaggerUI.value(), File);
+        this->sendFile(ServerConfigs::SwaggerUI.value(), File);
+        return true;
     }
 
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
-    if (_api == "/stats.json") {
+    if (_api == "/stats.json")
+    {
         gServerStats.Success.inc();
-        return this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
+        this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
+        return true;
     }
+
+    if (_api == "/ping")
+    {
+        gServerStats.Success.inc();
+        this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
+                                                                  { "pong", QDateTime::currentDateTime().toSecsSinceEpoch() },
+                                                              }));
+        return true;
+    }
+
+    return false;
+}
+
+void clsRequestHandler::findAndCallAPI(QString _api)
+{
+    if (this->callStaticAPI(_api))
+        return;
+
+    //-----------------------------------------------------
+    QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
     QString ExtraAPIPath;
     QString MethodString = this->Request->methodString();

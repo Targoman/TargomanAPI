@@ -1,20 +1,66 @@
-FROM opensuse/leap:15.3
+FROM  opensuse/leap:15.3 as builder
 LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
 
-WORKDIR /
+WORKDIR /opt
 
-RUN zypper ref && \
-    zypper --non-interactive in \
+RUN zypper ref
+RUN zypper --non-interactive in \
+      wget \
+      vim \
+      git \
+      which \
+      unzip \
+      zlib-devel \
+      hiredis-devel \
+      libcurl-devel \
+      libQt5Sql-devel \
+      libQt5Sql5-mysql \
+      libQt5Test-devel  \
+      libQt5Network-devel \
+      libQt5Concurrent-devel \
+      libqt5-qtwebsockets-devel \
+      libboost_thread1_75_0-devel \
+      libboost_system1_75_0-devel \
+      gtest \
+      protobuf-devel \
+      libicu-devel
+RUN wget https://github.com/google/libphonenumber/archive/refs/tags/v8.12.37.zip && \
+      unzip v8.12.37.zip && \
+      mkdir libphonenumber-8.12.37/cpp/build && cd libphonenumber-8.12.37/cpp/build && \
+      cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && \
+      make -j install
+
+COPY . .
+
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug && make -j 4
+
+FROM  opensuse/leap:15.3
+
+RUN zypper ref && zypper --non-interactive in \
       libhiredis0_13 \
       libcurl4 \
       libQt5Sql5-mysql \
       libQt5Network5 \
       libQt5Concurrent5 \
       libQt5WebSockets5 \
-      zlib && \
-      mkdir -p /targoman/bin  /targoman/conf/TextProcessor/
+      libboost_thread1_75_0 \
+      libboost_system1_75_0 \
+      libboost_date_time1_75_0 \
+      libprotobuf20 \
+      libicu \
+      zlib && mkdir -p /targoman/bin
 
-COPY run-targoman.sh .
+WORKDIR /targoman
+COPY conf conf
+COPY Docker/run-targoman.sh .
+COPY --from=builder /opt/out .
 
-EXPOSE 10000
-ENTRYPOINT [ "run-targoman.sh" ]
+COPY --from=builder /usr/lib64/libphonenumber.so.8.12 /usr/lib64/libphonenumber.so.8.12
+COPY --from=builder /usr/lib64/libphonenumber.so.8 /usr/lib64/libphonenumber.so.8
+COPY --from=builder /usr/lib64/libphonenumber.so /usr/lib64/libphonenumber.so
+
+COPY --from=builder /usr/lib64/libgeocoding.so.8.12 /usr/lib64/libgeocoding.so.8.12
+COPY --from=builder /usr/lib64/libgeocoding.so.8 /usr/lib64/libgeocoding.so.8
+COPY --from=builder /usr/lib64/libgeocoding.so /usr/lib64/libgeocoding.so
+
+ENTRYPOINT [ "/targoman/run-targoman.sh" ]
