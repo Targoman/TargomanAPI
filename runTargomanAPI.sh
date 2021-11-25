@@ -1,6 +1,4 @@
 #!/bin/bash
 
-cd out/bin
-export LD_LIBRARY_PATH=../lib:../lib64
-./targomanAPI --plugins ../modules -c ../../conf/api.conf
-
+export LD_LIBRARY_PATH=out/lib:out/lib64
+out/bin/targomanAPI --plugins out/modules -c conf/api.conf
