@@ -86,7 +86,6 @@ static QSet<QString> InvalidPasswords = {
     "a87ff679a2f3e71d9181a67b7542122c",
     "e4da3b7fbbce2345d7772b0674a318d5",
     "1679091c5a880faf6fb5e6087eb1b2dc",
-    "1679091c5a880faf6fb5e6087eb1b2dc",
     "8f14e45fceea167a5a36dedd4bea2543",
     "c9f0f895fb98ab9159f51fd0297e236d",
     "45c48cce2e2d7fbdea1afc51c7c6ad26",
@@ -1206,6 +1205,7 @@ QVariant Account::apiPOSTfixtureSetup(
     Random = QRandomGenerator::global()->generate();
     QString UserEmail = QString("fixture.%1.user@dev.test").arg(Random);
 
+    //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
     QVariantMap SignupUserResult = this->apiPUTsignup(
                                     _REMOTE_IP,
                                     UserEmail,
@@ -1247,6 +1247,7 @@ QVariant Account::apiPOSTfixtureSetup(
     Random = QRandomGenerator::global()->generate();
     QString AdminUserEmail = QString("fixture.%1.admin@dev.test").arg(Random);
 
+    //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
     QVariantMap SignupAdminUserResult = this->apiPUTsignup(
                                             _REMOTE_IP,
                                             AdminUserEmail,

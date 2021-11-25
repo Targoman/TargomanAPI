@@ -113,6 +113,7 @@ private slots:
     void login_user()
     {
         QJsonObject MultiJWT;
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     { "emailOrMobile", this->CreatedUserEmail },
@@ -130,6 +131,7 @@ private slots:
     void login_admin()
     {
         QJsonObject MultiJWT;
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     { "emailOrMobile", this->CreatedAdminEmail },

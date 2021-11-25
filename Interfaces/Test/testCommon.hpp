@@ -90,6 +90,7 @@ protected:
         if (rolID == 0)
             clsDACResult Result2 = DAC.execQuery("", "SELECT rolID FROM tblRoles WHERE rolName=? AND rolStatus <> 'R'", { UT_RoleName });
 
+        //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         if (_createUsers) {
             DAC.execQuery("", R"(
           INSERT IGNORE
@@ -108,6 +109,7 @@ protected:
                 }
             );
 
+            //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
             clsDACResult res2 = DAC.execQuery("", R"(
           INSERT IGNORE
             INTO tblUser

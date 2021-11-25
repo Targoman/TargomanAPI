@@ -157,6 +157,7 @@ private slots:
     //-------------------------------------------------------
     void Signup()
     {
+        //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_UserEmail},
@@ -170,6 +171,7 @@ private slots:
                            .toULongLong()) > 0)
                 ;
 
+        //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
@@ -274,6 +276,7 @@ private slots:
 
     void Login()
     {
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QJsonObject MultiJWT;
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -303,6 +306,7 @@ private slots:
 
     void LoginAgain(){
         QJsonObject MultiJWT;
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"emailOrMobile", UT_UserEmail},
@@ -313,6 +317,7 @@ private slots:
         gLoginJWT = MultiJWT.value("lgn").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"emailOrMobile", UT_AdminUserEmail},
@@ -346,13 +351,16 @@ private slots:
         DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprUUID=?",
         {Code});
 
+        //827ccb0eea8a706c4c34a16891f84e7b # 12345
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePassByUUID", {},{
-                            {"uuid", Code},
-                            {"newPass", "827ccb0eea8a706c4c34a16891f84e7b"}
+                            { "uuid", Code },
+                            { "newPass", "827ccb0eea8a706c4c34a16891f84e7b" }
                         }).toBool());
     }
 
+    //d769dd673f86addfe039dc2d2dab4f73 = MD5(1234 + 827ccb0eea8a706c4c34a16891f84e7b # 12345)
+    //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
     void ChangePass(){
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePass", {},{
@@ -367,6 +375,7 @@ private slots:
         clsDAC DAC;
 
         try {
+            //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
             DAC.callSP("", "sp_CREATE_approvalRequest", {
                            { "iBy", "M" },
                            { "iUserID", gUserID },
@@ -399,6 +408,7 @@ private slots:
         clsDAC DAC;
 
         try {
+            //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
             DAC.callSP("", "sp_CREATE_approvalRequest", {
                            { "iBy", "M" },
                            { "iUserID", gUserID },
