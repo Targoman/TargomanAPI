@@ -166,29 +166,29 @@ Account::Account() :
     }
 }
 
+TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
+{
+    return clsJWT::createSignedLogin(_remember, { { JWTItems::usrLogin, _login } }, QJsonObject({ { "svc", _services } }), _ssid);
+}
+
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
 {
     return clsJWT::createSigned({
-                                    {JWTItems::usrLogin,        _login},
-                                    {JWTItems::usrName,         _activeAccount.Privs["usrGivenName"]},
-                                    {JWTItems::usrFamily,       _activeAccount.Privs["usrFamilyName"]},
-                                    {JWTItems::rolName,         _activeAccount.Privs["rolName"]},
-                                    {JWTItems::rolID,           _activeAccount.Privs["rolID"]},
-                                    {JWTItems::privs,           _activeAccount.Privs["privs"]},
-                                    {JWTItems::usrID,           _activeAccount.Privs["usrID"]},
-                                    {JWTItems::canChangePass,   _activeAccount.Privs["hasPass"]},
-                                    {JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString())},
-                                    {JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString())},
+                                    { JWTItems::usrLogin,        _login },
+                                    { JWTItems::usrID,           _activeAccount.Privs["usrID"] },
+                                    { JWTItems::usrName,         _activeAccount.Privs["usrName"] },
+                                    { JWTItems::usrFamily,       _activeAccount.Privs["usrFamily"] },
+                                    { JWTItems::rolID,           _activeAccount.Privs["usr_rolID"] },
+                                    { JWTItems::rolName,         _activeAccount.Privs["rolName"] },
+                                    { JWTItems::privs,           _activeAccount.Privs["privs"] },
+                                    { JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
+                                    { JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
+                                    { JWTItems::canChangePass,   _activeAccount.Privs["hasPass"] },
                                 },
-                                QJsonObject({{"svc", _services}}),
+                                QJsonObject({ { "svc", _services } }),
                                 _activeAccount.TTL,
                                 _activeAccount.Privs["ssnKey"].toString()
             );
-}
-
-TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
-{
-    return clsJWT::createSignedLogin(_remember, { {JWTItems::usrLogin, _login} }, QJsonObject({{"svc", _services}}), _ssid);
 }
 
 /*****************************************************************\
