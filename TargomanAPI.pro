@@ -26,4 +26,5 @@ OTHER_FILES += \
     Docs/Models/Accounting.scxml \
     dumpDBSchema-all.sh \
     runTargomanAPI.sh \
-    SwaggerUI/*
+    SwaggerUI/* \
+    Docker/*
