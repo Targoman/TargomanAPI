@@ -385,11 +385,20 @@ bool clsRequestHandler::callStaticAPI(QString _api)
         return true;
     }
 
+    if (_api == "/version")
+    {
+        gServerStats.Success.inc();
+        this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
+                                                                  { "version", TARGOMAN_M2STR(PROJ_VERSION) },
+                                                              }));
+        return true;
+    }
+
     if (_api == "/ping")
     {
         gServerStats.Success.inc();
         this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
-                                                                  { "pong", QDateTime::currentDateTime().toSecsSinceEpoch() },
+                                                                  { "currdatetime", QDateTime::currentDateTime().toSecsSinceEpoch() },
                                                               }));
         return true;
     }
