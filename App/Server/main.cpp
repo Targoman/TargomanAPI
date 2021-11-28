@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QCoreApplication>
@@ -40,7 +41,6 @@ using namespace Targoman::API::Server;
 int main(int _argc, char *_argv[])
 {
 /*
-
     static const QVariant       QNull     = QVariant(QVariant::Line);
     static const QVariant       QInvalid  = QVariant(QVariant::Invalid);
     static const QVariant       QRequired = QVariant(QVariant::RectF);
@@ -60,7 +60,9 @@ int main(int _argc, char *_argv[])
     compare(QAuto);
 
     exit(0);*/
-    try{
+
+    try
+    {
         QCoreApplication App(_argc, _argv);
 
 #pragma GCC diagnostic push
@@ -74,14 +76,18 @@ int main(int _argc, char *_argv[])
         QTimer::singleShot(10, new appTargomanAPI, SLOT(slotExecute()));
 
         return App.exec();
-    }catch(exTargomanBase& ex){
+    }
+    catch(exTargomanBase& ex)
+    {
         TargomanError(ex.what());
-    }catch (std::exception& ex){
+    }
+    catch (std::exception& ex)
+    {
         TargomanError(ex.what());
-    }catch(...){
+    }
+    catch(...)
+    {
         TargomanError("FATAL Unrecognized exception");
     }
     return -1;
 }
-
-

@@ -31,10 +31,11 @@ using namespace DBM;
 
 QJsonObject OpenAPIGenerator::CachedJson;
 
-QJsonObject initializeObject()
+QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _port = 80)
 {
 
-    if(ServerConfigs::BaseOpenAPIObjectFile.value().size()){
+    if (ServerConfigs::BaseOpenAPIObjectFile.value().size())
+    {
         QFile File(ServerConfigs::BaseOpenAPIObjectFile.value());
         File.open(QIODevice::ReadOnly);
         if (File.isReadable() == false)
@@ -43,7 +44,9 @@ QJsonObject initializeObject()
         if(JsonDoc.isNull() || JsonDoc.isObject() == false)
             throw exTargomanAPI("Invalid json reading from: <" + ServerConfigs::BaseOpenAPIObjectFile.value() + ">");
         return JsonDoc.object();
-    }else{
+    }
+    else
+    {
         return QJsonObject({
                                { "swagger","2.0" },
                                { "info",QJsonObject({
@@ -52,7 +55,7 @@ QJsonObject initializeObject()
                                     { "description", "" },
                                     { "contact", QJsonObject({{"email", "sample@example.com"}}) }
                                 }) },
-                               { "host", QString("127.0.0.1:%1").arg(ServerConfigs::ListenPort.value()) },
+                               { "host", QString("%1:%2").arg(_host).arg(_port) },
                                { "securityDefinitions", QJsonObject({
                                     { "Bearer", QJsonObject({
                                          { "type", "apiKey" },
@@ -74,14 +77,20 @@ QJsonObject initializeObject()
     }
 }
 
-QJsonObject OpenAPIGenerator::retrieveJson()
+QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _port)
 {
     if (OpenAPIGenerator::CachedJson.isEmpty() == false)
-        return OpenAPIGenerator::CachedJson;
-    /**/
-    OpenAPIGenerator::CachedJson = initializeObject();
+    {
+        QJsonObject Return = OpenAPIGenerator::CachedJson;
 
-    if(OpenAPIGenerator::CachedJson.value("info").isObject() == false)
+        Return["host"] = QString("%1:%2").arg(_host).arg(_port);
+
+        return Return;
+    }
+
+    OpenAPIGenerator::CachedJson = initializeObject(_host, _port);
+
+    if (OpenAPIGenerator::CachedJson.value("info").isObject() == false)
         throw exHTTPInternalServerError("Invalid OpenAPI base json");
 
     QJsonObject PathsObject;
