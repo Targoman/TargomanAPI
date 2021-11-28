@@ -38,34 +38,48 @@ class intfCacheConnector;
 namespace Common {
 
 template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
-class tmplAPIArg : public intfAPIArgManipulator {
+class tmplAPIArg : public intfAPIArgManipulator
+{
 public:
     virtual ~tmplAPIArg(){}
 
-    virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final{
+    virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final
+    {
         *_argStorage = nullptr;
-        if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
+
+        ///TODO: check if _val is null
+        /// test case: Account/User/extraInfo with not first param(e.g. education) value, then first param(job) throws
+
+        if (this->fromVariantLambda == nullptr && (_val.canConvert<_itmplType>() == false))
+            if (_val.isValid())
                 throw exHTTPBadRequest("Invalid value specified for parameter.: " + _paramName);
+
         *_argStorage = new _itmplType;
+
         *(reinterpret_cast<_itmplType*>(*_argStorage)) =
                 this->fromVariantLambda == nullptr ? _val.value<_itmplType>() : this->fromVariantLambda(_val, _paramName);
+
         return QGenericArgument(this->RealTypeName, *_argStorage);
     }
 
-    inline QVariant invokeMethod(const intfAPIObject *_apiObject, const QVariantList& _arguments) final {
-           _itmplType Result;
-           _apiObject->invokeMethod(_arguments, QReturnArgument<_itmplType >(this->RealTypeName, Result));
-           return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
+    inline QVariant invokeMethod(const intfAPIObject *_apiObject, const QVariantList& _arguments) final
+    {
+        _itmplType Result;
+        _apiObject->invokeMethod(_arguments, QReturnArgument<_itmplType>(this->RealTypeName, Result));
+        return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
     }
 
-    inline void validate(const QVariant& _val, const QByteArray& _paramName) const final {
-        if(this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
-                throw exHTTPBadRequest("Invalid value specified for parameter.:: " + _paramName);
-        if(this->fromVariantLambda)
+    inline void validate(const QVariant& _val, const QByteArray& _paramName) const final
+    {
+        if (this->fromVariantLambda == nullptr && !_val.canConvert<_itmplType>())
+            throw exHTTPBadRequest("Invalid value specified for parameter.:: " + _paramName);
+
+        if (this->fromVariantLambda)
             this->fromVariantLambda(_val, _paramName);
     }
 
-    inline QVariant defaultVariant() const {
+    inline QVariant defaultVariant() const
+    {
         _itmplType Default;
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Default) : this->toVariantLambda(Default);
     }

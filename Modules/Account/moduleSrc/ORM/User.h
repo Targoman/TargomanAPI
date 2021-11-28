@@ -113,10 +113,11 @@ private slots:
     bool REST_UPDATE(
         extraInfo,
         (
-            TAPI::JWT_t   _JWT,
-            QString       _job = {},
-            QString       _education = {},
-            QString       _fieldOfStudy = {}
+            TAPI::JWT_t     _JWT,
+            QString         _job = {},
+            QString         _education = {},
+            QString         _fieldOfStudy = {},
+            TAPI::Date_t    _birthDate = {}
         ),
         "Update User extra info"
     )

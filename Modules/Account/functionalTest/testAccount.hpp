@@ -469,19 +469,41 @@ private slots:
                 .toBool());
     }
 
-    void UpdateUserExtraInfo() {
+    void UpdateUserExtraInfo_json() {
         QVERIFY(callAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
                         {},
                         {
+//                            { "job", "1234" },
+                            { "education", "456" },
+                        })
+                .toBool());
+    }
+
+    void UpdateUserExtraInfo_birthdate() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/extraInfo",
+                        {},
+                        {
+                            { "birthDate", "1973/09/11" },
+                        })
+                .toBool());
+    }
+
+    void UpdateUserExtraInfo_all() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/extraInfo",
+                        {},
+                        {
+                            { "birthDate", "1973/09/11" },
                             { "job", "1234" },
                             { "education", "" },
                         })
                 .toBool());
     }
 
-//private:
 private slots:
+//private:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
