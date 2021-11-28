@@ -39,9 +39,7 @@
 #include "APICache.hpp"
 #include "OpenAPIGenerator.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 using namespace qhttp::server;
 using namespace Targoman::Common;
@@ -52,12 +50,13 @@ clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QO
     Response(_res)
 {}
 
-void clsRequestHandler::process(const QString& _api) {
-    this->Request->onData([this](QByteArray _data ){
-        try {
-            TargomanLogInfo(7,
-                            "posted data: " <<
-                            _data);
+void clsRequestHandler::process(const QString& _api)
+{
+    this->Request->onData([this](QByteArray _data )
+    {
+        try
+        {
+            TargomanLogInfo(7, "posted data: " << _data);
 
             QByteArray ContentType= this->Request->headers().value("content-type");
 
@@ -77,7 +76,8 @@ void clsRequestHandler::process(const QString& _api) {
             if (ContentLength > ServerConfigs::MaxUploadSize.value())
                 throw exHTTPPayloadTooLarge(QString("Content-Size is too large: %d").arg(ContentLength));
 
-            switch(this->Request->method()) {
+            switch(this->Request->method())
+            {
                 case qhttp::EHTTP_POST:
                 case qhttp::EHTTP_PUT:
                 case qhttp::EHTTP_PATCH:
@@ -90,37 +90,48 @@ void clsRequestHandler::process(const QString& _api) {
             static constexpr char APPLICATION_FORM_HEADER[] = "application/x-www-form-urlencoded";
             static constexpr char MULTIPART_BOUNDARY_HEADER[] = "multipart/form-data; boundary=";
 
-            switch (ContentType.at(0)) {
-                case 'a': {
+            switch (ContentType.at(0))
+            {
+                case 'a':
+                {
                     if (ContentType != APPLICATION_JSON_HEADER && ContentType != APPLICATION_FORM_HEADER)
                         throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
 
-                    if (_data.size() == ContentLength) {
+                    if (_data.size() == ContentLength)
+                    {
                         this->RemainingData = _data;
                     }
-                    else if (this->RemainingData.size()) {
+                    else if (this->RemainingData.size())
+                    {
                         this->RemainingData += _data;
                         if(this->RemainingData.size() < ContentLength)
                             return;
                     }
-                    else {
+                    else
+                    {
                         this->RemainingData = _data;
                         return;
                     }
 
                     this->RemainingData = this->RemainingData.trimmed();
 
-                    if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('[')) {
+                    if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('['))
+                    {
                         if (this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
                             throw exHTTPBadRequest("Invalid JSON Object");
+
                         QJsonParseError Error;
                         QJsonDocument JSON = QJsonDocument::fromJson(this->RemainingData, &Error);
+
                         if (JSON.isNull() || JSON.isObject() == false)
                             throw exHTTPBadRequest(QString("Invalid JSON Object: %1").arg(Error.errorString()));
+
                         QJsonObject JSONObject = JSON.object();
+
                         for (auto JSONObjectIter = JSONObject.begin();
                                 JSONObjectIter != JSONObject.end();
-                                ++JSONObjectIter) {
+                                ++JSONObjectIter)
+                        {
                             if (JSONObjectIter.value().isBool())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toBool() ? "1" : "0");
                             else if (JSONObjectIter.value().isNull())
@@ -135,10 +146,12 @@ void clsRequestHandler::process(const QString& _api) {
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
                         }
                     }
-                    else {
+                    else
+                    {
                         QList<QByteArray> Params = this->RemainingData.split('&');
 
-                        static auto decodePercentEncoding = [](QByteArray& _value) {
+                        static auto decodePercentEncoding = [](QByteArray& _value)
+                        {
                             _value = _value.replace("+"," ");
                             QUrl URL = QUrl::fromPercentEncoding("http://127.0.0.1/?key=" + _value);
                             _value=URL.query(QUrl::FullyDecoded).toUtf8();
@@ -146,7 +159,8 @@ void clsRequestHandler::process(const QString& _api) {
                             return _value;
                         };
 
-                        foreach (auto Param, Params) {
+                        foreach (auto Param, Params)
+                        {
                             QList<QByteArray> ParamParts = Param.split('=');
                             if(ParamParts.size() != 2)
                                 throw exHTTPBadRequest("Invalid Param: " + Param);
@@ -155,8 +169,10 @@ void clsRequestHandler::process(const QString& _api) {
                     }
                     break;
                 }
-                case 'm': {
-                    if (this->MultipartFormDataHandler.isNull()) {
+                case 'm':
+                {
+                    if (this->MultipartFormDataHandler.isNull())
+                    {
                         if (ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
                             throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
 
@@ -168,8 +184,10 @@ void clsRequestHandler::process(const QString& _api) {
                     }
 
                     qlonglong Fed = 0;
-                    while (!this->MultipartFormDataHandler->stopped() && _data.size() > Fed) {
-                        do {
+                    while (!this->MultipartFormDataHandler->stopped() && _data.size() > Fed)
+                    {
+                        do
+                        {
                             qulonglong Ret = this->MultipartFormDataHandler->feed(_data.mid(static_cast<int>(Fed)).constData(), _data.size() - Fed);
                             Fed += Ret;
                         } while (Fed < _data.size() && !this->MultipartFormDataHandler->stopped());
@@ -183,44 +201,56 @@ void clsRequestHandler::process(const QString& _api) {
             }
 
             TargomanLogInfo(7, "request user defined values: ");
-            foreach (auto val, this->Request->userDefinedValues()) {
+            foreach (auto val, this->Request->userDefinedValues())
+            {
                 TargomanLogInfo(7, val.first << " : " << val.second);
             }
         }
-        catch(exTargomanBase& ex) {
+        catch(exTargomanBase& ex)
+        {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }
-        catch(exQFVRequiredParam &ex) {
+        catch(exQFVRequiredParam &ex)
+        {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(exQFVInvalidValue &ex) {
+        catch(exQFVInvalidValue &ex)
+        {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(std::exception &ex) {
+        catch(std::exception &ex)
+        {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
         }
     });
 
-    this->Request->onEnd([this, _api]() {
-        try {
+    this->Request->onEnd([this, _api]()
+    {
+        try
+        {
             if (this->Request->method() == qhttp::EHTTP_OPTIONS)
                 this->sendCORSOptions();
             else
                 this->findAndCallAPI (_api);
         }
-        catch(exTargomanBase& ex) {
+        catch(exTargomanBase& ex)
+        {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }
-        catch(exQFVRequiredParam &ex) {
+        catch(exQFVRequiredParam &ex)
+        {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(exQFVInvalidValue &ex) {
+        catch(exQFVInvalidValue &ex)
+        {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
         }
-        catch(std::exception &ex) {
+        catch(std::exception &ex)
+        {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
         }
-        catch(...) {
+        catch(...)
+        {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", true);
         }
     });
@@ -340,12 +370,43 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
     }
 }
 
+QString clsRequestHandler::host() const
+{
+    const qhttp::THeaderHash headers = this->Request->headers();
+
+    if (headers.has("host") == false)
+        return "127.0.0.1";
+
+    QString Host = headers["host"];
+
+    int idx;
+    if ((idx = Host.indexOf(":")) >= 0)
+        Host = Host.left(idx);
+
+    return Host;
+}
+quint16 clsRequestHandler::port() const
+{
+    const qhttp::THeaderHash headers = this->Request->headers();
+
+    if (headers.has("host") == false)
+        return ServerConfigs::ListenPort.value();
+
+    QString Host = headers["host"];
+
+    int idx;
+    if ((idx = Host.indexOf(":")) < 0)
+        return 80;
+
+    return Host.mid(idx+1).toUInt();
+}
+
 bool clsRequestHandler::callStaticAPI(QString _api)
 {
     if (_api == "/openAPI.json")
     {
         gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson());
+        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(this->host(), this->port()));
         return true;
     }
 
@@ -765,6 +826,4 @@ void clsUpdateAndPruneThread::run()
     this->exec();
 }
 
-}
-}
-}
+} //namespace Targoman::API::Server

@@ -18,8 +18,8 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_CLSREQUESTHANDLER_H
 #define TARGOMAN_API_SERVER_CLSREQUESTHANDLER_H
@@ -32,24 +32,26 @@
 #include "ServerConfigs.h"
 #include "RESTAPIRegistry.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 class clsRequestHandler;
 
-class clsUpdateAndPruneThread : public QThread{
+class clsUpdateAndPruneThread : public QThread
+{
     Q_OBJECT
+
 private:
     void run() Q_DECL_FINAL;
 };
 
-class clsMultipartFormDataRequestHandler : public MultipartReader{
+class clsMultipartFormDataRequestHandler : public MultipartReader
+{
 public:
     clsMultipartFormDataRequestHandler(clsRequestHandler* _parent, const QByteArray& _marker) :
         MultipartReader(_marker.toStdString()),
         pRequestHandler(_parent),
-        LastWrittenBytes(0){
+        LastWrittenBytes(0)
+    {
         this->onPartBegin = clsMultipartFormDataRequestHandler::onMultiPartBegin;
         this->onPartData = clsMultipartFormDataRequestHandler::onMultiPartData;
         this->onPartEnd = clsMultipartFormDataRequestHandler::onMultiPartEnd;
@@ -57,7 +59,8 @@ public:
         this->userData = reinterpret_cast<void*>(this);
     }
 
-    size_t feed(const char *_buffer, long long  _len){
+    size_t feed(const char *_buffer, long long  _len)
+    {
         return static_cast<size_t>(MultipartReader::feed(_buffer, _len));
     }
 
@@ -86,7 +89,8 @@ private:
 class clsRequestHandler : public QObject
 {
     Q_OBJECT
-    struct stuResult {
+    struct stuResult
+    {
         qhttp::TStatusCode StatusCode;
         QVariant Result;
         stuResult(const QVariant& _result = {}, qhttp::TStatusCode _code = qhttp::ESTATUS_OK) :
@@ -100,8 +104,10 @@ public:
                       qhttp::server::QHttpResponse* _res,
                       QObject *_parent = nullptr);
     void process(const QString& _api);
+
 private:
     bool callStaticAPI(QString _api);
+
 public:
     void findAndCallAPI(QString _api);
     void sendError(qhttp::TStatusCode _code,
@@ -111,6 +117,9 @@ public:
     void sendResponse(qhttp::TStatusCode _code, QVariant _response);
     void sendCORSOptions();
     void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
+
+    QString host() const;
+    quint16 port() const;
 
 private:
     void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
@@ -133,10 +142,6 @@ private:
     friend class clsMultipartFormDataRequestHandler;
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
 
 #endif // TARGOMAN_API_SERVER_CLSREQUESTHANDLER_H
-
-

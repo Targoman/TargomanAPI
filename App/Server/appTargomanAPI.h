@@ -18,28 +18,27 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #ifndef TARGOMAN_API_SERVER_APPTARGOMANAPI_H
 #define TARGOMAN_API_SERVER_APPTARGOMANAPI_H
 
 #include <QObject>
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 class appTargomanAPI : public QObject
 {
     Q_OBJECT
+
 public:
     explicit appTargomanAPI(QObject *parent = nullptr);
 
 public slots:
     void slotExecute();
-
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
+
 #endif // TARGOMAN_API_SERVER_APPTARGOMANAPI_H

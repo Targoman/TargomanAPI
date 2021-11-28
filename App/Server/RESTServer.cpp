@@ -39,7 +39,6 @@
 #include "APICache.hpp"
 
 namespace Targoman::API {
-
 namespace Server {
 
 using namespace Targoman::Common;
@@ -51,68 +50,74 @@ static WebSocketServer gWSServer;
 #endif
 static clsUpdateAndPruneThread *gStatUpdateThread;
 
-void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
-    if(this->IsStarted)
-        throw exTargomanInitialization("QRESTServer can be started one time only");
+void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList)
+{
+    if (this->IsStarted)
+        throw exTargomanInitialization("RESTServer can be run single instance only");
 
     this->fnIPInBlackList = _fnIPInBlackList;
 
     QString BasePath = ServerConfigs::BasePath.value();
 
-    if(BasePath.endsWith('/') == false)
-        BasePath+='/';
+    if (BasePath.endsWith('/') == false)
+        BasePath += '/';
 
-    if(BasePath.startsWith('/') == false)
-        BasePath='/'+BasePath;
+    if (BasePath.startsWith('/') == false)
+        BasePath = '/' + BasePath;
 
-    if(ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
+    if (ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
         throw exRESTRegistry("Invalid connector url specified for central cache");
 
 #ifdef TARGOMAN_API_REDIS_PROTOCOL
-    if(ServerConfigs::CacheConnector.value().startsWith(TARGOMAN_M2STR(QHTTP_REDIS_PROTOCOL)))
+    if (ServerConfigs::CacheConnector.value().startsWith(TARGOMAN_M2STR(QHTTP_REDIS_PROTOCOL)))
         CentralCache::setup(new clsRedisConnector(ServerConfigs::CacheConnector.value()));
 #endif
 
-    if(ServerConfigs::CacheConnector.value().size() && CentralCache::isValid() == false)
+    if (ServerConfigs::CacheConnector.value().size() && CentralCache::isValid() == false)
         throw exRESTRegistry("Unsupported cache connector protocol.");
 
     ServerConfigs::BasePathWithVersion = BasePath + ServerConfigs::Version.value();
-    if(ServerConfigs::BasePathWithVersion.endsWith('/') == false)
+    if (ServerConfigs::BasePathWithVersion.endsWith('/') == false)
         ServerConfigs::BasePathWithVersion += '/';
 
     this->IsStarted = true;
 
-    if(ServerConfigs::StatisticsInterval.value()){
+    if (ServerConfigs::StatisticsInterval.value())
+    {
         gStatUpdateThread = new clsUpdateAndPruneThread();
         connect(gStatUpdateThread, &clsUpdateAndPruneThread::finished, gStatUpdateThread, &QObject::deleteLater);
         gStatUpdateThread->start();
     }
 
-
-    QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con){
+    QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con)
+    {
         if (!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
             _con->killConnection();
     });
 
     QHostAddress ListenAddress = ServerConfigs::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
 
-    gHTTPServer.listen(ListenAddress, ServerConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res){
+    gHTTPServer.listen(ListenAddress, ServerConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res)
+    {
         clsRequestHandler* RequestHandler = new clsRequestHandler(_req, _res);
-        try{
+        try
+        {
             QString Path = _req->url().adjusted(QUrl::NormalizePathSegments |
                                                 QUrl::RemoveAuthority
                                                 ).path(QUrl::PrettyDecoded);
-            if(Path != _req->url().path())
+            if (Path != _req->url().path())
                 return  RequestHandler->redirect(Path, false);
 
-            if(ServerConfigs::PublicPath.value().size() && QFile::exists(ServerConfigs::PublicPath.value() + Path))
+            if (ServerConfigs::PublicPath.value().size() && QFile::exists(ServerConfigs::PublicPath.value() + Path))
                 return RequestHandler->sendFile(ServerConfigs::PublicPath.value(), Path);
 
-            if(Path.startsWith(BasePath) == false)
+            if (Path.startsWith(BasePath) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", true);
-            if(Path.startsWith(ServerConfigs::BasePathWithVersion) == false)
+
+            if (Path.startsWith(ServerConfigs::BasePathWithVersion) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "Invalid Version or version not specified", true);
-            if(Path == ServerConfigs::BasePathWithVersion )
+
+            if (Path == ServerConfigs::BasePathWithVersion )
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", true);
 
             TargomanLogInfo(7,
@@ -127,14 +132,19 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
                             "?"<<
                             _req->url().query());
             RequestHandler->process(Path.mid(ServerConfigs::BasePathWithVersion.size() - 1));
-        }catch(exTargomanBase& ex){
+        }
+        catch(exTargomanBase& ex)
+        {
             RequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
         }
     });
 
-    if(gHTTPServer.isListening()){
+    if (gHTTPServer.isListening())
+    {
         TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value()<<ServerConfigs::BasePathWithVersion);
-    }else{
+    }
+    else
+    {
         TargomanLogError("Unable to start server to listen on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value());
         QCoreApplication::exit(-1);
     }
@@ -159,7 +169,7 @@ void RESTServer::stop()
 #endif
 
     this->IsStarted = false;
-    if(gStatUpdateThread)
+    if (gStatUpdateThread)
         gStatUpdateThread->quit();
 }
 
@@ -186,12 +196,14 @@ bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _p
 {
     enuIPBlackListStatus::Type IPBlackListStatus = enuIPBlackListStatus::Unknown;
 
-    if(this->fnIPInBlackList &&
-            (IPBlackListStatus = this->fnIPInBlackList(_peerAddress)) != enuIPBlackListStatus::Ok){
+    if (this->fnIPInBlackList &&
+            (IPBlackListStatus = this->fnIPInBlackList(_peerAddress)) != enuIPBlackListStatus::Ok)
+    {
         TargomanLogWarn(1,"Connection from " + _peerAddress.toString() + " was closed by security provider due to: "+enuIPBlackListStatus::toStr(IPBlackListStatus));
         gServerStats.Blocked.inc();
         return false;
     }
+
     gServerStats.Connections.inc();
 
     TargomanLogInfo(7, "New connection accepted from: "<<_peerAddress.toString()<<":"<<_peerPort);

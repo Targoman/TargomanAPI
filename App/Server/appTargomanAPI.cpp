@@ -54,7 +54,8 @@ appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
 
 void appTargomanAPI::slotExecute()
 {
-    try {
+    try
+    {
         // Load modules
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
@@ -62,8 +63,10 @@ void appTargomanAPI::slotExecute()
         if (LoadedModules.isEmpty())
             throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
-        foreach (auto Plugin, LoadedModules) {
+        foreach (auto Plugin, LoadedModules)
+        {
             intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
+
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
@@ -73,6 +76,7 @@ void appTargomanAPI::slotExecute()
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
             auto DBInfo = Module->requiredDB();
+
             if (DBInfo.Schema.size())
                 RequiredDBs.insert(Module->moduleBaseName(), DBInfo);
 
@@ -91,12 +95,12 @@ void appTargomanAPI::slotExecute()
                     && ServerConfigs::MasterDB::Schema.value().size())
             {
                 intfPureModule::stuDBInfo MasterDBInfo = {
-                                                            ServerConfigs::MasterDB::Schema.value(),
-                                                            ServerConfigs::MasterDB::Port.value(),
-                                                            ServerConfigs::MasterDB::Host.value(),
-                                                            ServerConfigs::MasterDB::User.value(),
-                                                            ServerConfigs::MasterDB::Pass.value()
-                                                        };
+                    ServerConfigs::MasterDB::Schema.value(),
+                    ServerConfigs::MasterDB::Port.value(),
+                    ServerConfigs::MasterDB::Host.value(),
+                    ServerConfigs::MasterDB::User.value(),
+                    ServerConfigs::MasterDB::Pass.value()
+                };
 
                 ConnectionStrings.insert(MasterDBInfo.toConnStr(/*true*/));
                 DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
@@ -130,7 +134,8 @@ void appTargomanAPI::slotExecute()
 
         TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
     }
-    catch(Targoman::Common::exTargomanBase& e) {
+    catch(Targoman::Common::exTargomanBase& e)
+    {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);
     }

@@ -18,28 +18,25 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_OPENAPIGENERATOR_H
 #define TARGOMAN_API_SERVER_OPENAPIGENERATOR_H
 
 #include "RESTAPIRegistry.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 class OpenAPIGenerator
 {
 public:
-    static QJsonObject retrieveJson();
+    static QJsonObject retrieveJson(const QString& _host = "127.0.0.1", const quint16 _port = 80);
 
 private:
     static QJsonObject CachedJson;
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
+
 #endif // TARGOMAN_API_SERVER_OPENAPIGENERATOR_H
