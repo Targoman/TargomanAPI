@@ -273,8 +273,6 @@ bool User::apiUPDATEpersonalInfo(
     if (_family.isNull() == false)      ToUpdate.insert(tblUser::usrFamily, _family);
     if (_language.isNull() == false)    ToUpdate.insert(tblUser::usrLanguage, _language);
     if (NULLABLE_HAS_VALUE(_gender))    ToUpdate.insert(tblUser::usrGender, *_gender);
-    //    if (NULLABLE_HAS_VALUE(_birthDate)) ToUpdate.insert(tblUserExtraInfo::ueiBirthDate, *_birthDate);
-    //    if (_birthDate.isNull() == false) ToUpdate.insert(tblUserExtraInfo::ueiBirthDate, _birthDate);
     if (ToUpdate.size())
         this->Update(*this,
                      CurrentUserID,
@@ -337,83 +335,115 @@ bool User::apiUPDATEextraInfo(
         TAPI::JWT_t     _JWT,
         QString         _job,
         QString         _education,
-        QString         _fieldOfStudy
+        QString         _fieldOfStudy,
+        TAPI::Date_t    _birthDate
     )
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-    QVariantMap ToUpdate;
-    QStringList ToRemove;
+    QVariantMap ToUpdateJson;
+    QStringList ToRemoveJson;
 
     //userExtra info json field
     if (_job.isNull() == false)
     {
         if (_job.isEmpty())
-            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job));
+            ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job));
         else
-            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job), _job);
+            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job), _job);
     }
     if (_education.isNull() == false)
     {
         if (_education.isEmpty())
-            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education));
+            ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education));
         else
-            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education), _education);
+            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education), _education);
     }
     if (_fieldOfStudy.isNull() == false)
     {
         if (_fieldOfStudy.isEmpty())
-            ToRemove.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy));
+            ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy));
         else
-            ToUpdate.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy), _fieldOfStudy);
+            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy), _fieldOfStudy);
     }
 
-    QString qry, updateQuery;
+    QString jsonQry, updateQuery;
 
-    if (ToUpdate.size())
-        updateQuery = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdate)).toJson(QJsonDocument::Compact) + "'";
+    if (ToUpdateJson.size())
+        updateQuery = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdateJson)).toJson(QJsonDocument::Compact) + "'";
 
-    if (ToRemove.length())
+    if (ToRemoveJson.length())
     {
-        if (ToUpdate.size())
+        if (ToUpdateJson.size())
         {
-            qry = QString()
+            jsonQry = QString()
                   + "JSON_MERGE_PATCH("
-                  + "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemove.join("', '$.") + "'),"
+                  + "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "'),"
                   + updateQuery
                   + ")";
         }
         else
         {
-            qry = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemove.join("', '$.") + "')";
+            jsonQry = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "')";
         }
 
     }
-    else if (ToUpdate.size())
+    else if (ToUpdateJson.size())
     {
-        qry = QString()
+        jsonQry = QString()
               + "JSON_MERGE_PATCH(COALESCE(ueiExtraInfo, '{}'),"
               + updateQuery
               + ")";
     }
-    if (qry.isEmpty() == false)
+
+    //--------------------------------------
+    QVariantList Params;
+
+    //--------------------------------------
+    QStringList ToUpdate;
+
+    if (_birthDate.isNull() == false)
     {
-        qry = QString()
-              + "INSERT INTO"
-              + " " + tblUserExtraInfo::Name
-              + " SET"
-              + "     ueiExtraInfo=" + (ToUpdate.size() ? updateQuery : "NULL")
-              + "   , uei_usrID=?"
-              + " ON DUPLICATE KEY UPDATE"
-              + "     ueiExtraInfo=" + qry
-              + "   , ueiUpdatedBy_usrID=?"
-              ;
+        ToUpdate.append(tblUserExtraInfo::ueiBirthDate);
+        Params.append(_birthDate);
+    }
+
+    //--------------------------------------
+    Params.append(CurrentUserID);
+    if ((ToUpdate.isEmpty() == false) || (jsonQry.isEmpty() == false))
+    {
+        QString qry = QString("INSERT INTO %1 SET").arg(tblUserExtraInfo::Name);
+
+        if (ToUpdate.isEmpty() == false)
+        {
+            qry += " " + ToUpdate.join("=? ,") + "=?";
+            if (jsonQry.isEmpty() == false)
+                qry += ",";
+        }
+        if (jsonQry.isEmpty() == false)
+            qry += " ueiExtraInfo=" + (ToUpdateJson.size() ? updateQuery : "NULL");
+
+        qry += QString()
+              + ", uei_usrID=?"
+              + " ON DUPLICATE KEY UPDATE";
+
+        if (ToUpdate.isEmpty() == false)
+        {
+            qry += " " + ToUpdate.join("=? ,") + "=?";
+            if (jsonQry.isEmpty() == false)
+                qry += ",";
+        }
+        if (jsonQry.isEmpty() == false)
+            qry += " ueiExtraInfo=" + jsonQry;
+
+        qry += ", ueiUpdatedBy_usrID=?";
+
+        qDebug() << "******************************" << qry;
+
         clsDACResult Result = UserExtraInfo::instance().execQuery(
                                   qry,
-                                  {
-                                      CurrentUserID,
-                                      CurrentUserID,
-                                  });
+                                  Params + Params
+                                  );
     }
 
     //------------------------

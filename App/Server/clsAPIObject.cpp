@@ -256,47 +256,120 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
     return Result;
 }
 
-void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const{
-    bool InvocationResult= true;
+void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const {
+    bool InvocationResult = true;
     QMetaMethod InvokableMethod;
-    if(_arguments.size() == this->ParamNames.size())
+
+    if (_arguments.size() == this->ParamNames.size())
         InvokableMethod = this->BaseMethod;
     else
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
     QVector<void*> ArgStorage(_arguments.size(), {});
 
-    try{
-        switch(_arguments.size()){
-        case  0: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg);break;
-        case  1: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0));break;
-        case  2: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0), USE_ARG_AT(1));break;
-        case  3: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2));break;
-        case  4: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3));break;
-        case  5: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4));break;
-        case  6: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4),
-                                                           USE_ARG_AT(5));break;
-        case  7: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4),
-                                                           USE_ARG_AT(5),USE_ARG_AT(6));break;
-        case  8: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4),
-                                                           USE_ARG_AT(5),USE_ARG_AT(6),USE_ARG_AT(7));break;
-        case  9: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4),
-                                                           USE_ARG_AT(5),USE_ARG_AT(6),USE_ARG_AT(7),USE_ARG_AT(8));break;
-        case 10: InvocationResult = InvokableMethod.invoke(this->parent(), this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
-                                                           _returnArg, USE_ARG_AT(0),USE_ARG_AT(1),USE_ARG_AT(2),USE_ARG_AT(3),USE_ARG_AT(4),
-                                                           USE_ARG_AT(5),USE_ARG_AT(6),USE_ARG_AT(7),USE_ARG_AT(8),USE_ARG_AT(9));break;
-        default:
-            throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+    try {
+        switch(_arguments.size()) {
+            case  0: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg);
+                    break;
+            case  1: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0));
+                    break;
+            case  2: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1));
+                    break;
+            case  3: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2));
+                    break;
+            case  4: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3));
+                    break;
+            case  5: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4));
+                    break;
+            case  6: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4),
+                                                               USE_ARG_AT(5));
+                    break;
+            case  7: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4),
+                                                               USE_ARG_AT(5),
+                                                               USE_ARG_AT(6));
+                    break;
+            case  8: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4),
+                                                               USE_ARG_AT(5),
+                                                               USE_ARG_AT(6),
+                                                               USE_ARG_AT(7));
+                    break;
+            case  9: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4),
+                                                               USE_ARG_AT(5),
+                                                               USE_ARG_AT(6),
+                                                               USE_ARG_AT(7),
+                                                               USE_ARG_AT(8));
+                    break;
+            case 10: InvocationResult = InvokableMethod.invoke(this->parent(),
+                                                               this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+                                                               _returnArg,
+                                                               USE_ARG_AT(0),
+                                                               USE_ARG_AT(1),
+                                                               USE_ARG_AT(2),
+                                                               USE_ARG_AT(3),
+                                                               USE_ARG_AT(4),
+                                                               USE_ARG_AT(5),
+                                                               USE_ARG_AT(6),
+                                                               USE_ARG_AT(7),
+                                                               USE_ARG_AT(8),
+                                                               USE_ARG_AT(9));
+                    break;
+            default:
+                throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
         }
 
         if (InvocationResult == false)
@@ -304,7 +377,7 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
 
         for(int i=0; i< _arguments.size(); ++i)
             CLEAN_ARG_AT(i);
-    }catch(...){
+    } catch(...) {
         for(int i=0; i< _arguments.size(); ++i)
             CLEAN_ARG_AT(i);
         throw;
