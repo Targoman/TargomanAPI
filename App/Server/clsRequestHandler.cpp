@@ -459,7 +459,7 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     {
         gServerStats.Success.inc();
         this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
-                                                                  { "currdatetime", QDateTime::currentDateTime().toSecsSinceEpoch() },
+                                                                  { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
                                                               }));
         return true;
     }
