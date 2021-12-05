@@ -47,6 +47,12 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
     }
     else
     {
+        QString HostPort;
+        if (_port == 80)
+            HostPort = _host;
+        else
+            HostPort = QString("%1:%2").arg(_host).arg(_port);
+
         return QJsonObject({
                                { "swagger","2.0" },
                                { "info",QJsonObject({
@@ -55,7 +61,7 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
                                     { "description", "" },
                                     { "contact", QJsonObject({{"email", "sample@example.com"}}) }
                                 }) },
-                               { "host", QString("%1:%2").arg(_host).arg(_port) },
+                               { "host", HostPort },
                                { "securityDefinitions", QJsonObject({
                                     { "Bearer", QJsonObject({
                                          { "type", "apiKey" },
@@ -83,7 +89,13 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
     {
         QJsonObject Return = OpenAPIGenerator::CachedJson;
 
-        Return["host"] = QString("%1:%2").arg(_host).arg(_port);
+        QString HostPort;
+        if (_port == 80)
+            HostPort = _host;
+        else
+            HostPort = QString("%1:%2").arg(_host).arg(_port);
+
+        Return["host"] = HostPort;
 
         return Return;
     }
