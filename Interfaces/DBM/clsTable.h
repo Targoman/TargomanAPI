@@ -182,6 +182,8 @@ public:
     const QVariant getDBProperty(const QString& _key);
     const QString getStatusColumnName();
 
+    const QString schema() const;
+
 protected:
     /*inline */const QString domain();
 

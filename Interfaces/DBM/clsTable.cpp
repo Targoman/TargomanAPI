@@ -247,6 +247,11 @@ void clsTable::prepareRelationsFiltersList(const QList<stuRelation> &_relations,
     }
 }
 
+const QString clsTable::schema() const
+{
+    return this->Schema;
+}
+
 const QString clsTable::domain()
 {
     if (this->Domain.length())

@@ -50,9 +50,8 @@ OTHER_FILES += \
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \
+    -laws-cpp-sdk-s3
 
 DISTFILES += \
     conf/test.conf \
     conf/api.server.conf \
-
-

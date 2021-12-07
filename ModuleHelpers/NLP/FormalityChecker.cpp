@@ -45,7 +45,7 @@ tmplConfigurable<double>     gConfigs::Classifier::Threshold(
 tmplConfigurable<FilePath_t>     gConfigs::Classifier::ModelPath(
         gConfigs::Classifier::makeConfig("ModelPath"),
         "Directory where FastText models are stored.",
-        "",
+        "fasttext",
         Validators::tmplPathAccessValidator<
         TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
         false>,

@@ -32,6 +32,7 @@ DIST_HEADERS += \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
     API/intfSQLBasedWithActionLogsModule.h \
+    Helpers/ObjectStorageHelper.h
 
 PRIVATE_HEADERS += \
 
@@ -39,6 +40,7 @@ HEADERS += \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
+    Helpers/ObjectStorageHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
@@ -48,12 +50,14 @@ HEADERS += \
     DBM/clsTable.h \
     DBM/QueryBuilders.h \
     ORM/intfActionLogs.h \
-    ORM/intfAlerts.h
+    ORM/intfAlerts.h \
+    ORM/intfUploads.h
 
 SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
+    Helpers/ObjectStorageHelper.cpp \
     Helpers/PhoneHelper.cpp \
     Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
@@ -70,7 +74,8 @@ SOURCES += \
     API/intfSQLBasedModule.cpp \
     API/intfSQLBasedWithActionLogsModule.cpp \
     ORM/intfActionLogs.cpp \
-    ORM/intfAlerts.cpp
+    ORM/intfAlerts.cpp \
+    ORM/intfUploads.cpp
 
 OTHER_FILES += \
     Test/testBase.hpp \
@@ -78,6 +83,8 @@ OTHER_FILES += \
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/
+
+LIBS += -laws-cpp-sdk-s3
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)

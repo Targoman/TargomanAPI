@@ -31,5 +31,7 @@ OTHER_FILES += \
     dumpDBSchema.sh \
     ORM/Schema.my.sql \
 
+LIBS += -laws-cpp-sdk-s3
+
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
