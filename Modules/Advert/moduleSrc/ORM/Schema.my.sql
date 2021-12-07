@@ -329,6 +329,32 @@ CREATE TABLE `tblClicks` (
   CONSTRAINT `FK_tblClicks_tblLocations` FOREIGN KEY (`clk_locID`) REFERENCES `tblLocations` (`locid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblFileStorageGateways`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblFileStorageGateways` (
+  `fsgwID` int unsigned NOT NULL AUTO_INCREMENT,
+  `fsgwName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'D:Disk, N:NAS, C:Cloud',
+  `fsgwDriver` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwBucket` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwRegion` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `fsgwMetaInfo` json DEFAULT NULL,
+  `fsgwMaxFilesCount` bigint unsigned DEFAULT NULL,
+  `fsgwMaxFilesSize` bigint unsigned DEFAULT NULL,
+  `fsgwCreatedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwCreatedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwDeletedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwDeletedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwLastActionTime` datetime DEFAULT NULL,
+  `fsgwStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Disabled, R:Removed',
+  `fsgwCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fsgwCreatedBy_usrID` bigint unsigned NOT NULL,
+  `fsgwUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`fsgwID`) USING BTREE,
+  UNIQUE KEY `fsgwBucket_fsgwRegion` (`fsgwBucket`,`fsgwRegion`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblLocations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -435,6 +461,22 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+DROP TABLE IF EXISTS `tblUploads`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblUploads` (
+  `uplID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uplURL` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uplFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uplSize` bigint DEFAULT NULL,
+  `uplMimeType` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uplStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uplCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `uplCreatedBy_usrID` bigint DEFAULT NULL,
+  `uplUpdatedBy_usrID` bigint DEFAULT NULL,
+  PRIMARY KEY (`uplID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_coupon_decreaseStats` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;

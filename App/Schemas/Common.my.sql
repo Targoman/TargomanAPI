@@ -79,6 +79,32 @@ CREATE TABLE `tblDownloadRequests` (
   KEY `dwrSSID` (`dwr_ssnID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblFileStorageGateways`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblFileStorageGateways` (
+  `fsgwID` int unsigned NOT NULL AUTO_INCREMENT,
+  `fsgwName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'D:Disk, N:NAS, C:Cloud',
+  `fsgwDriver` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwBucket` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fsgwRegion` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `fsgwMetaInfo` json DEFAULT NULL,
+  `fsgwMaxFilesCount` bigint unsigned DEFAULT NULL,
+  `fsgwMaxFilesSize` bigint unsigned DEFAULT NULL,
+  `fsgwCreatedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwCreatedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwDeletedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwDeletedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `fsgwLastActionTime` datetime DEFAULT NULL,
+  `fsgwStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Disabled, R:Removed',
+  `fsgwCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fsgwCreatedBy_usrID` bigint unsigned NOT NULL,
+  `fsgwUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`fsgwID`),
+  UNIQUE KEY `fsgwBucket_fsgwRegion` (`fsgwBucket`,`fsgwRegion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 DROP FUNCTION IF EXISTS `fnCreateRandomMD5` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
