@@ -28,6 +28,9 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 using namespace Targoman::Common;
 
+#include "Interfaces/Helpers/ObjectStorageHelper.h"
+using namespace Targoman::API::Helpers;
+
 using namespace Targoman::API::DBM;
 using namespace Targoman::API::API;
 
@@ -39,7 +42,8 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuS3Provider,
                               )
 
 TARGOMAN_DEFINE_ENUM(enuUploadStatus,
-                     New       = 'N',
+                     Queued    = 'Q',
+                     Uploaded  = 'U',
                      Removed   = 'R'
                      )
 
@@ -52,6 +56,8 @@ namespace tblUploads {
     TARGOMAN_CREATE_CONSTEXPR(uplFileName);
     TARGOMAN_CREATE_CONSTEXPR(uplSize);
     TARGOMAN_CREATE_CONSTEXPR(uplMimeType);
+    TARGOMAN_CREATE_CONSTEXPR(uplTempFullFileName);
+    TARGOMAN_CREATE_CONSTEXPR(uplUploadLastErrorMessage);
     TARGOMAN_CREATE_CONSTEXPR(uplStatus);
     TARGOMAN_CREATE_CONSTEXPR(uplCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(uplCreatedBy_usrID);
@@ -92,7 +98,7 @@ public:
 protected slots:
 //    QVariant ORMGET("Get Uploads.")
 
-    quint64 REST_PUT(
+    Targoman::API::Helpers::stuSaveFileResult REST_PUT(
         save,
         (
             const TAPI::JWT_t &_JWT,

@@ -159,8 +159,10 @@ QVariant RESTClientHelper::callAPI(
 
     if (CUrl.lastError().isOk() == false)
     {
-        qDebug() << "CURL ERROR:" << CUrl.lastError().code() << CUrl.lastError().text()
-                 << ", BUFFER:" << CUrl.errorBuffer()
+        auto LastError = CUrl.lastError();
+        qDebug() << "CURL ERROR:" << LastError.code() << LastError.text()
+                 << ", ERROR_BUFFER:" << CUrl.errorBuffer()
+                 << ", BUFFER:" << CUrl.buffer()
                  << ", RESULT:" << CUrlResult;
         return QVariant();
     }

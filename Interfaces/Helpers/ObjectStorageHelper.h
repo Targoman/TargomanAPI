@@ -25,11 +25,17 @@
 #define TARGOMAN_API_OBJECTSTORAGEHELPER_H
 
 #include <QString>
-#include "ORM/intfUploads.h"
-using namespace Targoman::API::ORM;
+#include "libTargomanCommon/CmdIO.h"
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include <QJsonObject>
+
 #include <aws/core/Aws.h>
 #include <aws/s3/S3Client.h>
 using namespace Aws;
+
+namespace Targoman::API::ORM {
+class intfUploads;
+}
 
 namespace Targoman::API::Helpers {
 
@@ -73,22 +79,33 @@ static __static_s3_initializer__ __static_s3_initializer__internal;
 
 } //namespace Private
 
-//struct stuSaveFileResult {
-//    QString FullFileUrl;
-//    QString MimeType;
-//};
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
+    SF_QString(FullFileUrl),
+    SF_QString(MimeType),
+    SF_quint8(IsUploaded),
+    SF_quint64(uplID)
+);
 
 class ObjectStorageHelper
 {
 public:
-    static quint64 saveFile(
-            intfUploads *_uploads,
+    static Targoman::API::Helpers::stuSaveFileResult saveFile(
+            Targoman::API::ORM::intfUploads *_uploads,
             const quint64 _currentUserID,
             QString &_fileName,
             const QString &_base64Content
             );
+private:
+    static bool uploadFileToS3(
+            const QString &_fileName,
+            const QString &_fullFileName,
+            const QString &_bucket,
+            const QString &_region = {}
+            );
 };
 
 } //namespace Targoman::API::Helpers
+
+TAPI_DECLARE_METATYPE(Targoman::API::Helpers::stuSaveFileResult) // -> TAPI_REGISTER_METATYPE() in ObjectStorageHelper.cpp
 
 #endif // TARGOMAN_API_OBJECTSTORAGEHELPER_H

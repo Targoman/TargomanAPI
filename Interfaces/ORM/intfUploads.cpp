@@ -26,8 +26,6 @@
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
-#include "Interfaces/Helpers/ObjectStorageHelper.h"
-using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuS3Provider);
@@ -43,16 +41,18 @@ intfUploads::intfUploads(
         _schema,
         _name,
         tblUploads::Name,
-        {///< ColName                           Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
-            { tblUploads::uplID,                ORM_PRIMARYKEY_64 },
-            { tblUploads::uplURL,               S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploads::uplFileName,          S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploads::uplSize,              S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUploads::uplMimeType,          S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploads::uplStatus,            ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadStatus, Targoman::API::ORM::enuUploadStatus::New) },
-            { tblUploads::uplCreationDateTime,  ORM_CREATED_ON },
-            { tblUploads::uplCreatedBy_usrID,   ORM_CREATED_BY },
-            { tblUploads::uplUpdatedBy_usrID,   ORM_UPDATED_BY },
+        {///< ColName                                   Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            { tblUploads::uplID,                        ORM_PRIMARYKEY_64 },
+            { tblUploads::uplURL,                       S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploads::uplFileName,                  S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploads::uplSize,                      S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploads::uplMimeType,                  S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploads::uplTempFullFileName,          S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploads::uplUploadLastErrorMessage,    S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploads::uplStatus,                    ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadStatus, Targoman::API::ORM::enuUploadStatus::Queued) },
+            { tblUploads::uplCreationDateTime,          ORM_CREATED_ON },
+            { tblUploads::uplCreatedBy_usrID,           ORM_CREATED_BY },
+            { tblUploads::uplUpdatedBy_usrID,           ORM_UPDATED_BY },
         },
         {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(tblUploads::uplCreatedBy_usrID),
@@ -71,7 +71,7 @@ QVariant intfUploads::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 }
 */
 
-quint64 intfUploads::apiPUTsave(
+stuSaveFileResult intfUploads::apiPUTsave(
         const TAPI::JWT_t &_JWT,
         QString _fileName,
         const QString &_base64Content
@@ -79,12 +79,13 @@ quint64 intfUploads::apiPUTsave(
 {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return ObjectStorageHelper::saveFile(
-                this,
-                clsJWT(_JWT).usrID(),
-                _fileName,
-                _base64Content
-                );
+    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
+                                           this,
+                                           clsJWT(_JWT).usrID(),
+                                           _fileName,
+                                           _base64Content
+                                           );
+    return SaveFileResult;
 }
 
 } //namespace Targoman::API::ORM
