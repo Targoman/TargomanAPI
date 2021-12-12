@@ -23,6 +23,22 @@ CREATE TABLE `tblActionLogs` (
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblTicketAttachments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblTicketAttachments` (
+  `tatID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `tat_tktID` bigint unsigned DEFAULT NULL,
+  `tat_uplID` bigint unsigned DEFAULT NULL,
+  `tatCreationDateTime` datetime NOT NULL,
+  `tatCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`tatID`),
+  KEY `FK_tblTicketAttachments_tblTickets` (`tat_tktID`),
+  KEY `FK_tblTicketAttachments_tblUploads` (`tat_uplID`),
+  CONSTRAINT `FK_tblTicketAttachments_tblTickets` FOREIGN KEY (`tat_tktID`) REFERENCES `tblTickets` (`tktID`) ON DELETE CASCADE,
+  CONSTRAINT `FK_tblTicketAttachments_tblUploads` FOREIGN KEY (`tat_uplID`) REFERENCES `tblUploadFiles` (`uflID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTicketRead`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -71,18 +87,64 @@ DROP TABLE IF EXISTS `tblUploadFiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblUploadFiles` (
-  `uplID` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uplURL` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uplFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uplSize` bigint unsigned NOT NULL,
-  `uplMimeType` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uplTempFullFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uplUploadLastErrorMessage` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uplStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Q:Queued, U:Uploaded, R:Removed',
-  `uplCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `uplCreatedBy_usrID` bigint unsigned DEFAULT NULL,
-  `uplUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
-  PRIMARY KEY (`uplID`) USING BTREE
+  `uflID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uflURL` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uflFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uflSize` bigint unsigned NOT NULL,
+  `uflMimeType` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uflTempFullFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uflUploadLastErrorMessage` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uflStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Q' COMMENT 'Q:Queued, U:Uploaded, R:Removed',
+  `uflCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `uflCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `uflUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`uflID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblUploadGateways`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblUploadGateways` (
+  `ugwID` int unsigned NOT NULL AUTO_INCREMENT,
+  `ugwBucket` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ugwEndpointUrl` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ugwSecretKey` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ugwAccessKey` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ugwMetaInfo` json DEFAULT NULL,
+  `ugwAllowedFileTypes` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ugwAllowedMimeTypes` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ugwAllowedMinFileSize` bigint DEFAULT NULL,
+  `ugwAllowedMaxFileSize` bigint DEFAULT NULL,
+  `ugwMaxFilesCount` bigint unsigned DEFAULT NULL,
+  `ugwMaxFilesSize` bigint unsigned DEFAULT NULL,
+  `ugwCreatedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `ugwCreatedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `ugwDeletedFilesCount` bigint unsigned NOT NULL DEFAULT '0',
+  `ugwDeletedFilesSize` bigint unsigned NOT NULL DEFAULT '0',
+  `ugwLastActionTime` datetime DEFAULT NULL,
+  `ugwStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Disabled, R:Removed',
+  `ugwCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ugwCreatedBy_usrID` bigint unsigned NOT NULL,
+  `ugwUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`ugwID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tblUploadStorages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblUploadStorages` (
+  `ustID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ust_uflID` bigint unsigned NOT NULL,
+  `ust_ugwID` int unsigned NOT NULL,
+  `ustStatus` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Q',
+  `ustCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ustCreatedBy_usrID` bigint unsigned DEFAULT NULL,
+  `ustUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`ustID`),
+  KEY `FK_tblUploadStorages_tblUploadGateways` (`ust_ugwID`),
+  KEY `FK_tblUploadStorages_tblUploadFiles` (`ust_uflID`),
+  CONSTRAINT `FK_tblUploadStorages_tblUploadFiles` FOREIGN KEY (`ust_uflID`) REFERENCES `tblUploadFiles` (`uflID`),
+  CONSTRAINT `FK_tblUploadStorages_tblUploadGateways` FOREIGN KEY (`ust_ugwID`) REFERENCES `tblUploadGateways` (`ugwID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

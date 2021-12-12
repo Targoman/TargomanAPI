@@ -435,24 +435,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-DROP TABLE IF EXISTS `tblUploadFiles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tblUploadFiles` (
-  `uplID` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uplURL` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uplFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uplSize` bigint unsigned NOT NULL,
-  `uplMimeType` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uplTempFullFileName` varchar(256) COLLATE utf8mb4_general_ci NOT NULL,
-  `uplUploadLastErrorMessage` varchar(1024) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uplStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Q:Queued, U:Uploaded, R:Removed',
-  `uplCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `uplCreatedBy_usrID` bigint unsigned DEFAULT NULL,
-  `uplUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
-  PRIMARY KEY (`uplID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_coupon_decreaseStats` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
