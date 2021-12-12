@@ -60,6 +60,8 @@ QVariant RESTClientHelper::callAPI(
         const QString& _api,
         const QVariantMap& _urlArgs,
         const QVariantMap& _postFields,
+        const QVariantMap& _formFields,
+        const QVariantMap& _formFiles,
         QString _aPIURL
     )
 {
@@ -80,6 +82,8 @@ QVariant RESTClientHelper::callAPI(
         _api,
         _urlArgs,
         _postFields,
+        _formFields,
+        _formFiles,
         _aPIURL
     );
 }
@@ -90,6 +94,8 @@ QVariant RESTClientHelper::callAPI(
         const QString& _api,
         const QVariantMap& _urlArgs,
         const QVariantMap& _postFields,
+        const QVariantMap& _formFields,
+        const QVariantMap& _formFiles,
         QString _aPIURL
     )
 {
@@ -114,11 +120,28 @@ QVariant RESTClientHelper::callAPI(
         return URLStr;
     };
 
+    bool HasForm = false;
+    if (_formFields.isEmpty() == false)
+    {
+        HasForm = true;
+        for (auto iter=_formFields.begin(); iter!=_formFields.end(); ++iter)
+            CUrl.mime_addData(iter.key(), iter.value().toString());
+    }
+    if (_formFiles.isEmpty() == false)
+    {
+        HasForm = true;
+        for (auto iter=_formFiles.begin(); iter!=_formFiles.end(); ++iter)
+            CUrl.mime_addFile(iter.key(), iter.value().toString());
+    }
+
     QtCUrl::Options Opt;
     Opt[CURLOPT_URL] = makeURL();
     Opt[CURLOPT_TIMEOUT] = 10000;
     Opt[CURLOPT_FAILONERROR] = true;
-    QStringList Headers = QStringList({"Content-Type: application/json"});
+    QStringList Headers;
+
+    if (HasForm == false)
+        Headers.append("Content-Type: application/json");
 
     if (_encodedJWT.size())
         Headers.append("Authorization: Bearer " + _encodedJWT);

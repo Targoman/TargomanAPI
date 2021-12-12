@@ -141,13 +141,10 @@ private slots:
                 RESTClientHelper::PUT,
                 "Ticketing/UploadFiles/save",
                 {},
+                {},
+                {},
                 {
-                    {"file", "aa"
-                     /*TAPI::stuFileInfo(
-                        "test_file_name.txt",
-                        { "base64Content",  QString("this is test file content").toLatin1().toBase64().toStdString().c_str() },
-                        )*/
-                    },
+                    { "file", "../../README.md" },
                 }
             );
 

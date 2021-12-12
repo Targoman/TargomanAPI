@@ -25,6 +25,7 @@
 #define TARGOMAN_API_OBJECTSTORAGEHELPER_H
 
 #include <QString>
+#include <QVariantMap>
 #include "libTargomanCommon/CmdIO.h"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
@@ -36,6 +37,8 @@ using namespace Aws;
 
 namespace Targoman::API::ORM {
 class intfUploadFiles;
+class intfUploadGateways;
+class intfUploadQueue;
 }
 
 namespace Targoman::API::Helpers {
@@ -90,8 +93,17 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
 class ObjectStorageHelper
 {
 public:
-    static Targoman::API::Helpers::stuSaveFileResult saveFile(
+    static QVariantMap saveFiles(
             Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+            Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+            Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+            const quint64 _currentUserID,
+            const TAPI::Files_t &_files
+            );
+    static quint64 saveFile(
+            Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+            Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+            Targoman::API::ORM::intfUploadQueue &_uploadQueue,
             const quint64 _currentUserID,
             const TAPI::stuFileInfo &_file
             );

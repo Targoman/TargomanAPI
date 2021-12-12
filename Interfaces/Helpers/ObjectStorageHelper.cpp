@@ -21,12 +21,14 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "ObjectStorageHelper.h"
-
+#include <QUuid>
 #include <QMimeDatabase>
-
+#include "ObjectStorageHelper.h"
 #include "ORM/ObjectStorage.h"
 using namespace Targoman::API::ORM;
+
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
 
 #include <fstream>
 //#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
@@ -47,66 +49,155 @@ sudo make install
 */
 
 TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_Object,
-    /* namespace          */ Targoman::API::Helpers,
-    /* type               */ stuSaveFileResult,
-    /* toVariantLambda    */ [](const stuSaveFileResult& _value) -> QVariant {
-        return _value.toJson().toVariantMap();
-    }
-    /* fromVariantLambda  */ /*[](const QVariant& _value, const QByteArray& _paramName) -> stuSaveFileResult {
-        if (_value.isValid() == false)
-            return stuSaveFileResult();
-
-        if (_value.canConvert<QVariantMap>()
-    //                || _value.canConvert<QVariantList>()
-    //                || _value.canConvert<double>()
-            )
-        {
-            auto ret = QJsonDocument::fromVariant(_value);
-            return stuSaveFileResult().fromJson(ret.object());
-        }
-
-        if (_value.toString().isEmpty())
-            return stuSaveFileResult();
-
-        QJsonParseError Error;
-        QJsonDocument Doc;
-        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-
-        if (Error.error != QJsonParseError::NoError)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
-        if (Doc.isObject() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
-        return stuSaveFileResult().fromJson(Doc.object());
-    }*/
+    /* complexity      */ COMPLEXITY_Object,
+    /* namespace       */ Targoman::API::Helpers,
+    /* type            */ stuSaveFileResult,
+    /* toVariantLambda */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 namespace Targoman::API::Helpers {
 
-stuSaveFileResult ObjectStorageHelper::saveFile(
+QVariantMap ObjectStorageHelper::saveFiles(
         intfUploadFiles &_uploadFiles,
+        intfUploadGateways &_uploadGateways,
+        intfUploadQueue &_uploadQueue,
+        const quint64 _currentUserID,
+        const TAPI::Files_t &_files
+    )
+{
+    QVariantMap Result;
+    foreach(auto _file, _files)
+    {
+        try
+        {
+            quint64 ID = saveFile(
+                             _uploadFiles,
+                             _uploadGateways,
+                             _uploadQueue,
+                             _currentUserID,
+                             _file
+                             );
+            Result.insert(_file.Name, ID);
+        }
+        catch (std::exception &exp)
+        {
+            Result.insert(_file.Name, exp.what());
+        }
+    }
+    return Result;
+}
+
+quint64 ObjectStorageHelper::saveFile(
+        intfUploadFiles &_uploadFiles,
+        intfUploadGateways &_uploadGateways,
+        intfUploadQueue &_uploadQueue,
         const quint64 _currentUserID,
         const TAPI::stuFileInfo &_file
     )
 {
-#ifdef AAAAAAAAAAAAAA
- //    auto _objectStorageConfigs = _uploadFiles->getObjectStorageConfigs();
-    Targoman::API::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs = _uploadFiles->getObjectStorageConfigs();
+    Targoman::API::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs = _uploadFiles.getObjectStorageConfigs();
 
-    //1: save file to the /tmp
-    QByteArray Content = QByteArray::fromBase64(_base64Content.toLatin1());
-    if (Content.length() == 0)
-        throw exTargomanBase("The content is empty.", ESTATUS_BAD_REQUEST);
+    //save file to the _objectStorageConfigs.LocalStoragePath (LOCAL/NFS)
+    if (_file.Size == 0)
+        throw exTargomanBase("The file is empty.", ESTATUS_BAD_REQUEST);
 
-    _fileName = _fileName.trimmed();
-    if ((_fileName.indexOf('/') >= 0) || (_fileName.indexOf('\\') >= 0))
+    if ((_file.Name.indexOf('/') >= 0) || (_file.Name.indexOf('\\') >= 0))
         throw exTargomanBase("Invalid character in file name.", ESTATUS_BAD_REQUEST);
 
-    QString FullFileName = QString("/tmp/TAPI/%1/%2").arg(_uploadFiles->schema()).arg(_fileName);
+    //check existance
+    QVariant OldData = _uploadFiles.Select(_uploadFiles,
+                                      /* currentUserID */ _currentUserID,
+                                      /* pksByPath     */ {},
+                                      /* offset        */ 0,
+                                      /* limit         */ 10,
+                                      /* cols          */ {},
+                                      /* filters       */ QString("%1=%2").arg(tblUploadFiles::uflFileName).arg(QString(_file.Name).replace(" ", "$SPACE$")),
+                                      /* orderBy       */ {},
+                                      /* groupBy       */ {},
+                                      /* reportCount   */ false
+                                      );
+    if (OldData.isValid() && (OldData.toList().length() > 0))
+        throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
 
-    //----------------------------------------
-    QMimeDatabase MimeDB;
-    QString MimeType = MimeDB.mimeTypeForFile(FullFileName).name();
+    //move from temp to persistance location
+    QString FullPath = _objectStorageConfigs.LocalStoragePath;
+    QDir(FullPath).mkpath(".");
+
+//    QString FileUUID = SecurityHelper::UUIDtoMD5();
+    QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
+
+    QString FullFileName = QString("%1/%2").arg(FullPath).arg(FileUUID);
+
+    QFile::rename(_file.TempName, FullFileName);
+
+    //get mime type
+    QString MimeType = _file.Mime;
+    if (MimeType.isEmpty())
+    {
+        QMimeDatabase MimeDB;
+        QString MimeType = MimeDB.mimeTypeForFile(FullFileName).name().toLower();
+    }
+
+    //get file extension
+    QString FileType;
+    int Idx = _file.Name.lastIndexOf('.');
+    if (Idx >= 0)
+        FileType = _file.Name.mid(Idx + 2).toLower();
+
+    //save to tblUploadFiles
+    TAPI::ORMFields_t CreateInfo({
+        { tblUploadFiles::uflFileName, _file.Name },
+        { tblUploadFiles::uflSize, _file.Size },
+        { tblUploadFiles::uflMimeType, MimeType },
+        { tblUploadFiles::uflLocalFullFileName, FullFileName },
+    });
+    quint64 UploadedFileID = _uploadFiles.Create(_uploadFiles, _currentUserID, CreateInfo);
+
+    //find matched uploadGateways
+    SelectQuery QueryMatched = SelectQuery(_uploadGateways)
+            .addCol(tblUploadGateways::ugwID)
+            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedFileTypes, enuConditionOperator::Null })
+                .orCond({ { enuAggregation::LOWER, tblUploadGateways::ugwAllowedFileTypes }, enuConditionOperator::Like, FileType }))
+            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMimeTypes, enuConditionOperator::Null })
+                .orCond({ { enuAggregation::LOWER, tblUploadGateways::ugwAllowedMimeTypes }, enuConditionOperator::Like, MimeType }))
+            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMinFileSize, enuConditionOperator::Null })
+                .orCond({ tblUploadGateways::ugwAllowedMinFileSize, enuConditionOperator::LessEqual, _file.Size }))
+            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMaxFileSize, enuConditionOperator::Null })
+                .orCond({ tblUploadGateways::ugwAllowedMaxFileSize, enuConditionOperator::GreaterEqual, _file.Size }))
+
+                               AND ugwMaxFilesCount IS NULL
+                               OR ugwMaxFilesCount < (ugwCreatedFilesCount - ugwDeletedFilesCount)
+
+                               AND ugwMaxFilesSize IS NULL
+                               OR ugwMaxFilesSize <= (ugwCreatedFilesSize - ugwDeletedFilesSize + _file.Size)
+
+
+tblUploadGateways::ugwMaxFilesCount
+tblUploadGateways::ugwMaxFilesSize
+
+tblUploadGateways::ugwCreatedFilesCount
+tblUploadGateways::ugwCreatedFilesSize
+tblUploadGateways::ugwDeletedFilesCount
+tblUploadGateways::ugwDeletedFilesSize
+
+            ;
+
+
+    //create tblUploadQueue (queue for upload to gateway)
+
+    //trigger async upload to s3(s)
+
+
+
+    return UploadedFileID;
+
+
+
+
+
+
+
+
 
     QString FullFileUrl = _objectStorageConfigs.Bucket;
     FullFileUrl += ".s3";
@@ -151,7 +242,6 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
     QFile File(FullFileName);
     if (File.open(QFile::WriteOnly) == false)
         throw exTargomanBase("Could not create temp file.", ESTATUS_CONFLICT);
-
     File.write(Content);
     File.close();
 
@@ -196,7 +286,6 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
     SaveFileResult.uplID = _uploadFiles->Create(*_uploadFiles, _currentUserID, CreateInfo);
 
     return SaveFileResult;
-#endif
 }
 
 bool ObjectStorageHelper::uploadFileToS3(

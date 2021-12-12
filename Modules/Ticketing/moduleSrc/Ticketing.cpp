@@ -60,20 +60,32 @@ quint64 Ticketing::insertTicket(
         enuTicketType::Type _ticketType,
         const QString& _title,
         const QString& _body,
-        bool _hasAttachemnt,
-
-
-//        TAPI::ATTACHMENTS_t _attachments
-
-
+//        bool _hasAttachemnt,
+        const TAPI::Files_t &_files,
         quint64 _createdBy
     )
 {
-//    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
-//                                           &UploadFiles::instance(),
-//                                           _createdBy,
+    if (_files.isEmpty() == false)
+    {
+        foreach(auto _file, _files)
+        {
+            try
+            {
+                quint64 ID = ObjectStorageHelper::saveFile(
+                                 UploadFiles::instance(),
+                                 UploadGateways::instance(),
+                                 UploadQueue::instance(),
+                                 _createdBy,
+                                 _file
+                                 );
+            }
+            catch (std::exception &exp)
+            {
+//                Result.insert(_file.Name, exp.what());
+            }
+        }
 
-
+    }
 
 
 

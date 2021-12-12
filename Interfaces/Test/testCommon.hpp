@@ -139,7 +139,7 @@ protected:
 
     QVariant callRefreshAPI() {
         return RESTClientHelper::callAPI(
-            gLoginJWT, RESTClientHelper::GET, "Account/refreshJWT", {}, {}, APIURL
+            gLoginJWT, RESTClientHelper::GET, "Account/refreshJWT", {}, {}, {}, {}, APIURL
         );
     }
 
@@ -147,11 +147,13 @@ protected:
             RESTClientHelper::enuHTTPMethod _method,
             const QString& _api,
             const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postFields = {}
+            const QVariantMap& _postFields = {},
+            const QVariantMap& _formFields = {},
+            const QVariantMap& _formFiles = {}
         )
     {
         return RESTClientHelper::callAPI(
-            gEncodedJWT, _method, _api, _urlArgs, _postFields, APIURL
+            gEncodedJWT, _method, _api, _urlArgs, _postFields, _formFields, _formFiles, APIURL
         );
     }
 
@@ -159,11 +161,13 @@ protected:
             RESTClientHelper::enuHTTPMethod _method,
             const QString& _api,
             const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postFields = {}
+            const QVariantMap& _postFields = {},
+            const QVariantMap& _formFields = {},
+            const QVariantMap& _formFiles = {}
         )
     {
         return RESTClientHelper::callAPI(
-            gEncodedAdminJWT, _method, _api, _urlArgs, _postFields, APIURL
+            gEncodedAdminJWT, _method, _api, _urlArgs, _postFields, _formFields, _formFiles, APIURL
         );
     }
 

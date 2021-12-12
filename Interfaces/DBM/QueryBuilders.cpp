@@ -1008,7 +1008,10 @@ QString clsCondition::buildConditionString(
 
                 CondStr += " LIKE '";
                 //makeValueAsSQL(
-                CondStr += conditionData.Value.value<QString>();
+                QString LikeVal = conditionData.Value.value<QString>();
+                if (LikeVal.indexOf("%") < 0)
+                    LikeVal = "%" + LikeVal + "%";
+                CondStr += LikeVal;
                 CondStr += "'";
             }
             else if (conditionData.Operator == enuConditionOperator::In)

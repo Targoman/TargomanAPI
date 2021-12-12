@@ -55,6 +55,8 @@ public:
         const QString& _api,
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postFields = {},
+        const QVariantMap& _formFields = {},
+        const QVariantMap& _formFiles = {},
         QString _aPIURL = {}
     );
 
@@ -64,6 +66,8 @@ public:
         const QString& _api,
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postFields = {},
+        const QVariantMap& _formFields = {},
+        const QVariantMap& _formFiles = {},
         QString _aPIURL = {}
     );
 

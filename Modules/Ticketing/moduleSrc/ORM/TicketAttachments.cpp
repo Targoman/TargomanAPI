@@ -47,7 +47,7 @@ TicketAttachments::TicketAttachments() :
         },
         {///< Alias        Col                               Reference Table                        ForeignCol          Rename     LeftJoin
             { "tickets", { tblTicketAttachments::tat_tktID,  R(TicketingSchema, tblTickets::Name),  tblTickets::tktID } },
-                         { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadFiles::Name),  tblUploadFiles::uplID },
+                         { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadFiles::Name),  tblUploadFiles::uflID },
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
     )

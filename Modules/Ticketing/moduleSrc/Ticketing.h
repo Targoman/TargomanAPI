@@ -53,8 +53,10 @@ private:
                          enuTicketType::Type _ticketType,
                          const QString& _title,
                          const QString& _body,
-                         bool _hasAttachemnt,
-                         quint64 _createdBy);
+//                         bool _hasAttachemnt,
+                         const TAPI::Files_t &_files,
+                         quint64 _createdBy
+                         );
 
 private slots:
     bool REST_PUT(

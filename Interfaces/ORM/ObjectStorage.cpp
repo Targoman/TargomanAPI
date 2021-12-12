@@ -27,11 +27,70 @@
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadGatewayStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadFileStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadStorageStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadGatewayStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadQueueStatus);
 
 namespace Targoman::API::ORM {
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
+intfUploadFiles::intfUploadFiles(
+        const QString &_schema,
+        const QString &_name
+    ) :
+    intfSQLBasedModule(
+        _schema,
+        _name,
+        tblUploadFiles::Name,
+        {///< ColName                                       Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            { tblUploadFiles::uflID,                        ORM_PRIMARYKEY_64 },
+            { tblUploadFiles::uflURL,                       S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflFileName,                  S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflSize,                      S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploadFiles::uflMimeType,                  S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploadFiles::uflLocalFullFileName,         S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflUploadLastErrorMessage,    S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploadFiles::uflStatus,                    ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadFileStatus, Targoman::API::ORM::enuUploadFileStatus::Queued) },
+            { tblUploadFiles::uflCreationDateTime,          ORM_CREATED_ON },
+            { tblUploadFiles::uflCreatedBy_usrID,           ORM_CREATED_BY },
+            { tblUploadFiles::uflUpdatedBy_usrID,           ORM_UPDATED_BY },
+        },
+        {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ORM_RELATION_OF_CREATOR(tblUploadFiles::uflCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblUploadFiles::uflUpdatedBy_usrID),
+        }
+    )
+{}
+
+/*
+QVariant intfUploadFiles::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+{
+//    Authorization::checkPriv(_JWT, { this->ModuleName + ":Uploads:CRUD~0100" });
+    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+}
+*/
+
+#ifdef QT_DEBUG
+//stuSaveFileResult intfUploadFiles::apiPUTsave(
+//        const TAPI::JWT_t &_JWT,
+//        const TAPI::stuFileInfo &_file
+//    )
+//{
+//    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+//    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
+//                                           *this,
+//                                           intfUploadGateways
+//                                           clsJWT(_JWT).usrID(),
+//                                           _file
+//                                           );
+//    return SaveFileResult;
+//}
+#endif
 
 /******************************************************************/
 /******************************************************************/
@@ -108,98 +167,28 @@ bool intfUploadGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfUploadFiles::intfUploadFiles(
+intfUploadQueue::intfUploadQueue(
         const QString &_schema,
         const QString &_name
     ) :
     intfSQLBasedModule(
         _schema,
         _name,
-        tblUploadFiles::Name,
-        {///< ColName                                       Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
-            { tblUploadFiles::uflID,                        ORM_PRIMARYKEY_64 },
-            { tblUploadFiles::uflURL,                       S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflFileName,                  S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflSize,                      S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUploadFiles::uflMimeType,                  S(QString),             QFV,                        QNull,      UPNone },
-            { tblUploadFiles::uflTempFullFileName,          S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflUploadLastErrorMessage,    S(QString),             QFV,                        QNull,      UPNone },
-            { tblUploadFiles::uflStatus,                    ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadFileStatus, Targoman::API::ORM::enuUploadFileStatus::Queued) },
-            { tblUploadFiles::uflCreationDateTime,          ORM_CREATED_ON },
-            { tblUploadFiles::uflCreatedBy_usrID,           ORM_CREATED_BY },
-            { tblUploadFiles::uflUpdatedBy_usrID,           ORM_UPDATED_BY },
+        tblUploadQueue::Name,
+        {///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            { tblUploadQueue::uquID,                ORM_PRIMARYKEY_64 },
+            { tblUploadQueue::uqu_uflID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploadQueue::uqu_ugwID,            S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploadQueue::uquStatus,            ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadQueueStatus, Targoman::API::ORM::enuUploadQueueStatus::Queued) },
+            { tblUploadQueue::uquCreationDateTime,  ORM_CREATED_ON },
+            { tblUploadQueue::uquCreatedBy_usrID,   ORM_CREATED_BY },
+            { tblUploadQueue::uquUpdatedBy_usrID,   ORM_UPDATED_BY },
         },
         {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
-            ORM_RELATION_OF_CREATOR(tblUploadFiles::uflCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblUploadFiles::uflUpdatedBy_usrID),
+            ORM_RELATION_OF_CREATOR(tblUploadQueue::uquCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblUploadQueue::uquUpdatedBy_usrID),
         }
     )
 {}
-
-/*
-QVariant intfUploadFiles::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
-//    Authorization::checkPriv(_JWT, { this->ModuleName + ":Uploads:CRUD~0100" });
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
-
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-*/
-
-#ifdef QT_DEBUG
-stuSaveFileResult intfUploadFiles::apiPUTsave(
-        const TAPI::JWT_t &_JWT,
-//        QString _fileName,
-        const TAPI::stuFileInfo &_file
-    )
-{
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-
-    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
-                                           *this,
-                                           clsJWT(_JWT).usrID(),
-//                                           _fileName,
-                                           _file
-                                           );
-    return SaveFileResult;
-}
-#endif
-
-/******************************************************************/
-/******************************************************************/
-/******************************************************************/
-intfUploadStorages::intfUploadStorages(
-        const QString &_schema,
-        const QString &_name
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        _name,
-        tblUploadStorages::Name,
-        {///< ColName                                   Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
-            { tblUploadStorages::ustID,                 ORM_PRIMARYKEY_64 },
-            { tblUploadStorages::ust_uflID,             S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUploadStorages::ust_ugwID,             S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUploadStorages::ustStatus,             ORM_STATUS_FIELD(Targoman::API::ORM::enuUploadStorageStatus, Targoman::API::ORM::enuUploadStorageStatus::Queued) },
-            { tblUploadStorages::ustCreationDateTime,   ORM_CREATED_ON },
-            { tblUploadStorages::ustCreatedBy_usrID,    ORM_CREATED_BY },
-            { tblUploadStorages::ustUpdatedBy_usrID,    ORM_UPDATED_BY },
-        },
-        {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
-            ORM_RELATION_OF_CREATOR(tblUploadStorages::ustCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblUploadStorages::ustUpdatedBy_usrID),
-        }
-    )
-{}
-
-/*
-QVariant intfUploadStorages::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
-//    Authorization::checkPriv(_JWT, { this->ModuleName + ":UploadStorages:CRUD~0100" });
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
-
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-*/
 
 } //namespace Targoman::API::ORM
