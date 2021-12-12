@@ -27,6 +27,7 @@
 #include <QString>
 #include "libTargomanCommon/CmdIO.h"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include "Interfaces/Common/GenericTypes.h"
 #include <QJsonObject>
 
 #include <aws/core/Aws.h>
@@ -34,7 +35,7 @@
 using namespace Aws;
 
 namespace Targoman::API::ORM {
-class intfUploads;
+class intfUploadFiles;
 }
 
 namespace Targoman::API::Helpers {
@@ -90,11 +91,18 @@ class ObjectStorageHelper
 {
 public:
     static Targoman::API::Helpers::stuSaveFileResult saveFile(
-            Targoman::API::ORM::intfUploads *_uploads,
+            Targoman::API::ORM::intfUploadFiles &_uploadFiles,
             const quint64 _currentUserID,
-            QString &_fileName,
-            const QString &_base64Content
+            const TAPI::stuFileInfo &_file
             );
+
+//    static Targoman::API::Helpers::stuSaveFileResult saveFile(
+//            Targoman::API::ORM::intfUploadFiles *_uploadFiles,
+//            const quint64 _currentUserID,
+//            QString &_fileName,
+//            const QString &_base64Content
+//            );
+
 private:
     static bool uploadFileToS3(
             const QString &_fileName,

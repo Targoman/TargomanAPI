@@ -24,10 +24,14 @@
 #include "Ticketing.h"
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
+#include "ORM/TicketAttachments.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
+#include "Interfaces/Helpers/ObjectStorageHelper.h"
 #include "libQFieldValidator/QFieldValidator.h"
+
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
@@ -36,14 +40,17 @@ namespace Targoman::API::TicketingModule {
 using namespace ORM;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
+TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
     intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema)
 {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
 
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());
+    this->addSubModule(&TicketAttachments::instance());
 }
 
 quint64 Ticketing::insertTicket(
@@ -54,10 +61,29 @@ quint64 Ticketing::insertTicket(
         const QString& _title,
         const QString& _body,
         bool _hasAttachemnt,
+
+
+//        TAPI::ATTACHMENTS_t _attachments
+
+
         quint64 _createdBy
     )
 {
-  return this->execQuery(
+//    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
+//                                           &UploadFiles::instance(),
+//                                           _createdBy,
+
+
+
+
+
+
+//                );
+
+//TicketAttachments::instance()
+
+
+    return this->execQuery(
         "INSERT INTO tblTickets "
         "   SET tblTickets.tktTarget_usrID =?,"
         "       tblTickets.tkt_svcID =?,"
@@ -90,12 +116,18 @@ bool Ticketing::apiPUTnewMessage(
         quint64 _targetUserID
     )
 {
-  Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
+    Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
 
-  return this->insertTicket(
-             _targetUserID, _serviceID, 0,
-             _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
-             _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
+    return this->insertTicket(
+                _targetUserID,
+                _serviceID,
+                0,
+                _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
+                _title,
+                _bodyMarkdown,
+                false,
+                clsJWT(_JWT).usrID()
+                ) > 0;
 }
 
 bool Ticketing::apiPUTnewFeedback(

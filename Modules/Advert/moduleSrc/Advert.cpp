@@ -64,7 +64,7 @@ namespace Targoman::API::AdvertModule {
 using namespace ORM;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema)
-TARGOMAN_API_UPLOAD_CONFIG_IMPL(Advert, AdvertSchema)
+TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Advert, AdvertSchema)
 
 Advert::Advert() :
     intfAccountingBasedModule(
@@ -83,7 +83,7 @@ Advert::Advert() :
     )
 {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
-    TARGOMAN_API_IMPLEMENT_UPLOAD(Advert, AdvertSchema)
+    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 
     this->addSubModule(AccountProducts.data());
     this->addSubModule(AccountSaleables.data());

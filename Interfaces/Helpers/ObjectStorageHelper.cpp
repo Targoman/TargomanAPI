@@ -25,7 +25,7 @@
 
 #include <QMimeDatabase>
 
-#include "ORM/intfUploads.h"
+#include "ORM/ObjectStorage.h"
 using namespace Targoman::API::ORM;
 
 #include <fstream>
@@ -37,7 +37,7 @@ using namespace Aws;
 #include "QHttp/qhttpfwd.hpp"
 using namespace qhttp;
 
-/** installing AmazonAWS S3 ************************************************************
+/** installing AmazonAWS S3 from source ************************************************************
 git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
 mkdir aws-build.s3
 cd aws-build.s3
@@ -84,14 +84,14 @@ TAPI_REGISTER_METATYPE(
 namespace Targoman::API::Helpers {
 
 stuSaveFileResult ObjectStorageHelper::saveFile(
-        intfUploads *_uploads,
+        intfUploadFiles &_uploadFiles,
         const quint64 _currentUserID,
-        QString &_fileName,
-        const QString &_base64Content
+        const TAPI::stuFileInfo &_file
     )
 {
-//    auto _objectStorageConfigs = _uploads->getObjectStorageConfigs();
-    Targoman::API::ORM::intfUploads::stuObjectStorageConfigs _objectStorageConfigs = _uploads->getObjectStorageConfigs();
+#ifdef AAAAAAAAAAAAAA
+ //    auto _objectStorageConfigs = _uploadFiles->getObjectStorageConfigs();
+    Targoman::API::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs = _uploadFiles->getObjectStorageConfigs();
 
     //1: save file to the /tmp
     QByteArray Content = QByteArray::fromBase64(_base64Content.toLatin1());
@@ -102,7 +102,7 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
     if ((_fileName.indexOf('/') >= 0) || (_fileName.indexOf('\\') >= 0))
         throw exTargomanBase("Invalid character in file name.", ESTATUS_BAD_REQUEST);
 
-    QString FullFileName = QString("/tmp/TAPI/%1/%2").arg(_uploads->schema()).arg(_fileName);
+    QString FullFileName = QString("/tmp/TAPI/%1/%2").arg(_uploadFiles->schema()).arg(_fileName);
 
     //----------------------------------------
     QMimeDatabase MimeDB;
@@ -120,7 +120,7 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
 
         ///todo: domain for arvan s3
         case Targoman::API::ORM::enuS3Provider::Arvan:
-            FullFileUrl += ".arvancloud.com";
+            FullFileUrl += ".arvan_____XYZ.com";
             break;
 
         default:
@@ -130,22 +130,22 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
     FullFileUrl += QString("/%1").arg(_fileName);
 
     //----------------------------------------
-    QVariant OldData = _uploads->Select(*_uploads,
-                                        /* currentUserID */ _currentUserID,
-                                        /* pksByPath     */ {},
-                                        /* offset        */ 0,
-                                        /* limit         */ 10,
-                                        /* cols          */ {},
-                                        /* filters       */ QString("%1=%2").arg(tblUploads::uplURL).arg(FullFileUrl.replace(" ", "$SPACE$")),
-                                        /* orderBy       */ {},
-                                        /* groupBy       */ {},
-                                        /* reportCount   */ false
-                                        );
+    QVariant OldData = _uploadFiles.Select(_uploadFiles,
+                                      /* currentUserID */ _currentUserID,
+                                      /* pksByPath     */ {},
+                                      /* offset        */ 0,
+                                      /* limit         */ 10,
+                                      /* cols          */ {},
+                                      /* filters       */ QString("%1=%2").arg(tblUploadFiles::uplURL).arg(FullFileUrl.replace(" ", "$SPACE$")),
+                                      /* orderBy       */ {},
+                                      /* groupBy       */ {},
+                                      /* reportCount   */ false
+                                      );
     if (OldData.isValid() && (OldData.toList().length() > 0))
 //    if (QFile::exists(FullFileName))
         throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
 
-    QString FullPath = QString("/tmp/TAPI/%1").arg(_uploads->schema());
+    QString FullPath = QString("/tmp/TAPI/%1").arg(_uploadFiles->schema());
     QDir(FullPath).mkpath(".");
 
     QFile File(FullFileName);
@@ -180,22 +180,23 @@ stuSaveFileResult ObjectStorageHelper::saveFile(
 
     //------------------------------------------
     TAPI::ORMFields_t CreateInfo({
-        { tblUploads::uplURL, FullFileUrl },
-        { tblUploads::uplFileName, _fileName },
-        { tblUploads::uplSize, Content.length() },
-        { tblUploads::uplMimeType, MimeType },
-        { tblUploads::uplTempFullFileName, FullFileName },
-        { tblUploads::uplStatus, SaveFileResult.IsUploaded
-          ? enuUploadStatus::Uploaded
-          : enuUploadStatus::Queued },
+        { tblUploadFiles::uplURL, FullFileUrl },
+        { tblUploadFiles::uplFileName, _fileName },
+        { tblUploadFiles::uplSize, Content.length() },
+        { tblUploadFiles::uplMimeType, MimeType },
+        { tblUploadFiles::uplTempFullFileName, FullFileName },
+        { tblUploadFiles::uplStatus, SaveFileResult.IsUploaded
+          ? enuUploadFileStatus::Uploaded
+          : enuUploadFileStatus::Queued },
     });
 
     if (SaveErrorMessage.isEmpty() == false)
-        CreateInfo.insert(tblUploads::uplUploadLastErrorMessage, SaveErrorMessage);
+        CreateInfo.insert(tblUploadFiles::uplUploadLastErrorMessage, SaveErrorMessage);
 
-    SaveFileResult.uplID = _uploads->Create(*_uploads, _currentUserID, CreateInfo);
+    SaveFileResult.uplID = _uploadFiles->Create(*_uploadFiles, _currentUserID, CreateInfo);
 
     return SaveFileResult;
+#endif
 }
 
 bool ObjectStorageHelper::uploadFileToS3(
@@ -205,6 +206,7 @@ bool ObjectStorageHelper::uploadFileToS3(
         const QString &_region
         )
 {
+#ifdef AAAAAAAAAAAAAA
     //upload to s3
     S3::Model::PutObjectRequest Request;
 
@@ -224,6 +226,8 @@ bool ObjectStorageHelper::uploadFileToS3(
     if (_region.isEmpty() == false)
         S3ClientConfig.region = _region.toStdString();
 
+    S3ClientConfig.endpointOverride
+
     S3::S3Client S3Client(S3ClientConfig);
 
     Aws::S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
@@ -232,34 +236,7 @@ bool ObjectStorageHelper::uploadFileToS3(
         throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
 
     return true;
+#endif
 }
 
 } //namespace Targoman::API::Helpers
-
-/*
-CREATE TABLE `tblFileStorageGateways` (
-    `fsgwID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `fsgwName` VARCHAR(64) NOT NULL COLLATE 'utf8mb4_general_ci',
-    `fsgwType` CHAR(1) NOT NULL COMMENT 'D:Disk, N:NAS, C:Cloud' COLLATE 'utf8mb4_general_ci',
-    `fsgwDriver` VARCHAR(32) NOT NULL COLLATE 'utf8mb4_general_ci',
-    `fsgwBucket` VARCHAR(64) NOT NULL COLLATE 'utf8mb4_general_ci',
-    `fsgwRegion` VARCHAR(64) NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci',
-    `fsgwMetaInfo` JSON NULL DEFAULT NULL,
-    `fsgwMaxFilesCount` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
-    `fsgwMaxFilesSize` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
-    `fsgwCreatedFilesCount` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-    `fsgwCreatedFilesSize` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-    `fsgwDeletedFilesCount` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-    `fsgwDeletedFilesSize` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-    `fsgwLastActionTime` DATETIME NULL DEFAULT NULL,
-    `fsgwStatus` CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Disabled, R:Removed' COLLATE 'utf8mb4_general_ci',
-    `fsgwCreationDateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `fsgwCreatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL,
-    `fsgwUpdatedBy_usrID` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
-    PRIMARY KEY (`fsgwID`) USING BTREE,
-    UNIQUE INDEX `fsgwBucket_fsgwRegion` (`fsgwBucket`, `fsgwRegion`) USING BTREE
-)
-COLLATE='utf8mb4_general_ci'
-ENGINE=InnoDB
-;
-*/

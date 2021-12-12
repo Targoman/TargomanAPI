@@ -25,13 +25,16 @@
 #define TARGOMAN_API_MODULES_TICKETING_TICKETING_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "ORM/Defs.hpp"
+using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule {
 
 TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_OBJECTSTORAGE_PREPARENT;
 
 class Ticketing : public intfSQLBasedWithActionLogsModule
 {
@@ -41,6 +44,7 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
     TARGOMAN_API_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
+    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
 
 private:
     quint64 insertTicket(quint64 _targetUserID,
@@ -82,6 +86,7 @@ private slots:
 };
 
 TARGOMAN_ACTIONLOG_POSTPARENT(Ticketing, TicketingSchema);
+TARGOMAN_OBJECTSTORAGE_POSTPARENT(Ticketing, TicketingSchema);
 
 } //namespace Targoman::API::TicketingModule
 

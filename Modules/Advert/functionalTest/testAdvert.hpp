@@ -614,26 +614,6 @@ private slots:
         }
     }
 
-    void Uploads_save()
-    {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::PUT,
-                "Advert/Uploads/save",
-                {},
-                {
-                    { "fileName",       "test_file_name.txt" },
-                    { "base64Content",  QString("ths is test file content").toLatin1().toBase64().toStdString().c_str() },
-                }
-            );
-
-//            QVERIFY(this->Voucher.ID > 0);
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-
 private:
 private slots:
     /***************************************************************************************/
