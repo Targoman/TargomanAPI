@@ -83,12 +83,12 @@ static __static_s3_initializer__ __static_s3_initializer__internal;
 
 } //namespace Private
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
-    SF_QString(FullFileUrl),
-    SF_QString(MimeType),
-    SF_quint8(IsUploaded),
-    SF_quint64(uplID)
-);
+//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
+//    SF_QString(FullFileUrl),
+//    SF_QString(MimeType),
+//    SF_quint8(IsUploaded),
+//    SF_quint64(uplID)
+//);
 
 class ObjectStorageHelper
 {
@@ -116,16 +116,45 @@ public:
 //            );
 
 private:
+    struct stuProcessQueueParams {
+        quint64 CurrentUserID;
+        Targoman::API::ORM::intfUploadFiles &UploadFiles;
+        Targoman::API::ORM::intfUploadGateways &UploadGateways;
+        Targoman::API::ORM::intfUploadQueue &UploadQueue;
+        quint64 UploadedFileID = 0;
+        quint16 MaxItemsCount = 100;
+
+        stuProcessQueueParams(
+                quint64 _currentUserID,
+                Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+                Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+                Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+                quint64 _uploadedFileID = 0,
+                quint16 _maxItemsCount = 100
+            ) :
+            CurrentUserID(_currentUserID),
+            UploadFiles(_uploadFiles),
+            UploadGateways(_uploadGateways),
+            UploadQueue(_uploadQueue),
+            UploadedFileID(_uploadedFileID),
+            MaxItemsCount(_maxItemsCount)
+        {}
+    };
+
+    static bool processQueue(const stuProcessQueueParams &_processQueueParams);
+
     static bool uploadFileToS3(
             const QString &_fileName,
             const QString &_fullFileName,
             const QString &_bucket,
-            const QString &_region = {}
+            const QString &_endpointUrl,
+            const QString &_secretKey,
+            const QString &_accessKey
             );
 };
 
 } //namespace Targoman::API::Helpers
 
-TAPI_DECLARE_METATYPE(Targoman::API::Helpers::stuSaveFileResult) // -> TAPI_REGISTER_METATYPE() in ObjectStorageHelper.cpp
+//TAPI_DECLARE_METATYPE(Targoman::API::Helpers::stuSaveFileResult) // -> TAPI_REGISTER_METATYPE() in ObjectStorageHelper.cpp
 
 #endif // TARGOMAN_API_OBJECTSTORAGEHELPER_H

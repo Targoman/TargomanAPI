@@ -1208,7 +1208,7 @@ template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(clsTable& _table, const QString& _alias) :
     Data(new itmplData(_table, _alias)) {
     if (_table.AllCols.isEmpty())
-        throw exQueryBuilder("Call prepareFiltersList on table before creating a QueryBuilder");
+        throw exQueryBuilder(QString("Call prepareFiltersList on table (%1) before creating a QueryBuilder").arg(_table.Name));
 }
 
 template <class itmplDerived, class itmplData>
@@ -3358,6 +3358,7 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, 
     return invalidateQueryString;
 }
 
+///TODO: BUG: the create query may results more than one rows, but only last inserted id returns by .execute
 quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding)
 {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);

@@ -54,8 +54,7 @@ public:
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs = {},
-        const QVariantMap& _postFields = {},
-        const QVariantMap& _formFields = {},
+        const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
         QString _aPIURL = {}
     );
@@ -65,8 +64,7 @@ public:
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs = {},
-        const QVariantMap& _postFields = {},
-        const QVariantMap& _formFields = {},
+        const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
         QString _aPIURL = {}
     );

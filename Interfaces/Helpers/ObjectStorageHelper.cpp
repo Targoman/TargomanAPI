@@ -23,6 +23,7 @@
 
 #include <QUuid>
 #include <QMimeDatabase>
+#include <QtConcurrent/QtConcurrent>
 #include "ObjectStorageHelper.h"
 #include "ORM/ObjectStorage.h"
 using namespace Targoman::API::ORM;
@@ -33,6 +34,8 @@ using namespace Targoman::API::Helpers;
 #include <fstream>
 //#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
 #include <aws/core/Aws.h>
+//#include <aws/core/auth/AWSAuthSigner.h>
+#include <aws/core/auth/AWSCredentials.h>
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/PutObjectRequest.h>
 using namespace Aws;
@@ -48,12 +51,12 @@ make
 sudo make install
 */
 
-TAPI_REGISTER_METATYPE(
-    /* complexity      */ COMPLEXITY_Object,
-    /* namespace       */ Targoman::API::Helpers,
-    /* type            */ stuSaveFileResult,
-    /* toVariantLambda */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
-);
+//TAPI_REGISTER_METATYPE(
+//    /* complexity      */ COMPLEXITY_Object,
+//    /* namespace       */ Targoman::API::Helpers,
+//    /* type            */ stuSaveFileResult,
+//    /* toVariantLambda */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+//);
 
 namespace Targoman::API::Helpers {
 
@@ -121,7 +124,12 @@ quint64 ObjectStorageHelper::saveFile(
 
     //move from temp to persistance location
     QString FullPath = _objectStorageConfigs.LocalStoragePath;
-    QDir(FullPath).mkpath(".");
+    QDir FullPathDir(FullPath);
+    if (FullPathDir.exists() == false)
+    {
+        if (FullPathDir.mkpath(".") == false)
+            throw exTargomanBase("Could not create storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
+    }
 
 //    QString FileUUID = SecurityHelper::UUIDtoMD5();
     QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
@@ -142,160 +150,253 @@ quint64 ObjectStorageHelper::saveFile(
     QString FileType;
     int Idx = _file.Name.lastIndexOf('.');
     if (Idx >= 0)
-        FileType = _file.Name.mid(Idx + 2).toLower();
+        FileType = _file.Name.mid(Idx + 1).toLower();
 
     //save to tblUploadFiles
-    TAPI::ORMFields_t CreateInfo({
-        { tblUploadFiles::uflFileName, _file.Name },
-        { tblUploadFiles::uflSize, _file.Size },
-        { tblUploadFiles::uflMimeType, MimeType },
-        { tblUploadFiles::uflLocalFullFileName, FullFileName },
-    });
-    quint64 UploadedFileID = _uploadFiles.Create(_uploadFiles, _currentUserID, CreateInfo);
+    quint64 UploadedFileID;
+    quint16 QueueRowsCount;
+    try
+    {
+        QVariantMap SpOutVars = _uploadFiles.callSP("sp_CREATE_uploadedFile", {
+                { "iFileName", _file.Name },
+                { "iFileSize", _file.Size },
+                { "iFileType", FileType },
+                { "iMimeType", MimeType },
+                { "iFullFileName", FullFileName },
+                { "iCreatorUserID", _currentUserID },
+                { "iQueueStatus", QChar(enuUploadQueueStatus::Uploading) }, //this means that cronized s3 process not act to this queue items
+            })
+            .spDirectOutputs();
 
-    //find matched uploadGateways
-    SelectQuery QueryMatched = SelectQuery(_uploadGateways)
-            .addCol(tblUploadGateways::ugwID)
-            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedFileTypes, enuConditionOperator::Null })
-                .orCond({ { enuAggregation::LOWER, tblUploadGateways::ugwAllowedFileTypes }, enuConditionOperator::Like, FileType }))
-            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMimeTypes, enuConditionOperator::Null })
-                .orCond({ { enuAggregation::LOWER, tblUploadGateways::ugwAllowedMimeTypes }, enuConditionOperator::Like, MimeType }))
-            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMinFileSize, enuConditionOperator::Null })
-                .orCond({ tblUploadGateways::ugwAllowedMinFileSize, enuConditionOperator::LessEqual, _file.Size }))
-            .andWhere(clsCondition({ tblUploadGateways::ugwAllowedMaxFileSize, enuConditionOperator::Null })
-                .orCond({ tblUploadGateways::ugwAllowedMaxFileSize, enuConditionOperator::GreaterEqual, _file.Size }))
-
-                               AND ugwMaxFilesCount IS NULL
-                               OR ugwMaxFilesCount < (ugwCreatedFilesCount - ugwDeletedFilesCount)
-
-                               AND ugwMaxFilesSize IS NULL
-                               OR ugwMaxFilesSize <= (ugwCreatedFilesSize - ugwDeletedFilesSize + _file.Size)
-
-
-tblUploadGateways::ugwMaxFilesCount
-tblUploadGateways::ugwMaxFilesSize
-
-tblUploadGateways::ugwCreatedFilesCount
-tblUploadGateways::ugwCreatedFilesSize
-tblUploadGateways::ugwDeletedFilesCount
-tblUploadGateways::ugwDeletedFilesSize
-
-            ;
-
-
-    //create tblUploadQueue (queue for upload to gateway)
+        UploadedFileID = SpOutVars.value("oUploadedFileID").toULongLong();
+        QueueRowsCount = SpOutVars.value("oQueueRowsCount").toUInt();
+    }
+    catch (std::exception &exp)
+    {
+        TargomanDebug(5, "ERROR: sp_CREATE_uploadedFile:" << exp.what());
+        throw;
+    }
 
     //trigger async upload to s3(s)
+    try
+    {
+        if (QueueRowsCount > 0)
+        {
+            QFuture<bool> ret = QtConcurrent::run(
+                                    ObjectStorageHelper::processQueue,
+                                    stuProcessQueueParams(
+                                        _currentUserID,
+                                        _uploadFiles,
+                                        _uploadGateways,
+                                        _uploadQueue,
+                                        UploadedFileID,
+                                        QueueRowsCount
+                                    ));
 
+#ifdef QT_DEBUG
+//            bool rrr = ret.result();
+#endif
+        }
+    }
+    catch (std::exception &exp)
+    {
+        TargomanDebug(5, "ERROR: concurrent run of upload file queue:" << exp.what());
 
+        //convert iQueueStatus to New for post processing by cron
+        UpdateQuery(_uploadQueue)
+            .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::New)
+            .where({ tblUploadQueue::uqu_uflID, enuConditionOperator::Equal, UploadedFileID })
+            .execute(_currentUserID)
+        ;
+    }
 
     return UploadedFileID;
+}
 
+bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueueParams)
+{
+    TargomanDebug(5, "ObjectStorageHelper::processQueue:" << _processQueueParams.UploadedFileID);
 
+    _processQueueParams.UploadQueue.prepareFiltersList();
 
+    SelectQuery Query = SelectQuery(_processQueueParams.UploadQueue)
+        .addCol(tblUploadQueue::uquID)
+        .addCol(tblUploadQueue::uqu_uflID)
+        .addCol(tblUploadQueue::uqu_ugwID)
+        .addCol(tblUploadQueue::uquStatus)
+        .addCol(tblUploadFiles::uflID)
+        .addCol(tblUploadFiles::uflFileName)
+        .addCol(tblUploadFiles::uflSize)
+        .addCol(tblUploadFiles::uflFileType)
+        .addCol(tblUploadFiles::uflMimeType)
+        .addCol(tblUploadFiles::uflLocalFullFileName)
+        .addCol(tblUploadFiles::uflStatus)
+        .addCol(tblUploadGateways::ugwID)
+        .addCol(tblUploadGateways::ugwBucket)
+        .addCol(tblUploadGateways::ugwEndpointUrl)
+        .addCol(tblUploadGateways::ugwSecretKey)
+        .addCol(tblUploadGateways::ugwAccessKey)
+        .addCol(tblUploadGateways::ugwMetaInfo)
+        .addCol(tblUploadGateways::ugwCreatedFilesCount)
+        .addCol(tblUploadGateways::ugwCreatedFilesSize)
+        .addCol(tblUploadGateways::ugwLastActionTime)
+        .addCol(tblUploadGateways::ugwStatus)
 
+        .innerJoinWith(tblUploadQueue::Relation::File)
+        .innerJoinWith(tblUploadQueue::Relation::Gateway)
+    ;
 
+    if (_processQueueParams.UploadedFileID > 0)
+        Query.andWhere({ tblUploadQueue::uqu_uflID, enuConditionOperator::Equal, _processQueueParams.UploadedFileID })
+             .andWhere({ tblUploadQueue::uquStatus, enuConditionOperator::In,
+                         "'" + QStringList({ QChar(enuUploadQueueStatus::New), QChar(enuUploadQueueStatus::Uploading) }).join("','") + "'" })
+        ;
+    else
+        Query.andWhere({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::New });
 
-
-
-
-    QString FullFileUrl = _objectStorageConfigs.Bucket;
-    FullFileUrl += ".s3";
-    if (_objectStorageConfigs.Region.isEmpty() == false)
-        FullFileUrl += QString(".%1").arg(_objectStorageConfigs.Region);
-    switch (_objectStorageConfigs.Provider)
-    {
-        case Targoman::API::ORM::enuS3Provider::Amazon:
-            FullFileUrl += ".amazonaws.com";
-            break;
-
-        ///todo: domain for arvan s3
-        case Targoman::API::ORM::enuS3Provider::Arvan:
-            FullFileUrl += ".arvan_____XYZ.com";
-            break;
-
-        default:
-            break;
-    }
-    FullFileUrl = FullFileUrl.toLower();
-    FullFileUrl += QString("/%1").arg(_fileName);
-
-    //----------------------------------------
-    QVariant OldData = _uploadFiles.Select(_uploadFiles,
-                                      /* currentUserID */ _currentUserID,
-                                      /* pksByPath     */ {},
-                                      /* offset        */ 0,
-                                      /* limit         */ 10,
-                                      /* cols          */ {},
-                                      /* filters       */ QString("%1=%2").arg(tblUploadFiles::uplURL).arg(FullFileUrl.replace(" ", "$SPACE$")),
-                                      /* orderBy       */ {},
-                                      /* groupBy       */ {},
-                                      /* reportCount   */ false
-                                      );
-    if (OldData.isValid() && (OldData.toList().length() > 0))
-//    if (QFile::exists(FullFileName))
-        throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
-
-    QString FullPath = QString("/tmp/TAPI/%1").arg(_uploadFiles->schema());
-    QDir(FullPath).mkpath(".");
-
-    QFile File(FullFileName);
-    if (File.open(QFile::WriteOnly) == false)
-        throw exTargomanBase("Could not create temp file.", ESTATUS_CONFLICT);
-    File.write(Content);
-    File.close();
-
-    stuSaveFileResult SaveFileResult;
-    SaveFileResult.FullFileUrl = FullFileUrl;
-    SaveFileResult.MimeType = MimeType;
-    QString SaveErrorMessage = "";
+    QVariantList QueueItems;
 
     try
     {
-        SaveFileResult.IsUploaded = ObjectStorageHelper::uploadFileToS3(
-            _fileName,
-            FullFileName,
-            _objectStorageConfigs.Bucket,
-            _objectStorageConfigs.Region
-        );
+        QueueItems = Query.all({}, _processQueueParams.MaxItemsCount);
     }
-    catch (const std::exception &exp)
+    catch (std::exception &exp)
     {
-        SaveErrorMessage = exp.what();
-        SaveFileResult.IsUploaded = false;
+        TargomanDebug(5, "ERROR: fetching upload queue items:" << exp.what());
     }
 
-    if (SaveFileResult.IsUploaded)
-        QFile::remove(FullFileName);
+    if (QueueItems.isEmpty())
+    {
+        if (_processQueueParams.UploadedFileID > 0)
+            UpdateQuery(_processQueueParams.UploadFiles)
+                    .setPksByPath(_processQueueParams.UploadedFileID)
+                    .set(tblUploadFiles::uflStatus, enuUploadFileStatus::New)
+                    .execute(_processQueueParams.CurrentUserID);
 
-    //------------------------------------------
-    TAPI::ORMFields_t CreateInfo({
-        { tblUploadFiles::uplURL, FullFileUrl },
-        { tblUploadFiles::uplFileName, _fileName },
-        { tblUploadFiles::uplSize, Content.length() },
-        { tblUploadFiles::uplMimeType, MimeType },
-        { tblUploadFiles::uplTempFullFileName, FullFileName },
-        { tblUploadFiles::uplStatus, SaveFileResult.IsUploaded
-          ? enuUploadFileStatus::Uploaded
-          : enuUploadFileStatus::Queued },
-    });
+        return false;
+    }
 
-    if (SaveErrorMessage.isEmpty() == false)
-        CreateInfo.insert(tblUploadFiles::uplUploadLastErrorMessage, SaveErrorMessage);
+    //update Queue Status to Uploading
+    QStringList UploadingQueueIDs;
+    foreach(QVariant Var, QueueItems)
+    {
+        Targoman::API::ORM::Private::stuProcessUploadQueueInfo Info;
+        Info.fromVariantMap(Var.toMap());
 
-    SaveFileResult.uplID = _uploadFiles->Create(*_uploadFiles, _currentUserID, CreateInfo);
+        if (Info.uquStatus == enuUploadQueueStatus::New)
+            UploadingQueueIDs.append(QString::number(Info.uquID));
+    }
+    if (UploadingQueueIDs.length())
+    {
+        UpdateQuery(_processQueueParams.UploadQueue)
+                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Uploading)
+                .where({ tblUploadQueue::uquID, enuConditionOperator::In, UploadingQueueIDs.join(",") })
+                .execute(_processQueueParams.CurrentUserID);
+    }
 
-    return SaveFileResult;
+    //------------------------------
+    QHash<quint32, quint32> GatewayUploadedFileCount;
+    QHash<quint32, quint64> GatewayUploadedFileSize;
+//    QStringList UploadedFileIDs;
+    QStringList UploadedQueueIDs;
+//    QStringList FailedFileIDs;
+    QStringList FailedQueueIDs;
+
+    foreach(QVariant Var, QueueItems)
+    {
+        Targoman::API::ORM::Private::stuProcessUploadQueueInfo Info;
+        Info.fromVariantMap(Var.toMap());
+
+        bool S3Stored = false;
+        try
+        {
+            S3Stored = ObjectStorageHelper::uploadFileToS3(
+                           Info.uflFileName,
+                           Info.uflLocalFullFileName,
+                           Info.ugwBucket,
+                           Info.ugwEndpointUrl,
+                           Info.ugwSecretKey,
+                           Info.ugwAccessKey
+                           );
+        }
+        catch (std::exception &exp)
+        {
+            TargomanDebug(5, "ERROR: storing file to s3:" << exp.what());
+        }
+
+        if (S3Stored)
+        {
+            if (GatewayUploadedFileCount.contains(Info.ugwID))
+            {
+                GatewayUploadedFileCount[Info.ugwID] += 1;
+                GatewayUploadedFileSize[Info.ugwID] += Info.uflSize;
+            }
+            else
+            {
+                GatewayUploadedFileCount.insert(Info.ugwID, 1);
+                GatewayUploadedFileSize.insert(Info.ugwID, Info.uflSize);
+            }
+
+//            QList<quint64> UploadedFileIDs;
+            UploadedQueueIDs.append(QString::number(Info.uquID));
+        }
+        else
+        {
+//            QList<quint64> FailedFileIDs;
+            FailedQueueIDs.append(QString::number(Info.uquID));
+        }
+    }
+
+    //update gateway ststictics
+    if (GatewayUploadedFileCount.count())
+    {
+        foreach(quint64 GatewayID, GatewayUploadedFileCount.keys())
+        {
+            UpdateQuery(_processQueueParams.UploadGateways)
+                    .increament(tblUploadGateways::ugwCreatedFilesCount, GatewayUploadedFileCount[GatewayID])
+                    .increament(tblUploadGateways::ugwCreatedFilesSize, GatewayUploadedFileSize[GatewayID])
+                    .setPksByPath(GatewayID)
+                    .execute(_processQueueParams.CurrentUserID)
+                    ;
+        }
+    }
+
+    //update queue
+    if (UploadedQueueIDs.length())
+    {
+        UpdateQuery(_processQueueParams.UploadQueue)
+                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Stored)
+                .where({ tblUploadQueue::uquID, enuConditionOperator::In, UploadedQueueIDs.join(',') })
+                .execute(_processQueueParams.CurrentUserID);
+                ;
+    }
+    if (FailedQueueIDs.length())
+    {
+        UpdateQuery(_processQueueParams.UploadQueue)
+                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::New)
+                .where({ tblUploadQueue::uquID, enuConditionOperator::In, FailedQueueIDs.join(',') })
+                .execute(_processQueueParams.CurrentUserID);
+                ;
+    }
+
+    ///TODO: re compute upload file status by queue items status
+
+    //------------------------------------------------
+    return true;
 }
 
 bool ObjectStorageHelper::uploadFileToS3(
         const QString &_fileName,
         const QString &_fullFileName,
         const QString &_bucket,
-        const QString &_region
+        const QString &_endpointUrl,
+        const QString &_secretKey,
+        const QString &_accessKey
         )
 {
-#ifdef AAAAAAAAAAAAAA
+    ///TODO: use MultipartUploader for files larger than 400 MB
+
+
     //upload to s3
     S3::Model::PutObjectRequest Request;
 
@@ -311,13 +412,16 @@ bool ObjectStorageHelper::uploadFileToS3(
     Request.SetBody(InputData);
 
     //----------------------------------------
+    Aws::Auth::AWSCredentials AWSCredentials(_accessKey.toStdString(), _secretKey.toStdString());
+
     Aws::Client::ClientConfiguration S3ClientConfig;
-    if (_region.isEmpty() == false)
-        S3ClientConfig.region = _region.toStdString();
 
-    S3ClientConfig.endpointOverride
+//    if (_region.isEmpty() == false)
+//        S3ClientConfig.region = _region.toStdString();
 
-    S3::S3Client S3Client(S3ClientConfig);
+    S3ClientConfig.endpointOverride = _endpointUrl.toStdString();
+
+    S3::S3Client S3Client(AWSCredentials, S3ClientConfig);
 
     Aws::S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
 
@@ -325,7 +429,6 @@ bool ObjectStorageHelper::uploadFileToS3(
         throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
 
     return true;
-#endif
 }
 
 } //namespace Targoman::API::Helpers

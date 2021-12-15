@@ -47,26 +47,27 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
 
 private:
-    quint64 insertTicket(quint64 _targetUserID,
-                         quint32 _serviceID,
-                         quint64 _inReplyTo,
-                         enuTicketType::Type _ticketType,
-                         const QString& _title,
-                         const QString& _body,
-//                         bool _hasAttachemnt,
-                         const TAPI::Files_t &_files,
-                         quint64 _createdBy
-                         );
+    quint64 insertTicket(
+            quint64 _createdBy,
+            quint64 _targetUserID,
+            quint32 _serviceID,
+            quint64 _inReplyTo,
+            enuTicketType::Type _ticketType,
+            const QString &_title,
+            const QString &_body,
+            const TAPI::Files_t &_files = {}
+        );
 
 private slots:
     bool REST_PUT(
         newMessage,
         (
             TAPI::JWT_t _JWT,
-            const QString& _title,
-            const QString& _bodyMarkdown,
+            const QString &_title,
+            const QString &_body,
             quint32 _serviceID,
-            quint64 _targetUserID = 0
+            quint64 _targetUserID = 0,
+            const TAPI::stuFileInfo &_file = {}
         ),
         "create new message targeting a user or all users (if target user is 0)"
     )
@@ -75,12 +76,12 @@ private slots:
         newFeedback,
         (
             TAPI::JWT_t _JWT,
-            const QString& _title,
-            const QString& _text,
+            const QString &_title,
+            const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
             quint64 _inReplyTo = 0,
-            TAPI::stuFileInfo _file = {}
+            const TAPI::stuFileInfo &_file = {}
         ),
         "create a new/reply feedback with"
     )

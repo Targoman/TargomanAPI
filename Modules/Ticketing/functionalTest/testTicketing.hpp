@@ -130,19 +130,37 @@ private slots:
     }
 
     /***************************************************************************************/
-    void UploadFiles_save()
-    {
-//        static constexpr char APPLICATION_JSON_HEADER[] = "application/json";
-//        static constexpr char APPLICATION_FORM_HEADER[] = "application/x-www-form-urlencoded";
-//        static constexpr char MULTIPART_BOUNDARY_HEADER[] = "multipart/form-data; boundary=";
+//    void UploadFiles_save()
+//    {
+//        QT_TRY {
+//            QVariant Result = callAdminAPI(
+//                RESTClientHelper::PUT,
+//                "Ticketing/UploadFiles/save",
+//                {},
+//                {},
+//                {},
+//                {
+//                    { "file", "../../README.md" },
+//                }
+//            );
 
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
+    void Ticket_newMessage()
+    {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
-                "Ticketing/UploadFiles/save",
+                "Ticketing/newMessage",
                 {},
-                {},
-                {},
+                {
+                    { "serviceID", 123 },
+                    { "title", "this is ticket title" },
+                    { "body", "this is ticket body" },
+                },
                 {
                     { "file", "../../README.md" },
                 }
@@ -152,6 +170,8 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
+
+
 
 private:
 private slots:

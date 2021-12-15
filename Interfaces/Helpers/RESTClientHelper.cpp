@@ -59,8 +59,7 @@ QVariant RESTClientHelper::callAPI(
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs,
-        const QVariantMap& _postFields,
-        const QVariantMap& _formFields,
+        const QVariantMap& _postOrFormFields,
         const QVariantMap& _formFiles,
         QString _aPIURL
     )
@@ -81,8 +80,7 @@ QVariant RESTClientHelper::callAPI(
         _method,
         _api,
         _urlArgs,
-        _postFields,
-        _formFields,
+        _postOrFormFields,
         _formFiles,
         _aPIURL
     );
@@ -93,8 +91,7 @@ QVariant RESTClientHelper::callAPI(
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs,
-        const QVariantMap& _postFields,
-        const QVariantMap& _formFields,
+        const QVariantMap& _postOrFormFields,
         const QVariantMap& _formFiles,
         QString _aPIURL
     )
@@ -121,12 +118,6 @@ QVariant RESTClientHelper::callAPI(
     };
 
     bool HasForm = false;
-    if (_formFields.isEmpty() == false)
-    {
-        HasForm = true;
-        for (auto iter=_formFields.begin(); iter!=_formFields.end(); ++iter)
-            CUrl.mime_addData(iter.key(), iter.value().toString());
-    }
     if (_formFiles.isEmpty() == false)
     {
         HasForm = true;
@@ -140,8 +131,29 @@ QVariant RESTClientHelper::callAPI(
     Opt[CURLOPT_FAILONERROR] = true;
     QStringList Headers;
 
-    if (HasForm == false)
+    if (HasForm)
+    {
+        if (_postOrFormFields.isEmpty() == false)
+        {
+            for (auto iter = _postOrFormFields.begin(); iter != _postOrFormFields.end(); ++iter)
+                CUrl.mime_addData(iter.key(), iter.value().toString());
+        }
+    }
+    else
+    {
         Headers.append("Content-Type: application/json");
+
+        switch (_method)
+        {
+            case GET:
+            case DELETE:
+                break;
+            case POST:
+            case PUT:
+            case PATCH:
+                Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(_postOrFormFields).toJson(QJsonDocument::Compact);
+        }
+    }
 
     if (_encodedJWT.size())
         Headers.append("Authorization: Bearer " + _encodedJWT);
@@ -165,17 +177,6 @@ QVariant RESTClientHelper::callAPI(
         case PATCH:
             Opt[CURLOPT_CUSTOMREQUEST] = "PATCH";
             break;
-    }
-
-    switch (_method)
-    {
-        case GET:
-        case DELETE:
-            break;
-        case POST:
-        case PUT:
-        case PATCH:
-            Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(_postFields).toJson(QJsonDocument::Compact);
     }
 
     QString CUrlResult = CUrl.exec(Opt);
