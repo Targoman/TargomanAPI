@@ -27,4 +27,6 @@ OTHER_FILES += \
     dumpDBSchema-all.sh \
     runTargomanAPI.sh \
     SwaggerUI/* \
-    Docker/*
+    Docker/* \
+    Deploy/* \
+    .github/workflows/*
