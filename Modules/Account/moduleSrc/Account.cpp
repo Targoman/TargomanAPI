@@ -1570,19 +1570,34 @@ bool Account::apiPOSTfixtureApproveEmail(
     )
 {
     clsDAC DAC;
-    QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode"
-                                 "  FROM tblApprovalRequest "
-                                 " INNER JOIN tblUser"
-                                 "    ON tblUser.usrID = tblApprovalRequest.apr_usrID "
-                                 " WHERE usrEmail=?",
-                                 {
-                                     _email
-                                 })
-                   .toJson(true).object().value("aprApprovalCode").toString();
 
+    QJsonObject Result = DAC.execQuery("",
+                                       "SELECT aprApprovalCode"
+                                       "     , usrID"
+                                       "  FROM tblApprovalRequest "
+                                       " INNER JOIN tblUser"
+                                       "    ON tblUser.usrID = tblApprovalRequest.apr_usrID "
+                                       " WHERE usrEmail=?",
+                                       {
+                                           _email
+                                       })
+                         .toJson(true).object();
+
+    QString Code = Result.value("aprApprovalCode").toString();
     if (Code.isEmpty())
         return false;
+
+    quint64 UserID = Result.value("usrID").toInt();
+
+    DAC.execQuery("",
+                  "UPDATE tblApprovalRequest"
+                  "   SET aprStatus=?"
+                  "     , aprSentDate=NOW()"
+                  " WHERE apr_usrID=?",
+                  {
+                      QChar(enuAPRStatus::Sent),
+                      UserID
+                  });
 
     this->apiPOSTapproveEmail(_REMOTE_IP, _email, Code);
 
@@ -1596,17 +1611,32 @@ bool Account::apiPOSTfixtureApproveMobile(
     )
 {
     clsDAC DAC;
-    QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode"
-                                 "  FROM tblApprovalRequest "
-                                 " WHERE aprApprovalKey=?",
-                                 {
-                                     _mobile
-                                 })
-                   .toJson(true).object().value("aprApprovalCode").toString();
 
+    QJsonObject Result = DAC.execQuery("",
+                                       "SELECT aprApprovalCode"
+                                       "     , usrID"
+                                       "  FROM tblApprovalRequest "
+                                       " WHERE aprApprovalKey=?",
+                                       {
+                                           _mobile
+                                       })
+                         .toJson(true).object();
+
+    QString Code = Result.value("aprApprovalCode").toString();
     if (Code.isEmpty())
         return false;
+
+    quint64 UserID = Result.value("usrID").toInt();
+
+    DAC.execQuery("",
+                  "UPDATE tblApprovalRequest"
+                  "   SET aprStatus=?"
+                  "     , aprSentDate=NOW()"
+                  " WHERE apr_usrID=?",
+                  {
+                      QChar(enuAPRStatus::Sent),
+                      UserID
+                  });
 
     this->apiPOSTapproveMobile(_REMOTE_IP, _mobile, Code.toUInt());
 
