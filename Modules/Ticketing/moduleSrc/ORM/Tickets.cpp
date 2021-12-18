@@ -88,7 +88,7 @@ QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     ///TODO: complete this lambda for retreiving lastReplyDateTime and totalReplyCount
     auto QueryLambda = [](SelectQuery &_query) {
 //        _query
-//            .leftJoin(SelectQuery(Tickets::instance())
+//            .leftJoin(SelectQuery(TicketAttachments::instance())
 
 //            )
     };

@@ -2555,7 +2555,7 @@ BEGIN
               )
            ),
            tblUser.usrID,
-           tblUserExtraInfo.ueiUpdatedBy_usrID,
+           tblUserExtraInfo.ueiOAuthAccounts,
            usrApprovalState,
            usrEmail
       INTO vLoginStatus,

@@ -108,19 +108,19 @@ quint64 ObjectStorageHelper::saveFile(
         throw exTargomanBase("Invalid character in file name.", ESTATUS_BAD_REQUEST);
 
     //check existance
-    QVariant OldData = _uploadFiles.Select(_uploadFiles,
-                                      /* currentUserID */ _currentUserID,
-                                      /* pksByPath     */ {},
-                                      /* offset        */ 0,
-                                      /* limit         */ 10,
-                                      /* cols          */ {},
-                                      /* filters       */ QString("%1=%2").arg(tblUploadFiles::uflFileName).arg(QString(_file.Name).replace(" ", "$SPACE$")),
-                                      /* orderBy       */ {},
-                                      /* groupBy       */ {},
-                                      /* reportCount   */ false
-                                      );
-    if (OldData.isValid() && (OldData.toList().length() > 0))
-        throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
+//    QVariant OldData = _uploadFiles.Select(_uploadFiles,
+//                                      /* currentUserID */ _currentUserID,
+//                                      /* pksByPath     */ {},
+//                                      /* offset        */ 0,
+//                                      /* limit         */ 10,
+//                                      /* cols          */ {},
+//                                      /* filters       */ QString("%1=%2").arg(tblUploadFiles::uflFileName).arg(QString(_file.Name).replace(" ", "$SPACE$")),
+//                                      /* orderBy       */ {},
+//                                      /* groupBy       */ {},
+//                                      /* reportCount   */ false
+//                                      );
+//    if (OldData.isValid() && (OldData.toList().length() > 0))
+//        throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
 
     //move from temp to persistance location
     QString FullPath = _objectStorageConfigs.LocalStoragePath;
@@ -159,6 +159,7 @@ quint64 ObjectStorageHelper::saveFile(
     {
         QVariantMap SpOutVars = _uploadFiles.callSP("sp_CREATE_uploadedFile", {
                 { "iFileName", _file.Name },
+                { "iFileUUID", FileUUID },
                 { "iFileSize", _file.Size },
                 { "iFileType", FileType },
                 { "iMimeType", MimeType },
@@ -182,6 +183,7 @@ quint64 ObjectStorageHelper::saveFile(
     {
         if (QueueRowsCount > 0)
         {
+            TargomanDebug(5, "before queue ObjectStorageHelper::processQueue(" << UploadedFileID << ")");
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageHelper::processQueue,
                                     stuProcessQueueParams(
@@ -192,6 +194,7 @@ quint64 ObjectStorageHelper::saveFile(
                                         UploadedFileID,
                                         QueueRowsCount
                                     ));
+            TargomanDebug(5, "after queue ObjectStorageHelper::processQueue(" << UploadedFileID << ")");
 
 #ifdef QT_DEBUG
 //            bool rrr = ret.result();
@@ -200,7 +203,7 @@ quint64 ObjectStorageHelper::saveFile(
     }
     catch (std::exception &exp)
     {
-        TargomanDebug(5, "ERROR: concurrent run of upload file queue:" << exp.what());
+        TargomanDebug(5, "ERROR: concurrent run of upload file queue(" << UploadedFileID << "):" << exp.what());
 
         //convert iQueueStatus to New for post processing by cron
         UpdateQuery(_uploadQueue)
@@ -215,7 +218,7 @@ quint64 ObjectStorageHelper::saveFile(
 
 bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueueParams)
 {
-    TargomanDebug(5, "ObjectStorageHelper::processQueue:" << _processQueueParams.UploadedFileID);
+    TargomanDebug(5, "ObjectStorageHelper::processQueue(" << _processQueueParams.UploadedFileID << ")");
 
     _processQueueParams.UploadQueue.prepareFiltersList();
 
@@ -226,6 +229,7 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
         .addCol(tblUploadQueue::uquStatus)
         .addCol(tblUploadFiles::uflID)
         .addCol(tblUploadFiles::uflFileName)
+        .addCol(tblUploadFiles::uflFileUUID)
         .addCol(tblUploadFiles::uflSize)
         .addCol(tblUploadFiles::uflFileType)
         .addCol(tblUploadFiles::uflMimeType)
@@ -276,15 +280,18 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
         return false;
     }
 
+    QList<Targoman::API::ORM::Private::stuProcessUploadQueueInfo> QueueInfos;
+
     //update Queue Status to Uploading
     QStringList UploadingQueueIDs;
     foreach(QVariant Var, QueueItems)
     {
-        Targoman::API::ORM::Private::stuProcessUploadQueueInfo Info;
-        Info.fromVariantMap(Var.toMap());
+        Targoman::API::ORM::Private::stuProcessUploadQueueInfo QueueInfo;
+        QueueInfo.fromVariantMap(Var.toMap());
+        QueueInfos.append(QueueInfo);
 
-        if (Info.uquStatus == enuUploadQueueStatus::New)
-            UploadingQueueIDs.append(QString::number(Info.uquID));
+        if (QueueInfo.uquStatus == enuUploadQueueStatus::New)
+            UploadingQueueIDs.append(QString::number(QueueInfo.uquID));
     }
     if (UploadingQueueIDs.length())
     {
@@ -302,21 +309,19 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
 //    QStringList FailedFileIDs;
     QStringList FailedQueueIDs;
 
-    foreach(QVariant Var, QueueItems)
+    foreach(Targoman::API::ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos)
     {
-        Targoman::API::ORM::Private::stuProcessUploadQueueInfo Info;
-        Info.fromVariantMap(Var.toMap());
-
         bool S3Stored = false;
         try
         {
             S3Stored = ObjectStorageHelper::uploadFileToS3(
-                           Info.uflFileName,
-                           Info.uflLocalFullFileName,
-                           Info.ugwBucket,
-                           Info.ugwEndpointUrl,
-                           Info.ugwSecretKey,
-                           Info.ugwAccessKey
+                           QueueInfo.uflFileName,
+                           QueueInfo.uflFileUUID,
+                           QueueInfo.uflLocalFullFileName,
+                           QueueInfo.ugwBucket,
+                           QueueInfo.ugwEndpointUrl,
+                           QueueInfo.ugwSecretKey,
+                           QueueInfo.ugwAccessKey
                            );
         }
         catch (std::exception &exp)
@@ -326,24 +331,24 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
 
         if (S3Stored)
         {
-            if (GatewayUploadedFileCount.contains(Info.ugwID))
+            if (GatewayUploadedFileCount.contains(QueueInfo.ugwID))
             {
-                GatewayUploadedFileCount[Info.ugwID] += 1;
-                GatewayUploadedFileSize[Info.ugwID] += Info.uflSize;
+                GatewayUploadedFileCount[QueueInfo.ugwID] += 1;
+                GatewayUploadedFileSize[QueueInfo.ugwID] += QueueInfo.uflSize;
             }
             else
             {
-                GatewayUploadedFileCount.insert(Info.ugwID, 1);
-                GatewayUploadedFileSize.insert(Info.ugwID, Info.uflSize);
+                GatewayUploadedFileCount.insert(QueueInfo.ugwID, 1);
+                GatewayUploadedFileSize.insert(QueueInfo.ugwID, QueueInfo.uflSize);
             }
 
 //            QList<quint64> UploadedFileIDs;
-            UploadedQueueIDs.append(QString::number(Info.uquID));
+            UploadedQueueIDs.append(QString::number(QueueInfo.uquID));
         }
         else
         {
 //            QList<quint64> FailedFileIDs;
-            FailedQueueIDs.append(QString::number(Info.uquID));
+            FailedQueueIDs.append(QString::number(QueueInfo.uquID));
         }
     }
 
@@ -379,7 +384,9 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
                 ;
     }
 
-    ///TODO: re compute upload file status by queue items status
+    ///TODO: re compute upload file status by queue items status in the next version
+//    QString QueueIDs = QueueInfos.keys().join(',');
+//    update
 
     //------------------------------------------------
     return true;
@@ -387,13 +394,16 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
 
 bool ObjectStorageHelper::uploadFileToS3(
         const QString &_fileName,
+        const QString &_fileUUID,
         const QString &_fullFileName,
         const QString &_bucket,
         const QString &_endpointUrl,
         const QString &_secretKey,
         const QString &_accessKey
-        )
+    )
 {
+    Q_UNUSED(_fileName);
+
     ///TODO: use MultipartUploader for files larger than 400 MB
 
 
@@ -401,7 +411,7 @@ bool ObjectStorageHelper::uploadFileToS3(
     S3::Model::PutObjectRequest Request;
 
     Request.SetBucket(_bucket.toStdString());
-    Request.SetKey(_fileName.toStdString());
+    Request.SetKey(QString("%1/%2").arg(_fileUUID).arg(_fileName).toStdString());
 
     //----------------------------------------
     std::shared_ptr<Aws::IOStream> InputData =

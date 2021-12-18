@@ -27,7 +27,6 @@
 #include "Interfaces/AAA/clsJWT.hpp"
 using namespace Targoman::API::AAA;
 
-//#include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/Common/QtTypes.hpp"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuUploadFileStatus);
@@ -47,10 +46,12 @@ void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info)
     //Upload File
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflID                  , _info, tblUploadFiles);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileName            , _info, tblUploadFiles);
+    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileUUID            , _info, tblUploadFiles);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflSize                , _info, tblUploadFiles);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileType            , _info, tblUploadFiles);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflMimeType            , _info, tblUploadFiles);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflLocalFullFileName   , _info, tblUploadFiles);
+    ///TODO: bug at this line:
 //    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflStatus              , _info, tblUploadFiles);
     //Upload Gateway
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwID                  , _info, tblUploadGateways);
@@ -80,6 +81,7 @@ intfUploadFiles::intfUploadFiles(
         {///< ColName                                       Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
             { tblUploadFiles::uflID,                        ORM_PRIMARYKEY_64 },
             { tblUploadFiles::uflFileName,                  S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflFileUUID,                  S(QString),             QFV,                        QRequired,  UPNone },
             { tblUploadFiles::uflSize,                      S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblUploadFiles::uflFileType,                  S(QString),             QFV,                        QNull,      UPNone },
             { tblUploadFiles::uflMimeType,                  S(QString),             QFV,                        QNull,      UPNone },
@@ -95,34 +97,6 @@ intfUploadFiles::intfUploadFiles(
         }
     )
 {}
-
-/*
-QVariant intfUploadFiles::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
-//    Authorization::checkPriv(_JWT, { this->ModuleName + ":Uploads:CRUD~0100" });
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
-
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-}
-*/
-
-#ifdef QT_DEBUG
-//stuSaveFileResult intfUploadFiles::apiPUTsave(
-//        const TAPI::JWT_t &_JWT,
-//        const TAPI::stuFileInfo &_file
-//    )
-//{
-//    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-
-//    stuSaveFileResult SaveFileResult = ObjectStorageHelper::saveFile(
-//                                           *this,
-//                                           intfUploadGateways
-//                                           clsJWT(_JWT).usrID(),
-//                                           _file
-//                                           );
-//    return SaveFileResult;
-//}
-#endif
 
 /******************************************************************/
 /******************************************************************/

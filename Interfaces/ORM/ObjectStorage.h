@@ -38,11 +38,11 @@ namespace Targoman::API::ORM {
 
 TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
                      New        = 'N', //new file and not queued (must be queued)
+                     Removed    = 'R'
+                     )
 //                     Queued     = 'Q', //queued
 //                     Uploading  = 'U', //queue(s) are in uploading
 //                     Stored     = 'S', //queued before and uploaded to all matched s3 gateways
-                     Removed    = 'R'
-                     )
 
 TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
                      Active     = 'A',
@@ -64,6 +64,7 @@ namespace tblUploadFiles {
     constexpr char Name[] = "tblUploadFiles";
     TARGOMAN_CREATE_CONSTEXPR(uflID);
     TARGOMAN_CREATE_CONSTEXPR(uflFileName);
+    TARGOMAN_CREATE_CONSTEXPR(uflFileUUID);
     TARGOMAN_CREATE_CONSTEXPR(uflSize);
     TARGOMAN_CREATE_CONSTEXPR(uflFileType);
     TARGOMAN_CREATE_CONSTEXPR(uflMimeType);
@@ -131,6 +132,7 @@ struct stuProcessUploadQueueInfo
     //Upload File
     quint64 uflID;
     QString uflFileName;
+    QString uflFileUUID;
     quint64 uflSize;
     QString uflFileType;
     QString uflMimeType;
@@ -178,19 +180,6 @@ public:
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;
 
 protected slots:
-//    QVariant ORMGET("Get Upload Files.")
-
-#ifdef QT_DEBUG
-//    Targoman::API::Helpers::stuSaveFileResult REST_PUT(
-//        save,
-//        (
-//            const TAPI::JWT_t &_JWT,
-//            const TAPI::stuFileInfo &_file
-//        ),
-//        "Saves the newly uploaded file to the file server and places the file header in the database,"
-//        " then returns the saved file ID in table."
-//    )
-#endif
 };
 
 class intfUploadGateways : public intfSQLBasedModule

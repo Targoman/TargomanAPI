@@ -94,19 +94,20 @@ class ObjectStorageHelper
 {
 public:
     static QVariantMap saveFiles(
-            Targoman::API::ORM::intfUploadFiles &_uploadFiles,
-            Targoman::API::ORM::intfUploadGateways &_uploadGateways,
-            Targoman::API::ORM::intfUploadQueue &_uploadQueue,
-            const quint64 _currentUserID,
-            const TAPI::Files_t &_files
-            );
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        const quint64 _currentUserID,
+        const TAPI::Files_t &_files
+    );
+
     static quint64 saveFile(
-            Targoman::API::ORM::intfUploadFiles &_uploadFiles,
-            Targoman::API::ORM::intfUploadGateways &_uploadGateways,
-            Targoman::API::ORM::intfUploadQueue &_uploadQueue,
-            const quint64 _currentUserID,
-            const TAPI::stuFileInfo &_file
-            );
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        const quint64 _currentUserID,
+        const TAPI::stuFileInfo &_file
+    );
 
 //    static Targoman::API::Helpers::stuSaveFileResult saveFile(
 //            Targoman::API::ORM::intfUploadFiles *_uploadFiles,
@@ -144,13 +145,14 @@ private:
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);
 
     static bool uploadFileToS3(
-            const QString &_fileName,
-            const QString &_fullFileName,
-            const QString &_bucket,
-            const QString &_endpointUrl,
-            const QString &_secretKey,
-            const QString &_accessKey
-            );
+        const QString &_fileName,
+        const QString &_fileUUID,
+        const QString &_fullFileName,
+        const QString &_bucket,
+        const QString &_endpointUrl,
+        const QString &_secretKey,
+        const QString &_accessKey
+    );
 };
 
 } //namespace Targoman::API::Helpers

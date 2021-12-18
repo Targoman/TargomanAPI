@@ -87,11 +87,12 @@ DROP TABLE IF EXISTS `tblUploadFiles`;
 CREATE TABLE `tblUploadFiles` (
   `uflID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uflFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `uflFileUUID` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `uflSize` bigint unsigned NOT NULL,
   `uflFileType` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `uflMimeType` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `uflLocalFullFileName` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uflStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'N:New, Q:Queued, U:Uploading, S:Stored, R:Removed',
+  `uflStatus` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'N' COMMENT 'N:New, R:Removed',
   `uflCreationDateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `uflCreatedBy_usrID` bigint unsigned DEFAULT NULL,
   `uflUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
@@ -156,6 +157,7 @@ CREATE TABLE `tblUploadQueue` (
 DELIMITER ;;
 CREATE PROCEDURE `sp_CREATE_uploadedFile`(
 	IN `iFileName` VARCHAR(256),
+	IN `iFileUUID` VARCHAR(64),
 	IN `iFileSize` BIGINT UNSIGNED,
 	IN `iFileType` VARCHAR(64),
 	IN `iMimeType` VARCHAR(128),
@@ -180,6 +182,7 @@ BEGIN
                tblActionLogs.atlDescription = JSON_OBJECT(
                    "err",            vErr,
                    "iFileName",      iFileName,
+                   "iFileUUID",      iFileUUID,
                    "iFileSize",      iFileSize,
                    "iFileType",      iFileType,
                    "iMimeType",      iMimeType,
@@ -195,6 +198,7 @@ BEGIN
 
     INSERT INTO tblUploadFiles
        SET tblUploadFiles.uflFileName = iFileName,
+           tblUploadFiles.uflFileUUID = iFileUUID,
            tblUploadFiles.uflSize = iFileSize,
            tblUploadFiles.uflFileType = iFileType,
            tblUploadFiles.uflMimeType = iMimeType,
@@ -212,7 +216,8 @@ BEGIN
          , tblUploadGateways.ugwID
          , iQueueStatus
       FROM tblUploadGateways
-     WHERE (tblUploadGateways.ugwAllowedFileTypes IS NULL
+     WHERE tblUploadGateways.ugwStatus = 'A'
+       AND (tblUploadGateways.ugwAllowedFileTypes IS NULL
         OR LOWER(tblUploadGateways.ugwAllowedFileTypes) LIKE CONCAT('%', iFileType, '%')
            )
        AND (tblUploadGateways.ugwAllowedMimeTypes IS NULL
@@ -232,19 +237,22 @@ BEGIN
            )
     ;
     SET oQueueRowsCount = ROW_COUNT();
-    
+
+    /* this is for next version    
     IF (oQueueRowsCount > 0) THEN
         UPDATE tblUploadFiles
            SET tblUploadFiles.uflStatus = 'Q'
          WHERE tblUploadFiles.uflID = oUploadedFileID
         ;
     END IF;
+    */
 
     INSERT INTO tblActionLogs
        SET tblActionLogs.atlBy_usrID = iCreatorUserID,
            tblActionLogs.atlType = 'UploadFile.Success',
            tblActionLogs.atlDescription = JSON_OBJECT(
                "iFileName",      iFileName,
+               "iFileUUID",      iFileUUID,
                "iFileSize",      iFileSize,
                "iFileType",      iFileType,
                "iMimeType",      iMimeType,
