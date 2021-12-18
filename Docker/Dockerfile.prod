@@ -60,7 +60,7 @@ RUN zypper ref && \
       libprotobuf20 \
       libicu \
       zlib \
-      libopenssl \
+      openssl \
     && mkdir -p /targoman/bin
 
 WORKDIR /targoman
