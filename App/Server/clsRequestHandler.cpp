@@ -58,7 +58,7 @@ void clsRequestHandler::process(const QString& _api)
         {
             TargomanLogInfo(7, "posted data: " << _data);
 
-            QByteArray ContentType= this->Request->headers().value("content-type");
+            QByteArray ContentType = this->Request->headers().value("content-type");
 
             if (ContentType.isEmpty())
                 throw exHTTPBadRequest("No content-type header present");

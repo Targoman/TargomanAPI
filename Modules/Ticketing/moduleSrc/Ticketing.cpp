@@ -24,10 +24,14 @@
 #include "Ticketing.h"
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
+#include "ORM/TicketAttachments.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
+#include "Interfaces/Helpers/ObjectStorageHelper.h"
 #include "libQFieldValidator/QFieldValidator.h"
+
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
@@ -36,76 +40,117 @@ namespace Targoman::API::TicketingModule {
 using namespace ORM;
 
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
+TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
     intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema)
 {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
 
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());
+    this->addSubModule(&TicketAttachments::instance());
 }
 
 quint64 Ticketing::insertTicket(
+        quint64 _createdBy,
         quint64 _targetUserID,
         quint32 _serviceID,
         quint64 _inReplyTo,
         enuTicketType::Type _ticketType,
-        const QString& _title,
-        const QString& _body,
-        bool _hasAttachemnt,
-        quint64 _createdBy
+        const QString &_title,
+        const QString &_body,
+        const TAPI::Files_t &_files
     )
 {
-  return this->execQuery(
-        "INSERT INTO tblTickets "
-        "   SET tblTickets.tktTarget_usrID =?,"
-        "       tblTickets.tkt_svcID =?,"
-        "       tblTickets.tktInReply_tktID =?,"
-        "       tblTickets.tktType =?,"
-        "       tblTickets.tktTitle =?,"
-        "       tblTickets.tktBodyMarkdown =?,"
-        "       tblTickets.tktHasAttachment =?,"
-        "       tblTickets.tktCreatedBy_usrID =?",
+    TAPI::ORMFields_t CreateFields({
+       { tblTickets::tktType, _ticketType },
+       { tblTickets::tktTitle, _title },
+       { tblTickets::tktBody, _body },
+    });
+
+    if (_targetUserID > 0)
+        CreateFields.insert(tblTickets::tktTarget_usrID, _targetUserID);
+
+    if (_serviceID > 0)
+        CreateFields.insert(tblTickets::tkt_svcID, _serviceID);
+
+    if (_inReplyTo > 0)
+        CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTo);
+
+    quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
+
+    if (_files.isEmpty() == false)
+    {
+        CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
+                                             .addCol(tblTicketAttachments::tat_tktID)
+                                             .addCol(tblTicketAttachments::tat_uplID)
+                                             ;
+
+        foreach(auto _file, _files)
         {
-            _targetUserID ? _targetUserID : QVariant(),
-            _serviceID ? _serviceID : QVariant(),
-            _inReplyTo ? _inReplyTo : QVariant(),
-            QString("%1").arg(_ticketType),
-            _title,
-            _body,
-            _hasAttachemnt,
-            _createdBy
+            try
+            {
+                quint64 UploadedFileID = ObjectStorageHelper::saveFile(
+                                             UploadFiles::instance(),
+                                             UploadGateways::instance(),
+                                             UploadQueue::instance(),
+                                             _createdBy,
+                                             _file
+                                             );
+                if (UploadedFileID > 0)
+                    QueryCreateAttachments.values(QVariantMap({
+                                                                  { tblTicketAttachments::tat_tktID, TicketID },
+                                                                  { tblTicketAttachments::tat_uplID, UploadedFileID },
+                                                              }));
+            }
+            catch (std::exception &exp)
+            {
+                TargomanDebug(5, "ObjectStorageHelper::saveFile(" << _file.Name << "):" << exp.what());
+            }
         }
-    )
-    .lastInsertId()
-    .toULongLong();
+
+        QueryCreateAttachments.execute(_createdBy);
+    }
+
+    return TicketID;
 }
 
 bool Ticketing::apiPUTnewMessage(
         TAPI::JWT_t _JWT,
-        const QString& _title,
-        const QString& _bodyMarkdown,
+        const QString &_title,
+        const QString &_body,
         quint32 _serviceID,
-        quint64 _targetUserID
+        quint64 _targetUserID,
+        const TAPI::stuFileInfo &_file
     )
 {
-  Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
+    Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
 
-  return this->insertTicket(
-             _targetUserID, _serviceID, 0,
-             _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
-             _title, _bodyMarkdown, false, clsJWT(_JWT).usrID()) > 0;
+    TAPI::Files_t Files;
+    Files.append(_file);
+
+    return this->insertTicket(
+                clsJWT(_JWT).usrID(),
+                _targetUserID,
+                _serviceID,
+                0,
+                _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
+                _title,
+                _body,
+                Files
+                ) > 0;
 }
 
 bool Ticketing::apiPUTnewFeedback(
         TAPI::JWT_t _JWT,
-        const QString& _title,
-        const QString& _text,
+        const QString &_title,
+        const QString &_body,
         Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
         quint32 _serviceID,
         quint64 _inReplyTo,
-        TAPI::stuFileInfo _file
+        const TAPI::stuFileInfo &_file
     )
 {
   Authorization::checkPriv(_JWT, {});
@@ -118,23 +163,20 @@ bool Ticketing::apiPUTnewFeedback(
     throw exHTTPBadRequest(
         "Message and Broadcast tickets must be sent via newMessage method");
 
-  quint64 TicketID = this->insertTicket(
-                         _inReplyTo,
-                         _serviceID,
-                         0,
-                         _ticketType,
-                         _title,
-                         _text,
-                         _file.Size > 0,
-                         clsJWT(_JWT).usrID());
+  TAPI::Files_t Files;
+  Files.append(_file);
 
-  if (_file.Size > 0)
-  {
-    ///TODO: move to tickt attachemnts with ID
-    // QFile::rename(_file.TempName, )
-  }
+  return this->insertTicket(
+              clsJWT(_JWT).usrID(),
+              _inReplyTo,
+              _serviceID,
+              0,
+              _ticketType,
+              _title,
+              _body,
+              Files
+              ) > 0;
 
-  ///TODO: return true if file moved
   return true;
 }
 

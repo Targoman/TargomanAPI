@@ -27,11 +27,13 @@ DIST_HEADERS += \
     AAA/intfAccountingBasedModule.h \
     DBM/clsORMField.h \
     DBM/clsTable.h \
+    ORM/ObjectStorage.h \
     ORM/intfActionLogs.h \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
     API/intfSQLBasedWithActionLogsModule.h \
+    Helpers/ObjectStorageHelper.h
 
 PRIVATE_HEADERS += \
 
@@ -39,6 +41,7 @@ HEADERS += \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
+    Helpers/ObjectStorageHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
@@ -47,6 +50,7 @@ HEADERS += \
     DBM/clsORMField.h \
     DBM/clsTable.h \
     DBM/QueryBuilders.h \
+    ORM/ObjectStorage.h \
     ORM/intfActionLogs.h \
     ORM/intfAlerts.h
 
@@ -54,6 +58,7 @@ SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
+    Helpers/ObjectStorageHelper.cpp \
     Helpers/PhoneHelper.cpp \
     Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
@@ -69,6 +74,7 @@ SOURCES += \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
     API/intfSQLBasedWithActionLogsModule.cpp \
+    ORM/ObjectStorage.cpp \
     ORM/intfActionLogs.cpp \
     ORM/intfAlerts.cpp
 
@@ -78,6 +84,8 @@ OTHER_FILES += \
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/
+
+LIBS += -laws-cpp-sdk-s3
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)

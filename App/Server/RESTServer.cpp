@@ -131,6 +131,18 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList)
                             Path<<
                             "?"<<
                             _req->url().query());
+
+            //----------------------------------
+            try
+            {
+                auto headers = _req->headers();
+                QStringList headersLog;
+                for (auto Iter = headers.begin(); Iter != headers.end(); ++Iter)
+                    headersLog.append(QString("    %1: %2").arg(Iter.key().toStdString().c_str()).arg(Iter.value().toStdString().c_str()));
+                TargomanLogInfo(7, "headers: " << "\n" << headersLog.join("\n"));
+            } catch (...) {}
+
+            //----------------------------------
             RequestHandler->process(Path.mid(ServerConfigs::BasePathWithVersion.size() - 1));
         }
         catch(exTargomanBase& ex)

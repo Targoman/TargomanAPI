@@ -25,13 +25,16 @@
 #define TARGOMAN_API_MODULES_TICKETING_TICKETING_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "ORM/Defs.hpp"
+using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule {
 
 TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_OBJECTSTORAGE_PREPARENT;
 
 class Ticketing : public intfSQLBasedWithActionLogsModule
 {
@@ -41,26 +44,30 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
     TARGOMAN_DEFINE_API_MODULE(Ticketing);
     TARGOMAN_API_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
+    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
 
 private:
-    quint64 insertTicket(quint64 _targetUserID,
-                         quint32 _serviceID,
-                         quint64 _inReplyTo,
-                         enuTicketType::Type _ticketType,
-                         const QString& _title,
-                         const QString& _body,
-                         bool _hasAttachemnt,
-                         quint64 _createdBy);
+    quint64 insertTicket(
+            quint64 _createdBy,
+            quint64 _targetUserID,
+            quint32 _serviceID,
+            quint64 _inReplyTo,
+            enuTicketType::Type _ticketType,
+            const QString &_title,
+            const QString &_body,
+            const TAPI::Files_t &_files = {}
+        );
 
 private slots:
     bool REST_PUT(
         newMessage,
         (
             TAPI::JWT_t _JWT,
-            const QString& _title,
-            const QString& _bodyMarkdown,
+            const QString &_title,
+            const QString &_body,
             quint32 _serviceID,
-            quint64 _targetUserID = 0
+            quint64 _targetUserID = 0,
+            const TAPI::stuFileInfo &_file = {}
         ),
         "create new message targeting a user or all users (if target user is 0)"
     )
@@ -69,12 +76,12 @@ private slots:
         newFeedback,
         (
             TAPI::JWT_t _JWT,
-            const QString& _title,
-            const QString& _text,
+            const QString &_title,
+            const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
             quint64 _inReplyTo = 0,
-            TAPI::stuFileInfo _file = {}
+            const TAPI::stuFileInfo &_file = {}
         ),
         "create a new/reply feedback with"
     )
@@ -82,6 +89,7 @@ private slots:
 };
 
 TARGOMAN_ACTIONLOG_POSTPARENT(Ticketing, TicketingSchema);
+TARGOMAN_OBJECTSTORAGE_POSTPARENT(Ticketing, TicketingSchema);
 
 } //namespace Targoman::API::TicketingModule
 

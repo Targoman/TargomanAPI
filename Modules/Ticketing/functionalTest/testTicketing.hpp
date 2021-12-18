@@ -47,6 +47,9 @@ class testTicketing : public clsBaseTest
 {
     Q_OBJECT
 
+    QString CreatedUserEmail;
+    QString CreatedAdminEmail;
+
     void cleanupUnitTestData()
     {
         clsDAC DAC;
@@ -67,7 +70,133 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
+    void setupAccountFixture()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureSetup"
+            );
 
+            qDebug() << "--------- Account fixtureSetup: " << Result;
+
+            QVERIFY(Result.isValid());
+
+            this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
+            gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
+
+            this->CreatedAdminEmail = Result.toMap().value("Admin").toMap().value("email").toString();
+            gAdminUserID = Result.toMap().value("Admin").toMap().value("usrID").toULongLong();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void login_user()
+    {
+        QJsonObject MultiJWT;
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+                                "Account/login",{},{
+                                    { "emailOrMobile", this->CreatedUserEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", "1234" },
+                                }).toJsonObject()).size());
+
+        gEncodedJWT = MultiJWT.value("ssn").toString();
+        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
+        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+    void login_admin()
+    {
+        QJsonObject MultiJWT;
+        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
+        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+                                "Account/login",{},{
+                                    { "emailOrMobile", this->CreatedAdminEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", "1234" },
+                                }).toJsonObject()).size());
+
+        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
+        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
+
+        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
+        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+    /***************************************************************************************/
+//    void UploadFiles_save()
+//    {
+//        QT_TRY {
+//            QVariant Result = callAdminAPI(
+//                RESTClientHelper::PUT,
+//                "Ticketing/UploadFiles/save",
+//                {},
+//                {},
+//                {},
+//                {
+//                    { "file", "../../README.md" },
+//                }
+//            );
+
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
+
+    void Ticket_newMessage()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PUT,
+                "Ticketing/newMessage",
+                {},
+                {
+                    { "serviceID", 123 },
+                    { "title", "this is ticket title" },
+                    { "body", "this is ticket body" },
+                },
+                {
+                    { "file", "../../README.md" },
+                }
+            );
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+
+
+private:
+private slots:
+    /***************************************************************************************/
+    /* cleanup *****************************************************************************/
+    /***************************************************************************************/
+
+    void cleanupAccountFixture()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureCleanup",
+                {},
+                {}
+            );
+
+            qDebug() << "--------- Account fixtureCleanup: " << Result;
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 };
 
 #endif // TEST_TICKETING_HPP

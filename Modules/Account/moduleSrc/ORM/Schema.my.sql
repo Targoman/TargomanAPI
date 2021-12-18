@@ -2555,7 +2555,7 @@ BEGIN
               )
            ),
            tblUser.usrID,
-           tblUserExtraInfo.ueiUpdatedBy_usrID,
+           tblUserExtraInfo.ueiOAuthAccounts,
            usrApprovalState,
            usrEmail
       INTO vLoginStatus,
@@ -2578,7 +2578,7 @@ BEGIN
        AND tblUser.usrStatus IN ('A','V');
 
     IF NOT ISNULL(vUserApprovalState) AND vUserApprovalState NOT IN ('A', IF(vUserEmail = iLogin, 'E', 'M')) THEN
-        SET vMessage = CONCAT('401:', IF(vUserEmail = iLogin, 'Email', 'Mobile'), ' not approved');
+        SET vMessage = CONCAT('405:', IF(vUserEmail = iLogin, 'Email', 'Mobile'), ' not approved');
 
         SIGNAL SQLSTATE '45000'
            SET MESSAGE_TEXT = vMessage;

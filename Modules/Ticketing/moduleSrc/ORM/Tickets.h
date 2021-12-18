@@ -39,31 +39,28 @@ namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-
 namespace tblTickets {
-constexpr char Name[] = "tblTickets";
-TARGOMAN_CREATE_CONSTEXPR(tktID);
-TARGOMAN_CREATE_CONSTEXPR(tktCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
-TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
-TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
-TARGOMAN_CREATE_CONSTEXPR(tktBase_tktID);
-TARGOMAN_CREATE_CONSTEXPR(tktType);
-TARGOMAN_CREATE_CONSTEXPR(tktTitle);
-TARGOMAN_CREATE_CONSTEXPR(tktBodyMarkdown);
-TARGOMAN_CREATE_CONSTEXPR(tktHasAttachment);
-TARGOMAN_CREATE_CONSTEXPR(tktCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(tktStatus);
+    constexpr char Name[] = "tblTickets";
+    TARGOMAN_CREATE_CONSTEXPR(tktID);
+    TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
+    TARGOMAN_CREATE_CONSTEXPR(tktBase_tktID);
+    TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
+    TARGOMAN_CREATE_CONSTEXPR(tktType);
+    TARGOMAN_CREATE_CONSTEXPR(tktTitle);
+    TARGOMAN_CREATE_CONSTEXPR(tktBody);
+    TARGOMAN_CREATE_CONSTEXPR(tktStatus);
+    TARGOMAN_CREATE_CONSTEXPR(tktCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(tktCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
 }
 
 namespace tblTicketRead {
-constexpr char Name[] = "tblTicketRead";
-TARGOMAN_CREATE_CONSTEXPR(tkr_tktID);
-TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
+    constexpr char Name[] = "tblTicketRead";
+    TARGOMAN_CREATE_CONSTEXPR(tkr_tktID);
+    TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
 }
-
 #pragma GCC diagnostic pop
 
 class Tickets : public intfSQLBasedModule

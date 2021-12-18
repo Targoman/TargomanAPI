@@ -46,13 +46,13 @@ OTHER_FILES += \
     dumpDBSchema.sh \
     Schemas/Common.my.sql \
     Schemas/CommonFuncs.my.sql \
-    Schemas/I18N.my.sql
+    Schemas/I18N.my.sql \
+    ../conf/api.conf
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface \
+    -laws-cpp-sdk-s3
 
 DISTFILES += \
     conf/test.conf \
     conf/api.server.conf \
-
-

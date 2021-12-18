@@ -9,17 +9,21 @@
 ModuleName=Ticketing
 
 HEADERS += \
+    ORM/TicketAttachments.h \
     Ticketing.h \
     ORM/Tickets.h \
     ORM/Defs.hpp \
 
 SOURCES += \
+    ORM/TicketAttachments.cpp \
     Ticketing.cpp \
     ORM/Tickets.cpp \
 
 OTHER_FILES += \
     dumpDBSchema.sh \
     ORM/Schema.my.sql \
+
+LIBS += -laws-cpp-sdk-s3
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)

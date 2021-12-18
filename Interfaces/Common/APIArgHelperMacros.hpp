@@ -213,10 +213,13 @@
     QT_TRY { \
         TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
     } \
-    QT_CATCH (const std::exception &e) { \
-        qDebug() << "fieldName:" << #_tableFieldName << e.what(); \
+    QT_CATCH (const std::exception &exp) { \
+        TargomanDebug(5, "*** SET_FIELD_FROM_VARIANT_MAP *** ERROR: fieldName:" << #_tableFieldName << exp.what()); \
         QT_RETHROW; \
     }
+
+#define SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(_storage, _varName, _infoRec, _table) \
+    SET_FIELD_FROM_VARIANT_MAP(_storage _varName, _infoRec, _table, _varName)
 
 #define C2DBL(v) INTERNAL_C2DBL(v)
 #define C2U64(v) INTERNAL_C2DBL(v)

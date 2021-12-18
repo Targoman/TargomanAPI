@@ -25,12 +25,14 @@
 #define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 using namespace Targoman::API::AAA;
+using namespace Targoman::API::ORM;
 
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
@@ -62,6 +64,7 @@ struct stuAdvertBill {
 };
 
 TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_OBJECTSTORAGE_PREPARENT;
 
 class Advert : public intfAccountingBasedModule
 {
@@ -71,6 +74,7 @@ class Advert : public intfAccountingBasedModule
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
     TARGOMAN_DEFINE_API_MODULE(Advert);
     TARGOMAN_API_DEFINE_ACTIONLOG(Advert, AdvertSchema);
+    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
@@ -163,10 +167,10 @@ protected slots:
 //    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP);
 
 #endif
-
 };
 
 TARGOMAN_ACTIONLOG_POSTPARENT(Advert, AdvertSchema);
+TARGOMAN_OBJECTSTORAGE_POSTPARENT(Advert, AdvertSchema);
 
 } //namespace Targoman::API::AdvertModule
 
