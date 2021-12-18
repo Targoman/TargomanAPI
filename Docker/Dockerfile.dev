@@ -23,7 +23,8 @@ RUN zypper --non-interactive in \
       libboost_system1_75_0-devel \
       gtest \
       protobuf-devel \
-      libicu-devel
+      libicu-devel \
+      libopenssl-devel
 
 RUN wget https://github.com/google/libphonenumber/archive/refs/tags/v8.12.39.zip && \
       unzip v8.12.39.zip && \
