@@ -27,10 +27,11 @@ RUN zypper --non-interactive in \
       libopenssl-devel
 
 RUN wget https://github.com/google/libphonenumber/archive/refs/tags/v8.12.39.zip && \
-      unzip v8.12.39.zip && \
-      mkdir libphonenumber-8.12.39/cpp/build && cd libphonenumber-8.12.39/cpp/build && \
-      cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && \
-      make -j install
+    unzip v8.12.39.zip && \
+    mkdir libphonenumber-8.12.39/cpp/build && \
+    cd libphonenumber-8.12.39/cpp/build && \
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && \
+    make -j install
 
 RUN git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp && \
     mkdir aws-build.s3 && \
@@ -43,9 +44,10 @@ COPY . .
 
 RUN qmake-qt5 QJsonRPC=0 && make -j 4
 
-FROM  opensuse/leap:15.3
+FROM opensuse/leap:15.3
 
-RUN zypper ref && zypper --non-interactive in \
+RUN zypper ref && \
+    zypper --non-interactive in \
       libhiredis0_13 \
       libcurl4 \
       libQt5Sql5-mysql \
@@ -57,7 +59,9 @@ RUN zypper ref && zypper --non-interactive in \
       libboost_date_time1_75_0 \
       libprotobuf20 \
       libicu \
-      zlib && mkdir -p /targoman/bin
+      zlib \
+      libopenssl \
+    && mkdir -p /targoman/bin
 
 WORKDIR /targoman
 COPY conf conf
