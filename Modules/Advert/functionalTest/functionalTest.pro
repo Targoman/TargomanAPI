@@ -10,7 +10,8 @@ TEST_NAME = advertFunctionalTest
 
 HEADERS += \
     ORM/actionLogs.hpp \
-    testAdvert.hpp
+    testAdvert.hpp \
+    testAdvertFixture.hpp
 
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
