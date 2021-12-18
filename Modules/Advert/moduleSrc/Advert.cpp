@@ -361,6 +361,7 @@ QVariant Advert::apiPOSTfixtureSetup(
         /* extraReferrerParams */ {},
         /* lastPreVoucher      */ LastPreVoucher
     );
+    Result.insert("LastPreVoucher", LastPreVoucher.toJson());
 
     //-- finalize basket --------------------------------------
     QVariant res = RESTClientHelper::callAPI(
@@ -377,6 +378,7 @@ QVariant Advert::apiPOSTfixtureSetup(
         }
     );
     Voucher.fromJson(res.toJsonObject());
+    Result.insert("Voucher", Voucher.toJson());
 
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentMD5.isEmpty() == false)
@@ -397,6 +399,7 @@ QVariant Advert::apiPOSTfixtureSetup(
             }
         );
         ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());
+        Result.insert("ApproveOnlinePaymentVoucher", ApproveOnlinePaymentVoucher.toJson());
     }
 
     //----------------------------------------

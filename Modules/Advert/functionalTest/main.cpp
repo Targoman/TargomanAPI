@@ -24,6 +24,7 @@
 #include <QtTest>
 #include "testBase.hpp"
 #include "testAdvert.hpp"
+#include "testAdvertFixture.hpp"
 
 TAPI_MARSHAL_TEST_VARIABLES
 
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
     try {
         FailedTests += QTest::qExec(new testBase, argc, argv);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture, argc, argv);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
     } catch(std::exception &e) {
         qDebug()<<e.what();
