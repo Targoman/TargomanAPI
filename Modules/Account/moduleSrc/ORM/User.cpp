@@ -139,7 +139,7 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
 
 //    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
 
-    auto Photo = SelectQuery(*this)
+    auto Photo = SelectQuery(UserExtraInfo::instance())
         .addCol(tblUserExtraInfo::ueiPhoto)
         .where({ tblUserExtraInfo::uei_usrID, enuConditionOperator::Equal, _usrID })
         .one()
