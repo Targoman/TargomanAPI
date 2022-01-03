@@ -39,6 +39,7 @@ then
         fi
     else
         echo -e "\n------------# $project:$tag didn't deploy. #-----------"
+        curl -s ""$deploy_url"deploy-log?token=$token&project=$project&tag=$tag"
         exit 2
     fi
 else
