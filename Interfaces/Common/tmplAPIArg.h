@@ -48,7 +48,22 @@ public:
         *_argStorage = nullptr;
 
         ///TODO: check if _val is null
-        /// test case: Account/User/extraInfo with not first param(e.g. education) value, then first param(job) throws
+        /// test case: Account/User/extraInfo with not first param (e.g. education) value, then first param (birthDate) throws
+
+//        if (_paramName == "birthDate")
+//        {
+//            try {
+//                _itmplType vvv;
+
+//                if (this->fromVariantLambda == nullptr)
+//                    vvv = _val.value<_itmplType>();
+//                else
+//                    vvv = this->fromVariantLambda(_val, _paramName);
+
+//            }  catch (std::exception &exp) {
+//                qDebug() << exp.what();
+//            }
+//        }
 
         if (this->fromVariantLambda == nullptr && (_val.canConvert<_itmplType>() == false))
             if (_val.isValid())
