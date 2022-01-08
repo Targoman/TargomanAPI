@@ -114,10 +114,12 @@ private slots:
         extraInfo,
         (
             TAPI::JWT_t     _JWT,
+            NULLABLE_TYPE(TAPI::Date_t)    _birthDate = NULLABLE_NULL_VALUE,
             QString         _job = {},
             QString         _education = {},
             QString         _fieldOfStudy = {},
-            TAPI::Date_t    _birthDate = {}
+//            QString         _language = {},
+            QString         _theme = {}
         ),
         "Update User extra info"
     )
@@ -136,6 +138,8 @@ TARGOMAN_DEFINE_ENUM(enuUserExtraInfoJsonKey,
                      Job,
                      Education,
                      FieldOfStudy,
+                     Language,
+                     Theme
                      );
 
 namespace ORM {
@@ -143,16 +147,16 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblUserExtraInfo {
-constexpr char Name[] = "tblUserExtraInfo";
-TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
-//TARGOMAN_CREATE_CONSTEXPR(ueiGender);
-TARGOMAN_CREATE_CONSTEXPR(ueiBirthDate);
-TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
-TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
-TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
-TARGOMAN_CREATE_CONSTEXPR(ueiEther);
-TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
-TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
+    constexpr char Name[] = "tblUserExtraInfo";
+    TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
+    //TARGOMAN_CREATE_CONSTEXPR(ueiGender);
+    TARGOMAN_CREATE_CONSTEXPR(ueiBirthDate);
+    TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
+    TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
+    TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
+    TARGOMAN_CREATE_CONSTEXPR(ueiEther);
+    TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
+    TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
 }
 #pragma GCC diagnostic pop
 

@@ -65,7 +65,7 @@ User::User() :
         },
         {///< Col                          Reference Table                        ForeignCol                    Rename LeftJoin
             { tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          tblRoles::rolID },
-            { tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  tblUserExtraInfo::uei_usrID,  "",    true },
+            { tblUser::Relation::ExtraInfo, { tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  tblUserExtraInfo::uei_usrID,  "",    true } },
             ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
         },
@@ -100,7 +100,45 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    if (_cols.isEmpty())
+        _cols = QStringList({
+            tblUser::usrEmail,
+            tblUser::usrName,
+            tblUser::usrFamily,
+            tblUser::usrGender,
+            tblUser::usrMobile,
+            tblUser::usrApprovalState,
+            tblUser::usr_rolID,
+//            tblUser::usrSpecialPrivs,
+            tblUser::usrLanguage,
+//            tblUser::usrMaxSessions,
+            tblUser::usrActiveSessions,
+            tblUser::usrLastLogin,
+            tblUser::usrStatus,
+//            tblUser::usrCreationDateTime,
+//            tblUser::usrCreatedBy_usrID,
+//            tblUser::usrUpdatedBy_usrID,
+            Targoman::API::CURRENT_TIMESTAMP,
+            //-------------------
+//            tblUserExtraInfo::uei_usrID,
+            //tblUserExtraInfo::ueiGender,
+            tblUserExtraInfo::ueiBirthDate,
+//            tblUserExtraInfo::ueiPhoto,
+//            tblUserExtraInfo::ueiOAuthAccounts,
+            tblUserExtraInfo::ueiIBAN,
+            tblUserExtraInfo::ueiEther,
+            tblUserExtraInfo::ueiExtraInfo,
+//            tblUserExtraInfo::ueiUpdatedBy_usrID,
+        }).join(",");
+
+    return /*Targoman::API::Query::*/this->Select(
+                *this,
+                GET_METHOD_CALL_ARGS_INTERNAL_CALL,
+                {},
+                0,
+                [](SelectQuery &_query) {
+                    _query.leftJoinWith(tblUser::Relation::ExtraInfo);
+    });
 
 //    return query.one();
 
@@ -333,10 +371,12 @@ bool User::apiUPDATEfinancialInfo(
 
 bool User::apiUPDATEextraInfo(
         TAPI::JWT_t     _JWT,
+        NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
         QString         _job,
         QString         _education,
         QString         _fieldOfStudy,
-        TAPI::Date_t    _birthDate
+//        QString         _language,
+        QString         _theme
     )
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
@@ -365,6 +405,20 @@ bool User::apiUPDATEextraInfo(
             ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy));
         else
             ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy), _fieldOfStudy);
+    }
+//    if (_language.isNull() == false)
+//    {
+//        if (_language.isEmpty())
+//            ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Language));
+//        else
+//            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Language), _language);
+//    }
+    if (_theme.isNull() == false)
+    {
+        if (_theme.isEmpty())
+            ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Theme));
+        else
+            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Theme), _theme);
     }
 
     QString jsonQry, updateQuery;
@@ -402,10 +456,15 @@ bool User::apiUPDATEextraInfo(
     //--------------------------------------
     QStringList ToUpdate;
 
-    if (_birthDate.isNull() == false)
+//    if (_birthDate.isNull() == false)
+//    {
+//        ToUpdate.append(tblUserExtraInfo::ueiBirthDate);
+//        Params.append(_birthDate);
+//    }
+    if (NULLABLE_HAS_VALUE(_birthDate))
     {
         ToUpdate.append(tblUserExtraInfo::ueiBirthDate);
-        Params.append(_birthDate);
+        Params.append(NULLABLE_GET(_birthDate));
     }
 
     //--------------------------------------

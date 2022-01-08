@@ -490,6 +490,16 @@ private slots:
                 .toBool());
     }
 
+    void UpdateUserExtraInfo_clearBirthDate() {
+        QVERIFY(callAPI(RESTClientHelper::PATCH,
+                        "Account/User/extraInfo",
+                        {},
+                        {
+                            { "birthDate", "" },
+                        })
+                .toBool());
+    }
+
     void UpdateUserExtraInfo_all() {
         QVERIFY(callAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
@@ -500,6 +510,14 @@ private slots:
                             { "education", "" },
                         })
                 .toBool());
+    }
+
+    void User_Get_With_ExtraInfo() {
+        QVariant Result = callAPI(RESTClientHelper::GET,
+                                  QString("Account/User/%1").arg(gUserID)
+                                  );
+
+        qDebug() << Result;
     }
 
 private slots:

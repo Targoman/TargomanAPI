@@ -63,26 +63,30 @@ TARGOMAN_CREATE_CONSTEXPR(usrID);
 }
 
 namespace tblUser {
-constexpr char Name[] = "tblUser";
-constexpr quint64 MinNormalUserID = 100;
-TARGOMAN_CREATE_CONSTEXPR(usrID);
-TARGOMAN_CREATE_CONSTEXPR(usrGender);
-TARGOMAN_CREATE_CONSTEXPR(usrName);
-TARGOMAN_CREATE_CONSTEXPR(usrFamily);
-TARGOMAN_CREATE_CONSTEXPR(usrEmail);
-TARGOMAN_CREATE_CONSTEXPR(usrMobile);
-TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
-TARGOMAN_CREATE_CONSTEXPR(usrPass);
-TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
-TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
-TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
-TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
-TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
-TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
-TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+    constexpr char Name[] = "tblUser";
+    namespace Relation {
+        constexpr char ExtraInfo[] = "extrainfo";
+    }
+
+    constexpr quint64 MinNormalUserID = 100;
+    TARGOMAN_CREATE_CONSTEXPR(usrID);
+    TARGOMAN_CREATE_CONSTEXPR(usrGender);
+    TARGOMAN_CREATE_CONSTEXPR(usrName);
+    TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+    TARGOMAN_CREATE_CONSTEXPR(usrEmail);
+    TARGOMAN_CREATE_CONSTEXPR(usrMobile);
+    TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
+    TARGOMAN_CREATE_CONSTEXPR(usrPass);
+    TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
+    TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
+    TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
+    TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
+    TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
+    TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
+    TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 }
 #pragma GCC diagnostic pop
 
