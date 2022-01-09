@@ -56,7 +56,6 @@ private slots:
         ),
         "Get user photo as image"
     )
-
     bool REST_UPDATE(
         photo,
         (
@@ -64,6 +63,13 @@ private slots:
             TAPI::Base64Image_t _image
         ),
         "Updates user image based using a base64 encoded image"
+    )
+    bool REST_DELETE(
+        photo,
+        (
+            TAPI::JWT_t _JWT
+        ),
+        "Delete user image"
     )
 
     bool REST_UPDATE(

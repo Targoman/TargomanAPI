@@ -98,7 +98,7 @@ User::User() :
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 {
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(_JWT, {"Account:User:CRUD~0100"});
+        Authorization::checkPriv(_JWT, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -173,9 +173,12 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 
 TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
 {
-    ///TODO: check access
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
-//    auto Photo =  this->selectFromTable({},{}, QString::number(_usrID), 0, 1, tblUserExtraInfo::ueiPhoto).toMap().value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
+    if (CurrentUserID != _usrID)
+        Authorization::checkPriv(_JWT, { "Account:User:photo:CRUD~0100" });
+
+    UserExtraInfo::instance().prepareFiltersList();
 
     auto Photo = SelectQuery(UserExtraInfo::instance())
         .addCol(tblUserExtraInfo::ueiPhoto)
@@ -217,14 +220,27 @@ bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
                                   CurrentUserID,
                               });
 
-//    clsDACResult Result = UserExtraInfo::instance().execQuery(
-//                              "UPDATE " + this->Name
-//                              + QUERY_SEPARATOR
-//                              + "SET " + tblUserExtraInfo::ueiPhoto +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
-//                              + QUERY_SEPARATOR
-//                              + "WHERE " + tblUserExtraInfo::uei_usrID + " = ?",
-//                              { _image, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
-//        );
+    return Result.numRowsAffected() > 0;
+}
+
+bool User::apiDELETEphoto(TAPI::JWT_t _JWT)
+{
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+
+    QString qry = QString()
+          + "UPDATE"
+          + " " + tblUserExtraInfo::Name
+          + " SET ueiPhoto=NULL"
+          + "   , ueiUpdatedBy_usrID=?"
+          + " WHERE uei_usrID=?"
+          ;
+
+    clsDACResult Result = UserExtraInfo::instance().execQuery(
+                              qry,
+                              {
+                                  CurrentUserID,
+                                  CurrentUserID,
+                              });
 
     return Result.numRowsAffected() > 0;
 }
