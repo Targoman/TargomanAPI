@@ -76,4 +76,7 @@ COPY --from=builder /usr/lib64/libgeocoding.so.8.12 /usr/lib64/libgeocoding.so.8
 COPY --from=builder /usr/lib64/libgeocoding.so.8 /usr/lib64/libgeocoding.so.8
 COPY --from=builder /usr/lib64/libgeocoding.so /usr/lib64/libgeocoding.so
 
+COPY --from=builder /usr/lib64/libaws-cpp-sdk-s3.so /usr/lib64/libaws-cpp-sdk-s3.so
+COPY --from=builder /usr/lib64/libaws-cpp-sdk-core.so /usr/lib64/libaws-cpp-sdk-core.so
+
 ENTRYPOINT [ "/targoman/run-targoman.sh" ]
