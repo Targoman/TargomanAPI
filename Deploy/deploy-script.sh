@@ -10,7 +10,7 @@ success=0
 
 curl -s ""$deploy_url"pull?token=$token&project=$project&tag=$tag" > /dev/null 2>&1
 sleep 6m
-while [ $counter -lt 120 ];do
+while [ $counter -lt 240 ];do
     curl -s ""$deploy_url"check-pull?token=$token&project=$project&tag=$tag" | grep pulled > /dev/null 2>&1
     if [ $? -eq 0 ]
     then
@@ -43,6 +43,7 @@ then
         exit 2
     fi
 else
+    curl -s ""$deploy_url"check-pull?token=$token&project=$project&tag=$tag"
     echo -e "\n------------# $project:$tag didn't pull on server #-----------"
     exit 1
 fi
