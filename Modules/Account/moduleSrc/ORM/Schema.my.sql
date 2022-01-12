@@ -2582,7 +2582,7 @@ BEGIN
        AND tblUser.usrStatus IN ('A','V');
 
     IF NOT ISNULL(vUserApprovalState) AND vUserApprovalState NOT IN ('A', IF(vUserEmail = iLogin, 'E', 'M')) THEN
-        SET vMessage = CONCAT('405:', IF(vUserEmail = iLogin, 'Email', 'Mobile'), ' not approved');
+        SET vMessage = CONCAT('428:', IF(vUserEmail = iLogin, 'Email', 'Mobile'), ' not approved');
 
         SIGNAL SQLSTATE '45000'
            SET MESSAGE_TEXT = vMessage;
@@ -2622,7 +2622,7 @@ BEGIN
                    tblActionLogs.atlBy_usrID = vUserID;
             COMMIT;
             SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '405:Max sessions used close old sessions';
+               SET MESSAGE_TEXT = '409:Max sessions used close old sessions';
 
         WHEN 'I' THEN
             INSERT
@@ -2640,7 +2640,7 @@ BEGIN
                    tblActionLogs.atlBy_usrID = vUserID;
             COMMIT;
             SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '405:User Removed. Ask administrator';
+               SET MESSAGE_TEXT = '403:User Removed. Ask administrator';
 
         WHEN 'B' THEN
             INSERT
@@ -2649,7 +2649,7 @@ BEGIN
                    tblActionLogs.atlBy_usrID = vUserID;
             COMMIT;
             SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '405:User Blocked. Ask administrator';
+               SET MESSAGE_TEXT = '403:User Blocked. Ask administrator';
 
         WHEN 'V' THEN
             IF ISNULL(iOAuthInfo) THEN 
@@ -2659,7 +2659,7 @@ BEGIN
                        tblActionLogs.atlBy_usrID = vUserID;
                 COMMIT;
                 SIGNAL SQLSTATE '45000'
-                   SET MESSAGE_TEXT = '405:You must approve either email or mobile';
+                   SET MESSAGE_TEXT = '428:You must approve either email or mobile';
             END IF;
 
         WHEN 'A' THEN
