@@ -52,6 +52,7 @@ class testAdvert : public clsBaseTest
 {
     Q_OBJECT
 
+    QString LastRandomNumber;
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
 
@@ -92,12 +93,17 @@ private slots:
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
-                "Account/fixtureSetup"
-            );
+                "Account/fixtureSetup",
+                {},
+                {
+                    { "random", 1 },
+                });
 
             qDebug() << "--------- Account fixtureSetup: " << Result;
 
             QVERIFY(Result.isValid());
+
+            this->LastRandomNumber = Result.toMap().value("Random").toString();
 
             this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
             gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
@@ -145,23 +151,6 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
-
-//    void setupAdvertFixture()
-//    {
-//        QT_TRY {
-//            QVariant Result = callAdminAPI(
-//                RESTClientHelper::POST,
-//                "Advert/fixtureSetup"
-//            );
-
-//            qDebug() << "--------- Advert fixtureSetup: " << Result;
-
-//            QVERIFY(Result.isValid());
-
-//        } QT_CATCH (const std::exception &exp) {
-//            QTest::qFail(exp.what(), __FILE__, __LINE__);
-//        }
-//    }
 
     void createLocation()
     {
@@ -742,25 +731,6 @@ private slots:
     }
 
     /***************************************************************************************/
-//    void cleanupAdvertFixture()
-//    {
-//        QT_TRY {
-//            QVariant Result = callAdminAPI(
-//                RESTClientHelper::POST,
-//                "Advert/fixtureCleanup",
-//                {},
-//                {}
-//            );
-
-//            qDebug() << "--------- Advert fixtureCleanup: " << Result;
-
-//            QVERIFY(Result.isValid());
-
-//        } QT_CATCH (const std::exception &exp) {
-//            QTest::qFail(exp.what(), __FILE__, __LINE__);
-//        }
-//    }
-
     void cleanupAccountFixture()
     {
         QT_TRY {
@@ -768,8 +738,9 @@ private slots:
                 RESTClientHelper::POST,
                 "Account/fixtureCleanup",
                 {},
-                {}
-            );
+                {
+                    { "random", this->LastRandomNumber },
+                });
 
             qDebug() << "--------- Account fixtureCleanup: " << Result;
 

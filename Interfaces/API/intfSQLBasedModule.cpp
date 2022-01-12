@@ -262,16 +262,4 @@ bool intfSQLBasedModule::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_I
     return query.execute(_userID, {}, _realDelete) > 0;
 }
 
-//#ifdef QT_DEBUG
-//QVariant intfSQLBasedModule::apiPOSTfixtureSetup(TAPI::RemoteIP_t _REMOTE_IP)
-//{
-//    return fixtureSetup(_REMOTE_IP);
-//}
-
-//QVariant intfSQLBasedModule::apiPOSTfixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP)
-//{
-//    return fixtureCleanup(_REMOTE_IP);
-//}
-//#endif
-
 } // namespace Targoman::API::API

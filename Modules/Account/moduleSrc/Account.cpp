@@ -48,6 +48,7 @@
 #include "Interfaces/Helpers/PhoneHelper.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
+#include "Interfaces/Helpers/FixtureHelper.h"
 using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
@@ -231,7 +232,7 @@ QVariantMap Account::apiPUTsignup(
     else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
-    QFV.asciiAlNum().maxLenght(50).validate(_role);
+    QFV/*.asciiAlNum()*/.maxLenght(50).validate(_role);
 
     if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
         throw exHTTPForbidden("Selected role is not allowed to signup");
@@ -441,7 +442,7 @@ bool Account::apiloginByMobileOnly(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QFV.asciiAlNum().maxLenght(50).validate(_signupRole);
+    QFV/*.asciiAlNum()*/.maxLenght(50).validate(_signupRole);
 
     if (_signupIfNotExists
             && (_signupRole.toLower() == "administrator"
@@ -1172,20 +1173,29 @@ bool Account::apiPOSTcheckVoucherTTL(
         quint64 _voucherID
     )
 {
-
 }
 
+/****************************************************************\
+|** fixture *****************************************************|
+\****************************************************************/
 #ifdef QT_DEBUG
 QVariant Account::apiPOSTfixtureSetup(
-        TAPI::RemoteIP_t _REMOTE_IP
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _random
     )
 {
     QVariantMap Result;
-    quint32 Random;
+
+    if (_random == "1")
+        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+
+    if (_random.isEmpty() == false)
+        Result.insert("Random", _random);
 
     constexpr quint64 UT_SystemUserID = 1;
     constexpr quint32 UT_AdminRoleID = 3;
-    constexpr char UT_RoleName[] = "fixture_role";
+//    constexpr char UT_RoleName[] = "fixture_role";
+    QString RoleName = FixtureHelper::MakeRandomizeName(_random, "-", "fixture", "role");
 
     clsDAC DAC;
 
@@ -1196,103 +1206,139 @@ QVariant Account::apiPOSTfixtureSetup(
                   "   SET rolName=?"
                   "     , rolCreatedBy_usrID=?",
                   {
-                      UT_RoleName,
+                      RoleName,
                       UT_SystemUserID
                   });
-//    Result.insert("Role", );
+    Result.insert("Role", RoleName);
 
-    //-- create user --------------------------------------
-    Random = QRandomGenerator::global()->generate();
-    QString UserEmail = QString("fixture.%1.user@dev.test").arg(Random);
+    //-- user --------------------------------------
+    QString UserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "user@dev.test");
 
-    //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-    QVariantMap SignupUserResult = this->apiPUTsignup(
-                                    _REMOTE_IP,
-                                    UserEmail,
-                                    { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
-                                    UT_RoleName,
-                                    "fixture test",
-                                    "user"
-                                   );
+    clsDACResult UserDACResult = DAC.execQuery("",
+        "SELECT usrID"
+        "  FROM tblUser"
+        " WHERE usrEmail=?",
+        {
+            UserEmail
+        });
 
-    SignupUserResult.insert("email", UserEmail);
+    if (UserDACResult.isValid())
+    {
+        Result.insert("User", QVariantMap({
+                                              { "usrID", UserDACResult.value("usrID") },
+                                              { "email", UserEmail },
+                                          }));
+    }
+    else
+    {
+        //-- create user --------------------------------------
+        //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
+        QVariantMap SignupUserResult = this->apiPUTsignup(
+                                        _REMOTE_IP,
+                                        UserEmail,
+                                        { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                        RoleName,
+                                        "fixture test",
+                                        "user"
+                                       );
 
-    Result.insert("User", SignupUserResult);
+        SignupUserResult.insert("email", UserEmail);
 
-    quint64 UserID = SignupUserResult["usrID"].toUInt();
+        Result.insert("User", SignupUserResult);
 
-    //-- approve user email --------------------------------------
-    QString Code = DAC.execQuery("",
-                                 "SELECT aprApprovalCode"
-                                 "  FROM tblApprovalRequest"
-                                 " WHERE apr_usrID=?",
-                                 {
-                                     UserID
-                                 })
-                   .toJson(true).object().value("aprApprovalCode").toString();
+        quint64 UserID = SignupUserResult["usrID"].toUInt();
 
-    DAC.execQuery("",
-                  "UPDATE tblApprovalRequest"
-                  "   SET aprStatus=?"
-                  "     , aprSentDate=NOW()"
-                  " WHERE apr_usrID=?",
-                  {
-                      QChar(enuAPRStatus::Sent),
-                      UserID
-                  });
+        //-- approve user email --------------------------------------
+        QString Code = DAC.execQuery("",
+                                     "SELECT aprApprovalCode"
+                                     "  FROM tblApprovalRequest"
+                                     " WHERE apr_usrID=?",
+                                     {
+                                         UserID
+                                     })
+                       .toJson(true).object().value("aprApprovalCode").toString();
 
-    this->apiPOSTapproveEmail(_REMOTE_IP, UserEmail, Code);
+        DAC.execQuery("",
+                      "UPDATE tblApprovalRequest"
+                      "   SET aprStatus=?"
+                      "     , aprSentDate=NOW()"
+                      " WHERE apr_usrID=?",
+                      {
+                          QChar(enuAPRStatus::Sent),
+                          UserID
+                      });
 
-    //-- create admin --------------------------------------
-    Random = QRandomGenerator::global()->generate();
-    QString AdminUserEmail = QString("fixture.%1.admin@dev.test").arg(Random);
+        this->apiPOSTapproveEmail(_REMOTE_IP, UserEmail, Code);
+    }
 
-    //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-    QVariantMap SignupAdminUserResult = this->apiPUTsignup(
-                                            _REMOTE_IP,
-                                            AdminUserEmail,
-                                            { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
-                                            UT_RoleName,
-                                            "fixture test",
-                                            "admin"
-                                            );
+    //-- admin --------------------------------------
+    QString AdminUserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "admin@dev.test");
 
-    SignupAdminUserResult.insert("email", AdminUserEmail);
+    clsDACResult AdminDACResult = DAC.execQuery("",
+        "SELECT usrID"
+        "  FROM tblUser"
+        " WHERE usrEmail=?",
+        {
+            AdminUserEmail
+        });
 
-    Result.insert("Admin", SignupAdminUserResult);
+    if (AdminDACResult.isValid())
+    {
+        Result.insert("Admin", QVariantMap({
+                                               { "usrID", AdminDACResult.value("usrID") },
+                                               { "email", AdminUserEmail },
+                                           }));
+    }
+    else
+    {
+        //-- create admin --------------------------------------
+        //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
+        QVariantMap SignupAdminUserResult = this->apiPUTsignup(
+                                                _REMOTE_IP,
+                                                AdminUserEmail,
+                                                { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                                RoleName,
+                                                "fixture test",
+                                                "admin"
+                                                );
 
-    quint64 AdminUserID = SignupAdminUserResult["usrID"].toUInt();
+        SignupAdminUserResult.insert("email", AdminUserEmail);
 
-    DAC.execQuery("",
-                  "UPDATE tblUser"
-                  "   SET tblUser.usr_rolID=?"
-                  " WHERE tblUser.usrID=?",
-                  {
-                      UT_AdminRoleID,
-                      AdminUserID
-                  });
+        Result.insert("Admin", SignupAdminUserResult);
 
-    //-- approve admin email --------------------------------------
-    Code = DAC.execQuery("",
-                         "SELECT aprApprovalCode"
-                         "  FROM tblApprovalRequest"
-                         " WHERE apr_usrID=?",
-                         {
-                             AdminUserID
-                         })
-           .toJson(true).object().value("aprApprovalCode").toString();
+        quint64 AdminUserID = SignupAdminUserResult["usrID"].toUInt();
 
-    DAC.execQuery("",
-                  "UPDATE tblApprovalRequest"
-                  "   SET aprStatus=?"
-                  "     , aprSentDate=NOW()"
-                  " WHERE apr_usrID=?",
-                  {
-                      QChar(enuAPRStatus::Sent),
-                      AdminUserID
-                  });
+        DAC.execQuery("",
+                      "UPDATE tblUser"
+                      "   SET tblUser.usr_rolID=?"
+                      " WHERE tblUser.usrID=?",
+                      {
+                          UT_AdminRoleID,
+                          AdminUserID
+                      });
 
-    this->apiPOSTapproveEmail(_REMOTE_IP, AdminUserEmail, Code);
+        //-- approve admin email --------------------------------------
+        QString Code = DAC.execQuery("",
+                             "SELECT aprApprovalCode"
+                             "  FROM tblApprovalRequest"
+                             " WHERE apr_usrID=?",
+                             {
+                                 AdminUserID
+                             })
+               .toJson(true).object().value("aprApprovalCode").toString();
+
+        DAC.execQuery("",
+                      "UPDATE tblApprovalRequest"
+                      "   SET aprStatus=?"
+                      "     , aprSentDate=NOW()"
+                      " WHERE apr_usrID=?",
+                      {
+                          QChar(enuAPRStatus::Sent),
+                          AdminUserID
+                      });
+
+        this->apiPOSTapproveEmail(_REMOTE_IP, AdminUserEmail, Code);
+    }
 
     //-- payment gateway --------------------------------------
     quint32 pgwTotalRows = DAC.execQuery("",
@@ -1324,7 +1370,7 @@ QVariant Account::apiPOSTfixtureSetup(
             try
             {
                 QVariantMap PaymentGatewayValues = {
-                    { tblPaymentGateways::pgwName,     QString("fixture.devtest %1").arg(QRandomGenerator::global()->generate()) },
+                    { tblPaymentGateways::pgwName,     FixtureHelper::MakeRandomizeName(_random, " ", "fixture.devtest") },
                     { tblPaymentGateways::pgwType,     enuPaymentGatewayType::toStr(enuPaymentGatewayType::_DeveloperTest) },
                     { tblPaymentGateways::pgwDriver,   "DevTest" },
                     { tblPaymentGateways::pgwMetaInfo, QVariantMap({
@@ -1376,7 +1422,8 @@ QVariant Account::apiPOSTfixtureSetup(
 }
 
 QVariant Account::apiPOSTfixtureCleanup(
-        TAPI::RemoteIP_t _REMOTE_IP
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _random
     )
 {
     Q_UNUSED(_REMOTE_IP);
@@ -1385,22 +1432,32 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     clsDAC DAC;
 
+    QString UserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "user@dev.test");
+    QString AdminUserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "admin@dev.test");
+
+//    OR u.usrMobile LIKE '+98999887%'
+
     try
     {
         QString QueryString = R"(
             DELETE wb
-                FROM tblWalletBalances wb
-                INNER JOIN tblWalletsTransactions wt
+              FROM tblWalletBalances wb
+        INNER JOIN tblWalletsTransactions wt
                 ON wt.wltID = wb.wbl_wltID
-                INNER JOIN tblUserWallets uw
+        INNER JOIN tblUserWallets uw
                 ON uw.walID = wt.wlt_walID
-                INNER JOIN tblUser u
+        INNER JOIN tblUser u
                 ON u.usrID = uw.wal_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblWalletBalances", QVariantMap({
+                                                           { "numRowsAffected", DACResult.numRowsAffected() },
+                                                       }));
     }
     catch(...)
     {
@@ -1410,16 +1467,21 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE wt
-                FROM tblWalletsTransactions wt
-                INNER JOIN tblUserWallets uw
+              FROM tblWalletsTransactions wt
+        INNER JOIN tblUserWallets uw
                 ON uw.walID = wt.wlt_walID
-                INNER JOIN tblUser u
+        INNER JOIN tblUser u
                 ON u.usrID = uw.wal_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblWalletsTransactions", QVariantMap({
+                                                                { "numRowsAffected", DACResult.numRowsAffected() },
+                                                            }));
     }
     catch(...)
     {
@@ -1429,14 +1491,19 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE uw
-                FROM tblUserWallets uw
-                INNER JOIN tblUser u
+              FROM tblUserWallets uw
+        INNER JOIN tblUser u
                 ON u.usrID = uw.wal_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblUserWallets", QVariantMap({
+                                                        { "numRowsAffected", DACResult.numRowsAffected() },
+                                                    }));
     }
     catch(...)
     {
@@ -1446,16 +1513,21 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE op
-                FROM tblOnlinePayments op
-                INNER JOIN tblVoucher vch
+              FROM tblOnlinePayments op
+        INNER JOIN tblVoucher vch
                 ON vch.vchID = op.onp_vchID
-                INNER JOIN tblUser u
+        INNER JOIN tblUser u
                 ON u.usrID = vch.vch_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblOnlinePayments", QVariantMap({
+                                                           { "numRowsAffected", DACResult.numRowsAffected() },
+                                                       }));
     }
     catch(...)
     {
@@ -1465,16 +1537,21 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE fp
-                FROM tblOfflinePayments fp
-                INNER JOIN tblVoucher vch
+              FROM tblOfflinePayments fp
+        INNER JOIN tblVoucher vch
                 ON vch.vchID = fp.ofp_vchID
-                INNER JOIN tblUser u
+        INNER JOIN tblUser u
                 ON u.usrID = vch.vch_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblOfflinePayments", QVariantMap({
+                                                            { "numRowsAffected", DACResult.numRowsAffected() },
+                                                        }));
     }
     catch(...)
     {
@@ -1484,14 +1561,19 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE vch
-                FROM tblVoucher vch
-                INNER JOIN tblUser u
+              FROM tblVoucher vch
+        INNER JOIN tblUser u
                 ON u.usrID = vch.vch_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblVoucher", QVariantMap({
+                                                    { "numRowsAffected", DACResult.numRowsAffected() },
+                                                }));
     }
     catch(...)
     {
@@ -1501,14 +1583,19 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE apr
-                FROM tblApprovalRequest apr
-                INNER JOIN tblUser u
+              FROM tblApprovalRequest apr
+        INNER JOIN tblUser u
                 ON u.usrID = apr.apr_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblApprovalRequest", QVariantMap({
+                                                            { "numRowsAffected", DACResult.numRowsAffected() },
+                                                        }));
     }
     catch(...)
     {
@@ -1518,14 +1605,19 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE sn
-                FROM tblActiveSessions sn
-                INNER JOIN tblUser u
+              FROM tblActiveSessions sn
+        INNER JOIN tblUser u
                 ON u.usrID = sn.ssn_usrID
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblActiveSessions", QVariantMap({
+                                                           { "numRowsAffected", DACResult.numRowsAffected() },
+                                                       }));
     }
     catch(...)
     {
@@ -1535,12 +1627,18 @@ QVariant Account::apiPOSTfixtureCleanup(
     {
         QString QueryString = R"(
             DELETE u
-                FROM tblUser u
-                WHERE LOWER(u.usrEmail) LIKE 'fixture%'
-                OR u.usrMobile LIKE '+98999887%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+              FROM tblUser u
+             WHERE u.usrEmail=?
+                OR u.usrEmail=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   UserEmail,
+                                                   AdminUserEmail
+                                               });
+        Result.insert("tblUser", QVariantMap({
+                                                 { "items", QStringList({ UserEmail, AdminUserEmail }).join(",") },
+                                                 { "numRowsAffected", DACResult.numRowsAffected() },
+                                             }));
     }
     catch(...)
     {
@@ -1548,13 +1646,19 @@ QVariant Account::apiPOSTfixtureCleanup(
 
     try
     {
+        QString RoleName = FixtureHelper::MakeRandomizeName(_random, "-", "fixture", "role");
         QString QueryString = R"(
             DELETE r
-                FROM tblRoles r
-                WHERE LOWER(r.rolName) LIKE 'fixture%'
-            ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString);
-        Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+              FROM tblRoles r
+             WHERE r.rolName=?
+        ;)";
+        clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                   RoleName
+                                               });
+        Result.insert("tblRoles", QVariantMap({
+                                                  { "items", RoleName },
+                                                  { "numRowsAffected", DACResult.numRowsAffected() },
+                                              }));
     }
     catch(...)
     {

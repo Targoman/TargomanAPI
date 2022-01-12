@@ -39,6 +39,7 @@ using namespace Targoman::API::Helpers;
 #include "ORM/Locations.h"
 
 #include "Interfaces/Helpers/RESTClientHelper.h"
+#include "Interfaces/Helpers/FixtureHelper.h"
 using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
@@ -177,19 +178,28 @@ QString Advert::apiGETretrieveURL(
     )
 {}
 
+/****************************************************************\
+|** fixture *****************************************************|
+\****************************************************************/
 #ifdef QT_DEBUG
 QVariant Advert::apiPOSTfixtureSetup(
         TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::JWT_t _JWT
+        TAPI::JWT_t _JWT,
+        QString _random
     )
 {
     Q_UNUSED(_REMOTE_IP);
 
     QVariantMap Result;
-    quint32 Random;
+
+    if (_random == "1")
+        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+
+    if (_random.isEmpty() == false)
+        Result.insert("Random", _random);
 
     //-- location --------------------------------------
-    QString LocationUrl = QString("http://fixture.%1.com").arg(SecurityHelper::UUIDtoMD5());
+    QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com"); //.arg(SecurityHelper::UUIDtoMD5());
 
     QVariantMap LocationValues = {
         { tblLocations::locURL,        LocationUrl },
@@ -207,12 +217,11 @@ QVariant Advert::apiPOSTfixtureSetup(
     Result.insert("Location", LocationValues);
 
     //-- product --------------------------------------
-    Random = QRandomGenerator::global()->generate();
-    QString ProductCode = QString("fixture-%1").arg(Random);
+    QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
 
     QVariantMap ProductValues = {
         { tblAccountProductsBase::prdCode,          ProductCode },
-        { tblAccountProductsBase::prdName,          QString("fixture product %1").arg(Random) },
+        { tblAccountProductsBase::prdName,          FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
         { tblAccountProductsBase::prdInStockQty,    1'000 },
         { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
         { tblAccountProducts::prd_locID,            LocationID },
@@ -247,20 +256,19 @@ QVariant Advert::apiPOSTfixtureSetup(
     Result.insert("Product", ProductValues);
 
     //-- saleable --------------------------------------
-    Random = QRandomGenerator::global()->generate();
-    QString SaleableCode = QString("%1-%2").arg(ProductCode).arg(Random);
+    QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
 
     QVariantMap SaleableValues = {
         { tblAccountSaleablesBase::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::slbCode,             SaleableCode },
-        { tblAccountSaleablesBase::slbName,             QString("fixture saleable %1 name").arg(Random) },
-        { tblAccountSaleablesBase::slbDesc,             QString("fixture saleable %1 desc").arg(Random) },
+        { tblAccountSaleablesBase::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
+        { tblAccountSaleablesBase::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
         { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
         { tblAccountSaleablesBase::slbBasePrice,        12'000 },
 //        { tblAccountSaleablesBase::slbProductCount,     900 },
 //        { tblAccountSaleablesBase::slbMaxSaleCountPerUser,  },
         { tblAccountSaleablesBase::slbInStockQty,       150 },
-        { tblAccountSaleablesBase::slbVoucherTemplate,  QString("fixture saleable %1 vt").arg(Random) },
+        { tblAccountSaleablesBase::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
     };
 
     quint32 SaleableID = CreateQuery(*this->AccountSaleables)
@@ -297,8 +305,7 @@ QVariant Advert::apiPOSTfixtureSetup(
      Result.insert("Saleable", SaleableValues);
 
     //-- coupon --------------------------------------
-    Random = QRandomGenerator::global()->generate();
-    QString CouponCode = QString("fixture-%1").arg(Random);
+    QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
 
     QVariantMap CouponValues = {
         { tblAccountCouponsBase::cpnCode, CouponCode },
@@ -414,20 +421,32 @@ QVariant Advert::apiPOSTfixtureSetup(
 //}
 
 QVariant Advert::apiPOSTfixtureCleanup(
-        TAPI::RemoteIP_t _REMOTE_IP
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _random
     )
 {
     Q_UNUSED(_REMOTE_IP);
 
     QVariantMap Result;
 
+    //online payment
+    //voucher
+
     try
     {
-        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
-                              .arg(tblAccountCouponsBase::Name)
-                              .arg(tblAccountCouponsBase::cpnCode);
-        clsDACResult DACResult = this->AccountCoupons->execQuery(QueryString);
-        Result.insert("Coupon", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
+        QString QueryString = R"(
+            DELETE c
+              FROM tblAccountCoupons c
+             WHERE c.cpnCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountCoupons->execQuery(QueryString, {
+                                                                     CouponCode
+                                                                 });
+        Result.insert("tblCoupon", QVariantMap({
+                                                   { "items", CouponCode },
+                                                   { "numRowsAffected", DACResult.numRowsAffected() },
+                                               }));
     }
     catch(...)
     {
@@ -435,11 +454,19 @@ QVariant Advert::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
-                              .arg(tblAccountSaleablesBase::Name)
-                              .arg(tblAccountSaleablesBase::slbCode);
-        clsDACResult DACResult = this->AccountSaleables->execQuery(QueryString);
-        Result.insert("Saleable", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
+        QString QueryString = R"(
+            DELETE s
+              FROM tblAccountSaleables s
+             WHERE s.slbCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountSaleables->execQuery(QueryString, {
+                                                                       SaleableCode
+                                                                   });
+        Result.insert("tblSaleable", QVariantMap({
+                                                  { "items", SaleableCode },
+                                                  { "numRowsAffected", DACResult.numRowsAffected() },
+                                              }));
     }
     catch(...)
     {
@@ -447,11 +474,19 @@ QVariant Advert::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'fixture-%'")
-                              .arg(tblAccountProductsBase::Name)
-                              .arg(tblAccountProductsBase::prdCode);
-        clsDACResult DACResult = this->AccountProducts->execQuery(QueryString);
-        Result.insert("Product", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
+        QString QueryString = R"(
+            DELETE p
+              FROM tblAccountProducts p
+             WHERE p.prdCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountProducts->execQuery(QueryString, {
+                                                                      ProductCode
+                                                                  });
+        Result.insert("tblProduct", QVariantMap({
+                                                 { "items", ProductCode },
+                                                 { "numRowsAffected", DACResult.numRowsAffected() },
+                                             }));
     }
     catch(...)
     {
@@ -459,11 +494,19 @@ QVariant Advert::apiPOSTfixtureCleanup(
 
     try
     {
-        QString QueryString = QString("DELETE FROM %1 WHERE %2 LIKE 'http://fixture.%'")
-                              .arg(tblLocations::Name)
-                              .arg(tblLocations::locURL);
-        clsDACResult DACResult = Locations::instance().execQuery(QueryString);
-        Result.insert("Location", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com");
+        QString QueryString = R"(
+            DELETE l
+              FROM tblLocations l
+             WHERE l.locURL=?
+        ;)";
+        clsDACResult DACResult = Locations::instance().execQuery(QueryString, {
+                                                                     LocationUrl
+                                                                 });
+        Result.insert("tblLocation", QVariantMap({
+                                                  { "items", LocationUrl },
+                                                  { "numRowsAffected", DACResult.numRowsAffected() },
+                                              }));
     }
     catch(...)
     {

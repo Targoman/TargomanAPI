@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TEST_ADVERTFIXTURE_HPP
-#define TEST_ADVERTFIXTURE_HPP
+#ifndef TEST_ACCOUNTFIXTURE_HPP
+#define TEST_ACCOUNTFIXTURE_HPP
 
 #include <QRandomGenerator>
 #include "Interfaces/Test/testCommon.hpp"
@@ -45,16 +45,17 @@ using namespace Targoman::API::AAA;
 //using namespace Targoman::API::AdvertModule;
 //using namespace Targoman::API::AdvertModule::ORM;
 
-//#include "Interfaces/Helpers/SecurityHelper.h"
-//using namespace Targoman::API::Helpers;
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
 
-class testAdvertFixture : public clsBaseTest
+class testAccountFixture : public clsBaseTest
 {
     Q_OBJECT
 
     QString LastRandomNumber;
-    QString CreatedUserEmail;
-    QString CreatedAdminEmail;
+
+//    QString CreatedUserEmail;
+//    QString CreatedAdminEmail;
 
 //    QVariant LocationID;
 //    QVariant BannerProductID;
@@ -88,7 +89,40 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
-    void setupAccountFixture()
+    void setupAccountFixture_no_random()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureSetup"
+            );
+
+            qDebug() << "--------- Account fixtureSetup: " << Result;
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void cleanupAccountFixture_no_random()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureCleanup",
+                {},
+                {}
+            );
+
+            qDebug() << "--------- Account fixtureCleanup: " << Result;
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void setupAccountFixture_random()
     {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -101,103 +135,14 @@ private slots:
 
             qDebug() << "--------- Account fixtureSetup: " << Result;
 
-            QVERIFY(Result.isValid());
-
             this->LastRandomNumber = Result.toMap().value("Random").toString();
 
-            this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
-            gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
-
-            this->CreatedAdminEmail = Result.toMap().value("Admin").toMap().value("email").toString();
-            gAdminUserID = Result.toMap().value("Admin").toMap().value("usrID").toULongLong();
-
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
-    void login_user()
-    {
-        QJsonObject MultiJWT;
-        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    { "emailOrMobile", this->CreatedUserEmail },
-                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
-                                    { "salt", "1234" },
-                                }).toJsonObject()).size());
-
-        gEncodedJWT = MultiJWT.value("ssn").toString();
-        gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
-
-        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
-    }
-
-    void login_admin()
-    {
-        QJsonObject MultiJWT;
-        //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
-                                    { "emailOrMobile", this->CreatedAdminEmail },
-                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
-                                    { "salt", "1234" },
-                                }).toJsonObject()).size());
-
-        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
-        gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
-
-        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
-        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
-    }
-
-    void setupAdvertFixture()
-    {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::POST,
-                "Advert/fixtureSetup",
-                {},
-                {
-                    { "random", this->LastRandomNumber },
-                });
-
-            qDebug() << "--------- Advert fixtureSetup: " << Result;
-
-            QVERIFY(Result.isValid());
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-
-private:
-private slots:
-    /***************************************************************************************/
-    /* cleanup *****************************************************************************/
-    /***************************************************************************************/
-    void cleanupAdvertFixture()
-    {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::POST,
-                "Advert/fixtureCleanup",
-                {},
-                {
-                    { "random", this->LastRandomNumber },
-                });
-
-            qDebug() << "--------- Advert fixtureCleanup: " << Result;
-
-            QVERIFY(Result.isValid());
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-
-    void cleanupAccountFixture()
+    void cleanupAccountFixture_random()
     {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -219,4 +164,4 @@ private slots:
 
 };
 
-#endif // TEST_ADVERTFIXTURE_HPP
+#endif // TEST_ACCOUNTFIXTURE_HPP
