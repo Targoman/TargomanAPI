@@ -41,6 +41,7 @@ HEADERS += \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
+    Helpers/FixtureHelper.h \
     Helpers/ObjectStorageHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
@@ -58,6 +59,7 @@ SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
+    Helpers/FixtureHelper.cpp \
     Helpers/ObjectStorageHelper.cpp \
     Helpers/PhoneHelper.cpp \
     Helpers/RESTClientHelper.cpp \

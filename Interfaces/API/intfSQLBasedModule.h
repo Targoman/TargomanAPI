@@ -102,28 +102,6 @@ public:
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
-
-//#ifdef QT_DEBUG
-//protected slots:
-//    QVariant REST_POST(
-//        fixtureSetup,
-//        (
-//                TAPI::RemoteIP_t _REMOTE_IP
-//        ),
-//        "Create sample data"
-//    )
-
-//    QVariant REST_POST(
-//        fixtureCleanup,
-//        (
-//                TAPI::RemoteIP_t _REMOTE_IP
-//        ),
-//        "Cleanup sample data"
-//    )
-//protected:
-//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP) { Q_UNUSED(_REMOTE_IP); return QVariant(); }
-//#endif
 };
 
 } // namespace Targoman::API::API

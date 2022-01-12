@@ -356,23 +356,21 @@ private slots:
     )
 
 #ifdef QT_DEBUG
-//protected:
-//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP);
-//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP);
-
 protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _random = {}
         ),
-        "Create sample data"
+        "Create sample data. give random=1 to auto generate random number"
     )
 
     QVariant REST_POST(
         fixtureCleanup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _random = {}
         ),
         "Cleanup sample data"
     )

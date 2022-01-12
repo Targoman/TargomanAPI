@@ -141,15 +141,17 @@ protected slots:
         fixtureSetup,
         (
                 TAPI::RemoteIP_t _REMOTE_IP,
-                TAPI::JWT_t _JWT
+                TAPI::JWT_t _JWT,
+                QString _random = {}
         ),
-        "Create sample data"
+        "Create sample data. give random=1 to auto generate random number"
     )
 
     QVariant REST_POST(
         fixtureCleanup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _random = {}
         ),
         "Cleanup sample data"
     )
@@ -161,11 +163,6 @@ protected slots:
 //        ),
 //        "Sets up basket and voucher"
 //    )
-
-//protected:
-//    virtual QVariant fixtureSetup(TAPI::RemoteIP_t _REMOTE_IP);
-//    virtual QVariant fixtureCleanup(TAPI::RemoteIP_t _REMOTE_IP);
-
 #endif
 };
 

@@ -265,6 +265,14 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
     else
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
+#ifdef QT_DEBUG
+    if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup")
+    {
+        int i = 0;
+
+    }
+#endif
+
     QVector<void*> ArgStorage(_arguments.size(), {});
 
     try {
