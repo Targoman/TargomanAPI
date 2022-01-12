@@ -338,8 +338,8 @@ private slots:
     void CreateForgotPasswordLink(){
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink",{},{
-                            {"login", UT_UserEmail},
-                            {"via", "Web"},
+                            {"emailOrMobile", UT_UserEmail},
+//                            {"via", "Web"},
                         }).toBool());
     }
 
@@ -354,6 +354,7 @@ private slots:
         //827ccb0eea8a706c4c34a16891f84e7b # 12345
         QVERIFY(callAPI(RESTClientHelper::POST,
                         "Account/changePassByUUID", {},{
+                            { "emailOrMobile", UT_UserEmail },
                             { "uuid", Code },
                             { "newPass", "827ccb0eea8a706c4c34a16891f84e7b" }
                         }).toBool());

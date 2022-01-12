@@ -47,13 +47,16 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblForgotPassRequest {
-constexpr char Name[] = "tblForgotPassRequest";
-TARGOMAN_CREATE_CONSTEXPR(fprUUID);
-TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
-TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
-TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
-TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
-TARGOMAN_CREATE_CONSTEXPR(fprStatus);
+    constexpr char Name[] = "tblForgotPassRequest";
+    namespace Relation {
+        constexpr char User[] = "user";
+    }
+    TARGOMAN_CREATE_CONSTEXPR(fprUUID);
+    TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
+    TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
+    TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
+    TARGOMAN_CREATE_CONSTEXPR(fprStatus);
 }
 #pragma GCC diagnostic pop
 
