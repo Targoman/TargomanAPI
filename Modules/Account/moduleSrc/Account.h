@@ -248,9 +248,31 @@ private slots:
         createForgotPasswordLink,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
-            QString _login
+            QString _emailOrMobile
         ),
         "Create a forgot password request returning a UUID for the requiest"
+    )
+
+#ifdef QT_DEBUG
+    QString REST_POST(
+        fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
+        (
+                TAPI::RemoteIP_t _REMOTE_IP,
+                QString _emailOrMobile
+        ),
+        "fixture: Get Last Forgot Password UUID And Make As Sent"
+    )
+#endif
+
+    bool REST_GET_OR_POST(
+        changePassByUUID,
+        (
+            TAPI::RemoteIP_t _REMOTE_IP,
+            QString _emailOrMobile,
+            TAPI::MD5_t _uuid,
+            TAPI::MD5_t _newPass
+        ),
+        "Changes password based on a UUID provided by createForgotPasswordLink"
     )
 
     bool REST_GET_OR_POST(
@@ -262,16 +284,6 @@ private slots:
             TAPI::MD5_t _newPass
         ),
         "Changes password of the logged-in user"
-    )
-
-    bool REST_GET_OR_POST(
-        changePassByUUID,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::MD5_t _uuid,
-            TAPI::MD5_t _newPass
-        ),
-        "Changes password based on a UUID provided by "
     )
 
     /*****************************************************************\
@@ -356,7 +368,6 @@ private slots:
     )
 
 #ifdef QT_DEBUG
-protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (

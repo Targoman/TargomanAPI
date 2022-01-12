@@ -128,6 +128,26 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
     enuConfigSource::Arg | enuConfigSource::File
 );
 
+QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile)
+{
+    if (QFV.email().isValid(_emailOrMobile))
+    {
+        if (QFV.emailNotFake().isValid(_emailOrMobile) == false)
+            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+
+        _emailOrMobile = _emailOrMobile.toLower();
+        return "E";
+    }
+
+    if (QFV.mobile().isValid(_emailOrMobile))
+    {
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
+        return "M";
+    }
+
+    throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
+}
+
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
@@ -216,21 +236,7 @@ QVariantMap Account::apiPUTsignup(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QString Type;
-
-    if (QFV.email().isValid(_emailOrMobile)) {
-        if (QFV.emailNotFake().isValid(_emailOrMobile))
-            Type = 'E';
-        else
-            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }
-    else if (QFV.mobile().isValid(_emailOrMobile))
-    {
-        Type = 'M';
-        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
-    }
-    else
-        throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
+    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QFV/*.asciiAlNum()*/.maxLenght(50).validate(_role);
 
@@ -412,11 +418,12 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+//    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
+//    if (QFV.mobile().isValid(_emailOrMobile))
+//        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
+    ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    if (QFV.mobile().isValid(_emailOrMobile))
-        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
+    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     auto LoginInfo = Authentication::login(_REMOTE_IP,
                                            _emailOrMobile,
@@ -471,22 +478,7 @@ bool Account::apiresendApprovalCode(
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QString Type;
-
-    if (QFV.email().isValid(_emailOrMobile))
-    {
-        if (QFV.emailNotFake().isValid(_emailOrMobile))
-            Type = 'E';
-        else
-            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }
-    else if (QFV.mobile().isValid(_emailOrMobile))
-    {
-        Type = 'M';
-        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
-    }
-    else
-        throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
+    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
 //    this->callSP("AAA.sp_CREATE_approvalRequestAgain", {
 //                     { "iBy", Type },
@@ -657,22 +649,89 @@ bool Account::apilogout(TAPI::JWT_t _JWT)
 
 QString Account::apicreateForgotPasswordLink(
         TAPI::RemoteIP_t _REMOTE_IP,
-        QString _login
+        QString _emailOrMobile
     )
 {
     Authorization::validateIPAddress(_REMOTE_IP);
 
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_login, "login");
+    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     this->callSP("AAA.sp_CREATE_forgotPassRequest", {
-                     { "iLogin", _login },
-                     { "iVia", QString(_login.contains('@') ? 'E' : 'M') },
+                     { "iLogin", _emailOrMobile },
+                     { "iVia", Type },
                  });
 
-    return _login.contains('@') ? "email" : "mobile";
+    return (Type == "E" ? "email" : "mobile");
 }
 
-bool Account::apichangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _oldPassSalt, TAPI::MD5_t _newPass)
+#ifdef QT_DEBUG
+QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile
+    )
+{
+    Q_UNUSED(_REMOTE_IP);
+
+    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+
+    QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
+                       .addCol(tblForgotPassRequest::fprUUID)
+                       .addCol(tblForgotPassRequest::fprStatus)
+                       .innerJoinWith(tblForgotPassRequest::Relation::User)
+                       .where({ Type == "E" ? tblUser::usrEmail : tblUser::usrMobile, enuConditionOperator::Equal, _emailOrMobile })
+                       .andWhere({ tblForgotPassRequest::fprRequestedVia, enuConditionOperator::Equal, Type.at(0) })
+                       .orderBy(tblForgotPassRequest::fprRequestDate, enuOrderDir::Descending)
+                       .one()
+                       ;
+
+    QString UUID = Data.value(tblForgotPassRequest::fprUUID).toString();
+
+    if (UUID.isEmpty())
+        throw exHTTPNotFound("No UUID could be found");
+
+    QString fprStatus = Data.value(tblForgotPassRequest::fprStatus).toString();
+    if (fprStatus != "Sent")
+    {
+        quint64 RowsCount = UpdateQuery(ForgotPassRequest::instance())
+                            .set(tblForgotPassRequest::fprStatus, enuFPRStatus::Sent)
+                            .where({ tblForgotPassRequest::fprUUID, enuConditionOperator::Equal, UUID })
+                            .execute(1)
+                            ;
+        if (RowsCount == 0)
+            throw exHTTPNotFound("error in set as sent");
+    }
+
+    return UUID;
+}
+#endif
+
+bool Account::apichangePassByUUID(
+        TAPI::RemoteIP_t _REMOTE_IP,
+        QString _emailOrMobile,
+        TAPI::MD5_t _uuid,
+        TAPI::MD5_t _newPass
+    )
+{
+    Authorization::validateIPAddress(_REMOTE_IP);
+
+    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+
+    this->callSP("AAA.sp_UPDATE_changePassByUUID", {
+                     { "iVia", Type },
+                     { "iLogin", _emailOrMobile },
+                     { "iUUID", _uuid },
+                     { "iNewPass", _newPass },
+                 });
+
+    return true;
+}
+
+bool Account::apichangePass(
+        TAPI::JWT_t _JWT,
+        TAPI::MD5_t _oldPass,
+        QString _oldPassSalt,
+        TAPI::MD5_t _newPass
+    )
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
@@ -680,22 +739,6 @@ bool Account::apichangePass(TAPI::JWT_t _JWT, TAPI::MD5_t _oldPass, QString _old
                      { "iUserID", clsJWT(_JWT).usrID() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
-                     { "iNewPass", _newPass },
-                 });
-
-    return true;
-}
-
-bool Account::apichangePassByUUID(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::MD5_t _uuid,
-        TAPI::MD5_t _newPass
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
-
-    this->callSP("AAA.sp_UPDATE_changePassByUUID", {
-                     { "iUUID", _uuid },
                      { "iNewPass", _newPass },
                  });
 

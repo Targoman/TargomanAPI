@@ -1309,53 +1309,61 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE PROCEDURE `sp_CREATE_forgotPassRequest`(
 	IN `iLogin` VARCHAR(50),
 	IN `iVia` CHAR(1)
-
 )
 BEGIN
- DECLARE UserID INT UNSIGNED;
- DECLARE UserName VARCHAR(50);
- DECLARE UserFamily VARCHAR(50);
- DECLARE LinkUUID CHAR(32);
-  
-  SELECT tblUser.usrID,
-         tblUser.usrName,
-         tblUser.usrFamily
-    INTO UserID,
-         UserName,
-         UserFamily
-    FROM tblUser
-      LEFT JOIN tblForgotPassRequest 
-        ON tblForgotPassRequest.fpr_usrID = tblUser.usrID
-   WHERE (tblUser.usrEmail = iLogin OR tblUser.usrMobile = iLogin)
-     AND (ISNULL(tblForgotPassRequest.fprStatus)
-          OR tblForgotPassRequest.fprStatus != 'N' 
-          OR TIME_TO_SEC(TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate)) > 60
-         )
-   LIMIT 1;
-   
-  IF (UserID IS NOT NULL) THEN 
-    SET LinkUUID = Common.fnCreateRandomMD5();
-    
-    INSERT INTO tblForgotPassRequest 
-       SET tblForgotPassRequest.fpr_usrID = UserID,
-           tblForgotPassRequest.fprRequestedVia = iVia,
-           tblForgotPassRequest.fprUUID = LinkUUID;	
+    DECLARE vUserID INT UNSIGNED;
+    DECLARE vUserName VARCHAR(50);
+    DECLARE vUserFamily VARCHAR(50);
+    DECLARE vLinkUUID CHAR(32);
 
-    INSERT INTO Common.tblAlerts
-       SET Common.tblAlerts.alr_usrID = UserID,
-           Common.tblAlerts.alr_altCode = 'passReset',
-           Common.tblAlerts.alrReplacements = JSON_OBJECT(
-    			 	'usrName',UserName,
-		    		'usrFamily',UserFamily,
-            'via', iVia,
-				    'UUID',LinkUUID
-          ); 		 
-  END IF;       
+    SELECT tblUser.usrID
+         , tblUser.usrName
+         , tblUser.usrFamily
+      INTO vUserID
+         , vUserName
+         , vUserFamily
+      FROM tblUser
+ LEFT JOIN tblForgotPassRequest
+        ON tblForgotPassRequest.fpr_usrID = tblUser.usrID
+     WHERE (
+           tblUser.usrEmail = iLogin
+        OR tblUser.usrMobile = iLogin
+           )
+       AND (
+           ISNULL(tblForgotPassRequest.fprStatus)
+        OR tblForgotPassRequest.fprStatus != 'N'
+        OR TIME_TO_SEC(TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate)) > 60
+           )
+     LIMIT 1
+    ;
+
+    IF (vUserID IS NOT NULL) THEN
+        SET vLinkUUID = Common.fnCreateRandomMD5();
+
+        INSERT
+          INTO tblForgotPassRequest
+           SET tblForgotPassRequest.fpr_usrID = vUserID
+             , tblForgotPassRequest.fprRequestedVia = iVia
+             , tblForgotPassRequest.fprUUID = vLinkUUID
+        ;
+
+        INSERT
+          INTO Common.tblAlerts
+           SET Common.tblAlerts.alr_usrID = vUserID
+             , Common.tblAlerts.alr_altCode = 'passReset'
+             , Common.tblAlerts.alrReplacements = JSON_OBJECT(
+                 'usrName',   vUserName,
+                 'usrFamily', vUserFamily,
+                 'via',       iVia,
+                 'UUID',      vLinkUUID
+               )
+        ;
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2478,36 +2486,48 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE PROCEDURE `sp_UPDATE_changePassByUUID`(
+	IN `iVia` VARCHAR(1),
+	IN `iLogin` VARCHAR(50),
 	IN `iUUID` VARCHAR(50),
 	IN `iNewPass` VARCHAR(50)
 )
 BEGIN
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE IsExpired BOOL;
-  
-  SELECT tblForgotPassRequest.fpr_usrID,
-         TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate) > "00:30:00"
-    INTO UserID, IsExpired
-    FROM tblForgotPassRequest
-   WHERE tblForgotPassRequest.fprUUID = iUUID
-     AND tblForgotPassRequest.fprStatus = 'S';
-  
-  IF ISNULL (IsExpired) OR IsExpired THEN 
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401:Invalid or Expired link';
-  END IF;
-  
-  UPDATE tblForgotPassRequest
-     SET tblForgotPassRequest.fprStatus = IF(tblForgotPassRequest.fprUUID = iUUID, 'A', 'E')
-   WHERE tblForgotPassRequest.fpr_usrID = UserID
-     AND tblForgotPassRequest.fprStatus IN ('S', 'N'); 
-       
-  UPDATE tblUser
-     SET tblUser.usrPass = iNewPass
-   WHERE tblUser.usrID = UserID;
+    DECLARE vUserID BIGINT UNSIGNED;
+    DECLARE vIsExpired BOOL;
+
+    SELECT tblForgotPassRequest.fpr_usrID
+         , TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate) > "00:30:00"
+      INTO vUserID
+         , vIsExpired
+      FROM tblForgotPassRequest
+INNER JOIN tblUser
+        ON tblUser.usrID = tblForgotPassRequest.fpr_usrID
+     WHERE (
+           tblUser.usrEmail = iLogin
+        OR tblUser.usrMobile = iLogin
+           )
+       AND tblForgotPassRequest.fprUUID = iUUID
+       AND tblForgotPassRequest.fprStatus = 'S'
+    ;
+
+    IF ISNULL (vIsExpired) OR vIsExpired THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = '401:Invalid or Expired link';
+    END IF;
+
+    UPDATE tblForgotPassRequest
+       SET tblForgotPassRequest.fprStatus = IF(tblForgotPassRequest.fprUUID = iUUID, 'A', 'E')
+     WHERE tblForgotPassRequest.fpr_usrID = vUserID
+       AND tblForgotPassRequest.fprStatus IN ('S', 'N')
+    ; 
+
+    UPDATE tblUser
+       SET tblUser.usrPass = iNewPass
+     WHERE tblUser.usrID = vUserID
+    ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
