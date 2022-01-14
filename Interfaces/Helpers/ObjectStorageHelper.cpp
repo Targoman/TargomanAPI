@@ -157,7 +157,7 @@ quint64 ObjectStorageHelper::saveFile(
     quint16 QueueRowsCount;
     try
     {
-        QVariantMap SpOutVars = _uploadFiles.callSP("sp_CREATE_uploadedFile", {
+        QVariantMap SpOutVars = _uploadFiles.callSP("spUploadedFile_Create", {
                 { "iFileName", _file.Name },
                 { "iFileUUID", FileUUID },
                 { "iFileSize", _file.Size },
@@ -174,7 +174,7 @@ quint64 ObjectStorageHelper::saveFile(
     }
     catch (std::exception &exp)
     {
-        TargomanDebug(5, "ERROR: sp_CREATE_uploadedFile:" << exp.what());
+        TargomanDebug(5, "ERROR: spUploadedFile_Create:" << exp.what());
         throw;
     }
 

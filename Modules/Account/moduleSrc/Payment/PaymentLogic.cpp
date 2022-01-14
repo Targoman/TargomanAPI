@@ -205,7 +205,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         try
         {
             onpMD5 = OnlinePayments::instance()
-                     .callSP("sp_CREATE_onlinePayment", {
+                     .callSP("spOnlinePayment_Create", {
                                  { "iVoucherID", _vchID },
                                  { "iGatewayID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
@@ -271,7 +271,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         try
         {
             Targoman::API::AccountModule::ORM::PaymentGateways::instance()
-                     .callSP("sp_UPDATE_paymentGateway_RequestCounters", {
+                     .callSP("spPaymentGateway_UpdateRequestCounters", {
                                  { "iPgwID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
                              })
@@ -367,7 +367,7 @@ quint64 PaymentLogic::approveOnlinePayment(
 
         //increase pgwSumFailedCount
         Targoman::API::AccountModule::ORM::PaymentGateways::instance()
-                 .callSP("sp_UPDATE_paymentGateway_FailedCounters", {
+                 .callSP("spPaymentGateway_UpdateFailedCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
                          })
@@ -394,7 +394,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     try
     {
         Targoman::API::AccountModule::ORM::PaymentGateways::instance()
-                 .callSP("sp_UPDATE_paymentGateway_OkCounters", {
+                 .callSP("spPaymentGateway_UpdateOkCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
                          })

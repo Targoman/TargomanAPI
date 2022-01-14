@@ -47,6 +47,7 @@ class testTicketing : public clsBaseTest
 {
     Q_OBJECT
 
+    QString LastRandomNumber;
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
 
@@ -75,12 +76,17 @@ private slots:
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
-                "Account/fixtureSetup"
-            );
+                "Account/fixtureSetup",
+            {},
+            {
+                { "random", 1 },
+            });
 
             qDebug() << "--------- Account fixtureSetup: " << Result;
 
             QVERIFY(Result.isValid());
+
+            this->LastRandomNumber = Result.toMap().value("Random").toString();
 
             this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
             gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
@@ -186,8 +192,9 @@ private slots:
                 RESTClientHelper::POST,
                 "Account/fixtureCleanup",
                 {},
-                {}
-            );
+                {
+                    { "random", this->LastRandomNumber },
+                });
 
             qDebug() << "--------- Account fixtureCleanup: " << Result;
 

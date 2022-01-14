@@ -377,7 +377,7 @@ private slots:
 
         try {
             //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-            DAC.callSP("", "sp_CREATE_approvalRequest", {
+            DAC.callSP("", "spApproval_Request", {
                            { "iBy", "M" },
                            { "iUserID", gUserID },
                            { "iKey", "+989998882020" },
@@ -410,7 +410,7 @@ private slots:
 
         try {
             //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-            DAC.callSP("", "sp_CREATE_approvalRequest", {
+            DAC.callSP("", "spApproval_Request", {
                            { "iBy", "M" },
                            { "iUserID", gUserID },
                            { "iKey", "+989998882020" },
