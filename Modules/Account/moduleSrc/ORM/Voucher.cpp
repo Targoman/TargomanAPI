@@ -137,7 +137,7 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
 
 quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, quint64 _walID, const QString& _desc)
 {
-    return this->callSP("sp_CREATE_withdrawalRequest", {
+    return this->callSP("spWithdrawal_Request", {
                             {"iWalletID",_walID},
                             {"iForUsrID", clsJWT(_JWT).usrID()},
                             {"iByUserID", clsJWT(_JWT).usrID()},
@@ -150,7 +150,7 @@ quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUs
 {
     Authorization::checkPriv(_JWT, {"AAA:RequestWithdraw"});
 
-    return this->callSP("sp_CREATE_withdrawalRequest", {
+    return this->callSP("spWithdrawal_Request", {
                             {"iWalletID", 0},
                             {"iForUsrID", _targetUsrID},
                             {"iByUserID", clsJWT(_JWT).usrID()},

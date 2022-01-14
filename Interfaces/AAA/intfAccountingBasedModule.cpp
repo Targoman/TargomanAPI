@@ -328,7 +328,7 @@ bool intfAccountingBasedModule::increaseDiscountUsage(
 {
     if (_voucherItem.DisAmount > 0)
     {
-        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_increaseStats", {
+        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_IncreaseStats", {
             { "iDiscountID", _voucherItem.Discount.ID },
             { "iTotalUsedCount", 1 },
             { "iTotalUsedAmount", _voucherItem.DisAmount },
@@ -343,7 +343,7 @@ bool intfAccountingBasedModule::decreaseDiscountUsage(
 {
     if (_voucherItem.DisAmount > 0)
     {
-        clsDACResult Result = this->AccountCoupons->callSP("sp_UPDATE_coupon_decreaseStats", {
+        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_DecreaseStats", {
             { "iDiscountID", _voucherItem.Discount.ID },
             { "iTotalUsedCount", 1 },
             { "iTotalUsedAmount", _voucherItem.DisAmount },
@@ -436,7 +436,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
 
     //-- un-reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP("sp_UPDATE_saleable_un_reserve", {
+    this->AccountSaleables->callSP("spSaleable_unReserve", {
         { "iSaleableID", SaleableID },
         { "iUserID", _userID },
         { "iQty", _voucherItem.Qty },
@@ -829,7 +829,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     } //if discount
 
     //-- reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP("sp_UPDATE_saleable_reserve", {
+    this->AccountSaleables->callSP("spSaleable_Reserve", {
         { "iSaleableID", AssetItem.slbID },
         { "iUserID", currentUserID },
         { "iQty", _qty },

@@ -249,7 +249,7 @@ QVariantMap Account::apiPUTsignup(
     if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
-    quint64 UserID = this->callSP("AAA.sp_CREATE_signup", {
+    quint64 UserID = this->callSP("AAA.spSignup", {
             { "iBy", Type },
             { "iLogin", _emailOrMobile },
             { "iPass", _pass },
@@ -295,7 +295,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
     if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
         throw exHTTPForbidden("Selected role is not allowed to signup");
 
-    quint64 UserID = this->callSP("AAA.sp_CREATE_signup", {
+    quint64 UserID = this->callSP("AAA.spSignup", {
             { "iBy", "M" },
             { "iLogin", _mobile },
             { "iPass", "" },
@@ -332,7 +332,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
 
     _email = _email.toLower().trimmed();
 
-    QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_acceptApproval", {
+    QJsonObject UserInfo = this->callSP("AAA.spApproval_Accept", {
             { "iBy", "E" },
             { "iKey", _email },
             { "iCode", _uuid },
@@ -376,7 +376,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_acceptApproval", {
+    QJsonObject UserInfo = this->callSP("AAA.spApproval_Accept", {
             { "iBy", "M" },
             { "iKey", _mobile },
             { "iCode", _code },
@@ -462,7 +462,7 @@ bool Account::apiloginByMobileOnly(
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
+    this->callSP("AAA.spMobileVerifyCode_Request", {
                      { "iMobile", _mobile },
                      { "iSignupIfNotExists", _signupIfNotExists ? 1 : 0 },
                      { "iSignupRole", _signupRole },
@@ -480,14 +480,14 @@ bool Account::apiresendApprovalCode(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-//    this->callSP("AAA.sp_CREATE_approvalRequestAgain", {
+//    this->callSP("AAA.spApprovalRequestAgain", {
 //                     { "iBy", Type },
 //                     { "iKey", _emailOrMobile },
 //                     { "iIP", _REMOTE_IP },
 //                     { "iRecreateIfExpired", true },
 //                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
 //                 });
-    this->callSP("AAA.sp_CREATE_approvalRequest", {
+    this->callSP("AAA.spApproval_Request", {
                      { "iBy", Type },
                      { "iKey", _emailOrMobile },
                      { "iUserID", {} },
@@ -510,7 +510,7 @@ bool Account::apiresendApprovalCode(
 
 //    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-//    quint64 aprID = this->callSP("AAA.sp_CREATE_requestMobileVerifyCode", {
+//    quint64 aprID = this->callSP("AAA.spMobileVerifyCode_Request", {
 //                                     { "iMobile", _mobile },
 //                                 })
 //                    .spDirectOutputs()
@@ -535,7 +535,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    QJsonObject UserInfo = this->callSP("AAA.sp_UPDATE_verifyLoginByMobileCode", {
+    QJsonObject UserInfo = this->callSP("AAA.spLogin_VerifyByMobileCode", {
                                             { "iMobile", _mobile },
                                             { "iCode", _code },
                                             { "iIP", _REMOTE_IP },
@@ -639,7 +639,7 @@ bool Account::apilogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
 
-    this->callSP("AAA.sp_UPDATE_logout", {
+    this->callSP("AAA.spLogout", {
                      { "iByUserID", clsJWT(_JWT).usrID() },
                      { "iSessionGUID", clsJWT(_JWT).session() },
                  });
@@ -656,7 +656,7 @@ QString Account::apicreateForgotPasswordLink(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("AAA.sp_CREATE_forgotPassRequest", {
+    this->callSP("AAA.spForgotPass_Request", {
                      { "iLogin", _emailOrMobile },
                      { "iVia", Type },
                  });
@@ -716,7 +716,7 @@ bool Account::apichangePassByUUID(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("AAA.sp_UPDATE_changePassByUUID", {
+    this->callSP("AAA.spPassword_ChangeByUUID", {
                      { "iVia", Type },
                      { "iLogin", _emailOrMobile },
                      { "iUUID", _uuid },
@@ -735,7 +735,7 @@ bool Account::apichangePass(
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    this->callSP("AAA.sp_UPDATE_changePass", {
+    this->callSP("AAA.spPassword_Change", {
                      { "iUserID", clsJWT(_JWT).usrID() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
@@ -922,9 +922,9 @@ void Account::tryCancelVoucher(
 
     //2: cancel voucher
 
-    ///TODO: complete sp_UPDATE_voucher_cancel: create cancel voucher and credit to wallet
+    ///TODO: complete spVoucher_Cancel: create cancel voucher and credit to wallet
 
-    clsDACResult Result = Voucher::instance().callSP("sp_UPDATE_voucher_cancel", {
+    clsDACResult Result = Voucher::instance().callSP("spVoucher_Cancel", {
         { "iUserID", SYSTEM_USER_ID },
         { "iVoucherID", _voucherID },
         { "iSetAsError", _setAsError },
@@ -998,7 +998,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
         if ((_walletID >= 0) && (RemainingAfterWallet > 0))
         {
-            clsDACResult Result = this->callSP("sp_CREATE_walletTransaction", {
+            clsDACResult Result = this->callSP("spWalletTransaction_Create", {
                                                    { "iWalletID", _walletID },
                                                    { "iVoucherID", Voucher.ID },
                                                });
@@ -1069,7 +1069,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
     try
     {
-        this->callSP("sp_CREATE_walletTransactionOnPayment", {
+        this->callSP("spWalletTransactionOnPayment_Create", {
                          { "iVoucherID", VoucherID },
                          { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
@@ -1140,7 +1140,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
 //                                       }));
 
     try {
-        this->callSP("sp_CREATE_walletTransactionOnPayment", {
+        this->callSP("spWalletTransactionOnPayment_Create", {
                          { "iVoucherID", _vchID },
                          { "iPaymentType", QChar(enuPaymentType::Offline) }
                      });

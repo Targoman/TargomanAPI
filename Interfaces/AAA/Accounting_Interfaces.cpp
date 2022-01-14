@@ -415,7 +415,7 @@ bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsBy
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-  this->callSP("sp_UPDATE_setAsPrefered", {
+  this->callSP("spUserAsset_SetAsPrefered", {
                  {"iUserID", clsJWT(_JWT).usrID()},
                  {"iUASID",  UserPackageID},
                });

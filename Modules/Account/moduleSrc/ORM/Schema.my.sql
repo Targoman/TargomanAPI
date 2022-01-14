@@ -866,7 +866,7 @@ DELIMITER ;;
            SET MESSAGE_TEXT = '500:Transaction status must be New on insertion';
     END IF;
 
-    CALL sp_SYSTEM_prepareBalanceInfo(
+    CALL spBalanceInfo_Prepare(
           NEW.wlt_walID
         , NEW.wltID
         , NEW.wltDateTime
@@ -1172,7 +1172,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_approvalRequest` */;
+/*!50003 DROP PROCEDURE IF EXISTS `spApproval_Accept` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1182,1097 +1182,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_approvalRequest`(
-	IN `iBy` CHAR(1),
-	IN `iUserID` BIGINT UNSIGNED,
-	IN `iKey` VARCHAR(128),
-	IN `iPass` VARCHAR(100),
-	IN `iSalt` VARCHAR(100)
-)
-BEGIN
-    DECLARE vApprovalCode VARCHAR(50);
-    DECLARE vUserName VARCHAR(100);
-    DECLARE vUserFamily VARCHAR(100);
-
-    SELECT 1
-         , tblUser.usrName
-         , tblUser.usrFamily
-      INTO vApprovalCode
-         , vUserName
-         , vUserFamily
-      FROM tblUser
-     WHERE tblUser.usrID = iUserID
-           ;
-
-    IF (NOT ISNULL(iPass)) THEN 
-        IF ISNULL(vApprovalCode) THEN
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:User Not Found';
-        END IF;
-
-        SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err')
-             , tblUser.usrName
-             , tblUser.usrFamily
-          INTO vApprovalCode
-             , vUserName
-             , vUserFamily
-          FROM tblUser
-         WHERE tblUser.usrID = iUserID
-        ;
-
-        IF ISNULL(vApprovalCode) THEN 
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:Invalid userID';
-        END IF;
-
-        IF vApprovalCode = 'Err' THEN 
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:Invalid password';
-        END IF;
-    END IF;
-  
-    -- find user id if not provided
-    IF ISNULL(vApprovalCode) THEN
-        IF (NOT ISNULL(iUserID)) THEN 
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:Invalid userID';
-        END IF;
-
-          SELECT tblApprovalRequest.apr_usrID
-               , tblUser.usrName
-               , tblUser.usrFamily
-            INTO vApprovalCode
-               , vUserName
-               , vUserFamily
-            FROM tblApprovalRequest
-       LEFT JOIN tblUser
-              ON tblUser.usrID = tblApprovalRequest.apr_usrID
-           WHERE tblApprovalRequest.aprApprovalKey = iKey
-             AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2', 'E')
---               N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
-        ORDER BY aprRequestDate DESC
-           LIMIT 1
-                 ;
-
-        IF ISNULL(vApprovalCode) THEN 
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:Could not find user by key';
-        END IF;
-        
-        SET iUserID = CAST(vApprovalCode AS UNSIGNED);
-    END IF;
-
-    -- check if active approval request exists, expire it
-    UPDATE tblApprovalRequest
-       SET tblApprovalRequest.aprStatus = 'E'
-     WHERE tblApprovalRequest.aprApprovalKey = iKey
-       AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2')
---         N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
-           ;
-
-    IF iBy = 'E' THEN
-        SET vApprovalCode = Common.fnCreateRandomMD5();
-    ELSE 
-        SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
-    END IF;
-  
-    INSERT
-      INTO tblApprovalRequest
-       SET tblApprovalRequest.apr_usrID = iUserID,
-           tblApprovalRequest.aprRequestedFor = iBy,
---           aprIsForLogin = 0,
-           tblApprovalRequest.aprApprovalKey = iKey,
-           tblApprovalRequest.aprApprovalCode = vApprovalCode
-    ;
-
-    INSERT
-      INTO Common.tblAlerts
-       SET Common.tblAlerts.alr_usrID = iUserID,
-           Common.tblAlerts.alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
-           Common.tblAlerts.alrReplacedContactInfo = iKey,
-           Common.tblAlerts.alrReplacements = JSON_OBJECT(
-              'usrName', vUserName,
-              'usrFamily', vUserFamily,
-              'ApprovalCode', vApprovalCode
-           );
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_forgotPassRequest` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_forgotPassRequest`(
-	IN `iLogin` VARCHAR(50),
-	IN `iVia` CHAR(1)
-)
-BEGIN
-    DECLARE vUserID INT UNSIGNED;
-    DECLARE vUserName VARCHAR(50);
-    DECLARE vUserFamily VARCHAR(50);
-    DECLARE vLinkUUID CHAR(32);
-
-    SELECT tblUser.usrID
-         , tblUser.usrName
-         , tblUser.usrFamily
-      INTO vUserID
-         , vUserName
-         , vUserFamily
-      FROM tblUser
- LEFT JOIN tblForgotPassRequest
-        ON tblForgotPassRequest.fpr_usrID = tblUser.usrID
-     WHERE (
-           tblUser.usrEmail = iLogin
-        OR tblUser.usrMobile = iLogin
-           )
-       AND (
-           ISNULL(tblForgotPassRequest.fprStatus)
-        OR tblForgotPassRequest.fprStatus != 'N'
-        OR TIME_TO_SEC(TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate)) > 60
-           )
-     LIMIT 1
-    ;
-
-    IF (vUserID IS NOT NULL) THEN
-        SET vLinkUUID = Common.fnCreateRandomMD5();
-
-        INSERT
-          INTO tblForgotPassRequest
-           SET tblForgotPassRequest.fpr_usrID = vUserID
-             , tblForgotPassRequest.fprRequestedVia = iVia
-             , tblForgotPassRequest.fprUUID = vLinkUUID
-        ;
-
-        INSERT
-          INTO Common.tblAlerts
-           SET Common.tblAlerts.alr_usrID = vUserID
-             , Common.tblAlerts.alr_altCode = 'passReset'
-             , Common.tblAlerts.alrReplacements = JSON_OBJECT(
-                 'usrName',   vUserName,
-                 'usrFamily', vUserFamily,
-                 'via',       iVia,
-                 'UUID',      vLinkUUID
-               )
-        ;
-    END IF;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_newOnlinePayment` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_newOnlinePayment`(
-	IN `iVoucherID` BIGINT UNSIGNED,
-	IN `iGatewayID` INT,
-	IN `iAmount` BIGINT UNSIGNED,
-	OUT `oMD5` VARCHAR(50)
-)
-BEGIN
-	SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = '500:DEPRECATED. use sp_CREATE_onlinePayment instead';
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_onlinePayment` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_onlinePayment`(
-	IN `iVoucherID` BIGINT UNSIGNED,
-	IN `iGatewayID` INT,
-	IN `iAmount` BIGINT UNSIGNED,
-	OUT `oMD5` VARCHAR(50)
-)
-BEGIN
-  SET oMD5 = Common.fnCreateRandomMD5();
-  
-  INSERT
-    INTO tblOnlinePayments
-     SET onpMD5 = oMD5
-       , onp_vchID = iVoucherID
-       , onp_pgwID = iGatewayID
-       , onpAmount = iAmount
-  ;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_requestMobileVerifyCode` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_requestMobileVerifyCode`(
-	IN `iMobile` VARCHAR(50),
-	IN `iSignupIfNotExists` TINYINT,
-	IN `iSignupRole` VARCHAR(50)
-)
-BEGIN
-    DECLARE UserID BIGINT UNSIGNED;
-    DECLARE ApprovalCode VARCHAR(50);
-
-    IF ISNULL(iMobile) THEN
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Invalid mobile';
-    END IF;
-
-    SELECT usrID
-      INTO UserID
-      FROM tblUser
-     WHERE usrMobile = iMobile
-    ;
-
-    IF ISNULL(UserID) THEN
-        IF iSignupIfNotExists = 1 THEN
-            INSERT
-              INTO tblUser
-               SET tblUser.usrMobile = iMobile,
-                   tblUser.usr_rolID = (
-            SELECT tblRoles.rolID
-              FROM tblRoles
-             WHERE LOWER(tblRoles.rolName) = LOWER(iSignupRole)
---               AND (tblRoles.rolSignupAllowedIPs IS NULL
---                OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
-                   )
-            ;
-                   
-            SET UserID = LAST_INSERT_ID();
-        ELSE
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:User Not Found';
-        END IF;
-    END IF;
-
-    SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
-  
-    INSERT
-      INTO tblApprovalRequest
-       SET apr_usrID = UserID,
-           aprRequestedFor = 'M',
---           aprIsForLogin = 1,
-           aprApprovalKey = iMobile,
-           aprApprovalCode = ApprovalCode
-    ;
-
-    INSERT
-      INTO Common.tblAlerts
-       SET alr_usrID = UserID,
-           alrMobile = iMobile,
-           alr_altCode = 'approveMobile',
-           alrReplacedContactInfo = iMobile,
-           alrReplacements = JSON_OBJECT(
-               'ApprovalCode', ApprovalCode
-           )
-    ;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_signup` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_signup`(
-	IN `iBy` CHAR(1),
-	IN `iLogin` VARCHAR(50),
-	IN `iPass` CHAR(32),
-	IN `iRole` VARCHAR(50),
-	IN `iIP` VARCHAR(50),
-	IN `iName` VARCHAR(100),
-	IN `iFamily` VARCHAR(100),
-	IN `iSpecialPrivs` VARCHAR(5000),
-	IN `iMaxSessions` INT,
-	IN `iCreatorUserID` BIGINT UNSIGNED,
-	OUT `oUserID` BIGINT UNSIGNED
-)
-BEGIN
-    DECLARE RoleID BIGINT UNSIGNED;
-    DECLARE InnerRolID BIGINT;
-    DECLARE SessionGUID CHAR(32);
-    DECLARE Err VARCHAR(500);
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-
-        ROLLBACK;  
-
-        INSERT
-          INTO tblActionLogs
-           SET tblActionLogs.atlBy_usrID = 1,
-               tblActionLogs.atlType = 'Signup.Error',
-               tblActionLogs.atlDescription = JSON_OBJECT(
-                   "err", Err,
-                   "iBy", iBy,
-                   "iLogin", iLogin,
-                   "iPass", iPass,
-                   "iRole", iRole,
-                   "iIP", iIP,
-                   "iName", iName,
-                   "iFamily", iFamily,
-                   "iSpecialPrivs", iSpecialPrivs,
-                   "iMaxSessions", iMaxSessions,
-                   "iCreatorUserID", iCreatorUserID
-               )
-        ;
-
-        RESIGNAL;  
-    END;
-    
-    DECLARE EXIT HANDLER FOR 1062
-    BEGIN
-        ROLLBACK;
-
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '409:Already registered.';
-    END;
-
-    CALL Common.sp_AddDebugLog('AAA', 'signup');
-
-    SELECT tblRoles.rolID
-      INTO RoleID
-      FROM tblRoles
-     WHERE tblRoles.rolName = iRole
-       AND (tblRoles.rolSignupAllowedIPs IS NULL
-        OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
-    ;
-
-    IF ISNULL(RoleID) THEN
-        SIGNAL SQLSTATE '45403'
-           SET MESSAGE_TEXT = "403:Role not found or is not allowed to signup from this IP";
-    END IF;
-
-    START TRANSACTION;
-
-    UPDATE tblUser
-       SET _InvalidatedAt = UNIX_TIMESTAMP()
-     WHERE _InvalidatedAt = 0
-       AND usrStatus = 'R'
-       AND (
-           (IFNULL(IF(iBy = 'E', iLogin, NULL), '') <> '' AND IFNULL(usrEmail, '') = IF(iBy = 'E', iLogin, NULL))
-        OR (IFNULL(IF(iBy = 'M', iLogin, NULL), '') <> '' AND IFNULL(usrMobile, '') = IF(iBy = 'M', iLogin, NULL))
-           )
-    ;
-
-    IF (IFNULL(iPass, '') = '') THEN
-        SET iPass = 'NOT_SET';
-    ELSE
-        SET iPass = LOWER(iPass);
-    END IF;
-
-    INSERT INTO tblUser
-       SET tblUser.usrName = iName,
-           tblUser.usrFamily = iFamily,
-           tblUser.usrEmail = IF(iBy = 'E', iLogin, NULL),
-           tblUser.usrMobile = IF(iBy = 'M', iLogin, NULL),     
-           tblUser.usrPass = iPass,
-           tblUser.usr_rolID = RoleID,
-           tblUser.usrSpecialPrivs = iSpecialPrivs,
-           tblUser.usrMaxSessions = iMaxSessions,
-           tblUser.usrCreatedBy_usrID = IFNULL(iCreatorUserID, 1)
-    ;
-
-    SET oUserID = LAST_INSERT_ID();
-
-    CALL sp_CREATE_approvalRequest(iBy, oUserID, iLogin, NULL, NULL);
-
-    INSERT
-      INTO tblUserWallets
-       SET tblUserWallets.wal_usrID = oUserID,
-           tblUserWallets.walName = 'Default',
-           tblUserWallets.walDefault = 1,
-           tblUserWallets.walCreatedBy_usrID = IFNULL(iCreatorUserID, 1)
-    ;
-
-    INSERT
-      INTO tblActionLogs
-       SET tblActionLogs.atlBy_usrID = oUserID,
-           tblActionLogs.atlType = 'UserCreated'
-    ;
-
-    COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_transfer` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_transfer`(
-	IN `iFromUserID` BIGINT UNSIGNED,
-	IN `iFromWalID` INT,
-	IN `iToUserLogin` INT,
-	IN `iAmount` INT,
-	IN `iPass` INT,
-	IN `iSalt` INT
-)
-BEGIN
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE Valid TINYINT;
-  DECLARE TargetUserID BIGINT UNSIGNED;
-  DECLARE TargetWalletID BIGINT UNSIGNED;
-  DECLARE FromNameFamily VARCHAR(100);
-  DECLARE ToNameFamily VARCHAR(100);
-  DECLARE Err VARCHAR(500);
-  
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = iFromUserID,
-         tblActionLogs.atlType = 'Transfer.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iFromUserID", iFromUserID,
-              "iFromWalID", iFromWalID,
-              "iToUserLogin", iToUserLogin,
-              "iAmount", iAmount,
-              "iPass", iPass,
-              "iSalt", iSalt
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-  
-  SELECT IFNULL(CONCAT(tblUser.usrName, ' ', tblUser.usrFamily), IFNULL(tblUser.usrEmail, tblUser.usrMobile)),
-         tblUser.usrID,
-         tblUserWallets.walID
-    INTO ToNameFamily,
-         TargetUserID,
-         TargetWalletID
-    FROM tblUser
-      JOIN tblUserWallets
-        ON tblUserWallets.wal_usrID = tblUser.usrID
-   WHERE tblUser.usrStatus = 'A'
-     AND (tblUser.usrEmail = iToUserLogin OR tblUser.usrMobile = iToUserLogin)
-     AND tblUserWallets.walDefault = TRUE;
-     
-  IF ISNULL(ToNameFamily) THEN 
- 		SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = '401: Target user not found or is inactive';
-  END IF;
-
-  SELECT fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass),
-         IFNULL(CONCAT(tblUser.usrName, ' ', tblUser.usrFamily), IFNULL(tblUser.usrEmail, tblUser.usrMobile))
-    INTO Valid,
-         FromNameFamily
-    FROM tblUser
-   WHERE tblUser.usrID = iFromUserID
-     AND tblUser.usrStatus = 'A';
-   
-  IF ISNULL(Valid) THEN
- 		SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = '401:Invalid UserID';
-  END IF;
-  
-  IF Valid = FALSE THEN
- 		SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = '401:Incorrect password';
-  END IF;
-  
-  CALL sp_SYSTEM_validateWalletTransaction(iFromUserID, iFromWalID, 'T', iAmount, Valid);
-
-  START TRANSACTION;
-    INSERT INTO tblVoucher
-       SET tblVoucher.vch_usrID = iFromUserID,
-           tblVoucher.vchType = 'T',
-           tblVoucher.vchDesc = JSON_OBJECT(
-              "targetID", TargetUserID,
-              "targetLogin", iToUserLogin,
-              "targetName", ToNameFamily
-           ),
-           tblVoucher.vchTotalAmount = Amount,
-           tblVoucher.vchStatus = 'F';
-           
-    INSERT INTO tblWalletsTransactions
-       SET tblWalletsTransactions.wlt_walID = iFromWalID,
-           tblWalletsTransactions.wlt_vchID = LAST_INSERT_ID(),
-           tblWalletsTransactions.wltType = 'T',
-           tblWalletsTransactions.wltAmount = iAmount * -1;
-
-    -- Do not merge this with previous query. Creation of a transatction must be separaet from it's acceptance           
-    UPDATE tblWalletsTransactions
-       SET tblWalletsTransactions.wltStatus = 'A'
-     WHERE tblWalletsTransactions.wltID = LAST_INSERT_ID();  
-    
-    INSERT INTO tblVoucher
-       SET tblVoucher.vch_usrID = TargetUserID,
-           tblVoucher.vchType = 'F',
-           tblVoucher.vchDesc = JSON_OBJECT(
-              "fromID", iFromUserID,
-              "fromName", FromNameFamily
-           ),
-           tblVoucher.vchTotalAmount = Amount,
-           tblVoucher.vchStatus = 'F';
-
-    INSERT INTO tblWalletsTransactions
-       SET tblWalletsTransactions.wlt_walID = TargetWalletID,
-           tblWalletsTransactions.wlt_vchID = LAST_INSERT_ID(),
-           tblWalletsTransactions.wltType = 'F',
-           tblWalletsTransactions.wltAmount = iAmount;
-
-    UPDATE tblWalletsTransactions
-       SET tblWalletsTransactions.wltStatus = 'A'
-     WHERE tblWalletsTransactions.wltID = LAST_INSERT_ID();  
-  COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_walletTransaction` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_walletTransaction`(
-	IN `iWalletID` BIGINT UNSIGNED,
-	IN `iVoucherID` BIGINT UNSIGNED,
-	OUT `oAmount` INT UNSIGNED
-)
-BEGIN
-  DECLARE TransactionType CHAR(1);
-  DECLARE Multiplier TINYINT;
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE Err VARCHAR(500);
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-
-    INSERT
-      INTO tblActionLogs
-       SET tblActionLogs.atlBy_usrID = UserID,
-           tblActionLogs.atlType = 'WLT.Error',
-           tblActionLogs.atlDescription = JSON_OBJECT(
-               "err", Err,
-               "iWalletID", iWalletID,
-               "iVoucherID",iVoucherID
-           );
-
---	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-
-    SELECT tblVoucher.vch_usrID,
-           tblVoucher.vchType, 
-           tblVoucher.vchTotalAmount
-      INTO UserID, 
-           TransactionType,
-           oAmount
-      FROM tblVoucher
-     WHERE tblVoucher.vchID = iVoucherID
-       AND tblVoucher.vchStatus = 'N'
-  ;
-
-  IF ISNULL(UserID) THEN 
-    SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = '401:Invalid voucher ID';
-  END IF;
-
-  CALL sp_SYSTEM_validateWalletTransaction(UserID, iWalletID, TransactionType, oAmount, Multiplier);
-  
-  IF oAmount > 0 THEN 
-    INSERT INTO tblWalletsTransactions
-       SET tblWalletsTransactions.wlt_walID = WalletID,
-           tblWalletsTransactions.wlt_vchID = iVoucherID,
-           tblWalletsTransactions.wltType = TrasnactionType,
-           tblWalletsTransactions.wltAmount = oAmount * Multiplier;
-  END IF;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_walletTransactionOnPayment` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_walletTransactionOnPayment`(
-	IN `iVoucherID` BIGINT UNSIGNED,
-	IN `iPaymentType` CHAR(1)
-)
-BEGIN
-  DECLARE PaymentID BIGINT UNSIGNED;
-  DECLARE ExpenseVoucherID BIGINT UNSIGNED;
-  DECLARE CreditVoucherID BIGINT UNSIGNED;
-  DECLARE Amount BIGINT UNSIGNED;
-  DECLARE TotalAmount BIGINT UNSIGNED;
-  DECLARE RemainingAfterWallet BIGINT UNSIGNED;
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE UserDefaultWallet BIGINT UNSIGNED;
-  DECLARE Err VARCHAR(500);
-  DECLARE LastID BIGINT UNSIGNED;
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = UserID,
-         tblActionLogs.atlType = 'VirtWLT.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iVoucherID", iVoucherID,
-              "iPaymentType", iPaymentType
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-
-  START TRANSACTION;
-    IF iPaymentType = 'N' THEN /*Online*/
-      SELECT tblOnlinePayments.onpID,
-             tblOnlinePayments.onp_vchID,
-             tblOnlinePayments.onpAmount,
-             tblVoucher.vchTotalAmount,
-             tblVoucher.vch_usrID
-        INTO PaymentID,
-             ExpenseVoucherID,
-             Amount,
-             TotalAmount,
-             UserID
-        FROM tblOnlinePayments
-        JOIN tblVoucher
-          ON tblVoucher.vchID = tblOnlinePayments.onp_vchID
-       WHERE tblOnlinePayments.onp_vchID = iVoucherID
-         AND tblOnlinePayments.onpStatus = 'Y'; /*Payed*/
-    ELSEIF iPaymentType = 'F' THEN /*Offline*/
-      SELECT tblOnlinePayments.onpID,
-             tblOfflinePayments.ofp_vchID,
-             tblOfflinePayments.ofpAmount,
-             tblVoucher.vchTotalAmount,
-             tblVoucher.vch_usrID
-        INTO PaymentID,
-             ExpenseVoucherID,
-             Amount,
-             TotalAmount,
-             UserID     
-        FROM tblOfflinePayments
-        JOIN tblVoucher
-          ON tblVoucher.vchID = tblOnlinePayments.onp_vchID
-       WHERE tblOfflinePayments.ofp_invID = iVoucherID
-         AND tblOfflinePayments.onpStatus = 'Y'; /*Payed*/
-    ELSE
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '500:Invalid payment type';
-    END IF;
-
-    IF ISNULL(ExpenseVoucherID) THEN 
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '500:Payment not found or is not yet payed';
-    END IF;
-
-    SELECT tblUserWallets.walID INTO UserDefaultWallet
-      FROM tblUserWallets
-     WHERE tblUserWallets.wal_usrID = UserID
-       AND tblUserWallets.walDefault = TRUE;
-
-    IF ISNULL(UserDefaultWallet) THEN 
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '500:Default wallet not found';
-    END IF;
-
-    SELECT TotalAmount - tblWalletsTransactions.wltAmount
-      INTO RemainingAfterWallet
-      FROM tblWalletsTransactions
-	  WHERE tblWalletsTransactions.wlt_vchID = iVoucherID
-       AND tblWalletsTransactions.wltStatus = 'A';
-
-    IF (IFNULL(RemainingAfterWallet, 0) < 0) THEN 
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '500:Remaining After Wallet can not be negative';
-    END IF;
-
-    INSERT INTO tblVoucher
-       SET tblVoucher.vch_usrID = UserID,
-           tblVoucher.vchType = 'C',
-           tblVoucher.vchDesc = JSON_OBJECT(
-              "type", IF(iPaymentType = 'N', 'Online', 'Offline'),
-              "paymentID", PaymentID
-           ),
-           tblVoucher.vchTotalAmount = Amount,
-           tblVoucher.vchStatus = 'F';
-    
-	 SET LastID = LAST_INSERT_ID();
-	 IF (LastID IS NULL) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
-    END IF;
-    
-    INSERT INTO tblWalletsTransactions
-       SET tblWalletsTransactions.wlt_walID = UserDefaultWallet,
-           tblWalletsTransactions.wlt_vchID = LastID,
-           tblWalletsTransactions.wlt_vchType = 'C', /*Credit*/
-           tblWalletsTransactions.wltAmount = Amount;
-
-	 SET LastID = LAST_INSERT_ID();
-	 IF (LastID IS NULL) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
-    END IF;
-
-    UPDATE tblWalletsTransactions
-       SET tblWalletsTransactions.wltStatus = 'A'
-     WHERE tblWalletsTransactions.wltID = LastID;
-
-  IF (RemainingAfterWallet > 0) THEN
-    INSERT INTO tblWalletsTransactions
-       SET tblWalletsTransactions.wlt_walID = UserDefaultWallet,
-           tblWalletsTransactions.wlt_vchID = iVoucherID,
-           tblWalletsTransactions.wlt_vchType = 'E', /*Expense*/
-           tblWalletsTransactions.wltAmount = RemainingAfterWallet;
-
-	 SET LastID = LAST_INSERT_ID();
-	 IF (LastID IS NULL) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
-    END IF;
-
-    UPDATE tblWalletsTransactions
-       SET tblWalletsTransactions.wltStatus = 'Y'
-     WHERE tblWalletsTransactions.wltID = LastID;
-  END IF;
-
-  COMMIT;  
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_CREATE_withdrawalRequest` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_CREATE_withdrawalRequest`(
-	IN `iWalletID` BIGINT UNSIGNED,
-	IN `iForUsrID` BIGINT UNSIGNED,
-	IN `iByUserID` BIGINT UNSIGNED,
-	IN `iAmount` INT UNSIGNED,
-	IN `iDesc` VARCHAR(500),
-	OUT `oVoucherID` BIGINT UNSIGNED
-)
-BEGIN
-  DECLARE Multiplier TINYINT;
-  DECLARE Err VARCHAR(500);
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = iByUserID,
-         tblActionLogs.atlType = 'Withdraw.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iWalletID", iWalletID,
-              "iForUsrID", iForUsrID,
-              "iByUserID", iByUserID,
-              "iAmount",iAmount,
-              "iDesc",iDesc
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-  
-  CALL sp_SYSTEM_validateWalletTransaction(iForUsrID, iWalletID, 'W', iAmount, Multiplier);
-
-  INSERT INTO tblVoucher
-     SET tblVoucher.vch_usrID = iForUsrID,
-         tblVoucher.vchType = 'W',
-         tblVoucher.vchTotalAmount = iAmount,
-         tblVoucher.vchDesc = JSON_OBJECT(
-          "desc", iDesc
-         );
-         
-  SET oVoucherID = LAST_INSERT_ID();
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_SYSTEM_prepareBalanceInfo` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_SYSTEM_prepareBalanceInfo`(
-	IN `iWalID` BIGINT UNSIGNED,
-	IN `iWltID` BIGINT UNSIGNED,
-	IN `iWltDateTime` DATETIME,
-	OUT `oLastTransactionDate` DATETIME,
-	OUT `oLastBalance` BIGINT,
-	OUT `oLastIncome` BIGINT,
-	OUT `oLastExpense` BIGINT,
-	OUT `oMultipleInsert` TINYINT
-)
-BEGIN
-
-  SELECT tblWalletsTransactions.wltDateTime INTO oLastTransactionDate
-    FROM tblWalletsTransactions
-    JOIN tblWalletBalances
-      ON tblWalletBalances.wbl_wltID = tblWalletsTransactions.wltID
-   WHERE tblWalletsTransactions.wlt_walID = iWalID
-     AND tblWalletsTransactions.wltID < iWltID
-   ORDER BY tblWalletsTransactions.wltDateTime DESC
-   LIMIT 1;
-   
-  CALL Common.sp_AddDebugLog('afterInsertTransaction', JSON_OBJECT('oLastTransactionDate', oLastTransactionDate, 
-                                                              'iWalID',iWalID,
-                                                              'iWltID',iWltID,
-                                                              'iWltDateTime',iWltDateTime,
-                                                              'compare', oLastTransactionDate >= iWltDateTime
-                                                              ));
-   
-  IF NOT ISNULL(oLastTransactionDate) AND oLastTransactionDate >= iWltDateTime THEN
-    DELETE tblWalletBalances
-      FROM tblWalletBalances
-      JOIN tblWalletsTransactions
-        ON tblWalletsTransactions.wltID = tblWalletBalances.wbl_wltID
-     WHERE tblWalletsTransactions.wltDateTime >= iWltDateTime;   
-    SET oMultipleInsert = TRUE;
-  END IF;
-  
-  SET oLastTransactionDate = NULL;
-  
-  SELECT tblWalletBalances.wblBalance,
-         tblWalletsTransactions.wltDateTime 
-    INTO oLastBalance,
-         oLastTransactionDate
-    FROM tblWalletBalances
-    JOIN tblWalletsTransactions
-      ON tblWalletsTransactions.wltID = tblWalletBalances.wbl_wltID
-   WHERE tblWalletsTransactions.wlt_walID = iWalID
-   ORDER BY tblWalletsTransactions.wltDateTime DESC, tblWalletsTransactions.wltID DESC
-   LIMIT 1;
-
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_SYSTEM_validateIPAccess` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_SYSTEM_validateIPAccess`(
-	IN `iIP` BIGINT
-
-
-)
-    READS SQL DATA
-Proc: BEGIN
-	DECLARE IPStatus CHAR DEFAULT NULL;
-	DECLARE LastAccess BIGINT UNSIGNED DEFAULT NULL;
-	DECLARE Diff DOUBLE;
-	
-	SELECT tblIPBin.ipbStatus,
-			 (UNIX_TIMESTAMP(CURTIME(4)) - MAX(tblIPStats.ipsTimeStamp))
-		INTO IPStatus,
-		     Diff
-		FROM tblIPBin
-			JOIN tblIPStats
-				ON tblIPStats.ips_ipbIP = tblIPBin.ipbIP
-		WHERE tblIPBin.ipbIP = iIP;
-	
-	IF IPStatus IS NULL THEN
-		LEAVE Proc;
-	END IF;
-	
-	IF (IPStatus != 'A') THEN  
-		SIGNAL SQLSTATE '45403'
-	      SET MESSAGE_TEXT = "403:IP %IP% has been blocked. Contact system admin.";
-   ELSEIF (Diff < 0.01) THEN
-		SIGNAL SQLSTATE '45403'
-	      SET MESSAGE_TEXT = "403:Fast request from %IP% has been banned";
-	END IF;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_SYSTEM_validateWalletTransaction` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_SYSTEM_validateWalletTransaction`(
-	IN `iUserID` BIGINT UNSIGNED,
-	INOUT `ioWalletID` BIGINT UNSIGNED,
-	IN `iTransactionType` CHAR(1),
-	INOUT `ioAmount` INT UNSIGNED,
-	OUT `oMultiplier` TINYINT
-)
-BEGIN
-  DECLARE LastBalance BIGINT;
-  DECLARE MinBalance BIGINT;
-  DECLARE NotTransferable BIGINT;
-  DECLARE MaxTransferPerDay BIGINT;
-  DECLARE TodayTransfers BIGINT;
-
-  SELECT tblUserWallets.walID,
-         tblUserWallets.walMinBalance,
-         tblUserWallets.walLastBalance,
-         tblUserWallets.walNotTransferableAmount
-    INTO ioWalletID,
-         MinBalance,
-         LastBalance,
-         NotTransferable
-    FROM tblUserWallets
-   WHERE tblUserWallets.wal_usrID = iUserID
-     AND (tblUserWallets.walID = ioWalletID 
-          OR (ioWalletID = 0 
-              AND  tblUserWallets.walDefault = TRUE
-              )
-         );
-         
-  IF ISNULL(ioWalletID) THEN 
- 		SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = '401:Wallet not found or is not yours';
-  END IF;
-  
-  CASE iTransactionType
-    WHEN 'E' THEN 
-      SET ioAmount = LEAST(ioAmount, GREATEST(0, LastBalance - MinBalance)), oMultiplier = -1;
-    WHEN 'T' THEN 
-      IF LastBalance - NotTransferable - MinBalance - ioAmount < 0 THEN
-     		SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Not enough credit in wallet to transfer';
-      END IF;
-      
-      SELECT COALESCE(SUM(tblWalletsTransactions.wltAmount),0) INTO TodayTransfers
-        FROM tblWalletsTransactions
-       WHERE tblWalletsTransactions.wlt_walID = ioWalletID
-         AND DATE(tblWalletsTransactions.wltDateTime) = DATE(NOW())
-         AND tblWalletsTransactions.wltType = 'T'
-         AND tblWalletsTransactions.wltStatus = 'A';        
-      
-      IF MaxTransferable >0 AND MaxTransferPerDay < ioAmount + TodayTransfers THEN
-     		SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Amount is greater than your per day allowed transfer';
-      END IF;
-      SET oMultiplier = -1;
-    WHEN 'F' THEN 
-      SET oMultiplier = 1;
-    WHEN 'I' THEN 
-      SET oMultiplier = 1;
-    WHEN 'C' THEN 
-      SET oMultiplier = 1;
-    WHEN 'W' THEN 
-      IF LastBalance - NotTransferable - MinBalance - ioAmount < 0 THEN
-     		SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Not enough credit in wallet to withdraw';
-      END IF;
-      
-      SET oMultiplier = -1;
-    ELSE 
-    	SIGNAL SQLSTATE '45000'
-         SET MESSAGE_TEXT = '500:Invalid wallet transaction type';
-  END CASE;
-/**/
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_acceptApproval` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_acceptApproval`(
+CREATE PROCEDURE `spApproval_Accept`(
 	IN `iBy` CHAR(1),
 	IN `iKey` VARCHAR(128),
 	IN `iCode` VARCHAR(50),
@@ -2440,45 +1350,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_changePass` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_changePass`(
-	IN `iUserID` BIGINT UNSIGNED,
-	IN `iOldPass` CHAR(32),
-	IN `iOldPassSalt` VARCHAR(50),
-	IN `iNewPass` CHAR(32)
-)
-BEGIN
-  DECLARE WasOK BOOL DEFAULT FALSE;
-
-  SELECT 1 INTO WasOK
-    FROM tblUser
-   WHERE tblUser.usrID = iUserID
-     AND fnPasswordsAreEqual(iOldPass, iOldPassSalt, tblUser.usrPass);
-  
-  IF NOT WasOK THEN
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401:Invalid User or Password';
-  END IF;
-  
-  UPDATE tblUser
-     SET tblUser.usrPass = iNewPass
-   WHERE tblUser.usrID = iUserID;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_changePassByUUID` */;
+/*!50003 DROP PROCEDURE IF EXISTS `spApproval_Request` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -2488,53 +1360,261 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_changePassByUUID`(
-	IN `iVia` VARCHAR(1),
-	IN `iLogin` VARCHAR(50),
-	IN `iUUID` VARCHAR(50),
-	IN `iNewPass` VARCHAR(50)
+CREATE PROCEDURE `spApproval_Request`(
+	IN `iBy` CHAR(1),
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iKey` VARCHAR(128),
+	IN `iPass` VARCHAR(100),
+	IN `iSalt` VARCHAR(100)
 )
 BEGIN
-    DECLARE vUserID BIGINT UNSIGNED;
-    DECLARE vIsExpired BOOL;
+    DECLARE vApprovalCode VARCHAR(50);
+    DECLARE vUserName VARCHAR(100);
+    DECLARE vUserFamily VARCHAR(100);
 
-    SELECT tblForgotPassRequest.fpr_usrID
-         , TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate) > "00:30:00"
+    SELECT 1
+         , tblUser.usrName
+         , tblUser.usrFamily
+      INTO vApprovalCode
+         , vUserName
+         , vUserFamily
+      FROM tblUser
+     WHERE tblUser.usrID = iUserID
+           ;
+
+    IF (NOT ISNULL(iPass)) THEN 
+        IF ISNULL(vApprovalCode) THEN
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:User Not Found';
+        END IF;
+
+        SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err')
+             , tblUser.usrName
+             , tblUser.usrFamily
+          INTO vApprovalCode
+             , vUserName
+             , vUserFamily
+          FROM tblUser
+         WHERE tblUser.usrID = iUserID
+        ;
+
+        IF ISNULL(vApprovalCode) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid userID';
+        END IF;
+
+        IF vApprovalCode = 'Err' THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid password';
+        END IF;
+    END IF;
+  
+    -- find user id if not provided
+    IF ISNULL(vApprovalCode) THEN
+        IF (NOT ISNULL(iUserID)) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Invalid userID';
+        END IF;
+
+          SELECT tblApprovalRequest.apr_usrID
+               , tblUser.usrName
+               , tblUser.usrFamily
+            INTO vApprovalCode
+               , vUserName
+               , vUserFamily
+            FROM tblApprovalRequest
+       LEFT JOIN tblUser
+              ON tblUser.usrID = tblApprovalRequest.apr_usrID
+           WHERE tblApprovalRequest.aprApprovalKey = iKey
+             AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2', 'E')
+--               N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
+        ORDER BY aprRequestDate DESC
+           LIMIT 1
+                 ;
+
+        IF ISNULL(vApprovalCode) THEN 
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:Could not find user by key';
+        END IF;
+        
+        SET iUserID = CAST(vApprovalCode AS UNSIGNED);
+    END IF;
+
+    -- check if active approval request exists, expire it
+    UPDATE tblApprovalRequest
+       SET tblApprovalRequest.aprStatus = 'E'
+     WHERE tblApprovalRequest.aprApprovalKey = iKey
+       AND tblApprovalRequest.aprStatus IN ('N', 'S', '1', '2')
+--         N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2: SecondTry, E: Expired
+           ;
+
+    IF iBy = 'E' THEN
+        SET vApprovalCode = Common.fnCreateRandomMD5();
+    ELSE 
+        SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
+    END IF;
+  
+    INSERT
+      INTO tblApprovalRequest
+       SET tblApprovalRequest.apr_usrID = iUserID,
+           tblApprovalRequest.aprRequestedFor = iBy,
+--           aprIsForLogin = 0,
+           tblApprovalRequest.aprApprovalKey = iKey,
+           tblApprovalRequest.aprApprovalCode = vApprovalCode
+    ;
+
+    INSERT
+      INTO Common.tblAlerts
+       SET Common.tblAlerts.alr_usrID = iUserID,
+           Common.tblAlerts.alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
+           Common.tblAlerts.alrReplacedContactInfo = iKey,
+           Common.tblAlerts.alrReplacements = JSON_OBJECT(
+              'usrName', vUserName,
+              'usrFamily', vUserFamily,
+              'ApprovalCode', vApprovalCode
+           );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spBalanceInfo_Prepare` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spBalanceInfo_Prepare`(
+	IN `iWalID` BIGINT UNSIGNED,
+	IN `iWltID` BIGINT UNSIGNED,
+	IN `iWltDateTime` DATETIME,
+	OUT `oLastTransactionDate` DATETIME,
+	OUT `oLastBalance` BIGINT,
+	OUT `oLastIncome` BIGINT,
+	OUT `oLastExpense` BIGINT,
+	OUT `oMultipleInsert` TINYINT
+)
+BEGIN
+
+  SELECT tblWalletsTransactions.wltDateTime INTO oLastTransactionDate
+    FROM tblWalletsTransactions
+    JOIN tblWalletBalances
+      ON tblWalletBalances.wbl_wltID = tblWalletsTransactions.wltID
+   WHERE tblWalletsTransactions.wlt_walID = iWalID
+     AND tblWalletsTransactions.wltID < iWltID
+   ORDER BY tblWalletsTransactions.wltDateTime DESC
+   LIMIT 1;
+   
+  CALL Common.spLogDebug('afterInsertTransaction', JSON_OBJECT('oLastTransactionDate', oLastTransactionDate, 
+                                                              'iWalID',iWalID,
+                                                              'iWltID',iWltID,
+                                                              'iWltDateTime',iWltDateTime,
+                                                              'compare', oLastTransactionDate >= iWltDateTime
+                                                              ));
+   
+  IF NOT ISNULL(oLastTransactionDate) AND oLastTransactionDate >= iWltDateTime THEN
+    DELETE tblWalletBalances
+      FROM tblWalletBalances
+      JOIN tblWalletsTransactions
+        ON tblWalletsTransactions.wltID = tblWalletBalances.wbl_wltID
+     WHERE tblWalletsTransactions.wltDateTime >= iWltDateTime;   
+    SET oMultipleInsert = TRUE;
+  END IF;
+  
+  SET oLastTransactionDate = NULL;
+  
+  SELECT tblWalletBalances.wblBalance,
+         tblWalletsTransactions.wltDateTime 
+    INTO oLastBalance,
+         oLastTransactionDate
+    FROM tblWalletBalances
+    JOIN tblWalletsTransactions
+      ON tblWalletsTransactions.wltID = tblWalletBalances.wbl_wltID
+   WHERE tblWalletsTransactions.wlt_walID = iWalID
+   ORDER BY tblWalletsTransactions.wltDateTime DESC, tblWalletsTransactions.wltID DESC
+   LIMIT 1;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spForgotPass_Request` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spForgotPass_Request`(
+	IN `iLogin` VARCHAR(50),
+	IN `iVia` CHAR(1)
+)
+BEGIN
+    DECLARE vUserID INT UNSIGNED;
+    DECLARE vUserName VARCHAR(50);
+    DECLARE vUserFamily VARCHAR(50);
+    DECLARE vLinkUUID CHAR(32);
+
+    SELECT tblUser.usrID
+         , tblUser.usrName
+         , tblUser.usrFamily
       INTO vUserID
-         , vIsExpired
-      FROM tblForgotPassRequest
-INNER JOIN tblUser
-        ON tblUser.usrID = tblForgotPassRequest.fpr_usrID
+         , vUserName
+         , vUserFamily
+      FROM tblUser
+ LEFT JOIN tblForgotPassRequest
+        ON tblForgotPassRequest.fpr_usrID = tblUser.usrID
      WHERE (
            tblUser.usrEmail = iLogin
         OR tblUser.usrMobile = iLogin
            )
-       AND tblForgotPassRequest.fprUUID = iUUID
-       AND tblForgotPassRequest.fprStatus = 'S'
+       AND (
+           ISNULL(tblForgotPassRequest.fprStatus)
+        OR tblForgotPassRequest.fprStatus != 'N'
+        OR TIME_TO_SEC(TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate)) > 60
+           )
+     LIMIT 1
     ;
 
-    IF ISNULL (vIsExpired) OR vIsExpired THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = '401:Invalid or Expired link';
+    IF (vUserID IS NOT NULL) THEN
+        SET vLinkUUID = Common.fnCreateRandomMD5();
+
+        INSERT
+          INTO tblForgotPassRequest
+           SET tblForgotPassRequest.fpr_usrID = vUserID
+             , tblForgotPassRequest.fprRequestedVia = iVia
+             , tblForgotPassRequest.fprUUID = vLinkUUID
+        ;
+
+        INSERT
+          INTO Common.tblAlerts
+           SET Common.tblAlerts.alr_usrID = vUserID
+             , Common.tblAlerts.alr_altCode = 'passReset'
+             , Common.tblAlerts.alrReplacements = JSON_OBJECT(
+                 'usrName',   vUserName,
+                 'usrFamily', vUserFamily,
+                 'via',       iVia,
+                 'UUID',      vLinkUUID
+               )
+        ;
     END IF;
-
-    UPDATE tblForgotPassRequest
-       SET tblForgotPassRequest.fprStatus = IF(tblForgotPassRequest.fprUUID = iUUID, 'A', 'E')
-     WHERE tblForgotPassRequest.fpr_usrID = vUserID
-       AND tblForgotPassRequest.fprStatus IN ('S', 'N')
-    ; 
-
-    UPDATE tblUser
-       SET tblUser.usrPass = iNewPass
-     WHERE tblUser.usrID = vUserID
-    ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_login` */;
+/*!50003 DROP PROCEDURE IF EXISTS `spIP_ValidateAccess` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -2544,7 +1624,58 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_login`(
+CREATE PROCEDURE `spIP_ValidateAccess`(
+	IN `iIP` BIGINT
+)
+    READS SQL DATA
+Proc: BEGIN
+    DECLARE vIP BIGINT;
+    DECLARE vIPStatus CHAR DEFAULT NULL;
+    DECLARE vDiff DOUBLE;
+--    DECLARE vLastAccess BIGINT UNSIGNED DEFAULT NULL;
+
+    SELECT tblIPBin.ipbIP
+         , tblIPBin.ipbStatus
+         , (UNIX_TIMESTAMP(CURTIME(4)) - MAX(tblIPStats.ipsTimeStamp))
+      INTO vIP
+         , vIPStatus
+         , vDiff
+      FROM tblIPBin
+ LEFT JOIN tblIPStats
+        ON tblIPStats.ips_ipbIP = tblIPBin.ipbIP
+     WHERE tblIPBin.ipbIP = iIP
+  GROUP BY tblIPBin.ipbIP
+         , tblIPBin.ipbStatus
+    ;
+
+    IF vIPStatus IS NULL THEN
+        LEAVE Proc;
+    END IF;
+
+    IF (vIPStatus != 'A') THEN
+        SIGNAL SQLSTATE '45403'
+            SET MESSAGE_TEXT = "403:IP %iIP% has been blocked. Contact system admin.";
+    ELSEIF (vDiff < 0.01) THEN
+        SIGNAL SQLSTATE '45403'
+            SET MESSAGE_TEXT = "403:Fast request from %iIP% has been banned";
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spLogin` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spLogin`(
 	IN `iLogin` VARCHAR(100),
 	IN `iIP` VARCHAR(50),
 	IN `iPass` CHAR(32),
@@ -2613,7 +1744,7 @@ BEGIN
         SIGNAL SQLSTATE '45000'
            SET MESSAGE_TEXT = '401:Invalid User or Password';
       ELSE 
---        CALL sp_CREATE_signup(iBy, iLogin, iPass, iRole, iIP, iName, iFamily, iSpecialPrivs, iMaxSessions, oUserID);
+--        CALL spSignup(iBy, iLogin, iPass, iRole, iIP, iName, iFamily, iSpecialPrivs, iMaxSessions, oUserID);
 -- TODO create wallet
         INSERT
           INTO tblUser
@@ -2758,7 +1889,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_logout` */;
+/*!50003 DROP PROCEDURE IF EXISTS `spLogin_VerifyByMobileCode` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -2768,473 +1899,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_logout`(
-	IN `iByUserID` BIGINT UNSIGNED,
-	IN `iSessionGUID` CHAR(32)
-)
-BEGIN
-    DECLARE vUserID BIGINT UNSIGNED;
-    
-    SELECT tblActiveSessions.ssn_usrID 
-      INTO vUserID
-      FROM tblActiveSessions
-     WHERE tblActiveSessions.ssnKey = iSessionGUID
-       AND tblActiveSessions.ssnStatus = 'A'
-    ;
-    
-    IF vUserID = iByUserID THEN
-        UPDATE tblActiveSessions
-           SET tblActiveSessions.ssnStatus = 'G'
-         WHERE tblActiveSessions.ssnKey = iSessionGUID
-        ;
-        
-        INSERT
-          INTO tblActionLogs
-           SET tblActionLogs.atlBy_usrID = vUserID,
-               tblActionLogs.atlType = 'UserLogout'
-        ;
-    ELSE 
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '405:Logout by other users is not allowed yet';
-    END IF;          
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_paymentGateway_FailedCounters` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_paymentGateway_FailedCounters`(
-	IN `iPgwID` INT UNSIGNED,
-	IN `iAmount` BIGINT UNSIGNED
-)
-BEGIN
-	UPDATE tblPaymentGateways
-	   SET pgwSumFailedCount = IFNULL(pgwSumFailedCount, 0) + 1
-	 WHERE pgwID = iPgwID
-	;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_paymentGateway_OkCounters` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_paymentGateway_OkCounters`(
-	IN `iPgwID` INT UNSIGNED,
-	IN `iAmount` BIGINT UNSIGNED
-)
-BEGIN
-	UPDATE tblPaymentGateways
-	   SET pgwSumTodayPaidAmount = IF(DATEDIFF(pgwLastPaymentDateTime, CURDATE()) = 0, pgwSumTodayPaidAmount + iAmount, iAmount)
-	 WHERE pgwID = iPgwID
-	;
-
-	UPDATE tblPaymentGateways
-	   SET pgwLastPaymentDateTime = CURRENT_TIMESTAMP()
-	 WHERE pgwID = iPgwID
-	;
-
-	UPDATE tblPaymentGateways
-	   SET pgwSumOkCount = IFNULL(pgwSumOkCount, 0) + 1
-	     , pgwSumPaidAmount = IFNULL(pgwSumPaidAmount, 0) + iAmount
-	 WHERE pgwID = iPgwID
-	;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_paymentGateway_RequestCounters` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_paymentGateway_RequestCounters`(
-	IN `iPgwID` INT UNSIGNED,
-	IN `iAmount` BIGINT UNSIGNED
-)
-BEGIN
-	UPDATE tblPaymentGateways
-	   SET pgwSumRequestCount = IFNULL(pgwSumRequestCount, 0) + 1
-	     , pgwSumRequestAmount = IFNULL(pgwSumRequestAmount, 0) + iAmount
-	 WHERE pgwID = iPgwID
-	;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_reserveWalletPayment` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_reserveWalletPayment`(
-	IN `iWalletID` BIGINT UNSIGNED,
-	IN `iUserID` BIGINT UNSIGNED,
-	IN `iVoucherID` BIGINT UNSIGNED
-)
-BEGIN
-  
-  DECLARE IsAllowed BOOLEAN;
-  DECLARE WalletStatus CHAR(1);
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE Amount BIGINT;
-  DECLARE Err VARCHAR(500);
-  
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = UserID,
-         tblActionLogs.atlType = 'reserveWallet.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iWalletID", iWalletID,
-              "iVoucherID", iVoucherID
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-
-  
-  SELECT tblVoucher.vchTotalAmount INTO Amount
-    FROM tblVoucher
-   WHERE tblVoucher.vchID = iVoucherID;
-   
-  IF ISNULL(WalletStatus) THEN 
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '401:voucher not found';
-  END IF;   
-  
-  SELECT tblUserWallets.walID,
-         tblUserWallets.walLastBalance - Amount < tblUserWallets.walMinBalance,
-         tblUserWallets.walStatus 
-    INTO iWalletID, 
-         IsAllowed, 
-         WalletStatus
-    FROM tblUserWallets
-   WHERE tblUserWallets.wal_usrID = iUserID
-     AND (tblUserWallets.walID = iWalletID 
-          OR (iWalletID =0 AND tblUserWallets.walDefault = 1)
-         );
-          
-  IF ISNULL(WalletStatus) THEN 
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '401:Wallet not found';
-  ELSEIF WalletStatus != 'A' THEN
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '401:Selected wallet can not be used';
-  ELSEIF IsAllowed = FALSE THEN
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '401:Not enough credit in your wallet';
-  END IF;
-  
-  INSERT INTO tblWalletsTransactions
-     SET tblWalletsTransactions.wlt_walID = iWalletID,
-         tblWalletsTransactions.wlt_vchID = iVoucherID,
-         tblWalletsTransactions.wltAmount = Amount;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_retrieveTokenInfo` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_retrieveTokenInfo`(
-	IN `iToken` VARCHAR(50),
-	IN `iIP` VARCHAR(50)
-)
-BEGIN
-	DECLARE UserID BIGINT DEFAULT NULL;
-	DECLARE TokenID BIGINT DEFAULT NULL;
-	DECLARE ValidateIP BOOL DEFAULT FALSE;
-	DECLARE IP BIGINT UNSIGNED;
-	DECLARE AccessCount BIGINT UNSIGNED;
-	DECLARE ExpiryDate DATE;
-	DECLARE Privs VARCHAR(5000);
-	DECLARE RoleName VARCHAR(50);
-	DECLARE PreferedLang CHAR(2);
-	DECLARE LastStatus CHAR(1);
-  DECLARE Err VARCHAR(500);
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = UserID,
-         tblActionLogs.atlType = 'Token.Error',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iToken", iToken,
-              "iIP", iIP
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-
-		
-	SET IP = INET_ATON(iIP);
-	CALL sp_SYSTEM_validateIPAccess(IP);
-
-	SELECT tblAPITokens.aptID,
-			   tblAPITokens.apt_usrID,
-			   tblAPITokens.aptValidateIP,
-			   tblAPITokens.aptAccessCount,
-			   fnGetAllPrivs(tblAPITokens.apt_rolID, tblAPITokens.aptExtraPriviledges),
-			   tblAPITokens.aptExpiryDate,
-			   LOWER(tblRoles.rolName),
-			   tblAPITokens.aptLang,
-			   tblAPITokens.aptStatus
-	  INTO TokenID,
-	     	 UserID,
-			   ValidateIP,
-			   AccessCount,
-			   Privs,
-			   ExpiryDate,
-			   RoleName,
-			   PreferedLang,
-			   LastStatus		
-	  FROM tblAPITokens
-			JOIN tblUser
-				ON tblUser.usrID = tblAPITokens.apt_usrID
-			JOIN tblRoles
-				ON tblRoles.rolID = tblAPITokens.apt_rolID
-	 WHERE	fnSanitizeToken(tblAPITokens.aptToken)  = fnSanitizeToken(iToken)
-	   AND  (ISNULL(tblAPITokens.aptExpiryDate) OR tblAPITokens.aptExpiryDate = "2000-01-01" OR tblAPITokens.aptExpiryDate > now())
-	   AND	tblAPITokens.aptStatus IN ('A', 'C')
-	   AND	tblUser.usrStatus = 'A';	
-	
-	IF ISNULL(UserID) THEN
-		SIGNAL SQLSTATE '45000'
-	      SET MESSAGE_TEXT = '403:User blocked or Token Expired';
-	END IF;	
-	
-	IF LastStatus = 'C' THEN 
-		SIGNAL SQLSTATE '45000'
-	      SET MESSAGE_TEXT = '402:Your credit has been finished please recharge it.';
-	END IF;
-	
-	IF (ValidateIP = 1) THEN
-		SET ValidateIP = NULL;
-		SELECT 1 INTO ValidateIP 
-			FROM tblAPITokenValidIPs 
-		 WHERE tblAPITokenValidIPs.tviIP = IP 
-		   AND tblAPITokenValidIPs.tvi_aptID = TokenID
-		   AND tblAPITokenValidIPs.tviStatus = 'A';
-			  
-		IF (ISNULL(ValidateIP)) THEN
-			SIGNAL SQLSTATE '45000'
-		      SET MESSAGE_TEXT = '403:Token usage on %IP% is restricted.';
-		END IF;	
-	END IF;
-
-	START TRANSACTION;
-		UPDATE tblAPITokens
-			SET tblAPITokens.aptAccessCount = tblAPITokens.aptAccessCount + 1,
-	 	      tblAPITokens.aptLastActivity = now(),
-	 			  tblAPITokens.aptExpiryDate = IF ((NOT ISNULL(ExpiryDate) AND ExpiryDate <= "2010-01-01"),
-	 			 		DATE_ADD(CURDATE(),INTERVAL MONTH(ExpiryDate) * 30 + DAY(ExpiryDate) DAY),
-	 			 		tblAPITokens.aptExpiryDate)
-	 		WHERE tblAPITokens.aptID = TokenID;
-				
-		INSERT IGNORE INTO tblIPBin
-		 	 SET tblIPBin.ipbIP = IP;
-		
-		INSERT INTO tblIPStats(
-				tblIPStats.ips_ipbIP,
-				tblIPStats.ipsTimeStamp
-			)VALUES(
-				IP,
-				UNIX_TIMESTAMP(CURTIME(4))
-			);
-			
-		SELECT 
-			iToken       AS `token`,
-			TokenID      AS `tokID`,
-			UserID       AS `usrID`,
-			iIP          AS `ip`,
-			RoleName     AS `usrRole`,
-			AccessCount  AS `tokAccessCount`,
-			Privs        AS `privs`,
-			PreferedLang AS `intfLang`;
-	COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_sessionActivity` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_sessionActivity`(
-	IN `iSSID` CHAR(32),
-	IN `iIP` VARCHAR(50)
-)
-BEGIN
-  DECLARE SessionStatus CHAR(1);
-  DECLARE UserStatus CHAR(1);
-  DECLARE UserID BIGINT UNSIGNED;
-  DECLARE Err VARCHAR(500);
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
-    INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = UserID,
-         tblActionLogs.atlType = 'Session.act',
-         tblActionLogs.atlDescription = JSON_OBJECT(
-              "err", Err,
-              "iSSID", iSSID,
-              "iIP", iIP
-          );
-	  ROLLBACK;  
-	  RESIGNAL;  
-  END;
-
-  SELECT tblActiveSessions.ssnStatus,
-         tblActiveSessions.ssn_usrID, 
-         tblUser.usrStatus 
-    INTO SessionStatus,
-         UserID,
-         UserStatus
-    FROM tblActiveSessions
-    JOIN tblUser
-      ON tblUser.usrID = tblActiveSessions.ssn_usrID
-   WHERE tblActiveSessions.ssnKey = iSSID;
-   
-  IF ISNULL(SessionStatus) THEN
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401:Invalid Session';
-  ELSEIF SessionStatus = 'E' THEN
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401:Session expired';
-  ELSEIF SessionStatus = 'F' THEN
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401: You were fired out contact admin';
-  ELSEIF SessionStatus = 'G' THEN
-		SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = '401: You were logged out';
-  ELSEIF UserStatus = 'B' THEN
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '405:User Blocked. Ask administrator';
-  ELSEIF UserStatus = 'B' THEN
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '405:User Removed. Ask administrator';
-  ELSEIF UserStatus != 'A' THEN
-   		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = '501:Invalid Session State';
-  END IF;
-  
-  -- CHECK for same IP was discarded
-  UPDATE tblActiveSessions
-     SET tblActiveSessions.ssnLastActivity = NOW()
-   WHERE tblActiveSessions.ssnKey = iSSID;
-    
-  SELECT tblUser.usrID,
-         tblUser.usrName,
-         tblUser.usrFamily,
-         tblUser.usrEmail,
-         tblUser.usr_rolID,
-         tblUser.usrApprovalState,
-         tblRoles.rolName,
-         fnGetAllPrivs(tblUser.usr_rolID, tblUser.usrSpecialPrivs) AS privs,
-         NOT ISNULL(tblUser.usrPass) AS hasPass,
-         tblUser.usrStatus,
-         iSSID AS ssnKey
-    FROM tblUser
-    JOIN tblRoles
-      ON tblRoles.rolID = tblUser.usr_rolID
-   WHERE tblUser.usrID = UserID; 
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_setSessionExpired` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_setSessionExpired`(
-	IN `iSessionGUID` INT,
-	IN `Param2` INT
-)
-BEGIN
-    UPDATE tblActiveSessions
-       SET ssnStatus = 'E'
-     WHERE ssnKey = iSessionGUID;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_verifyLoginByMobileCode` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_verifyLoginByMobileCode`(
+CREATE PROCEDURE `spLogin_VerifyByMobileCode`(
 	IN `iMobile` VARCHAR(50),
 	IN `iCode` INT UNSIGNED,
 	IN `iIP` VARCHAR(50),
@@ -3248,7 +1913,7 @@ BEGIN
     DECLARE SessionGUID CHAR(32);
 
         SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:DEPRECATED. USE sp_UPDATE_acceptApproval INSTEAD.';
+           SET MESSAGE_TEXT = '401:DEPRECATED. USE spApproval_Accept INSTEAD.';
 
     IF ISNULL(iMobile) THEN
         SIGNAL SQLSTATE '45000'
@@ -3346,7 +2011,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_UPDATE_voucher_cancel` */;
+/*!50003 DROP PROCEDURE IF EXISTS `spLogout` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -3356,7 +2021,731 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE PROCEDURE `sp_UPDATE_voucher_cancel`(
+CREATE PROCEDURE `spLogout`(
+	IN `iByUserID` BIGINT UNSIGNED,
+	IN `iSessionGUID` CHAR(32)
+)
+BEGIN
+    DECLARE vUserID BIGINT UNSIGNED;
+    
+    SELECT tblActiveSessions.ssn_usrID 
+      INTO vUserID
+      FROM tblActiveSessions
+     WHERE tblActiveSessions.ssnKey = iSessionGUID
+       AND tblActiveSessions.ssnStatus = 'A'
+    ;
+    
+    IF vUserID = iByUserID THEN
+        UPDATE tblActiveSessions
+           SET tblActiveSessions.ssnStatus = 'G'
+         WHERE tblActiveSessions.ssnKey = iSessionGUID
+        ;
+        
+        INSERT
+          INTO tblActionLogs
+           SET tblActionLogs.atlBy_usrID = vUserID,
+               tblActionLogs.atlType = 'UserLogout'
+        ;
+    ELSE 
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '405:Logout by other users is not allowed yet';
+    END IF;          
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spMobileVerifyCode_Request` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spMobileVerifyCode_Request`(
+	IN `iMobile` VARCHAR(50),
+	IN `iSignupIfNotExists` TINYINT,
+	IN `iSignupRole` VARCHAR(50)
+)
+BEGIN
+    DECLARE UserID BIGINT UNSIGNED;
+    DECLARE ApprovalCode VARCHAR(50);
+
+    IF ISNULL(iMobile) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Invalid mobile';
+    END IF;
+
+    SELECT usrID
+      INTO UserID
+      FROM tblUser
+     WHERE usrMobile = iMobile
+    ;
+
+    IF ISNULL(UserID) THEN
+        IF iSignupIfNotExists = 1 THEN
+            INSERT
+              INTO tblUser
+               SET tblUser.usrMobile = iMobile,
+                   tblUser.usr_rolID = (
+            SELECT tblRoles.rolID
+              FROM tblRoles
+             WHERE LOWER(tblRoles.rolName) = LOWER(iSignupRole)
+--               AND (tblRoles.rolSignupAllowedIPs IS NULL
+--                OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
+                   )
+            ;
+                   
+            SET UserID = LAST_INSERT_ID();
+        ELSE
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:User Not Found';
+        END IF;
+    END IF;
+
+    SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
+  
+    INSERT
+      INTO tblApprovalRequest
+       SET apr_usrID = UserID,
+           aprRequestedFor = 'M',
+--           aprIsForLogin = 1,
+           aprApprovalKey = iMobile,
+           aprApprovalCode = ApprovalCode
+    ;
+
+    INSERT
+      INTO Common.tblAlerts
+       SET alr_usrID = UserID,
+           alrMobile = iMobile,
+           alr_altCode = 'approveMobile',
+           alrReplacedContactInfo = iMobile,
+           alrReplacements = JSON_OBJECT(
+               'ApprovalCode', ApprovalCode
+           )
+    ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spOnlinePayment_Create` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spOnlinePayment_Create`(
+	IN `iVoucherID` BIGINT UNSIGNED,
+	IN `iGatewayID` INT,
+	IN `iAmount` BIGINT UNSIGNED,
+	OUT `oMD5` VARCHAR(50)
+)
+BEGIN
+  SET oMD5 = Common.fnCreateRandomMD5();
+  
+  INSERT
+    INTO tblOnlinePayments
+     SET onpMD5 = oMD5
+       , onp_vchID = iVoucherID
+       , onp_pgwID = iGatewayID
+       , onpAmount = iAmount
+  ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spPassword_Change` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spPassword_Change`(
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iOldPass` CHAR(32),
+	IN `iOldPassSalt` VARCHAR(50),
+	IN `iNewPass` CHAR(32)
+)
+BEGIN
+  DECLARE WasOK BOOL DEFAULT FALSE;
+
+  SELECT 1 INTO WasOK
+    FROM tblUser
+   WHERE tblUser.usrID = iUserID
+     AND fnPasswordsAreEqual(iOldPass, iOldPassSalt, tblUser.usrPass);
+  
+  IF NOT WasOK THEN
+		SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = '401:Invalid User or Password';
+  END IF;
+  
+  UPDATE tblUser
+     SET tblUser.usrPass = iNewPass
+   WHERE tblUser.usrID = iUserID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spPassword_ChangeByUUID` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spPassword_ChangeByUUID`(
+	IN `iVia` VARCHAR(1),
+	IN `iLogin` VARCHAR(50),
+	IN `iUUID` VARCHAR(50),
+	IN `iNewPass` VARCHAR(50)
+)
+BEGIN
+    DECLARE vUserID BIGINT UNSIGNED;
+    DECLARE vIsExpired BOOL;
+
+    SELECT tblForgotPassRequest.fpr_usrID
+         , TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate) > "00:30:00"
+      INTO vUserID
+         , vIsExpired
+      FROM tblForgotPassRequest
+INNER JOIN tblUser
+        ON tblUser.usrID = tblForgotPassRequest.fpr_usrID
+     WHERE (
+           tblUser.usrEmail = iLogin
+        OR tblUser.usrMobile = iLogin
+           )
+       AND tblForgotPassRequest.fprUUID = iUUID
+       AND tblForgotPassRequest.fprStatus = 'S'
+    ;
+
+    IF ISNULL (vIsExpired) OR vIsExpired THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = '401:Invalid or Expired link';
+    END IF;
+
+    UPDATE tblForgotPassRequest
+       SET tblForgotPassRequest.fprStatus = IF(tblForgotPassRequest.fprUUID = iUUID, 'A', 'E')
+     WHERE tblForgotPassRequest.fpr_usrID = vUserID
+       AND tblForgotPassRequest.fprStatus IN ('S', 'N')
+    ; 
+
+    UPDATE tblUser
+       SET tblUser.usrPass = iNewPass
+     WHERE tblUser.usrID = vUserID
+    ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spPaymentGateway_UpdateFailedCounters` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spPaymentGateway_UpdateFailedCounters`(
+	IN `iPgwID` INT UNSIGNED,
+	IN `iAmount` BIGINT UNSIGNED
+)
+BEGIN
+	UPDATE tblPaymentGateways
+	   SET pgwSumFailedCount = IFNULL(pgwSumFailedCount, 0) + 1
+	 WHERE pgwID = iPgwID
+	;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spPaymentGateway_UpdateOkCounters` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spPaymentGateway_UpdateOkCounters`(
+	IN `iPgwID` INT UNSIGNED,
+	IN `iAmount` BIGINT UNSIGNED
+)
+BEGIN
+	UPDATE tblPaymentGateways
+	   SET pgwSumTodayPaidAmount = IF(DATEDIFF(pgwLastPaymentDateTime, CURDATE()) = 0, pgwSumTodayPaidAmount + iAmount, iAmount)
+	 WHERE pgwID = iPgwID
+	;
+
+	UPDATE tblPaymentGateways
+	   SET pgwLastPaymentDateTime = CURRENT_TIMESTAMP()
+	 WHERE pgwID = iPgwID
+	;
+
+	UPDATE tblPaymentGateways
+	   SET pgwSumOkCount = IFNULL(pgwSumOkCount, 0) + 1
+	     , pgwSumPaidAmount = IFNULL(pgwSumPaidAmount, 0) + iAmount
+	 WHERE pgwID = iPgwID
+	;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spPaymentGateway_UpdateRequestCounters` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spPaymentGateway_UpdateRequestCounters`(
+	IN `iPgwID` INT UNSIGNED,
+	IN `iAmount` BIGINT UNSIGNED
+)
+BEGIN
+	UPDATE tblPaymentGateways
+	   SET pgwSumRequestCount = IFNULL(pgwSumRequestCount, 0) + 1
+	     , pgwSumRequestAmount = IFNULL(pgwSumRequestAmount, 0) + iAmount
+	 WHERE pgwID = iPgwID
+	;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spSession_Expire` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spSession_Expire`(
+	IN `iSessionGUID` INT,
+	IN `Param2` INT
+)
+BEGIN
+    UPDATE tblActiveSessions
+       SET ssnStatus = 'E'
+     WHERE ssnKey = iSessionGUID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spSession_UpdateActivity` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spSession_UpdateActivity`(
+	IN `iSSID` CHAR(32),
+	IN `iIP` VARCHAR(50)
+)
+BEGIN
+  DECLARE SessionStatus CHAR(1);
+  DECLARE UserStatus CHAR(1);
+  DECLARE UserID BIGINT UNSIGNED;
+  DECLARE Err VARCHAR(500);
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = UserID,
+         tblActionLogs.atlType = 'Session.act',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iSSID", iSSID,
+              "iIP", iIP
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+
+  SELECT tblActiveSessions.ssnStatus,
+         tblActiveSessions.ssn_usrID, 
+         tblUser.usrStatus 
+    INTO SessionStatus,
+         UserID,
+         UserStatus
+    FROM tblActiveSessions
+    JOIN tblUser
+      ON tblUser.usrID = tblActiveSessions.ssn_usrID
+   WHERE tblActiveSessions.ssnKey = iSSID;
+   
+  IF ISNULL(SessionStatus) THEN
+		SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = '401:Invalid Session';
+  ELSEIF SessionStatus = 'E' THEN
+		SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = '401:Session expired';
+  ELSEIF SessionStatus = 'F' THEN
+		SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = '401: You were fired out contact admin';
+  ELSEIF SessionStatus = 'G' THEN
+		SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = '401: You were logged out';
+  ELSEIF UserStatus = 'B' THEN
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '405:User Blocked. Ask administrator';
+  ELSEIF UserStatus = 'B' THEN
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '405:User Removed. Ask administrator';
+  ELSEIF UserStatus != 'A' THEN
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '501:Invalid Session State';
+  END IF;
+  
+  -- CHECK for same IP was discarded
+  UPDATE tblActiveSessions
+     SET tblActiveSessions.ssnLastActivity = NOW()
+   WHERE tblActiveSessions.ssnKey = iSSID;
+    
+  SELECT tblUser.usrID,
+         tblUser.usrName,
+         tblUser.usrFamily,
+         tblUser.usrEmail,
+         tblUser.usr_rolID,
+         tblUser.usrApprovalState,
+         tblRoles.rolName,
+         fnGetAllPrivs(tblUser.usr_rolID, tblUser.usrSpecialPrivs) AS privs,
+         NOT ISNULL(tblUser.usrPass) AS hasPass,
+         tblUser.usrStatus,
+         iSSID AS ssnKey
+    FROM tblUser
+    JOIN tblRoles
+      ON tblRoles.rolID = tblUser.usr_rolID
+   WHERE tblUser.usrID = UserID; 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spSignup` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spSignup`(
+	IN `iBy` CHAR(1),
+	IN `iLogin` VARCHAR(50),
+	IN `iPass` CHAR(32),
+	IN `iRole` VARCHAR(50),
+	IN `iIP` VARCHAR(50),
+	IN `iName` VARCHAR(100),
+	IN `iFamily` VARCHAR(100),
+	IN `iSpecialPrivs` VARCHAR(5000),
+	IN `iMaxSessions` INT,
+	IN `iCreatorUserID` BIGINT UNSIGNED,
+	OUT `oUserID` BIGINT UNSIGNED
+)
+BEGIN
+    DECLARE RoleID BIGINT UNSIGNED;
+    DECLARE InnerRolID BIGINT;
+    DECLARE SessionGUID CHAR(32);
+    DECLARE Err VARCHAR(500);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+
+        ROLLBACK;  
+
+        INSERT
+          INTO tblActionLogs
+           SET tblActionLogs.atlBy_usrID = 1,
+               tblActionLogs.atlType = 'Signup.Error',
+               tblActionLogs.atlDescription = JSON_OBJECT(
+                   "err", Err,
+                   "iBy", iBy,
+                   "iLogin", iLogin,
+                   "iPass", iPass,
+                   "iRole", iRole,
+                   "iIP", iIP,
+                   "iName", iName,
+                   "iFamily", iFamily,
+                   "iSpecialPrivs", iSpecialPrivs,
+                   "iMaxSessions", iMaxSessions,
+                   "iCreatorUserID", iCreatorUserID
+               )
+        ;
+
+        RESIGNAL;  
+    END;
+    
+    DECLARE EXIT HANDLER FOR 1062
+    BEGIN
+        ROLLBACK;
+
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '409:Already registered.';
+    END;
+
+    CALL Common.spLogDebug('AAA', 'signup');
+
+    SELECT tblRoles.rolID
+      INTO RoleID
+      FROM tblRoles
+     WHERE tblRoles.rolName = iRole
+       AND (tblRoles.rolSignupAllowedIPs IS NULL
+        OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
+    ;
+
+    IF ISNULL(RoleID) THEN
+        SIGNAL SQLSTATE '45403'
+           SET MESSAGE_TEXT = "403:Role not found or is not allowed to signup from this IP";
+    END IF;
+
+    START TRANSACTION;
+
+    UPDATE tblUser
+       SET _InvalidatedAt = UNIX_TIMESTAMP()
+     WHERE _InvalidatedAt = 0
+       AND usrStatus = 'R'
+       AND (
+           (IFNULL(IF(iBy = 'E', iLogin, NULL), '') <> '' AND IFNULL(usrEmail, '') = IF(iBy = 'E', iLogin, NULL))
+        OR (IFNULL(IF(iBy = 'M', iLogin, NULL), '') <> '' AND IFNULL(usrMobile, '') = IF(iBy = 'M', iLogin, NULL))
+           )
+    ;
+
+    IF (IFNULL(iPass, '') = '') THEN
+        SET iPass = 'NOT_SET';
+    ELSE
+        SET iPass = LOWER(iPass);
+    END IF;
+
+    INSERT INTO tblUser
+       SET tblUser.usrName = iName,
+           tblUser.usrFamily = iFamily,
+           tblUser.usrEmail = IF(iBy = 'E', iLogin, NULL),
+           tblUser.usrMobile = IF(iBy = 'M', iLogin, NULL),     
+           tblUser.usrPass = iPass,
+           tblUser.usr_rolID = RoleID,
+           tblUser.usrSpecialPrivs = iSpecialPrivs,
+           tblUser.usrMaxSessions = iMaxSessions,
+           tblUser.usrCreatedBy_usrID = IFNULL(iCreatorUserID, 1)
+    ;
+
+    SET oUserID = LAST_INSERT_ID();
+
+    CALL spApproval_Request(iBy, oUserID, iLogin, NULL, NULL);
+
+    INSERT
+      INTO tblUserWallets
+       SET tblUserWallets.wal_usrID = oUserID,
+           tblUserWallets.walName = 'Default',
+           tblUserWallets.walDefault = 1,
+           tblUserWallets.walCreatedBy_usrID = IFNULL(iCreatorUserID, 1)
+    ;
+
+    INSERT
+      INTO tblActionLogs
+       SET tblActionLogs.atlBy_usrID = oUserID,
+           tblActionLogs.atlType = 'UserCreated'
+    ;
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spToken_RetrieveInfo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spToken_RetrieveInfo`(
+	IN `iToken` VARCHAR(50),
+	IN `iIP` VARCHAR(50)
+)
+BEGIN
+	DECLARE UserID BIGINT DEFAULT NULL;
+	DECLARE TokenID BIGINT DEFAULT NULL;
+	DECLARE ValidateIP BOOL DEFAULT FALSE;
+	DECLARE IP BIGINT UNSIGNED;
+	DECLARE AccessCount BIGINT UNSIGNED;
+	DECLARE ExpiryDate DATE;
+	DECLARE Privs VARCHAR(5000);
+	DECLARE RoleName VARCHAR(50);
+	DECLARE PreferedLang CHAR(2);
+	DECLARE LastStatus CHAR(1);
+  DECLARE Err VARCHAR(500);
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = UserID,
+         tblActionLogs.atlType = 'Token.Error',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iToken", iToken,
+              "iIP", iIP
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+
+		
+	SET IP = INET_ATON(iIP);
+	CALL spIP_ValidateAccess(IP);
+
+	SELECT tblAPITokens.aptID,
+			   tblAPITokens.apt_usrID,
+			   tblAPITokens.aptValidateIP,
+			   tblAPITokens.aptAccessCount,
+			   fnGetAllPrivs(tblAPITokens.apt_rolID, tblAPITokens.aptExtraPriviledges),
+			   tblAPITokens.aptExpiryDate,
+			   LOWER(tblRoles.rolName),
+			   tblAPITokens.aptLang,
+			   tblAPITokens.aptStatus
+	  INTO TokenID,
+	     	 UserID,
+			   ValidateIP,
+			   AccessCount,
+			   Privs,
+			   ExpiryDate,
+			   RoleName,
+			   PreferedLang,
+			   LastStatus		
+	  FROM tblAPITokens
+			JOIN tblUser
+				ON tblUser.usrID = tblAPITokens.apt_usrID
+			JOIN tblRoles
+				ON tblRoles.rolID = tblAPITokens.apt_rolID
+	 WHERE	fnSanitizeToken(tblAPITokens.aptToken)  = fnSanitizeToken(iToken)
+	   AND  (ISNULL(tblAPITokens.aptExpiryDate) OR tblAPITokens.aptExpiryDate = "2000-01-01" OR tblAPITokens.aptExpiryDate > now())
+	   AND	tblAPITokens.aptStatus IN ('A', 'C')
+	   AND	tblUser.usrStatus = 'A';	
+	
+	IF ISNULL(UserID) THEN
+		SIGNAL SQLSTATE '45000'
+	      SET MESSAGE_TEXT = '403:User blocked or Token Expired';
+	END IF;	
+	
+	IF LastStatus = 'C' THEN 
+		SIGNAL SQLSTATE '45000'
+	      SET MESSAGE_TEXT = '402:Your credit has been finished please recharge it.';
+	END IF;
+	
+	IF (ValidateIP = 1) THEN
+		SET ValidateIP = NULL;
+		SELECT 1 INTO ValidateIP 
+			FROM tblAPITokenValidIPs 
+		 WHERE tblAPITokenValidIPs.tviIP = IP 
+		   AND tblAPITokenValidIPs.tvi_aptID = TokenID
+		   AND tblAPITokenValidIPs.tviStatus = 'A';
+			  
+		IF (ISNULL(ValidateIP)) THEN
+			SIGNAL SQLSTATE '45000'
+		      SET MESSAGE_TEXT = '403:Token usage on %IP% is restricted.';
+		END IF;	
+	END IF;
+
+	START TRANSACTION;
+		UPDATE tblAPITokens
+			SET tblAPITokens.aptAccessCount = tblAPITokens.aptAccessCount + 1,
+	 	      tblAPITokens.aptLastActivity = now(),
+	 			  tblAPITokens.aptExpiryDate = IF ((NOT ISNULL(ExpiryDate) AND ExpiryDate <= "2010-01-01"),
+	 			 		DATE_ADD(CURDATE(),INTERVAL MONTH(ExpiryDate) * 30 + DAY(ExpiryDate) DAY),
+	 			 		tblAPITokens.aptExpiryDate)
+	 		WHERE tblAPITokens.aptID = TokenID;
+				
+		INSERT IGNORE INTO tblIPBin
+		 	 SET tblIPBin.ipbIP = IP;
+		
+		INSERT INTO tblIPStats(
+				tblIPStats.ips_ipbIP,
+				tblIPStats.ipsTimeStamp
+			)VALUES(
+				IP,
+				UNIX_TIMESTAMP(CURTIME(4))
+			);
+			
+		SELECT 
+			iToken       AS `token`,
+			TokenID      AS `tokID`,
+			UserID       AS `usrID`,
+			iIP          AS `ip`,
+			RoleName     AS `usrRole`,
+			AccessCount  AS `tokAccessCount`,
+			Privs        AS `privs`,
+			PreferedLang AS `intfLang`;
+	COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spVoucher_Cancel` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spVoucher_Cancel`(
 	IN `iUserID` BIGINT UNSIGNED,
 	IN `iVoucherID` BIGINT UNSIGNED,
 	IN `iSetAsError` BOOL
@@ -3389,6 +2778,596 @@ BEGIN
 
     -- ///TODO: cancel voucher and credit to wallet
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWalletPayment_Reserve` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWalletPayment_Reserve`(
+	IN `iWalletID` BIGINT UNSIGNED,
+	IN `iUserID` BIGINT UNSIGNED,
+	IN `iVoucherID` BIGINT UNSIGNED
+)
+BEGIN
+  
+  DECLARE IsAllowed BOOLEAN;
+  DECLARE WalletStatus CHAR(1);
+  DECLARE UserID BIGINT UNSIGNED;
+  DECLARE Amount BIGINT;
+  DECLARE Err VARCHAR(500);
+  
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = UserID,
+         tblActionLogs.atlType = 'reserveWallet.Error',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iWalletID", iWalletID,
+              "iVoucherID", iVoucherID
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+
+  
+  SELECT tblVoucher.vchTotalAmount INTO Amount
+    FROM tblVoucher
+   WHERE tblVoucher.vchID = iVoucherID;
+   
+  IF ISNULL(WalletStatus) THEN 
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '401:voucher not found';
+  END IF;   
+  
+  SELECT tblUserWallets.walID,
+         tblUserWallets.walLastBalance - Amount < tblUserWallets.walMinBalance,
+         tblUserWallets.walStatus 
+    INTO iWalletID, 
+         IsAllowed, 
+         WalletStatus
+    FROM tblUserWallets
+   WHERE tblUserWallets.wal_usrID = iUserID
+     AND (tblUserWallets.walID = iWalletID 
+          OR (iWalletID =0 AND tblUserWallets.walDefault = 1)
+         );
+          
+  IF ISNULL(WalletStatus) THEN 
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '401:Wallet not found';
+  ELSEIF WalletStatus != 'A' THEN
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '401:Selected wallet can not be used';
+  ELSEIF IsAllowed = FALSE THEN
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '401:Not enough credit in your wallet';
+  END IF;
+  
+  INSERT INTO tblWalletsTransactions
+     SET tblWalletsTransactions.wlt_walID = iWalletID,
+         tblWalletsTransactions.wlt_vchID = iVoucherID,
+         tblWalletsTransactions.wltAmount = Amount;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWalletTransactionOnPayment_Create` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWalletTransactionOnPayment_Create`(
+	IN `iVoucherID` BIGINT UNSIGNED,
+	IN `iPaymentType` CHAR(1)
+)
+BEGIN
+  DECLARE PaymentID BIGINT UNSIGNED;
+  DECLARE ExpenseVoucherID BIGINT UNSIGNED;
+  DECLARE CreditVoucherID BIGINT UNSIGNED;
+  DECLARE Amount BIGINT UNSIGNED;
+  DECLARE TotalAmount BIGINT UNSIGNED;
+  DECLARE RemainingAfterWallet BIGINT UNSIGNED;
+  DECLARE UserID BIGINT UNSIGNED;
+  DECLARE UserDefaultWallet BIGINT UNSIGNED;
+  DECLARE Err VARCHAR(500);
+  DECLARE LastID BIGINT UNSIGNED;
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = UserID,
+         tblActionLogs.atlType = 'VirtWLT.Error',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iVoucherID", iVoucherID,
+              "iPaymentType", iPaymentType
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+
+  START TRANSACTION;
+    IF iPaymentType = 'N' THEN /*Online*/
+      SELECT tblOnlinePayments.onpID,
+             tblOnlinePayments.onp_vchID,
+             tblOnlinePayments.onpAmount,
+             tblVoucher.vchTotalAmount,
+             tblVoucher.vch_usrID
+        INTO PaymentID,
+             ExpenseVoucherID,
+             Amount,
+             TotalAmount,
+             UserID
+        FROM tblOnlinePayments
+        JOIN tblVoucher
+          ON tblVoucher.vchID = tblOnlinePayments.onp_vchID
+       WHERE tblOnlinePayments.onp_vchID = iVoucherID
+         AND tblOnlinePayments.onpStatus = 'Y'; /*Payed*/
+    ELSEIF iPaymentType = 'F' THEN /*Offline*/
+      SELECT tblOnlinePayments.onpID,
+             tblOfflinePayments.ofp_vchID,
+             tblOfflinePayments.ofpAmount,
+             tblVoucher.vchTotalAmount,
+             tblVoucher.vch_usrID
+        INTO PaymentID,
+             ExpenseVoucherID,
+             Amount,
+             TotalAmount,
+             UserID     
+        FROM tblOfflinePayments
+        JOIN tblVoucher
+          ON tblVoucher.vchID = tblOnlinePayments.onp_vchID
+       WHERE tblOfflinePayments.ofp_invID = iVoucherID
+         AND tblOfflinePayments.onpStatus = 'Y'; /*Payed*/
+    ELSE
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Invalid payment type';
+    END IF;
+
+    IF ISNULL(ExpenseVoucherID) THEN 
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Payment not found or is not yet payed';
+    END IF;
+
+    SELECT tblUserWallets.walID INTO UserDefaultWallet
+      FROM tblUserWallets
+     WHERE tblUserWallets.wal_usrID = UserID
+       AND tblUserWallets.walDefault = TRUE;
+
+    IF ISNULL(UserDefaultWallet) THEN 
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Default wallet not found';
+    END IF;
+
+    SELECT TotalAmount - tblWalletsTransactions.wltAmount
+      INTO RemainingAfterWallet
+      FROM tblWalletsTransactions
+	  WHERE tblWalletsTransactions.wlt_vchID = iVoucherID
+       AND tblWalletsTransactions.wltStatus = 'A';
+
+    IF (IFNULL(RemainingAfterWallet, 0) < 0) THEN 
+   		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '500:Remaining After Wallet can not be negative';
+    END IF;
+
+    INSERT INTO tblVoucher
+       SET tblVoucher.vch_usrID = UserID,
+           tblVoucher.vchType = 'C',
+           tblVoucher.vchDesc = JSON_OBJECT(
+              "type", IF(iPaymentType = 'N', 'Online', 'Offline'),
+              "paymentID", PaymentID
+           ),
+           tblVoucher.vchTotalAmount = Amount,
+           tblVoucher.vchStatus = 'F';
+    
+	 SET LastID = LAST_INSERT_ID();
+	 IF (LastID IS NULL) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
+    END IF;
+    
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = UserDefaultWallet,
+           tblWalletsTransactions.wlt_vchID = LastID,
+           tblWalletsTransactions.wlt_vchType = 'C', /*Credit*/
+           tblWalletsTransactions.wltAmount = Amount;
+
+	 SET LastID = LAST_INSERT_ID();
+	 IF (LastID IS NULL) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
+    END IF;
+
+    UPDATE tblWalletsTransactions
+       SET tblWalletsTransactions.wltStatus = 'A'
+     WHERE tblWalletsTransactions.wltID = LastID;
+
+  IF (RemainingAfterWallet > 0) THEN
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = UserDefaultWallet,
+           tblWalletsTransactions.wlt_vchID = iVoucherID,
+           tblWalletsTransactions.wlt_vchType = 'E', /*Expense*/
+           tblWalletsTransactions.wltAmount = RemainingAfterWallet;
+
+	 SET LastID = LAST_INSERT_ID();
+	 IF (LastID IS NULL) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '500:LastID IS NULL';
+    END IF;
+
+    UPDATE tblWalletsTransactions
+       SET tblWalletsTransactions.wltStatus = 'Y'
+     WHERE tblWalletsTransactions.wltID = LastID;
+  END IF;
+
+  COMMIT;  
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWalletTransaction_Create` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWalletTransaction_Create`(
+	IN `iWalletID` BIGINT UNSIGNED,
+	IN `iVoucherID` BIGINT UNSIGNED,
+	OUT `oAmount` INT UNSIGNED
+)
+BEGIN
+  DECLARE TransactionType CHAR(1);
+  DECLARE Multiplier TINYINT;
+  DECLARE UserID BIGINT UNSIGNED;
+  DECLARE Err VARCHAR(500);
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+
+    INSERT
+      INTO tblActionLogs
+       SET tblActionLogs.atlBy_usrID = UserID,
+           tblActionLogs.atlType = 'WLT.Error',
+           tblActionLogs.atlDescription = JSON_OBJECT(
+               "err", Err,
+               "iWalletID", iWalletID,
+               "iVoucherID",iVoucherID
+           );
+
+--	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+
+    SELECT tblVoucher.vch_usrID,
+           tblVoucher.vchType, 
+           tblVoucher.vchTotalAmount
+      INTO UserID, 
+           TransactionType,
+           oAmount
+      FROM tblVoucher
+     WHERE tblVoucher.vchID = iVoucherID
+       AND tblVoucher.vchStatus = 'N'
+  ;
+
+  IF ISNULL(UserID) THEN 
+    SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = '401:Invalid voucher ID';
+  END IF;
+
+  CALL spWalletTransaction_Validate(UserID, iWalletID, TransactionType, oAmount, Multiplier);
+  
+  IF oAmount > 0 THEN 
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = WalletID,
+           tblWalletsTransactions.wlt_vchID = iVoucherID,
+           tblWalletsTransactions.wltType = TrasnactionType,
+           tblWalletsTransactions.wltAmount = oAmount * Multiplier;
+  END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWalletTransaction_Validate` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWalletTransaction_Validate`(
+	IN `iUserID` BIGINT UNSIGNED,
+	INOUT `ioWalletID` BIGINT UNSIGNED,
+	IN `iTransactionType` CHAR(1),
+	INOUT `ioAmount` INT UNSIGNED,
+	OUT `oMultiplier` TINYINT
+)
+BEGIN
+  DECLARE LastBalance BIGINT;
+  DECLARE MinBalance BIGINT;
+  DECLARE NotTransferable BIGINT;
+  DECLARE MaxTransferPerDay BIGINT;
+  DECLARE TodayTransfers BIGINT;
+
+  SELECT tblUserWallets.walID,
+         tblUserWallets.walMinBalance,
+         tblUserWallets.walLastBalance,
+         tblUserWallets.walNotTransferableAmount
+    INTO ioWalletID,
+         MinBalance,
+         LastBalance,
+         NotTransferable
+    FROM tblUserWallets
+   WHERE tblUserWallets.wal_usrID = iUserID
+     AND (tblUserWallets.walID = ioWalletID 
+          OR (ioWalletID = 0 
+              AND  tblUserWallets.walDefault = TRUE
+              )
+         );
+         
+  IF ISNULL(ioWalletID) THEN 
+ 		SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = '401:Wallet not found or is not yours';
+  END IF;
+  
+  CASE iTransactionType
+    WHEN 'E' THEN 
+      SET ioAmount = LEAST(ioAmount, GREATEST(0, LastBalance - MinBalance)), oMultiplier = -1;
+    WHEN 'T' THEN 
+      IF LastBalance - NotTransferable - MinBalance - ioAmount < 0 THEN
+     		SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Not enough credit in wallet to transfer';
+      END IF;
+      
+      SELECT COALESCE(SUM(tblWalletsTransactions.wltAmount),0) INTO TodayTransfers
+        FROM tblWalletsTransactions
+       WHERE tblWalletsTransactions.wlt_walID = ioWalletID
+         AND DATE(tblWalletsTransactions.wltDateTime) = DATE(NOW())
+         AND tblWalletsTransactions.wltType = 'T'
+         AND tblWalletsTransactions.wltStatus = 'A';        
+      
+      IF MaxTransferable >0 AND MaxTransferPerDay < ioAmount + TodayTransfers THEN
+     		SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Amount is greater than your per day allowed transfer';
+      END IF;
+      SET oMultiplier = -1;
+    WHEN 'F' THEN 
+      SET oMultiplier = 1;
+    WHEN 'I' THEN 
+      SET oMultiplier = 1;
+    WHEN 'C' THEN 
+      SET oMultiplier = 1;
+    WHEN 'W' THEN 
+      IF LastBalance - NotTransferable - MinBalance - ioAmount < 0 THEN
+     		SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Not enough credit in wallet to withdraw';
+      END IF;
+      
+      SET oMultiplier = -1;
+    ELSE 
+    	SIGNAL SQLSTATE '45000'
+         SET MESSAGE_TEXT = '500:Invalid wallet transaction type';
+  END CASE;
+/**/
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWallet_Transfer` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWallet_Transfer`(
+	IN `iFromUserID` BIGINT UNSIGNED,
+	IN `iFromWalID` INT,
+	IN `iToUserLogin` INT,
+	IN `iAmount` INT,
+	IN `iPass` INT,
+	IN `iSalt` INT
+)
+BEGIN
+  DECLARE UserID BIGINT UNSIGNED;
+  DECLARE Valid TINYINT;
+  DECLARE TargetUserID BIGINT UNSIGNED;
+  DECLARE TargetWalletID BIGINT UNSIGNED;
+  DECLARE FromNameFamily VARCHAR(100);
+  DECLARE ToNameFamily VARCHAR(100);
+  DECLARE Err VARCHAR(500);
+  
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = iFromUserID,
+         tblActionLogs.atlType = 'Transfer.Error',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iFromUserID", iFromUserID,
+              "iFromWalID", iFromWalID,
+              "iToUserLogin", iToUserLogin,
+              "iAmount", iAmount,
+              "iPass", iPass,
+              "iSalt", iSalt
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+  
+  SELECT IFNULL(CONCAT(tblUser.usrName, ' ', tblUser.usrFamily), IFNULL(tblUser.usrEmail, tblUser.usrMobile)),
+         tblUser.usrID,
+         tblUserWallets.walID
+    INTO ToNameFamily,
+         TargetUserID,
+         TargetWalletID
+    FROM tblUser
+      JOIN tblUserWallets
+        ON tblUserWallets.wal_usrID = tblUser.usrID
+   WHERE tblUser.usrStatus = 'A'
+     AND (tblUser.usrEmail = iToUserLogin OR tblUser.usrMobile = iToUserLogin)
+     AND tblUserWallets.walDefault = TRUE;
+     
+  IF ISNULL(ToNameFamily) THEN 
+ 		SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = '401: Target user not found or is inactive';
+  END IF;
+
+  SELECT fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass),
+         IFNULL(CONCAT(tblUser.usrName, ' ', tblUser.usrFamily), IFNULL(tblUser.usrEmail, tblUser.usrMobile))
+    INTO Valid,
+         FromNameFamily
+    FROM tblUser
+   WHERE tblUser.usrID = iFromUserID
+     AND tblUser.usrStatus = 'A';
+   
+  IF ISNULL(Valid) THEN
+ 		SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = '401:Invalid UserID';
+  END IF;
+  
+  IF Valid = FALSE THEN
+ 		SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = '401:Incorrect password';
+  END IF;
+  
+  CALL spWalletTransaction_Validate(iFromUserID, iFromWalID, 'T', iAmount, Valid);
+
+  START TRANSACTION;
+    INSERT INTO tblVoucher
+       SET tblVoucher.vch_usrID = iFromUserID,
+           tblVoucher.vchType = 'T',
+           tblVoucher.vchDesc = JSON_OBJECT(
+              "targetID", TargetUserID,
+              "targetLogin", iToUserLogin,
+              "targetName", ToNameFamily
+           ),
+           tblVoucher.vchTotalAmount = Amount,
+           tblVoucher.vchStatus = 'F';
+           
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = iFromWalID,
+           tblWalletsTransactions.wlt_vchID = LAST_INSERT_ID(),
+           tblWalletsTransactions.wltType = 'T',
+           tblWalletsTransactions.wltAmount = iAmount * -1;
+
+    -- Do not merge this with previous query. Creation of a transatction must be separaet from it's acceptance           
+    UPDATE tblWalletsTransactions
+       SET tblWalletsTransactions.wltStatus = 'A'
+     WHERE tblWalletsTransactions.wltID = LAST_INSERT_ID();  
+    
+    INSERT INTO tblVoucher
+       SET tblVoucher.vch_usrID = TargetUserID,
+           tblVoucher.vchType = 'F',
+           tblVoucher.vchDesc = JSON_OBJECT(
+              "fromID", iFromUserID,
+              "fromName", FromNameFamily
+           ),
+           tblVoucher.vchTotalAmount = Amount,
+           tblVoucher.vchStatus = 'F';
+
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = TargetWalletID,
+           tblWalletsTransactions.wlt_vchID = LAST_INSERT_ID(),
+           tblWalletsTransactions.wltType = 'F',
+           tblWalletsTransactions.wltAmount = iAmount;
+
+    UPDATE tblWalletsTransactions
+       SET tblWalletsTransactions.wltStatus = 'A'
+     WHERE tblWalletsTransactions.wltID = LAST_INSERT_ID();  
+  COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `spWithdrawal_Request` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `spWithdrawal_Request`(
+	IN `iWalletID` BIGINT UNSIGNED,
+	IN `iForUsrID` BIGINT UNSIGNED,
+	IN `iByUserID` BIGINT UNSIGNED,
+	IN `iAmount` INT UNSIGNED,
+	IN `iDesc` VARCHAR(500),
+	OUT `oVoucherID` BIGINT UNSIGNED
+)
+BEGIN
+  DECLARE Multiplier TINYINT;
+  DECLARE Err VARCHAR(500);
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    GET DIAGNOSTICS CONDITION 1 Err = MESSAGE_TEXT;
+    INSERT INTO tblActionLogs
+     SET tblActionLogs.atlBy_usrID = iByUserID,
+         tblActionLogs.atlType = 'Withdraw.Error',
+         tblActionLogs.atlDescription = JSON_OBJECT(
+              "err", Err,
+              "iWalletID", iWalletID,
+              "iForUsrID", iForUsrID,
+              "iByUserID", iByUserID,
+              "iAmount",iAmount,
+              "iDesc",iDesc
+          );
+	  ROLLBACK;  
+	  RESIGNAL;  
+  END;
+  
+  CALL spWalletTransaction_Validate(iForUsrID, iWalletID, 'W', iAmount, Multiplier);
+
+  INSERT INTO tblVoucher
+     SET tblVoucher.vch_usrID = iForUsrID,
+         tblVoucher.vchType = 'W',
+         tblVoucher.vchTotalAmount = iAmount,
+         tblVoucher.vchDesc = JSON_OBJECT(
+          "desc", iDesc
+         );
+         
+  SET oVoucherID = LAST_INSERT_ID();
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
