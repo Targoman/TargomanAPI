@@ -30,6 +30,7 @@
 #include "ORM/actionLogs.hpp"
 #include <cstdlib>
 #include <unistd.h>
+#include "../moduleSrc/ORM/Defs.hpp"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
@@ -51,9 +52,13 @@ class testTicketing : public clsBaseTest
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
 
+    quint64 MainTicketID;
+    quint64 Reply1TicketID;
+    quint64 Reply2TicketID;
+
     void cleanupUnitTestData()
     {
-        clsDAC DAC;
+        clsDAC DAC("AAA");
         DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
     }
 
@@ -172,18 +177,244 @@ private slots:
                 }
             );
 
+//            qDebug() << Result;
+
+            this->MainTicketID = Result.toMap().value("id").toUInt();
+
+            QVERIFY(this->MainTicketID > 0);
+
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
+    void Ticket_newFeedback_1()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PUT,
+                "Ticketing/newFeedback",
+                {},
+                {
+                    { "serviceID", 123 },
+                    { "title", "this is ticket reply title" },
+                    { "body", "this is ticket reply body" },
+                    { "ticketType", Targoman::API::TicketingModule::enuTicketType::Reply },
+                    { "inReplyTicketID", this->MainTicketID },
+                },
+                {
+                    { "file", "../../README.md" },
+                }
+            );
 
+            qDebug() << Result;
+
+            this->Reply1TicketID = Result.toMap().value("id").toUInt();
+
+            QVERIFY(this->Reply1TicketID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Ticket_newFeedback_2()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PUT,
+                "Ticketing/newFeedback",
+                {},
+                {
+                    { "serviceID", 123 },
+                    { "title", "this is ticket reply title" },
+                    { "body", "this is ticket reply body" },
+                    { "ticketType", Targoman::API::TicketingModule::enuTicketType::Reply },
+                    { "inReplyTicketID", this->Reply1TicketID },
+                },
+                {
+                    { "file", "../../README.md" },
+                }
+            );
+
+            qDebug() << Result;
+
+            this->Reply2TicketID = Result.toMap().value("id").toUInt();
+
+            QVERIFY(this->Reply2TicketID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_Get()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                QString("Ticketing/Tickets/%1").arg(this->MainTicketID),
+                {},
+                {}
+            );
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isNull() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+    void Tickets_List()
+
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {},
+                {}
+            );
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isNull() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_List_by_baseTicketID()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {
+                    { "baseTicketID", this->MainTicketID },
+                },
+                {
+                });
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isNull() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_List_by_inReplyTicketID()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {
+                    { "inReplyTicketID", this->MainTicketID },
+                },
+                {
+                });
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isNull() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 
 private:
 private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
+    void cleanupTickets()
+    {
+        clsDAC DAC("Ticketing");
+
+        try
+        {
+            QString QueryString = R"(
+                DELETE t
+                  FROM tblTickets t
+                 WHERE t.tktID = ?
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                       this->Reply2TicketID
+                                                   });
+            qDebug() << QVariantMap({{ "(2) numRowsAffected", DACResult.numRowsAffected() }});
+        }
+        catch(std::exception &exp)
+        {
+            qDebug() << "(2)" << exp.what();
+        }
+
+        try
+        {
+            QString QueryString = R"(
+                DELETE t
+                  FROM tblTickets t
+                 WHERE t.tktID = ?
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                       this->Reply1TicketID
+                                                   });
+            qDebug() << QVariantMap({{ "(1) numRowsAffected", DACResult.numRowsAffected() }});
+        }
+        catch(std::exception &exp)
+        {
+            qDebug() << "(1)" << exp.what();
+        }
+
+        try
+        {
+            QString QueryString = R"(
+                DELETE t
+                  FROM tblTickets t
+                 WHERE t.tktID = ?
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString, {
+                                                       this->MainTicketID
+                                                   });
+            qDebug() << QVariantMap({{ "(MAIN) numRowsAffected", DACResult.numRowsAffected() }});
+        }
+        catch(std::exception &exp)
+        {
+            qDebug() << "(MAIN)" << exp.what();
+        }
+    }
+
+    void cleanupOrphanUploadedFiles()
+    {
+        clsDAC DAC("Ticketing");
+
+        try
+        {
+            QString QueryString = R"(
+                DELETE tblUploadFiles
+                  FROM tblUploadFiles
+             LEFT JOIN (
+                SELECT tat_uplID
+                     , COUNT(*) AS _cnt
+                  FROM tblTicketAttachments
+              GROUP BY tat_uplID
+                       ) tmpCnt
+                    ON tmpCnt.tat_uplID = tblUploadFiles.uflID
+                 WHERE tmpCnt._cnt IS NULL
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            qDebug() << QVariantMap({{ "(ORPHAN) numRowsAffected", DACResult.numRowsAffected() }});
+        }
+        catch(std::exception &exp)
+        {
+            qDebug() << "(ORPHAN)" << exp.what();
+        }
+    }
 
     void cleanupAccountFixture()
     {

@@ -36,12 +36,21 @@ int main(int argc, char *argv[])
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
-    clsDAC::addDBEngine(enuDBEngines::MySQL);
+    clsDAC::addDBEngine(enuDBEngines::MySQL, "AAA");
     clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
                                 "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
                                 "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
                                 "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
-                                "SCHEMA=" TARGOMAN_M2STR(UNITTEST_DB_SCHEMA) ";");
+                                "SCHEMA=AAA;"
+                                , "AAA");
+
+    clsDAC::addDBEngine(enuDBEngines::MySQL, "Ticketing");
+    clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
+                                "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
+                                "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
+                                "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
+                                "SCHEMA=Ticketing;"
+                                , "Ticketing");
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;

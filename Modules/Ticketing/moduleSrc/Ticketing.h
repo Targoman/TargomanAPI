@@ -51,7 +51,7 @@ private:
             quint64 _createdBy,
             quint64 _targetUserID,
             quint32 _serviceID,
-            quint64 _inReplyTo,
+            quint64 _inReplyTicketID,
             enuTicketType::Type _ticketType,
             const QString &_title,
             const QString &_body,
@@ -59,7 +59,7 @@ private:
         );
 
 private slots:
-    bool REST_PUT(
+    QVariantMap REST_PUT(
         newMessage,
         (
             TAPI::JWT_t _JWT,
@@ -72,7 +72,7 @@ private slots:
         "create new message targeting a user or all users (if target user is 0)"
     )
 
-    bool REST_PUT(
+    QVariantMap REST_PUT(
         newFeedback,
         (
             TAPI::JWT_t _JWT,
@@ -80,7 +80,7 @@ private slots:
             const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
-            quint64 _inReplyTo = 0,
+            quint64 _inReplyTicketID = 0,
             const TAPI::stuFileInfo &_file = {}
         ),
         "create a new/reply feedback with"

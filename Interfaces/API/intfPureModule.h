@@ -37,28 +37,102 @@
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
 
+/**********************************************************************\
+|** GET ***************************************************************|
+\**********************************************************************/
 //used by Api call methods
-#define GET_METHOD_ARGS_HEADER_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, quint64 _offset = 0, quint16 _limit = 10, TAPI::Cols_t _cols = {}, TAPI::Filter_t _filters = {}, TAPI::OrderBy_t _orderBy = {}, TAPI::GroupBy_t _groupBy = {}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL_APICALL     TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, quint64 _offset, quint16 _limit, TAPI::Cols_t _cols, TAPI::Filter_t _filters, TAPI::OrderBy_t _orderBy, TAPI::GroupBy_t _groupBy, bool _reportCount
+#define GET_METHOD_ARGS_HEADER_APICALL \
+    TAPI::JWT_t _JWT, \
+    TAPI::PKsByPath_t _pksByPath = {}, \
+    quint64 _offset = 0, \
+    quint16 _limit = 10, \
+    TAPI::Cols_t _cols = {}, \
+    TAPI::Filter_t _filters = {}, \
+    TAPI::OrderBy_t _orderBy = {}, \
+    TAPI::GroupBy_t _groupBy = {}, \
+    bool _reportCount = true
+
+#define GET_METHOD_ARGS_IMPL_APICALL \
+    TAPI::JWT_t _JWT, \
+    TAPI::PKsByPath_t _pksByPath, \
+    quint64 _offset, \
+    quint16 _limit, \
+    TAPI::Cols_t _cols, \
+    TAPI::Filter_t _filters, \
+    TAPI::OrderBy_t _orderBy, \
+    TAPI::GroupBy_t _groupBy, \
+    bool _reportCount
+
 //#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
-#define ORMGET(_doc)                     apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
+
+#define ORMGET(_doc) \
+    apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET() { return _doc; }
-#define ORMGETPureVirtual(_doc)          apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
+
+#define ORMGETPureVirtual(_doc) \
+    apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
     virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     virtual QString docOfGET() { return _doc; }
-#define ORMGETWithBody(_doc, _body)          apiGET(GET_METHOD_ARGS_HEADER_APICALL) _body \
+
+#define ORMGETWithBody(_doc, _body) \
+    apiGET(GET_METHOD_ARGS_HEADER_APICALL) _body \
     virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     virtual QString docOfGET() { return _doc; }
-#define ORMGETByName(_name, _doc)      apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
+
+#define ORMGETByName(_name, _doc) \
+    apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET##_name(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET##_name() { return _doc; }
-//used by ApiQuery
-#define GET_METHOD_ARGS_HEADER_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, quint64 _offset = 0, quint16 _limit = 10, TAPI::Cols_t _cols = {}, TAPI::Filter_t _filters = {}, TAPI::OrderBy_t _orderBy = {}, TAPI::GroupBy_t _groupBy = {}, bool _reportCount = true
-#define GET_METHOD_ARGS_IMPL_INTERNAL_CALL     quint64 _userID, TAPI::PKsByPath_t _pksByPath, quint64 _offset, quint16 _limit, TAPI::Cols_t _cols, TAPI::Filter_t _filters, TAPI::OrderBy_t _orderBy, TAPI::GroupBy_t _groupBy, bool _reportCount
-#define GET_METHOD_CALL_ARGS_INTERNAL_CALL     clsJWT(_JWT).usrID(), _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
-#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW _userID, _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
 
+//used by ApiQuery
+#define GET_METHOD_ARGS_HEADER_INTERNAL_CALL \
+    quint64 _userID, \
+    TAPI::PKsByPath_t _pksByPath = {}, \
+    quint64 _offset = 0, \
+    quint16 _limit = 10, \
+    TAPI::Cols_t _cols = {}, \
+    TAPI::Filter_t _filters = {}, \
+    TAPI::OrderBy_t _orderBy = {}, \
+    TAPI::GroupBy_t _groupBy = {}, \
+    bool _reportCount = true \
+
+#define GET_METHOD_ARGS_IMPL_INTERNAL_CALL \
+    quint64 _userID, \
+    TAPI::PKsByPath_t _pksByPath, \
+    quint64 _offset, \
+    quint16 _limit, \
+    TAPI::Cols_t _cols, \
+    TAPI::Filter_t _filters, \
+    TAPI::OrderBy_t _orderBy, \
+    TAPI::GroupBy_t _groupBy, \
+    bool _reportCount
+
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL \
+    clsJWT(_JWT).usrID(), \
+    _pksByPath, \
+    _offset, \
+    _limit, \
+    _cols, \
+    _filters, \
+    _orderBy, \
+    _groupBy, \
+    _reportCount
+
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW \
+    _userID, \
+    _pksByPath, \
+    _offset, \
+    _limit, \
+    _cols, \
+    _filters, \
+    _orderBy, \
+    _groupBy, \
+    _reportCount
+
+/**********************************************************************\
+|** CREATE ************************************************************|
+\**********************************************************************/
 //used by Api call methods
 #define CREATE_METHOD_ARGS_HEADER_APICALL   TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo = {}
 #define CREATE_METHOD_ARGS_IMPL_APICALL     TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo
@@ -71,6 +145,9 @@
 #define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::ORMFields_t _createInfo
 #define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _createInfo
 
+/**********************************************************************\
+|** UPDATE ************************************************************|
+\**********************************************************************/
 //used by Api call methods
 #define UPDATE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
 #define UPDATE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
@@ -83,6 +160,9 @@
 #define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 #define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
 
+/**********************************************************************\
+|** DELETE ************************************************************|
+\**********************************************************************/
 //used by Api call methods
 #define DELETE_METHOD_ARGS_HEADER_APICALL TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath = {}
 #define DELETE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath

@@ -28,9 +28,38 @@
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
-namespace Targoman::API::TicketingModule::ORM {
+using namespace Targoman::API::TicketingModule;
 
-//using namespace ORM;
+//TAPI_REGISTER_METATYPE(
+//    /* complexity         */ COMPLEXITY_Object,
+//    /* namespace          */ Targoman::API::TicketingModule,
+//    /* type               */ stuTicketScope,
+//    /* toVariantLambda    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+//    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuTicketScope {
+//        if (_value.isValid() == false)
+//            return stuTicketScope();
+
+//        if (_value.canConvert<QVariantMap>())
+//            return stuTicketScope().fromJson(QJsonDocument::fromVariant(_value).object());
+
+//        if (_value.toString().isEmpty())
+//            return stuTicketScope();
+
+//        QJsonParseError Error;
+//        QJsonDocument Doc;
+//        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+//        if (Error.error != QJsonParseError::NoError)
+//            throw exHTTPBadRequest(_paramName + " is not a valid stuTicketScope: <" + _value.toString() + ">" + Error.errorString());
+
+//        if (Doc.isObject() == false)
+//            throw exHTTPBadRequest(_paramName + " is not a valid stuTicketScope object: <" + _value.toString() + ">");
+
+//        return stuTicketScope().fromJson(Doc.object());
+//    }
+//);
+
+namespace Targoman::API::TicketingModule::ORM {
 
 /******************************************************************************/
 /******************************************************************************/
@@ -63,51 +92,82 @@ Tickets::Tickets() :
     )
 {}
 
-QVariant Tickets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+QVariant Tickets::apiGET(
+//        GET_METHOD_ARGS_IMPL_APICALL,
+        TAPI::JWT_t _JWT,
+        TAPI::PKsByPath_t _pksByPath,
+        quint64 _offset,
+        quint16 _limit,
+//            TAPI::Cols_t _cols,
+//            TAPI::Filter_t _filters,
+        TAPI::OrderBy_t _orderBy,
+//            TAPI::GroupBy_t _groupBy,
+        bool _reportCount,
+        //-------------------------------------
+//        const stuTicketScope &_ticketScope
+        quint64 _baseTicketID,
+        quint64 _inReplyTicketID
+    )
 {
-//    QString ExtraFilters;
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-//                       .arg(tblTickets::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
-//                       .arg(tblTickets::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
-//                       .arg(tblTickets::tktTarget_usrID)
-//                       .arg(tblTickets::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
+    TAPI::Cols_t _cols;
+    TAPI::Filter_t _filters;
+    TAPI::GroupBy_t _groupBy;
 
+    quint64 CurrentUserID = clsJWT(_JWT).usrID();
     clsCondition ExtraFilters = {};
+
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
-            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
+            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
+            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })
             .orCond(
                 clsCondition({ tblTickets::tktTarget_usrID, enuConditionOperator::Null })
-                .andCond({ tblTickets::tktType,
-                           enuConditionOperator::Equal,
-                           Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
+                .andCond({ tblTickets::tktType, enuConditionOperator::Equal, enuTicketType::Broadcast })
             );
 
-    ///TODO: complete this lambda for retreiving lastReplyDateTime and totalReplyCount
-    auto QueryLambda = [](SelectQuery &_query) {
-//        _query
-//            .leftJoin(SelectQuery(TicketAttachments::instance())
+    auto QueryLambda = [&_baseTicketID, _inReplyTicketID](SelectQuery &_query) {
+        _query
+            .addCol(tblTickets::tktID)
+            .addCol(tblTickets::tktTarget_usrID)
+            .addCol(tblTickets::tkt_svcID)
+            .addCol(tblTickets::tktBase_tktID)
+            .addCol(tblTickets::tktInReply_tktID)
+            .addCol(tblTickets::tktType)
+            .addCol(tblTickets::tktTitle)
+            .addCol(tblTickets::tktBody)
+            .addCol(tblTickets::tktStatus)
+            .addCol(tblTickets::tktCreationDateTime)
+            .addCol(tblTickets::tktCreatedBy_usrID)
+            .addCol(tblTickets::tktUpdatedBy_usrID)
+            .addCol(CURRENT_TIMESTAMP)
+        ;
 
-//            )
+        if (_inReplyTicketID > 0)
+            _query.andWhere({ tblTickets::tktInReply_tktID, enuConditionOperator::Equal, _inReplyTicketID });
+        else
+        {
+            if (_baseTicketID == 0)
+                _query.andWhere({ tblTickets::tktBase_tktID, enuConditionOperator::Null });
+            else
+                _query.andWhere({ tblTickets::tktBase_tktID, enuConditionOperator::Equal, _baseTicketID });
+        }
+
+        _query
+            .leftJoin(SelectQuery(Tickets::instance())
+                      .addCol(tblTickets::tktBase_tktID)
+                      .addCol(enuAggregation::COUNT, tblTickets::tktID, "_cnt")
+                      .addCol(enuAggregation::MAX, tblTickets::tktCreationDateTime, "_maxdate")
+                      .where(clsCondition(tblTickets::tktBase_tktID, enuConditionOperator::NotNull))
+                      .groupBy(tblTickets::tktBase_tktID),
+                      "tmpReply",
+                      clsCondition("tmpReply", tblTickets::tktBase_tktID, enuConditionOperator::Equal, tblTickets::Name, tblTickets::tktID)
+            )
+            .addCol("tmpReply._cnt", "TotalReplyCount")
+            .addCol("tmpReply._maxdate", "LastReplyDateTime")
+        ;
     };
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
-
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        query
-//            .where({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
-//            .orWhere({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
-//            .orWhere(//clsCondition::scope(
-//                clsCondition(tblTickets::tktTarget_usrID, enuConditionOperator::Null)
-//                .orCond({ tblTickets::tktType, enuConditionOperator::Equal, Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
-//            )//)
-//        ;
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, ExtraFilters, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 /******************************************************************************/

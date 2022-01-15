@@ -57,7 +57,7 @@ quint64 Ticketing::insertTicket(
         quint64 _createdBy,
         quint64 _targetUserID,
         quint32 _serviceID,
-        quint64 _inReplyTo,
+        quint64 _inReplyTicketID,
         enuTicketType::Type _ticketType,
         const QString &_title,
         const QString &_body,
@@ -76,8 +76,8 @@ quint64 Ticketing::insertTicket(
     if (_serviceID > 0)
         CreateFields.insert(tblTickets::tkt_svcID, _serviceID);
 
-    if (_inReplyTo > 0)
-        CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTo);
+    if (_inReplyTicketID > 0)
+        CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTicketID);
 
     quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
 
@@ -117,7 +117,7 @@ quint64 Ticketing::insertTicket(
     return TicketID;
 }
 
-bool Ticketing::apiPUTnewMessage(
+QVariantMap Ticketing::apiPUTnewMessage(
         TAPI::JWT_t _JWT,
         const QString &_title,
         const QString &_body,
@@ -131,31 +131,35 @@ bool Ticketing::apiPUTnewMessage(
     TAPI::Files_t Files;
     Files.append(_file);
 
-    return this->insertTicket(
-                clsJWT(_JWT).usrID(),
-                _targetUserID,
-                _serviceID,
-                0,
-                _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
-                _title,
-                _body,
-                Files
-                ) > 0;
+    quint64 ID = this->insertTicket(
+                     clsJWT(_JWT).usrID(),
+                     _targetUserID,
+                     _serviceID,
+                     0,
+                     _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
+                     _title,
+                     _body,
+                     Files
+                     );
+
+    return QVariantMap({
+                           { "id", ID },
+                       });
 }
 
-bool Ticketing::apiPUTnewFeedback(
+QVariantMap Ticketing::apiPUTnewFeedback(
         TAPI::JWT_t _JWT,
         const QString &_title,
         const QString &_body,
         Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
         quint32 _serviceID,
-        quint64 _inReplyTo,
+        quint64 _inReplyTicketID,
         const TAPI::stuFileInfo &_file
     )
 {
   Authorization::checkPriv(_JWT, {});
 
-  if (_inReplyTo && (_ticketType != enuTicketType::Reply))
+  if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
     throw exHTTPBadRequest("Reply tickets must have reply type");
 
   if (_ticketType == enuTicketType::Message ||
@@ -166,18 +170,20 @@ bool Ticketing::apiPUTnewFeedback(
   TAPI::Files_t Files;
   Files.append(_file);
 
-  return this->insertTicket(
-              clsJWT(_JWT).usrID(),
-              _inReplyTo,
-              _serviceID,
-              0,
-              _ticketType,
-              _title,
-              _body,
-              Files
-              ) > 0;
+  quint64 ID = this->insertTicket(
+                   clsJWT(_JWT).usrID(),
+                   0,
+                   _serviceID,
+                   _inReplyTicketID,
+                   _ticketType,
+                   _title,
+                   _body,
+                   Files
+                   );
 
-  return true;
+  return QVariantMap({
+                         { "id", ID },
+                     });
 }
 
 }  // namespace Targoman::API::TicketingModule
