@@ -97,6 +97,7 @@ CREATE TABLE `tblTickets` (
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblTickets_before_insert` BEFORE INSERT ON `tblTickets` FOR EACH ROW BEGIN
     DECLARE vID BIGINT;
+
     IF (NEW.tktInReply_tktID IS NOT NULL) THEN
         SELECT IF(tktBase_tktID IS NULL, tktID, tktBase_tktID)
           INTO vID
