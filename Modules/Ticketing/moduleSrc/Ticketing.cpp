@@ -117,7 +117,7 @@ quint64 Ticketing::insertTicket(
     return TicketID;
 }
 
-bool Ticketing::apiPUTnewMessage(
+QVariantMap Ticketing::apiPUTnewMessage(
         TAPI::JWT_t _JWT,
         const QString &_title,
         const QString &_body,
@@ -131,19 +131,23 @@ bool Ticketing::apiPUTnewMessage(
     TAPI::Files_t Files;
     Files.append(_file);
 
-    return this->insertTicket(
-                clsJWT(_JWT).usrID(),
-                _targetUserID,
-                _serviceID,
-                0,
-                _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
-                _title,
-                _body,
-                Files
-                ) > 0;
+    quint64 ID = this->insertTicket(
+                     clsJWT(_JWT).usrID(),
+                     _targetUserID,
+                     _serviceID,
+                     0,
+                     _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
+                     _title,
+                     _body,
+                     Files
+                     );
+
+    return QVariantMap({
+                           { "id", ID },
+                       });
 }
 
-bool Ticketing::apiPUTnewFeedback(
+QVariantMap Ticketing::apiPUTnewFeedback(
         TAPI::JWT_t _JWT,
         const QString &_title,
         const QString &_body,
@@ -166,18 +170,20 @@ bool Ticketing::apiPUTnewFeedback(
   TAPI::Files_t Files;
   Files.append(_file);
 
-  return this->insertTicket(
-              clsJWT(_JWT).usrID(),
-              _inReplyTo,
-              _serviceID,
-              0,
-              _ticketType,
-              _title,
-              _body,
-              Files
-              ) > 0;
+  quint64 ID = this->insertTicket(
+                   clsJWT(_JWT).usrID(),
+                   _inReplyTo,
+                   _serviceID,
+                   0,
+                   _ticketType,
+                   _title,
+                   _body,
+                   Files
+                   );
 
-  return true;
+  return QVariantMap({
+                         { "id", ID },
+                     });
 }
 
 }  // namespace Targoman::API::TicketingModule

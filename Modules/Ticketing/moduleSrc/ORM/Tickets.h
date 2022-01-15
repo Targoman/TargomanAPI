@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
 #define TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H
 
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
 
 namespace Targoman::API::TicketingModule {
@@ -34,6 +35,11 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      New       = 'N',
                      Removed   = 'R'
                      )
+
+//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuTicketScope,
+//    QString, baseTicketID,    QString(), v.size(), v, v.toString(),
+//    QString, inReplyTicketID, QString(), v.size(), v, v.toString()
+//);
 
 namespace ORM {
 
@@ -69,7 +75,28 @@ class Tickets : public intfSQLBasedModule
     TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
 
 private slots:
-    QVariant ORMGET("Get Tickets")
+//    QVariant ORMGET("Get Tickets")
+    QVariant REST_GET(
+        ,
+        (
+//            GET_METHOD_ARGS_HEADER_APICALL,
+            TAPI::JWT_t _JWT,
+            TAPI::PKsByPath_t _pksByPath = {},
+            quint64 _offset = 0,
+            quint16 _limit = 10,
+//            TAPI::Cols_t _cols = {},
+//            TAPI::Filter_t _filters = {},
+            TAPI::OrderBy_t _orderBy = {},
+//            TAPI::GroupBy_t _groupBy = {},
+            bool _reportCount = true,
+            //-------------------------------------
+//            const Targoman::API::TicketingModule::stuTicketScope &_ticketScope = {}
+            quint64 _baseTicketID = 0,
+            quint64 _inReplyTicketID = 0
+        ),
+        "Get Tickets"
+    )
+
 };
 
 class TicketRead : public intfSQLBasedModule
@@ -82,5 +109,6 @@ class TicketRead : public intfSQLBasedModule
 } //namespace Targoman::API::TicketingModule
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
+//TAPI_DECLARE_METATYPE(Targoman::API::TicketingModule::stuTicketScope)
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H

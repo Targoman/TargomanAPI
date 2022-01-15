@@ -59,7 +59,7 @@ private:
         );
 
 private slots:
-    bool REST_PUT(
+    QVariantMap REST_PUT(
         newMessage,
         (
             TAPI::JWT_t _JWT,
@@ -72,7 +72,7 @@ private slots:
         "create new message targeting a user or all users (if target user is 0)"
     )
 
-    bool REST_PUT(
+    QVariantMap REST_PUT(
         newFeedback,
         (
             TAPI::JWT_t _JWT,

@@ -269,13 +269,43 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
     if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup")
     {
         int i = 0;
-
     }
 #endif
 
     QVector<void*> ArgStorage(_arguments.size(), {});
 
-    try {
+    try
+    {
+        if (_arguments.size() > 10)
+            throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+
+        QGenericArgument Arguments[10];
+
+        for (int i=0; i<10; ++i)
+        {
+            if (i < _arguments.size())
+                Arguments[i] = USE_ARG_AT(i);
+            else
+                Arguments[i] = QGenericArgument();
+        }
+
+        InvocationResult = InvokableMethod.invoke(
+            this->parent(),
+            this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
+            _returnArg,
+            Arguments[0],
+            Arguments[1],
+            Arguments[2],
+            Arguments[3],
+            Arguments[4],
+            Arguments[5],
+            Arguments[6],
+            Arguments[7],
+            Arguments[8],
+            Arguments[9]
+        );
+
+        /*
         switch(_arguments.size()) {
             case  0: InvocationResult = InvokableMethod.invoke(this->parent(),
                                                                this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
@@ -379,14 +409,17 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
             default:
                 throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
         }
+        */
 
         if (InvocationResult == false)
             throw exHTTPInternalServerError(QString("Unable to invoke method"));
 
-        for(int i=0; i< _arguments.size(); ++i)
+        for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
-    } catch(...) {
-        for(int i=0; i< _arguments.size(); ++i)
+    }
+    catch(...)
+    {
+        for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
         throw;
     }

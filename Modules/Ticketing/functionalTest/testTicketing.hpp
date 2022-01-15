@@ -172,19 +172,73 @@ private slots:
                 }
             );
 
+            qDebug() << Result;
+
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
+    void Tickets_List()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {},
+                {}
+            );
 
+            qDebug() << Result;
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_List_by_baseTicketID()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {
+                    { "baseTicketID", 1 },
+                },
+                {
+                });
+
+            qDebug() << Result;
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_List_by_inReplyTicketID()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/Tickets",
+                {
+                    { "inReplyTicketID", 1 },
+                },
+                {
+                });
+
+            qDebug() << Result;
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 
 private:
 private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-
     void cleanupAccountFixture()
     {
         QT_TRY {
