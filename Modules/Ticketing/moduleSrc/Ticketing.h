@@ -51,7 +51,7 @@ private:
             quint64 _createdBy,
             quint64 _targetUserID,
             quint32 _serviceID,
-            quint64 _inReplyTo,
+            quint64 _inReplyTicketID,
             enuTicketType::Type _ticketType,
             const QString &_title,
             const QString &_body,
@@ -80,7 +80,7 @@ private slots:
             const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
-            quint64 _inReplyTo = 0,
+            quint64 _inReplyTicketID = 0,
             const TAPI::stuFileInfo &_file = {}
         ),
         "create a new/reply feedback with"

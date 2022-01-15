@@ -82,7 +82,7 @@ protected:
             cleanupUnitTestData();
 //            deleteOldTestData();
 
-        clsDAC DAC;
+        clsDAC DAC("AAA");
 
         clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?", { UT_RoleName, UT_SystemUserID });
         auto rolID = Result.lastInsertId().toUInt();
@@ -172,7 +172,7 @@ protected:
 private:
     void deleteOldTestData() //bool _createUsers=false)
     {
-        clsDAC DAC;
+        clsDAC DAC("AAA");
 
         DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", { UT_NormalToken, UT_AdminToken });
         DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", { UT_ServiceName });
