@@ -87,7 +87,5 @@ OTHER_FILES += \
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
-LIBS += -laws-cpp-sdk-s3
-
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)

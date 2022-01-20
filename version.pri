@@ -36,6 +36,10 @@ defined(QJsonRPC, var) equals(QJsonRPC, 1) {
   DEFINES += TARGOMAN_API_REDIS_PROTOCOL
 }
 
+!defined(NoAwsS3, var) | equals(NoAwsS3, 1) {
+  LIBS += -laws-cpp-sdk-s3
+  DEFINES += TARGOMAN_API_AWS_S3
+}
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 QT+= core sql network
