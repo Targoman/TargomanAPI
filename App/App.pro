@@ -50,8 +50,7 @@ OTHER_FILES += \
     ../conf/api.conf
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-LIBS += -lTargomanAPIInterface \
-    -laws-cpp-sdk-s3
+LIBS += -lTargomanAPIInterface
 
 DISTFILES += \
     conf/test.conf \

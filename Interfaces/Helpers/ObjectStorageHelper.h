@@ -31,9 +31,11 @@
 #include "Interfaces/Common/GenericTypes.h"
 #include <QJsonObject>
 
+#ifdef TARGOMAN_API_AWS_S3
 #include <aws/core/Aws.h>
 #include <aws/s3/S3Client.h>
 using namespace Aws;
+#endif
 
 namespace Targoman::API::ORM {
 class intfUploadFiles;
@@ -45,6 +47,7 @@ namespace Targoman::API::Helpers {
 
 namespace Private {
 
+#ifdef TARGOMAN_API_AWS_S3
 struct __static_s3_initializer__ {
     static inline bool Initialized = false;
     static inline SDKOptions options;
@@ -80,6 +83,7 @@ struct __static_s3_initializer__ {
     }
 };
 static __static_s3_initializer__ __static_s3_initializer__internal;
+#endif
 
 } //namespace Private
 
@@ -144,6 +148,7 @@ private:
 
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);
 
+#ifdef TARGOMAN_API_AWS_S3
     static bool uploadFileToS3(
         const QString &_fileName,
         const QString &_fileUUID,
@@ -153,6 +158,7 @@ private:
         const QString &_secretKey,
         const QString &_accessKey
     );
+#endif
 };
 
 } //namespace Targoman::API::Helpers

@@ -32,6 +32,8 @@ using namespace Targoman::API::ORM;
 using namespace Targoman::API::Helpers;
 
 #include <fstream>
+
+#ifdef TARGOMAN_API_AWS_S3
 //#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
 #include <aws/core/Aws.h>
 //#include <aws/core/auth/AWSAuthSigner.h>
@@ -39,6 +41,8 @@ using namespace Targoman::API::Helpers;
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/PutObjectRequest.h>
 using namespace Aws;
+#endif
+
 #include "QHttp/qhttpfwd.hpp"
 using namespace qhttp;
 
@@ -311,10 +315,11 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
 
     foreach(Targoman::API::ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos)
     {
-        bool S3Stored = false;
+        bool Stored = false;
         try
         {
-            S3Stored = ObjectStorageHelper::uploadFileToS3(
+#ifdef TARGOMAN_API_AWS_S3
+            Stored = ObjectStorageHelper::uploadFileToS3(
                            QueueInfo.uflFileName,
                            QueueInfo.uflFileUUID,
                            QueueInfo.uflLocalFullFileName,
@@ -323,13 +328,14 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
                            QueueInfo.ugwSecretKey,
                            QueueInfo.ugwAccessKey
                            );
+#endif
         }
         catch (std::exception &exp)
         {
-            TargomanDebug(5, "ERROR: storing file to s3:" << exp.what());
+            TargomanDebug(5, "ERROR: storing file to remote storage:" << exp.what());
         }
 
-        if (S3Stored)
+        if (Stored)
         {
             if (GatewayUploadedFileCount.contains(QueueInfo.ugwID))
             {
@@ -392,6 +398,7 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
     return true;
 }
 
+#ifdef TARGOMAN_API_AWS_S3
 bool ObjectStorageHelper::uploadFileToS3(
         const QString &_fileName,
         const QString &_fileUUID,
@@ -440,5 +447,6 @@ bool ObjectStorageHelper::uploadFileToS3(
 
     return true;
 }
+#endif
 
 } //namespace Targoman::API::Helpers

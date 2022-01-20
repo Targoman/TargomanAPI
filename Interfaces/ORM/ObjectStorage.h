@@ -42,7 +42,7 @@ TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
                      )
 //                     Queued     = 'Q', //queued
 //                     Uploading  = 'U', //queue(s) are in uploading
-//                     Stored     = 'S', //queued before and uploaded to all matched s3 gateways
+//                     Stored     = 'S', //queued before and uploaded to all matched remote storage gateways
 
 TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
                      Active     = 'A',
@@ -53,7 +53,7 @@ TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
 TARGOMAN_DEFINE_ENUM(enuUploadQueueStatus,
                      New        = 'N',
                      Uploading  = 'U', //queue(s) are in uploading
-                     Stored     = 'S', //queued before and upload to s3 completed
+                     Stored     = 'S', //queued before and upload to remote storage completed
                      Removed    = 'R'
                      )
 
