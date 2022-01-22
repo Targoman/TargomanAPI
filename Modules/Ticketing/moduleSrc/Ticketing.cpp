@@ -22,16 +22,15 @@
  */
 
 #include "Ticketing.h"
+#include "libQFieldValidator/QFieldValidator.h"
 #include "ORM/Defs.hpp"
 #include "ORM/Tickets.h"
 #include "ORM/TicketAttachments.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
-#include "Interfaces/Helpers/ObjectStorageHelper.h"
-#include "libQFieldValidator/QFieldValidator.h"
-
-using namespace Targoman::API::Helpers;
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+using namespace Targoman::API::ObjectStorage;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
@@ -92,7 +91,7 @@ quint64 Ticketing::insertTicket(
         {
             try
             {
-                quint64 UploadedFileID = ObjectStorageHelper::saveFile(
+                quint64 UploadedFileID = ObjectStorageManager::saveFile(
                                              _createdBy,
                                              UploadFiles::instance(),
                                              UploadQueue::instance(),
@@ -107,7 +106,7 @@ quint64 Ticketing::insertTicket(
             }
             catch (std::exception &exp)
             {
-                TargomanDebug(5, "ObjectStorageHelper::saveFile(" << _file.Name << "):" << exp.what());
+                TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
             }
         }
 

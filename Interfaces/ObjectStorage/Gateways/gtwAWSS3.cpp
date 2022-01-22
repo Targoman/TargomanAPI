@@ -32,9 +32,9 @@ using namespace qhttp;
 
 using namespace Targoman::API::Common;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Extensions::ObjectStorage, enuAWSS3MetaInfo);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::Gateways, enuAWSS3MetaInfo);
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwAWSS3::storeFile(
         const TAPI::JSON_t &_metaInfo,
@@ -84,6 +84,6 @@ bool gtwAWSS3::storeFile(
     return true;
 }
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways
 
 #endif // TARGOMAN_API_AWS_S3

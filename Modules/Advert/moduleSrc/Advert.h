@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
-#include "Interfaces/ORM/ObjectStorage.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"

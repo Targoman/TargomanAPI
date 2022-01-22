@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_GTWNFS_H
-#define TARGOMAN_API_GTWNFS_H
+#ifndef TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H
+#define TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H
 
 #include "intfObjectStorageGateway.h"
 #include "libTargomanCommon/Macros.h"
@@ -31,7 +31,7 @@
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
 TARGOMAN_DEFINE_ENUM(enuNFSMetaInfo,
                      Path
@@ -48,8 +48,8 @@ public:
     );
 };
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Extensions::ObjectStorage, enuNFSMetaInfo);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::Gateways, enuNFSMetaInfo);
 
-#endif // TARGOMAN_API_GTWNFS_H
+#endif // TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H

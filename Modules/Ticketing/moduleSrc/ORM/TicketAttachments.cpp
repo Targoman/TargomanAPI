@@ -25,9 +25,9 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 #include "Tickets.h"
-//#include "Interfaces/ORM/ObjectStorage.h"
-#include "Interfaces/Helpers/ObjectStorageHelper.h"
-using namespace Targoman::API::Helpers;
+//#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+using namespace Targoman::API::ObjectStorage;
 #include "Ticketing.h"
 
 using namespace Targoman::API::ORM;
@@ -106,7 +106,7 @@ QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
                      })
         ;
 
-        ObjectStorageHelper::applyGetFileUrlInQuery(
+        ObjectStorageManager::applyGetFileUrlInQuery(
                     _query,
                     UploadFiles::instance(),
                     UploadQueue::instance()

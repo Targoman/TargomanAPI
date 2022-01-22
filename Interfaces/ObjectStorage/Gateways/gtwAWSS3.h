@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_GTWAWSS3_H
-#define TARGOMAN_API_GTWAWSS3_H
+#ifndef TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H
+#define TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H
 
 #ifdef TARGOMAN_API_AWS_S3
 
@@ -51,7 +51,7 @@ make
 sudo make install
 */
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
 struct __static_s3_initializer__ {
     static inline bool Initialized = false;
@@ -107,10 +107,10 @@ public:
     );
 };
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::Extensions::ObjectStorage, enuAWSS3MetaInfo);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::Gateways, enuAWSS3MetaInfo);
 
 #endif // TARGOMAN_API_AWS_S3
 
-#endif // TARGOMAN_API_GTWAWSS3_H
+#endif // TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H

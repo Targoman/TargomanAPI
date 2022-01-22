@@ -28,13 +28,13 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 using namespace Targoman::Common;
 
-//#include "Interfaces/Helpers/ObjectStorageHelper.h"
+//#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
 //using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::DBM;
 using namespace Targoman::API::API;
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::ObjectStorage::ORM {
 
 TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
                      New        = 'N', //new file and not queued (must be queued)
@@ -217,12 +217,12 @@ private slots:
     bool ORMDELETE("Delete a object storage gateway")
 };
 
-} //namespace Targoman::API::ORM
+} //namespace Targoman::API::ObjectStorage::ORM
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadFileStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadQueueStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadGatewayType);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadGatewayStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadFileStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadQueueStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayStatus);
 
 /****************************************************/
 //put this macro before module class definition (.h)
@@ -233,7 +233,7 @@ TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadGatewayStatus);
 
 //put this macro after module class definition (.h)
 #define TARGOMAN_OBJECTSTORAGE_POSTPARENT(_module, _schema) \
-class UploadFiles : public Targoman::API::ORM::intfUploadFiles \
+class UploadFiles : public Targoman::API::ObjectStorage::ORM::intfUploadFiles \
 { \
     Q_OBJECT \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadFiles) \
@@ -250,7 +250,7 @@ public: \
         ); \
     } \
 }; \
-class UploadQueue : public Targoman::API::ORM::intfUploadQueue \
+class UploadQueue : public Targoman::API::ObjectStorage::ORM::intfUploadQueue \
 { \
     Q_OBJECT \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadQueue) \
@@ -262,7 +262,7 @@ public: \
         ) \
     {} \
 }; \
-class UploadGateways : public Targoman::API::ORM::intfUploadGateways \
+class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
 { \
     Q_OBJECT \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadGateways) \

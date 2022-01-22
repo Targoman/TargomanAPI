@@ -23,6 +23,6 @@
 
 #include "intfObjectStorageGateway.h"
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways

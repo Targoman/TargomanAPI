@@ -28,9 +28,9 @@ using namespace qhttp;
 
 using namespace Targoman::API::Common;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::Extensions::ObjectStorage, enuNFSMetaInfo);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::Gateways, enuNFSMetaInfo);
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwNFS::storeFile(
         const TAPI::JSON_t &_metaInfo,
@@ -50,4 +50,4 @@ bool gtwNFS::storeFile(
     return QFile::copy(_fullFileName, FullFileName);
 }
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways

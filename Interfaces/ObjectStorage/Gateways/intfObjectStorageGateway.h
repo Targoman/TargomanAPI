@@ -21,15 +21,15 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_INTFOBJECTSTORAGEGATEWAY_H
-#define TARGOMAN_API_INTFOBJECTSTORAGEGATEWAY_H
+#ifndef TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H
+#define TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H
 
-namespace Targoman::API::Extensions::ObjectStorage {
+namespace Targoman::API::ObjectStorage::Gateways {
 
 class intfObjectStorageGateway
 {
 };
 
-} //namespace Targoman::API::Extensions::ObjectStorage
+} //namespace Targoman::API::ObjectStorage::Gateways
 
-#endif // TARGOMAN_API_INTFOBJECTSTORAGEGATEWAY_H
+#endif // TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H
