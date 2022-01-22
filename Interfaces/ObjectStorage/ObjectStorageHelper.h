@@ -30,12 +30,8 @@
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include <QJsonObject>
-
-#ifdef TARGOMAN_API_AWS_S3
-#include <aws/core/Aws.h>
-#include <aws/s3/S3Client.h>
-using namespace Aws;
-#endif
+#include "Interfaces/ORM/ObjectStorage.h"
+using namespace Targoman::API::ORM;
 
 namespace Targoman::API::ORM {
 class intfUploadFiles;
@@ -45,48 +41,6 @@ class intfUploadQueue;
 
 namespace Targoman::API::Helpers {
 
-namespace Private {
-
-#ifdef TARGOMAN_API_AWS_S3
-struct __static_s3_initializer__ {
-    static inline bool Initialized = false;
-    static inline SDKOptions options;
-
-    __static_s3_initializer__()
-    {
-        if (Initialized)
-            return;
-
-        TargomanDebug(0, "Initialize S3 API");
-
-        //The Aws::SDKOptions struct contains SDK configuration options.
-        //An instance of Aws::SDKOptions is passed to the Aws::InitAPI and
-        //Aws::ShutdownAPI methods. The same instance should be sent to both methods.
-        options.loggingOptions.logLevel = Utils::Logging::LogLevel::Debug;
-
-        //The AWS SDK for C++ must be initialized by calling Aws::InitAPI.
-        InitAPI(options);
-
-        Initialized = true;
-    }
-    ~__static_s3_initializer__()
-    {
-        if (Initialized == false)
-            return;
-
-        TargomanDebug(0, "Shutdown S3 API");
-
-        //Before the application terminates, the SDK must be shut down.
-        ShutdownAPI(options);
-
-        Initialized = false;
-    }
-};
-static __static_s3_initializer__ __static_s3_initializer__internal;
-#endif
-
-} //namespace Private
-
 //TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
 //    SF_QString(FullFileUrl),
 //    SF_QString(MimeType),
@@ -94,28 +48,50 @@ static __static_s3_initializer__ __static_s3_initializer__internal;
 //    SF_quint64(uplID)
 //);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+TARGOMAN_CREATE_CONSTEXPR(uflFullFileUrl);
+#pragma GCC diagnostic pop
+
 class ObjectStorageHelper
 {
 public:
-    static QVariantMap saveFiles(
-        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
-        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+    static QString getFileUrl(
         const quint64 _currentUserID,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+        const quint64 _uploadedFileID
+    );
+
+    static void applyGetFileUrlInQuery(
+        SelectQuery &_query,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue
+//        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+//        const QString &_foreignTableName,
+//        const QString &_foreignTableUploadedFileIDFieldName
+        );
+
+    static QVariantMap saveFiles(
+        const quint64 _currentUserID,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
         const TAPI::Files_t &_files
     );
 
     static quint64 saveFile(
-        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
-        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
         const quint64 _currentUserID,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
         const TAPI::stuFileInfo &_file
     );
 
 //    static Targoman::API::Helpers::stuSaveFileResult saveFile(
-//            Targoman::API::ORM::intfUploadFiles *_uploadFiles,
 //            const quint64 _currentUserID,
+//            Targoman::API::ORM::intfUploadFiles *_uploadFiles,
 //            QString &_fileName,
 //            const QString &_base64Content
 //            );
@@ -124,23 +100,23 @@ private:
     struct stuProcessQueueParams {
         quint64 CurrentUserID;
         Targoman::API::ORM::intfUploadFiles &UploadFiles;
-        Targoman::API::ORM::intfUploadGateways &UploadGateways;
         Targoman::API::ORM::intfUploadQueue &UploadQueue;
+        Targoman::API::ORM::intfUploadGateways &UploadGateways;
         quint64 UploadedFileID = 0;
         quint16 MaxItemsCount = 100;
 
         stuProcessQueueParams(
                 quint64 _currentUserID,
                 Targoman::API::ORM::intfUploadFiles &_uploadFiles,
-                Targoman::API::ORM::intfUploadGateways &_uploadGateways,
                 Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+                Targoman::API::ORM::intfUploadGateways &_uploadGateways,
                 quint64 _uploadedFileID = 0,
                 quint16 _maxItemsCount = 100
             ) :
             CurrentUserID(_currentUserID),
             UploadFiles(_uploadFiles),
-            UploadGateways(_uploadGateways),
             UploadQueue(_uploadQueue),
+            UploadGateways(_uploadGateways),
             UploadedFileID(_uploadedFileID),
             MaxItemsCount(_maxItemsCount)
         {}
@@ -148,17 +124,13 @@ private:
 
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);
 
-#ifdef TARGOMAN_API_AWS_S3
-    static bool uploadFileToS3(
+    static bool storeFile(
+        const enuUploadGatewayType::Type &_storageType,
+        const TAPI::JSON_t &_metaInfo,
         const QString &_fileName,
         const QString &_fileUUID,
-        const QString &_fullFileName,
-        const QString &_bucket,
-        const QString &_endpointUrl,
-        const QString &_secretKey,
-        const QString &_accessKey
+        const QString &_fullFileName
     );
-#endif
 };
 
 } //namespace Targoman::API::Helpers

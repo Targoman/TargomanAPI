@@ -93,10 +93,10 @@ quint64 Ticketing::insertTicket(
             try
             {
                 quint64 UploadedFileID = ObjectStorageHelper::saveFile(
-                                             UploadFiles::instance(),
-                                             UploadGateways::instance(),
-                                             UploadQueue::instance(),
                                              _createdBy,
+                                             UploadFiles::instance(),
+                                             UploadQueue::instance(),
+                                             UploadGateways::instance(),
                                              _file
                                              );
                 if (UploadedFileID > 0)

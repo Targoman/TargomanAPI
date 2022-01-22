@@ -41,6 +41,9 @@ HEADERS += \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
+    Extensions/ObjectStorage/gtwAWSS3.h \
+    Extensions/ObjectStorage/gtwNFS.h \
+    Extensions/ObjectStorage/intfObjectStorageGateway.h \
     Helpers/FixtureHelper.h \
     Helpers/ObjectStorageHelper.h \
     Helpers/RESTClientHelper.h \
@@ -59,6 +62,9 @@ SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
+    Extensions/ObjectStorage/gtwAWSS3.cpp \
+    Extensions/ObjectStorage/gtwNFS.cpp \
+    Extensions/ObjectStorage/intfObjectStorageGateway.cpp \
     Helpers/FixtureHelper.cpp \
     Helpers/ObjectStorageHelper.cpp \
     Helpers/PhoneHelper.cpp \

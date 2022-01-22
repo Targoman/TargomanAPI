@@ -1449,35 +1449,37 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
 //        ForeignTable_Name = _foreignTable;
 
     //find relation definition
-    stuRelation* Relation = nullptr;
+    bool RelationFound = false;
+    stuRelation Relation("", "", "");
     foreach (stuRelation Rel, this->JoinTraitData->Owner->Data->Table.Relations)
     {
 //        parts = Rel.ReferenceTable.split('.', QString::SkipEmptyParts);
 //        if (parts[parts.length() - 1] == ForeignTable_Name)
         if (Rel.ReferenceTable == _foreignTable)
         {
-            if (Relation != nullptr)
+            if (RelationFound)
                 throw exHTTPInternalServerError(QString("Multiple relations defined to table (%1).").arg(_foreignTable));
 
-            Relation = &Rel;
+            RelationFound = true;
+            Relation = Rel;
 //            break;
         }
     }
 
-    if (Relation == nullptr)
+    if (RelationFound == false)
         throw exHTTPInternalServerError(QString("Relation on table (%1) has not been defined.").arg(_foreignTable));
 
-    clsTable* ForeignTable = clsTable::Registry[Relation->ReferenceTable];
+    clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
 
     if (ForeignTable == nullptr)
-        throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
+        throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation.ReferenceTable));
 
     clsCondition On(
         _alias.length() ? _alias : ForeignTable->Name,
-        Relation->ForeignColumn,
+        Relation.ForeignColumn,
         enuConditionOperator::Equal,
         this->JoinTraitData->Owner->Data->Alias.length() ? this->JoinTraitData->Owner->Data->Alias : this->JoinTraitData->Owner->Data->Table.Name,
-        Relation->Column
+        Relation.Column
     );
 
     this->JoinTraitData->Joins.append({ _joinType, _foreignTable, _alias, On });

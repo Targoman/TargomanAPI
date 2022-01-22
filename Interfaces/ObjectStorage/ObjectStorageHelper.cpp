@@ -25,35 +25,19 @@
 #include <QMimeDatabase>
 #include <QtConcurrent/QtConcurrent>
 #include "ObjectStorageHelper.h"
-#include "ORM/ObjectStorage.h"
-using namespace Targoman::API::ORM;
 
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
-#include <fstream>
+//#include <fstream>
 
+#include "Extensions/ObjectStorage/gtwNFS.h"
 #ifdef TARGOMAN_API_AWS_S3
-//#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
-#include <aws/core/Aws.h>
-//#include <aws/core/auth/AWSAuthSigner.h>
-#include <aws/core/auth/AWSCredentials.h>
-#include <aws/s3/S3Client.h>
-#include <aws/s3/model/PutObjectRequest.h>
-using namespace Aws;
+#include "Extensions/ObjectStorage/gtwAWSS3.h"
 #endif
 
 #include "QHttp/qhttpfwd.hpp"
 using namespace qhttp;
-
-/** installing AmazonAWS S3 from source ************************************************************
-git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
-mkdir aws-build.s3
-cd aws-build.s3
-cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
-make
-sudo make install
-*/
 
 //TAPI_REGISTER_METATYPE(
 //    /* complexity      */ COMPLEXITY_Object,
@@ -64,11 +48,73 @@ sudo make install
 
 namespace Targoman::API::Helpers {
 
-QVariantMap ObjectStorageHelper::saveFiles(
-        intfUploadFiles &_uploadFiles,
-        intfUploadGateways &_uploadGateways,
-        intfUploadQueue &_uploadQueue,
+QString ObjectStorageHelper::getFileUrl(
         const quint64 _currentUserID,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue,
+        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+        const quint64 _uploadedFileID
+    )
+{
+}
+
+void ObjectStorageHelper::applyGetFileUrlInQuery(
+        SelectQuery &_query,
+        Targoman::API::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ORM::intfUploadQueue &_uploadQueue
+//        Targoman::API::ORM::intfUploadGateways &_uploadGateways,
+//        const QString &_foreignTableName,
+//        const QString &_foreignTableUploadedFileIDFieldName
+    )
+{
+    Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
+//    Targoman::API::DBM::clsTable* TBL_uploadQueue = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadQueue);
+
+    /*
+     * https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html#:~:text=If%20the%20ONLY_FULL_GROUP_BY%20SQL%20mode,are%20functionally%20dependent%20on%20them.:
+     *  -> You can achieve the same effect without disabling ONLY_FULL_GROUP_BY by using ANY_VALUE() to refer to the nonaggregated column.
+     */
+    _query
+        .innerJoin(TBL_uploadFiles->name())
+        .addCols({
+                    tblUploadFiles::uflID,
+                    tblUploadFiles::uflFileName,
+                    tblUploadFiles::uflFileUUID,
+                    tblUploadFiles::uflSize,
+                    tblUploadFiles::uflFileType,
+                    tblUploadFiles::uflMimeType,
+                    tblUploadFiles::uflLocalFullFileName,
+                    tblUploadFiles::uflStatus,
+                    tblUploadFiles::uflCreationDateTime,
+                    tblUploadFiles::uflCreatedBy_usrID,
+                    tblUploadFiles::uflUpdatedBy_usrID,
+                 })
+
+        .innerJoin(SelectQuery(_uploadQueue)
+                   .addCol(tblUploadQueue::uqu_uflID) //, "_q_uflID")
+                   .addCol(DBExpression::VALUE(QString(R"(
+                                                       ANY_VALUE(
+                                                       %1
+                                                       )
+                                                       )").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
+                   .innerJoin(tblUploadGateways::Name)
+                   .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored })
+                   .groupBy(tblUploadQueue::uqu_uflID)
+                   ,
+                   "tmpQueue",
+                   clsCondition("tmpQueue", tblUploadQueue::uqu_uflID,
+                                enuConditionOperator::Equal,
+                                TBL_uploadFiles->name(), tblUploadFiles::uflID)
+                   )
+        .addCol(QString("tmpQueue.%1").arg(uflFullFileUrl), uflFullFileUrl)
+    ;
+}
+
+QVariantMap ObjectStorageHelper::saveFiles(
+        const quint64 _currentUserID,
+        intfUploadFiles &_uploadFiles,
+        intfUploadQueue &_uploadQueue,
+        intfUploadGateways &_uploadGateways,
         const TAPI::Files_t &_files
     )
 {
@@ -78,10 +124,10 @@ QVariantMap ObjectStorageHelper::saveFiles(
         try
         {
             quint64 ID = saveFile(
-                             _uploadFiles,
-                             _uploadGateways,
-                             _uploadQueue,
                              _currentUserID,
+                             _uploadFiles,
+                             _uploadQueue,
+                             _uploadGateways,
                              _file
                              );
             Result.insert(_file.Name, ID);
@@ -95,10 +141,10 @@ QVariantMap ObjectStorageHelper::saveFiles(
 }
 
 quint64 ObjectStorageHelper::saveFile(
-        intfUploadFiles &_uploadFiles,
-        intfUploadGateways &_uploadGateways,
-        intfUploadQueue &_uploadQueue,
         const quint64 _currentUserID,
+        intfUploadFiles &_uploadFiles,
+        intfUploadQueue &_uploadQueue,
+        intfUploadGateways &_uploadGateways,
         const TAPI::stuFileInfo &_file
     )
 {
@@ -169,7 +215,7 @@ quint64 ObjectStorageHelper::saveFile(
                 { "iMimeType", MimeType },
                 { "iFullFileName", FullFileName },
                 { "iCreatorUserID", _currentUserID },
-                { "iQueueStatus", QChar(enuUploadQueueStatus::Uploading) }, //this means that cronized s3 process not act to this queue items
+                { "iQueueStatus", QChar(enuUploadQueueStatus::Uploading) }, //this means that cronized store process not act to this queue items
             })
             .spDirectOutputs();
 
@@ -182,7 +228,7 @@ quint64 ObjectStorageHelper::saveFile(
         throw;
     }
 
-    //trigger async upload to s3(s)
+    //trigger async upload to storage(s)
     try
     {
         if (QueueRowsCount > 0)
@@ -193,8 +239,8 @@ quint64 ObjectStorageHelper::saveFile(
                                     stuProcessQueueParams(
                                         _currentUserID,
                                         _uploadFiles,
-                                        _uploadGateways,
                                         _uploadQueue,
+                                        _uploadGateways,
                                         UploadedFileID,
                                         QueueRowsCount
                                     ));
@@ -240,10 +286,11 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
         .addCol(tblUploadFiles::uflLocalFullFileName)
         .addCol(tblUploadFiles::uflStatus)
         .addCol(tblUploadGateways::ugwID)
-        .addCol(tblUploadGateways::ugwBucket)
-        .addCol(tblUploadGateways::ugwEndpointUrl)
-        .addCol(tblUploadGateways::ugwSecretKey)
-        .addCol(tblUploadGateways::ugwAccessKey)
+        .addCol(tblUploadGateways::ugwType)
+//        .addCol(tblUploadGateways::ugwBucket)
+//        .addCol(tblUploadGateways::ugwEndpointUrl)
+//        .addCol(tblUploadGateways::ugwSecretKey)
+//        .addCol(tblUploadGateways::ugwAccessKey)
         .addCol(tblUploadGateways::ugwMetaInfo)
         .addCol(tblUploadGateways::ugwCreatedFilesCount)
         .addCol(tblUploadGateways::ugwCreatedFilesSize)
@@ -318,17 +365,13 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
         bool Stored = false;
         try
         {
-#ifdef TARGOMAN_API_AWS_S3
-            Stored = ObjectStorageHelper::uploadFileToS3(
-                           QueueInfo.uflFileName,
-                           QueueInfo.uflFileUUID,
-                           QueueInfo.uflLocalFullFileName,
-                           QueueInfo.ugwBucket,
-                           QueueInfo.ugwEndpointUrl,
-                           QueueInfo.ugwSecretKey,
-                           QueueInfo.ugwAccessKey
-                           );
-#endif
+            Stored = ObjectStorageHelper::storeFile(
+                         QueueInfo.ugwType,
+                         QueueInfo.ugwMetaInfo,
+                         QueueInfo.uflFileName,
+                         QueueInfo.uflFileUUID,
+                         QueueInfo.uflLocalFullFileName
+                         );
         }
         catch (std::exception &exp)
         {
@@ -398,55 +441,35 @@ bool ObjectStorageHelper::processQueue(const stuProcessQueueParams &_processQueu
     return true;
 }
 
-#ifdef TARGOMAN_API_AWS_S3
-bool ObjectStorageHelper::uploadFileToS3(
+bool ObjectStorageHelper::storeFile(
+        const enuUploadGatewayType::Type &_storageType,
+        const TAPI::JSON_t &_metaInfo,
         const QString &_fileName,
         const QString &_fileUUID,
-        const QString &_fullFileName,
-        const QString &_bucket,
-        const QString &_endpointUrl,
-        const QString &_secretKey,
-        const QString &_accessKey
+        const QString &_fullFileName
     )
 {
-    Q_UNUSED(_fileName);
+    switch (_storageType)
+    {
+        case enuUploadGatewayType::NFS:
+            return Extensions::ObjectStorage::gtwNFS::storeFile(
+                        _metaInfo,
+                        _fileName,
+                        _fileUUID,
+                        _fullFileName
+                        );
 
-    ///TODO: use MultipartUploader for files larger than 400 MB
+        case enuUploadGatewayType::AWSS3:
+            return Extensions::ObjectStorage::gtwAWSS3::storeFile(
+                        _metaInfo,
+                        _fileName,
+                        _fileUUID,
+                        _fullFileName
+                        );
 
+    }
 
-    //upload to s3
-    S3::Model::PutObjectRequest Request;
-
-    Request.SetBucket(_bucket.toStdString());
-    Request.SetKey(QString("%1/%2").arg(_fileUUID).arg(_fileName).toStdString());
-
-    //----------------------------------------
-    std::shared_ptr<Aws::IOStream> InputData =
-            Aws::MakeShared<Aws::FStream>("SampleAllocationTag",
-                                          _fullFileName.toStdString().c_str(),
-                                          std::ios_base::in | std::ios_base::binary);
-
-    Request.SetBody(InputData);
-
-    //----------------------------------------
-    Aws::Auth::AWSCredentials AWSCredentials(_accessKey.toStdString(), _secretKey.toStdString());
-
-    Aws::Client::ClientConfiguration S3ClientConfig;
-
-//    if (_region.isEmpty() == false)
-//        S3ClientConfig.region = _region.toStdString();
-
-    S3ClientConfig.endpointOverride = _endpointUrl.toStdString();
-
-    S3::S3Client S3Client(AWSCredentials, S3ClientConfig);
-
-    Aws::S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
-
-    if (Outcome.IsSuccess() == false)
-        throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
-
-    return true;
+    return false;
 }
-#endif
 
 } //namespace Targoman::API::Helpers
