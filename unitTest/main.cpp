@@ -21,6 +21,7 @@
  */
 
 #include <QtTest>
+#include "testMacros.hpp"
 #include "testQueryBuilders.hpp"
 #include "App/Server/RESTAPIRegistry.h"
 
@@ -33,17 +34,20 @@ int main(int argc, char *argv[])
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
-    try{
-        if(BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }catch(std::exception &e){
-        qDebug()<<e.what();
+    try
+    {
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
     }
-    if(FailedTests > 0){
-        qDebug() << "total number of failed tests: " << FailedTests;
-    }else{
-        qDebug() << "all tests passed :)";
+    catch(std::exception &exp)
+    {
+        qDebug()<<exp.what();
     }
 
+    if (FailedTests > 0)
+        qDebug() << "total number of failed tests: " << FailedTests;
+    else
+        qDebug() << "all tests passed :)";
+
     return FailedTests;
-    /**/
 }

@@ -56,6 +56,7 @@ QString ObjectStorageManager::getFileUrl(
         const quint64 _uploadedFileID
     )
 {
+    //if not stored yet, return local http server url that serves uflLocalFullFileName
 }
 
 void ObjectStorageManager::applyGetFileUrlInQuery(
@@ -148,9 +149,10 @@ quint64 ObjectStorageManager::saveFile(
         const TAPI::stuFileInfo &_file
     )
 {
-    Targoman::API::ObjectStorage::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs = _uploadFiles.getObjectStorageConfigs();
+    Targoman::API::ObjectStorage::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs
+            = _uploadFiles.getObjectStorageConfigs();
 
-    //save file to the _objectStorageConfigs.LocalStoragePath (LOCAL/NFS)
+    //save file to the _objectStorageConfigs.TempLocalStoragePath (LOCAL/NFS)
     if (_file.Size == 0)
         throw exTargomanBase("The file is empty.", ESTATUS_BAD_REQUEST);
 
@@ -172,8 +174,7 @@ quint64 ObjectStorageManager::saveFile(
 //    if (OldData.isValid() && (OldData.toList().length() > 0))
 //        throw exTargomanBase("A file already exists with the same name.", ESTATUS_CONFLICT);
 
-    //move from temp to persistance location
-    QString FullPath = _objectStorageConfigs.LocalStoragePath;
+    QString FullPath = _objectStorageConfigs.TempLocalStoragePath;
     QDir FullPathDir(FullPath);
     if (FullPathDir.exists() == false)
     {
@@ -183,18 +184,18 @@ quint64 ObjectStorageManager::saveFile(
 
 //    QString FileUUID = SecurityHelper::UUIDtoMD5();
     QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
-
-    QString FullFileName = QString("%1/%2").arg(FullPath).arg(FileUUID);
-
-    QFile::rename(_file.TempName, FullFileName);
+    QString FullFileName = QString("%1/%2_%3").arg(FullPath).arg(FileUUID).arg(_file.Name);
 
     //get mime type
     QString MimeType = _file.Mime;
     if (MimeType.isEmpty())
     {
         QMimeDatabase MimeDB;
-        QString MimeType = MimeDB.mimeTypeForFile(FullFileName).name().toLower();
+        QString MimeType = MimeDB.mimeTypeForFile(_file.TempName).name().toLower();
     }
+
+    //move from temp to persistance location
+    QFile::rename(_file.TempName, FullFileName);
 
     //get file extension
     QString FileType;

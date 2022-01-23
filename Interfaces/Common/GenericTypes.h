@@ -171,7 +171,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(QTime,       Time_t,      _value.toTime());
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
 
 //TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(QList, T, JSONLIST_t, *this = QJsonDocument::fromVariant(_value));
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t,             *this = QJsonDocument::fromVariant(_value));
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t,             qDebug() << "************"; *this = QJsonDocument::fromVariant(_value));
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, PrivObject_t,       *this = QJsonDocument::fromVariant(_value));
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, SaleableAdditive_t, *this = QJsonDocument::fromVariant(_value));
 

@@ -354,6 +354,7 @@ private slots:
     /***************************************************************************************/
     void cleanupTickets()
     {
+return;
         clsDAC DAC("Ticketing");
 
         try

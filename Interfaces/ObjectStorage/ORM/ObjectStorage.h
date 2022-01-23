@@ -174,13 +174,13 @@ public:
 
     struct stuObjectStorageConfigs
     {
-        QString LocalStoragePath;
+        QString TempLocalStoragePath;
 
         stuObjectStorageConfigs(const stuObjectStorageConfigs &_other) :
-            LocalStoragePath(_other.LocalStoragePath)
+            TempLocalStoragePath(_other.TempLocalStoragePath)
         {}
         stuObjectStorageConfigs(const QString &_localStoragePath) :
-            LocalStoragePath(_localStoragePath)
+            TempLocalStoragePath(_localStoragePath)
         {}
     };
 
@@ -246,7 +246,7 @@ public: \
     {} \
     virtual intfUploadFiles::stuObjectStorageConfigs getObjectStorageConfigs() const { \
         return intfUploadFiles::stuObjectStorageConfigs( \
-            _module::ObjectStorage::LocalStoragePath.value() \
+            _module::ObjectStorage::TempLocalStoragePath.value() \
         ); \
     } \
 }; \
@@ -278,34 +278,38 @@ public: \
 //put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
 #define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
-    QScopedPointer<UploadFiles>     _UploadFiles;    \
-    QScopedPointer<UploadQueue>     _UploadQueue; \
-    QScopedPointer<UploadGateways>  _UploadGateways; \
+    QScopedPointer<UploadFiles>     _UploadFiles;       \
+    QScopedPointer<UploadQueue>     _UploadQueue;       \
+    QScopedPointer<UploadGateways>  _UploadGateways;    \
 public: \
     struct ObjectStorage { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/ObjectStorage/%2").arg(TARGOMAN_M2STR(_module), _name); } \
-        static Targoman::Common::Configuration::tmplConfigurable<QString>   LocalStoragePath; \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>   TempLocalStoragePath; \
     };
 
 //put this macro before module class constructor (.cpp)
-#define TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(_module, _schema)                \
-    using namespace Targoman::Common::Configuration;                            \
-    tmplConfigurable<QString> _module::ObjectStorage::LocalStoragePath(         \
-        _module::ObjectStorage::makeConfig("LocalStoragePath"),                 \
-        "LocalStoragePath",                                                     \
-        QString("%1/tapi/%2/objectstorage").arg(QDir::homePath()).arg(TARGOMAN_M2STR(_module))  \
-    );                                                                          \
+#define TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(_module, _schema)                                \
+    using namespace Targoman::Common::Configuration;                                            \
+    tmplConfigurable<QString> _module::ObjectStorage::TempLocalStoragePath(                     \
+        _module::ObjectStorage::makeConfig("TempLocalStoragePath"),                             \
+        "Path to store uploading files that shares by instances on same server",                \
+        QString("%1/tapi/%2/objectstorage").arg(QDir::homePath()).arg(TARGOMAN_M2STR(_module)), \
+        ReturnTrueCrossValidator(),                                                             \
+        "",                                                                                     \
+        "TempLocalStoragePath",                                                                 \
+        QString("%1-temp-local-storage-path").arg(TARGOMAN_M2STR(_module)).toLower(),           \
+        enuConfigSource::Arg | enuConfigSource::File                                            \
+    );
 //    QString("/var/spool/tapi/%1/objectstorage").arg(TARGOMAN_M2STR(_module))
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema) \
-    this->_UploadFiles   .reset(&UploadFiles   ::instance()); \
-    this->_UploadQueue   .reset(&UploadQueue   ::instance()); \
-    this->_UploadGateways.reset(&UploadGateways::instance()); \
-    \
-    this->addSubModule(this->_UploadFiles.data());    \
-    this->addSubModule(this->_UploadQueue.data());    \
-    this->addSubModule(this->_UploadGateways.data()); \
+#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema)  \
+    this->_UploadFiles   .reset(&UploadFiles   ::instance());   \
+    this->_UploadQueue   .reset(&UploadQueue   ::instance());   \
+    this->_UploadGateways.reset(&UploadGateways::instance());   \
+    this->addSubModule(this->_UploadFiles.data());              \
+    this->addSubModule(this->_UploadQueue.data());              \
+    this->addSubModule(this->_UploadGateways.data());
 
 //    UploadFiles    ::instance().prepareFiltersList(); \
 //    UploadQueue    ::instance().prepareFiltersList(); \

@@ -61,7 +61,13 @@ void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info)
 //    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwEndpointUrl         , _info, tblUploadGateways);
 //    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwSecretKey           , _info, tblUploadGateways);
 //    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwAccessKey           , _info, tblUploadGateways);
+
+
+    QVariant v = _info.value(tblUploadGateways::ugwMetaInfo);
+    TAPI::setFromVariant(this->ugwMetaInfo, _info.value(tblUploadGateways::ugwMetaInfo));
+
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwMetaInfo            , _info, tblUploadGateways);
+
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwCreatedFilesCount   , _info, tblUploadGateways);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwCreatedFilesSize    , _info, tblUploadGateways);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwLastActionTime      , _info, tblUploadGateways);
