@@ -28,8 +28,6 @@ using namespace qhttp;
 
 using namespace Targoman::API::Common;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::Gateways, enuNFSMetaInfo);
-
 namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwNFS::storeFile(
@@ -39,7 +37,7 @@ bool gtwNFS::storeFile(
         const QString &_fullFileName
     )
 {
-    QString StoragePath = _metaInfo[enuNFSMetaInfo::Path].toString();
+    QString StoragePath = _metaInfo[NFSMetaInfoJsonKey::Path].toString();
 
     QDir FullPath(StoragePath);
     if (FullPath.exists() == false)

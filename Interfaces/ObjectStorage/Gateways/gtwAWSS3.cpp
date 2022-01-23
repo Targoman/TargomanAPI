@@ -32,8 +32,6 @@ using namespace qhttp;
 
 using namespace Targoman::API::Common;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::Gateways, enuAWSS3MetaInfo);
-
 namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwAWSS3::storeFile(
@@ -43,10 +41,10 @@ bool gtwAWSS3::storeFile(
         const QString &_fullFileName
     )
 {
-    QString Bucket = _metaInfo[enuAWSS3MetaInfo::Bucket].toString();
-    QString EndpointUrl = _metaInfo[enuAWSS3MetaInfo::EndpointUrl].toString();
-    QString SecretKey = _metaInfo[enuAWSS3MetaInfo::SecretKey].toString();
-    QString AccessKey = _metaInfo[enuAWSS3MetaInfo::AccessKey].toString();
+    QString Bucket = _metaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
+    QString EndpointUrl = _metaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
+    QString SecretKey = _metaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
+    QString AccessKey = _metaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
 
     ///TODO: use MultipartUploader for files larger than 400 MB
 

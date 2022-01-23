@@ -89,12 +89,15 @@ struct __static_s3_initializer__ {
 };
 static __static_s3_initializer__ __static_s3_initializer__internal;
 
-TARGOMAN_DEFINE_ENUM(enuAWSS3MetaInfo,
-                     Bucket,
-                     EndpointUrl,
-                     SecretKey,
-                     AccessKey
-                     );
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace AWSS3MetaInfoJsonKey {
+TARGOMAN_CREATE_CONSTEXPR(Bucket);
+TARGOMAN_CREATE_CONSTEXPR(EndpointUrl);
+TARGOMAN_CREATE_CONSTEXPR(SecretKey);
+TARGOMAN_CREATE_CONSTEXPR(AccessKey);
+}
+#pragma GCC diagnostic pop
 
 class gtwAWSS3 : public intfObjectStorageGateway
 {
@@ -108,8 +111,6 @@ public:
 };
 
 } //namespace Targoman::API::ObjectStorage::Gateways
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::Gateways, enuAWSS3MetaInfo);
 
 #endif // TARGOMAN_API_AWS_S3
 

@@ -56,8 +56,9 @@ private slots:
 //        QVariant v = a;
 
         QVariantMap val = { {"aa", "11"}, {"bb", "22"} };
-
         TAPI::setFromVariant(a, val);
+
+        qDebug() << a << "[aa]" << a["aa"];
     }
 
 };

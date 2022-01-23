@@ -28,14 +28,20 @@
 #include "APIArgHelperMacrosPrivate.h"
 
 /************************************************************/
-#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
-    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant)
+#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
+    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda)
 
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
-    TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, this->fromVariant(_value) )
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
+        Q_UNUSED(_paramName); \
+        this->fromVariant(_value); \
+    })
 
 #define TAPI_ADD_TYPE_STRING(_typeName) \
-    TAPI_ADD_TYPE_SPECIALFROMVARIANT(QString, _typeName, _value.toString() )
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT(QString, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
+        Q_UNUSED(_paramName); \
+        *this = _value.toString(); \
+    })
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \
@@ -75,45 +81,7 @@
         }, \
         /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _type { \
             _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
-            if (_value.isValid() == false) \
-            { \
-                _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "fromVariantLambda.1", _paramName, _value); \
-                return QJsonDocument(); \
-            } \
-            if (_value.userType() == QMetaType::QJsonObject) { \
-                auto Doc = QJsonDocument(); \
-                auto _val = _value.value<QJsonObject>(); \
-                Doc.setObject(_val); \
-                _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "fromVariantLambda.2", _paramName, _val, endl, Doc); \
-                return Doc; \
-            } \
-            if (_value.userType() == QMetaType::QJsonArray) { \
-                auto Doc = QJsonDocument(); \
-                auto _val = _value.value<QJsonArray>(); \
-                Doc.setArray(_val); \
-                _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "fromVariantLambda.3", _paramName, _value, endl, Doc); \
-                return Doc; \
-            } \
-            if (_value.canConvert<QVariantMap>() || \
-                   _value.canConvert<QVariantList>() || \
-                   _value.canConvert<double>()) \
-            { \
-                auto Doc = QJsonDocument::fromVariant(_value); \
-                _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "fromVariantLambda.4", _paramName, _value, endl, Doc); \
-                return Doc; \
-            } \
-            if (_value.toString().isEmpty()) \
-            { \
-                _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "fromVariantLambda.5", _paramName, _value); \
-                return QJsonDocument(); \
-            } \
-            QJsonParseError Error; \
-            QJsonDocument Doc; \
-            Doc = Doc.fromJson(_value.toString().toUtf8(), &Error); \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "fromVariantLambda.6", _paramName, _value, endl, Doc); \
-            if (Error.error != QJsonParseError::NoError) \
-                throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString()); \
-            return Doc; \
+            return _type::fromVariant(_value); \
         }, \
         /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
         /* toORMValueLambda   */ [](const QVariant& _value) { \

@@ -33,9 +33,12 @@
 
 namespace Targoman::API::ObjectStorage::Gateways {
 
-TARGOMAN_DEFINE_ENUM(enuNFSMetaInfo,
-                     Path
-                     );
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace NFSMetaInfoJsonKey {
+TARGOMAN_CREATE_CONSTEXPR(Path);
+}
+#pragma GCC diagnostic pop
 
 class gtwNFS : public intfObjectStorageGateway
 {
@@ -49,7 +52,5 @@ public:
 };
 
 } //namespace Targoman::API::ObjectStorage::Gateways
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::Gateways, enuNFSMetaInfo);
 
 #endif // TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H
