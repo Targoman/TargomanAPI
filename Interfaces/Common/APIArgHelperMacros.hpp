@@ -56,7 +56,9 @@
 #define TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, ...) \
     TAPI_REGISTER_METATYPE_MACRO_SELECTOR(TAPI_REGISTER_METATYPE_, __VA_ARGS__)(_complexity, _namespace, _type, __VA_ARGS__)
 
+#ifdef QT_DEBUG
 #define _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
+#endif
 #ifdef _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                             qDebug() << "==============================" << TARGOMAN_M2STR(_type)
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, _a1)                        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                         << "(" << _a1 << ")"
@@ -65,7 +67,7 @@
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)         _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, _a1, _a2, _a3)          << _a4
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, _a1, _a2, _a3, _a4, _a5)    _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)     << _a5
 #else
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, ...)
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, ...)
 #define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, ...)
