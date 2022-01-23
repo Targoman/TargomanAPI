@@ -328,6 +328,25 @@ private slots:
         }
     }
 
+    void TicketAttachments_List()
+    {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Ticketing/TicketAttachments",
+                {},
+                {}
+            );
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isNull() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
 private:
 private slots:
     /***************************************************************************************/
@@ -335,6 +354,7 @@ private slots:
     /***************************************************************************************/
     void cleanupTickets()
     {
+return;
         clsDAC DAC("Ticketing");
 
         try

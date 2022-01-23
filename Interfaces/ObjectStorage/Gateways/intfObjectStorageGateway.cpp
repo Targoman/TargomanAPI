@@ -17,37 +17,12 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include <QtTest>
-#include "testMacros.hpp"
-#include "testQueryBuilders.hpp"
-#include "App/Server/RESTAPIRegistry.h"
+#include "intfObjectStorageGateway.h"
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication App(argc, argv);
-    App.setAttribute(Qt::AA_Use96Dpi, true);
+namespace Targoman::API::ObjectStorage::Gateways {
 
-    Targoman::API::Server::RESTAPIRegistry::registerMetaTypeInfoMap();
-
-    bool BreakOnFirstFail = true;
-    int FailedTests = 0;
-    try
-    {
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }
-    catch(std::exception &exp)
-    {
-        qDebug()<<exp.what();
-    }
-
-    if (FailedTests > 0)
-        qDebug() << "total number of failed tests: " << FailedTests;
-    else
-        qDebug() << "all tests passed :)";
-
-    return FailedTests;
-}
+} //namespace Targoman::API::ObjectStorage::Gateways

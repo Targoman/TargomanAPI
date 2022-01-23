@@ -17,37 +17,40 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include <QtTest>
-#include "testMacros.hpp"
-#include "testQueryBuilders.hpp"
-#include "App/Server/RESTAPIRegistry.h"
+#ifndef TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H
+#define TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication App(argc, argv);
-    App.setAttribute(Qt::AA_Use96Dpi, true);
+#include "intfObjectStorageGateway.h"
+#include "libTargomanCommon/Macros.h"
+//using namespace Targoman::Common;
 
-    Targoman::API::Server::RESTAPIRegistry::registerMetaTypeInfoMap();
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include "Interfaces/Common/GenericTypes.h"
 
-    bool BreakOnFirstFail = true;
-    int FailedTests = 0;
-    try
-    {
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }
-    catch(std::exception &exp)
-    {
-        qDebug()<<exp.what();
-    }
+namespace Targoman::API::ObjectStorage::Gateways {
 
-    if (FailedTests > 0)
-        qDebug() << "total number of failed tests: " << FailedTests;
-    else
-        qDebug() << "all tests passed :)";
-
-    return FailedTests;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace NFSMetaInfoJsonKey {
+TARGOMAN_CREATE_CONSTEXPR(Path);
 }
+#pragma GCC diagnostic pop
+
+class gtwNFS : public intfObjectStorageGateway
+{
+public:
+    static bool storeFile(
+        const TAPI::JSON_t &_metaInfo,
+        const QString &_fileName,
+        const QString &_fileUUID,
+        const QString &_fullFileName
+    );
+};
+
+} //namespace Targoman::API::ObjectStorage::Gateways
+
+#endif // TARGOMAN_API_OBJECTSTORAGE_GTWNFS_H

@@ -25,7 +25,10 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 #include "Tickets.h"
-#include "Interfaces/ORM/ObjectStorage.h"
+//#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+using namespace Targoman::API::ObjectStorage;
+#include "Ticketing.h"
 
 using namespace Targoman::API::ORM;
 
@@ -45,9 +48,11 @@ TicketAttachments::TicketAttachments() :
             { tblTicketAttachments::tatCreationDateTime,    ORM_CREATED_ON },
             { tblTicketAttachments::tatCreatedBy_usrID,     ORM_CREATED_BY },
         },
-        {///< Alias        Col                               Reference Table                        ForeignCol          Rename     LeftJoin
-            { "tickets", { tblTicketAttachments::tat_tktID,  R(TicketingSchema, tblTickets::Name),  tblTickets::tktID } },
+        {///< Alias        Col                               Reference Table                            ForeignCol          Rename     LeftJoin
+            { "tickets", { tblTicketAttachments::tat_tktID,  R(TicketingSchema, tblTickets::Name),      tblTickets::tktID } },
                          { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadFiles::Name),  tblUploadFiles::uflID },
+                         //this index is preventing querybuilder invalid column for filter error:
+                         { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::uqu_uflID },
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
     )
@@ -76,7 +81,40 @@ QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
             );
 
     auto QueryLambda = [](SelectQuery &_query) {
-        _query.innerJoinWith("tickets");
+        _query
+            .addCols({
+                         tblTicketAttachments::tatID,
+                         tblTicketAttachments::tat_tktID,
+                         tblTicketAttachments::tat_uplID,
+                         tblTicketAttachments::tatCreationDateTime,
+                         tblTicketAttachments::tatCreatedBy_usrID,
+                     })
+            .innerJoinWith("tickets")
+            .addCols({
+                         tblTickets::tktID,
+                         tblTickets::tktTarget_usrID,
+                         tblTickets::tkt_svcID,
+                         tblTickets::tktBase_tktID,
+                         tblTickets::tktInReply_tktID,
+                         tblTickets::tktType,
+                         tblTickets::tktTitle,
+                         tblTickets::tktBody,
+                         tblTickets::tktStatus,
+                         tblTickets::tktCreationDateTime,
+                         tblTickets::tktCreatedBy_usrID,
+                         tblTickets::tktUpdatedBy_usrID,
+                     })
+        ;
+
+        ObjectStorageManager::applyGetFileUrlInQuery(
+                    _query,
+                    UploadFiles::instance(),
+                    UploadQueue::instance()
+                    );
+
+//                    UploadGateways::instance(),
+//                    tblTicketAttachments::Name,
+//                    tblTicketAttachments::tat_uplID
     };
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);

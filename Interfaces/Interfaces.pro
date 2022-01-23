@@ -27,13 +27,13 @@ DIST_HEADERS += \
     AAA/intfAccountingBasedModule.h \
     DBM/clsORMField.h \
     DBM/clsTable.h \
-    ORM/ObjectStorage.h \
     ORM/intfActionLogs.h \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
     API/intfSQLBasedWithActionLogsModule.h \
-    Helpers/ObjectStorageHelper.h
+    ObjectStorage/ORM/ObjectStorage.h \
+    ObjectStorage/ObjectStorageManager.h
 
 PRIVATE_HEADERS += \
 
@@ -42,7 +42,6 @@ HEADERS += \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
     Helpers/FixtureHelper.h \
-    Helpers/ObjectStorageHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
@@ -51,16 +50,19 @@ HEADERS += \
     DBM/clsORMField.h \
     DBM/clsTable.h \
     DBM/QueryBuilders.h \
-    ORM/ObjectStorage.h \
     ORM/intfActionLogs.h \
-    ORM/intfAlerts.h
+    ORM/intfAlerts.h \
+    ObjectStorage/ORM/ObjectStorage.h \
+    ObjectStorage/Gateways/intfObjectStorageGateway.h \
+    ObjectStorage/Gateways/gtwAWSS3.h \
+    ObjectStorage/Gateways/gtwNFS.h \
+    ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \
     Helpers/FixtureHelper.cpp \
-    Helpers/ObjectStorageHelper.cpp \
     Helpers/PhoneHelper.cpp \
     Helpers/RESTClientHelper.cpp \
     Helpers/SecurityHelper.cpp \
@@ -76,9 +78,13 @@ SOURCES += \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
     API/intfSQLBasedWithActionLogsModule.cpp \
-    ORM/ObjectStorage.cpp \
     ORM/intfActionLogs.cpp \
-    ORM/intfAlerts.cpp
+    ORM/intfAlerts.cpp \
+    ObjectStorage/ORM/ObjectStorage.cpp \
+    ObjectStorage/Gateways/intfObjectStorageGateway.cpp \
+    ObjectStorage/Gateways/gtwAWSS3.cpp \
+    ObjectStorage/Gateways/gtwNFS.cpp \
+    ObjectStorage/ObjectStorageManager.cpp
 
 OTHER_FILES += \
     Test/testBase.hpp \

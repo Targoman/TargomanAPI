@@ -287,12 +287,17 @@ inline QString toCammel(const QString& _name)
 //NULLABLE_TYPE(_namespace::_enum::Type) Value(new _namespace::_enum::Type);
 
 /************************************************************/
-#define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
+#define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
     class _typeName : public _baseType { \
     public: \
         _typeName() {} \
         _typeName(const _baseType& _other):_baseType(_other) {} \
-        void customFromVariant (const QVariant& _value) { _fromVariant; } \
+        void customFromVariant(const QVariant& _value) { _setFromVariantLambda(_value); } \
+        static _typeName fromVariant(const QVariant& _value) { \
+            _typeName _var; \
+            _var.customFromVariant(_value); \
+            return _var; \
+        } \
     }; \
     inline void setFromVariant(_typeName& _storage, const QVariant& _val) { \
         _storage.customFromVariant(_val); \

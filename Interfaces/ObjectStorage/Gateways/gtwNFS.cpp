@@ -17,37 +17,35 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include <QtTest>
-#include "testMacros.hpp"
-#include "testQueryBuilders.hpp"
-#include "App/Server/RESTAPIRegistry.h"
+#include "gtwNFS.h"
+#include <QDir>
+#include "QHttp/qhttpfwd.hpp"
+using namespace qhttp;
 
-int main(int argc, char *argv[])
+using namespace Targoman::API::Common;
+
+namespace Targoman::API::ObjectStorage::Gateways {
+
+bool gtwNFS::storeFile(
+        const TAPI::JSON_t &_metaInfo,
+        const QString &_fileName,
+        const QString &_fileUUID,
+        const QString &_fullFileName
+    )
 {
-    QCoreApplication App(argc, argv);
-    App.setAttribute(Qt::AA_Use96Dpi, true);
+    QString StoragePath = _metaInfo[NFSMetaInfoJsonKey::Path].toString();
 
-    Targoman::API::Server::RESTAPIRegistry::registerMetaTypeInfoMap();
+    QDir FullPath(StoragePath);
+    if (FullPath.exists() == false)
+        throw exTargomanBase("NFS path not exists", ESTATUS_INTERNAL_SERVER_ERROR);
 
-    bool BreakOnFirstFail = true;
-    int FailedTests = 0;
-    try
-    {
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }
-    catch(std::exception &exp)
-    {
-        qDebug()<<exp.what();
-    }
+    QString FullFileName = QString("%1/%2_%3").arg(StoragePath).arg(_fileUUID).arg(_fileName);
 
-    if (FailedTests > 0)
-        qDebug() << "total number of failed tests: " << FailedTests;
-    else
-        qDebug() << "all tests passed :)";
-
-    return FailedTests;
+    return QFile::copy(_fullFileName, FullFileName);
 }
+
+} //namespace Targoman::API::ObjectStorage::Gateways

@@ -28,13 +28,13 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 using namespace Targoman::Common;
 
-#include "Interfaces/Helpers/ObjectStorageHelper.h"
-using namespace Targoman::API::Helpers;
+//#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+//using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::DBM;
 using namespace Targoman::API::API;
 
-namespace Targoman::API::ORM {
+namespace Targoman::API::ObjectStorage::ORM {
 
 TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
                      New        = 'N', //new file and not queued (must be queued)
@@ -44,16 +44,21 @@ TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
 //                     Uploading  = 'U', //queue(s) are in uploading
 //                     Stored     = 'S', //queued before and uploaded to all matched remote storage gateways
 
-TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
-                     Active     = 'A',
-                     Disabled   = 'D',
-                     Removed    = 'R'
-                     )
-
 TARGOMAN_DEFINE_ENUM(enuUploadQueueStatus,
                      New        = 'N',
                      Uploading  = 'U', //queue(s) are in uploading
                      Stored     = 'S', //queued before and upload to remote storage completed
+                     Removed    = 'R'
+                     )
+
+TARGOMAN_DEFINE_ENUM(enuUploadGatewayType,
+                     NFS    = 'N',
+                     AWSS3  = '3',
+                     )
+
+TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
+                     Active     = 'A',
+                     Disabled   = 'D',
                      Removed    = 'R'
                      )
 
@@ -75,13 +80,29 @@ namespace tblUploadFiles {
     TARGOMAN_CREATE_CONSTEXPR(uflUpdatedBy_usrID);
 }
 
+namespace tblUploadQueue {
+    constexpr char Name[] = "tblUploadQueue";
+    namespace Relation {
+        constexpr char File[] = "file";
+        constexpr char Gateway[] = "gateway";
+    }
+    TARGOMAN_CREATE_CONSTEXPR(uquID);
+    TARGOMAN_CREATE_CONSTEXPR(uqu_uflID);
+    TARGOMAN_CREATE_CONSTEXPR(uqu_ugwID);
+    TARGOMAN_CREATE_CONSTEXPR(uquStatus);
+    TARGOMAN_CREATE_CONSTEXPR(uquCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(uquCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(uquUpdatedBy_usrID);
+}
+
 namespace tblUploadGateways {
     constexpr char Name[] = "tblUploadGateways";
     TARGOMAN_CREATE_CONSTEXPR(ugwID);
-    TARGOMAN_CREATE_CONSTEXPR(ugwBucket);
-    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointUrl);
-    TARGOMAN_CREATE_CONSTEXPR(ugwSecretKey);
-    TARGOMAN_CREATE_CONSTEXPR(ugwAccessKey);
+    TARGOMAN_CREATE_CONSTEXPR(ugwType);
+//    TARGOMAN_CREATE_CONSTEXPR(ugwBucket);
+//    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointUrl);
+//    TARGOMAN_CREATE_CONSTEXPR(ugwSecretKey);
+//    TARGOMAN_CREATE_CONSTEXPR(ugwAccessKey);
     TARGOMAN_CREATE_CONSTEXPR(ugwMetaInfo);
     // conditions
     TARGOMAN_CREATE_CONSTEXPR(ugwAllowedFileTypes);
@@ -101,21 +122,6 @@ namespace tblUploadGateways {
     TARGOMAN_CREATE_CONSTEXPR(ugwCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(ugwCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ugwUpdatedBy_usrID);
-}
-
-namespace tblUploadQueue {
-    constexpr char Name[] = "tblUploadQueue";
-    namespace Relation {
-        constexpr char File[] = "file";
-        constexpr char Gateway[] = "gateway";
-    }
-    TARGOMAN_CREATE_CONSTEXPR(uquID);
-    TARGOMAN_CREATE_CONSTEXPR(uqu_uflID);
-    TARGOMAN_CREATE_CONSTEXPR(uqu_ugwID);
-    TARGOMAN_CREATE_CONSTEXPR(uquStatus);
-    TARGOMAN_CREATE_CONSTEXPR(uquCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(uquCreatedBy_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(uquUpdatedBy_usrID);
 }
 
 #pragma GCC diagnostic pop
@@ -141,11 +147,12 @@ struct stuProcessUploadQueueInfo
 
     //Upload Gateway
     quint32 ugwID;
-    QString ugwBucket;
-    QString ugwEndpointUrl;
-    QString ugwSecretKey;
-    QString ugwAccessKey;
-    NULLABLE_TYPE(TAPI::JSON_t) ugwMetaInfo;
+    enuUploadGatewayType::Type ugwType;
+//    QString ugwBucket;
+//    QString ugwEndpointUrl;
+//    QString ugwSecretKey;
+//    QString ugwAccessKey;
+    TAPI::JSON_t ugwMetaInfo;
     quint64 ugwCreatedFilesCount;
     quint64 ugwCreatedFilesSize;
     NULLABLE_TYPE(TAPI::DateTime_t) ugwLastActionTime; //used for loadbalance
@@ -167,19 +174,30 @@ public:
 
     struct stuObjectStorageConfigs
     {
-        QString LocalStoragePath;
+        QString TempLocalStoragePath;
 
         stuObjectStorageConfigs(const stuObjectStorageConfigs &_other) :
-            LocalStoragePath(_other.LocalStoragePath)
+            TempLocalStoragePath(_other.TempLocalStoragePath)
         {}
         stuObjectStorageConfigs(const QString &_localStoragePath) :
-            LocalStoragePath(_localStoragePath)
+            TempLocalStoragePath(_localStoragePath)
         {}
     };
 
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;
 
 protected slots:
+};
+
+class intfUploadQueue : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfUploadQueue(
+            const QString &_schema,
+            const QString &_name
+        );
 };
 
 class intfUploadGateways : public intfSQLBasedModule
@@ -199,33 +217,23 @@ private slots:
     bool ORMDELETE("Delete a object storage gateway")
 };
 
-class intfUploadQueue : public intfSQLBasedModule
-{
-    Q_OBJECT
+} //namespace Targoman::API::ObjectStorage::ORM
 
-public:
-    intfUploadQueue(
-            const QString &_schema,
-            const QString &_name
-        );
-};
-
-} //namespace Targoman::API::ORM
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadFileStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadGatewayStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ORM, enuUploadQueueStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadFileStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadQueueStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayStatus);
 
 /****************************************************/
 //put this macro before module class definition (.h)
 #define TARGOMAN_OBJECTSTORAGE_PREPARENT \
     class UploadFiles; \
-    class UploadGateways; \
-    class UploadQueue;
+    class UploadQueue; \
+    class UploadGateways;
 
 //put this macro after module class definition (.h)
 #define TARGOMAN_OBJECTSTORAGE_POSTPARENT(_module, _schema) \
-class UploadFiles : public Targoman::API::ORM::intfUploadFiles \
+class UploadFiles : public Targoman::API::ObjectStorage::ORM::intfUploadFiles \
 { \
     Q_OBJECT \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadFiles) \
@@ -238,23 +246,11 @@ public: \
     {} \
     virtual intfUploadFiles::stuObjectStorageConfigs getObjectStorageConfigs() const { \
         return intfUploadFiles::stuObjectStorageConfigs( \
-            _module::ObjectStorage::LocalStoragePath.value() \
+            _module::ObjectStorage::TempLocalStoragePath.value() \
         ); \
     } \
 }; \
-class UploadGateways : public Targoman::API::ORM::intfUploadGateways \
-{ \
-    Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadGateways) \
-public: \
-    UploadGateways() : \
-        intfUploadGateways( \
-            Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
-            _schema \
-        ) \
-    {} \
-}; \
-class UploadQueue : public Targoman::API::ORM::intfUploadQueue \
+class UploadQueue : public Targoman::API::ObjectStorage::ORM::intfUploadQueue \
 { \
     Q_OBJECT \
     TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadQueue) \
@@ -265,43 +261,59 @@ public: \
             _schema \
         ) \
     {} \
+}; \
+class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
+{ \
+    Q_OBJECT \
+    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadGateways) \
+public: \
+    UploadGateways() : \
+        intfUploadGateways( \
+            Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
+            _schema \
+        ) \
+    {} \
 };
 
 //put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
 #define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
-    QScopedPointer<UploadFiles>     _UploadFiles;    \
-    QScopedPointer<UploadGateways>  _UploadGateways; \
-    QScopedPointer<UploadQueue>     _UploadQueue; \
+    QScopedPointer<UploadFiles>     _UploadFiles;       \
+    QScopedPointer<UploadQueue>     _UploadQueue;       \
+    QScopedPointer<UploadGateways>  _UploadGateways;    \
 public: \
     struct ObjectStorage { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/ObjectStorage/%2").arg(TARGOMAN_M2STR(_module), _name); } \
-        static Targoman::Common::Configuration::tmplConfigurable<QString>   LocalStoragePath; \
+        static Targoman::Common::Configuration::tmplConfigurable<QString>   TempLocalStoragePath; \
     };
 
 //put this macro before module class constructor (.cpp)
-#define TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(_module, _schema)                \
-    using namespace Targoman::Common::Configuration;                            \
-    tmplConfigurable<QString> _module::ObjectStorage::LocalStoragePath(         \
-        _module::ObjectStorage::makeConfig("LocalStoragePath"),                 \
-        "LocalStoragePath",                                                     \
-        QString("%1/tapi/%2/objectstorage").arg(QDir::homePath()).arg(TARGOMAN_M2STR(_module))  \
-    );                                                                          \
+#define TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(_module, _schema)                                \
+    using namespace Targoman::Common::Configuration;                                            \
+    tmplConfigurable<QString> _module::ObjectStorage::TempLocalStoragePath(                     \
+        _module::ObjectStorage::makeConfig("TempLocalStoragePath"),                             \
+        "Path to store uploading files that shares by instances on same server",                \
+        QString("%1/tapi/%2/objectstorage").arg(QDir::homePath()).arg(TARGOMAN_M2STR(_module)), \
+        ReturnTrueCrossValidator(),                                                             \
+        "",                                                                                     \
+        "TempLocalStoragePath",                                                                 \
+        QString("%1-temp-local-storage-path").arg(TARGOMAN_M2STR(_module)).toLower(),           \
+        enuConfigSource::Arg | enuConfigSource::File                                            \
+    );
 //    QString("/var/spool/tapi/%1/objectstorage").arg(TARGOMAN_M2STR(_module))
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema) \
-    this->_UploadFiles   .reset(&UploadFiles   ::instance()); \
-    this->_UploadGateways.reset(&UploadGateways::instance()); \
-    this->_UploadQueue   .reset(&UploadQueue   ::instance()); \
-    \
-    this->addSubModule(this->_UploadFiles.data());    \
-    this->addSubModule(this->_UploadGateways.data()); \
-    this->addSubModule(this->_UploadQueue.data());    \
+#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema)  \
+    this->_UploadFiles   .reset(&UploadFiles   ::instance());   \
+    this->_UploadQueue   .reset(&UploadQueue   ::instance());   \
+    this->_UploadGateways.reset(&UploadGateways::instance());   \
+    this->addSubModule(this->_UploadFiles.data());              \
+    this->addSubModule(this->_UploadQueue.data());              \
+    this->addSubModule(this->_UploadGateways.data());
 
-//UploadFiles    ::instance().prepareFiltersList(); \
-//    UploadGateways ::instance().prepareFiltersList(); \
-//    UploadQueue    ::instance().prepareFiltersList();
+//    UploadFiles    ::instance().prepareFiltersList(); \
+//    UploadQueue    ::instance().prepareFiltersList(); \
+//    UploadGateways ::instance().prepareFiltersList();
 
 /****************************************************/
 #endif // TARGOMAN_API_OBJECTSTORAGE_H

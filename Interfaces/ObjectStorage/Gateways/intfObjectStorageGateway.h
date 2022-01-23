@@ -17,37 +17,19 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include <QtTest>
-#include "testMacros.hpp"
-#include "testQueryBuilders.hpp"
-#include "App/Server/RESTAPIRegistry.h"
+#ifndef TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H
+#define TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H
 
-int main(int argc, char *argv[])
+namespace Targoman::API::ObjectStorage::Gateways {
+
+class intfObjectStorageGateway
 {
-    QCoreApplication App(argc, argv);
-    App.setAttribute(Qt::AA_Use96Dpi, true);
+};
 
-    Targoman::API::Server::RESTAPIRegistry::registerMetaTypeInfoMap();
+} //namespace Targoman::API::ObjectStorage::Gateways
 
-    bool BreakOnFirstFail = true;
-    int FailedTests = 0;
-    try
-    {
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }
-    catch(std::exception &exp)
-    {
-        qDebug()<<exp.what();
-    }
-
-    if (FailedTests > 0)
-        qDebug() << "total number of failed tests: " << FailedTests;
-    else
-        qDebug() << "all tests passed :)";
-
-    return FailedTests;
-}
+#endif // TARGOMAN_API_OBJECTSTORAGE_INTFOBJECTSTORAGEGATEWAY_H

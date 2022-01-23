@@ -28,14 +28,20 @@
 #include "APIArgHelperMacrosPrivate.h"
 
 /************************************************************/
-#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant) \
-    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fromVariant)
+#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
+    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda)
 
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
-    TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, this->fromVariant(_value) )
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
+        Q_UNUSED(_paramName); \
+        this->fromVariant(_value); \
+    })
 
 #define TAPI_ADD_TYPE_STRING(_typeName) \
-    TAPI_ADD_TYPE_SPECIALFROMVARIANT(QString, _typeName, _value.toString() )
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT(QString, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
+        Q_UNUSED(_paramName); \
+        *this = _value.toString(); \
+    })
 
 /************************************************************/
 #define TAPI_DECLARE_METATYPE(_type) \
@@ -50,53 +56,32 @@
 #define TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, ...) \
     TAPI_REGISTER_METATYPE_MACRO_SELECTOR(TAPI_REGISTER_METATYPE_, __VA_ARGS__)(_complexity, _namespace, _type, __VA_ARGS__)
 
+#define _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
+#ifdef _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                             qDebug() << "==============================" << TARGOMAN_M2STR(_type)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, _a1)                        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                         << "(" << _a1 << ")"
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, _a1, _a2)                   _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, _a1)                    << _a2
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, _a1, _a2, _a3)              _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, _a1, _a2)               << _a3
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)         _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, _a1, _a2, _a3)          << _a4
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, _a1, _a2, _a3, _a4, _a5)    _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)     << _a5
+#else
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, ...)
+#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, ...)
+#endif
+
 #define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
     TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, \
         /* toVariantLambda    */ [](const _type& _value) -> QVariant { \
-            /*qDebug() << "JSON_t(1) =================================" << _value; */ \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, "toVariantLambda", _value); \
             return _value; \
         }, \
-        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JSON_t { \
-            /*qDebug() << "JSON_t(2) =================================" << _paramName << ":" << _value; */ \
-            if (_value.isValid() == false) \
-            { \
-                /*qDebug() << "JSON_t(2.1) =================================" << _paramName << ":" << _value;*/ \
-                return QJsonDocument(); \
-            } \
-            if (_value.userType() == QMetaType::QJsonObject) { \
-                auto Doc = QJsonDocument(); \
-                auto _val = _value.value<QJsonObject>(); \
-                Doc.setObject(_val); \
-                /*qDebug() << "JSON_t(2.2) =================================" << _paramName << ":" << _val << endl << "  =" << Doc;*/ \
-                return Doc; \
-            } \
-            if (_value.userType() == QMetaType::QJsonArray) { \
-                auto Doc = QJsonDocument(); \
-                auto _val = _value.value<QJsonArray>(); \
-                Doc.setArray(_val); \
-                /*qDebug() << "JSON_t(2.3) =================================" << _paramName << ":" << _val << endl << "  =" << Doc;*/ \
-                return Doc; \
-            } \
-            if (_value.canConvert<QVariantMap>() || \
-                   _value.canConvert<QVariantList>() || \
-                   _value.canConvert<double>()) \
-            { \
-                auto Doc = QJsonDocument::fromVariant(_value); \
-                /*qDebug() << "JSON_t(2.4) =================================" << _paramName << ":" << _value << endl << "  =" << Doc;*/  \
-                return Doc; \
-            } \
-            if (_value.toString().isEmpty()) \
-            { \
-                /*qDebug() << "JSON_t(2.5) =================================" << _paramName << ":" << _value;*/  \
-                return QJsonDocument(); \
-            } \
-            QJsonParseError Error; \
-            QJsonDocument Doc; \
-            Doc = Doc.fromJson(_value.toString().toUtf8(), &Error); \
-            /*qDebug() << "JSON_t(2.6) =================================" << _paramName << ":" << _value << endl << "  =" << Doc;*/  \
-            if (Error.error != QJsonParseError::NoError) \
-                throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+"> " + Error.errorString()); \
-            return Doc; \
+        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _type { \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
+            return _type::fromVariant(_value); \
         }, \
         /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
         /* toORMValueLambda   */ [](const QVariant& _value) { \

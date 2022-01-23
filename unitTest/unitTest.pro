@@ -25,6 +25,7 @@ HEADERS +=  \
     $$BASE_PROJECT_PATH/App/Server/clsAPIObject.h \
     $$BASE_PROJECT_PATH/App/Server/OpenAPIGenerator.h \
  \    #$$BASE_PROJECT_PATH/App/Server/WebSocketServer.h \
+    testMacros.hpp \
     testQueryBuilders.hpp
 
 SOURCES += main.cpp \

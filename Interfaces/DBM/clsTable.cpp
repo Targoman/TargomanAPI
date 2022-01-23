@@ -252,6 +252,18 @@ const QString clsTable::schema() const
     return this->Schema;
 }
 
+const QString clsTable::name() const
+{
+    return this->Name;
+}
+const QString clsTable::nameWithSchema() const
+{
+    if (this->Schema.isEmpty())
+        return this->Name;
+
+    return QString("%1.%2").arg(this->Schema).arg(this->Name);
+}
+
 const QString clsTable::domain()
 {
     if (this->Domain.length())

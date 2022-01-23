@@ -183,6 +183,8 @@ public:
     const QString getStatusColumnName();
 
     const QString schema() const;
+    const QString name() const;
+    const QString nameWithSchema() const;
 
 protected:
     /*inline */const QString domain();

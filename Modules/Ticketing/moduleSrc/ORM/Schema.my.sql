@@ -136,11 +136,8 @@ DROP TABLE IF EXISTS `tblUploadGateways`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tblUploadGateways` (
   `ugwID` int unsigned NOT NULL AUTO_INCREMENT,
-  `ugwBucket` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ugwEndpointUrl` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ugwSecretKey` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ugwAccessKey` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ugwMetaInfo` json DEFAULT NULL,
+  `ugwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '3:AWS_S3, N:NFS',
+  `ugwMetaInfo` json NOT NULL,
   `ugwAllowedFileTypes` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ugwAllowedMimeTypes` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ugwAllowedMinFileSize` bigint DEFAULT NULL,

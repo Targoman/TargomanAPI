@@ -136,39 +136,6 @@ class testQueryBuilders: public QObject
 {
     Q_OBJECT
 
-//private slots:
-    void testOptional()
-    {
-        optional<quint32> a;
-        a = 1234;
-
-//            std::optional<enuAggregation::Type> z1;
-//            z1 = enuAggregation::MAX;
-//            *zzz = enuAggregation::MAX;
-
-//            NULLABLE_TYPE(enuAggregation::Type) a1, a2;
-//            TAPI::tmplNullable<enuAggregation::Type> a1, a2;
-//            enuAggregation::Type a3 = a1;
-//            std::optional<enuAggregation::Type> a1, a2;
-//            if (a1 < a2)
-//            {
-//            }
-    }
-
-    void testQSharedPointer()
-    {
-        QSharedPointer<quint32> a = QSharedPointer<quint32>::create();
-        *a = 1234;
-    }
-
-    void testNullable()
-    {
-        NULLABLE_TYPE(quint32) a;
-        a = 1234;
-
-        TAPI::setFromVariant(a, QVariant());
-    }
-
     TestTable1 t1;
     TestTable2 t2;
 //    TAPI::JWT_t JWT;

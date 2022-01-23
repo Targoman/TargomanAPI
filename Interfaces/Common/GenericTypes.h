@@ -26,11 +26,13 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QUrl>
 
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/clsCountAndSpeed.h"
 #include "Interfaces/Common/tmplAPIArg.h"
+#include "Interfaces/Common/HTTPExceptions.hpp"
 
 namespace Targoman {
 namespace API {
@@ -164,16 +166,101 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
 
 /**********************************************************************/
 
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonObject, JWT_t,       this->fromVariantMap(_value.toMap()));
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QVariantMap, ORMFields_t, _value.toMap());
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDate,       Date_t,      _value.toDate());
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QTime,       Time_t,      _value.toTime());
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QDateTime,   DateTime_t,  _value.toDateTime());
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(
+    /* baseType             */ QJsonObject,
+    /* typeName             */ JWT_t,
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
+        Q_UNUSED(_paramName);
+        this->fromVariantMap(_value.toMap());
+    }
+);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(
+    /* baseType             */ QVariantMap,
+    /* typeName             */ ORMFields_t,
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
+        Q_UNUSED(_paramName);
+        *this = _value.toMap();
+    }
+);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(
+    /* baseType             */ QDate,
+    /* typeName             */ Date_t,
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
+        Q_UNUSED(_paramName);
+        *this = _value.toDate();
+    }
+);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(
+    /* baseType             */ QTime,
+    /* typeName             */ Time_t,
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
+        Q_UNUSED(_paramName);
+        *this = _value.toTime();
+    }
+);
+TAPI_ADD_TYPE_SPECIALFROMVARIANT(
+    /* baseType             */ QDateTime,
+    /* typeName             */ DateTime_t,
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
+        Q_UNUSED(_paramName);
+        *this = _value.toDateTime();
+    }
+);
 
-//TAPI_ADD_TEMPLATED_TYPE_SPECIALFROMVARIANT(QList, T, JSONLIST_t, *this = QJsonDocument::fromVariant(_value));
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, JSON_t,             *this = QJsonDocument::fromVariant(_value));
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, PrivObject_t,       *this = QJsonDocument::fromVariant(_value));
-TAPI_ADD_TYPE_SPECIALFROMVARIANT(QJsonDocument, SaleableAdditive_t, *this = QJsonDocument::fromVariant(_value));
+//        *this = QJsonDocument::fromVariant(_value)
+#define TAPI_ADD_TYPE_QJSONDOCUMENT(_type) \
+    TAPI_ADD_TYPE_SPECIALFROMVARIANT( \
+    /* baseType             */ QJsonDocument, \
+    /* typeName             */ _type, \
+    /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) { \
+        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "***** setFromVariantLambda", _paramName, _value); \
+        if (_value.isValid() == false) \
+        { \
+            this->setObject({}); \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "setFromVariantLambda.1", _paramName, _value); \
+            return; \
+        } \
+        if (_value.userType() == QMetaType::QJsonObject) \
+        { \
+            auto _val = _value.value<QJsonObject>(); \
+            this->setObject(_val); \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.2", _paramName, _val, endl, *this); \
+            return; \
+        } \
+        if (_value.userType() == QMetaType::QJsonArray) \
+        { \
+            auto _val = _value.value<QJsonArray>(); \
+            this->setArray(_val); \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.3", _paramName, _val, endl, *this); \
+            return; \
+        } \
+        if (_value.canConvert<QVariantMap>() || \
+               _value.canConvert<QVariantList>() || \
+               _value.canConvert<double>() \
+            ) \
+        { \
+            *this = QJsonDocument::fromVariant(_value); \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.4", _paramName, _value, endl, *this); \
+            return; \
+        } \
+        if (_value.toString().isEmpty()) \
+        { \
+            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "setFromVariantLambda.5", _paramName, _value); \
+            return; \
+        } \
+        QJsonParseError Error; \
+        QJsonDocument Doc; \
+        *this = Doc.fromJson(_value.toString().toUtf8(), &Error); \
+        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.6", _paramName, _value, endl, *this); \
+        if (Error.error != QJsonParseError::NoError) \
+            throw Targoman::API::exHTTPBadRequest(_paramName + " is not a valid JSON: <" + _value.toString() + "> " + Error.errorString()); \
+        return; \
+    } \
+);
+
+TAPI_ADD_TYPE_QJSONDOCUMENT(JSON_t);
+TAPI_ADD_TYPE_QJSONDOCUMENT(PrivObject_t);
+TAPI_ADD_TYPE_QJSONDOCUMENT(SaleableAdditive_t);
 
 TAPI_ADD_TYPE(qhttp::THeaderHash, HEADERS_t);
 TAPI_ADD_TYPE(qhttp::THeaderHash, COOKIES_t);
