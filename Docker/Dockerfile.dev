@@ -3,6 +3,7 @@ LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
 
 WORKDIR /opt
 
+RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
 RUN zypper ref
 RUN zypper --non-interactive in \
       wget \
@@ -24,21 +25,9 @@ RUN zypper --non-interactive in \
       gtest \
       protobuf-devel \
       libicu-devel \
-      libopenssl-devel
-
-RUN wget https://github.com/google/libphonenumber/archive/refs/tags/v8.12.39.zip && \
-    unzip v8.12.39.zip && \
-    mkdir libphonenumber-8.12.39/cpp/build && \
-    cd libphonenumber-8.12.39/cpp/build && \
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && \
-    make -j install
-
-RUN git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp && \
-    mkdir aws-build.s3 && \
-    cd aws-build.s3 && \
-    cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3" && \
-    make -j install && \
-    cd ..
+      libopenssl-devel \
+      aws-sdk-cpp-s3-devel \
+      libphonenumber-devel
 
 COPY . .
 
@@ -46,6 +35,7 @@ RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug && make -j 4
 
 FROM opensuse/leap:15.3
 
+RUN RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
 RUN zypper ref && \
     zypper --non-interactive in \
       libhiredis0_13 \
@@ -61,22 +51,13 @@ RUN zypper ref && \
       libicu \
       zlib \
       openssl \
+      aws-sdk-cpp-s3-libs \
+      libphonenumber8
     && mkdir -p /targoman/bin
 
 WORKDIR /targoman
 COPY conf conf
 COPY Docker/run-targoman.sh .
 COPY --from=builder /opt/out .
-
-COPY --from=builder /usr/lib64/libphonenumber.so.8.12 /usr/lib64/libphonenumber.so.8.12
-COPY --from=builder /usr/lib64/libphonenumber.so.8 /usr/lib64/libphonenumber.so.8
-COPY --from=builder /usr/lib64/libphonenumber.so /usr/lib64/libphonenumber.so
-
-COPY --from=builder /usr/lib64/libgeocoding.so.8.12 /usr/lib64/libgeocoding.so.8.12
-COPY --from=builder /usr/lib64/libgeocoding.so.8 /usr/lib64/libgeocoding.so.8
-COPY --from=builder /usr/lib64/libgeocoding.so /usr/lib64/libgeocoding.so
-
-COPY --from=builder /usr/lib64/libaws-cpp-sdk-s3.so /usr/lib64/libaws-cpp-sdk-s3.so
-COPY --from=builder /usr/lib64/libaws-cpp-sdk-core.so /usr/lib64/libaws-cpp-sdk-core.so
 
 ENTRYPOINT [ "/targoman/run-targoman.sh" ]
