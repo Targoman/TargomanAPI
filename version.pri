@@ -8,7 +8,10 @@
 ################################################################################
 ProjectName="TargomanAPI"
 VERSION=0.2
-DEFINES += GIT_VERSION=$$system(git describe --always)
+
+#!defined(GIT_VERSION) {
+#    DEFINES += GIT_VERSION=$$system(git describe --always)
+#}
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 LIBS += -lTargomanCommon \
@@ -22,24 +25,24 @@ LIBS += -lTargomanCommon \
 defined(QJsonRPC, var) equals(QJsonRPC, 1) {
     DEFINES += WITH_QJsonRPC
     LIBS += -lQJsonRPC
-}else{
+} else {
     DISABLED_DPES += QJsonRPC
 }
 
 !defined(NoWebSockets, var)|equals(NoWebSockets, 1) {
-  QT+= websockets
-}else{
+    QT+= websockets
+} else {
     DEFINES += TARGOMAN_API_WEBSOCKET
 }
 
 !defined(NoRedis, var)|equals(NoRedis, 1) {
-  LIBS+= -lhiredis
-  DEFINES += TARGOMAN_API_REDIS_PROTOCOL
+    LIBS+= -lhiredis
+    DEFINES += TARGOMAN_API_REDIS_PROTOCOL
 }
 
 !defined(NoAwsS3, var) | equals(NoAwsS3, 1) {
-  LIBS += -laws-cpp-sdk-s3
-  DEFINES += TARGOMAN_API_AWS_S3
+    LIBS += -laws-cpp-sdk-s3
+    DEFINES += TARGOMAN_API_AWS_S3
 }
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
