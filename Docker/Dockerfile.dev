@@ -37,7 +37,7 @@ RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
 
 FROM opensuse/leap:15.3
 
-RUN RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
+RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
 RUN zypper ref && \
     zypper --non-interactive in \
       libhiredis0_13 \
