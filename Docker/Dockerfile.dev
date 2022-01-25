@@ -31,7 +31,9 @@ RUN zypper --non-interactive in \
 
 COPY . .
 
-RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug && make -j 4
+ARG TAG
+RUN echo $TAG
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
 
 FROM opensuse/leap:15.3
 

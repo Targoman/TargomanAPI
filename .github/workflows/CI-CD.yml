@@ -20,7 +20,7 @@ jobs:
       - run: echo "$TAG has been pushed"
       - name: build
         run: mkdir conf/tmp && cp -rL conf/TextProcessor conf/tmp && rm -f conf/TextProcessor && mv conf/tmp/* conf/ && rmdir conf/tmp && ls -lR conf
-      - run: docker build -f Docker/Dockerfile.dev . -t ${{ env.PROJECT_NAME }}:$TAG
+      - run: docker build --build-arg TAG -f Docker/Dockerfile.dev . -t ${{ env.PROJECT_NAME }}:$TAG
       - run: docker save --output="${{ env.PROJECT_NAME }}-$TAG.tar" ${{ env.PROJECT_NAME }}:$TAG
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
