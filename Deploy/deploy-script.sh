@@ -29,6 +29,7 @@ else
         		counter=$counter+1
     		fi
 	done
+fi
 if [ $success -eq 1 ]
 then
     curl -s ""$deploy_url"deploy?token=$token&project=$project&tag=$tag" | grep successfully > /dev/null 2>&1

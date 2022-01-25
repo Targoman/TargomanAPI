@@ -27,6 +27,7 @@ jobs:
         with:
           name: ${{ env.PROJECT_NAME }}-docker-image-${{ steps.build-tag.outputs.TAG }}
           path: ${{ env.PROJECT_NAME }}-${{ env.TAG }}.tar
+          retention-days: 1
     outputs:
         tag: ${{ steps.build-tag.outputs.TAG }}
   delivery:
