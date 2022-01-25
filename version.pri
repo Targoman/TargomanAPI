@@ -8,6 +8,7 @@
 ################################################################################
 ProjectName="TargomanAPI"
 VERSION=0.2
+DEFINES += GIT_VERSION=$$system(git describe --always)
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 LIBS += -lTargomanCommon \
