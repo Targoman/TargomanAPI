@@ -449,9 +449,12 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     if (_api == "/version")
     {
         gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
-                                                                  { "version", TARGOMAN_M2STR(PROJ_VERSION) },
-                                                              }));
+        QJsonObject Version;
+        Version.insert("version", TARGOMAN_M2STR(PROJ_VERSION));
+#ifdef GIT_VERSION
+        Version.insert("git-version", TARGOMAN_M2STR(GIT_VERSION));
+#endif
+        this->sendResponseBase(qhttp::ESTATUS_OK, Version);
         return true;
     }
 
