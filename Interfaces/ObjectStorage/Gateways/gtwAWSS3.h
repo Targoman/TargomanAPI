@@ -42,6 +42,13 @@ using namespace Targoman::Common;
 #include <aws/s3/model/PutObjectRequest.h>
 using namespace Aws;
 
+/** installing AmazonAWS S3 from repo (recommended) ************************************************
+15.2) zypper ar -no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/openSUSE_Leap_15.2/home:targoman.repo
+15.3) zypper ar -no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
+
+zypper in aws-sdk-cpp-s3-devel
+*/
+
 /** installing AmazonAWS S3 from source ************************************************************
 git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
 mkdir aws-build.s3
