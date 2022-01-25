@@ -52,7 +52,7 @@ RUN zypper ref && \
       zlib \
       openssl \
       aws-sdk-cpp-s3-libs \
-      libphonenumber8
+      libphonenumber8 \
     && mkdir -p /targoman/bin
 
 WORKDIR /targoman
