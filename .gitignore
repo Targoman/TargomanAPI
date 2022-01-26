@@ -35,6 +35,7 @@
 out
 *.autosave
 *~
+.migrations
 
 # Qt
 Makefile*
