@@ -23,6 +23,7 @@ OTHER_FILES += \
     conf/invalidPass.tbl \
     conf/api.server.conf \
     conf/api.conf \
+    conf/migration-dev.conf \
     Docs/Models/Accounting.scxml \
     dumpDBSchema-all.sh \
     runTargomanAPI.sh \
