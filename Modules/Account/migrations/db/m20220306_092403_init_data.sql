@@ -1,4 +1,4 @@
-/* Migration File: m20220306_092403_initial_data.sql */
+/* Migration File: m20220306_092403_init_data.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
