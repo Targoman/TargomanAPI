@@ -9,19 +9,17 @@
 ModuleName=Ticketing
 
 HEADERS += \
-    ORM/TicketAttachments.h \
     Ticketing.h \
+    ORM/TicketAttachments.h \
     ORM/Tickets.h \
     ORM/Defs.hpp \
 
 SOURCES += \
-    ORM/TicketAttachments.cpp \
     Ticketing.cpp \
+    ORM/TicketAttachments.cpp \
     ORM/Tickets.cpp \
 
-OTHER_FILES += \
-    dumpDBSchema.sh \
-    ORM/Schema.my.sql \
+OTHER_FILES +=
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)

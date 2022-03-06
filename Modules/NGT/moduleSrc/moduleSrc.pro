@@ -16,7 +16,6 @@ SOURCES += \
     NGTv1.cpp
 
 OTHER_FILES += \
-    dumpDBSchema.sh \
     ORM/Schema.my.sql \
 
 ################################################################################

@@ -58,12 +58,9 @@ SOURCES += \
     Payment/Gateways/gtwMellatBank.cpp \
     Payment/Gateways/gtwZibal.cpp
 
-OTHER_FILES += \
-    dumpDBSchema.sh \
-    ORM/Schema.my.sql
+OTHER_FILES +=
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
 
-DISTFILES += \
-    ORM/Data.my.sql
+DISTFILES +=

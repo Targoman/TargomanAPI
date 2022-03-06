@@ -44,10 +44,6 @@ SOURCES += \
 
 OTHER_FILES += \
     ../conf/api.conf \
-    dumpDBSchema.sh \
-    Schemas/Common.my.sql \
-    Schemas/CommonFuncs.my.sql \
-    Schemas/I18N.my.sql \
     migrations/db/* \
     migrations/local/*
 
