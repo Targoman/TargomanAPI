@@ -2,7 +2,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +15,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `Advert` /*!40100 DEFAULT CHARACTER SET
 USE `Advert`;
 DROP TABLE IF EXISTS `tblAccountAssetUsage`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAccountAssetUsage` (
   `usg_uasID` bigint unsigned NOT NULL,
   `usgRemainingDays` smallint NOT NULL DEFAULT '0',
@@ -31,7 +31,7 @@ CREATE TABLE `tblAccountAssetUsage` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountCoupons`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAccountCoupons` (
   `cpnID` int unsigned NOT NULL AUTO_INCREMENT,
   `cpnCode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
@@ -65,7 +65,7 @@ CREATE TABLE `tblAccountCoupons` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountProducts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAccountProducts` (
   `prdID` int unsigned NOT NULL AUTO_INCREMENT,
   `prdCode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE `tblAccountProducts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountSaleables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAccountSaleables` (
   `slbID` int unsigned NOT NULL AUTO_INCREMENT,
   `slb_prdID` int unsigned NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE `tblAccountSaleables` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAccountUserAssets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAccountUserAssets` (
   `uasID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uas_usrID` bigint unsigned NOT NULL,
@@ -183,7 +183,7 @@ CREATE TABLE `tblAccountUserAssets` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActionLogs` (
   `atlID` bigint NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
@@ -197,7 +197,7 @@ CREATE TABLE `tblActionLogs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblActiveAds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActiveAds` (
   `act_binID` int unsigned NOT NULL,
   `act_locID` int unsigned NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE `tblActiveAds` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBanners`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblBanners` (
   `bnr_binID` int unsigned NOT NULL,
   `bnrImage` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -253,7 +253,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblBin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblBin` (
   `binID` int unsigned NOT NULL AUTO_INCREMENT,
   `binType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'T' COMMENT 'T: Text, I:Image',
@@ -309,7 +309,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblClicks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblClicks` (
   `clkID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `clk_binID` int unsigned NOT NULL,
@@ -335,7 +335,7 @@ CREATE TABLE `tblClicks` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblLocations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblLocations` (
   `locID` int unsigned NOT NULL AUTO_INCREMENT,
   `locURL` varchar(200) COLLATE utf8mb4_general_ci NOT NULL,
@@ -382,9 +382,18 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+DROP TABLE IF EXISTS `tblMigrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblMigrations` (
+  `migName` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `migAppliedAt` datetime NOT NULL,
+  PRIMARY KEY (`migName`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblProps`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblProps` (
   `prp_binID` int unsigned NOT NULL,
   `prp_locID` int unsigned NOT NULL,

@@ -2,7 +2,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +15,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `Ticketing` /*!40100 DEFAULT CHARACTER 
 USE `Ticketing`;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActionLogs` (
   `atlID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE `tblActionLogs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTicketAttachments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTicketAttachments` (
   `tatID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tat_tktID` bigint unsigned DEFAULT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `tblTicketAttachments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTicketRead`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTicketRead` (
   `tkr_tktID` bigint unsigned NOT NULL,
   `tkrBy_usrID` bigint unsigned NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `tblTicketRead` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTickets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTickets` (
   `tktID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tktTarget_usrID` bigint unsigned DEFAULT NULL,
@@ -115,7 +115,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblUploadFiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadFiles` (
   `uflID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uflFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE `tblUploadFiles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblUploadGateways`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadGateways` (
   `ugwID` int unsigned NOT NULL AUTO_INCREMENT,
   `ugwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '3:AWS_S3, N:NFS',
@@ -158,7 +158,7 @@ CREATE TABLE `tblUploadGateways` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblUploadQueue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadQueue` (
   `uquID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uqu_uflID` bigint unsigned NOT NULL,

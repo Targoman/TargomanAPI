@@ -30,4 +30,8 @@ OTHER_FILES += \
     SwaggerUI/* \
     Docker/* \
     Deploy/* \
-    .github/workflows/*
+    .github/workflows/* \
+    migrations/CommonFuncs/db/* \
+    migrations/CommonFuncs/local/* \
+    migrations/I18N/db/* \
+    migrations/I18N/local/*

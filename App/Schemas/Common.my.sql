@@ -2,7 +2,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +15,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `Common` /*!40100 DEFAULT CHARACTER SET
 USE `Common`;
 DROP TABLE IF EXISTS `tblAlertTemplates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAlertTemplates` (
   `altlID` int unsigned NOT NULL AUTO_INCREMENT,
   `altCode` varchar(50) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `tblAlertTemplates` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblAlerts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAlerts` (
   `alrID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `alrType` char(1) NOT NULL DEFAULT 'I' COMMENT 'I: Informational, C: Critical, W:Warning',
@@ -56,7 +56,7 @@ CREATE TABLE `tblAlerts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDBG`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblDBG` (
   `dbgID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `dbgFrom` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE `tblDBG` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblDownloadRequests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblDownloadRequests` (
   `dwrID` int unsigned NOT NULL AUTO_INCREMENT,
   `dwr_ssnID` bigint unsigned NOT NULL,

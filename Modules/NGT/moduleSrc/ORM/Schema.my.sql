@@ -2,7 +2,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +15,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `NGT` /*!40100 DEFAULT CHARACTER SET ut
 USE `NGT`;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActionLogs` (
   `atlID` int NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE `tblActionLogs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblClasses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblClasses` (
   `clsID` smallint unsigned NOT NULL AUTO_INCREMENT,
   `clsName` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE `tblClasses` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblFiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblFiles` (
   `filMD5` char(32) COLLATE utf8mb4_general_ci NOT NULL,
   `filType` char(3) COLLATE utf8mb4_general_ci NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE `tblFiles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblHardness`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblHardness` (
   `hrdID` char(3) COLLATE utf8mb4_general_ci NOT NULL,
   `hrdName` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -114,7 +114,7 @@ CREATE TABLE `tblHardness` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblNGTAccounting`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblNGTAccounting` (
   `accID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `acc_nprjID` int unsigned NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE `tblNGTAccounting` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblNGTProject`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblNGTProject` (
   `nprjID` int unsigned NOT NULL DEFAULT '0',
   `nprj_filMD5` char(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -182,7 +182,7 @@ CREATE TABLE `tblNGTProject` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblNGTProjectExtraInfo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblNGTProjectExtraInfo` (
   `npei_nprjID` int unsigned NOT NULL,
   `npeiTM` json DEFAULT NULL,
@@ -193,7 +193,7 @@ CREATE TABLE `tblNGTProjectExtraInfo` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblOutputLMs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblOutputLMs` (
   `olmID` tinyint unsigned NOT NULL AUTO_INCREMENT,
   `olmName` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
@@ -212,7 +212,7 @@ CREATE TABLE `tblOutputLMs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblPartialTypes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblPartialTypes` (
   `parID` tinyint unsigned NOT NULL AUTO_INCREMENT,
   `parName` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
@@ -231,7 +231,7 @@ CREATE TABLE `tblPartialTypes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblPostEditors`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblPostEditors` (
   `poe_usrID` int unsigned NOT NULL,
   `poeAffiliate_usrID` bigint DEFAULT NULL,
@@ -256,7 +256,7 @@ CREATE TABLE `tblPostEditors` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblProjectActionStates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblProjectActionStates` (
   `pasCode` char(1) COLLATE utf8mb4_general_ci NOT NULL,
   `pasPriority` tinyint unsigned NOT NULL,
@@ -268,7 +268,7 @@ CREATE TABLE `tblProjectActionStates` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblProjectActions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblProjectActions` (
   `actID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `act_nprjID` int unsigned NOT NULL DEFAULT '0',
@@ -287,7 +287,7 @@ CREATE TABLE `tblProjectActions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblPublisher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblPublisher` (
   `pubID` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `pubParentName` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -306,7 +306,7 @@ CREATE TABLE `tblPublisher` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblSettings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblSettings` (
   `setKey` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `setValue` json DEFAULT NULL,
@@ -317,7 +317,7 @@ CREATE TABLE `tblSettings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTranslatedFile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTranslatedFile` (
   `tflID` int unsigned NOT NULL AUTO_INCREMENT,
   `tfl_nprjID` int unsigned NOT NULL,

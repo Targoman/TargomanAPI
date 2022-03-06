@@ -1,8 +1,7 @@
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +14,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `AAA` /*!40100 DEFAULT CHARACTER SET ut
 USE `AAA`;
 DROP TABLE IF EXISTS `tblAPITokenValidIPs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAPITokenValidIPs` (
   `tviID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tvi_aptID` bigint unsigned NOT NULL,
@@ -69,7 +68,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblAPITokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblAPITokens` (
   `aptID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `aptToken` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -141,7 +140,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActionLogs` (
   `atlID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
@@ -195,7 +194,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblActiveSessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActiveSessions` (
   `ssnKey` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `ssn_usrID` bigint unsigned NOT NULL,
@@ -256,7 +255,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblApprovalRequest`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblApprovalRequest` (
   `aprID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `apr_usrID` bigint unsigned NOT NULL,
@@ -280,7 +279,7 @@ CREATE TABLE `tblApprovalRequest` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblBlockingRules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblBlockingRules` (
   `blrID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `blr_ipbIP` bigint unsigned DEFAULT NULL,
@@ -338,7 +337,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblForgotPassRequest`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblForgotPassRequest` (
   `fprUUID` char(36) NOT NULL,
   `fpr_usrID` bigint unsigned NOT NULL,
@@ -357,7 +356,7 @@ CREATE TABLE `tblForgotPassRequest` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblIPBin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblIPBin` (
   `ipbIP` bigint unsigned NOT NULL,
   `ipbReadable` varchar(50) GENERATED ALWAYS AS (inet_ntoa(`ipbIP`)) VIRTUAL,
@@ -399,7 +398,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblIPStats`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblIPStats` (
   `ips_ipbIP` bigint unsigned NOT NULL,
   `ipsTimeStamp` double unsigned NOT NULL,
@@ -428,9 +427,18 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+DROP TABLE IF EXISTS `tblMigrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblMigrations` (
+  `migName` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `migAppliedAt` datetime NOT NULL,
+  PRIMARY KEY (`migName`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblOfflinePayments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblOfflinePayments` (
   `ofpID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `ofp_vchID` bigint unsigned NOT NULL,
@@ -479,7 +487,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblOnlinePayments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblOnlinePayments` (
   `onpID` bigint NOT NULL AUTO_INCREMENT,
   `onpMD5` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -525,7 +533,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblPaymentGateways`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblPaymentGateways` (
   `pgwID` int unsigned NOT NULL AUTO_INCREMENT,
   `pgwName` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
@@ -554,7 +562,7 @@ CREATE TABLE `tblPaymentGateways` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblRoles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblRoles` (
   `rolID` int unsigned NOT NULL AUTO_INCREMENT,
   `rolName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -580,7 +588,7 @@ CREATE TABLE `tblRoles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblService`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblService` (
   `svcID` int unsigned NOT NULL AUTO_INCREMENT,
   `svcName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -606,7 +614,7 @@ CREATE TABLE `tblService` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblUser`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUser` (
   `usrID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `usrEmail` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -687,7 +695,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblUserExtraInfo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUserExtraInfo` (
   `uei_usrID` bigint unsigned NOT NULL,
   `ueiBirthDate` date DEFAULT NULL,
@@ -735,7 +743,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblUserWallets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUserWallets` (
   `walID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `wal_usrID` bigint unsigned NOT NULL,
@@ -767,7 +775,7 @@ CREATE TABLE `tblUserWallets` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblVoucher`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblVoucher` (
   `vchID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `vch_usrID` bigint unsigned NOT NULL,
@@ -811,7 +819,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblWalletBalances`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblWalletBalances` (
   `wbl_wltID` bigint unsigned NOT NULL,
   `wblBalance` bigint NOT NULL,
@@ -825,7 +833,7 @@ CREATE TABLE `tblWalletBalances` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblWalletsTransactions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblWalletsTransactions` (
   `wltID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `wlt_walID` bigint unsigned NOT NULL,
@@ -3383,4 +3391,3 @@ DELIMITER ;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
