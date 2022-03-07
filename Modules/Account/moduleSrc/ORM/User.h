@@ -48,13 +48,13 @@ private slots:
     bool ORMUPDATE("Update User info by priviledged user")
     bool ORMDELETE("Delete a User by priviledged user")
 
-    TAPI::RawData_t REST_GET(
+    TAPI::Base64Image_t REST_GET(
         photo,
         (
             TAPI::JWT_t _JWT,
             quint64 _usrID
         ),
-        "Get user photo as image"
+        "Get user photo as base64"
     )
     bool REST_UPDATE(
         photo,

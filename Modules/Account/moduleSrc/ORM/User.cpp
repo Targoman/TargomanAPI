@@ -171,7 +171,7 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
+TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
@@ -186,15 +186,7 @@ TAPI::RawData_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
         .one()
         .value(tblUserExtraInfo::ueiPhoto).toString().toLatin1();
 
-    QString Mime = "image/png";
-    QByteArray Image;
-    if (Photo.size() && Photo.startsWith("data:image/"))
-    {
-        Mime = Photo.split(';').first().mid(sizeof("data"));
-        Image = QByteArray::fromBase64(Photo.mid(Photo.indexOf("base64,") + sizeof ("base64,") - 1));
-    }
-
-    return TAPI::RawData_t(Image, Mime);
+    return TAPI::Base64Image_t(Photo);
 }
 
 bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
