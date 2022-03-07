@@ -1,8 +1,9 @@
+/* Migration File: m20220306_094442_init.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -15,7 +16,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `Ticketing` /*!40100 DEFAULT CHARACTER 
 USE `Ticketing`;
 DROP TABLE IF EXISTS `tblActionLogs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblActionLogs` (
   `atlID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `atlBy_usrID` bigint unsigned DEFAULT NULL,
@@ -29,7 +30,7 @@ CREATE TABLE `tblActionLogs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTicketAttachments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTicketAttachments` (
   `tatID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tat_tktID` bigint unsigned DEFAULT NULL,
@@ -45,7 +46,7 @@ CREATE TABLE `tblTicketAttachments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTicketRead`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTicketRead` (
   `tkr_tktID` bigint unsigned NOT NULL,
   `tkrBy_usrID` bigint unsigned NOT NULL,
@@ -57,7 +58,7 @@ CREATE TABLE `tblTicketRead` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblTickets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblTickets` (
   `tktID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tktTarget_usrID` bigint unsigned DEFAULT NULL,
@@ -104,7 +105,7 @@ DELIMITER ;;
           FROM tblTickets
          WHERE tktID = NEW.tktInReply_tktID
         ;
- 
+
         SET NEW.tktBase_tktID = vID;
     END IF;
 END */;;
@@ -115,7 +116,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 DROP TABLE IF EXISTS `tblUploadFiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadFiles` (
   `uflID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uflFileName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -133,7 +134,7 @@ CREATE TABLE `tblUploadFiles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblUploadGateways`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadGateways` (
   `ugwID` int unsigned NOT NULL AUTO_INCREMENT,
   `ugwType` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '3:AWS_S3, N:NFS',
@@ -158,7 +159,7 @@ CREATE TABLE `tblUploadGateways` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tblUploadQueue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblUploadQueue` (
   `uquID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uqu_uflID` bigint unsigned NOT NULL,
@@ -185,16 +186,16 @@ CREATE TABLE `tblUploadQueue` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE PROCEDURE `spUploadedFile_Create`(
-	IN `iFileName` VARCHAR(256),
-	IN `iFileUUID` VARCHAR(64),
-	IN `iFileSize` BIGINT UNSIGNED,
-	IN `iFileType` VARCHAR(64),
-	IN `iMimeType` VARCHAR(128),
-	IN `iFullFileName` VARCHAR(1024),
-	IN `iCreatorUserID` BIGINT UNSIGNED,
-	IN `iQueueStatus` CHAR(1),
-	OUT `oUploadedFileID` BIGINT UNSIGNED,
-	OUT `oQueueRowsCount` INT UNSIGNED
+    IN `iFileName` VARCHAR(256),
+    IN `iFileUUID` VARCHAR(64),
+    IN `iFileSize` BIGINT UNSIGNED,
+    IN `iFileType` VARCHAR(64),
+    IN `iMimeType` VARCHAR(128),
+    IN `iFullFileName` VARCHAR(1024),
+    IN `iCreatorUserID` BIGINT UNSIGNED,
+    IN `iQueueStatus` CHAR(1),
+    OUT `oUploadedFileID` BIGINT UNSIGNED,
+    OUT `oQueueRowsCount` INT UNSIGNED
 )
 BEGIN
     DECLARE vErr VARCHAR(500);
@@ -220,7 +221,7 @@ BEGIN
                )
         ;
 
-        RESIGNAL;  
+        RESIGNAL;
     END;
 
     /****************/ START TRANSACTION; /****************/
@@ -260,14 +261,14 @@ BEGIN
            )
        AND (tblUploadGateways.ugwMaxFilesCount IS NULL
         OR tblUploadGateways.ugwMaxFilesCount < tblUploadGateways.ugwCreatedFilesCount - tblUploadGateways.ugwDeletedFilesCount
-           )  
+           )
        AND (tblUploadGateways.ugwMaxFilesSize IS NULL
         OR tblUploadGateways.ugwMaxFilesSize <= tblUploadGateways.ugwCreatedFilesSize - tblUploadGateways.ugwDeletedFilesSize + iFileSize
            )
     ;
     SET oQueueRowsCount = ROW_COUNT();
 
-    /* this is for next version    
+    /* this is for next version
     IF (oQueueRowsCount > 0) THEN
         UPDATE tblUploadFiles
            SET tblUploadFiles.uflStatus = 'Q'
@@ -308,4 +309,3 @@ DELIMITER ;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
