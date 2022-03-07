@@ -215,7 +215,7 @@ bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
     return Result.numRowsAffected() > 0;
 }
 
-bool User::apiDELETEphoto(TAPI::JWT_t _JWT)
+bool User::apiPOSTdeletePhoto(TAPI::JWT_t _JWT)
 {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 

@@ -463,8 +463,8 @@ private slots:
         qDebug() << Result;
     }
     void User_Photo_Delete() {
-        QVariant Result = callAPI(RESTClientHelper::DELETE,
-                                  "Account/User/photo",
+        QVariant Result = callAPI(RESTClientHelper::POST,
+                                  "Account/User/deletePhoto",
                                   {},
                                   {}
                                   );
