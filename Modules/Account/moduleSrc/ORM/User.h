@@ -64,8 +64,8 @@ private slots:
         ),
         "Updates user image based using a base64 encoded image"
     )
-    bool REST_DELETE(
-        photo,
+    bool REST_POST(
+        deletePhoto,
         (
             TAPI::JWT_t _JWT
         ),

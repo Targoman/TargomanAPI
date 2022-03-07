@@ -112,6 +112,11 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
         QString HTTPMethod = Key.split(" ").first().toLower();
         QStringList PKInPathStorage;
 
+//        if (PathString != "/Account/User/photo")
+//        {
+//            continue;
+//        }
+
         clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
 
         auto paramName = [APIObject](quint8 i) {
