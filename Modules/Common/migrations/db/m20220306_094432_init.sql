@@ -86,13 +86,13 @@ CREATE TABLE `tblDownloadRequests` (
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `fnCreateRandomMD5`() RETURNS char(32) CHARSET utf8mb4
     NO SQL
 BEGIN
   RETURN MD5(CONCAT(RAND(), UUID()));
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -106,7 +106,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spLogDebug`(
     IN `iFrom` VARCHAR(50),
     IN `iInfo` VARCHAR(500)
@@ -117,8 +117,8 @@ BEGIN
        SET tblDBG.dbgFrom = iFrom
          , tblDBG.dbgInfo = iInfo
     ;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;

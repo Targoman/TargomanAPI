@@ -224,7 +224,7 @@ CREATE TABLE `tblBanners` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblBanners_after_update */;
-DELIMITER ;;
+
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblBanners_after_update` AFTER UPDATE ON `tblBanners` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
 
@@ -235,8 +235,8 @@ DELIMITER ;;
      SET tblActionLogs.atlBy_usrID = NEW.bnrUpdatedBy_usrID,
          tblActionLogs.atlType = "tblBanners-Updated",
          tblActionLogs.atlDescription = Changes;
-END */;;
-DELIMITER ;
+END */;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -275,7 +275,7 @@ CREATE TABLE `tblBin` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblBin_after_update */;
-DELIMITER ;;
+
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblBin_after_update` AFTER UPDATE ON `tblBin` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
 
@@ -290,8 +290,8 @@ DELIMITER ;;
      SET tblActionLogs.atlBy_usrID = NEW.binUpdatedBy_usrID,
          tblActionLogs.atlType = "tblBin-Updated",
          tblActionLogs.atlDescription = Changes;
-END */;;
-DELIMITER ;
+END */;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -351,7 +351,7 @@ CREATE TABLE `tblLocations` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblLocations_after_update */;
-DELIMITER ;;
+
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblLocations_after_update` AFTER UPDATE ON `tblLocations` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
 
@@ -363,8 +363,8 @@ DELIMITER ;;
      SET tblActionLogs.atlBy_usrID = NEW.locUpdatedBy_usrID,
          tblActionLogs.atlType = "locStatus-Updated",
          tblActionLogs.atlDescription = Changes;
-END */;;
-DELIMITER ;
+END */;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -404,7 +404,7 @@ CREATE TABLE `tblProps` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblProps_after_update */;
-DELIMITER ;;
+
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblProps_after_update` AFTER UPDATE ON `tblProps` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT "{}";
 
@@ -419,8 +419,8 @@ DELIMITER ;;
      SET tblActionLogs.atlBy_usrID = NEW.prpUpdatedBy_usrID,
          tblActionLogs.atlType = "tblProps-Updated",
          tblActionLogs.atlDescription = Changes;
-END */;;
-DELIMITER ;
+END */;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -434,7 +434,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spCoupon_DecreaseStats`(
     IN `iDiscountID` INT UNSIGNED,
     IN `iTotalUsedCount` INT UNSIGNED,
@@ -446,8 +446,8 @@ BEGIN
          , cpnTotalUsedAmount = IFNULL(cpnTotalUsedAmount, 0) - iTotalUsedAmount
      WHERE cpnID = iDiscountID
     ;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -461,7 +461,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spCoupon_IncreaseStats`(
     IN `iDiscountID` INT UNSIGNED,
     IN `iTotalUsedCount` INT UNSIGNED,
@@ -473,8 +473,8 @@ BEGIN
          , cpnTotalUsedAmount = IFNULL(cpnTotalUsedAmount, 0) + iTotalUsedAmount
      WHERE cpnID = iDiscountID
     ;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -488,7 +488,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spSaleable_Reserve`(
     IN `iSaleableID` INT UNSIGNED,
     IN `iUserID` BIGINT UNSIGNED,
@@ -508,8 +508,8 @@ BEGIN
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -523,7 +523,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spSaleable_unReserve`(
     IN `iSaleableID` INT UNSIGNED,
     IN `iUserID` BIGINT UNSIGNED,
@@ -543,8 +543,8 @@ BEGIN
              , prdUpdatedBy_usrID = iUserID
          WHERE slbID = iSaleableID
     ;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -558,7 +558,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+
 CREATE PROCEDURE `spUserAsset_SetAsPrefered`(
     IN `iUserID` BIGINT UNSIGNED,
     IN `iUASID` BIGINT UNSIGNED
@@ -589,8 +589,8 @@ BEGIN
        AND tblAccountUserAssets.uasID = iUASID;
   COMMIT;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;

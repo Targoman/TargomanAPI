@@ -20,7 +20,7 @@
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `farsiDigit`(
     `iChar` CHAR(1)
 ) RETURNS varchar(1000) CHARSET utf8
@@ -40,8 +40,8 @@ BEGIN
     WHEN '0' THEN RETURN '۰';
     ELSE   RETURN iChar;
   END CASE;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -55,7 +55,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `farsiMonthName`(
     `iMonth` TINYINT
 ) RETURNS varchar(100) CHARSET utf8mb4
@@ -82,8 +82,8 @@ BEGIN
         ELSE RETURN CONCAT_WS(':','ERROR',iMonth);
     END CASE;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -97,7 +97,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `farsiNumerals`(
     `iText` VARCHAR(5000)
 ) RETURNS varchar(5000) CHARSET utf8mb4
@@ -115,8 +115,8 @@ BEGIN
   END LOOP;
   RETURN PersianText;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -130,7 +130,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `fromJalali`(
     `iJalaliYear` smallint,
     `iJalaliMonth` TINYINT,
@@ -236,8 +236,8 @@ BEGIN
   SET gd=g_day_mo;
 
   RETURN CONCAT_WS('-',gy,gm,gd);
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -251,7 +251,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `fromJalaliStr`(
     `iJalaliDate` VARCHAR(50)
 ) RETURNS datetime
@@ -280,8 +280,8 @@ BEGIN
 
   RETURN CONCAT_WS(' ',I18N.fromJalali(jy,jm,jd), jTime);
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -295,7 +295,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `jalaliDateTime`(
     `iDateTime` DATETIME
 
@@ -359,8 +359,8 @@ BEGIN
     END IF;
 
     RETURN resout;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -374,7 +374,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `jalaliDay`(
     `iDate` DATE
 
@@ -432,8 +432,8 @@ BEGIN
 
     RETURN jd;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -447,7 +447,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `jalaliMonth`(
     `iDate` DATE
 ) RETURNS tinyint
@@ -502,8 +502,8 @@ BEGIN
 --	SET jd = j_day_no + 1;
 
     RETURN jm;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -517,7 +517,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `jalaliYear`(
     `iDate` DATE
 
@@ -562,8 +562,8 @@ BEGIN
     END IF;
 
     RETURN jy;
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -577,7 +577,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `_gdmarray`(
     `m` smallint
 ) RETURNS smallint
@@ -603,8 +603,8 @@ BEGIN
         WHEN 11 THEN RETURN 31;
     END CASE;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -618,7 +618,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `_gdmarray2`(
     `m` smallint,
     `k` SMALLINT
@@ -646,8 +646,8 @@ BEGIN
     END CASE;
 
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -661,7 +661,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `_intDiv`(
     `a` int,
     `b` int
@@ -674,8 +674,8 @@ BEGIN
 # Version V1.0.2
 
     return FLOOR(a / b);
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -689,7 +689,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `_jdmarray`(
     `m` smallint
 ) RETURNS smallint
@@ -715,8 +715,8 @@ BEGIN
         WHEN 11 THEN RETURN 29;
     END CASE;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -730,7 +730,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
+
 CREATE FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint
     NO SQL
     DETERMINISTIC
@@ -754,8 +754,8 @@ BEGIN
         WHEN 12 THEN RETURN 29;
     END CASE;
 
-END ;;
-DELIMITER ;
+END ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
