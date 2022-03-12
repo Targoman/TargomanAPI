@@ -45,7 +45,8 @@ SOURCES += \
 OTHER_FILES += \
     ../conf/api.conf \
     migrations/db/* \
-    migrations/local/*
+    migrations/local/* \
+    migrations/local/.migrations
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 LIBS += -lTargomanAPIInterface
