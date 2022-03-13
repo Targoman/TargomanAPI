@@ -1,4 +1,4 @@
-/* Migration File: m20220216_114615_init.sql */
+/* Migration File: m20220216_114615_AAA_init.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -45,6 +45,7 @@ CREATE TABLE `tblAPITokenValidIPs` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblAPITokenValidIPs_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblAPITokenValidIPs_after_update` AFTER UPDATE ON `tblAPITokenValidIPs` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("tviID", OLD.tviID);
 
@@ -58,7 +59,8 @@ CREATE TABLE `tblAPITokenValidIPs` (
            tblActionLogs.atlType = "tblAPITokenValidIPs",
            tblActionLogs.atlDescription = Changes;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -111,6 +113,7 @@ CREATE TABLE `tblAPITokens` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblAPIToken_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblAPIToken_after_update` AFTER UPDATE ON `tblAPITokens` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("aptID", OLD.aptID);
 
@@ -129,7 +132,8 @@ CREATE TABLE `tblAPITokens` (
            tblActionLogs.atlType = "tblAPIToken",
            tblActionLogs.atlDescription = Changes;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -144,7 +148,7 @@ CREATE TABLE `tblActionLogs` (
   `atlType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `atlDescription` json DEFAULT NULL,
   PRIMARY KEY (`atlID`),
-  KEY `FK_tbl_AAA_ActionLog_tbl_AAA_User` (`atlBy_usrID`),
+  KEY `FK_tblActionLog_tblUser` (`atlBy_usrID`),
   KEY `atlType` (`atlType`),
   KEY `atlInsertionDateTime` (`atlInsertionDateTime`),
   CONSTRAINT `FK_tblActionLogs_tblUser` FOREIGN KEY (`atlBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -160,10 +164,12 @@ CREATE TABLE `tblActionLogs` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblActionLogs_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblActionLogs_before_update` BEFORE UPDATE ON `tblActionLogs` FOR EACH ROW BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblActionLogs';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -179,10 +185,12 @@ END */;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblActionLogs_before_delete */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblActionLogs_before_delete` BEFORE DELETE ON `tblActionLogs` FOR EACH ROW BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = '500:DELETE is not allowed on tblActionLogs';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -205,14 +213,14 @@ CREATE TABLE `tblActiveSessions` (
   PRIMARY KEY (`ssnKey`),
   KEY `ssnStatus` (`ssnStatus`),
   KEY `ssnCreationDateTime` (`ssnCreationDateTime`),
-  KEY `FK_tbl_AAA_ActiveSessions_tbl_AAA_User` (`ssn_usrID`),
-  KEY `FK_tbl_AAA_ActiveSessions_tbl_AAA_User_1` (`ssnUpdatedBy_usrID`),
+  KEY `FK_tblActiveSessions_tblUser` (`ssn_usrID`),
+  KEY `FK_tblActiveSessions_tblUser_1` (`ssnUpdatedBy_usrID`),
   KEY `ssnLastActivity` (`ssnLastActivity`),
   KEY `ssnRemember` (`ssnRemember`),
   KEY `ssnIP` (`ssnIP`),
   KEY `ssnFingerPrint` (`ssnFingerPrint`),
   CONSTRAINT `FK_tblActiveSessions_tblUser` FOREIGN KEY (`ssn_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tblActiveSessions_tblUser_2` FOREIGN KEY (`ssnUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `FK_tblActiveSessions_tblUser_1` FOREIGN KEY (`ssnUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -225,6 +233,7 @@ CREATE TABLE `tblActiveSessions` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblActiveSessions_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblActiveSessions_after_update` AFTER UPDATE ON `tblActiveSessions` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("ssnKey", OLD.ssnKey);
 
@@ -242,7 +251,8 @@ CREATE TABLE `tblActiveSessions` (
        SET tblUser.usrActiveSessions = tblUser.usrActiveSessions - 1
      WHERE tblUser.usrID = NEW.ssn_usrID;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -289,11 +299,11 @@ CREATE TABLE `tblBlockingRules` (
   KEY `blaStartingTime` (`blrStartingTime`),
   KEY `blaEndingTime` (`blrEndingTime`),
   KEY `FK_tblBlockingsApplied_tblIPBin` (`blr_ipbIP`),
-  KEY `blrInsertedBy_usrID` (`blrCreatedBy_usrID`),
+  KEY `FK_tblBlockingRules_tblUser` (`blrCreatedBy_usrID`),
   KEY `blrInsertionDate` (`blrCreationDateTime`),
-  KEY `FK_tbl_AAA_BlockingRules_tblUser_1` (`blrUpdatedBy_usrID`),
+  KEY `FK_tblBlockingRules_tblUser_1` (`blrUpdatedBy_usrID`),
   CONSTRAINT `FK_tblBlockingRules_tblUser` FOREIGN KEY (`blrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_tblBlockingRules_tblUser_2` FOREIGN KEY (`blrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_tblBlockingRules_tblUser_1` FOREIGN KEY (`blrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `FK_tblBlockingsApplied_tblIPBin` FOREIGN KEY (`blr_ipbIP`) REFERENCES `tblIPBin` (`ipbip`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -307,6 +317,7 @@ CREATE TABLE `tblBlockingRules` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblBlockingRules_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblBlockingRules_after_update` AFTER UPDATE ON `tblBlockingRules` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("blrID", OLD.blrID);
 
@@ -322,7 +333,8 @@ CREATE TABLE `tblBlockingRules` (
            tblActionLogs.atlType = "tblBlockingRules",
            tblActionLogs.atlDescription = Changes;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -339,7 +351,7 @@ CREATE TABLE `tblForgotPassRequest` (
   `fprStatus` char(1) NOT NULL DEFAULT 'N' COMMENT 'N: New, S: Sent, A: Applied, R: Removed',
   PRIMARY KEY (`fprUUID`),
   KEY `fprStatus` (`fprStatus`),
-  KEY `FK__tbl_AAA_User` (`fpr_usrID`),
+  KEY `FK_tblForgotPassRequest_tblUser` (`fpr_usrID`),
   KEY `fprRequestDate` (`fprRequestDate`),
   KEY `fprApplyDate` (`fprApplyDate`),
   KEY `fprRequestedVia` (`fprRequestedVia`),
@@ -361,7 +373,7 @@ CREATE TABLE `tblIPBin` (
   UNIQUE KEY `ipbIP__InvalidatedAt` (`ipbIP`,`_InvalidatedAt`),
   KEY `ipbAccesCount` (`ipbAccessCount`),
   KEY `ipbLastAccess` (`ipbLastAccess`),
-  KEY `FK_tbl_AAA_IPBin_tbl_AAA_User` (`ipbBlockedBy_usrID`),
+  KEY `FK_tblIPBin_tblUser` (`ipbBlockedBy_usrID`),
   KEY `ipbInsertionDateTime` (`ipbFirstAccess`),
   KEY `ipbStatus` (`ipbStatus`),
   KEY `ipbBlockingTime` (`ipbBlockingTime`),
@@ -378,10 +390,12 @@ CREATE TABLE `tblIPBin` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblIPBin_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblIPBin_before_update` BEFORE UPDATE ON `tblIPBin` FOR EACH ROW BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblIPBin';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -408,10 +422,12 @@ CREATE TABLE `tblIPStats` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblIPStats_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblIPStats_before_update` BEFORE UPDATE ON `tblIPStats` FOR EACH ROW BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblIPStats';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -456,10 +472,12 @@ CREATE TABLE `tblOfflinePayments` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblOfflinePayments_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblOfflinePayments_before_update` BEFORE UPDATE ON `tblOfflinePayments` FOR EACH ROW BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblOfflinePayments';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -501,10 +519,12 @@ CREATE TABLE `tblOnlinePayments` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblOnlinePayments_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblOnlinePayments_before_update` BEFORE UPDATE ON `tblOnlinePayments` FOR EACH ROW BEGIN
 --	SIGNAL SQLSTATE '45000'
 --    SET MESSAGE_TEXT = '500:UPDATE is not allowed on tblOnlinePayments';
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -619,8 +639,8 @@ CREATE TABLE `tblUser` (
   KEY `usrFamilyName` (`usrFamily`),
   KEY `usrActiveSessions` (`usrActiveSessions`),
   KEY `usrCreationDateTime` (`usrCreationDateTime`),
-  KEY `FK_tbl_AAA_User_tbl_AAA_User` (`usrCreatedBy_usrID`),
-  KEY `FK_tbl_AAA_User_tbl_AAA_User_1` (`usrUpdatedBy_usrID`),
+  KEY `FK_tblUser_tblUser` (`usrCreatedBy_usrID`),
+  KEY `FK_tblUser_tblUser_1` (`usrUpdatedBy_usrID`),
   KEY `usrMaxConcurrentSessions` (`usrMaxSessions`),
   KEY `usrApprovalState` (`usrApprovalState`),
   KEY `usrLanguage` (`usrLanguage`),
@@ -628,7 +648,7 @@ CREATE TABLE `tblUser` (
   KEY `FK_tblUser_tblRoles` (`usr_rolID`),
   CONSTRAINT `FK_tblUser_tblRoles` FOREIGN KEY (`usr_rolID`) REFERENCES `tblRoles` (`rolID`) ON UPDATE CASCADE,
   CONSTRAINT `FK_tblUser_tblUser` FOREIGN KEY (`usrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE,
-  CONSTRAINT `FK_tblUser_tblUser_2` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
+  CONSTRAINT `FK_tblUser_tblUser_1` FOREIGN KEY (`usrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -641,6 +661,7 @@ CREATE TABLE `tblUser` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblUser_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblUser_after_update` AFTER UPDATE ON `tblUser` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("usrID", OLD.usrID);
 
@@ -662,7 +683,8 @@ CREATE TABLE `tblUser` (
            tblActionLogs.atlType = "tblUser",
            tblActionLogs.atlDescription = Changes;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -680,10 +702,10 @@ CREATE TABLE `tblUserExtraInfo` (
   `ueiExtraInfo` json DEFAULT NULL,
   `ueiUpdatedBy_usrID` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`uei_usrID`),
-  KEY `FK_tbl_AAA_UserExtraInfo_tbl_AAA_User_1` (`ueiUpdatedBy_usrID`),
+  KEY `FK_tblUserExtraInfo_tblUser_1` (`ueiUpdatedBy_usrID`),
   KEY `ueiSheba` (`ueiIBAN`) USING BTREE,
   CONSTRAINT `FK_tblUserExtraInfo_tblUser` FOREIGN KEY (`uei_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tblUserExtraInfo_tblUser_2` FOREIGN KEY (`ueiUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `FK_tblUserExtraInfo_tblUser_1` FOREIGN KEY (`ueiUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -696,6 +718,7 @@ CREATE TABLE `tblUserExtraInfo` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblUserExtraInfo_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblUserExtraInfo_after_update` AFTER UPDATE ON `tblUserExtraInfo` FOR EACH ROW BEGIN
   DECLARE Changes  JSON DEFAULT JSON_OBJECT("uei_usrID", OLD.uei_usrID);
 
@@ -709,7 +732,8 @@ CREATE TABLE `tblUserExtraInfo` (
            tblActionLogs.atlType = "tblUserExtraInfo",
            tblActionLogs.atlDescription = Changes;
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -774,6 +798,7 @@ CREATE TABLE `tblVoucher` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblVoucher_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblVoucher_before_update` BEFORE UPDATE ON `tblVoucher` FOR EACH ROW BEGIN
     IF OLD.vchCreationDateTime != NEW.vchCreationDateTime
      OR OLD.vch_usrID != NEW.vch_usrID
@@ -783,7 +808,8 @@ CREATE TABLE `tblVoucher` (
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = '500:tblVoucher update is not allowed except for status';
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -832,6 +858,7 @@ CREATE TABLE `tblWalletsTransactions` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblWalletsTransactions_after_insert */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblWalletsTransactions_after_insert` AFTER INSERT ON `tblWalletsTransactions` FOR EACH ROW Proc: BEGIN
     DECLARE LastTransactionDate DATETIME;
     DECLARE LastBalance BIGINT;
@@ -899,7 +926,8 @@ CREATE TABLE `tblWalletsTransactions` (
      WHERE tblUserWallets.walID = NEW.wlt_walID;
   /**/
   -- TODO Update Last Income and LastExpenses
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -915,6 +943,7 @@ END */;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblWalletsTransactions_before_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblWalletsTransactions_before_update` BEFORE UPDATE ON `tblWalletsTransactions` FOR EACH ROW BEGIN
     IF OLD.wlt_walID != NEW.wlt_walID
      OR OLD.wlt_vchID != NEW.wlt_vchID
@@ -924,7 +953,8 @@ END */;
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = '500:tblWallet update is not allowed except for status';
   END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -940,6 +970,7 @@ END */;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS trg_tblWalletsTransactions_after_update */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `trg_tblWalletsTransactions_after_update` AFTER UPDATE ON `tblWalletsTransactions` FOR EACH ROW Proc: BEGIN
     DECLARE LastTransactionDate DATETIME;
     DECLARE LastBalance BIGINT;
@@ -1001,7 +1032,8 @@ END */;
      WHERE tblUserWallets.walID = NEW.wlt_walID;
   /**/
   -- TODO Update Last Income and LastExpenses
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1020,9 +1052,13 @@ END */;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
+
+DELIMITER ;;
 /*!50106 CREATE*/ /*!50117*/ /*!50106 EVENT `evExpireSession` ON SCHEDULE EVERY 15 MINUTE STARTS '2020-04-14 15:18:12' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
 
 END */ ;;
+DELIMITER ;
+
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;;
@@ -1040,6 +1076,7 @@ END */ ;;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fnGetAllPrivs`(
     `iRolID` INT UNSIGNED,
     `iSpecificPrivs` VARCHAR(5000)
@@ -1072,7 +1109,8 @@ BEGIN
         ']')INTO Privs;
 
     RETURN Privs;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1088,6 +1126,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fnPasswordsAreEqual`(
     `iSaltedPass` VARCHAR(50),
     `iSalt` VARCHAR(50),
@@ -1098,7 +1137,8 @@ CREATE FUNCTION `fnPasswordsAreEqual`(
     DETERMINISTIC
 BEGIN
   RETURN MD5(CONCAT(iSalt, LOWER(iHashedPass))) = LOWER(iSaltedPass);
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1114,6 +1154,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fnSanitizePrivs`(
     `iPrivs` VARCHAR(5000)
 ) RETURNS varchar(5000) CHARSET utf8mb4
@@ -1121,7 +1162,8 @@ CREATE FUNCTION `fnSanitizePrivs`(
     DETERMINISTIC
 BEGIN
   RETURN REPLACE(REPLACE(iPrivs, '\n', ''),'\r','');
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1137,6 +1179,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fnSanitizeToken`(
     `iToken` VARCHAR(50)
 ) RETURNS varchar(100) CHARSET utf8mb4
@@ -1144,7 +1187,8 @@ CREATE FUNCTION `fnSanitizeToken`(
     DETERMINISTIC
 BEGIN
   RETURN LOWER(REPLACE(REPLACE(REPLACE(REPLACE(iToken, '-',''), ' ', ''), '_', ''),',',''));
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1160,6 +1204,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spApproval_Accept`(
     IN `iBy` CHAR(1),
     IN `iKey` VARCHAR(128),
@@ -1322,7 +1367,8 @@ BEGIN
         ON tblRoles.rolID = tblUser.usr_rolID
      WHERE tblUser.usrID = vUserID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1338,6 +1384,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spApproval_Request`(
     IN `iBy` CHAR(1),
     IN `iUserID` BIGINT UNSIGNED,
@@ -1451,7 +1498,8 @@ BEGIN
               'usrFamily', vUserFamily,
               'ApprovalCode', vApprovalCode
            );
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1467,6 +1515,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spBalanceInfo_Prepare`(
     IN `iWalID` BIGINT UNSIGNED,
     IN `iWltID` BIGINT UNSIGNED,
@@ -1517,7 +1566,8 @@ BEGIN
    ORDER BY tblWalletsTransactions.wltDateTime DESC, tblWalletsTransactions.wltID DESC
    LIMIT 1;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1533,6 +1583,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spForgotPass_Request`(
     IN `iLogin` VARCHAR(50),
     IN `iVia` CHAR(1)
@@ -1586,7 +1637,8 @@ BEGIN
                )
         ;
     END IF;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1602,6 +1654,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spIP_ValidateAccess`(
     IN `iIP` BIGINT
 )
@@ -1637,7 +1690,8 @@ Proc: BEGIN
         SIGNAL SQLSTATE '45403'
             SET MESSAGE_TEXT = "403:Fast request from %iIP% has been banned";
     END IF;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1653,6 +1707,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spLogin`(
     IN `iLogin` VARCHAR(100),
     IN `iIP` VARCHAR(50),
@@ -1861,7 +1916,8 @@ BEGIN
       JOIN tblRoles
         ON tblRoles.rolID = tblUser.usr_rolID
      WHERE tblUser.usrID = vUserID;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1877,6 +1933,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spLogin_VerifyByMobileCode`(
     IN `iMobile` VARCHAR(50),
     IN `iCode` INT UNSIGNED,
@@ -1983,7 +2040,8 @@ BEGIN
         ON tblRoles.rolID = tblUser.usr_rolID
      WHERE tblUser.usrID = UserID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1999,6 +2057,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spLogout`(
     IN `iByUserID` BIGINT UNSIGNED,
     IN `iSessionGUID` CHAR(32)
@@ -2028,7 +2087,8 @@ BEGIN
         SIGNAL SQLSTATE '45000'
            SET MESSAGE_TEXT = '405:Logout by other users is not allowed yet';
     END IF;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2044,6 +2104,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spMobileVerifyCode_Request`(
     IN `iMobile` VARCHAR(50),
     IN `iSignupIfNotExists` TINYINT,
@@ -2106,7 +2167,8 @@ BEGIN
                'ApprovalCode', ApprovalCode
            )
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2122,6 +2184,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spOnlinePayment_Create`(
     IN `iVoucherID` BIGINT UNSIGNED,
     IN `iGatewayID` INT,
@@ -2138,7 +2201,8 @@ BEGIN
        , onp_pgwID = iGatewayID
        , onpAmount = iAmount
   ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2154,6 +2218,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spPassword_Change`(
     IN `iUserID` BIGINT UNSIGNED,
     IN `iOldPass` CHAR(32),
@@ -2176,7 +2241,8 @@ BEGIN
   UPDATE tblUser
      SET tblUser.usrPass = iNewPass
    WHERE tblUser.usrID = iUserID;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2192,6 +2258,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spPassword_ChangeByUUID`(
     IN `iVia` VARCHAR(1),
     IN `iLogin` VARCHAR(50),
@@ -2232,7 +2299,8 @@ INNER JOIN tblUser
        SET tblUser.usrPass = iNewPass
      WHERE tblUser.usrID = vUserID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2248,6 +2316,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spPaymentGateway_UpdateFailedCounters`(
     IN `iPgwID` INT UNSIGNED,
     IN `iAmount` BIGINT UNSIGNED
@@ -2257,7 +2326,8 @@ BEGIN
        SET pgwSumFailedCount = IFNULL(pgwSumFailedCount, 0) + 1
      WHERE pgwID = iPgwID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2273,6 +2343,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spPaymentGateway_UpdateOkCounters`(
     IN `iPgwID` INT UNSIGNED,
     IN `iAmount` BIGINT UNSIGNED
@@ -2293,7 +2364,8 @@ BEGIN
          , pgwSumPaidAmount = IFNULL(pgwSumPaidAmount, 0) + iAmount
      WHERE pgwID = iPgwID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2309,6 +2381,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spPaymentGateway_UpdateRequestCounters`(
     IN `iPgwID` INT UNSIGNED,
     IN `iAmount` BIGINT UNSIGNED
@@ -2319,7 +2392,8 @@ BEGIN
          , pgwSumRequestAmount = IFNULL(pgwSumRequestAmount, 0) + iAmount
      WHERE pgwID = iPgwID
     ;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2335,6 +2409,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spSession_Expire`(
     IN `iSessionGUID` INT,
     IN `Param2` INT
@@ -2343,7 +2418,8 @@ BEGIN
     UPDATE tblActiveSessions
        SET ssnStatus = 'E'
      WHERE ssnKey = iSessionGUID;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2359,6 +2435,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spSession_UpdateActivity`(
     IN `iSSID` CHAR(32),
     IN `iIP` VARCHAR(50)
@@ -2438,7 +2515,8 @@ BEGIN
     JOIN tblRoles
       ON tblRoles.rolID = tblUser.usr_rolID
    WHERE tblUser.usrID = UserID;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2454,6 +2532,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spSignup`(
     IN `iBy` CHAR(1),
     IN `iLogin` VARCHAR(50),
@@ -2573,7 +2652,8 @@ BEGIN
     ;
 
     COMMIT;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2589,6 +2669,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spToken_RetrieveInfo`(
     IN `iToken` VARCHAR(50),
     IN `iIP` VARCHAR(50)
@@ -2707,7 +2788,8 @@ BEGIN
             Privs        AS `privs`,
             PreferedLang AS `intfLang`;
     COMMIT;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2723,6 +2805,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spVoucher_Cancel`(
     IN `iUserID` BIGINT UNSIGNED,
     IN `iVoucherID` BIGINT UNSIGNED,
@@ -2756,7 +2839,8 @@ BEGIN
 
     -- ///TODO: cancel voucher and credit to wallet
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2772,6 +2856,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWalletPayment_Reserve`(
     IN `iWalletID` BIGINT UNSIGNED,
     IN `iUserID` BIGINT UNSIGNED,
@@ -2837,7 +2922,8 @@ BEGIN
      SET tblWalletsTransactions.wlt_walID = iWalletID,
          tblWalletsTransactions.wlt_vchID = iVoucherID,
          tblWalletsTransactions.wltAmount = Amount;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2853,6 +2939,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWalletTransactionOnPayment_Create`(
     IN `iVoucherID` BIGINT UNSIGNED,
     IN `iPaymentType` CHAR(1)
@@ -2996,7 +3083,8 @@ BEGIN
   END IF;
 
   COMMIT;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -3012,6 +3100,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWalletTransaction_Create`(
     IN `iWalletID` BIGINT UNSIGNED,
     IN `iVoucherID` BIGINT UNSIGNED,
@@ -3066,7 +3155,8 @@ BEGIN
            tblWalletsTransactions.wltType = TrasnactionType,
            tblWalletsTransactions.wltAmount = oAmount * Multiplier;
   END IF;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -3082,6 +3172,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWalletTransaction_Validate`(
     IN `iUserID` BIGINT UNSIGNED,
     INOUT `ioWalletID` BIGINT UNSIGNED,
@@ -3156,7 +3247,8 @@ BEGIN
          SET MESSAGE_TEXT = '500:Invalid wallet transaction type';
   END CASE;
 /**/
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -3172,6 +3264,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWallet_Transfer`(
     IN `iFromUserID` BIGINT UNSIGNED,
     IN `iFromWalID` INT,
@@ -3289,7 +3382,8 @@ BEGIN
        SET tblWalletsTransactions.wltStatus = 'A'
      WHERE tblWalletsTransactions.wltID = LAST_INSERT_ID();
   COMMIT;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -3305,6 +3399,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spWithdrawal_Request`(
     IN `iWalletID` BIGINT UNSIGNED,
     IN `iForUsrID` BIGINT UNSIGNED,
@@ -3346,7 +3441,8 @@ BEGIN
          );
 
   SET oVoucherID = LAST_INSERT_ID();
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

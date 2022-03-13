@@ -1,7 +1,8 @@
-/* Migration File: m20220308_131035_raise_error_in_spForgotPass_Request.sql */
+/* Migration File: m20220308_131035_AAA_raise_error_in_spForgotPass_Request.sql */
 
 DROP PROCEDURE IF EXISTS `spForgotPass_Request`;
 
+DELIMITER ;;
 CREATE PROCEDURE `spForgotPass_Request`(
     IN `iLogin` VARCHAR(50),
     IN `iVia` CHAR(1)
@@ -58,4 +59,5 @@ BEGIN
              'UUID',      vLinkUUID
            )
     ;
-END ;
+END ;;
+DELIMITER ;

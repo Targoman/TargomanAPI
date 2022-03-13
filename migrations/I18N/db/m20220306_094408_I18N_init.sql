@@ -1,4 +1,4 @@
-/* Migration File: m20220306_094408_init.sql */
+/* Migration File: m20220306_094408_I18N_init.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -21,6 +21,7 @@
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `farsiDigit`(
     `iChar` CHAR(1)
 ) RETURNS varchar(1000) CHARSET utf8
@@ -40,7 +41,8 @@ BEGIN
     WHEN '0' THEN RETURN '۰';
     ELSE   RETURN iChar;
   END CASE;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -56,6 +58,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `farsiMonthName`(
     `iMonth` TINYINT
 ) RETURNS varchar(100) CHARSET utf8mb4
@@ -82,7 +85,8 @@ BEGIN
         ELSE RETURN CONCAT_WS(':','ERROR',iMonth);
     END CASE;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -98,6 +102,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `farsiNumerals`(
     `iText` VARCHAR(5000)
 ) RETURNS varchar(5000) CHARSET utf8mb4
@@ -109,13 +114,14 @@ BEGIN
   AllChars: LOOP
     IF LENGTH(iText) = 0 THEN  LEAVE AllChars; END IF;
 
-    SET PersianText = CONCAT(PersianText, I18N.farsiDigit(SUBSTR(iText,1,1)));
+    SET PersianText = CONCAT(PersianText, /*I18N.*/farsiDigit(SUBSTR(iText,1,1)));
     SET iText = SUBSTR(iText,2);
 
   END LOOP;
   RETURN PersianText;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -131,6 +137,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fromJalali`(
     `iJalaliYear` smallint,
     `iJalaliMonth` TINYINT,
@@ -201,15 +208,15 @@ BEGIN
   SET jmm=iJalaliMonth-1;
 
   WHILE (jmm > 0) do
-    SET mday=mday+I18N._jdmarray2(jmm);
-    SET jmm=jmm-1;
+    SET mday = mday + /*I18N.*/_jdmarray2(jmm);
+    SET jmm = jmm-1;
   end WHILE;
 
-  SET j_day_no=(iJalaliYear-1)*365+(I18N._intDiv(iJalaliYear,4))+mday+iJalaliDay;
+  SET j_day_no=(iJalaliYear-1)*365+(/*I18N.*/_intDiv(iJalaliYear,4))+mday+iJalaliDay;
   SET g_day_no=j_day_no+226899;
 
 
-  SET g_day_no=g_day_no-(I18N._intDiv(gy-1,4));
+  SET g_day_no=g_day_no-(/*I18N.*/_intDiv(gy-1,4));
   SET g_day_mo=MOD(g_day_no,365);
 
     IF (k=1 and j=1) THEN
@@ -228,15 +235,16 @@ BEGIN
 
   SET mo=0;
   SET gm=gm+1;
-  while g_day_mo>I18N._gdmarray2(mo,k) do
-        SET g_day_mo=g_day_mo-I18N._gdmarray2(mo,k);
+  while g_day_mo>/*I18N.*/_gdmarray2(mo,k) do
+        SET g_day_mo=g_day_mo-/*I18N.*/_gdmarray2(mo,k);
     SET mo=mo+1;
     SET gm=gm+1;
   end WHILE;
   SET gd=g_day_mo;
 
   RETURN CONCAT_WS('-',gy,gm,gd);
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -252,6 +260,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `fromJalaliStr`(
     `iJalaliDate` VARCHAR(50)
 ) RETURNS datetime
@@ -278,9 +287,10 @@ BEGIN
     SET jy  = CAST(jyd AS UNSIGNED);
     SET jm  = CAST(jmd AS UNSIGNED);
 
-  RETURN CONCAT_WS(' ',I18N.fromJalali(jy,jm,jd), jTime);
+  RETURN CONCAT_WS(' ', /*I18N.*/fromJalali(jy,jm,jd), jTime);
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -296,6 +306,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `jalaliDateTime`(
     `iDateTime` DATETIME
 
@@ -319,11 +330,11 @@ BEGIN
     SET gm = MONTH(iDateTime) - 1;
     SET gd = DAY(iDateTime) - 1;
     SET ttime = TIME(iDateTime);
-    SET g_day_no = ((365 * gy) + I18N._intDiv(gy + 3, 4) - I18N._intDiv(gy + 99, 100) + I18N._intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + I18N._gdmarray(i);
+        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -335,18 +346,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * I18N._intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + I18N._intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= I18N._jdmarray(i)) do
-        SET j_day_no = j_day_no - I18N._jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -359,7 +370,8 @@ BEGIN
     END IF;
 
     RETURN resout;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -375,6 +387,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `jalaliDay`(
     `iDate` DATE
 
@@ -396,11 +409,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + I18N._intDiv(gy + 3, 4) - _intDiv(gy + 99, 100) + I18N._intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - _intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + I18N._gdmarray(i);
+        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -412,18 +425,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * I18N._intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + I18N._intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= I18N._jdmarray(i)) do
-        SET j_day_no = j_day_no - I18N._jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -432,7 +445,8 @@ BEGIN
 
     RETURN jd;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -448,6 +462,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `jalaliMonth`(
     `iDate` DATE
 ) RETURNS tinyint
@@ -467,11 +482,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + I18N._intDiv(gy + 3, 4) - I18N._intDiv(gy + 99, 100) + I18N._intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + I18N._gdmarray(i);
+        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -483,18 +498,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * I18N._intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + I18N._intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= I18N._jdmarray(i)) do
-        SET j_day_no = j_day_no - I18N._jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -502,7 +517,8 @@ BEGIN
 --	SET jd = j_day_no + 1;
 
     RETURN jm;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -518,6 +534,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `jalaliYear`(
     `iDate` DATE
 
@@ -538,11 +555,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + I18N._intDiv(gy + 3, 4) - I18N._intDiv(gy + 99, 100) + I18N._intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + I18N._gdmarray(i);
+        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -554,15 +571,16 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * I18N._intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + I18N._intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
     END IF;
 
     RETURN jy;
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -578,6 +596,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `_gdmarray`(
     `m` smallint
 ) RETURNS smallint
@@ -603,7 +622,8 @@ BEGIN
         WHEN 11 THEN RETURN 31;
     END CASE;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -619,6 +639,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `_gdmarray2`(
     `m` smallint,
     `k` SMALLINT
@@ -646,7 +667,8 @@ BEGIN
     END CASE;
 
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -662,6 +684,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `_intDiv`(
     `a` int,
     `b` int
@@ -674,7 +697,8 @@ BEGIN
 # Version V1.0.2
 
     return FLOOR(a / b);
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -690,6 +714,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `_jdmarray`(
     `m` smallint
 ) RETURNS smallint
@@ -715,7 +740,8 @@ BEGIN
         WHEN 11 THEN RETURN 29;
     END CASE;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -731,6 +757,7 @@ END ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 
+DELIMITER ;;
 CREATE FUNCTION `_jdmarray2`(`m` smallint) RETURNS smallint
     NO SQL
     DETERMINISTIC
@@ -754,7 +781,8 @@ BEGIN
         WHEN 12 THEN RETURN 29;
     END CASE;
 
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

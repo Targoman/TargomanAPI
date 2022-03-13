@@ -30,7 +30,12 @@ OTHER_FILES += \
     Docker/* \
     Deploy/* \
     .github/workflows/* \
+    migrations/TargomanMigrate/db/* \
+    migrations/TargomanMigrate/local/* \
+    migrations/TargomanMigrate/local/.migrations \
     migrations/CommonFuncs/db/* \
     migrations/CommonFuncs/local/* \
+    migrations/CommonFuncs/local/.migrations \
     migrations/I18N/db/* \
-    migrations/I18N/local/*
+    migrations/I18N/local/* \
+    migrations/I18N/local/.migrations
