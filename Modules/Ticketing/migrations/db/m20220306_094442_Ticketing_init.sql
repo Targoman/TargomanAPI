@@ -1,4 +1,4 @@
-/* Migration File: m20220306_094442_init.sql */
+/* Migration File: m20220306_094442_Ticketing_init.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -89,6 +89,7 @@ CREATE TABLE `tblTickets` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50032 DROP TRIGGER IF EXISTS tblTickets_before_insert */;
 
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017*/ /*!50003 TRIGGER `tblTickets_before_insert` BEFORE INSERT ON `tblTickets` FOR EACH ROW BEGIN
     DECLARE vID BIGINT;
 
@@ -101,7 +102,8 @@ CREATE TABLE `tblTickets` (
 
         SET NEW.tktBase_tktID = vID;
     END IF;
-END */;
+END */;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -175,6 +177,7 @@ CREATE TABLE `tblUploadQueue` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 
+DELIMITER ;;
 CREATE PROCEDURE `spUploadedFile_Create`(
     IN `iFileName` VARCHAR(256),
     IN `iFileUUID` VARCHAR(64),
@@ -284,7 +287,8 @@ BEGIN
     ;
 
     /****************/ COMMIT; /****************/
-END ;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
