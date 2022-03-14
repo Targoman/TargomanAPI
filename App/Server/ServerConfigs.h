@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_SERVER_CONFIGS_H
@@ -27,9 +28,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman{
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -59,8 +58,9 @@ struct ServerConfigs
 
     static QString BasePathWithVersion;
 
-    struct MasterDB{
-        static inline QString makeConfig(const QString& _name){return "/MasterDB/" + _name;}
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       DBPrefix;
+    struct MasterDB {
+        static inline QString makeConfig(const QString& _name) { return "/MasterDB/" + _name; }
         static Targoman::Common::Configuration::tmplConfigurable<QString>      Host;
         static Targoman::Common::Configuration::tmplRangedConfigurable<quint16>Port;
         static Targoman::Common::Configuration::tmplConfigurable<QString>      User;
@@ -73,8 +73,6 @@ constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 3;
 
 extern TAPI::stuStatistics gServerStats;
 
-}
-}
-}
+} //namespace Targoman::API::Server
 
 #endif // TARGOMAN_API_SERVER_CONFIGS_H

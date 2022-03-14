@@ -87,7 +87,7 @@ void appTargomanAPI::slotExecute()
         //Prepare database connections
         if (RequiredDBs.size())
         {
-            DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
+            TargomanDebug(0, "Registering db connections");
 
             QSet<QString> ConnectionStrings;
 
@@ -102,28 +102,31 @@ void appTargomanAPI::slotExecute()
                     ServerConfigs::MasterDB::Pass.value()
                 };
 
-                ConnectionStrings.insert(MasterDBInfo.toConnStr(/*true*/));
-                DBManager::clsDAC::setConnectionString(MasterDBInfo.toConnStr());
+                QString ConnStr = MasterDBInfo.toConnStr(ServerConfigs::DBPrefix.value()/*, true*/);
+                ConnectionStrings.insert(ConnStr);
+
+                TargomanDebug(0, "Registering " << ConnStr);
+                DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
+                DBManager::clsDAC::setConnectionString(ConnStr);
             }
 
             for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
             {
+                QString ConnStr = DBInfoIter->toConnStr(ServerConfigs::DBPrefix.value()/*true*/);
+
                 if (DBInfoIter->Host.size()
                         && DBInfoIter->Schema.size()
-                        && ConnectionStrings.contains(DBInfoIter->toConnStr(/*true*/)) == false)
+                        && ConnectionStrings.contains(ConnStr) == false)
                 {
+                    ConnectionStrings.insert(ConnStr);
+
+                    TargomanDebug(0, "Registering <" << DBInfoIter.key() << "> " << ConnStr);
                     DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL, DBInfoIter.key(), DBInfoIter->Schema);
-
-                    ConnectionStrings.insert(DBInfoIter->toConnStr(/*true*/));
-
-//                    if (ConnectionStrings.isEmpty())
-//                        DBManager::clsDAC::setConnectionString(DBInfoIter->toConnStr());
-//                    else
-                        DBManager::clsDAC::setConnectionString(
-                                    DBInfoIter->toConnStr(),
-                                    DBInfoIter.key(),
-                                    DBInfoIter->Schema
-                                    );
+                    DBManager::clsDAC::setConnectionString(
+                                ConnStr,
+                                DBInfoIter.key(),
+                                DBInfoIter->Schema
+                                );
                 }
             }
         }

@@ -18,15 +18,14 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "ServerConfigs.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "3rdParty/ISO639/ISO639.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
@@ -210,15 +209,26 @@ tmplConfigurable<FilePath_t>     ServerConfigs::PublicPath(
         "Directory static files are stored",
         "",
         Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
-        false>,
+            TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
+            false
+        >,
         "",
         "DIRECTORY",
         "public-path",
         enuConfigSource::Arg | enuConfigSource::File);
 
-
 /****************************************************************************/
+tmplConfigurable<QString> ServerConfigs::DBPrefix(
+    ServerConfigs::makeConfig("DBPrefix"),
+    "Prefix to prepend to all database schemas",
+    "",
+    ReturnTrueCrossValidator(),
+    "",
+    "PREFIX",
+    "dbprefix",
+    enuConfigSource::Arg | enuConfigSource::File
+);
+
 tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
         ServerConfigs::MasterDB::makeConfig("Host"),
         "Database Host address",
@@ -349,6 +359,4 @@ tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
         "List of valid translation servers to connect to them separated by their translation engine");
 */
 
-}
-}
-}
+} //namespace Targoman::API::Server

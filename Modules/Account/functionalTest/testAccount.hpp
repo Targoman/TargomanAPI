@@ -81,9 +81,6 @@ private slots:
 
 //        qDebug() << Result;
 //        QVERIFY(UserID > 0);
-
-//        clsDAC DAC;
-//        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
     void ApproveMobile_And_Login_0999_888_1010()

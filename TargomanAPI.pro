@@ -38,4 +38,7 @@ OTHER_FILES += \
     migrations/CommonFuncs/local/.migrations \
     migrations/I18N/db/* \
     migrations/I18N/local/* \
-    migrations/I18N/local/.migrations
+    migrations/I18N/local/.migrations \
+    migrations/MT/db/* \
+    migrations/MT/local/* \
+    migrations/MT/local/.migrations
