@@ -1,3 +1,5 @@
+/* Migration File: m00000000_000000_TargomanMigrate_migration_init.sql */
+
 USE `{{dbprefix}}{{Schema}}`;
 
 CREATE TABLE `{{GlobalHistoryTableName}}` (
