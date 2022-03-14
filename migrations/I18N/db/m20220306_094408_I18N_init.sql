@@ -114,7 +114,7 @@ BEGIN
   AllChars: LOOP
     IF LENGTH(iText) = 0 THEN  LEAVE AllChars; END IF;
 
-    SET PersianText = CONCAT(PersianText, /*I18N.*/farsiDigit(SUBSTR(iText,1,1)));
+    SET PersianText = CONCAT(PersianText, /*{{dbprefix}}I18N.*/farsiDigit(SUBSTR(iText,1,1)));
     SET iText = SUBSTR(iText,2);
 
   END LOOP;
@@ -208,15 +208,15 @@ BEGIN
   SET jmm=iJalaliMonth-1;
 
   WHILE (jmm > 0) do
-    SET mday = mday + /*I18N.*/_jdmarray2(jmm);
+    SET mday = mday + /*{{dbprefix}}I18N.*/_jdmarray2(jmm);
     SET jmm = jmm-1;
   end WHILE;
 
-  SET j_day_no=(iJalaliYear-1)*365+(/*I18N.*/_intDiv(iJalaliYear,4))+mday+iJalaliDay;
+  SET j_day_no=(iJalaliYear-1)*365+(/*{{dbprefix}}I18N.*/_intDiv(iJalaliYear,4))+mday+iJalaliDay;
   SET g_day_no=j_day_no+226899;
 
 
-  SET g_day_no=g_day_no-(/*I18N.*/_intDiv(gy-1,4));
+  SET g_day_no=g_day_no-(/*{{dbprefix}}I18N.*/_intDiv(gy-1,4));
   SET g_day_mo=MOD(g_day_no,365);
 
     IF (k=1 and j=1) THEN
@@ -235,8 +235,8 @@ BEGIN
 
   SET mo=0;
   SET gm=gm+1;
-  while g_day_mo>/*I18N.*/_gdmarray2(mo,k) do
-        SET g_day_mo=g_day_mo-/*I18N.*/_gdmarray2(mo,k);
+  while g_day_mo>/*{{dbprefix}}I18N.*/_gdmarray2(mo,k) do
+        SET g_day_mo=g_day_mo-/*{{dbprefix}}I18N.*/_gdmarray2(mo,k);
     SET mo=mo+1;
     SET gm=gm+1;
   end WHILE;
@@ -287,7 +287,7 @@ BEGIN
     SET jy  = CAST(jyd AS UNSIGNED);
     SET jm  = CAST(jmd AS UNSIGNED);
 
-  RETURN CONCAT_WS(' ', /*I18N.*/fromJalali(jy,jm,jd), jTime);
+  RETURN CONCAT_WS(' ', /*{{dbprefix}}I18N.*/fromJalali(jy,jm,jd), jTime);
 
 END ;;
 DELIMITER ;
@@ -330,11 +330,11 @@ BEGIN
     SET gm = MONTH(iDateTime) - 1;
     SET gd = DAY(iDateTime) - 1;
     SET ttime = TIME(iDateTime);
-    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*{{dbprefix}}I18N.*/_intDiv(gy + 3, 4) - /*{{dbprefix}}I18N.*/_intDiv(gy + 99, 100) + /*{{dbprefix}}I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
+        SET g_day_no = g_day_no + /*{{dbprefix}}I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -346,18 +346,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*{{dbprefix}}I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*{{dbprefix}}I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
-        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*{{dbprefix}}I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*{{dbprefix}}I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -409,11 +409,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - _intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*{{dbprefix}}I18N.*/_intDiv(gy + 3, 4) - _intDiv(gy + 99, 100) + /*{{dbprefix}}I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
+        SET g_day_no = g_day_no + /*{{dbprefix}}I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -425,18 +425,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*{{dbprefix}}I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*{{dbprefix}}I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
-        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*{{dbprefix}}I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*{{dbprefix}}I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -482,11 +482,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*{{dbprefix}}I18N.*/_intDiv(gy + 3, 4) - /*{{dbprefix}}I18N.*/_intDiv(gy + 99, 100) + /*{{dbprefix}}I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
+        SET g_day_no = g_day_no + /*{{dbprefix}}I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -498,18 +498,18 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*{{dbprefix}}I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*{{dbprefix}}I18N.*/_intDiv(j_day_no - 1, 365);
         SET j_day_no = (j_day_no - 1) % 365;
     END IF;
 
     SET i = 0;
 
-    WHILE (i < 11 and j_day_no >= /*I18N.*/_jdmarray(i)) do
-        SET j_day_no = j_day_no - /*I18N.*/_jdmarray(i);
+    WHILE (i < 11 and j_day_no >= /*{{dbprefix}}I18N.*/_jdmarray(i)) do
+        SET j_day_no = j_day_no - /*{{dbprefix}}I18N.*/_jdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -555,11 +555,11 @@ BEGIN
     SET gy = YEAR(iDate) - 1600;
     SET gm = MONTH(iDate) - 1;
     SET gd = DAY(iDate) - 1;
-    SET g_day_no = ((365 * gy) + /*I18N.*/_intDiv(gy + 3, 4) - /*I18N.*/_intDiv(gy + 99, 100) + /*I18N.*/_intDiv (gy + 399, 400));
+    SET g_day_no = ((365 * gy) + /*{{dbprefix}}I18N.*/_intDiv(gy + 3, 4) - /*{{dbprefix}}I18N.*/_intDiv(gy + 99, 100) + /*{{dbprefix}}I18N.*/_intDiv (gy + 399, 400));
     SET i = 0;
 
     WHILE (i < gm) do
-        SET g_day_no = g_day_no + /*I18N.*/_gdmarray(i);
+        SET g_day_no = g_day_no + /*{{dbprefix}}I18N.*/_gdmarray(i);
         SET i = i + 1;
     END WHILE;
 
@@ -571,11 +571,11 @@ BEGIN
     SET j_day_no = g_day_no - 79;
     SET j_np = j_day_no DIV 12053;
     SET j_day_no = j_day_no % 12053;
-    SET jy = 979 + 33 * j_np + 4 * /*I18N.*/_intDiv(j_day_no, 1461);
+    SET jy = 979 + 33 * j_np + 4 * /*{{dbprefix}}I18N.*/_intDiv(j_day_no, 1461);
     SET j_day_no = j_day_no % 1461;
 
     IF j_day_no >= 366 then
-        SET jy = jy + /*I18N.*/_intDiv(j_day_no - 1, 365);
+        SET jy = jy + /*{{dbprefix}}I18N.*/_intDiv(j_day_no - 1, 365);
     END IF;
 
     RETURN jy;
