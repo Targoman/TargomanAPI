@@ -44,7 +44,7 @@ CREATE TABLE `tblAlerts` (
   PRIMARY KEY (`alrID`),
   KEY `altType` (`alrType`),
   KEY `altStatus` (`alrStatus`),
-  KEY `FK_tbl_COMMON_Alert_tbl_AAA_User` (`alr_usrID`),
+  KEY `FK_tblAlert_tbl_AAA_User` (`alr_usrID`),
   KEY `alr_altCode` (`alr_altCode`),
   KEY `alrCreateDate` (`alrCreateDate`),
   KEY `alrSentDate` (`alrSentDate`)
@@ -116,7 +116,7 @@ CREATE PROCEDURE `spLogDebug`(
 )
 BEGIN
     INSERT
-      INTO /*Common.*/tblDBG
+      INTO /*{{dbprefix}}Common.*/tblDBG
        SET tblDBG.dbgFrom = iFrom
          , tblDBG.dbgInfo = iInfo
     ;

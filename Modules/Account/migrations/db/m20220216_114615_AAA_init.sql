@@ -1325,7 +1325,7 @@ BEGIN
     END IF;
 
     IF iLogin = 1 THEN
-        SET vSessionGUID = SUBSTRING(CommonFuncs.guid(NULL), 1, 32);
+        SET vSessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
 
         INSERT
           INTO tblActiveSessions
@@ -1474,26 +1474,25 @@ BEGIN
            ;
 
     IF iBy = 'E' THEN
-        SET vApprovalCode = Common.fnCreateRandomMD5();
+        SET vApprovalCode = {{dbprefix}}Common.fnCreateRandomMD5();
     ELSE
         SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
     END IF;
 
     INSERT
       INTO tblApprovalRequest
-       SET tblApprovalRequest.apr_usrID = iUserID,
-           tblApprovalRequest.aprRequestedFor = iBy,
---           aprIsForLogin = 0,
-           tblApprovalRequest.aprApprovalKey = iKey,
-           tblApprovalRequest.aprApprovalCode = vApprovalCode
+       SET apr_usrID = iUserID,
+           aprRequestedFor = iBy,
+           aprApprovalKey = iKey,
+           aprApprovalCode = vApprovalCode
     ;
 
     INSERT
-      INTO Common.tblAlerts
-       SET Common.tblAlerts.alr_usrID = iUserID,
-           Common.tblAlerts.alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
-           Common.tblAlerts.alrReplacedContactInfo = iKey,
-           Common.tblAlerts.alrReplacements = JSON_OBJECT(
+      INTO {{dbprefix}}Common.tblAlerts
+       SET alr_usrID = iUserID,
+           alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
+           alrReplacedContactInfo = iKey,
+           alrReplacements = JSON_OBJECT(
               'usrName', vUserName,
               'usrFamily', vUserFamily,
               'ApprovalCode', vApprovalCode
@@ -1537,12 +1536,13 @@ BEGIN
    ORDER BY tblWalletsTransactions.wltDateTime DESC
    LIMIT 1;
 
-  CALL Common.spLogDebug('afterInsertTransaction', JSON_OBJECT('oLastTransactionDate', oLastTransactionDate,
-                                                              'iWalID',iWalID,
-                                                              'iWltID',iWltID,
-                                                              'iWltDateTime',iWltDateTime,
-                                                              'compare', oLastTransactionDate >= iWltDateTime
-                                                              ));
+  CALL {{dbprefix}}Common.spLogDebug('afterInsertTransaction',
+                                     JSON_OBJECT('oLastTransactionDate', oLastTransactionDate,
+                                         'iWalID',iWalID,
+                                         'iWltID',iWltID,
+                                         'iWltDateTime',iWltDateTime,
+                                         'compare', oLastTransactionDate >= iWltDateTime
+                                    ));
 
   IF NOT ISNULL(oLastTransactionDate) AND oLastTransactionDate >= iWltDateTime THEN
     DELETE tblWalletBalances
@@ -1616,7 +1616,7 @@ BEGIN
     ;
 
     IF (vUserID IS NOT NULL) THEN
-        SET vLinkUUID = Common.fnCreateRandomMD5();
+        SET vLinkUUID = {{dbprefix}}Common.fnCreateRandomMD5();
 
         INSERT
           INTO tblForgotPassRequest
@@ -1626,10 +1626,10 @@ BEGIN
         ;
 
         INSERT
-          INTO Common.tblAlerts
-           SET Common.tblAlerts.alr_usrID = vUserID
-             , Common.tblAlerts.alr_altCode = 'passReset'
-             , Common.tblAlerts.alrReplacements = JSON_OBJECT(
+          INTO {{dbprefix}}Common.tblAlerts
+           SET alr_usrID = vUserID
+             , alr_altCode = 'passReset'
+             , alrReplacements = JSON_OBJECT(
                  'usrName',   vUserName,
                  'usrFamily', vUserFamily,
                  'via',       iVia,
@@ -1878,7 +1878,7 @@ BEGIN
         END IF;
     END IF;
 
-    SET vSessionGUID = SUBSTRING(CommonFuncs.guid(NULL), 1, 32);
+    SET vSessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
 
     INSERT
       INTO tblActiveSessions
@@ -1994,7 +1994,7 @@ BEGIN
      WHERE tblApprovalRequest.aprID = AprID
     ;
 
-    SET SessionGUID = SUBSTRING(CommonFuncs.guid(NULL), 1, 32);
+    SET SessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
 
     INSERT
       INTO tblActiveSessions
@@ -2158,7 +2158,7 @@ BEGIN
     ;
 
     INSERT
-      INTO Common.tblAlerts
+      INTO {{dbprefix}}Common.tblAlerts
        SET alr_usrID = UserID,
            alrMobile = iMobile,
            alr_altCode = 'approveMobile',
@@ -2192,7 +2192,7 @@ CREATE PROCEDURE `spOnlinePayment_Create`(
     OUT `oMD5` VARCHAR(50)
 )
 BEGIN
-  SET oMD5 = Common.fnCreateRandomMD5();
+  SET oMD5 = {{dbprefix}}Common.fnCreateRandomMD5();
 
   INSERT
     INTO tblOnlinePayments
@@ -2588,7 +2588,7 @@ BEGIN
            SET MESSAGE_TEXT = '409:Already registered.';
     END;
 
-    CALL Common.spLogDebug('AAA', 'signup');
+    CALL {{dbprefix}}Common.spLogDebug('AAA', 'signup');
 
     SELECT tblRoles.rolID
       INTO RoleID

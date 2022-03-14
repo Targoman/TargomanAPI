@@ -39,7 +39,7 @@ BEGIN
            SET MESSAGE_TEXT = '401:User not found';
     END IF;
 
-    SET vLinkUUID = Common.fnCreateRandomMD5();
+    SET vLinkUUID = {{dbprefix}}Common.fnCreateRandomMD5();
 
     INSERT
       INTO tblForgotPassRequest
@@ -49,10 +49,10 @@ BEGIN
     ;
 
     INSERT
-      INTO Common.tblAlerts
-       SET Common.tblAlerts.alr_usrID = vUserID
-         , Common.tblAlerts.alr_altCode = 'passReset'
-         , Common.tblAlerts.alrReplacements = JSON_OBJECT(
+      INTO {{dbprefix}}Common.tblAlerts
+       SET alr_usrID = vUserID
+         , alr_altCode = 'passReset'
+         , alrReplacements = JSON_OBJECT(
              'usrName',   vUserName,
              'usrFamily', vUserFamily,
              'via',       iVia,
