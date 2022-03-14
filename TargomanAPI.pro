@@ -23,7 +23,7 @@ OTHER_FILES += \
     conf/invalidPass.tbl \
     conf/api.server.conf \
     conf/api.conf \
-    conf/migration-dev.conf \
+    conf/migration.conf \
     Docs/Models/Accounting.scxml \
     runTargomanAPI.sh \
     SwaggerUI/* \
