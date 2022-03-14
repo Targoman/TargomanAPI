@@ -70,8 +70,8 @@ class testAdvert : public clsBaseTest
 
     void cleanupUnitTestData()
     {
-        clsDAC DAC;
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
+//        clsDAC DAC;
+//        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
     }
 
 private slots:

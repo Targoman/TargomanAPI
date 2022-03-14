@@ -107,13 +107,13 @@ intfPureModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _ho
     Schema(_schema)
 {}
 
-QString intfPureModule::stuDBInfo::toConnStr(bool _noSchema) {
-    return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5").arg(
-                this->Host).arg(
-                this->Port).arg(
-                this->User).arg(
-                this->Pass).arg(
-                _noSchema ? "" : this->Schema);
+QString intfPureModule::stuDBInfo::toConnStr(const QString &_dbPrefix, bool _noSchema) {
+    return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5")
+            .arg(this->Host)
+            .arg(this->Port)
+            .arg(this->User)
+            .arg(this->Pass)
+            .arg(_noSchema ? "" : _dbPrefix + this->Schema);
 }
 
 } //namespace Targoman::API::API

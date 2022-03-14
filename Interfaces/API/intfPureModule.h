@@ -284,7 +284,7 @@ public:
         QString Schema;
 
         stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "");
-        QString toConnStr(bool _noSchema = false);
+        QString toConnStr(const QString &_dbPrefix="", bool _noSchema=false);
     };
 
     struct stuModuleMethod {
