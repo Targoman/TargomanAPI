@@ -52,6 +52,15 @@ class testAccountFixture : public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testAccountFixture(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
+    void cleanupUnitTestData()
+    {
+        clsDAC DAC;
+        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
+    }
+
     QString LastRandomNumber;
 
 //    QString CreatedUserEmail;
@@ -68,12 +77,6 @@ class testAccountFixture : public clsBaseTest
 //    Targoman::API::AAA::stuPreVoucher LastPreVoucher;
 //    Targoman::API::AAA::stuVoucher Voucher;
 //    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
-
-    void cleanupUnitTestData()
-    {
-        clsDAC DAC;
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-    }
 
 private slots:
     void initTestCase()

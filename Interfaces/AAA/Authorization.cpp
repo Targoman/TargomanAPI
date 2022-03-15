@@ -33,7 +33,7 @@ namespace Authorization{
 void validateIPAddress(const QString& _ip)
 {
     makeAAADAC(DAC);
-    DAC.callSP({}, "AAA.spIP_ValidateAccess", {
+    DAC.callSP({}, "spIP_ValidateAccess", {
                    {"iIP", inet_addr(_ip.toLatin1().constData())},
                });
 }
@@ -44,7 +44,7 @@ QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const Q
 
     makeAAADAC(DAC);
     QJsonObject TokenInfo =  DAC.callSPCacheable(3600,{},
-                                                 "AAA.spToken_RetrieveInfo", {
+                                                 "spToken_RetrieveInfo", {
                                                      {"iToken", _token},
                                                      {"iIP", _ip},
                                                  }).toJson(true).object();

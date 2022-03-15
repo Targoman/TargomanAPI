@@ -41,6 +41,9 @@ class testAccount : public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testAccount(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
 private slots:
     void initTestCase() {
         initUnitTestData(false);
@@ -82,7 +85,7 @@ private slots:
 //        qDebug() << Result;
 //        QVERIFY(UserID > 0);
     }
-
+private:
     void ApproveMobile_And_Login_0999_888_1010()
     {
         clsDAC DAC;

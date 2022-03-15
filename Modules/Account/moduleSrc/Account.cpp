@@ -249,7 +249,7 @@ QVariantMap Account::apiPUTsignup(
     if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
-    quint64 UserID = this->callSP("AAA.spSignup", {
+    quint64 UserID = this->callSP("spSignup", {
             { "iBy", Type },
             { "iLogin", _emailOrMobile },
             { "iPass", _pass },
@@ -295,7 +295,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
     if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
         throw exHTTPForbidden("Selected role is not allowed to signup");
 
-    quint64 UserID = this->callSP("AAA.spSignup", {
+    quint64 UserID = this->callSP("spSignup", {
             { "iBy", "M" },
             { "iLogin", _mobile },
             { "iPass", "" },
@@ -332,7 +332,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
 
     _email = _email.toLower().trimmed();
 
-    QJsonObject UserInfo = this->callSP("AAA.spApproval_Accept", {
+    QJsonObject UserInfo = this->callSP("spApproval_Accept", {
             { "iBy", "E" },
             { "iKey", _email },
             { "iCode", _uuid },
@@ -376,7 +376,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    QJsonObject UserInfo = this->callSP("AAA.spApproval_Accept", {
+    QJsonObject UserInfo = this->callSP("spApproval_Accept", {
             { "iBy", "M" },
             { "iKey", _mobile },
             { "iCode", _code },
@@ -462,7 +462,7 @@ bool Account::apiloginByMobileOnly(
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    this->callSP("AAA.spMobileVerifyCode_Request", {
+    this->callSP("spMobileVerifyCode_Request", {
                      { "iMobile", _mobile },
                      { "iSignupIfNotExists", _signupIfNotExists ? 1 : 0 },
                      { "iSignupRole", _signupRole },
@@ -480,14 +480,14 @@ bool Account::apiresendApprovalCode(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-//    this->callSP("AAA.spApprovalRequestAgain", {
+//    this->callSP("spApprovalRequestAgain", {
 //                     { "iBy", Type },
 //                     { "iKey", _emailOrMobile },
 //                     { "iIP", _REMOTE_IP },
 //                     { "iRecreateIfExpired", true },
 //                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
 //                 });
-    this->callSP("AAA.spApproval_Request", {
+    this->callSP("spApproval_Request", {
                      { "iBy", Type },
                      { "iKey", _emailOrMobile },
                      { "iUserID", {} },
@@ -510,7 +510,7 @@ bool Account::apiresendApprovalCode(
 
 //    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-//    quint64 aprID = this->callSP("AAA.spMobileVerifyCode_Request", {
+//    quint64 aprID = this->callSP("spMobileVerifyCode_Request", {
 //                                     { "iMobile", _mobile },
 //                                 })
 //                    .spDirectOutputs()
@@ -535,7 +535,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    QJsonObject UserInfo = this->callSP("AAA.spLogin_VerifyByMobileCode", {
+    QJsonObject UserInfo = this->callSP("spLogin_VerifyByMobileCode", {
                                             { "iMobile", _mobile },
                                             { "iCode", _code },
                                             { "iIP", _REMOTE_IP },
@@ -639,7 +639,7 @@ bool Account::apilogout(TAPI::JWT_t _JWT)
 {
     clsJWT JWT(_JWT);
 
-    this->callSP("AAA.spLogout", {
+    this->callSP("spLogout", {
                      { "iByUserID", clsJWT(_JWT).usrID() },
                      { "iSessionGUID", clsJWT(_JWT).session() },
                  });
@@ -656,7 +656,7 @@ QString Account::apicreateForgotPasswordLink(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("AAA.spForgotPass_Request", {
+    this->callSP("spForgotPass_Request", {
                      { "iLogin", _emailOrMobile },
                      { "iVia", Type },
                  });
@@ -716,7 +716,7 @@ bool Account::apichangePassByUUID(
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("AAA.spPassword_ChangeByUUID", {
+    this->callSP("spPassword_ChangeByUUID", {
                      { "iVia", Type },
                      { "iLogin", _emailOrMobile },
                      { "iUUID", _uuid },
@@ -735,7 +735,7 @@ bool Account::apichangePass(
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    this->callSP("AAA.spPassword_Change", {
+    this->callSP("spPassword_Change", {
                      { "iUserID", clsJWT(_JWT).usrID() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },

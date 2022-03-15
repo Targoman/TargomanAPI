@@ -48,6 +48,15 @@ class testTicketing : public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testTicketing(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
+    void cleanupUnitTestData()
+    {
+        clsDAC DAC;
+        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
+    }
+
     QString LastRandomNumber;
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
@@ -55,12 +64,6 @@ class testTicketing : public clsBaseTest
     quint64 MainTicketID;
     quint64 Reply1TicketID;
     quint64 Reply2TicketID;
-
-    void cleanupUnitTestData()
-    {
-        clsDAC DAC("AAA");
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-    }
 
 private slots:
     void initTestCase()

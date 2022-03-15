@@ -73,8 +73,50 @@ extern quint64 gUserID;
 extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
+inline char **findDBPrefixFromArguments(int argc, char *argv[], QString &_dbPrefix, int &_outArgsCount)
+{
+    std::list<std::string> commandList;
+    commandList.push_back(argv[0]);
+    if (argc > 1)
+    {
+        for (int idx=1; idx<argc; idx++)
+        {
+            if ((qstricmp(argv[idx], "dbprefix") == 0)
+                    || (qstricmp(argv[idx], "-dbprefix") == 0)
+                    || (qstricmp(argv[idx], "--dbprefix") == 0)
+                )
+            {
+                if (argc-1 > idx)
+                {
+                    _dbPrefix = argv[idx+1];
+                    ++idx;
+                }
+            }
+            else
+                commandList.push_back(argv[idx]);
+        }
+    }
+
+    char **OutArgs = (char**)malloc(sizeof(char*) * commandList.size());
+    _outArgsCount = 0;
+
+    for(std::list<std::string>::iterator it=commandList.begin(); it!=commandList.end(); ++it)
+    {
+        char *item = new char[strlen((*it).c_str()) + 1];
+        strcpy(item, (*it).c_str());
+        OutArgs[_outArgsCount] = item;
+        ++_outArgsCount;
+    }
+
+    return OutArgs;
+}
+
 class clsBaseTest : public QObject
 {
+public:
+    clsBaseTest(const QString &_dbPrefix) : DBPrefix(_dbPrefix) {}
+    QString DBPrefix;
+
 protected:
     void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true)
     {
@@ -84,24 +126,24 @@ protected:
 
         clsDAC DAC("AAA");
 
-        clsDACResult Result = DAC.execQuery("", "INSERT IGNORE INTO tblRoles SET rolName=?, rolCreatedBy_usrID=?", { UT_RoleName, UT_SystemUserID });
+        clsDACResult Result = DAC.execQuery("", QString("INSERT IGNORE INTO %1AAA.tblRoles SET rolName=?, rolCreatedBy_usrID=?").arg(this->DBPrefix), { UT_RoleName, UT_SystemUserID });
         auto rolID = Result.lastInsertId().toUInt();
 
         if (rolID == 0)
-            clsDACResult Result2 = DAC.execQuery("", "SELECT rolID FROM tblRoles WHERE rolName=? AND rolStatus <> 'R'", { UT_RoleName });
+            clsDACResult Result2 = DAC.execQuery("", QString("SELECT rolID FROM %1AAA.tblRoles WHERE rolName=? AND rolStatus <> 'R'").arg(this->DBPrefix), { UT_RoleName });
 
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         if (_createUsers) {
-            DAC.execQuery("", R"(
+            DAC.execQuery("", QString(R"(
           INSERT IGNORE
-            INTO tblUser
+            INTO %1AAA.tblUser
              SET usrEmail = ?,
                  usrName = 'unit',
                  usrFamily = 'test',
                  usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',
                  usr_rolID = ?,
                  usrCreatedBy_usrID = ?
-                )",
+)").arg(this->DBPrefix),
                 {
                     UT_UserEmail,
                     rolID,
@@ -110,16 +152,16 @@ protected:
             );
 
             //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-            clsDACResult res2 = DAC.execQuery("", R"(
+            clsDACResult res2 = DAC.execQuery("", QString(R"(
           INSERT IGNORE
-            INTO tblUser
+            INTO %1AAA.tblUser
              SET usrEmail = ?,
                  usrName = 'admin unit',
                  usrFamily = 'test',
                  usrPass = 'df6d2338b2b8fce1ec2f6dda0a630eb0',
                  usr_rolID = ?,
                  usrCreatedBy_usrID = ?
-                )",
+)").arg(this->DBPrefix),
                 {
                     UT_AdminUserEmail,
                     UT_AdminRoleID,
@@ -129,7 +171,7 @@ protected:
 
             gAdminUserID = res2.lastInsertId().toULongLong();
 
-            DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?", { gAdminUserID });
+            DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET tblUser.usr_rolID=3 WHERE tblUser.usrID=?").arg(this->DBPrefix), { gAdminUserID });
         }
     }
 
@@ -174,12 +216,12 @@ private:
     {
         clsDAC DAC("AAA");
 
-        DAC.execQuery("", "DELETE FROM AAA.tblAPITokens WHERE aptToken IN(?,?)", { UT_NormalToken, UT_AdminToken });
-        DAC.execQuery("", "DELETE FROM AAA.tblService WHERE svcName=?", { UT_ServiceName });
+        DAC.execQuery("", QString("DELETE FROM %1AAA.tblAPITokens WHERE aptToken IN(?,?)").arg(this->DBPrefix), { UT_NormalToken, UT_AdminToken });
+        DAC.execQuery("", QString("DELETE FROM %1AAA.tblService WHERE svcName=?").arg(this->DBPrefix), { UT_ServiceName });
 
-        DAC.execQuery("", "UPDATE AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
-//        DAC.execQuery("", "DELETE FROM AAA.tblUser WHERE usrEmail IN (?,?)", {UT_UserEmail, UT_AdminUserEmail});
-//        DAC.execQuery("", "DELETE FROM AAA.tblRoles WHERE rolName IN(?,?)", {UT_ServiceRoleName, UT_RoleName});
+        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrUpdatedBy_usrID=NULL WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
+//        DAC.execQuery("", QString("DELETE FROM %1AAA.tblUser WHERE usrEmail IN (?,?)").arg(this->DBPrefix), {UT_UserEmail, UT_AdminUserEmail});
+//        DAC.execQuery("", QString("DELETE FROM %1AAA.tblRoles WHERE rolName IN(?,?)").arg(this->DBPrefix), {UT_ServiceRoleName, UT_RoleName});
 
 /*
 DELETE FROM tblWalletsTransactions;
