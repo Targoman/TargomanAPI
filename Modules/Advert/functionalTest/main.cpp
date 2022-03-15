@@ -28,37 +28,50 @@
 
 TAPI_MARSHAL_TEST_VARIABLES
 
-int main(int argc, char *argv[])
+int main(int _argc, char *_argv[])
 {
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Advert ---------------------------";
     qDebug() << "--------------------------------------------------";
 
-    QCoreApplication App(argc, argv);
+    //---------------------
+    QString DBPrefix;
+    int progArgsCount = 0;
+    char **progArgs = findDBPrefixFromArguments(_argc, _argv, DBPrefix, progArgsCount);
+
+    //---------------------
+    QCoreApplication App(progArgsCount, progArgs);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
-//    clsDAC::addDBEngine(enuDBEngines::MySQL);
-//    clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
-//                                "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
-//                                "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
-//                                "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
-//                                "SCHEMA=" TARGOMAN_M2STR(UNITTEST_DB_SCHEMA) ";");
+    clsDAC::addDBEngine(enuDBEngines::MySQL);
+    clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PORT))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_USER))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PASSWORD))
+                                .arg(DBPrefix)
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_SCHEMA))
+                                );
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
-    try {
-        FailedTests += QTest::qExec(new testBase, argc, argv);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert, argc, argv);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture, argc, argv);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
-    } catch(std::exception &e) {
-        qDebug()<<e.what();
+
+    try
+    {
+        FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
     }
-    if (FailedTests > 0) {
+    catch(std::exception &e)
+    {
+        qDebug() << e.what();
+    }
+
+    if (FailedTests > 0)
         qDebug() << "total number of failed tests: " << FailedTests;
-    } else {
+    else
         qDebug() << "all tests passed :)";
-    }
 
     clsDAC::shutdown();
 

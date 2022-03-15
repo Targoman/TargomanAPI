@@ -27,6 +27,12 @@
 
 int main(int argc, char *argv[])
 {
+    //---------------------
+//    QString DBPrefix;
+//    int progArgsCount = 0;
+//    char **progArgs = findDBPrefixFromArguments(_argc, _argv, DBPrefix, progArgsCount);
+
+    //---------------------
     QCoreApplication App(argc, argv);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 

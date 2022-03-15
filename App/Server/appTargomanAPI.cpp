@@ -102,7 +102,7 @@ void appTargomanAPI::slotExecute()
                     ServerConfigs::MasterDB::Pass.value()
                 };
 
-                QString ConnStr = MasterDBInfo.toConnStr(ServerConfigs::DBPrefix.value()/*, true*/);
+                QString ConnStr = MasterDBInfo.toConnStr(ServerCommonConfigs::DBPrefix.value()/*, true*/);
                 ConnectionStrings.insert(ConnStr);
 
                 TargomanDebug(0, "Registering " << ConnStr);
@@ -112,7 +112,7 @@ void appTargomanAPI::slotExecute()
 
             for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
             {
-                QString ConnStr = DBInfoIter->toConnStr(ServerConfigs::DBPrefix.value()/*true*/);
+                QString ConnStr = DBInfoIter->toConnStr(ServerCommonConfigs::DBPrefix.value()/*true*/);
 
                 if (DBInfoIter->Host.size()
                         && DBInfoIter->Schema.size()

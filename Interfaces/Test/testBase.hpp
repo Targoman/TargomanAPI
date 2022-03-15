@@ -29,6 +29,9 @@ class testBase: public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testBase(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
 private slots:
     void initTestCase() {}
     void cleanupTestCase() {}

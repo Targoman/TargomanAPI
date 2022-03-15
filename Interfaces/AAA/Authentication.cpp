@@ -40,7 +40,7 @@ stuActiveAccount login(
     makeAAADAC(DAC);
 
     QJsonObject UserInfo = DAC.callSP({},
-                                      "AAA.spLogin", {
+                                      "spLogin", {
                                           { "iLogin", _login },
                                           { "iIP", _ip },
                                           { "iPass", _pass },
@@ -60,7 +60,7 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
 {
     makeAAADAC(DAC);
     QJsonObject UserInfo = DAC.callSP({},
-                                      "AAA.spSession_UpdateActivity", {
+                                      "spSession_UpdateActivity", {
                                           {"iIP", _ip},
                                           {"iSSID", _ssid},
                                       }).toJson(true).object();

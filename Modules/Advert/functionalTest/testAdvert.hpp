@@ -52,6 +52,9 @@ class testAdvert : public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testAdvert(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
     QString LastRandomNumber;
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
@@ -70,8 +73,8 @@ class testAdvert : public clsBaseTest
 
     void cleanupUnitTestData()
     {
-//        clsDAC DAC;
-//        DAC.execQuery("", "UPDATE AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)", { UT_UserEmail, UT_AdminUserEmail });
+        clsDAC DAC;
+        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
     }
 
 private slots:

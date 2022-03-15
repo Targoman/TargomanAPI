@@ -68,6 +68,8 @@ QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //                       .arg(tblTicketAttachments::tktTarget_usrID)
 //                       .arg(tblTicketAttachments::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
+    UploadQueue::instance().prepareFiltersList();
+
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters

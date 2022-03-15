@@ -175,7 +175,7 @@ bool UserWallets::apiCREATEtransfer(
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destLogin, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP("AAA.spWallet_Transfer",
+    this->callSP("spWallet_Transfer",
                  {
                      { "iFromUserID", clsJWT(_JWT).usrID() },
                      { "iFromWalID", _walID },

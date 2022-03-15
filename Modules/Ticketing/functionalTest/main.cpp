@@ -27,37 +27,57 @@
 
 TAPI_MARSHAL_TEST_VARIABLES
 
-int main(int argc, char *argv[])
+int main(int _argc, char *_argv[])
 {
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Ticketing ------------------------";
     qDebug() << "--------------------------------------------------";
 
-    QCoreApplication App(argc, argv);
+    //---------------------
+    QString DBPrefix;
+    int progArgsCount = 0;
+    char **progArgs = findDBPrefixFromArguments(_argc, _argv, DBPrefix, progArgsCount);
+
+    //---------------------
+    QCoreApplication App(progArgsCount, progArgs);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
+    clsDAC::addDBEngine(enuDBEngines::MySQL);
+    clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PORT))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_USER))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PASSWORD))
+                                .arg(DBPrefix)
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_SCHEMA))
+                                );
+
     clsDAC::addDBEngine(enuDBEngines::MySQL, "AAA");
-    clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
-                                "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
-                                "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
-                                "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
-                                "SCHEMA=AAA;"
+    clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PORT))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_USER))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PASSWORD))
+                                .arg(DBPrefix)
+                                .arg("AAA")
                                 , "AAA");
 
     clsDAC::addDBEngine(enuDBEngines::MySQL, "Ticketing");
-    clsDAC::setConnectionString("HOST=" TARGOMAN_M2STR(UNITTEST_DB_HOST) ";"
-                                "PORT=" TARGOMAN_M2STR(UNITTEST_DB_PORT) ";"
-                                "USER=" TARGOMAN_M2STR(UNITTEST_DB_USER) ";"
-                                "PASSWORD=" TARGOMAN_M2STR(UNITTEST_DB_PASSWORD) ";"
-                                "SCHEMA=Ticketing;"
+    clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PORT))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_USER))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PASSWORD))
+                                .arg(DBPrefix)
+                                .arg("Ticketing")
                                 , "Ticketing");
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
     try {
-        FailedTests += QTest::qExec(new testBase, argc, argv);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testTicketing, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs, argc, argv);
+        FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testTicketing(DBPrefix), progArgsCount, progArgs);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
     } catch(std::exception &e) {
         qDebug()<<e.what();
     }

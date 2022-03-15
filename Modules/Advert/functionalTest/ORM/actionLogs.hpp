@@ -32,6 +32,9 @@ class testActionLogs: public clsBaseTest
 {
     Q_OBJECT
 
+public:
+    testActionLogs(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+
 private slots:
     void unprivActionLogs(){
         QVERIFY(callAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
