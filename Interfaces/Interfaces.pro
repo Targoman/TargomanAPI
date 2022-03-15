@@ -16,6 +16,7 @@ DIST_HEADERS += \
     Common/GenericEnums.hpp \
     Common/APIArgHelperMacros.hpp \
     Common/QtTypes.hpp \
+    Common/ServerCommon.h \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Authentication.h \
@@ -38,6 +39,7 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Common/ServerCommon.h \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
@@ -59,6 +61,7 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    Common/ServerCommon.cpp \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \

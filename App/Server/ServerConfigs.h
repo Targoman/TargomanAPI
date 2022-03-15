@@ -27,6 +27,7 @@
 #include <QHostAddress>
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/Common/ServerCommon.h"
 
 namespace Targoman::API::Server {
 
@@ -38,6 +39,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exTargomanAPI, Targoman::Common::exTargomanBase);
 struct ServerConfigs
 {
     static inline QString makeConfig(const QString& _name){return "/Server/" + _name;}
+
     static Targoman::Common::Configuration::tmplConfigurable<QString>       BasePath;
     static Targoman::Common::Configuration::tmplConfigurable<QString>       Version;
     static Targoman::Common::Configuration::tmplConfigurable<bool>          JustLocal;
@@ -58,7 +60,6 @@ struct ServerConfigs
 
     static QString BasePathWithVersion;
 
-    static Targoman::Common::Configuration::tmplConfigurable<QString>       DBPrefix;
     struct MasterDB {
         static inline QString makeConfig(const QString& _name) { return "/MasterDB/" + _name; }
         static Targoman::Common::Configuration::tmplConfigurable<QString>      Host;

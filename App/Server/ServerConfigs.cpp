@@ -218,17 +218,6 @@ tmplConfigurable<FilePath_t>     ServerConfigs::PublicPath(
         enuConfigSource::Arg | enuConfigSource::File);
 
 /****************************************************************************/
-tmplConfigurable<QString> ServerConfigs::DBPrefix(
-    ServerConfigs::makeConfig("DBPrefix"),
-    "Prefix to prepend to all database schemas",
-    "",
-    ReturnTrueCrossValidator(),
-    "",
-    "PREFIX",
-    "dbprefix",
-    enuConfigSource::Arg | enuConfigSource::File
-);
-
 tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
         ServerConfigs::MasterDB::makeConfig("Host"),
         "Database Host address",

@@ -203,6 +203,7 @@ int main(int _argc, char *_argv[])
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccountFixture(DBPrefix), progArgsCount, progArgs);
+
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles(DBPrefix), progArgsCount, progArgs);

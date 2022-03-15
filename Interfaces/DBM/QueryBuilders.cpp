@@ -27,6 +27,9 @@
 //#include "Interfaces/AAA/clsJWT.hpp"
 //using namespace Targoman::API::AAA;
 #include "Interfaces/Common/intfAPIArgManipulator.h"
+#include "Interfaces/Common/ServerCommon.h"
+
+using namespace Targoman::API::Common;
 
 namespace Targoman::API::DBM {
 
@@ -1175,10 +1178,9 @@ public:
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
 
+        this->BaseQueryPreparedItems.From = PrependSchema(this->Table.Schema) + "." + this->Table.Name;
         if (this->Alias.length())
-            this->BaseQueryPreparedItems.From = this->Table.Schema + "." + this->Table.Name + " " + this->Alias;
-        else
-            this->BaseQueryPreparedItems.From = this->Table.Schema + "." + this->Table.Name;
+            this->BaseQueryPreparedItems.From += " " + this->Alias;
     }
 
     friend clsQueryJoinTraitData<itmplDerived>;
@@ -1225,7 +1227,7 @@ bool tmplBaseQuery<itmplDerived, itmplData>::isValid() {
 
 //template <class itmplDerived, class itmplData>
 //clsDAC tmplBaseQuery<itmplDerived, itmplData>::DAC() {
-//    return clsDAC(this->Data->Table.domain(), this->Data->Table.Schema);
+//    return clsDAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 //}
 
 template <class itmplDerived, class itmplData>
@@ -1423,8 +1425,14 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     if (_foreignTable.isEmpty())
         throw exHTTPInternalServerError("Foreign Table is empty.");
 
+    if (_foreignTable.indexOf('.') < 0)
+        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->Table.Schema).arg(_foreignTable);
+
     if ((_joinType == enuJoinType::CROSS) || (_on.isEmpty() == false))
     {
+        //prefix table name with schema
+        _foreignTable = PrependSchema(_foreignTable);
+
         this->JoinTraitData->Joins.append({ _joinType, _foreignTable, _alias, _on });
 
         if (_alias.length())
@@ -1432,10 +1440,6 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
 
         return (itmplDerived&)*this;
     }
-
-    //prefix table name with schema
-    if (_foreignTable.indexOf('.') < 0)
-        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->Table.Schema).arg(_foreignTable);
 
 //    QString ForeignTable_Schema;
 //    QString ForeignTable_Name;
@@ -1455,6 +1459,8 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     {
 //        parts = Rel.ReferenceTable.split('.', QString::SkipEmptyParts);
 //        if (parts[parts.length() - 1] == ForeignTable_Name)
+//        qDebug() << "&&&&&&& search relation" << Rel.ReferenceTable << _foreignTable;
+
         if (Rel.ReferenceTable == _foreignTable)
         {
             if (RelationFound)
@@ -1465,6 +1471,9 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
 //            break;
         }
     }
+
+    //prefix table name with schema
+    _foreignTable = PrependSchema(_foreignTable);
 
     if (RelationFound == false)
         throw exHTTPInternalServerError(QString("Relation on table (%1) has not been defined.").arg(_foreignTable));
@@ -2782,7 +2791,7 @@ QVariantMap SelectQuery::one(QVariantMap _args)
 
     QJsonDocument Result;
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     if (this->Data->CahceTime > 0)
         Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
@@ -2792,7 +2801,7 @@ QVariantMap SelectQuery::one(QVariantMap _args)
                             .toJson(true, this->Data->Table.Converters);
 
     if (Result.object().isEmpty())
-        throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(this->Data->Table.Schema).arg(this->Data->Table.Name));
+        throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(PrependSchema(this->Data->Table.Schema)).arg(this->Data->Table.Name));
 
 //    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
 //    qDebug() << "--- SelectQuery::one(){tovariant}" << __FILE__ << __LINE__ << Result.toVariant();
@@ -2823,7 +2832,7 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
                                  << endl << "-- Query:" << endl << QueryString << endl;
 #endif
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     QJsonDocument Result;
 
@@ -2858,7 +2867,7 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
     QJsonDocument ResultRows;
     QJsonDocument ResultTotalRows;
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     if (this->Data->CahceTime > 0) {
         ResultTotalRows = DAC.execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
@@ -3352,7 +3361,7 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, 
     }
 
     invalidateQueryString
-        .replace(":tableName", _table.Schema + '.' + _table.Name)
+        .replace(":tableName", PrependSchema(_table.Schema) + '.' + _table.Name)
         .replace(":invalidatedAt", invalidatedAtFieldName)
         .replace(":statusFieldName", statusFieldName)
     ;
@@ -3365,7 +3374,7 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
 {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     ///TODO: start transaction
 
@@ -3725,7 +3734,7 @@ quint64 UpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
     }
 #endif
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     clsDACResult Result = DAC.execQuery(
                               "",
@@ -3894,7 +3903,7 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 {
     QString QueryString = this->buildQueryString(_currentUserID, _args);
 
-    clsDAC DAC(this->Data->Table.domain(), this->Data->Table.Schema);
+    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
     ///TODO: start transaction
 

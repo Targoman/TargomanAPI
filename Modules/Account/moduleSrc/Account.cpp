@@ -927,7 +927,7 @@ void Account::tryCancelVoucher(
     clsDACResult Result = Voucher::instance().callSP("spVoucher_Cancel", {
         { "iUserID", SYSTEM_USER_ID },
         { "iVoucherID", _voucherID },
-        { "iSetAsError", _setAsError },
+        { "iSetAsError", _setAsError ? 1 : 0 },
     });
 
 //    /*Targoman::API::Query::*/this->Update(Voucher::instance(),

@@ -42,6 +42,16 @@ int main(int _argc, char *_argv[])
     QCoreApplication App(progArgsCount, progArgs);
     App.setAttribute(Qt::AA_Use96Dpi, true);
 
+    clsDAC::addDBEngine(enuDBEngines::MySQL);
+    clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PORT))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_USER))
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_PASSWORD))
+                                .arg(DBPrefix)
+                                .arg(TARGOMAN_M2STR(UNITTEST_DB_SCHEMA))
+                                );
+
     clsDAC::addDBEngine(enuDBEngines::MySQL, "AAA");
     clsDAC::setConnectionString(QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5%6")
                                 .arg(TARGOMAN_M2STR(UNITTEST_DB_HOST))
