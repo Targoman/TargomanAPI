@@ -1,5 +1,5 @@
 #FROM  opensuse/leap:15.3 as builder
-FROM  targoman/api-devel:1 as builder
+FROM  targoman/api-devel:1 as builder-api
 LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
 
 WORKDIR /opt
@@ -36,7 +36,11 @@ ARG TAG
 RUN echo $TAG
 RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
 
-#FROM opensuse/leap:15.3
+FROM  targoman/api-devel:1 as builder-mt
+COPY ./MT/ .
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
+
+
 FROM targoman/api-devel:1-build
 
 
@@ -65,6 +69,8 @@ RUN mkdir -p /targoman/bin
 WORKDIR /targoman
 COPY conf conf
 COPY Docker/run-targoman.sh .
-COPY --from=builder /opt/out .
+COPY --from=builder-api /opt/out .
+COPY --from=builder-mt /opt/out .
+
 
 ENTRYPOINT [ "/targoman/run-targoman.sh" ]
