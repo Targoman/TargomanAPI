@@ -67,14 +67,39 @@ FROM targoman/api-devel:1-build
 RUN mkdir -p /targoman/bin
 
 WORKDIR /targoman
-COPY conf conf
-COPY Docker/run-targoman-dev.sh .
 COPY --from=builder-api /opt/out .
 COPY --from=builder-mt /opt/out .
-COPY migrate.sh .
+COPY conf conf
+COPY Docker/run-targoman-dev.sh .
 COPY migrate-dev.sh .
-COPY migrations .
+# COPY migrations .
 
+# mkdir migrations
+COPY Docker/migrations/MigrationTool migrations
+COPY Docker/migrations/CommopnFuncs migrations
+COPY Docker/migrations/I18N migrations
 
+# mkdir migrations/AAA
+COPY Docker/Modules/Account/migrations/ migrations/AAA
+
+# mkdir migrations/Advert
+COPY Docker/Modules/Advert/migrations/ migrations/Advert
+
+# mkdir migrations/App
+COPY Docker/App/migrations/ migrations/App
+
+# mkdir migrations/Common
+COPY Docker/Modules/Common/migrations/ migrations/Common
+
+# mkdir migrations/MT
+COPY Docker/Modules/MT/migrations/ migrations/MT
+
+# mkdir migrations/NGT
+COPY Docker/Modules/NGT/migrations/ migrations/NGT
+
+# mkdir migrations/Ticketing
+COPY Docker/Modules/Ticketing/migrations/ migrations/Ticketing
+
+COPY Docker/SwaggerUI .
 
 ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
