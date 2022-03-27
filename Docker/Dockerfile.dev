@@ -71,6 +71,10 @@ COPY conf conf
 COPY Docker/run-targoman-dev.sh .
 COPY --from=builder-api /opt/out .
 COPY --from=builder-mt /opt/out .
+COPY migrate.sh .
+COPY migrate-dev.sh .
+COPY migrations .
+
 
 
 ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
