@@ -10,6 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      
+      - uses: actions/checkout@v2
+        with:
+          repository: Targoman/MigrationTool
+          ref: dev
+          submodules: recursive
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -18,6 +24,7 @@ jobs:
         id: build-tag
         run: echo "::set-output name=TAG::$TAG"
       - run: echo "$TAG has been pushed"
+      - run: ls -ltrh
       - name: build
         run: mkdir conf/tmp && cp -rL conf/TextProcessor conf/tmp && rm -f conf/TextProcessor && mv conf/tmp/* conf/ && rmdir conf/tmp && ls -lR conf
       - run: docker build --build-arg TAG -f Docker/Dockerfile.dev . -t ${{ env.PROJECT_NAME }}:$TAG
