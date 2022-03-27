@@ -2,7 +2,7 @@
 
 echo copying TargomanAPI
 docker cp ../out/bin activeAPI:/targoman/.
-docker cp run-targoman.sh activeAPI:/.
+docker cp run-targoman-dev.sh activeAPI:/.
 echo copying modules
 docker cp ../out/modules activeAPI:/targoman/.
 echo copying library 

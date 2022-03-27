@@ -1,33 +1,34 @@
-FROM  opensuse/leap:15.3 as builder
+#FROM  opensuse/leap:15.3 as builder
+FROM  targoman/api-devel:1 as builder-api
 LABEL maintainer="S.Mehran M.Ziabary <ziabary@targoman.com>"
 
 WORKDIR /opt
 
-RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
-RUN zypper ref
-RUN zypper --non-interactive in \
-      wget \
-      vim \
-      git \
-      which \
-      unzip \
-      zlib-devel \
-      hiredis-devel \
-      libcurl-devel \
-      libQt5Sql-devel \
-      libQt5Sql5-mysql \
-      libQt5Test-devel  \
-      libQt5Network-devel \
-      libQt5Concurrent-devel \
-      libqt5-qtwebsockets-devel \
-      libboost_thread1_75_0-devel \
-      libboost_system1_75_0-devel \
-      gtest \
-      protobuf-devel \
-      libicu-devel \
-      libopenssl-devel \
-      aws-sdk-cpp-s3-devel \
-      libphonenumber-devel
+#RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
+#RUN zypper ref
+#RUN zypper --non-interactive in \
+#      wget \
+#      vim \
+#      git \
+#      which \
+#      unzip \
+#      zlib-devel \
+#      hiredis-devel \
+#      libcurl-devel \
+#      libQt5Sql-devel \
+#      libQt5Sql5-mysql \
+#      libQt5Test-devel  \
+#      libQt5Network-devel \
+#      libQt5Concurrent-devel \
+#      libqt5-qtwebsockets-devel \
+#      libboost_thread1_75_0-devel \
+#      libboost_system1_75_0-devel \
+#      gtest \
+#      protobuf-devel \
+#      libicu-devel \
+#      libopenssl-devel \
+#      aws-sdk-cpp-s3-devel \
+#      libphonenumber-devel
 
 COPY . .
 
@@ -35,31 +36,43 @@ ARG TAG
 RUN echo $TAG
 RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
 
-FROM opensuse/leap:15.3
+FROM  targoman/api-devel:1 as builder-mt
+COPY ./MT/ .
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug DEFINES+="GIT_VERSION=$TAG" && make -j 4
 
-RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
-RUN zypper ref && \
-    zypper --non-interactive in \
-      libhiredis0_13 \
-      libcurl4 \
-      libQt5Sql5-mysql \
-      libQt5Network5 \
-      libQt5Concurrent5 \
-      libQt5WebSockets5 \
-      libboost_thread1_75_0 \
-      libboost_system1_75_0 \
-      libboost_date_time1_75_0 \
-      libprotobuf20 \
-      libicu \
-      zlib \
-      openssl \
-      aws-sdk-cpp-s3-libs \
-      libphonenumber8 \
-    && mkdir -p /targoman/bin
+
+FROM targoman/api-devel:1-build
+
+
+###RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
+#RUN zypper ref && \
+#    zypper --non-interactive in \
+#      libhiredis0_13 \
+#      libcurl4 \
+#      libQt5Sql5-mysql \
+#      libQt5Network5 \
+#      libQt5Concurrent5 \
+#      libQt5WebSockets5 \
+#      libboost_thread1_75_0 \
+#      libboost_system1_75_0 \
+#      libboost_date_time1_75_0 \
+#      libprotobuf20 \
+#      libicu \
+#      zlib \
+#      openssl \
+#      aws-sdk-cpp-s3-libs \
+#      libphonenumber8 \
+#    && mkdir -p /targoman/bin
+
+RUN mkdir -p /targoman/bin
 
 WORKDIR /targoman
+COPY --from=builder-api /opt/out .
+COPY --from=builder-mt /opt/out .
 COPY conf conf
-COPY Docker/run-targoman.sh .
-COPY --from=builder /opt/out .
+COPY Docker/run-targoman-dev.sh .
+COPY migrate-dev.sh .
+COPY migrations .
+COPY SwaggerUI .
 
-ENTRYPOINT [ "/targoman/run-targoman.sh" ]
+ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
