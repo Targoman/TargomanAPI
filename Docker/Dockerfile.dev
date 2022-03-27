@@ -59,7 +59,7 @@ RUN zypper ref && \
 
 WORKDIR /targoman
 COPY conf conf
-COPY Docker/run-targoman.sh .
+COPY Docker/run-targoman-dev.sh .
 COPY --from=builder /opt/out .
 
-ENTRYPOINT [ "/targoman/run-targoman.sh" ]
+ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
