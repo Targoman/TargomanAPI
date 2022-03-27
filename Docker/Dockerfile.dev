@@ -71,8 +71,8 @@ COPY --from=builder-api /opt/out .
 COPY --from=builder-mt /opt/out .
 COPY conf conf
 COPY Docker/run-targoman-dev.sh .
-COPY migrate-dev.sh .
-COPY migrations .
-COPY SwaggerUI .
+COPY Docker/migrate-dev.sh .
+COPY migrations migrations
+COPY SwaggerUI SwaggerUI
 
 ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
