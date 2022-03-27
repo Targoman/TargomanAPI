@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./migrate-dev.sh --command commit -all
+./migrate-dev.sh --command commit --all
 
 export LD_LIBRARY_PATH=/targoman/lib64:/targoman/lib
 cd /targoman
