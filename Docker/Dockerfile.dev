@@ -68,9 +68,9 @@ RUN mkdir -p /targoman/bin
 
 WORKDIR /targoman
 COPY conf conf
-COPY Docker/run-targoman.sh .
+COPY Docker/run-targoman-dev.sh .
 COPY --from=builder-api /opt/out .
 COPY --from=builder-mt /opt/out .
 
 
-ENTRYPOINT [ "/targoman/run-targoman.sh" ]
+ENTRYPOINT [ "/targoman/run-targoman-dev.sh" ]
