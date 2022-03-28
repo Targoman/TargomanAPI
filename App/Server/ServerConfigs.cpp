@@ -52,6 +52,15 @@ tmplConfigurable<QString> ServerConfigs::Version(
         "VERSION",
         "version",
         enuConfigSource::Arg | enuConfigSource::File);
+tmplConfigurable<QString> ServerConfigs::ContactEmail(
+        ServerConfigs::makeConfig("ContactEmail"),
+        "Contact Email",
+        "info@sample.dom",
+        ReturnTrueCrossValidator(),
+        "",
+        "EMAIL",
+        "contact-email",
+        enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<bool> ServerConfigs::JustLocal(
         ServerConfigs::makeConfig("JustLocal"),

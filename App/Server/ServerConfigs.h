@@ -42,6 +42,7 @@ struct ServerConfigs
 
     static Targoman::Common::Configuration::tmplConfigurable<QString>       BasePath;
     static Targoman::Common::Configuration::tmplConfigurable<QString>       Version;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       ContactEmail;
     static Targoman::Common::Configuration::tmplConfigurable<bool>          JustLocal;
     static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
     static Targoman::Common::Configuration::tmplConfigurable<bool>          IndentedJson;

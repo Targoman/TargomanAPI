@@ -54,12 +54,12 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
             HostPort = QString("%1:%2").arg(_host).arg(_port);
 
         return QJsonObject({
-                               { "swagger","2.0" },
+                               { "swagger", "2.0" },
                                { "info",QJsonObject({
                                     { "version", ServerConfigs::Version.value() },
                                     { "title", "Targoman API" },
                                     { "description", "" },
-                                    { "contact", QJsonObject({{"email", "sample@example.com"}}) }
+                                     { "contact", QJsonObject({ { "email", ServerConfigs::ContactEmail.value() } }) }
                                 }) },
                                { "host", HostPort },
                                { "securityDefinitions", QJsonObject({
