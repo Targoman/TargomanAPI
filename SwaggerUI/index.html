@@ -38,25 +38,31 @@
     <script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
     <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
     <script>
-    window.onload = function() {
-      // Begin Swagger UI call region
-      const ui = SwaggerUIBundle({
-        url: "../openAPI.json", //"https://petstore.swagger.io/v2/swagger.json",
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        //layout: "StandaloneLayout"
-      });
-      // End Swagger UI call region
+        curPath = document.location.pathname;
+        if (curPath.endsWith('/'))
+            curPath = curPath.slice(0, -1);
+        curPath = curPath.substring(0, curPath.lastIndexOf('/'));
+        curUrl = document.location.origin + curPath + "/openAPI.json";
 
-      window.ui = ui;
-    };
-  </script>
+        window.onload = function() {
+          // Begin Swagger UI call region
+          const ui = SwaggerUIBundle({
+            url: curUrl, //"https://petstore.swagger.io/v2/swagger.json",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset
+            ],
+            plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            //layout: "StandaloneLayout"
+          });
+          // End Swagger UI call region
+
+          window.ui = ui;
+        };
+    </script>
   </body>
 </html>

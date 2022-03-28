@@ -406,7 +406,11 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     if (_api == "/openAPI.json")
     {
         gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(/*this->host()*/ "127.0.0.1", this->port()));
+        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(
+                                   this->host()
+//                                   "127.0.0.1"
+                                   , this->port())
+                               );
         return true;
     }
 
