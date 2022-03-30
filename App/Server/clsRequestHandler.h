@@ -93,9 +93,16 @@ class clsRequestHandler : public QObject
     {
         qhttp::TStatusCode StatusCode;
         QVariant Result;
-        stuResult(const QVariant& _result = {}, qhttp::TStatusCode _code = qhttp::ESTATUS_OK) :
+        QVariantMap ResponseHeader;
+
+        stuResult(
+                const QVariant &_result = {},
+                const QVariantMap &_responseHeaders = {},
+                qhttp::TStatusCode _code = qhttp::ESTATUS_OK
+            ) :
             StatusCode(_code),
-            Result(_result)
+            Result(_result),
+            ResponseHeader(_responseHeaders)
         {}
     };
 
@@ -112,9 +119,10 @@ public:
     void findAndCallAPI(QString _api);
     void sendError(qhttp::TStatusCode _code,
                    const QString& _message,
+                   const QVariantMap &_responseHeaders = {},
                    bool _closeConnection = false);
     void sendFile(const QString& _basePath, const QString _path);
-    void sendResponse(qhttp::TStatusCode _code, QVariant _response);
+    void sendResponse(qhttp::TStatusCode _code, const QVariant &_response, const QVariantMap &_responseHeaders);
     void sendCORSOptions();
     void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
 
@@ -122,7 +130,8 @@ public:
     quint16 port() const;
 
 private:
-    void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection = false);
+    void addHeaderValues(const QVariantMap &_responseHeaders);
+    void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, const QVariantMap &_responseHeaders = {}, bool _closeConnection = false);
     stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath);
     QString toIPv4(const QString _ip);
 

@@ -77,10 +77,19 @@ public:
         return QGenericArgument(this->RealTypeName, *_argStorage);
     }
 
-    inline QVariant invokeMethod(const intfAPIObject *_apiObject, const QVariantList& _arguments) final
+    inline QVariant invokeMethod(
+            const intfAPIObject *_apiObject,
+            const QVariantList& _arguments,
+            /*OUT*/ QVariantMap &_responseHeaders
+        ) final
     {
         _itmplType Result;
-        _apiObject->invokeMethod(_arguments, QReturnArgument<_itmplType>(this->RealTypeName, Result));
+
+        _apiObject->invokeMethod(
+                    _arguments,
+                    QReturnArgument<_itmplType>(this->RealTypeName, Result),
+                    _responseHeaders);
+
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
     }
 

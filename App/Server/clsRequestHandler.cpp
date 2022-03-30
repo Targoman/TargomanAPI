@@ -208,19 +208,19 @@ void clsRequestHandler::process(const QString& _api)
         }
         catch(exTargomanBase& ex)
         {
-            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
         }
         catch(exQFVRequiredParam &ex)
         {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
         }
         catch(exQFVInvalidValue &ex)
         {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
         }
         catch(std::exception &ex)
         {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
         }
     });
 
@@ -235,23 +235,23 @@ void clsRequestHandler::process(const QString& _api)
         }
         catch(exTargomanBase& ex)
         {
-            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
         }
         catch(exQFVRequiredParam &ex)
         {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
         }
         catch(exQFVInvalidValue &ex)
         {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
         }
         catch(std::exception &ex)
         {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
         }
         catch(...)
         {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", {}, true);
         }
     });
 }
@@ -301,6 +301,8 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 
 clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath)
 {
+    QVariantMap ResponseHeaders;
+
     try
     {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -336,37 +338,39 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
         Headers.remove("cookie");
 
-        return stuResult(_apiObject->invoke(
-                             this->Request->method() == qhttp::EHTTP_PATCH,
-                             _queries,
-                             this->Request->userDefinedValues(),
-                             Headers,
-                             Cookies,
-                             JWT,
-                             this->toIPv4(this->Request->remoteAddress()),
-                             _pksByPath
-                             ));
+        QVariant Result = _apiObject->invoke(
+                              this->Request->method() == qhttp::EHTTP_PATCH,
+                              _queries,
+                              ResponseHeaders,
+                              this->Request->userDefinedValues(),
+                              Headers,
+                              Cookies,
+                              JWT,
+                              this->toIPv4(this->Request->remoteAddress()),
+                              _pksByPath
+                              );
 
+        return stuResult(Result, ResponseHeaders);
     }
     catch(exTargomanBase& ex)
     {
-        return stuResult(ex.what(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), ResponseHeaders, static_cast<qhttp::TStatusCode>(ex.httpCode()));
     }
     catch(exQFVRequiredParam &ex)
     {
-        return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
     }
     catch(exQFVInvalidValue &ex)
     {
-        return stuResult(ex.what(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
     }
     catch(std::exception &ex)
     {
-        return stuResult(ex.what(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
     catch(...)
     {
-        return stuResult("INTERNAL SERVER ERROR!!!", qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -406,11 +410,7 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     if (_api == "/openAPI.json")
     {
         gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(
-                                   this->host()
-//                                   "127.0.0.1"
-                                   , this->port())
-                               );
+        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(this->host(), this->port()));
         return true;
     }
 
@@ -480,6 +480,9 @@ void clsRequestHandler::findAndCallAPI(QString _api)
         return;
 
     //-----------------------------------------------------
+    QElapsedTimer ElapsedTimer;
+    ElapsedTimer.start();
+
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
     QString ExtraAPIPath;
@@ -498,6 +501,7 @@ void clsRequestHandler::findAndCallAPI(QString _api)
     if (!APIObject)
         return this->sendError(qhttp::ESTATUS_NOT_FOUND,
                                QString("API not found [%1] (%2)").arg(MethodString).arg(_api),
+                               {},
                                true);
 
     if (ServerConfigs::MultiThreaded.value()) {
@@ -507,12 +511,15 @@ void clsRequestHandler::findAndCallAPI(QString _api)
             this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "Request Timed Out");
         });
 
-        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this]() {
+        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this, ElapsedTimer]() {
             stuResult Result = this->FutureWatcher.result();
+
+            Result.ResponseHeader.insert("X-DEBUG-TIME-ELAPSED-MS", ElapsedTimer.elapsed());
+
             if (Result.StatusCode == qhttp::ESTATUS_OK)
-                this->sendResponse(StatusCodeOnMethod[this->Request->method()], Result.Result);
+                this->sendResponse(StatusCodeOnMethod[this->Request->method()], Result.Result, Result.ResponseHeader);
             else
-                this->sendError(Result.StatusCode, Result.Result.toString(), Result.StatusCode >= 500);
+                this->sendError(Result.StatusCode, Result.Result.toString(), Result.ResponseHeader, Result.StatusCode >= 500);
         });
 
         this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
@@ -524,7 +531,12 @@ void clsRequestHandler::findAndCallAPI(QString _api)
         run(APIObject, Queries, ExtraAPIPath);
 }
 
-void clsRequestHandler::sendError(qhttp::TStatusCode _code, const QString& _message, bool _closeConnection)
+void clsRequestHandler::sendError(
+        qhttp::TStatusCode _code,
+        const QString& _message,
+        const QVariantMap &_responseHeaders,
+        bool _closeConnection
+    )
 {
     gServerStats.Errors.inc();
     this->sendResponseBase(_code,
@@ -536,6 +548,7 @@ void clsRequestHandler::sendError(qhttp::TStatusCode _code, const QString& _mess
                                             })
                                            }
                                        }),
+                           _responseHeaders,
                            _closeConnection);
 }
 
@@ -560,28 +573,75 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
-void clsRequestHandler::sendResponse(qhttp::TStatusCode _code, QVariant _response)
+void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders)
+{
+    if (_responseHeaders.isEmpty() == false)
+    {
+        TargomanLogInfo(7, "Response Custom Header Values:");
+
+        for (QVariantMap::const_iterator it = _responseHeaders.constBegin();
+             it != _responseHeaders.constEnd();
+             ++it
+        )
+        {
+            TargomanLogInfo(7,
+                            "    "
+                            << it.key().toLatin1()
+                            << " : "
+                            << it->toString()
+                            );
+
+            this->Response->addHeaderValue(
+                        it.key().toLatin1(),
+                        it->toString()
+                    );
+        }
+    }
+}
+
+void clsRequestHandler::sendResponse(
+        qhttp::TStatusCode _code,
+        const QVariant &_response,
+        const QVariantMap &_responseHeaders
+    )
 {
     gServerStats.Success.inc();
+
     if (_response.isValid() == false)
-        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue(QJsonValue::Undefined) }}));
-    else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
+        this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue(QJsonValue::Undefined) } }), _responseHeaders);
+    else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0)
+    {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
-        TargomanLogInfo(7, "Response ["<<
-                        this->Request->connection()->tcpSocket()->peerAddress().toString()<<
-                        ":"<<
-                        this->Request->connection()->tcpSocket()->peerPort()<<
-                        "]: (code:"<<_code<<"):"<<RawData.mime()<<":RAW_DATA_SIZE("<<RawData.data().length()<<")")
-                this->Response->setStatusCode(_code);
+
+        TargomanLogInfo(7,
+                        "Response ["
+                        << this->Request->connection()->tcpSocket()->peerAddress().toString()
+                        << ":"
+                        << this->Request->connection()->tcpSocket()->peerPort()
+                        << "]: (code:"
+                        << _code
+                        << "):"
+                        << RawData.mime()
+                        << ":RAW_DATA_SIZE("
+                        << RawData.data().length()
+                        << ")"
+                        );
+
+        this->Response->setStatusCode(_code);
+
         this->Response->addHeaderValue("content-length", RawData.data().length());
         this->Response->addHeaderValue("content-type", QString(RawData.mime()));
         this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
         this->Response->addHeaderValue("Connection", QString("keep-alive"));
+
+        this->addHeaderValues(_responseHeaders);
+
         this->Response->end(RawData.data());
+
         this->deleteLater();
     }
     else
-        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}));
+        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}), _responseHeaders);
 }
 
 void clsRequestHandler::sendCORSOptions()
@@ -605,8 +665,11 @@ void clsRequestHandler::sendCORSOptions()
     this->Response->addHeaderValue("content-length", 0);
     this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
+
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
+
     this->Response->end();
+
     this->deleteLater();
 }
 
@@ -616,37 +679,59 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
     Path = Path.replace(QRegularExpression("//+"), "/");
 
     this->Response->addHeaderValue("Location", Path);
+
     this->Response->setStatusCode(_permananet ?  qhttp::ESTATUS_MOVED_PERMANENTLY : qhttp::ESTATUS_TEMPORARY_REDIRECT);
+
     this->Response->end();
+
     this->deleteLater();
 }
 
-void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, bool _closeConnection){
-
+void clsRequestHandler::sendResponseBase(
+        qhttp::TStatusCode _code,
+        QJsonObject _dataObject,
+        const QVariantMap &_responseHeaders,
+        bool _closeConnection
+    )
+{
     if (!this->Request->connection()->tcpSocket())
       return;
-    QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()?
-                                                            QJsonDocument::Indented : QJsonDocument::Compact);
 
-    TargomanLogInfo(7, "Response ["<<
-                    this->Request->connection()->tcpSocket()->peerAddress().toString()<<
-                    ":"<<
-                    this->Request->connection()->tcpSocket()->peerPort()<<
-                    "]: (code:"<<_code<<"):"<<Data)
-            this->Response->setStatusCode(_code);
-    if(_closeConnection) this->Response->addHeader("connection", "close");
+    QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()
+                                                        ? QJsonDocument::Indented
+                                                        : QJsonDocument::Compact);
+
+    TargomanLogInfo(7,
+                    "Response ["
+                    << this->Request->connection()->tcpSocket()->peerAddress().toString()
+                    << ":"
+                    << this->Request->connection()->tcpSocket()->peerPort()
+                    << "]: (code:"
+                    << _code
+                    << "):"
+                    << Data);
+
+    this->Response->setStatusCode(_code);
+
+    if (_closeConnection)
+        this->Response->addHeader("connection", "close");
+
     this->Response->addHeaderValue("content-length", Data.length());
     this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
     this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
+
+    this->addHeaderValues(_responseHeaders);
+
     this->Response->end(Data.constData());
+
     this->deleteLater();
 }
 
 void clsRequestHandler::slotSendFileData()
 {
     if(this->FileHandler.isNull() || this->FileHandler->atEnd()){
-        //        this->Response->end();
+//        this->Response->end();
         this->deleteLater();
         return;
     }
@@ -732,9 +817,9 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
         }else
             throw exHTTPBadRequest("No Content-Disposition header provided");
     }catch(exHTTPError& ex){
-        Self->pRequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what(), ex.code() >= 500);
+        Self->pRequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what(), {}, ex.code() >= 500);
     }catch(exTargomanBase& ex){
-        Self->pRequestHandler->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), true);
+        Self->pRequestHandler->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
     }
 
 }

@@ -112,13 +112,13 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList)
                 return RequestHandler->sendFile(ServerConfigs::PublicPath.value(), Path);
 
             if (Path.startsWith(BasePath) == false)
-                return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", true);
+                return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", {}, true);
 
             if (Path.startsWith(ServerConfigs::BasePathWithVersion) == false)
-                return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "Invalid Version or version not specified", true);
+                return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "Invalid Version or version not specified", {}, true);
 
             if (Path == ServerConfigs::BasePathWithVersion )
-                return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", true);
+                return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", {}, true);
 
             TargomanLogInfo(7,
                             "New API Call ["<<
@@ -147,7 +147,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList)
         }
         catch(exTargomanBase& ex)
         {
-            RequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.httpCode() >= 500);
+            RequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
         }
     });
 

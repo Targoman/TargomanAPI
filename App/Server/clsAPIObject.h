@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_SERVER_CLSAPIOBJECT_HPP
@@ -28,9 +29,7 @@
 
 #include "Interfaces/API/intfPureModule.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
@@ -110,17 +109,22 @@ public:
         return this->BaseMethod.DefaultValues.at(_paramIndex);
     }
 
-    QVariant invoke(bool _isUpdateMethod,
-                    const QStringList& _args,
-                    QList<QPair<QString, QString>> _bodyArgs = {},
-                    qhttp::THeaderHash _headers = {},
-                    qhttp::THeaderHash _cookies = {},
-                    QJsonObject _jwt = {},
-                    QString _remoteIP = {},
-                    QString _extraAPIPath = {}
-                ) const;
+    QVariant invoke(
+            bool _isUpdateMethod,
+            const QStringList& _args,
+            /*OUT*/ QVariantMap &_responseHeaders,
+            QList<QPair<QString, QString>> _bodyArgs = {},
+            qhttp::THeaderHash _headers = {},
+            qhttp::THeaderHash _cookies = {},
+            QJsonObject _jwt = {},
+            QString _remoteIP = {},
+            QString _extraAPIPath = {}
+        ) const;
 
-    void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const;
+    void invokeMethod(
+            const QVariantList& _arguments,
+            QGenericReturnArgument _returnArg,
+            /*OUT*/ QVariantMap &_responseHeaders) const;
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
 private:
@@ -143,7 +147,6 @@ private:
     friend class OpenAPIGenerator;
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
+
 #endif // TARGOMAN_API_SERVER_CLSAPIOBJECT_HPP

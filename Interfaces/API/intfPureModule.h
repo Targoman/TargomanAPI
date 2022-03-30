@@ -275,6 +275,8 @@ namespace Targoman::API::API {
 
 class intfPureModule : public Targoman::Common::Configuration::intfModule
 {
+    Q_OBJECT
+
 public:
     struct stuDBInfo {
         QString Host;
@@ -331,6 +333,9 @@ public:
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;
+
+signals:
+    void addResponseHeader(const QString &_header, const QString &_value);
 
 protected:
     ModuleMethods_t Methods;

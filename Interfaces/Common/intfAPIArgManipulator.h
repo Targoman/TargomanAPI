@@ -53,17 +53,63 @@ class intfCacheConnector;
 class intfAPIObject {
 public:
     virtual ~intfAPIObject();
-    virtual void invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const = 0;
+    virtual void invokeMethod(
+            const QVariantList& _arguments,
+            QGenericReturnArgument _returnArg,
+            /*OUT*/ QVariantMap &_responseHeaders) const = 0;
+
+//    std::function<void(const QString &_header, const QString &_value)> _addResponseHeader,
+//    auto addResponseHeader = [&ResponseHeaders](const QString &_header, const QString &_value)
+//    {
+//        ResponseHeaders.insert(_header, _value);
+//    };
+//protected:
+//    QVariantMap responseHeaders;
+//public:
+//    const QVariantMap getResponseHeaders() const { return this->responseHeaders; }
+//    void addResponseHeader(const QString &_header, const QString &_value) { this->responseHeaders.insert(_header, _value); }
 };
 
 /**********************************************************************/
+//struct stuAPIInvokeResult {
+//    QVariant Result;
+//    QVariantMap Headers;
+
+//    stuAPIInvokeResult(const stuAPIInvokeResult &_other) :
+//        Result(_other.Result),
+//        Headers(_other.Headers)
+//    {}
+
+//    stuAPIInvokeResult(const QVariant &_result, const QVariantMap &_headers) :
+//        Result(_result),
+//        Headers(_headers)
+//    {}
+
+//    static stuAPIInvokeResult FromVariant(const QVariant &_val)
+//    {
+//        QVariantMap Map = _val.toMap();
+//        return stuAPIInvokeResult(
+//                    Map.value("result"),
+//                    Map.value("headers").toMap()
+//                    );
+//    }
+
+//    QVariant toVariant()
+//    {
+//        return QVariantMap({
+//                               { "result", this->Result },
+//                               { "headers", this->Headers },
+//                           });
+//    }
+//};
+
 class intfAPIArgManipulator {
 public:
     intfAPIArgManipulator(const QString& _realTypeName);
     virtual ~intfAPIArgManipulator();
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) = 0;
-    virtual QVariant invokeMethod(const intfAPIObject* _apiObject, const QVariantList& _arguments) = 0;
+    virtual QVariant invokeMethod(const intfAPIObject* _apiObject, const QVariantList& _arguments, /*OUT*/ QVariantMap &_responseHeaders) = 0;
     virtual QVariant defaultVariant() const = 0;
     virtual void cleanup (void* _argStorage) = 0;
     virtual bool hasFromVariantMethod() const = 0;

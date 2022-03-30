@@ -71,14 +71,17 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
         return gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(_paramIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
-QVariant clsAPIObject::invoke(bool _isUpdateMethod,
-                              const QStringList& _args,
-                              QList<QPair<QString, QString>> _bodyArgs,
-                              qhttp::THeaderHash _headers,
-                              qhttp::THeaderHash _cookies,
-                              QJsonObject _jwt,
-                              QString _remoteIP,
-                              QString _extraAPIPath) const
+QVariant clsAPIObject::invoke(
+        bool _isUpdateMethod,
+        const QStringList& _args,
+        /*OUT*/ QVariantMap &_responseHeaders,
+        QList<QPair<QString, QString>> _bodyArgs,
+        qhttp::THeaderHash _headers,
+        qhttp::THeaderHash _cookies,
+        QJsonObject _jwt,
+        QString _remoteIP,
+        QString _extraAPIPath
+    ) const
 {
     Q_ASSERT_X(this->parent(), "parent module", "Parent module not found to invoke method");
 
@@ -212,8 +215,7 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
     else if (LastArgumentWithValue < Arguments.size() - 1)
         Arguments = Arguments.mid(0, LastArgumentWithValue + 1);
 
-    QVariant Result;
-    QString  CacheKey;
+    QString CacheKey;
     if (this->Cache4Secs != 0 || this->Cache4SecsCentral != 0)
         CacheKey = this->makeCacheKey(Arguments);
 
@@ -221,41 +223,62 @@ QVariant clsAPIObject::invoke(bool _isUpdateMethod,
         QVariant CachedValue =  InternalCache::storedValue(CacheKey);
         if (CachedValue.isValid()) {
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
-            return CachedValue;
+
+            QVariantMap Map = CachedValue.toMap();
+            _responseHeaders = Map.value("headers").toMap();
+            return Map.value("result");
         }
     }
 
-    if(this->Cache4SecsCentral){
+    if (this->Cache4SecsCentral) {
         QVariant CachedValue =  CentralCache::storedValue(CacheKey);
         if(CachedValue.isValid()){
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
-            return CachedValue;
+
+            QVariantMap Map = CachedValue.toMap();
+            _responseHeaders = Map.value("headers").toMap();
+            return Map.value("result");
         }
     }
+
+    intfAPIArgManipulator *APIMethod;
 
     if (this->BaseMethod.returnType() >= TAPI_BASE_USER_DEFINED_TYPEID) {
         Q_ASSERT(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID < gUserDefinedTypesInfo.size());
         Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
-        Result = gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID)->invokeMethod(this, Arguments);
+        APIMethod = gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID);
     }
     else {
         Q_ASSERT(this->BaseMethod.returnType() < gOrderedMetaTypeInfo.size());
         Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.returnType()) != nullptr);
 
-        Result = gOrderedMetaTypeInfo.at(this->BaseMethod.returnType())->invokeMethod(this, Arguments);
+        APIMethod = gOrderedMetaTypeInfo.at(this->BaseMethod.returnType());
     }
 
+    QVariant Result = APIMethod->invokeMethod(
+                          this,
+                          Arguments,
+                          _responseHeaders);
+
+    QVariantMap ResultWithHeader = QVariantMap({
+                                                   { "result", Result },
+                                                   { "headers", _responseHeaders },
+                                               });
     if (this->Cache4Secs != 0)
-        InternalCache::setValue(CacheKey, Result, this->Cache4Secs);
+        InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
     else if (this->Cache4SecsCentral != 0)
-        CentralCache::setValue(CacheKey, Result, this->Cache4SecsCentral);
+        CentralCache::setValue(CacheKey, ResultWithHeader, this->Cache4SecsCentral);
 
     gServerStats.APICallsStats[this->BaseMethod.name()].inc();
     return Result;
 }
 
-void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnArgument _returnArg) const
+void clsAPIObject::invokeMethod(
+        const QVariantList& _arguments,
+        QGenericReturnArgument _returnArg,
+        /*OUT*/ QVariantMap &_responseHeaders
+    ) const
 {
     bool InvocationResult = true;
     QMetaMethod InvokableMethod;
@@ -289,8 +312,16 @@ void clsAPIObject::invokeMethod(const QVariantList& _arguments, QGenericReturnAr
                 Arguments[i] = QGenericArgument();
         }
 
+        QObject *parent = this->parent();
+        intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
+        QObject::connect(pureModule, &intfPureModule::addResponseHeader,
+                         [&_responseHeaders](const QString &_header, const QString &_value) {
+                            _responseHeaders.insert(_header, _value);
+                         }
+                        );
+
         InvocationResult = InvokableMethod.invoke(
-            this->parent(),
+            parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
             Arguments[0],
