@@ -37,6 +37,11 @@
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
 
+#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "X-PAGINATION-TOTAL-COUNT"
+#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "X-PAGINATION-PAGE-COUNT"
+#define RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE   "X-PAGINATION-CURRENT-PAGE"
+#define RESPONSE_HEADER_X_PAGINATION_PER_PAGE       "X-PAGINATION-PER-PAGE"
+
 /**********************************************************************\
 |** GET ***************************************************************|
 \**********************************************************************/
@@ -44,8 +49,8 @@
 #define GET_METHOD_ARGS_HEADER_APICALL \
     TAPI::JWT_t _JWT, \
     TAPI::PKsByPath_t _pksByPath = {}, \
-    quint64 _offset = 0, \
-    quint16 _limit = 10, \
+    quint64 _pageIndex = 0, \
+    quint16 _pageSize = 20, \
     TAPI::Cols_t _cols = {}, \
     TAPI::Filter_t _filters = {}, \
     TAPI::OrderBy_t _orderBy = {}, \
@@ -55,15 +60,15 @@
 #define GET_METHOD_ARGS_IMPL_APICALL \
     TAPI::JWT_t _JWT, \
     TAPI::PKsByPath_t _pksByPath, \
-    quint64 _offset, \
-    quint16 _limit, \
+    quint64 _pageIndex, \
+    quint16 _pageSize, \
     TAPI::Cols_t _cols, \
     TAPI::Filter_t _filters, \
     TAPI::OrderBy_t _orderBy, \
     TAPI::GroupBy_t _groupBy, \
     bool _reportCount
 
-//#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _offset, _limit, _cols, _filters, _orderBy, _groupBy, _reportCount
+//#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _pageIndex, _pageSize, _cols, _filters, _orderBy, _groupBy, _reportCount
 
 #define ORMGET(_doc) \
     apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
@@ -89,8 +94,8 @@
 #define GET_METHOD_ARGS_HEADER_INTERNAL_CALL \
     quint64 _userID, \
     TAPI::PKsByPath_t _pksByPath = {}, \
-    quint64 _offset = 0, \
-    quint16 _limit = 10, \
+    quint64 _pageIndex = 0, \
+    quint16 _pageSize = 20, \
     TAPI::Cols_t _cols = {}, \
     TAPI::Filter_t _filters = {}, \
     TAPI::OrderBy_t _orderBy = {}, \
@@ -100,8 +105,8 @@
 #define GET_METHOD_ARGS_IMPL_INTERNAL_CALL \
     quint64 _userID, \
     TAPI::PKsByPath_t _pksByPath, \
-    quint64 _offset, \
-    quint16 _limit, \
+    quint64 _pageIndex, \
+    quint16 _pageSize, \
     TAPI::Cols_t _cols, \
     TAPI::Filter_t _filters, \
     TAPI::OrderBy_t _orderBy, \
@@ -111,8 +116,8 @@
 #define GET_METHOD_CALL_ARGS_INTERNAL_CALL \
     clsJWT(_JWT).usrID(), \
     _pksByPath, \
-    _offset, \
-    _limit, \
+    _pageIndex, \
+    _pageSize, \
     _cols, \
     _filters, \
     _orderBy, \
@@ -122,8 +127,8 @@
 #define GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW \
     _userID, \
     _pksByPath, \
-    _offset, \
-    _limit, \
+    _pageIndex, \
+    _pageSize, \
     _cols, \
     _filters, \
     _orderBy, \

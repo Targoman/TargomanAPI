@@ -96,15 +96,22 @@ QVariantMap intfSQLBasedModule::SelectOne(
         .groupBy(_groupBy)
         .addFilters(_filters)
         .andWhere(_extraFilters)
-        .offset(_offset)
-        .limit(_limit)
+        .offset(_pageIndex * _pageSize)
+        .limit(_pageSize)
         .setCacheTime(_cacheTime)
     ;
 
     if (_lambda_TouchQuery != nullptr)
         _lambda_TouchQuery(Query);
 
-    return Query.one();
+    QVariantMap Result = Query.one();
+
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+
+    return Result;
 }
 
 QVariantList intfSQLBasedModule::SelectAll(
@@ -122,8 +129,8 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     SelectQuery Query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
-        .offset(_offset)
-        .limit(_limit)
+        .offset(_pageIndex * _pageSize)
+        .limit(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
@@ -135,7 +142,14 @@ QVariantList intfSQLBasedModule::SelectAll(
     if (_lambda_TouchQuery != nullptr)
         _lambda_TouchQuery(Query);
 
-    return Query.all();
+    QVariantList Result = Query.all();
+
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+
+    return Result;
 }
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
@@ -152,8 +166,8 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     SelectQuery Query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
-        .offset(_offset)
-        .limit(_limit)
+        .offset(_pageIndex * _pageSize)
+        .limit(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
@@ -165,16 +179,29 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     if (_lambda_TouchQuery != nullptr)
         _lambda_TouchQuery(Query);
 
-    return Query.allWithCount();
+    TAPI::stuTable Result = Query.allWithCount();
+
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+
+    return Result;
 }
 
 QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery)
 {
-    if (_pksByPath.isEmpty()) {
-        if (_reportCount)
-            return this->SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery).toVariant();
+    if (_pksByPath.isEmpty())
+    {
+        _reportCount = true;
 
-        return this->SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
+//        if (_reportCount)
+            return this->SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery)
+                    .Rows
+//                    .toVariant()
+                    ;
+
+//        return this->SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
     }
 
     return this->SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
