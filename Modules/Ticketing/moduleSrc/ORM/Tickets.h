@@ -50,6 +50,7 @@ namespace tblTickets {
     TARGOMAN_CREATE_CONSTEXPR(tktID);
     TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
     TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
+    TARGOMAN_CREATE_CONSTEXPR(tkt_untID);
     TARGOMAN_CREATE_CONSTEXPR(tktBase_tktID);
     TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
     TARGOMAN_CREATE_CONSTEXPR(tktType);
@@ -82,8 +83,8 @@ private slots:
 //            GET_METHOD_ARGS_HEADER_APICALL,
             TAPI::JWT_t _JWT,
             TAPI::PKsByPath_t _pksByPath = {},
-            quint64 _offset = 0,
-            quint16 _limit = 10,
+            quint64 _pageIndex = 0,
+            quint16 _pageSize = 20,
 //            TAPI::Cols_t _cols = {},
 //            TAPI::Filter_t _filters = {},
             TAPI::OrderBy_t _orderBy = {},

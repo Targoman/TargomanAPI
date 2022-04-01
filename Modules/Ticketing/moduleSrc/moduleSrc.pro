@@ -9,12 +9,16 @@
 ModuleName=Ticketing
 
 HEADERS += \
+    ORM/Departments.h \
+    ORM/Units.h \
     Ticketing.h \
     ORM/TicketAttachments.h \
     ORM/Tickets.h \
     ORM/Defs.hpp \
 
 SOURCES += \
+    ORM/Departments.cpp \
+    ORM/Units.cpp \
     Ticketing.cpp \
     ORM/TicketAttachments.cpp \
     ORM/Tickets.cpp \
