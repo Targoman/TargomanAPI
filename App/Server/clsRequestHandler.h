@@ -147,6 +147,7 @@ private:
     QTimer                                              FutureTimer;
     QMimeDatabase                                       MIMEDB;
     QScopedPointer<QFile>                               FileHandler;
+    QElapsedTimer                                       ElapsedTimer;
 
     friend class clsMultipartFormDataRequestHandler;
 };

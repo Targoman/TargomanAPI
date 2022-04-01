@@ -18,20 +18,19 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_CLSJWT_H
 #define TARGOMAN_API_SERVER_CLSJWT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 class clsJWT;
 }
-namespace Server {
+
+namespace Targoman::API::Server {
 
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
@@ -39,21 +38,28 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS512)
 class QJWT
 {
-    static inline QString makeConfig(const QString& _name){return "/JWT/" + _name;}
+public:
+    static inline QString makeConfig(const QString& _name) { return "/JWT/" + _name; }
     static Targoman::Common::Configuration::tmplConfigurable<QString>                 Secret;
     static Targoman::Common::Configuration::tmplConfigurable<enuJWTHashAlgs::Type>    HashAlgorithm;
     static Targoman::Common::Configuration::tmplConfigurable<quint16>                 TTL;
     static Targoman::Common::Configuration::tmplConfigurable<quint32>                 NormalLoginTTL;
     static Targoman::Common::Configuration::tmplConfigurable<quint32>                 RememberLoginTTL;
-public:
     static Targoman::Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 
-public:
-    static QString createSigned(QJsonObject _payload,
-                                QJsonObject _privatePayload = QJsonObject(),
-                                const qint32 _expiry = -1,
-                                const QString& _sessionID = QString());
-    static QJsonObject verifyReturnPayload(const QString& _jwt);
+    static QString createSigned(
+        QJsonObject _payload,
+        QJsonObject _privatePayload = QJsonObject(),
+        const qint32 _expiry = -1,
+        const QString &_sessionID = {},
+        const QString &_remoteIP = {}
+    );
+
+    static QJsonObject verifyReturnPayload(
+        /*INOUT*/ QString &_jwt,
+        const QString &_remoteIP,
+        bool _renewIfExpired = false
+    );
 
 private:
     static QByteArray hash(const QByteArray& _data);
@@ -61,9 +67,7 @@ private:
     friend class Targoman::API::AAA::clsJWT;
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
 
 ENUM_CONFIGURABLE(Targoman::API::Server::enuJWTHashAlgs)
 

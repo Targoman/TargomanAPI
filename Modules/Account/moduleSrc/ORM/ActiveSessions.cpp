@@ -43,6 +43,7 @@ ActiveSessions::ActiveSessions() :
             { tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),      QFV.allwaysInvalid(),        QNull,     UPNone, false, false },
             { tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
             { tblActiveSessions::ssnRemember,         S(bool),             QFV,                         false,     UPNone },
+            { tblActiveSessions::ssnJWT,              S(QString),          QFV,                         QNull,     UPAdmin, false, false },
             { tblActiveSessions::ssnStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
             { tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON },
             { tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY },
