@@ -60,12 +60,12 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserApproval);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuAuditableStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
 
-TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    Targoman::API::AccountModule,
-    stuMultiJWT,
-    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
-);
+//TAPI_REGISTER_METATYPE(
+//    COMPLEXITY_Complex,
+//    Targoman::API::AccountModule,
+//    stuMultiJWT,
+//    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+//);
 
 //namespace Targoman::API {
 
@@ -187,10 +187,10 @@ Account::Account() :
     }
 }
 
-TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
-{
-    return clsJWT::createSignedLogin(_remember, { { JWTItems::usrLogin, _login } }, QJsonObject({ { "svc", _services } }), _ssid);
-}
+//TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
+//{
+//    return clsJWT::createSignedLogin(_remember, { { JWTItems::usrLogin, _login } }, QJsonObject({ { "svc", _services } }), _ssid);
+//}
 
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
 {
@@ -317,7 +317,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
     };
 }
 */
-Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
+TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _email,
         TAPI::MD5_t _uuid,
@@ -347,7 +347,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
         .object();
 
     if (_autoLogin == false)
-        return Targoman::API::AccountModule::stuMultiJWT();
+        return TAPI::EncodedJWT_t();
 
     auto LoginInfo = PrivHelpers::processUserObject(
                          UserInfo,
@@ -355,13 +355,13 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveEmail(
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                                         this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                                         this->createJWT(_email, LoginInfo, _services)
-                                                     });
+    return this->createJWT(_email, LoginInfo, _services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                                         this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
+//                                                     });
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
+TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::Mobile_t _mobile,
         quint32 _code,
@@ -391,7 +391,7 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
         .object();
 
     if (_autoLogin == false)
-        return Targoman::API::AccountModule::stuMultiJWT();
+        return TAPI::EncodedJWT_t();
 
     auto LoginInfo = PrivHelpers::processUserObject(
                          UserInfo,
@@ -399,13 +399,13 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPOSTapproveMobile(
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                                         this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                                         this->createJWT(_mobile, LoginInfo, _services)
-                                                     });
+    return this->createJWT(_mobile, LoginInfo, _services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                                         this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
+//                                                     });
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
+TAPI::EncodedJWT_t Account::apilogin(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _emailOrMobile,
         TAPI::MD5_t _pass,
@@ -434,10 +434,10 @@ Targoman::API::AccountModule::stuMultiJWT Account::apilogin(
                                            _sessionInfo.object(),
                                            _fingerprint);
 
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                 this->createJWT(_emailOrMobile, LoginInfo, _services)
-                             });
+    return this->createJWT(_emailOrMobile, LoginInfo, _services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
+//                             });
 }
 
 bool Account::apiloginByMobileOnly(
@@ -521,7 +521,7 @@ bool Account::apiresendApprovalCode(
 //}
 
 /*
-Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode(
+TAPI::EncodedJWT_t Account::apiPUTverifyLoginByMobileCode(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::Mobile_t _mobile,
         quint32 _code,
@@ -548,17 +548,17 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiPUTverifyLoginByMobileCode
 
     auto LoginInfo = PrivHelpers::processUserObject(UserInfo, {}, _services.split(",", QString::SkipEmptyParts));
 
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                 this->createJWT(_mobile, LoginInfo, _services)
-                             });
+    return this->createJWT(_mobile, LoginInfo, _services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                 this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
+//                             });
 }
 */
 
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
-Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
+TAPI::EncodedJWT_t Account::apiloginByOAuth(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::enuOAuthType::Type _type,
         QString _oAuthToken,
@@ -607,33 +607,33 @@ Targoman::API::AccountModule::stuMultiJWT Account::apiloginByOAuth(
                          _fingerprint
                          );
 
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
-                                 this->createJWT(OAuthInfo.Email, LoginInfo, _services)
-                             });
+    return this->createJWT(OAuthInfo.Email, LoginInfo, _services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
+//                             });
 }
 
-Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::JWT_t _loginJWT,
-        QString _services
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
+//Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(
+//        TAPI::RemoteIP_t _REMOTE_IP,
+//        TAPI::JWT_t _loginJWT,
+//        QString _services
+//    )
+//{
+//    Authorization::validateIPAddress(_REMOTE_IP);
 
-    QJsonObject Obj;
+//    QJsonObject Obj;
 
-    clsJWT LoginJWT(_loginJWT);
-    QString Services = _services;
-    if(_services.isEmpty())
-        Services = LoginJWT.privatePart().value("svc").toString();
+//    clsJWT LoginJWT(_loginJWT);
+//    QString Services = _services;
+//    if(_services.isEmpty())
+//        Services = LoginJWT.privatePart().value("svc").toString();
 
-    auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
-    return Targoman::API::AccountModule::stuMultiJWT({
-                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
-                                 this->createJWT(LoginJWT.login(), NewPrivs, Services)
-                             });
-}
+//    auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
+//    return Targoman::API::AccountModule::stuMultiJWT({
+//                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
+//                                 this->createJWT(LoginJWT.login(), NewPrivs, Services)
+//                             });
+//}
 
 bool Account::apilogout(TAPI::JWT_t _JWT)
 {

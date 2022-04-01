@@ -125,23 +125,23 @@ private slots:
                           AprID
                       });
 
-        QJsonObject MultiJWT;
-        QVERIFY((MultiJWT = callAPI(
-                    RESTClientHelper::POST,
-                    "Account/approveMobile",
-                    {},
-                    {
-                        { "mobile", "0999-888-1010" },
-                        { "code", Code },
-                        { "autoLogin", true },
+        QVariant Result = callAPI(
+            RESTClientHelper::POST,
+            "Account/approveMobile",
+            {},
+            {
+                { "mobile", "0999-888-1010" },
+                { "code", Code },
+                { "autoLogin", true },
 //                        { "services",  },
 //                        { "rememberMe",  },
 //                        { "sessionInfo",  },
 //                        { "fingerprint",  },
-                    })
-                .toJsonObject()).size());
+            });
 
-        gEncodedJWT = MultiJWT.value("ssn").toString();
+        QVERIFY(Result.isValid());
+
+        gEncodedJWT = Result.toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).usrID() == UserID);
@@ -277,15 +277,16 @@ private slots:
     void Login()
     {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QJsonObject MultiJWT;
-        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+        QVariant Result = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toJsonObject()).size());
+                                });
 
-        gEncodedJWT = MultiJWT.value("ssn").toString();
+        QVERIFY(Result.isValid());
+
+        gEncodedJWT = Result.toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).usrID() == gUserID);
@@ -305,35 +306,37 @@ private slots:
 //    }
 
     void LoginAgain(){
-        QJsonObject MultiJWT;
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+        QVariant Result = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toJsonObject()).size());
-        gEncodedJWT = MultiJWT.value("ssn").toString();
-        gLoginJWT = MultiJWT.value("lgn").toString();
+                                });
+        QVERIFY(Result.isValid());
+
+        gEncodedJWT = Result.toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVERIFY((MultiJWT = callAPI(RESTClientHelper::POST,
+        Result = callAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     {"emailOrMobile", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
-                                }).toJsonObject()).size());
-        gEncodedAdminJWT = MultiJWT.value("ssn").toString();
+                                });
+        QVERIFY(Result.isValid());
+
+        gEncodedAdminJWT = Result.toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
     }
 
-    void RefreshJWT(){
-        QJsonObject MultiJWT;
+//    void RefreshJWT(){
+//        QJsonObject MultiJWT;
 
-        QVERIFY((MultiJWT = callRefreshAPI().toJsonObject()).size());
-        gEncodedJWT = MultiJWT.value("ssn").toString();
-    }
+//        QVERIFY((MultiJWT = callRefreshAPI().toJsonObject()).size());
+//        gEncodedJWT = MultiJWT.value("ssn").toString();
+//    }
 
     void CreateForgotPasswordLink(){
         QVERIFY(callAPI(RESTClientHelper::POST,

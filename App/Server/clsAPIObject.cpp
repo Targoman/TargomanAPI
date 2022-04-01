@@ -297,6 +297,8 @@ void clsAPIObject::invokeMethod(
 
     QVector<void*> ArgStorage(_arguments.size(), {});
 
+    QMetaObject::Connection Conn_addResponseHeader;
+
     try
     {
         if (_arguments.size() > 10)
@@ -314,7 +316,7 @@ void clsAPIObject::invokeMethod(
 
         QObject *parent = this->parent();
         intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
-        QObject::connect(pureModule, &intfPureModule::addResponseHeader,
+        Conn_addResponseHeader = QObject::connect(pureModule, &intfPureModule::addResponseHeader,
                          [&_responseHeaders](const QString &_header, const QString &_value) {
                             _responseHeaders.insert(_header, _value);
                          }
@@ -339,11 +341,15 @@ void clsAPIObject::invokeMethod(
         if (InvocationResult == false)
             throw exHTTPInternalServerError(QString("Unable to invoke method"));
 
+        QObject::disconnect(Conn_addResponseHeader);
+
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
     }
     catch(...)
     {
+        QObject::disconnect(Conn_addResponseHeader);
+
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
         throw;
