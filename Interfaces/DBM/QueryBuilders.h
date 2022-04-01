@@ -477,11 +477,11 @@ public:
 //    template<typename T> inline T one(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});
     QVariantMap tryOne(QVariantMap _args = {});
-    QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
-    TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
+    QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
+    TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});
 
-//    QVariant execute(QVariantMap _args = {}, quint16 _maxCount = 100, quint64 _from = 0);
+//    QVariant execute(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
 
 private:
     virtual void iAmAbstract() {}

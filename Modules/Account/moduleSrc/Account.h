@@ -35,14 +35,10 @@
 
 namespace Targoman::API::AccountModule {
 
-struct stuMultiJWT {
-    TAPI::EncodedJWT_t Login;
-    TAPI::EncodedJWT_t Session;
-};
-
-//namespace AAA {
-//class Voucher;
-//}
+//struct stuMultiJWT {
+//    TAPI::EncodedJWT_t Login;
+//    TAPI::EncodedJWT_t Session;
+//};
 
 TARGOMAN_ACTIONLOG_PREPARENT;
 
@@ -65,7 +61,7 @@ public:
     static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID, bool _setAsError = false);
 
 private:
-    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
+//    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
     TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
 
 private slots:
@@ -114,7 +110,7 @@ private slots:
 //    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
 //    "After the user submits this code, signupByMobile must be called again with verifyCode."
 
-    Targoman::API::AccountModule::stuMultiJWT REST_POST(
+    TAPI::EncodedJWT_t REST_POST(
         approveEmail,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -129,7 +125,7 @@ private slots:
         "Approves Email by provided UUID, then login if needed"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_POST(
+    TAPI::EncodedJWT_t REST_POST(
         approveMobile,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -144,7 +140,7 @@ private slots:
         "Approves Mobile by provided mobile and verify code, then login if needed"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
+    TAPI::EncodedJWT_t REST_GET_OR_POST(
         login,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -199,7 +195,7 @@ private slots:
 //        "Send verification code for provided mobile."
 //    )
 
-//    Targoman::API::AccountModule::stuMultiJWT REST_PUT(
+//    TAPI::EncodedJWT_t REST_PUT(
 //        verifyLoginByMobileCode,
 //        (
 //            TAPI::RemoteIP_t _REMOTE_IP,
@@ -213,7 +209,7 @@ private slots:
 //        "check verification code for provided mobile."
 //    )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
+    TAPI::EncodedJWT_t REST_GET_OR_POST(
         loginByOAuth,
         (
             TAPI::RemoteIP_t _REMOTE_IP,
@@ -226,15 +222,15 @@ private slots:
         "Login by Open Authentication and return an encoded JWT"
     )
 
-    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
-        refreshJWT,
-        (
-            TAPI::RemoteIP_t _REMOTE_IP,
-            TAPI::JWT_t _loginJWT,
-            QString _services = {}
-        ),
-        "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT"
-    )
+//    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
+//        refreshJWT,
+//        (
+//            TAPI::RemoteIP_t _REMOTE_IP,
+//            TAPI::JWT_t _loginJWT,
+//            QString _services = {}
+//        ),
+//        "Refresh JWT in order to update information or expiry time. Provide services in order to create service specific JWT"
+//    )
 
     bool REST_GET_OR_POST(
         logout,
@@ -410,6 +406,6 @@ TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 } //namespace Targoman::API::AccountModule
 
 TAPI_DECLARE_METATYPE_ENUM(TAPI, enuOAuthType);
-TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::stuMultiJWT);
+//TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::stuMultiJWT);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_AAA_H

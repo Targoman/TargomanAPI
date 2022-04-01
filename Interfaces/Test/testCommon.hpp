@@ -48,10 +48,10 @@ extern unsigned int gServiceID;
 extern unsigned int gAPITokenID;
 extern unsigned int gAPIAdminTokenID;
 
+//QString gLoginJWT;
 #define TAPI_MARSHAL_TEST_VARIABLES \
     QString APIURL = "http://127.0.0.1:10000/rest/v1"; \
     QString gEncodedJWT; \
-    QString gLoginJWT; \
     QString gEncodedAdminJWT; \
     QJsonObject gJWT; \
     QJsonObject gAdminJWT; \
@@ -65,7 +65,7 @@ extern unsigned int gAPIAdminTokenID;
 
 extern QString APIURL;
 extern QString gEncodedJWT;
-extern QString gLoginJWT;
+//extern QString gLoginJWT;
 extern QJsonObject gJWT;
 extern QJsonObject gAdminJWT;
 extern QString gEncodedAdminJWT;
@@ -179,11 +179,11 @@ protected:
         deleteOldTestData();
     }
 
-    QVariant callRefreshAPI() {
-        return RESTClientHelper::callAPI(
-            gLoginJWT, RESTClientHelper::GET, "Account/refreshJWT", {}, {}, {}, APIURL
-        );
-    }
+//    QVariant callRefreshAPI() {
+//        return RESTClientHelper::callAPI(
+//            gLoginJWT, RESTClientHelper::GET, "Account/refreshJWT", {}, {}, {}, APIURL
+//        );
+//    }
 
     QVariant callAPI(
             RESTClientHelper::enuHTTPMethod _method,
