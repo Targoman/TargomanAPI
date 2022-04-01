@@ -25,6 +25,8 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Defs.hpp"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Units.h"
+#include "Departments.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
@@ -72,6 +74,7 @@ Tickets::Tickets() :
             { tblTickets::tktID,                ORM_PRIMARYKEY_64 },
             { tblTickets::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
             { tblTickets::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { tblTickets::tkt_untID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
             { tblTickets::tktBase_tktID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
             { tblTickets::tktInReply_tktID,     S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
             { tblTickets::tktType,              S(Targoman::API::TicketingModule::enuTicketType::Type), QFV, Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
@@ -86,6 +89,7 @@ Tickets::Tickets() :
             { tblTickets::tktInReply_tktID, R(TicketingSchema,tblTickets::Name),      tblTickets::tktID,          "InReply_" , true },
             { tblTickets::tktTarget_usrID,  R(AAASchema,tblUser::Name),               tblUser::usrID,             "Target_"  , true },
             { tblTickets::tktID,            R(TicketingSchema,tblTicketRead::Name),   tblTicketRead::tkr_tktID,   "ReadInfo_", true },
+            { tblTickets::tkt_untID,        R(TicketingSchema, tblUnits::Name),       tblUnits::untID },
             ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
         }
@@ -130,6 +134,7 @@ QVariant Tickets::apiGET(
             .addCol(tblTickets::tktID)
             .addCol(tblTickets::tktTarget_usrID)
             .addCol(tblTickets::tkt_svcID)
+            .addCol(tblTickets::tkt_untID)
             .addCol(tblTickets::tktBase_tktID)
             .addCol(tblTickets::tktInReply_tktID)
             .addCol(tblTickets::tktType)
@@ -140,6 +145,12 @@ QVariant Tickets::apiGET(
             .addCol(tblTickets::tktCreatedBy_usrID)
             .addCol(tblTickets::tktUpdatedBy_usrID)
             .addCol(CURRENT_TIMESTAMP)
+
+            .leftJoin(tblUnits::Name)
+            .leftJoin(tblDepartments::Name, clsCondition(tblDepartments::Name, tblDepartments::depID, enuConditionOperator::Equal, tblUnits::Name, tblUnits::unt_depID))
+            .addCol(tblUnits::untName)
+            .addCol(tblDepartments::depID)
+            .addCol(tblDepartments::depName)
         ;
 
         if (_inReplyTicketID > 0)

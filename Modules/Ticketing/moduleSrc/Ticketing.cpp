@@ -24,6 +24,8 @@
 #include "Ticketing.h"
 #include "libQFieldValidator/QFieldValidator.h"
 #include "ORM/Defs.hpp"
+#include "ORM/Departments.h"
+#include "ORM/Units.h"
 #include "ORM/Tickets.h"
 #include "ORM/TicketAttachments.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -47,6 +49,8 @@ Ticketing::Ticketing() :
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
 
+    this->addSubModule(&Departments::instance());
+    this->addSubModule(&Units::instance());
     this->addSubModule(&Tickets::instance());
     this->addSubModule(&TicketRead::instance());
     this->addSubModule(&TicketAttachments::instance());
@@ -60,7 +64,8 @@ quint64 Ticketing::insertTicket(
         enuTicketType::Type _ticketType,
         const QString &_title,
         const QString &_body,
-        const TAPI::Files_t &_files
+        const TAPI::Files_t &_files,
+        NULLABLE_TYPE(quint32) _unitID
     )
 {
     TAPI::ORMFields_t CreateFields({
@@ -77,6 +82,9 @@ quint64 Ticketing::insertTicket(
 
     if (_inReplyTicketID > 0)
         CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTicketID);
+
+    if (NULLABLE_HAS_VALUE(_unitID))
+        CreateFields.insert(tblTickets::tkt_untID, NULLABLE_GET(_unitID));
 
     quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
 
@@ -122,6 +130,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
         const QString &_body,
         quint32 _serviceID,
         quint64 _targetUserID,
+        NULLABLE_TYPE(quint32) _unitID,
         const TAPI::stuFileInfo &_file
     )
 {
@@ -138,7 +147,8 @@ QVariantMap Ticketing::apiPUTnewMessage(
                      _targetUserID ? enuTicketType::Message : enuTicketType::Broadcast,
                      _title,
                      _body,
-                     Files
+                     Files,
+                     _unitID
                      );
 
     return QVariantMap({
