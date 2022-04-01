@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QMessageAuthenticationCode>
@@ -27,13 +28,12 @@
 
 #include "QJWT.h"
 
+#include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "ServerConfigs.h"
 #include "clsSimpleCrypt.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 using namespace Common;
 using namespace Targoman::Common::Configuration;
@@ -99,68 +99,178 @@ tmplConfigurable<quint32> QJWT::RememberLoginTTL(
         enuConfigSource::Arg | enuConfigSource::File);
 
 thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
-static clsSimpleCrypt* simpleCryptInstance(){
-    if(Q_UNLIKELY(!SimpleCryptInstance)){
+
+static clsSimpleCrypt* simpleCryptInstance()
+{
+    if (Q_UNLIKELY(!SimpleCryptInstance))
+    {
         SimpleCryptInstance = new clsSimpleCrypt(QJWT::SimpleCryptKey.value());
         SimpleCryptInstance->setIntegrityProtectionMode(clsSimpleCrypt::ProtectionHash);
     }
+
     return SimpleCryptInstance;
 }
 
-QString QJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint32 _expiry, const QString& _sessionID)
+QString QJWT::createSigned(
+        QJsonObject _payload,
+        QJsonObject _privatePayload,
+        const qint32 _expiry,
+        const QString &_sessionID,
+        const QString &_remoteIP
+    )
 {
     const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
     _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
-    if(_expiry >= 0)
+
+    if (_expiry >= 0)
         _payload["exp"] = _payload["iat"].toInt() + _expiry;
     else
         _payload.remove("exp");
 
-    if(_sessionID.size())
+    if (_sessionID.size())
         _payload["jti"] = _sessionID;
     else
         _payload.remove("jti");
 
-    if (!_privatePayload.isEmpty())
+    if (_remoteIP.isEmpty() == false)
+        _privatePayload.insert("cip", _remoteIP);
+
+    if (_privatePayload.isEmpty() == false)
         _payload["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
     else
         _payload.remove("prv");
 
-    QByteArray Data   = Header.toUtf8().toBase64() + "." + QJsonDocument(_payload).toJson().toBase64();
+    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(_payload).toJson().toBase64();
 
     return Data + "." + QJWT::hash(Data).toBase64();
 }
 
-QJsonObject QJWT::verifyReturnPayload(const QString& _jwt)
+QJsonObject QJWT::verifyReturnPayload(
+        QString &_jwt,
+        const QString &_remoteIP,
+        bool _renewIfExpired
+    )
 {
     QStringList JWTParts = _jwt.split('.');
-    if(JWTParts.length() != 3)
+
+    if (JWTParts.length() != 3)
         throw exHTTPForbidden("Invalid JWT Token");
-    if(QJWT::hash((JWTParts.at(0) + "." + JWTParts.at(1)).toUtf8()).toBase64() != JWTParts[2])
+
+    if (QJWT::hash((JWTParts.at(0) + "." + JWTParts.at(1)).toUtf8()).toBase64() != JWTParts[2])
         throw exHTTPForbidden("JWT signature verification failed");
+
     QJsonParseError Error;
     QJsonDocument Payload = QJsonDocument::fromJson(QByteArray::fromBase64(JWTParts.at(1).toLatin1()), &Error);
-    if(Payload.isNull())
+
+    if (Payload.isNull())
         throw exHTTPForbidden("Invalid JWT payload: " + Error.errorString());
 
     QJsonObject JWTPayload = Payload.object();
-    if(JWTPayload.empty())
-        throw exHTTPForbidden("Invalid JWT payload: empty object");
-    if(JWTPayload.contains("exp") &&
-            static_cast<quint64>(JWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
-            throw exHTTPUnauthorized("JWT expired");
 
-    if(JWTPayload.contains("prv")){
-        QString Decrypted= simpleCryptInstance()->decryptToString(JWTPayload.value("prv").toString());
-        if(Decrypted.isEmpty())
-            throw exHTTPExpectationFailed(QString("Invalid empty private JWT payload: DEC ErrNo: %1").arg(simpleCryptInstance()->lastError()));
+    if (JWTPayload.empty())
+        throw exHTTPForbidden("Invalid JWT payload: empty object");
+
+    if (JWTPayload.contains("prv"))
+    {
+        QString Decrypted = simpleCryptInstance()->decryptToString(JWTPayload.value("prv").toString());
+
+        if (Decrypted.isEmpty())
+            throw exHTTPExpectationFailed(QString("Invalid empty private JWT payload: DEC ErrNo: %1")
+                                          .arg(simpleCryptInstance()->lastError()));
 
         QJsonDocument Private = QJsonDocument::fromJson(Decrypted.toUtf8(), &Error);
-        if(Private.isNull())
+
+        if (Private.isNull())
             throw exHTTPExpectationFailed("Invalid private JWT payload: " + Error.errorString());
 
-        JWTPayload["prv"] = Private.object();
+        QJsonObject PrivateObject = Private.object();
+
+        JWTPayload["prv"] = PrivateObject;
+
+        // check client ip ---------------
+        if (PrivateObject.contains("cip"))
+        {
+            if (PrivateObject["cip"].toString() != _remoteIP)
+                throw exHTTPForbidden("Invalid client IP");
+        }
+    }
+
+    if (JWTPayload.contains("exp")
+            && static_cast<quint64>(JWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t()
+        )
+    {
+        if (_renewIfExpired == false)
+            throw exHTTPUnauthorized("JWT expired");
+
+        QString SessionKey = JWTPayload["jti"].toString();
+
+        DBManager::clsDAC DAC("AAA"); //master db dac -> AAA
+
+        //check session
+        QString Qry = R"(
+            SELECT TIME_TO_SEC((TIMEDIFF(NOW(), ssnCreationDateTime))) AS LifeSeconds
+                 , tblActiveSessions.*
+              FROM tblActiveSessions
+             WHERE ssnKey=?
+               AND ssnStatus='A'
+)";
+        QJsonDocument Result = DAC.execQuery({}, Qry, { SessionKey })
+                               .toJson(true);
+
+        if (Result.object().isEmpty())
+            throw exHTTPUnauthorized("Active session not found");
+
+        QVariantMap SessionInfo = Result.toVariant().toMap();
+
+        //check old JWT
+        QString ssnJWT = SessionInfo["ssnJWT"].toString();
+        if ((ssnJWT.isEmpty() == false) && (_jwt != ssnJWT))
+        {
+            _jwt = ssnJWT; //this will add response header X-AUTH-NEW-TOKEN
+            throw exHTTPForbidden("JWT not replaced by client");
+        }
+
+        //check large expiration
+        quint64 LifeSeconds = SessionInfo["LifeSeconds"].toUInt();
+        bool ssnRemember = (SessionInfo["ssnRemember"].toInt() == 1);
+
+        if (LifeSeconds >= (ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value()))
+        {
+            Qry = R"(
+                UPDATE tblActiveSessions
+                   SET ssnStatus='E'
+                 WHERE ssnKey=?
+)";
+            DAC.execQuery({}, Qry, { SessionKey });
+
+            throw exHTTPUnauthorized("Session expired");
+        }
+
+        //
+        if (SessionInfo["ssnIPReadable"] != _remoteIP)
+            throw exHTTPForbidden("Invalid IP");
+
+        //ssn_usrID
+        //ssnFingerPrint
+
+        //TODO: check user ban or large expiration
+
+        //----------------------------------------
+        _jwt = QJWT::createSigned(
+                JWTPayload,
+                JWTPayload.contains("prv") ? JWTPayload["prv"].toObject() : QJsonObject(),
+                JWTPayload["exp"].toInt() - JWTPayload["iat"].toInt(),
+                JWTPayload["jti"].toString(),
+                _remoteIP
+        );
+
+        Qry = R"(
+            UPDATE tblActiveSessions
+               SET ssnJWT=?
+             WHERE ssnKey=?
+)";
+        DAC.execQuery({}, Qry, { _jwt, SessionKey });
     }
 
     return JWTPayload;
@@ -168,19 +278,22 @@ QJsonObject QJWT::verifyReturnPayload(const QString& _jwt)
 
 QByteArray QJWT::hash(const QByteArray& _data)
 {
-    switch(QJWT::HashAlgorithm.value()){
-    case enuJWTHashAlgs::HS256:
-        return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
-    case enuJWTHashAlgs::HS384:
-        return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha384);
-    case enuJWTHashAlgs::HS512:
-        return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha512);
-    default:
-        throw exHTTPInternalServerError("Invalid JWT encryption algorithm");
+    switch (QJWT::HashAlgorithm.value())
+    {
+        case enuJWTHashAlgs::HS256:
+            return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
+
+        case enuJWTHashAlgs::HS384:
+            return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha384);
+
+        case enuJWTHashAlgs::HS512:
+            return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha512);
+
+        default:
+            throw exHTTPInternalServerError("Invalid JWT encryption algorithm");
     }
 }
 
-}
-}
-}
+} //namespace Targoman::API::Server
+
 ENUM_CONFIGURABLE_IMPL(Targoman::API::Server::enuJWTHashAlgs)

@@ -48,7 +48,9 @@ clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QO
     QObject(_parent),
     Request(_req),
     Response(_res)
-{}
+{
+    this->ElapsedTimer.start();
+}
 
 void clsRequestHandler::process(const QString& _api)
 {
@@ -320,8 +322,29 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
             QString Auth = Headers.value("authorization");
             if (Auth.startsWith("Bearer "))
             {
-                JWT = QJWT::verifyReturnPayload(Auth.mid(sizeof("Bearer")));
+                QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
+
+                QString OldBearerToken = BearerToken;
+
+                try
+                {
+                    JWT = QJWT::verifyReturnPayload(
+                              BearerToken,
+                              this->toIPv4(this->Request->remoteAddress()),
+                              true
+                              );
+
+                    if (BearerToken != OldBearerToken)
+                        ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
+                }
+                catch (...)
+                {
+                    if (BearerToken != OldBearerToken)
+                        ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
+
+                    throw;
+                }
             }
             else
                 throw exHTTPForbidden("No valid authentication header is present");
@@ -352,23 +375,23 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
         return stuResult(Result, ResponseHeaders);
     }
-    catch(exTargomanBase& ex)
+    catch (exTargomanBase& ex)
     {
         return stuResult(ex.what(), ResponseHeaders, static_cast<qhttp::TStatusCode>(ex.httpCode()));
     }
-    catch(exQFVRequiredParam &ex)
+    catch (exQFVRequiredParam &ex)
     {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
     }
-    catch(exQFVInvalidValue &ex)
+    catch (exQFVInvalidValue &ex)
     {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
     }
-    catch(std::exception &ex)
+    catch (std::exception &ex)
     {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
-    catch(...)
+    catch (...)
     {
         return stuResult("INTERNAL SERVER ERROR!!!", ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
@@ -410,7 +433,9 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     if (_api == "/openAPI.json")
     {
         gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, OpenAPIGenerator::retrieveJson(this->host(), this->port()));
+        this->sendResponseBase(
+                    qhttp::ESTATUS_OK,
+                    OpenAPIGenerator::retrieveJson(this->host(), this->port()));
         return true;
     }
 
@@ -480,9 +505,6 @@ void clsRequestHandler::findAndCallAPI(QString _api)
         return;
 
     //-----------------------------------------------------
-    QElapsedTimer ElapsedTimer;
-    ElapsedTimer.start();
-
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
     QString ExtraAPIPath;
@@ -511,10 +533,8 @@ void clsRequestHandler::findAndCallAPI(QString _api)
             this->sendError(qhttp::ESTATUS_REQUEST_TIMEOUT, "Request Timed Out");
         });
 
-        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this, ElapsedTimer]() {
+        this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::finished, [this]() {
             stuResult Result = this->FutureWatcher.result();
-
-            Result.ResponseHeader.insert("X-DEBUG-TIME-ELAPSED-MS", ElapsedTimer.elapsed());
 
             if (Result.StatusCode == qhttp::ESTATUS_OK)
                 this->sendResponse(StatusCodeOnMethod[this->Request->method()], Result.Result, Result.ResponseHeader);
@@ -554,21 +574,27 @@ void clsRequestHandler::sendError(
 
 void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
 {
-    if(QFile::exists(_basePath + _path) == false)
+    if (QFile::exists(_basePath + _path) == false)
         throw exHTTPNotFound(_path);
+
     Q_ASSERT(this->FileHandler.isNull());
+
     this->FileHandler.reset(new QFile(_basePath + _path));
     this->FileHandler->open(QFile::ReadOnly);
 
-    if(this->FileHandler->isReadable() == false)
+    if (this->FileHandler->isReadable() == false)
         throw exHTTPForbidden(_path);
 
     QMimeType FileMIME = this->MIMEDB.mimeTypeForFile(_basePath + _path);
     qint64 FileSize = QFileInfo(*this->FileHandler).size();
+
     this->Response->addHeaderValue("content-type", FileMIME.name());
     this->Response->addHeaderValue("content-length", QString("%1").arg(FileSize));
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
+
     this->Response->setStatusCode(qhttp::ESTATUS_OK);
+
+    this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
@@ -636,6 +662,9 @@ void clsRequestHandler::sendResponse(
 
         this->addHeaderValues(_responseHeaders);
 
+        if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
+            this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+
         this->Response->end(RawData.data());
 
         this->deleteLater();
@@ -667,6 +696,8 @@ void clsRequestHandler::sendCORSOptions()
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
 
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
+
+    this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
 
     this->Response->end();
 
@@ -722,6 +753,9 @@ void clsRequestHandler::sendResponseBase(
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
 
     this->addHeaderValues(_responseHeaders);
+
+    if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
+        this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
 
     this->Response->end(Data.constData());
 

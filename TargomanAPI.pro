@@ -42,4 +42,5 @@ OTHER_FILES += \
     migrations/I18N/local/.migrations \
     migrations/MT/db/* \
     migrations/MT/local/* \
-    migrations/MT/local/.migrations
+    migrations/MT/local/.migrations \
+    temp/sql-change-scripts.txt
