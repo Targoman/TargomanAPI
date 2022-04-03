@@ -339,8 +339,9 @@ public:
 
     virtual ModuleMethods_t listOfMethods() = 0;
 
+    void addResponseHeaderNameToExpose(const QString &_header);
 signals:
-    void addResponseHeader(const QString &_header, const QString &_value);
+    void addResponseHeader(const QString &_header, const QString &_value, bool _multiValue = false);
 
 protected:
     ModuleMethods_t Methods;

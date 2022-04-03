@@ -56,18 +56,8 @@ public:
     virtual void invokeMethod(
             const QVariantList& _arguments,
             QGenericReturnArgument _returnArg,
-            /*OUT*/ QVariantMap &_responseHeaders) const = 0;
-
-//    std::function<void(const QString &_header, const QString &_value)> _addResponseHeader,
-//    auto addResponseHeader = [&ResponseHeaders](const QString &_header, const QString &_value)
-//    {
-//        ResponseHeaders.insert(_header, _value);
-//    };
-//protected:
-//    QVariantMap responseHeaders;
-//public:
-//    const QVariantMap getResponseHeaders() const { return this->responseHeaders; }
-//    void addResponseHeader(const QString &_header, const QString &_value) { this->responseHeaders.insert(_header, _value); }
+            /*OUT*/ QVariantMap &_responseHeaders
+        ) const = 0;
 };
 
 /**********************************************************************/

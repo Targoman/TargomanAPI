@@ -117,13 +117,20 @@ private:
 
 public:
     void findAndCallAPI(QString _api);
+
     void sendError(qhttp::TStatusCode _code,
-                   const QString& _message,
-                   const QVariantMap &_responseHeaders = {},
-                   bool _closeConnection = false);
+            const QString& _message,
+            QVariantMap _responseHeaders = {},
+            bool _closeConnection = false
+        );
     void sendFile(const QString& _basePath, const QString _path);
-    void sendResponse(qhttp::TStatusCode _code, const QVariant &_response, const QVariantMap &_responseHeaders);
+    void sendResponse(
+            qhttp::TStatusCode _code,
+            const QVariant &_response,
+            QVariantMap _responseHeaders = {}
+        );
     void sendCORSOptions();
+
     void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
 
     QString host() const;
@@ -131,7 +138,12 @@ public:
 
 private:
     void addHeaderValues(const QVariantMap &_responseHeaders);
-    void sendResponseBase(qhttp::TStatusCode _code, QJsonObject _dataObject, const QVariantMap &_responseHeaders = {}, bool _closeConnection = false);
+    void sendResponseBase(
+            qhttp::TStatusCode _code,
+            QJsonObject _dataObject,
+            QVariantMap _responseHeaders = {},
+            bool _closeConnection = false
+        );
     stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath);
     QString toIPv4(const QString _ip);
 

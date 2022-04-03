@@ -554,10 +554,9 @@ void clsRequestHandler::findAndCallAPI(QString _api)
         run(APIObject, Queries, ExtraAPIPath);
 }
 
-void clsRequestHandler::sendError(
-        qhttp::TStatusCode _code,
+void clsRequestHandler::sendError(qhttp::TStatusCode _code,
         const QString& _message,
-        const QVariantMap &_responseHeaders,
+        QVariantMap _responseHeaders,
         bool _closeConnection
     )
 {
@@ -597,7 +596,10 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
 
     this->Response->setStatusCode(qhttp::ESTATUS_OK);
 
+#ifdef QT_DEBUG
+    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("X-DEBUG-TIME-ELAPSED"));
     this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+#endif
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
@@ -628,10 +630,9 @@ void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders)
     }
 }
 
-void clsRequestHandler::sendResponse(
-        qhttp::TStatusCode _code,
+void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         const QVariant &_response,
-        const QVariantMap &_responseHeaders
+        QVariantMap _responseHeaders
     )
 {
     gServerStats.Success.inc();
@@ -660,13 +661,26 @@ void clsRequestHandler::sendResponse(
 
         this->Response->addHeaderValue("content-length", RawData.data().length());
         this->Response->addHeaderValue("content-type", QString(RawData.mime()));
-        this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
-        this->Response->addHeaderValue("Connection", QString("keep-alive"));
+        this->Response->addHeaderValue("Access-Control-Allow-Origin", QStringLiteral("*"));
+        this->Response->addHeaderValue("Connection", QStringLiteral("keep-alive"));
 
-        this->addHeaderValues(_responseHeaders);
+        auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
+            if (_responseHeaders.contains("Access-Control-Expose-Headers"))
+                _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
+            else
+                _responseHeaders["Access-Control-Expose-Headers"] = _header;
+        };
+
+#ifdef QT_DEBUG
+        funcAddToHeaderArray("X-DEBUG-TIME-ELAPSED");
 
         if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
-            this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+            _responseHeaders["X-DEBUG-TIME-ELAPSED"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+#endif
+
+        funcAddToHeaderArray("X-AUTH-NEW-TOKEN");
+
+        this->addHeaderValues(_responseHeaders);
 
         this->Response->end(RawData.data());
 
@@ -679,11 +693,11 @@ void clsRequestHandler::sendResponse(
 void clsRequestHandler::sendCORSOptions()
 {
     this->Response->addHeaderValue("Access-Control-Allow-Origin", ServerConfigs::AccessControl.value());
-    this->Response->addHeaderValue("Access-Control-Allow-Credentials", QString("true"));
+    this->Response->addHeaderValue("Access-Control-Allow-Credentials", QStringLiteral("true"));
     this->Response->addHeaderValue("Access-Control-Allow-Methods",
-                                   QString("GET, POST, PUT, PATCH, DELETE"));
+                                   QStringLiteral("GET, POST, PUT, PATCH, DELETE"));
     this->Response->addHeaderValue("Access-Control-Allow-Headers",
-                                   QString("authorization,"
+                                   QStringLiteral("authorization,"
                                            "access-control-allow-origin,"
                                            "Access-Control-Allow-Headers,"
                                            "DNT,X-CustomHeader,"
@@ -695,12 +709,15 @@ void clsRequestHandler::sendCORSOptions()
                                            "Content-Type"));
     this->Response->addHeaderValue("Access-Control-Max-Age", 1728000);
     this->Response->addHeaderValue("content-length", 0);
-    this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
-    this->Response->addHeaderValue("Connection", QString("keep-alive"));
+    this->Response->addHeaderValue("content-type", QStringLiteral("application/json; charset=utf-8"));
+    this->Response->addHeaderValue("Connection", QStringLiteral("keep-alive"));
 
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
 
+#ifdef QT_DEBUG
+    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("X-DEBUG-TIME-ELAPSED"));
     this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+#endif
 
     this->Response->end();
 
@@ -721,10 +738,9 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
     this->deleteLater();
 }
 
-void clsRequestHandler::sendResponseBase(
-        qhttp::TStatusCode _code,
+void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
         QJsonObject _dataObject,
-        const QVariantMap &_responseHeaders,
+        QVariantMap _responseHeaders,
         bool _closeConnection
     )
 {
@@ -751,14 +767,27 @@ void clsRequestHandler::sendResponseBase(
         this->Response->addHeader("connection", "close");
 
     this->Response->addHeaderValue("content-length", Data.length());
-    this->Response->addHeaderValue("content-type", QString("application/json; charset=utf-8"));
-    this->Response->addHeaderValue("Access-Control-Allow-Origin", QString("*"));
-    this->Response->addHeaderValue("Connection", QString("keep-alive"));
+    this->Response->addHeaderValue("content-type", QStringLiteral("application/json; charset=utf-8"));
+    this->Response->addHeaderValue("Access-Control-Allow-Origin", QStringLiteral("*"));
+    this->Response->addHeaderValue("Connection", QStringLiteral("keep-alive"));
 
-    this->addHeaderValues(_responseHeaders);
+    auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
+        if (_responseHeaders.contains("Access-Control-Expose-Headers"))
+            _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
+        else
+            _responseHeaders["Access-Control-Expose-Headers"] = _header;
+    };
+
+#ifdef QT_DEBUG
+    funcAddToHeaderArray("X-DEBUG-TIME-ELAPSED");
 
     if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
-        this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+        _responseHeaders["X-DEBUG-TIME-ELAPSED"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+#endif
+
+    funcAddToHeaderArray("X-AUTH-NEW-TOKEN");
+
+    this->addHeaderValues(_responseHeaders);
 
     this->Response->end(Data.constData());
 
