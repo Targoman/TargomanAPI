@@ -106,6 +106,11 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     QVariantMap Result = Query.one();
 
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
@@ -144,6 +149,11 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     QVariantList Result = Query.all();
 
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
@@ -181,6 +191,11 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     TAPI::stuTable Result = Query.allWithCount();
 
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
     this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
@@ -193,15 +208,12 @@ QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTER
 {
     if (_pksByPath.isEmpty())
     {
-        _reportCount = true;
-
-//        if (_reportCount)
+        if (_reportCount)
             return this->SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery)
-                    .Rows
-//                    .toVariant()
-                    ;
+                    .toVariant()
+                ;
 
-//        return this->SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
+        return this->SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
     }
 
     return this->SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);

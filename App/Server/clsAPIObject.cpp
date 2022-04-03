@@ -317,8 +317,11 @@ void clsAPIObject::invokeMethod(
         QObject *parent = this->parent();
         intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
         Conn_addResponseHeader = QObject::connect(pureModule, &intfPureModule::addResponseHeader,
-                         [&_responseHeaders](const QString &_header, const QString &_value) {
-                            _responseHeaders.insert(_header, _value);
+                         [&_responseHeaders](const QString &_header, const QString &_value, bool _multiValue) {
+                            if (_multiValue && _responseHeaders.contains(_header))
+                                _responseHeaders[_header] = _responseHeaders[_header].toString() + "," + _value;
+                            else
+                                _responseHeaders.insert(_header, _value);
                          }
                         );
 
