@@ -81,7 +81,7 @@ tmplConfigurable<quint16> QJWT::TTL(
 tmplConfigurable<quint32> QJWT::NormalLoginTTL(
         QJWT::makeConfig("NormalLoginTTL"),
         "Time to live for the login token",
-        static_cast<quint16>(24*60*60),
+        static_cast<quint32>(24*60*60),
         ReturnTrueCrossValidator(),
         "",
         "",
@@ -91,7 +91,7 @@ tmplConfigurable<quint32> QJWT::NormalLoginTTL(
 tmplConfigurable<quint32> QJWT::RememberLoginTTL(
         QJWT::makeConfig("RememberLoginTTL"),
         "Time to live for the login token when remembered",
-        static_cast<quint16>(7*24*60*60),
+        static_cast<quint32>(7*24*60*60),
         ReturnTrueCrossValidator(),
         "",
         "TTL",
@@ -121,12 +121,18 @@ QString QJWT::createSigned(
 {
     const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
-    _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
+    if (_payload.contains("iat") == false)
+        _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
 
     if (_expiry >= 0)
         _payload["exp"] = _payload["iat"].toInt() + _expiry;
     else
         _payload.remove("exp");
+
+    bool ssnRemember = true;
+    if (_payload.contains("ssnexp") == false)
+        _payload["ssnexp"] = _payload["iat"].toInt()
+                + (qint32)(ssnRemember ? Server::QJWT::RememberLoginTTL.value() : Server::QJWT::NormalLoginTTL.value());
 
     if (_sessionID.size())
         _payload["jti"] = _sessionID;
@@ -134,7 +140,8 @@ QString QJWT::createSigned(
         _payload.remove("jti");
 
     if (_remoteIP.isEmpty() == false)
-        _privatePayload.insert("cip", _remoteIP);
+        _privatePayload["cip"] = _remoteIP;
+//    _privatePayload.insert("cip", _remoteIP);
 
     if (_privatePayload.isEmpty() == false)
         _payload["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
@@ -146,10 +153,9 @@ QString QJWT::createSigned(
     return Data + "." + QJWT::hash(Data).toBase64();
 }
 
-QJsonObject QJWT::verifyReturnPayload(
-        QString &_jwt,
-        const QString &_remoteIP,
-        bool _renewIfExpired
+TAPI::JWT_t QJWT::verifyJWT(
+        const QString &_jwt,
+        const QString &_remoteIP
     )
 {
     QStringList JWTParts = _jwt.split('.');
@@ -166,7 +172,7 @@ QJsonObject QJWT::verifyReturnPayload(
     if (Payload.isNull())
         throw exHTTPForbidden("Invalid JWT payload: " + Error.errorString());
 
-    QJsonObject JWTPayload = Payload.object();
+    TAPI::JWT_t JWTPayload = Payload.object();
 
     if (JWTPayload.empty())
         throw exHTTPForbidden("Invalid JWT payload: empty object");
@@ -185,7 +191,6 @@ QJsonObject QJWT::verifyReturnPayload(
             throw exHTTPExpectationFailed("Invalid private JWT payload: " + Error.errorString());
 
         QJsonObject PrivateObject = Private.object();
-
         JWTPayload["prv"] = PrivateObject;
 
         // check client ip ---------------
@@ -196,82 +201,15 @@ QJsonObject QJWT::verifyReturnPayload(
         }
     }
 
+    //check large expiration
+    if (JWTPayload.contains("ssnexp") == false)
+        exHTTPForbidden("Invalid ssnexp in JWT");
+    if (static_cast<quint64>(JWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+        throw exHTTPUnauthorized("Session expired");
+
     if (JWTPayload.contains("exp")
-            && static_cast<quint64>(JWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t()
-        )
-    {
-        if (_renewIfExpired == false)
-            throw exHTTPUnauthorized("JWT expired");
-
-        QString SessionKey = JWTPayload["jti"].toString();
-
-        DBManager::clsDAC DAC("AAA"); //master db dac -> AAA
-
-        //check session
-        QString Qry = R"(
-            SELECT TIME_TO_SEC((TIMEDIFF(NOW(), ssnCreationDateTime))) AS LifeSeconds
-                 , tblActiveSessions.*
-              FROM tblActiveSessions
-             WHERE ssnKey=?
-               AND ssnStatus='A'
-)";
-        QJsonDocument Result = DAC.execQuery({}, Qry, { SessionKey })
-                               .toJson(true);
-
-        if (Result.object().isEmpty())
-            throw exHTTPUnauthorized("Active session not found");
-
-        QVariantMap SessionInfo = Result.toVariant().toMap();
-
-        //check old JWT
-        QString ssnJWT = SessionInfo["ssnJWT"].toString();
-        if ((ssnJWT.isEmpty() == false) && (_jwt != ssnJWT))
-        {
-            _jwt = ssnJWT; //this will add response header X-AUTH-NEW-TOKEN
-            throw exHTTPForbidden("JWT not replaced by client");
-        }
-
-        //check large expiration
-        quint64 LifeSeconds = SessionInfo["LifeSeconds"].toUInt();
-        bool ssnRemember = (SessionInfo["ssnRemember"].toInt() == 1);
-
-        if (LifeSeconds >= (ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value()))
-        {
-            Qry = R"(
-                UPDATE tblActiveSessions
-                   SET ssnStatus='E'
-                 WHERE ssnKey=?
-)";
-            DAC.execQuery({}, Qry, { SessionKey });
-
-            throw exHTTPUnauthorized("Session expired");
-        }
-
-        //
-        if (SessionInfo["ssnIPReadable"] != _remoteIP)
-            throw exHTTPForbidden("Invalid IP");
-
-        //ssn_usrID
-        //ssnFingerPrint
-
-        //TODO: check user ban or large expiration
-
-        //----------------------------------------
-        _jwt = QJWT::createSigned(
-                JWTPayload,
-                JWTPayload.contains("prv") ? JWTPayload["prv"].toObject() : QJsonObject(),
-                JWTPayload["exp"].toInt() - JWTPayload["iat"].toInt(),
-                JWTPayload["jti"].toString(),
-                _remoteIP
-        );
-
-        Qry = R"(
-            UPDATE tblActiveSessions
-               SET ssnJWT=?
-             WHERE ssnKey=?
-)";
-        DAC.execQuery({}, Qry, { _jwt, SessionKey });
-    }
+            && static_cast<quint64>(JWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+        throw exJWTExpired("JWT expired");
 
     return JWTPayload;
 }

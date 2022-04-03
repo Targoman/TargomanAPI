@@ -25,12 +25,17 @@
 #define TARGOMAN_API_SERVER_CLSJWT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
+#include "Interfaces/Common/GenericTypes.h"
+#include "ServerConfigs.h"
 
 namespace Targoman::API::AAA {
 class clsJWT;
 }
 
 namespace Targoman::API::Server {
+
+TARGOMAN_ADD_EXCEPTION_HANDLER(exJWT, exTargomanAPI);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exJWTExpired, exJWT);
 
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
@@ -55,10 +60,9 @@ public:
         const QString &_remoteIP = {}
     );
 
-    static QJsonObject verifyReturnPayload(
-        /*INOUT*/ QString &_jwt,
-        const QString &_remoteIP,
-        bool _renewIfExpired = false
+    static TAPI::JWT_t verifyJWT(
+        const QString &_jwt,
+        const QString &_remoteIP
     );
 
 private:

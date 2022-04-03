@@ -34,23 +34,23 @@ ActiveSessions::ActiveSessions() :
     intfSQLBasedModule(
         AAASchema,
         tblActiveSessions::Name,
-        {///< ColName                                 Type                 Validation                   Default    UpBy    Sort   Filter Self  Virt   PK
-            { tblActiveSessions::ssnKey,              S(TAPI::MD5_t),      QFV,                         ORM_PRIMARY_KEY },
-            { tblActiveSessions::ssn_usrID,           S(quint64),          QFV.integer().minValue(1),   QRequired, UPNone },
-            { tblActiveSessions::ssnIP,               S(quint32),          QFV.integer().minValue(1),   QRequired, UPNone },
-            { tblActiveSessions::ssnIPReadable,       S(QString),          QFV.allwaysInvalid(),        QInvalid,  UPNone, false, false },
-            { tblActiveSessions::ssnInfo,             S(TAPI::JSON_t),     QFV,                         QNull,     UPNone, false, false },
-            { tblActiveSessions::ssnFingerPrint,      S(TAPI::MD5_t),      QFV.allwaysInvalid(),        QNull,     UPNone, false, false },
-            { tblActiveSessions::ssnLastActivity,     S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
-            { tblActiveSessions::ssnRemember,         S(bool),             QFV,                         false,     UPNone },
-            { tblActiveSessions::ssnJWT,              S(QString),          QFV,                         QNull,     UPAdmin, false, false },
-            { tblActiveSessions::ssnStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
-            { tblActiveSessions::ssnCreationDateTime, ORM_CREATED_ON },
-            { tblActiveSessions::ssnUpdatedBy_usrID,  ORM_UPDATED_BY },
+        {///< ColName                                   Type                 Validation                   Default    UpBy    Sort   Filter Self  Virt   PK
+            { tblActiveSessions::ssnKey,                S(TAPI::MD5_t),      QFV,                         ORM_PRIMARY_KEY },
+            { tblActiveSessions::ssn_usrID,             S(quint64),          QFV.integer().minValue(1),   QRequired, UPNone },
+            { tblActiveSessions::ssnIP,                 S(quint32),          QFV.integer().minValue(1),   QRequired, UPNone },
+            { tblActiveSessions::ssnIPReadable,         S(QString),          QFV.allwaysInvalid(),        QInvalid,  UPNone, false, false },
+            { tblActiveSessions::ssnInfo,               S(TAPI::JSON_t),     QFV,                         QNull,     UPNone, false, false },
+            { tblActiveSessions::ssnFingerPrint,        S(TAPI::MD5_t),      QFV.allwaysInvalid(),        QNull,     UPNone, false, false },
+            { tblActiveSessions::ssnLastActivity,       S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
+            { tblActiveSessions::ssnLastRenew,          S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
+            { tblActiveSessions::ssnRemember,           S(bool),             QFV,                         false,     UPNone },
+            { tblActiveSessions::ssnStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
+            { tblActiveSessions::ssnCreationDateTime,   ORM_CREATED_ON },
+            { tblActiveSessions::ssnUpdatedBy_usrID,    ORM_UPDATED_BY },
         },
-        {///< Col                                     Reference Table              ForeignCol      Rename      LeftJoin
-            { tblActiveSessions::ssn_usrID,           R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
-            { tblActiveSessions::ssnUpdatedBy_usrID,  R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true }
+        {///< Col                                       Reference Table              ForeignCol      Rename      LeftJoin
+            { tblActiveSessions::ssn_usrID,             R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
+            { tblActiveSessions::ssnUpdatedBy_usrID,    R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true }
         }
     )
 {}

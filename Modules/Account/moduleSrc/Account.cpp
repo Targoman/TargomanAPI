@@ -195,16 +195,17 @@ Account::Account() :
 TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
 {
     return clsJWT::createSigned({
-                                    { JWTItems::usrLogin,        _login },
-                                    { JWTItems::usrID,           _activeAccount.Privs["usrID"] },
-                                    { JWTItems::usrName,         _activeAccount.Privs["usrName"] },
-                                    { JWTItems::usrFamily,       _activeAccount.Privs["usrFamily"] },
-                                    { JWTItems::rolID,           _activeAccount.Privs["usr_rolID"] },
-                                    { JWTItems::rolName,         _activeAccount.Privs["rolName"] },
-                                    { JWTItems::privs,           _activeAccount.Privs["privs"] },
-                                    { JWTItems::usrApproval,     TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
-                                    { JWTItems::usrStatus,       TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
-                                    { JWTItems::canChangePass,   _activeAccount.Privs["hasPass"] },
+                                    { JWTItems::usrLogin,       _login },
+                                    { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
+                                    { JWTItems::usrName,        _activeAccount.Privs["usrName"] },
+                                    { JWTItems::usrFamily,      _activeAccount.Privs["usrFamily"] },
+                                    { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
+                                    { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
+                                    { JWTItems::privs,          _activeAccount.Privs["privs"] },
+                                    { JWTItems::usrApproval,    TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
+                                    { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
+                                    { JWTItems::canChangePass,  _activeAccount.Privs["hasPass"] },
+                                    { JWTItems::iat,            _activeAccount.Privs["Issuance"] },
                                 },
                                 QJsonObject({ { "svc", _services } }),
                                 _activeAccount.TTL,
@@ -425,16 +426,17 @@ TAPI::EncodedJWT_t Account::apilogin(
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    auto LoginInfo = Authentication::login(_REMOTE_IP,
-                                           _emailOrMobile,
-                                           _pass,
-                                           _salt,
-                                           _services.split(",", QString::SkipEmptyParts),
-                                           _rememberMe,
-                                           _sessionInfo.object(),
-                                           _fingerprint);
+    stuActiveAccount LoginInfo = Authentication::login(_REMOTE_IP,
+                                                       _emailOrMobile,
+                                                       _pass,
+                                                       _salt,
+                                                       _services.split(",", QString::SkipEmptyParts),
+                                                       _rememberMe,
+                                                       _sessionInfo.object(),
+                                                       _fingerprint
+                                                       );
 
-    return this->createJWT(_emailOrMobile, LoginInfo, _services);
+        return this->createJWT(_emailOrMobile, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -500,60 +502,6 @@ bool Account::apiresendApprovalCode(
 
     return true;
 }
-
-//bool Account::apiPUTrequestMobileVerifyCode(
-//        TAPI::RemoteIP_t _REMOTE_IP,
-//        TAPI::Mobile_t _mobile
-//    )
-//{
-//    Authorization::validateIPAddress(_REMOTE_IP);
-
-//    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
-
-//    quint64 aprID = this->callSP("spMobileVerifyCode_Request", {
-//                                     { "iMobile", _mobile },
-//                                 })
-//                    .spDirectOutputs()
-//                    .value("oAprID")
-//                    .toDouble();
-
-//    return (aprID > 0);
-//}
-
-/*
-TAPI::EncodedJWT_t Account::apiPUTverifyLoginByMobileCode(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile,
-        quint32 _code,
-        TAPI::CommaSeparatedStringList_t _services,
-        bool _rememberMe,
-        TAPI::JSON_t _sessionInfo,
-        TAPI::MD5_t _fingerprint
-    )
-{
-    Authorization::validateIPAddress(_REMOTE_IP);
-
-    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
-
-    QJsonObject UserInfo = this->callSP("spLogin_VerifyByMobileCode", {
-                                            { "iMobile", _mobile },
-                                            { "iCode", _code },
-                                            { "iIP", _REMOTE_IP },
-                                            { "iInfo", _sessionInfo.object() },
-                                            { "iRemember", _rememberMe ? "1" : "0" },
-                                            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-                                        })
-                           .toJson(true)
-                           .object();
-
-    auto LoginInfo = PrivHelpers::processUserObject(UserInfo, {}, _services.split(",", QString::SkipEmptyParts));
-
-    return this->createJWT(_mobile, LoginInfo, _services);
-//    return Targoman::API::AccountModule::stuMultiJWT({
-//                                 this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
-//                             });
-}
-*/
 
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module

@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_AAA_AUTHENTICATION_H
 #define TARGOMAN_API_AAA_AUTHENTICATION_H
 
+#include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/PrivHelpers.h"
 
@@ -48,21 +49,26 @@ struct stuOAuthInfo {
 };
 
 extern Targoman::API::AAA::stuActiveAccount login(
-        const QString& _ip,
-        const QString& _login,
-        const QString& _pass,
-        const QString& _salt,
-        const QStringList& _requiredServices,
-        bool _rememberMe,
-        const QJsonObject& _info,
-        const QString& _fingerPrint
-    );
+    const QString &_ip,
+    const QString &_login,
+    const QString &_pass,
+    const QString &_salt,
+    const QStringList &_requiredServices,
+    bool _rememberMe,
+    const QJsonObject &_info,
+    const QString &_fingerPrint
+);
 
-extern Targoman::API::AAA::stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices);
-extern stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken);
-extern stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken);
-extern stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken);
-extern stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken);
+//extern Targoman::API::AAA::stuActiveAccount updatePrivs(const QString &_ip, const QString &_ssid, const QString &_requiredServices);
+extern QString renewJWT(
+    const QString &_jwt,
+    const QString &_ip
+);
+
+extern stuOAuthInfo retrieveGoogleUserInfo(const QString &_authToken);
+extern stuOAuthInfo retrieveLinkedinUserInfo(const QString &_authToken);
+extern stuOAuthInfo retrieveYahooUserInfo(const QString &_authToken);
+extern stuOAuthInfo retrieveGitHubUserInfo(const QString &_authToken);
 
 } //namespace Targoman::API::AAA::Authentication
 

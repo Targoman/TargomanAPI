@@ -27,7 +27,7 @@
 #include <QDebug>
 #include "Interfaces/AAA/PrivHelpers.h"
 //#include "Interfaces/AAA/clsJWT.hpp"
-#include "App/Server/QJWT.h"
+//#include "App/Server/QJWT.h"
 
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::AAA;
@@ -57,26 +57,21 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 QVariant RESTClientHelper::callAPI(
         TAPI::JWT_t _JWT,
         RESTClientHelper::enuHTTPMethod _method,
-        const QString& _api,
-        const QVariantMap& _urlArgs,
-        const QVariantMap& _postOrFormFields,
-        const QVariantMap& _formFiles,
+        const QString &_api,
+        const QVariantMap &_urlArgs,
+        const QVariantMap &_postOrFormFields,
+        const QVariantMap &_formFiles,
         QString _aPIURL
     )
 {
-//    clsJWT JWT(_JWT);
-//    QString EncodedJWT = JWT.session();
-
-//    QString EncodedJWT = clsJWT::createSigned(_JWT);
-
-    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
-        {},
-        300, //Targoman::API::Server::QJWT::TTL.value(),
-        {}
-    );
+//    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
+//        {},
+//        300, //Targoman::API::Server::QJWT::TTL.value(),
+//        {}
+//    );
 
     return RESTClientHelper::callAPI(
-        EncodedJWT,
+        _JWT["encodedJWT"].toString(),
         _method,
         _api,
         _urlArgs,
@@ -89,10 +84,10 @@ QVariant RESTClientHelper::callAPI(
 QVariant RESTClientHelper::callAPI(
         QString _encodedJWT,
         RESTClientHelper::enuHTTPMethod _method,
-        const QString& _api,
-        const QVariantMap& _urlArgs,
-        const QVariantMap& _postOrFormFields,
-        const QVariantMap& _formFiles,
+        const QString &_api,
+        const QVariantMap &_urlArgs,
+        const QVariantMap &_postOrFormFields,
+        const QVariantMap &_formFiles,
         QString _aPIURL
     )
 {

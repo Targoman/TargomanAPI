@@ -34,7 +34,7 @@ namespace Targoman::API::Helpers {
 
 struct ClientConfigs
 {
-    static inline QString makeConfig(const QString& _name) { return "/Client/" + _name; }
+    static inline QString makeConfig(const QString &_name) { return "/Client/" + _name; }
     static Targoman::Common::Configuration::tmplConfigurable<QString> RESTServerAddress;
 };
 
@@ -52,20 +52,20 @@ public:
     static QVariant callAPI(
         TAPI::JWT_t _JWT,
         RESTClientHelper::enuHTTPMethod _method,
-        const QString& _api,
-        const QVariantMap& _urlArgs = {},
-        const QVariantMap& _postOrFormFields = {},
-        const QVariantMap& _formFiles = {},
+        const QString &_api,
+        const QVariantMap &_urlArgs = {},
+        const QVariantMap &_postOrFormFields = {},
+        const QVariantMap &_formFiles = {},
         QString _aPIURL = {}
     );
 
     static QVariant callAPI(
         QString _encodedJWT,
         RESTClientHelper::enuHTTPMethod _method,
-        const QString& _api,
-        const QVariantMap& _urlArgs = {},
-        const QVariantMap& _postOrFormFields = {},
-        const QVariantMap& _formFiles = {},
+        const QString &_api,
+        const QVariantMap &_urlArgs = {},
+        const QVariantMap &_postOrFormFields = {},
+        const QVariantMap &_formFiles = {},
         QString _aPIURL = {}
     );
 

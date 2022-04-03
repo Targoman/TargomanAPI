@@ -56,7 +56,7 @@ private:
             const QString &_title,
             const QString &_body,
             const TAPI::Files_t &_files = {},
-            NULLABLE_TYPE(quint32) _unitID = NULLABLE_NULL_VALUE
+            quint32 _unitID = 0
         );
 
 private slots:
@@ -68,7 +68,7 @@ private slots:
             const QString &_body,
             quint32 _serviceID,
             quint64 _targetUserID = 0,
-            NULLABLE_TYPE(quint32) _unitID = NULLABLE_NULL_VALUE,
+            quint32 _unitID = 0,
             const TAPI::stuFileInfo &_file = {}
         ),
         "create new message targeting a user or all users (if target user is 0)"
