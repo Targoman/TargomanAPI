@@ -39,6 +39,9 @@
 #include "APICache.hpp"
 #include "OpenAPIGenerator.h"
 
+#include "Interfaces/AAA/Authentication.h"
+using namespace Targoman::API::AAA;
+
 namespace Targoman::API::Server {
 
 using namespace qhttp::server;
@@ -315,7 +318,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
         qhttp::THeaderHash Headers = this->Request->headers();
         qhttp::THeaderHash Cookies;
-        QJsonObject JWT;
+        TAPI::JWT_t JWT;
 
         if (_apiObject->requiresJWT())
         {
@@ -325,26 +328,26 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
-                QString OldBearerToken = BearerToken;
+                QString RemoteIP = this->toIPv4(this->Request->remoteAddress());
 
                 try
                 {
-                    JWT = QJWT::verifyReturnPayload(
+                    JWT = QJWT::verifyJWT(
                               BearerToken,
-                              this->toIPv4(this->Request->remoteAddress()),
-                              true
+                              RemoteIP
                               );
-
-                    if (BearerToken != OldBearerToken)
-                        ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
                 }
-                catch (...)
+                catch (exJWTExpired &exp)
                 {
-                    if (BearerToken != OldBearerToken)
-                        ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
+                    QString NewToken = Authentication::renewJWT(
+                                BearerToken,
+                                RemoteIP
+                                );
 
-                    throw;
+                    BearerToken = NewToken;
+                    ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
                 }
+                JWT["encodedJWT"] = BearerToken;
             }
             else
                 throw exHTTPForbidden("No valid authentication header is present");

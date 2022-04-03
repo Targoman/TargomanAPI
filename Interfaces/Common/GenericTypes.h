@@ -34,16 +34,12 @@
 #include "Interfaces/Common/tmplAPIArg.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 extern QList<Targoman::API::Common::intfAPIArgManipulator*> gOrderedMetaTypeInfo;
 extern QList<Targoman::API::Common::intfAPIArgManipulator*> gUserDefinedTypesInfo;
 
-}
-}
-}
+} //namespace Targoman::API::Server
 
 //I used TAPI as namespace in order to make Targoman::API shorter
 namespace TAPI {

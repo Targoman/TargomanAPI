@@ -48,6 +48,15 @@ HEADERS += \
     Helpers/SecurityHelper.h \
     Helpers/URLHelper.h \
     Helpers/PhoneHelper.h \
+    AAA/AAA.hpp \
+    AAA/AAADefs.hpp \
+    AAA/Authentication.h \
+    AAA/Authorization.h \
+    AAA/clsJWT.hpp \
+    AAA/PrivHelpers.h \
+    AAA/Accounting_Interfaces.h \
+    AAA/Accounting_Defs.hpp \
+    AAA/intfAccountingBasedModule.h \
     DBM/Defs.hpp \
     DBM/clsORMField.h \
     DBM/clsTable.h \

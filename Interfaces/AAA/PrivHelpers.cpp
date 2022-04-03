@@ -138,7 +138,8 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
 }
 
 stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
-    _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
+    if (_userObj.contains(DBM_SPRESULT_ROWS))
+        _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
     if(_userObj.size()){
         stuActiveAccount ActiveAccount =
@@ -181,11 +182,11 @@ TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _priva
                                       _sessionID);
 }
 
-TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
-{
-    return Server::QJWT::createSigned(_payload, _privatePayload,
-                                      _remember ? Server::QJWT::RememberLoginTTL.value() : Server::QJWT::NormalLoginTTL.value(),
-                                      _sessionID);
-}
+//TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
+//{
+//    return Server::QJWT::createSigned(_payload, _privatePayload,
+//                                      _remember ? Server::QJWT::RememberLoginTTL.value() : Server::QJWT::NormalLoginTTL.value(),
+//                                      _sessionID);
+//}
 
 } //namespace Targoman::API::AAA

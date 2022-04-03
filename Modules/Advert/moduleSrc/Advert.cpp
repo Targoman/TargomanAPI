@@ -103,6 +103,14 @@ Advert::Advert() :
 
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
 {
+    //TODO: complete this
+    return stuServiceCreditsInfo(
+                {},
+                NULLABLE_NULL_VALUE,
+                NULLABLE_NULL_VALUE,
+                {},
+                {}
+                );
 }
 
 void Advert::breakCredit(quint64 _slbID)

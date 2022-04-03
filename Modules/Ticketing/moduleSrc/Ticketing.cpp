@@ -65,7 +65,7 @@ quint64 Ticketing::insertTicket(
         const QString &_title,
         const QString &_body,
         const TAPI::Files_t &_files,
-        NULLABLE_TYPE(quint32) _unitID
+        quint32 _unitID
     )
 {
     TAPI::ORMFields_t CreateFields({
@@ -83,8 +83,8 @@ quint64 Ticketing::insertTicket(
     if (_inReplyTicketID > 0)
         CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTicketID);
 
-    if (NULLABLE_HAS_VALUE(_unitID))
-        CreateFields.insert(tblTickets::tkt_untID, NULLABLE_GET(_unitID));
+    if (_unitID > 0)
+        CreateFields.insert(tblTickets::tkt_untID, _unitID);
 
     quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
 
@@ -130,7 +130,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
         const QString &_body,
         quint32 _serviceID,
         quint64 _targetUserID,
-        NULLABLE_TYPE(quint32) _unitID,
+        quint32 _unitID,
         const TAPI::stuFileInfo &_file
     )
 {

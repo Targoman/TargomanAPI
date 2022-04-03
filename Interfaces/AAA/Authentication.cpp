@@ -23,6 +23,8 @@
 
 #include "Authentication.h"
 #include "PrivHelpers.h"
+#include "Interfaces/AAA/clsJWT.hpp"
+#include "App/Server/QJWT.h"
 
 namespace Targoman::API::AAA::Authentication {
 
@@ -56,15 +58,65 @@ stuActiveAccount login(
     return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices);
 }
 
+/*
 stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices)
 {
     makeAAADAC(DAC);
+
     QJsonObject UserInfo = DAC.callSP({},
                                       "spSession_UpdateActivity", {
                                           {"iIP", _ip},
                                           {"iSSID", _ssid},
                                       }).toJson(true).object();
+
     return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices.split(',', QString::SkipEmptyParts));
+}
+*/
+
+QString renewJWT(
+        const QString &_jwt,
+        const QString &_ip
+    )
+{
+    QStringList JWTParts = _jwt.split('.');
+
+    if (JWTParts.length() != 3)
+        throw exHTTPForbidden("Invalid JWT Token");
+
+    QJsonParseError Error;
+    QJsonDocument Payload = QJsonDocument::fromJson(QByteArray::fromBase64(JWTParts.at(1).toLatin1()), &Error);
+
+    if (Payload.isNull())
+        throw exHTTPForbidden("Invalid JWT payload: " + Error.errorString());
+
+    TAPI::JWT_t JWTPayload = Payload.object();
+
+    clsJWT JWT(JWTPayload);
+    QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
+
+    makeAAADAC(DAC);
+
+    quint32 Duration = JWTPayload["exp"].toInt() - JWTPayload["iat"].toInt();
+    QJsonObject UserInfo = DAC.callSP({},
+                                      "spSessionRetrieveInfo", {
+                                          { "iSSID", JWT.session() },
+                                          { "iIP", _ip },
+                                          { "iIssuance", JWTPayload["iat"].toInt() },
+                                      }).toJson(true).object();
+
+
+    stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(UserInfo, {}, Services);
+
+    JWTPayload["iat"] = ActiveAccount.Privs["Issuance"];
+    JWTPayload["privs"] = ActiveAccount.Privs["privs"];
+
+    return Server::QJWT::createSigned(
+            JWTPayload,
+            JWTPayload.contains("prv") ? JWTPayload["prv"].toObject() : QJsonObject(),
+            Duration,
+            JWTPayload["jti"].toString(),
+            _ip
+    );
 }
 
 QString retrievePhoto(const QString _url)

@@ -32,18 +32,19 @@
 namespace Targoman::API::AAA {
 
 namespace JWTItems{
+TARGOMAN_CREATE_CONSTEXPR(iat);
+TARGOMAN_CREATE_CONSTEXPR(jti);
+TARGOMAN_CREATE_CONSTEXPR(priv);
+TARGOMAN_CREATE_CONSTEXPR(privs);
 TARGOMAN_CREATE_CONSTEXPR(usrLogin);
 TARGOMAN_CREATE_CONSTEXPR(usrName);
 TARGOMAN_CREATE_CONSTEXPR(usrFamily);
-TARGOMAN_CREATE_CONSTEXPR(rolName);
-TARGOMAN_CREATE_CONSTEXPR(rolID);
-TARGOMAN_CREATE_CONSTEXPR(privs);
 TARGOMAN_CREATE_CONSTEXPR(usrID);
 TARGOMAN_CREATE_CONSTEXPR(usrApproval);
 TARGOMAN_CREATE_CONSTEXPR(usrStatus);
-TARGOMAN_CREATE_CONSTEXPR(jti);
-TARGOMAN_CREATE_CONSTEXPR(priv);
 TARGOMAN_CREATE_CONSTEXPR(canChangePass);
+TARGOMAN_CREATE_CONSTEXPR(rolID);
+TARGOMAN_CREATE_CONSTEXPR(rolName);
 }
 
 class clsJWT{
@@ -91,7 +92,7 @@ public:
      * @param _sessionID optinally a session key for each user to be stored in `jti`
      * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
      */
-    static TAPI::EncodedJWT_t createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID = {});
+//    static TAPI::EncodedJWT_t createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID = {});
 private:
     const QJsonObject& Token;
 };
