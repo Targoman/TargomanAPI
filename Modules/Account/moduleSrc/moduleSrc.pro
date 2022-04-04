@@ -14,6 +14,7 @@ HEADERS += \
     ORM/APITokens.h \
     ORM/APITokenValidIPs.h \
     ORM/ApprovalRequest.h \
+    ORM/Auth.h \
     ORM/BlockingRules.h \
     ORM/ForgotPassRequest.h \
     ORM/IPBin.h \
@@ -40,6 +41,7 @@ SOURCES += \
     ORM/APITokens.cpp \
     ORM/APITokenValidIPs.cpp \
     ORM/ApprovalRequest.cpp \
+    ORM/Auth.cpp \
     ORM/BlockingRules.cpp \
     ORM/ForgotPassRequest.cpp \
     ORM/IPBin.cpp \
