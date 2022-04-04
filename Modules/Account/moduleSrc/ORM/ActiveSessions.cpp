@@ -42,7 +42,7 @@ ActiveSessions::ActiveSessions() :
             { tblActiveSessions::ssnInfo,               S(TAPI::JSON_t),     QFV,                         QNull,     UPNone, false, false },
             { tblActiveSessions::ssnFingerPrint,        S(TAPI::MD5_t),      QFV.allwaysInvalid(),        QNull,     UPNone, false, false },
             { tblActiveSessions::ssnLastActivity,       S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
-            { tblActiveSessions::ssnLastRenew,          S(TAPI::DateTime_t), QFV,                         QNull,     UPNone },
+            { tblActiveSessions::ssnLastRenew,          S(quint64),          QFV,                         QNull,     UPNone },
             { tblActiveSessions::ssnRemember,           S(bool),             QFV,                         false,     UPNone },
             { tblActiveSessions::ssnStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
             { tblActiveSessions::ssnCreationDateTime,   ORM_CREATED_ON },
