@@ -54,6 +54,8 @@ using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
 
+#include "Interfaces/Server/QJWT.h"
+
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuUserStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGender);
@@ -108,7 +110,6 @@ TARGOMAN_DEFINE_ENUM(enuPaymentType,
                      Offline = 'F'
                      )
 
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 
 //tmplConfigurableArray<intfPaymentGateway::stuGateway> intfPaymentGateway::GatewayEndPoints (
 //        AAA::Accounting::makeConfig("GatewayEndPoints"),
@@ -152,6 +153,9 @@ QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile)
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
+TARGOMAN_IMPL_API_MODULE(Account)
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
+
 Account::Account() :
     intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
 {
@@ -685,8 +689,10 @@ bool Account::apichangePass(
 {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
+    clsJWT CJWT(_JWT);
+
     this->callSP("spPassword_Change", {
-                     { "iUserID", clsJWT(_JWT).usrID() },
+                     { "iUserID", CJWT.usrID() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
                      { "iNewPass", _newPass },
@@ -699,7 +705,7 @@ bool Account::apichangePass(
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 Targoman::API::AAA::stuVoucher Account::processVoucher(
-        TAPI::JWT_t _JWT,
+        INOUT TAPI::JWT_t &_JWT,
         quint64 _voucherID
     )
 {
@@ -747,6 +753,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     //bypass process by end point?
                     if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
                     {
+                        QVariantMap ResponseHeaders;
+
                         QVariant Result = RESTClientHelper::callAPI(
                             _JWT,
                             RESTClientHelper::POST,
@@ -755,8 +763,23 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             {
                                 { "voucherItem", VoucherItem.toJson().toVariantMap() },
                                 { "voucherID", _voucherID },
-                            }
+                            },
+                            {},
+                            {},
+                            &ResponseHeaders
                         );
+
+                        //replace JWT by x-auth-new-token
+                        if (ResponseHeaders.contains("x-auth-new-token"))
+                        {
+                            QString NewToken = ResponseHeaders.value("x-auth-new-token").toString();
+                            Account::instance()->addResponseHeader("x-auth-new-token", NewToken);
+                            Server::QJWT::extractAndDecryptPayload(NewToken, _JWT);
+                            _JWT["encodedJWT"] = NewToken;
+                            qDebug() << "**********************************" << endl
+                                     << "JWT replaced by"
+                                     << NewToken;
+                        }
 
                         if ((Result.isValid() == false) || (Result.toBool() == false))
                             throw exHTTPInternalServerError("error in process voucher");
@@ -796,7 +819,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 }
 
 void Account::tryCancelVoucher(
-        TAPI::JWT_t _JWT,
+        INOUT TAPI::JWT_t &_JWT,
         quint64 _voucherID,
         bool _setAsError
     )
@@ -844,6 +867,8 @@ void Account::tryCancelVoucher(
                             {
                                 try
                                 {
+                                    QVariantMap ResponseHeaders;
+
                                     QVariant Result = RESTClientHelper::callAPI(
                                         _JWT,
                                         RESTClientHelper::POST,
@@ -851,8 +876,23 @@ void Account::tryCancelVoucher(
                                         {},
                                         {
                                             { "voucherItem", VoucherItem.toJson().toVariantMap() },
-                                        }
+                                        },
+                                        {},
+                                        {},
+                                        &ResponseHeaders
                                     );
+
+                                    //replace JWT by x-auth-new-token
+                                    if (ResponseHeaders.contains("x-auth-new-token"))
+                                    {
+                                        QString NewToken = ResponseHeaders.value("x-auth-new-token").toString();
+                                        Account::instance()->addResponseHeader("x-auth-new-token", NewToken);
+                                        Server::QJWT::extractAndDecryptPayload(NewToken, _JWT);
+                                        _JWT["encodedJWT"] = NewToken;
+                                        qDebug() << "**********************************" << endl
+                                                 << "JWT replaced by"
+                                                 << NewToken;
+                                    }
                                 }
                                 catch (...)
                                 {

@@ -33,17 +33,17 @@ class testActiveSessions: public clsBaseTest
 
 private slots:
     void ActiveSessions_GET_Unpriviledged(){
-        QVERIFY(callAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toString().isEmpty());
-        QVERIFY(callAPI(RESTClientHelper::GET,
+        QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toString().isEmpty());
+        QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session()), {
                             {"ssn_usrID",gUserID}, {"cols", "ssnKey"}
                         }).toMap().value("ssnKey") == clsJWT(gJWT).session());
-        QVERIFY(callAPI(RESTClientHelper::GET,
+        QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/"),{
                             {"filters",QString("ssn_usrID=%1 + ssnKey=%2").arg(gUserID).arg(clsJWT(gJWT).session())},
                             {"cols", "ssnKey"}
                         }).toMap().value("rows").toList().value(0).toMap().value("ssnKey")== clsJWT(gJWT).session());
-        QVERIFY(callAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool() == false);
+        QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool() == false);
     }
 
     void ActiveSessions_GET_Admin(){

@@ -186,16 +186,68 @@ protected:
 //    }
 
     QVariant callAPI(
+            bool _useAdminJWT,
             RESTClientHelper::enuHTTPMethod _method,
             const QString& _api,
             const QVariantMap& _urlArgs = {},
             const QVariantMap& _postOrFormFields = {},
-            const QVariantMap& _formFiles = {}
+            const QVariantMap& _formFiles = {},
+            QVariantMap *_outResponseHeaders = nullptr
         )
     {
-        return RESTClientHelper::callAPI(
-            gEncodedJWT, _method, _api, _urlArgs, _postOrFormFields, _formFiles, APIURL
-        );
+        QVariantMap ResponseHeaders;
+
+        QVariant Result = RESTClientHelper::callAPI(
+                              (_useAdminJWT ? gEncodedAdminJWT : gEncodedJWT),
+                              _method,
+                              _api,
+                              _urlArgs,
+                              _postOrFormFields,
+                              _formFiles,
+                              APIURL,
+                              &ResponseHeaders
+                              );
+
+        qDebug().noquote() << endl
+                 << "  Response Headers:" << ResponseHeaders << endl
+                 << "  Result:" << Result;
+
+        if (ResponseHeaders.contains("x-auth-new-token"))
+        {
+            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
+
+            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << NewJWT;
+
+            if (_useAdminJWT)
+                gEncodedAdminJWT = NewJWT;
+            else
+                gEncodedJWT = NewJWT;
+        }
+
+        if (_outResponseHeaders != nullptr)
+            *_outResponseHeaders = ResponseHeaders;
+
+        return Result;
+    }
+
+    QVariant callUserAPI(
+            RESTClientHelper::enuHTTPMethod _method,
+            const QString& _api,
+            const QVariantMap& _urlArgs = {},
+            const QVariantMap& _postOrFormFields = {},
+            const QVariantMap& _formFiles = {},
+            QVariantMap *_outResponseHeaders = nullptr
+        )
+    {
+        return callAPI(
+                    false,
+                    _method,
+                    _api,
+                    _urlArgs,
+                    _postOrFormFields,
+                    _formFiles,
+                    _outResponseHeaders
+                    );
     }
 
     QVariant callAdminAPI(
@@ -203,12 +255,19 @@ protected:
             const QString& _api,
             const QVariantMap& _urlArgs = {},
             const QVariantMap& _postOrFormFields = {},
-            const QVariantMap& _formFiles = {}
+            const QVariantMap& _formFiles = {},
+            QVariantMap *_outResponseHeaders = nullptr
         )
     {
-        return RESTClientHelper::callAPI(
-            gEncodedAdminJWT, _method, _api, _urlArgs, _postOrFormFields, _formFiles, APIURL
-        );
+        return callAPI(
+                    true,
+                    _method,
+                    _api,
+                    _urlArgs,
+                    _postOrFormFields,
+                    _formFiles,
+                    _outResponseHeaders
+                    );
     }
 
 private:

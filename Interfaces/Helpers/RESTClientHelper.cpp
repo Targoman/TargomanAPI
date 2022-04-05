@@ -27,7 +27,7 @@
 #include <QDebug>
 #include "Interfaces/AAA/PrivHelpers.h"
 //#include "Interfaces/AAA/clsJWT.hpp"
-//#include "App/Server/QJWT.h"
+//#include "Interfaces/Server/QJWT.h"
 
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::AAA;
@@ -61,7 +61,8 @@ QVariant RESTClientHelper::callAPI(
         const QVariantMap &_urlArgs,
         const QVariantMap &_postOrFormFields,
         const QVariantMap &_formFiles,
-        QString _aPIURL
+        QString _aPIURL,
+        QVariantMap *_outResponseHeaders
     )
 {
 //    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
@@ -77,7 +78,8 @@ QVariant RESTClientHelper::callAPI(
         _urlArgs,
         _postOrFormFields,
         _formFiles,
-        _aPIURL
+        _aPIURL,
+        _outResponseHeaders
     );
 }
 
@@ -88,7 +90,8 @@ QVariant RESTClientHelper::callAPI(
         const QVariantMap &_urlArgs,
         const QVariantMap &_postOrFormFields,
         const QVariantMap &_formFiles,
-        QString _aPIURL
+        QString _aPIURL,
+        QVariantMap *_outResponseHeaders
     )
 {
     if (_aPIURL.isEmpty())
@@ -176,13 +179,19 @@ QVariant RESTClientHelper::callAPI(
 
     QString CUrlResult = CUrl.exec(Opt);
 
+    if (_outResponseHeaders != nullptr)
+        *_outResponseHeaders = CUrl.headerBuffer();
+
     if (CUrl.lastError().isOk() == false)
     {
         auto LastError = CUrl.lastError();
-        qDebug() << "CURL ERROR:" << LastError.code() << LastError.text()
-                 << ", ERROR_BUFFER:" << CUrl.errorBuffer()
-                 << ", BUFFER:" << CUrl.buffer()
-                 << ", RESULT:" << CUrlResult;
+        qDebug().noquote().nospace()
+                << "-- CURL ERROR: (" << LastError.code() << ") " << LastError.text() << endl
+                << "  RESPONSE HEADERS: " << (_outResponseHeaders != nullptr ? *_outResponseHeaders : CUrl.headerBuffer()) << endl
+                << "  BUFFER: " << CUrl.buffer() << endl
+                << "  RESULT: " << CUrlResult << endl
+                << "  ERROR_BUFFER: " << CUrl.errorBuffer() << endl
+            ;
         return QVariant();
     }
 

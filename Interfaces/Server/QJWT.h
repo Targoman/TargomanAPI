@@ -21,12 +21,12 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_SERVER_CLSJWT_H
-#define TARGOMAN_API_SERVER_CLSJWT_H
+#ifndef TARGOMAN_API_SERVER_QJWT_H
+#define TARGOMAN_API_SERVER_QJWT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/Common/GenericTypes.h"
-#include "ServerConfigs.h"
+//#include "ServerConfigs.h"
 
 namespace Targoman::API::AAA {
 class clsJWT;
@@ -34,7 +34,7 @@ class clsJWT;
 
 namespace Targoman::API::Server {
 
-TARGOMAN_ADD_EXCEPTION_HANDLER(exJWT, exTargomanAPI);
+TARGOMAN_ADD_EXCEPTION_HANDLER(exJWT, Targoman::Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exJWTExpired, exJWT);
 
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
@@ -53,16 +53,22 @@ public:
     static Targoman::Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 
     static QString createSigned(
-        QJsonObject _payload,
+        INOUT QJsonObject &_payload,
         QJsonObject _privatePayload = QJsonObject(),
         const qint32 _expiry = -1,
         const QString &_sessionID = {},
         const QString &_remoteIP = {}
     );
 
-    static TAPI::JWT_t verifyJWT(
+    static void extractAndDecryptPayload(
         const QString &_jwt,
-        const QString &_remoteIP
+        TAPI::JWT_t &_jWTPayload
+    );
+
+    static void verifyJWT(
+        const QString &_jwt,
+        const QString &_remoteIP,
+        TAPI::JWT_t &_jWTPayload
     );
 
 private:
@@ -75,4 +81,4 @@ private:
 
 ENUM_CONFIGURABLE(Targoman::API::Server::enuJWTHashAlgs)
 
-#endif // TARGOMAN_API_SERVER_CLSJWT_H
+#endif // TARGOMAN_API_SERVER_QJWT_H

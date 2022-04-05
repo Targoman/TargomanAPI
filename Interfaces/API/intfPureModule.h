@@ -37,10 +37,10 @@
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
 
-#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "X-PAGINATION-TOTAL-COUNT"
-#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "X-PAGINATION-PAGE-COUNT"
-#define RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE   "X-PAGINATION-CURRENT-PAGE"
-#define RESPONSE_HEADER_X_PAGINATION_PER_PAGE       "X-PAGINATION-PER-PAGE"
+#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "x-pagination-total-count"
+#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "x-pagination-page-count"
+#define RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE   "x-pagination-current-page"
+#define RESPONSE_HEADER_X_PAGINATION_PER_PAGE       "x-pagination-per-page"
 
 /**********************************************************************\
 |** GET ***************************************************************|
@@ -317,6 +317,7 @@ public:
     virtual stuDBInfo requiredDB() const { return {}; }
 
     virtual bool init() { return true; }
+    virtual void setInstancePointer() { };
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL)
     {
@@ -374,7 +375,14 @@ public: \
 private: \
     TAPI_DISABLE_COPY(_name); \
 public: \
-    _name();
+    _name(); \
+    virtual void setInstancePointer() { _name::InstancePointer = this; } \
+protected: \
+    static _name* InstancePointer; \
+    static _name* instance() { return _name::InstancePointer; }
+
+#define TARGOMAN_IMPL_API_MODULE(_name) \
+    _name* _name::InstancePointer;
 
 #define TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
 public: \

@@ -28,6 +28,8 @@ using namespace Targoman::Common;
 namespace Targoman {
 namespace API {
 
+TARGOMAN_IMPL_API_MODULE(URLProcessor)
+
 URLProcessor::URLProcessor() :
     intfPureModule("Targoman")
 {}

@@ -33,7 +33,7 @@ class testActionLogs: public clsBaseTest
 
 private slots:
     void unprivActionLogs(){
-        QVERIFY(callAPI(RESTClientHelper::GET, "Account/ActionLogs").toString().isEmpty());
+        QVERIFY(callUserAPI(RESTClientHelper::GET, "Account/ActionLogs").toString().isEmpty());
     }
 };
 

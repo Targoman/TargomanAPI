@@ -16,9 +16,7 @@ HEADERS += \
     Server/appTargomanAPI.h \
     Server/clsRedisConnector.h \
     Server/clsRequestHandler.h \
-    Server/clsSimpleCrypt.h \
     Server/intfCacheConnector.hpp \
-    Server/QJWT.h \
     Server/RESTAPIRegistry.h \
     Server/RESTServer.h \
     Server/WebSocketServer.h \
@@ -33,8 +31,6 @@ SOURCES += \
     Server/clsAPIObject.cpp \
     Server/clsRedisConnector.cpp \
     Server/clsRequestHandler.cpp \
-    Server/clsSimpleCrypt.cpp \
-    Server/QJWT.cpp \
     Server/WebSocketServer.cpp \
     Server/RESTAPIRegistry.cpp \
     Server/RESTServer.cpp \

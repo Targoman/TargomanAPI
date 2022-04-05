@@ -33,7 +33,7 @@ class testRoles: public clsBaseTest
 
 private slots:
     void Roles_CREATE_Unprivileged(){
-        QVERIFY(callAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
+        QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
     }
@@ -61,7 +61,7 @@ private slots:
     }
 
     void Roles_UPDATE_Unprivileged(){
-        QVERIFY(callAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }) == gInvalid);
     }
@@ -84,7 +84,7 @@ private slots:
     }
 
     void Roles_DELETE_Unprivileged(){
-        QVERIFY(callAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)) == gInvalid);
+        QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)) == gInvalid);
     }
 
     void Roles_DELETE_Admin(){
@@ -93,8 +93,8 @@ private slots:
     }
 
     void Roles_GET_Unpriviledged(){
-        QVERIFY(callAPI(RESTClientHelper::GET, QString("Account/Roles/")) == gInvalid);
-        QVERIFY(callAPI(RESTClientHelper::GET,
+        QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Roles/")) == gInvalid);
+        QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
                             {"rolName",UT_ServiceRoleName}, {"cols", "rolName"}
                         }) == gInvalid);

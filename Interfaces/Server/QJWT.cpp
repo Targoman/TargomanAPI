@@ -30,8 +30,8 @@
 
 #include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
-#include "ServerConfigs.h"
-#include "clsSimpleCrypt.h"
+//#include "ServerConfigs.h"
+#include "Interfaces/Server/clsSimpleCrypt.h"
 
 namespace Targoman::API::Server {
 
@@ -112,7 +112,7 @@ static clsSimpleCrypt* simpleCryptInstance()
 }
 
 QString QJWT::createSigned(
-        QJsonObject _payload,
+        INOUT QJsonObject &_payload,
         QJsonObject _privatePayload,
         const qint32 _expiry,
         const QString &_sessionID,
@@ -143,19 +143,22 @@ QString QJWT::createSigned(
         _privatePayload["cip"] = _remoteIP;
 //    _privatePayload.insert("cip", _remoteIP);
 
-    if (_privatePayload.isEmpty() == false)
-        _payload["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
-    else
-        _payload.remove("prv");
+    //---------------------------------
+    QJsonObject PayloadForSign = _payload;
 
-    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(_payload).toJson().toBase64();
+    if (_privatePayload.isEmpty() == false)
+        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
+    else
+        PayloadForSign.remove("prv");
+
+    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(PayloadForSign).toJson().toBase64();
 
     return Data + "." + QJWT::hash(Data).toBase64();
 }
 
-TAPI::JWT_t QJWT::verifyJWT(
+void QJWT::extractAndDecryptPayload(
         const QString &_jwt,
-        const QString &_remoteIP
+        TAPI::JWT_t &_jWTPayload
     )
 {
     QStringList JWTParts = _jwt.split('.');
@@ -172,14 +175,14 @@ TAPI::JWT_t QJWT::verifyJWT(
     if (Payload.isNull())
         throw exHTTPForbidden("Invalid JWT payload: " + Error.errorString());
 
-    TAPI::JWT_t JWTPayload = Payload.object();
+    _jWTPayload = Payload.object();
 
-    if (JWTPayload.empty())
+    if (_jWTPayload.empty())
         throw exHTTPForbidden("Invalid JWT payload: empty object");
 
-    if (JWTPayload.contains("prv"))
+    if (_jWTPayload.contains("prv"))
     {
-        QString Decrypted = simpleCryptInstance()->decryptToString(JWTPayload.value("prv").toString());
+        QString Decrypted = simpleCryptInstance()->decryptToString(_jWTPayload.value("prv").toString());
 
         if (Decrypted.isEmpty())
             throw exHTTPExpectationFailed(QString("Invalid empty private JWT payload: DEC ErrNo: %1")
@@ -191,27 +194,40 @@ TAPI::JWT_t QJWT::verifyJWT(
             throw exHTTPExpectationFailed("Invalid private JWT payload: " + Error.errorString());
 
         QJsonObject PrivateObject = Private.object();
-        JWTPayload["prv"] = PrivateObject;
+        _jWTPayload["prv"] = PrivateObject;
+    }
+}
 
-        // check client ip ---------------
-        if (PrivateObject.contains("cip"))
-        {
-            if (PrivateObject["cip"].toString() != _remoteIP)
-                throw exHTTPForbidden("Invalid client IP");
-        }
+void QJWT::verifyJWT(
+        const QString &_jwt,
+        const QString &_remoteIP,
+        TAPI::JWT_t &_jWTPayload
+    )
+{
+    QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
+
+    // check client ip ---------------
+    if (_jWTPayload.contains("prv"))
+    {
+        QJsonObject PrivateObject = _jWTPayload["prv"].toObject();
+
+        if (PrivateObject.contains("cip") && (PrivateObject["cip"].toString() != _remoteIP))
+            throw exHTTPForbidden("Invalid client IP");
     }
 
     //check large expiration
-    if (JWTPayload.contains("ssnexp") == false)
+    if (_jWTPayload.contains("ssnexp") == false)
         exHTTPForbidden("Invalid ssnexp in JWT");
-    if (static_cast<quint64>(JWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+    if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
         throw exHTTPUnauthorized("Session expired");
 
-    if (JWTPayload.contains("exp")
-            && static_cast<quint64>(JWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+#ifdef QT_DEBUG
+    if (_jWTPayload.contains("exp")
+            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+#endif
         throw exJWTExpired("JWT expired");
 
-    return JWTPayload;
+//    return JWTPayload;
 }
 
 QByteArray QJWT::hash(const QByteArray& _data)
