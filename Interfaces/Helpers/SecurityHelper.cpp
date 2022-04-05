@@ -25,7 +25,7 @@
 #include <QCryptographicHash>
 #include <QRandomGenerator>
 #include "SecurityHelper.h"
-#include "App/Server/clsSimpleCrypt.h"
+#include "Interfaces/Server/clsSimpleCrypt.h"
 
 namespace Targoman::API::Helpers {
 

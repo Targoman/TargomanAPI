@@ -66,6 +66,7 @@ void appTargomanAPI::slotExecute()
         foreach (auto Plugin, LoadedModules)
         {
             intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
+            Module->setInstancePointer();
 
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));

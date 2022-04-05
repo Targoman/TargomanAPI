@@ -32,6 +32,8 @@ using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::ModuleHelpers;
 
+TARGOMAN_IMPL_API_MODULE(TextProcessor)
+
 TextProcessor::TextProcessor() :
     intfPureModule("Targoman")
 {}

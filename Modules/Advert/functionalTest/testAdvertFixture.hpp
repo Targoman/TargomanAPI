@@ -122,7 +122,7 @@ private slots:
     void login_user()
     {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     { "emailOrMobile", this->CreatedUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
@@ -140,7 +140,7 @@ private slots:
     void login_admin()
     {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
                                     { "emailOrMobile", this->CreatedAdminEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },

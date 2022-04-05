@@ -32,7 +32,7 @@ class testService: public clsBaseTest
 
 private slots:
     void Service_CREATE_Unpriviledged(){
-        QVERIFY(callAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
+        QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
                                 {"svcName", UT_ServiceName},
                              }) == gInvalid);
     }
@@ -52,7 +52,7 @@ private slots:
     }
 
     void Service_UPDATE_Unprivileged(){
-        QVERIFY(callAPI(RESTClientHelper::PATCH, QString("Account/Service/%1").arg(gServiceID),{},{
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH, QString("Account/Service/%1").arg(gServiceID),{},{
                                  {"svcStatus", "Removed"}
                              }) == gInvalid);
     }
@@ -64,7 +64,7 @@ private slots:
     }
 
     void Service_DELETE_Unprivileged(){
-        QVERIFY(callAPI(RESTClientHelper::DELETE, QString("Account/Service/%1").arg(gServiceID)) == gInvalid);
+        QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/Service/%1").arg(gServiceID)) == gInvalid);
     }
 
     void Service_DELETE_Admin(){
@@ -87,8 +87,8 @@ private slots:
     }
 
     void Service_GET_Unpriviledged(){
-        QVERIFY(callAPI(RESTClientHelper::GET, QString("Account/Service/")).toMap().isEmpty());
-        QVERIFY(callAPI(RESTClientHelper::GET,
+        QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Service/")).toMap().isEmpty());
+        QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Service/%1").arg(gServiceID), {
                             {"rolName",UT_ServiceName}, {"cols", "rolName"}
                         }) == gInvalid);

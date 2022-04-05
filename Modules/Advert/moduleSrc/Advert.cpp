@@ -64,6 +64,7 @@ namespace Targoman::API::AdvertModule {
 
 using namespace ORM;
 
+TARGOMAN_IMPL_API_MODULE(Advert)
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema)
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Advert, AdvertSchema)
 

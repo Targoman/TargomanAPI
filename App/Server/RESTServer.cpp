@@ -35,7 +35,7 @@
 #include "clsRedisConnector.h"
 #include "WebSocketServer.h"
 #include "RESTAPIRegistry.h"
-#include "QJWT.h"
+#include "Interfaces/Server/QJWT.h"
 #include "APICache.hpp"
 
 namespace Targoman::API {

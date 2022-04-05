@@ -56,7 +56,8 @@ public:
         const QVariantMap &_urlArgs = {},
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
-        QString _aPIURL = {}
+        QString _aPIURL = {},
+        QVariantMap *_outResponseHeaders = nullptr
     );
 
     static QVariant callAPI(
@@ -66,7 +67,8 @@ public:
         const QVariantMap &_urlArgs = {},
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
-        QString _aPIURL = {}
+        QString _aPIURL = {},
+        QVariantMap *_outResponseHeaders = nullptr
     );
 
 };

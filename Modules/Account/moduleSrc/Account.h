@@ -57,8 +57,15 @@ public:
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
 public:
-    static Targoman::API::AAA::stuVoucher processVoucher(TAPI::JWT_t _JWT, quint64 _voucherID);
-    static void tryCancelVoucher(TAPI::JWT_t _JWT, quint64 _voucherID, bool _setAsError = false);
+    static Targoman::API::AAA::stuVoucher processVoucher(
+            INOUT TAPI::JWT_t &_JWT,
+            quint64 _voucherID
+            );
+    static void tryCancelVoucher(
+            INOUT TAPI::JWT_t &_JWT,
+            quint64 _voucherID,
+            bool _setAsError = false
+            );
 
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);

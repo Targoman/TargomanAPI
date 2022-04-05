@@ -56,7 +56,7 @@ private slots:
     //-------------------------------------------------------
     void NormalizePhoneNumber()
     {
-        QVariant Result = callAPI(
+        QVariant Result = callUserAPI(
                               RESTClientHelper::POST,
                               "Account/normalizePhoneNumber",
                               {},
@@ -71,7 +71,7 @@ private slots:
 
     void SignupByMobileOnly_0999_888_1010()
     {
-        QVariant Result = callAPI(
+        QVariant Result = callUserAPI(
                               RESTClientHelper::POST,
                               "Account/loginByMobileOnly",
                               {},
@@ -125,7 +125,7 @@ private slots:
                           AprID
                       });
 
-        QVariant Result = callAPI(
+        QVariant Result = callUserAPI(
             RESTClientHelper::POST,
             "Account/approveMobile",
             {},
@@ -150,15 +150,17 @@ private slots:
 
     void Logout__0999_888_1010()
     {
-        QVERIFY(callAPI(RESTClientHelper::POST, "Account/logout").toBool());
-//        QVERIFY((gEncodedJWT = callAPI(RESTClientHelper::POST, "Account/refreshJWT").toString()).isEmpty());
+        QVERIFY(callUserAPI(RESTClientHelper::POST, "Account/logout").toBool());
+
+        gEncodedJWT = "";
+        gJWT = {};
     }
 
     //-------------------------------------------------------
     void Signup()
     {
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-        QVERIFY((gUserID = callAPI(RESTClientHelper::PUT,
+        QVERIFY((gUserID = callUserAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_UserEmail},
                                             {"name", "unit"},
@@ -172,7 +174,7 @@ private slots:
                 ;
 
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-        QVERIFY((gAdminUserID = callAPI(RESTClientHelper::PUT,
+        QVERIFY((gAdminUserID = callUserAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             {"emailOrMobile", UT_AdminUserEmail},
                                             {"name", "admin unit"},
@@ -191,7 +193,7 @@ private slots:
 
     void ResendEmailApproveCode()
     {
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/resendApprovalCode",
                                   {},
                                   {
@@ -202,7 +204,7 @@ private slots:
 
     void ApprovalRequest_timerInfo_before_send()
     {
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/ApprovalRequest/timerInfo",
                                   {},
                                   {
@@ -218,7 +220,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = DATE_SUB(NOW(), INTERVAL 10 SECOND) WHERE apr_usrID=?",
         {gUserID});
 
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/ApprovalRequest/timerInfo",
                                   {},
                                   {
@@ -247,7 +249,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
         {gUserID});
 
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/approveEmail",
                                   {},
                                   {
@@ -265,7 +267,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
         {gAdminUserID});
 
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/approveEmail",
                                   {},
                                   {
@@ -277,8 +279,8 @@ private slots:
     void Login()
     {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVariant Result = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
+                                "Account/login",{}, {
                                     {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
@@ -294,21 +296,23 @@ private slots:
     }
 
     void Logout(){
-        QVERIFY(callAPI(RESTClientHelper::POST, "Account/logout").toBool());
-//        QVERIFY((gEncodedJWT = callAPI(RESTClientHelper::POST, "Account/refreshJWT").toString()).isEmpty());
+        QVERIFY(callUserAPI(RESTClientHelper::POST, "Account/logout").toBool());
+
+        gEncodedJWT = "";
+        gJWT = {};
     }
 
 //    void loginAsGuest(){
-//        QVERIFY((callAPI(RESTClientHelper::POST,
-//                         "Account/loginAsGuest",{},{
+//        QVERIFY((callUserAPI(RESTClientHelper::POST,
+//                         "Account/loginAsGuest",{}, {
 //                             {"sessionInfo", "{\"a\":1}"},
 //                        }).toString()).size());
 //    }
 
     void LoginAgain(){
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVariant Result = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
+                                "Account/login",{}, {
                                     {"emailOrMobile", UT_UserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
@@ -319,8 +323,8 @@ private slots:
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        Result = callAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
+        Result = callUserAPI(RESTClientHelper::POST,
+                                "Account/login",{}, {
                                     {"emailOrMobile", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
@@ -339,8 +343,8 @@ private slots:
 //    }
 
     void CreateForgotPasswordLink(){
-        QVERIFY(callAPI(RESTClientHelper::POST,
-                        "Account/createForgotPasswordLink",{},{
+        QVERIFY(callUserAPI(RESTClientHelper::POST,
+                        "Account/createForgotPasswordLink",{}, {
                             {"emailOrMobile", UT_UserEmail},
 //                            {"via", "Web"},
                         }).toBool());
@@ -355,8 +359,8 @@ private slots:
         {Code});
 
         //827ccb0eea8a706c4c34a16891f84e7b # 12345
-        QVERIFY(callAPI(RESTClientHelper::POST,
-                        "Account/changePassByUUID", {},{
+        QVERIFY(callUserAPI(RESTClientHelper::POST,
+                        "Account/changePassByUUID", {}, {
                             { "emailOrMobile", UT_UserEmail },
                             { "uuid", Code },
                             { "newPass", "827ccb0eea8a706c4c34a16891f84e7b" }
@@ -366,8 +370,8 @@ private slots:
     //d769dd673f86addfe039dc2d2dab4f73 = MD5(1234 + 827ccb0eea8a706c4c34a16891f84e7b # 12345)
     //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
     void ChangePass(){
-        QVERIFY(callAPI(RESTClientHelper::POST,
-                        "Account/changePass", {},{
+        QVERIFY(callUserAPI(RESTClientHelper::POST,
+                        "Account/changePass", {}, {
                             { "oldPass", "d769dd673f86addfe039dc2d2dab4f73" },
                             { "oldPassSalt", 1234 },
                             { "newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0" }
@@ -395,7 +399,7 @@ private slots:
             { gUserID });
 
             //----------
-            QVariant Result = callAPI(RESTClientHelper::POST,
+            QVariant Result = callUserAPI(RESTClientHelper::POST,
                                       "Account/resendApprovalCode",
                                       {},
                                       {
@@ -429,8 +433,8 @@ private slots:
             DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
             {gUserID});
 
-            QVariant Result = callAPI(RESTClientHelper::POST,
-                            "Account/approveMobile", {},{
+            QVariant Result = callUserAPI(RESTClientHelper::POST,
+                            "Account/approveMobile", {}, {
                                 { "mobile", "09998882020" },
                                 { "code", Code }
                             });
@@ -445,7 +449,7 @@ private slots:
     }
 
     void User_Photo_Set() {
-        QVariant Result = callAPI(RESTClientHelper::PATCH,
+        QVariant Result = callUserAPI(RESTClientHelper::PATCH,
                                   "Account/User/photo",
                                   {},
                                   {
@@ -455,7 +459,7 @@ private slots:
         qDebug() << Result;
     }
     void User_Photo_Get() {
-        QVariant Result = callAPI(RESTClientHelper::GET,
+        QVariant Result = callUserAPI(RESTClientHelper::GET,
                                   "Account/User/photo",
                                   {
                                       { "usrID", gUserID },
@@ -466,7 +470,7 @@ private slots:
         qDebug() << Result.toString().left(100) + "...";
     }
     void User_Photo_Delete() {
-        QVariant Result = callAPI(RESTClientHelper::POST,
+        QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/User/deletePhoto",
                                   {},
                                   {}
@@ -480,7 +484,7 @@ private slots:
     ///TODO: test [PATCH]   Account/User/mobile
 
     void UpdateUserPersonalInfo() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/personalInfo",
                         {},
                         {
@@ -493,7 +497,7 @@ private slots:
     }
 
     void UpdateUserFinancialInfo() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/financialInfo",
                         {},
                         {
@@ -504,7 +508,7 @@ private slots:
     }
 
     void UpdateUserExtraInfo_json() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
                         {},
                         {
@@ -515,7 +519,7 @@ private slots:
     }
 
     void UpdateUserExtraInfo_birthdate() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
                         {},
                         {
@@ -525,7 +529,7 @@ private slots:
     }
 
     void UpdateUserExtraInfo_clearBirthDate() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
                         {},
                         {
@@ -535,7 +539,7 @@ private slots:
     }
 
     void UpdateUserExtraInfo_all() {
-        QVERIFY(callAPI(RESTClientHelper::PATCH,
+        QVERIFY(callUserAPI(RESTClientHelper::PATCH,
                         "Account/User/extraInfo",
                         {},
                         {
@@ -547,11 +551,17 @@ private slots:
     }
 
     void User_Get_With_ExtraInfo() {
-        QVariant Result = callAPI(RESTClientHelper::GET,
+        QVariant Result = callUserAPI(RESTClientHelper::GET,
                                   QString("Account/User/%1").arg(gUserID)
                                   );
 
         qDebug() << Result;
+    }
+
+    void ValidateJWT() {
+        QVERIFY(callUserAPI(RESTClientHelper::GET,
+                        "Account/Auth/validateJWT"
+                        ).toBool());
     }
 
 private slots:

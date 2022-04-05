@@ -311,8 +311,8 @@ public: \
     this->addSubModule(this->_UploadQueue.data());              \
     this->addSubModule(this->_UploadGateways.data());
 
-//    UploadFiles    ::instance().prepareFiltersList(); \
-//    UploadQueue    ::instance().prepareFiltersList(); \
+//    UploadFiles    ::instance().prepareFiltersList();
+//    UploadQueue    ::instance().prepareFiltersList();
 //    UploadGateways ::instance().prepareFiltersList();
 
 /****************************************************/

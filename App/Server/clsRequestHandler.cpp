@@ -35,7 +35,7 @@
 #include "libTargomanCommon/CmdIO.h"
 #include "Interfaces/API/intfPureModule.h"
 #include "ServerConfigs.h"
-#include "QJWT.h"
+#include "Interfaces/Server/QJWT.h"
 #include "APICache.hpp"
 #include "OpenAPIGenerator.h"
 
@@ -332,20 +332,21 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
                 try
                 {
-                    JWT = QJWT::verifyJWT(
-                              BearerToken,
-                              RemoteIP
-                              );
+                    QJWT::verifyJWT(
+                                BearerToken,
+                                RemoteIP,
+                                JWT
+                                );
                 }
                 catch (exJWTExpired &exp)
                 {
                     QString NewToken = Authentication::renewJWT(
-                                BearerToken,
+                                JWT,
                                 RemoteIP
                                 );
 
                     BearerToken = NewToken;
-                    ResponseHeaders.insert("X-AUTH-NEW-TOKEN", BearerToken);
+                    ResponseHeaders.insert("x-auth-new-token", BearerToken);
                 }
                 JWT["encodedJWT"] = BearerToken;
             }
@@ -597,8 +598,8 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
     this->Response->setStatusCode(qhttp::ESTATUS_OK);
 
 #ifdef QT_DEBUG
-    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("X-DEBUG-TIME-ELAPSED"));
-    this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
 #endif
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
@@ -672,13 +673,13 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         };
 
 #ifdef QT_DEBUG
-        funcAddToHeaderArray("X-DEBUG-TIME-ELAPSED");
+        funcAddToHeaderArray("x-debug-time-elapsed");
 
-        if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
-            _responseHeaders["X-DEBUG-TIME-ELAPSED"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+        if (_responseHeaders.contains("x-debug-time-elapsed") == false)
+            _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
 #endif
 
-        funcAddToHeaderArray("X-AUTH-NEW-TOKEN");
+        funcAddToHeaderArray("x-auth-new-token");
 
         this->addHeaderValues(_responseHeaders);
 
@@ -715,8 +716,8 @@ void clsRequestHandler::sendCORSOptions()
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
 
 #ifdef QT_DEBUG
-    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("X-DEBUG-TIME-ELAPSED"));
-    this->Response->addHeaderValue("X-DEBUG-TIME-ELAPSED", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
 #endif
 
     this->Response->end();
@@ -779,13 +780,13 @@ void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
     };
 
 #ifdef QT_DEBUG
-    funcAddToHeaderArray("X-DEBUG-TIME-ELAPSED");
+    funcAddToHeaderArray("x-debug-time-elapsed");
 
-    if (_responseHeaders.contains("X-DEBUG-TIME-ELAPSED") == false)
-        _responseHeaders["X-DEBUG-TIME-ELAPSED"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+    if (_responseHeaders.contains("x-debug-time-elapsed") == false)
+        _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
 #endif
 
-    funcAddToHeaderArray("X-AUTH-NEW-TOKEN");
+    funcAddToHeaderArray("x-auth-new-token");
 
     this->addHeaderValues(_responseHeaders);
 
