@@ -222,8 +222,8 @@ void QJWT::verifyJWT(
     if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
         throw exHTTPUnauthorized("Session expired");
 
-//    if (_jWTPayload.contains("exp")
-//            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+    if (_jWTPayload.contains("exp")
+            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
         throw exJWTExpired("JWT expired");
 }
 
