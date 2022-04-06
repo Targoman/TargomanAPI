@@ -323,6 +323,7 @@ clsDACResult clsTable::execQueryCacheable(quint32 _maxCacheTime, const QString& 
 }
 
 //TAPI::Filter_t -> QString
+//TODO: IMPORTANT! deprecated?
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters)
 {
     QStringList Filters;

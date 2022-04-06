@@ -77,10 +77,6 @@ QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
         this->setSelfFilters({ { tblUserWallets::wal_usrID, clsJWT(_JWT).usrID() } }, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
@@ -110,8 +106,6 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
     {
         ExtraFilters.insert(tblUserWallets::walDefault, 0);
-
-//        this->setSelfFilters({ { tblUserWallets::wal_usrID, clsJWT(_JWT).usrID() } }, ExtraFilters);
         ExtraFilters.insert(tblUserWallets::wal_usrID, clsJWT(_JWT).usrID());
     }
 
