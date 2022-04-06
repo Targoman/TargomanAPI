@@ -27,10 +27,11 @@
 #include <QDebug>
 #include "Interfaces/AAA/PrivHelpers.h"
 //#include "Interfaces/AAA/clsJWT.hpp"
-//#include "Interfaces/Server/QJWT.h"
+#include "Interfaces/Server/QJWT.h"
 
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::AAA;
+using namespace Targoman::API::Server;
 
 namespace Targoman::API::Helpers {
 
@@ -55,7 +56,7 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 //};
 
 QVariant RESTClientHelper::callAPI(
-        TAPI::JWT_t _JWT,
+        INOUT TAPI::JWT_t &_JWT,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs,
@@ -71,20 +72,35 @@ QVariant RESTClientHelper::callAPI(
 //        {}
 //    );
 
-    return RESTClientHelper::callAPI(
-        _JWT["encodedJWT"].toString(),
+    QString EncodedJWT = _JWT["encodedJWT"].toString();
+
+    QVariantMap ResponseHeaders;
+
+    QVariant Result = RESTClientHelper::callAPI(
+        EncodedJWT,
         _method,
         _api,
         _urlArgs,
         _postOrFormFields,
         _formFiles,
         _aPIURL,
-        _outResponseHeaders
+        &ResponseHeaders
     );
+
+    if (_outResponseHeaders != nullptr)
+        *_outResponseHeaders = ResponseHeaders;
+
+    if (EncodedJWT != _JWT["encodedJWT"].toString())
+    {
+        QJWT::extractAndDecryptPayload(EncodedJWT, _JWT);
+        _JWT["encodedJWT"] = EncodedJWT;
+    }
+
+    return Result;
 }
 
 QVariant RESTClientHelper::callAPI(
-        QString _encodedJWT,
+        INOUT QString &_encodedJWT,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs,
@@ -179,8 +195,22 @@ QVariant RESTClientHelper::callAPI(
 
     QString CUrlResult = CUrl.exec(Opt);
 
+    QVariantMap ResponseHeaders = CUrl.headerBuffer();
+
     if (_outResponseHeaders != nullptr)
-        *_outResponseHeaders = CUrl.headerBuffer();
+        *_outResponseHeaders = ResponseHeaders;
+
+    //replace JWT by x-auth-new-token
+    if (ResponseHeaders.contains("x-auth-new-token"))
+    {
+        _encodedJWT = ResponseHeaders.value("x-auth-new-token").toString();
+
+        qDebug() << "**********************************" << "JWT replaced by" << endl
+                 << _encodedJWT;
+
+        //TODO: complete this
+        //Account::instance()->addResponseHeader("x-auth-new-token", _encodedJWT);
+    }
 
     if (CUrl.lastError().isOk() == false)
     {

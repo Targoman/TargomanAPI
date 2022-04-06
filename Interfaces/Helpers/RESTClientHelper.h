@@ -50,7 +50,7 @@ public:
     };
 
     static QVariant callAPI(
-        TAPI::JWT_t _JWT,
+        INOUT TAPI::JWT_t &_JWT,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs = {},
@@ -61,7 +61,7 @@ public:
     );
 
     static QVariant callAPI(
-        QString _encodedJWT,
+        INOUT QString &_encodedJWT,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs = {},
