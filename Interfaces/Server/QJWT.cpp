@@ -132,19 +132,20 @@ QString QJWT::createSigned(
     bool ssnRemember = true;
     if (_payload.contains("ssnexp") == false)
         _payload["ssnexp"] = _payload["iat"].toInt()
-                + (qint32)(ssnRemember ? Server::QJWT::RememberLoginTTL.value() : Server::QJWT::NormalLoginTTL.value());
+                + (qint32)(ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value());
 
     if (_sessionID.size())
         _payload["jti"] = _sessionID;
     else
         _payload.remove("jti");
 
-    if (_remoteIP.isEmpty() == false)
-        _privatePayload["cip"] = _remoteIP;
-//    _privatePayload.insert("cip", _remoteIP);
-
     //---------------------------------
     QJsonObject PayloadForSign = _payload;
+
+    if (_remoteIP.isEmpty() == false)
+        _privatePayload["cip"] = _remoteIP;
+    else
+        _privatePayload.remove("cip");
 
     if (_privatePayload.isEmpty() == false)
         PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
@@ -221,13 +222,9 @@ void QJWT::verifyJWT(
     if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
         throw exHTTPUnauthorized("Session expired");
 
-#ifdef QT_DEBUG
-    if (_jWTPayload.contains("exp")
-            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
-#endif
+//    if (_jWTPayload.contains("exp")
+//            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
         throw exJWTExpired("JWT expired");
-
-//    return JWTPayload;
 }
 
 QByteArray QJWT::hash(const QByteArray& _data)

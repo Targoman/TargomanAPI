@@ -214,14 +214,14 @@ protected:
 
         if (ResponseHeaders.contains("x-auth-new-token"))
         {
-            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
+//            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
 
-            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << NewJWT;
+//            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << endl << NewJWT;
 
-            if (_useAdminJWT)
-                gEncodedAdminJWT = NewJWT;
-            else
-                gEncodedJWT = NewJWT;
+//            if (_useAdminJWT)
+//                gEncodedAdminJWT = NewJWT;
+//            else
+//                gEncodedJWT = NewJWT;
         }
 
         if (_outResponseHeaders != nullptr)

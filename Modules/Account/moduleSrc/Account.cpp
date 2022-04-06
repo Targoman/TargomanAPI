@@ -753,7 +753,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     //bypass process by end point?
                     if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
                     {
-                        QVariantMap ResponseHeaders;
+                        QString OldEncodedJWT = _JWT["encodedJWT"].toString();
 
                         QVariant Result = RESTClientHelper::callAPI(
                             _JWT,
@@ -763,23 +763,11 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             {
                                 { "voucherItem", VoucherItem.toJson().toVariantMap() },
                                 { "voucherID", _voucherID },
-                            },
-                            {},
-                            {},
-                            &ResponseHeaders
+                            }
                         );
 
-                        //replace JWT by x-auth-new-token
-                        if (ResponseHeaders.contains("x-auth-new-token"))
-                        {
-                            QString NewToken = ResponseHeaders.value("x-auth-new-token").toString();
-                            Account::instance()->addResponseHeader("x-auth-new-token", NewToken);
-                            Server::QJWT::extractAndDecryptPayload(NewToken, _JWT);
-                            _JWT["encodedJWT"] = NewToken;
-                            qDebug() << "**********************************" << endl
-                                     << "JWT replaced by"
-                                     << NewToken;
-                        }
+                        if (OldEncodedJWT != _JWT["encodedJWT"].toString())
+                            Account::instance()->addResponseHeader("x-auth-new-token", _JWT["encodedJWT"].toString());
 
                         if ((Result.isValid() == false) || (Result.toBool() == false))
                             throw exHTTPInternalServerError("error in process voucher");
@@ -867,7 +855,7 @@ void Account::tryCancelVoucher(
                             {
                                 try
                                 {
-                                    QVariantMap ResponseHeaders;
+                                    QString OldEncodedJWT = _JWT["encodedJWT"].toString();
 
                                     QVariant Result = RESTClientHelper::callAPI(
                                         _JWT,
@@ -876,23 +864,11 @@ void Account::tryCancelVoucher(
                                         {},
                                         {
                                             { "voucherItem", VoucherItem.toJson().toVariantMap() },
-                                        },
-                                        {},
-                                        {},
-                                        &ResponseHeaders
+                                        }
                                     );
 
-                                    //replace JWT by x-auth-new-token
-                                    if (ResponseHeaders.contains("x-auth-new-token"))
-                                    {
-                                        QString NewToken = ResponseHeaders.value("x-auth-new-token").toString();
-                                        Account::instance()->addResponseHeader("x-auth-new-token", NewToken);
-                                        Server::QJWT::extractAndDecryptPayload(NewToken, _JWT);
-                                        _JWT["encodedJWT"] = NewToken;
-                                        qDebug() << "**********************************" << endl
-                                                 << "JWT replaced by"
-                                                 << NewToken;
-                                    }
+                                    if (OldEncodedJWT != _JWT["encodedJWT"].toString())
+                                        Account::instance()->addResponseHeader("x-auth-new-token", _JWT["encodedJWT"].toString());
                                 }
                                 catch (...)
                                 {
