@@ -2511,11 +2511,7 @@ SelectQuery& SelectQuery::limit(quint16 _limit)
 
 SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime)
 {
-    Q_UNUSED(_cacheTime);
-
-    ///BUG: enabling cache affectes on WasSP and rows count (damages dac result data)
-//    this->Data->CahceTime = _cacheTime;
-
+    this->Data->CahceTime = _cacheTime;
     return *this;
 }
 

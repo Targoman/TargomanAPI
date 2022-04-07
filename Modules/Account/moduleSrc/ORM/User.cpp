@@ -181,6 +181,7 @@ TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
     UserExtraInfo::instance().prepareFiltersList();
 
     auto Photo = SelectQuery(UserExtraInfo::instance())
+        .setCacheTime(30)
         .addCol(tblUserExtraInfo::ueiPhoto)
         .where({ tblUserExtraInfo::uei_usrID, enuConditionOperator::Equal, _usrID })
         .one()
