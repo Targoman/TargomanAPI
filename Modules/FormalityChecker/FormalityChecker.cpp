@@ -32,17 +32,15 @@ TARGOMAN_IMPL_API_MODULE(FormalityChecker)
 
 FormalityChecker::FormalityChecker() :
     intfPureModule("Targoman")
-{}
+{ ; }
 
-bool FormalityChecker::init()
-{
+bool FormalityChecker::init() {
     NLP::FormalityChecker::instance();
 
     return true;
 }
 
-QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang)
-{
+QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang) {
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 

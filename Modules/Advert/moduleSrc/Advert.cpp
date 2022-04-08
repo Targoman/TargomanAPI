@@ -114,8 +114,7 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
                 );
 }
 
-void Advert::breakCredit(quint64 _slbID)
-{
+void Advert::breakCredit(quint64 _slbID) {
 }
 
 bool Advert::isUnlimited(const UsageLimits_t& _limits) const
@@ -126,9 +125,11 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 {
 }
 
-void Advert::applyAssetAdditives(TAPI::JWT_t _JWT,
-                                 INOUT stuAssetItem& _assetItem,
-                                 const OrderAdditives_t& _orderAdditives)
+void Advert::applyAssetAdditives(
+        TAPI::JWT_t _JWT,
+        INOUT stuAssetItem& _assetItem,
+        const OrderAdditives_t& _orderAdditives
+    )
 {
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 
@@ -169,7 +170,8 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
         QString _location,
         Targoman::API::AdvertModule::enuAdvertOrder::Type _order
     )
-{}
+{
+}
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -177,7 +179,8 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
         Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
         const QString _keywords
     )
-{}
+{
+}
 
 QString Advert::apiGETretrieveURL(
         TAPI::RemoteIP_t _REMOTE_IP,
@@ -185,7 +188,8 @@ QString Advert::apiGETretrieveURL(
         TAPI::IPv4_t _clientIP,
         QString _agent
     )
-{}
+{
+}
 
 /****************************************************************\
 |** fixture *****************************************************|
@@ -397,8 +401,7 @@ QVariant Advert::apiPOSTfixtureSetup(
     Result.insert("Voucher", Voucher.toJson());
 
     //-- approve online payment --------------------------------------
-    if (Voucher.PaymentMD5.isEmpty() == false)
-    {
+    if (Voucher.PaymentMD5.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
             _JWT,
             RESTClientHelper::POST,
@@ -441,8 +444,7 @@ QVariant Advert::apiPOSTfixtureCleanup(
     //online payment
     //voucher
 
-    try
-    {
+    try {
         QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
         QString QueryString = R"(
             DELETE c
@@ -456,13 +458,9 @@ QVariant Advert::apiPOSTfixtureCleanup(
                                                    { "items", CouponCode },
                                                    { "numRowsAffected", DACResult.numRowsAffected() },
                                                }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
         QString QueryString = R"(
             DELETE s
@@ -476,13 +474,9 @@ QVariant Advert::apiPOSTfixtureCleanup(
                                                   { "items", SaleableCode },
                                                   { "numRowsAffected", DACResult.numRowsAffected() },
                                               }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
         QString QueryString = R"(
             DELETE p
@@ -496,13 +490,9 @@ QVariant Advert::apiPOSTfixtureCleanup(
                                                  { "items", ProductCode },
                                                  { "numRowsAffected", DACResult.numRowsAffected() },
                                              }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com");
         QString QueryString = R"(
             DELETE l
@@ -516,10 +506,7 @@ QVariant Advert::apiPOSTfixtureCleanup(
                                                   { "items", LocationUrl },
                                                   { "numRowsAffected", DACResult.numRowsAffected() },
                                               }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
     return Result;
 }

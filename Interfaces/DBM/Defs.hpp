@@ -54,7 +54,7 @@ struct stuRelation
         ForeignColumn(_foreignColumn),
         RenamingPrefix(_renamingPrefix),
         IsLeftJoin(_isLeftJoin)
-    {}
+    { ; }
 
     stuRelation(QString _relationName, const stuRelation& _relation) :
         RelationName(_relationName),
@@ -63,7 +63,7 @@ struct stuRelation
         ForeignColumn(_relation.ForeignColumn),
         RenamingPrefix(_relation.RenamingPrefix),
         IsLeftJoin(_relation.IsLeftJoin)
-    {}
+    { ; }
 };
 
 TARGOMAN_DEFINE_ENUM(enuDBIndex,
@@ -81,11 +81,11 @@ struct stuDBIndex {
 
     stuDBIndex(QStringList _cols, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
         Type(_type), Columns(_cols), Name(_name)
-    {}
+    { ; }
 
     stuDBIndex(QString _col, enuDBIndex::Type _type = enuDBIndex::Key, QString _name = {}) :
         stuDBIndex(QStringList()<<_col, _type, _name)
-    {}
+    { ; }
 };
 
 extern stuRelation InvalidRelation;
@@ -98,12 +98,12 @@ struct stuRelatedORMField
 
     stuRelatedORMField(clsORMField _col, const stuRelation& _relation = InvalidRelation) :
         Col(_col), Relation(_relation)
-    {}
+    { ; }
 
     stuRelatedORMField() : Relation(InvalidRelation)
-    {}
+    { ; }
 
-    inline bool isValid(){ return this->Col.name().size();}
+    inline bool isValid() { return this->Col.name().size();}
 };
 
 extern QString finalColName(const clsORMField& _col, const QString& _prefix = {});

@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCryptographicHash>
 #include <QRandomGenerator>
 
-clsSimpleCrypt::clsSimpleCrypt():
+clsSimpleCrypt::clsSimpleCrypt() :
     m_key(0),
     m_compressionMode(CompressionAuto),
     m_protectionMode(ProtectionChecksum),
@@ -40,7 +40,7 @@ clsSimpleCrypt::clsSimpleCrypt():
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
 }
 
-clsSimpleCrypt::clsSimpleCrypt(quint64 key):
+clsSimpleCrypt::clsSimpleCrypt(quint64 key) :
     m_key(key),
     m_compressionMode(CompressionAuto),
     m_protectionMode(ProtectionChecksum),
@@ -50,14 +50,12 @@ clsSimpleCrypt::clsSimpleCrypt(quint64 key):
     splitKey();
 }
 
-void clsSimpleCrypt::setKey(quint64 key)
-{
+void clsSimpleCrypt::setKey(quint64 key) {
     m_key = key;
     splitKey();
 }
 
-void clsSimpleCrypt::splitKey()
-{
+void clsSimpleCrypt::splitKey() {
     m_keyParts.clear();
     m_keyParts.resize(8);
     for (int i=0;i<8;i++) {
@@ -69,20 +67,17 @@ void clsSimpleCrypt::splitKey()
     }
 }
 
-QByteArray clsSimpleCrypt::encryptToByteArray(const QString& _plaintext)
-{
+QByteArray clsSimpleCrypt::encryptToByteArray(const QString& _plaintext) {
     QByteArray plaintextArray = _plaintext.toUtf8();
     return encryptToByteArray(plaintextArray);
 }
 
-QByteArray clsSimpleCrypt::encryptToByteArray(QByteArray _plaintext)
-{
+QByteArray clsSimpleCrypt::encryptToByteArray(QByteArray _plaintext) {
     if (m_keyParts.isEmpty()) {
         qWarning() << "No key set.";
         m_lastError = ErrorNoKeySet;
         return QByteArray();
     }
-
 
     QByteArray ba = _plaintext;
 
@@ -135,23 +130,20 @@ QByteArray clsSimpleCrypt::encryptToByteArray(QByteArray _plaintext)
     return resultArray;
 }
 
-QString clsSimpleCrypt::encryptToString(const QString& _plaintext)
-{
+QString clsSimpleCrypt::encryptToString(const QString& _plaintext) {
     QByteArray plaintextArray = _plaintext.toUtf8();
     QByteArray cypher = encryptToByteArray(plaintextArray);
     QString cypherString = QString::fromLatin1(cypher.toBase64());
     return cypherString;
 }
 
-QString clsSimpleCrypt::encryptToString(QByteArray plaintext)
-{
+QString clsSimpleCrypt::encryptToString(QByteArray plaintext) {
     QByteArray cypher = encryptToByteArray(plaintext);
     QString cypherString = QString::fromLatin1(cypher.toBase64());
     return cypherString;
 }
 
-QString clsSimpleCrypt::decryptToString(const QString& _cyphertext)
-{
+QString clsSimpleCrypt::decryptToString(const QString& _cyphertext) {
     QByteArray cyphertextArray = QByteArray::fromBase64(_cyphertext.toLatin1());
     QByteArray plaintextArray = decryptToByteArray(cyphertextArray);
     QString plaintext = QString::fromUtf8(plaintextArray, plaintextArray.size());
@@ -159,24 +151,21 @@ QString clsSimpleCrypt::decryptToString(const QString& _cyphertext)
     return plaintext;
 }
 
-QString clsSimpleCrypt::decryptToString(QByteArray cypher)
-{
+QString clsSimpleCrypt::decryptToString(QByteArray cypher) {
     QByteArray ba = decryptToByteArray(cypher);
     QString plaintext = QString::fromUtf8(ba, ba.size());
 
     return plaintext;
 }
 
-QByteArray clsSimpleCrypt::decryptToByteArray(const QString& _cyphertext)
-{
+QByteArray clsSimpleCrypt::decryptToByteArray(const QString& _cyphertext) {
     QByteArray cyphertextArray = QByteArray::fromBase64(_cyphertext.toLatin1());
     QByteArray ba = decryptToByteArray(cyphertextArray);
 
     return ba;
 }
 
-QByteArray clsSimpleCrypt::decryptToByteArray(QByteArray _cypher)
-{
+QByteArray clsSimpleCrypt::decryptToByteArray(QByteArray _cypher) {
     if (m_keyParts.isEmpty()) {
         qWarning() << "No key set.";
         m_lastError = ErrorNoKeySet;

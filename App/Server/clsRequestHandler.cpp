@@ -50,17 +50,13 @@ using namespace Targoman::Common;
 clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QObject* _parent) :
     QObject(_parent),
     Request(_req),
-    Response(_res)
-{
+    Response(_res) {
     this->ElapsedTimer.start();
 }
 
-void clsRequestHandler::process(const QString& _api)
-{
-    this->Request->onData([this](QByteArray _data )
-    {
-        try
-        {
+void clsRequestHandler::process(const QString& _api) {
+    this->Request->onData([this](QByteArray _data ) {
+        try {
             TargomanLogInfo(7, "posted data: " << _data);
 
             QByteArray ContentType = this->Request->headers().value("content-type");
@@ -81,8 +77,7 @@ void clsRequestHandler::process(const QString& _api)
             if (ContentLength > ServerConfigs::MaxUploadSize.value())
                 throw exHTTPPayloadTooLarge(QString("Content-Size is too large: %d").arg(ContentLength));
 
-            switch(this->Request->method())
-            {
+            switch (this->Request->method()) {
                 case qhttp::EHTTP_POST:
                 case qhttp::EHTTP_PUT:
                 case qhttp::EHTTP_PATCH:
@@ -95,33 +90,26 @@ void clsRequestHandler::process(const QString& _api)
             static constexpr char APPLICATION_FORM_HEADER[] = "application/x-www-form-urlencoded";
             static constexpr char MULTIPART_BOUNDARY_HEADER[] = "multipart/form-data; boundary=";
 
-            switch (ContentType.at(0))
-            {
+            switch (ContentType.at(0)) {
                 case 'a':
                 {
                     if (ContentType != APPLICATION_JSON_HEADER && ContentType != APPLICATION_FORM_HEADER)
                         throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
 
                     if (_data.size() == ContentLength)
-                    {
                         this->RemainingData = _data;
-                    }
-                    else if (this->RemainingData.size())
-                    {
+                    else if (this->RemainingData.size()) {
                         this->RemainingData += _data;
-                        if(this->RemainingData.size() < ContentLength)
+                        if (this->RemainingData.size() < ContentLength)
                             return;
-                    }
-                    else
-                    {
+                    } else {
                         this->RemainingData = _data;
                         return;
                     }
 
                     this->RemainingData = this->RemainingData.trimmed();
 
-                    if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('['))
-                    {
+                    if (this->RemainingData.startsWith('{') || this->RemainingData.startsWith('[')) {
                         if (this->RemainingData.startsWith('{') == false || this->RemainingData.endsWith('}') == false)
                             throw exHTTPBadRequest("Invalid JSON Object");
 
@@ -135,8 +123,7 @@ void clsRequestHandler::process(const QString& _api)
 
                         for (auto JSONObjectIter = JSONObject.begin();
                                 JSONObjectIter != JSONObject.end();
-                                ++JSONObjectIter)
-                        {
+                                ++JSONObjectIter) {
                             if (JSONObjectIter.value().isBool())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toBool() ? "1" : "0");
                             else if (JSONObjectIter.value().isNull())
@@ -150,13 +137,10 @@ void clsRequestHandler::process(const QString& _api)
                             else
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
                         }
-                    }
-                    else
-                    {
+                    } else {
                         QList<QByteArray> Params = this->RemainingData.split('&');
 
-                        static auto decodePercentEncoding = [](QByteArray& _value)
-                        {
+                        static auto decodePercentEncoding = [](QByteArray& _value) {
                             _value = _value.replace("+"," ");
                             QUrl URL = QUrl::fromPercentEncoding("http://127.0.0.1/?key=" + _value);
                             _value=URL.query(QUrl::FullyDecoded).toUtf8();
@@ -164,10 +148,9 @@ void clsRequestHandler::process(const QString& _api)
                             return _value;
                         };
 
-                        foreach (auto Param, Params)
-                        {
+                        foreach (auto Param, Params) {
                             QList<QByteArray> ParamParts = Param.split('=');
-                            if(ParamParts.size() != 2)
+                            if (ParamParts.size() != 2)
                                 throw exHTTPBadRequest("Invalid Param: " + Param);
                             this->Request->addUserDefinedData(ParamParts.first(), decodePercentEncoding(ParamParts.last()));
                         }
@@ -176,8 +159,7 @@ void clsRequestHandler::process(const QString& _api)
                 }
                 case 'm':
                 {
-                    if (this->MultipartFormDataHandler.isNull())
-                    {
+                    if (this->MultipartFormDataHandler.isNull()) {
                         if (ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
                             throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
 
@@ -189,8 +171,7 @@ void clsRequestHandler::process(const QString& _api)
                     }
 
                     qlonglong Fed = 0;
-                    while (!this->MultipartFormDataHandler->stopped() && _data.size() > Fed)
-                    {
+                    while (!this->MultipartFormDataHandler->stopped() && _data.size() > Fed) {
                         do
                         {
                             qulonglong Ret = this->MultipartFormDataHandler->feed(_data.mid(static_cast<int>(Fed)).constData(), _data.size() - Fed);
@@ -206,56 +187,35 @@ void clsRequestHandler::process(const QString& _api)
             }
 
             TargomanLogInfo(7, "request user defined values: ");
-            foreach (auto val, this->Request->userDefinedValues())
-            {
+            foreach (auto val, this->Request->userDefinedValues()) {
                 TargomanLogInfo(7, val.first << " : " << val.second);
             }
-        }
-        catch(exTargomanBase& ex)
-        {
+        } catch (exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
-        }
-        catch(exQFVRequiredParam &ex)
-        {
+        } catch (exQFVRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
-        }
-        catch(exQFVInvalidValue &ex)
-        {
+        } catch (exQFVInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
-        }
-        catch(std::exception &ex)
-        {
+        } catch (std::exception &ex) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
         }
     });
 
-    this->Request->onEnd([this, _api]()
-    {
-        try
-        {
+    this->Request->onEnd([this, _api]() {
+        try {
             if (this->Request->method() == qhttp::EHTTP_OPTIONS)
                 this->sendCORSOptions();
             else
                 this->findAndCallAPI (_api);
-        }
-        catch(exTargomanBase& ex)
-        {
+        } catch (exTargomanBase& ex) {
             this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
-        }
-        catch(exQFVRequiredParam &ex)
-        {
+        } catch (exQFVRequiredParam &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
-        }
-        catch(exQFVInvalidValue &ex)
-        {
+        } catch (exQFVInvalidValue &ex) {
             this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
-        }
-        catch(std::exception &ex)
-        {
+        } catch (std::exception &ex) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
-        }
-        catch(...)
-        {
+        } catch (...) {
             this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", {}, true);
         }
     });
@@ -304,12 +264,10 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath)
-{
+clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath) {
     QVariantMap ResponseHeaders;
 
-    try
-    {
+    try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
 
@@ -320,26 +278,21 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
         qhttp::THeaderHash Cookies;
         TAPI::JWT_t JWT;
 
-        if (_apiObject->requiresJWT())
-        {
+        if (_apiObject->requiresJWT()) {
             QString Auth = Headers.value("authorization");
-            if (Auth.startsWith("Bearer "))
-            {
+            if (Auth.startsWith("Bearer ")) {
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
                 QString RemoteIP = this->toIPv4(this->Request->remoteAddress());
 
-                try
-                {
+                try {
                     QJWT::verifyJWT(
                                 BearerToken,
                                 RemoteIP,
                                 JWT
                                 );
-                }
-                catch (exJWTExpired &exp)
-                {
+                } catch (exJWTExpired &exp) {
                     QString NewToken = Authentication::renewJWT(
                                 JWT,
                                 RemoteIP
@@ -349,15 +302,12 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                     ResponseHeaders.insert("x-auth-new-token", BearerToken);
                 }
                 JWT["encodedJWT"] = BearerToken;
-            }
-            else
+            } else
                 throw exHTTPForbidden("No valid authentication header is present");
         }
 
-        if (_apiObject->requiresCookies() && Headers.value("cookie").size())
-        {
-            foreach (auto Cookie, Headers.value("cookie").split(';'))
-            {
+        if (_apiObject->requiresCookies() && Headers.value("cookie").size()) {
+            foreach (auto Cookie, Headers.value("cookie").split(';')) {
                 auto CookieParts = Cookie.split('=');
                 Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
             }
@@ -378,25 +328,15 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                               );
 
         return stuResult(Result, ResponseHeaders);
-    }
-    catch (exTargomanBase& ex)
-    {
+    } catch (exTargomanBase& ex) {
         return stuResult(ex.what(), ResponseHeaders, static_cast<qhttp::TStatusCode>(ex.httpCode()));
-    }
-    catch (exQFVRequiredParam &ex)
-    {
+    } catch (exQFVRequiredParam &ex) {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
-    }
-    catch (exQFVInvalidValue &ex)
-    {
+    } catch (exQFVInvalidValue &ex) {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
-    }
-    catch (std::exception &ex)
-    {
+    } catch (std::exception &ex) {
         return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
-    }
-    catch (...)
-    {
+    } catch (...) {
         return stuResult("INTERNAL SERVER ERROR!!!", ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
@@ -432,10 +372,8 @@ quint16 clsRequestHandler::port() const
     return Host.mid(idx+1).toUInt();
 }
 
-bool clsRequestHandler::callStaticAPI(QString _api)
-{
-    if (_api == "/openAPI.json")
-    {
+bool clsRequestHandler::callStaticAPI(QString _api) {
+    if (_api == "/openAPI.json") {
         gServerStats.Success.inc();
         this->sendResponseBase(
                     qhttp::ESTATUS_OK,
@@ -448,17 +386,14 @@ bool clsRequestHandler::callStaticAPI(QString _api)
 
     _api.replace(QRegularExpression("//+"), "/");
 
-    if (_api.toLower().startsWith("/swaggerui"))
-    {
-        if (ServerConfigs::SwaggerUI.value().isEmpty())
-        {
+    if (_api.toLower().startsWith("/swaggerui")) {
+        if (ServerConfigs::SwaggerUI.value().isEmpty()) {
             this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
             return true;
         }
 
         QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
-        if (File.isEmpty())
-        {
+        if (File.isEmpty()) {
             this->redirect(_api + "/");
             return true;
         }
@@ -472,15 +407,13 @@ bool clsRequestHandler::callStaticAPI(QString _api)
 
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
-    if (_api == "/stats.json")
-    {
+    if (_api == "/stats.json") {
         gServerStats.Success.inc();
         this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
         return true;
     }
 
-    if (_api == "/version")
-    {
+    if (_api == "/version") {
         gServerStats.Success.inc();
         QJsonObject Version;
         Version.insert("version", TARGOMAN_M2STR(PROJ_VERSION));
@@ -491,8 +424,7 @@ bool clsRequestHandler::callStaticAPI(QString _api)
         return true;
     }
 
-    if (_api == "/ping")
-    {
+    if (_api == "/ping") {
         gServerStats.Success.inc();
         this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
                                                                   { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
@@ -503,8 +435,7 @@ bool clsRequestHandler::callStaticAPI(QString _api)
     return false;
 }
 
-void clsRequestHandler::findAndCallAPI(QString _api)
-{
+void clsRequestHandler::findAndCallAPI(QString _api) {
     if (this->callStaticAPI(_api))
         return;
 
@@ -550,8 +481,7 @@ void clsRequestHandler::findAndCallAPI(QString _api)
 
         if (ServerConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());
-    }
-    else
+    } else
         run(APIObject, Queries, ExtraAPIPath);
 }
 
@@ -575,8 +505,7 @@ void clsRequestHandler::sendError(qhttp::TStatusCode _code,
                            _closeConnection);
 }
 
-void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
-{
+void clsRequestHandler::sendFile(const QString& _basePath, const QString _path) {
     if (QFile::exists(_basePath + _path) == false)
         throw exHTTPNotFound(_path);
 
@@ -605,17 +534,14 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path)
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
-void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders)
-{
-    if (_responseHeaders.isEmpty() == false)
-    {
+void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
+    if (_responseHeaders.isEmpty() == false) {
         TargomanLogInfo(7, "Response Custom Header Values:");
 
         for (QVariantMap::const_iterator it = _responseHeaders.constBegin();
              it != _responseHeaders.constEnd();
              ++it
-        )
-        {
+        ) {
             TargomanLogInfo(7,
                             "    "
                             << it.key().toLatin1()
@@ -640,8 +566,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 
     if (_response.isValid() == false)
         this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue(QJsonValue::Undefined) } }), _responseHeaders);
-    else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0)
-    {
+    else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
 
         TargomanLogInfo(7,
@@ -686,13 +611,11 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->end(RawData.data());
 
         this->deleteLater();
-    }
-    else
+    } else
         this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}), _responseHeaders);
 }
 
-void clsRequestHandler::sendCORSOptions()
-{
+void clsRequestHandler::sendCORSOptions() {
     this->Response->addHeaderValue("Access-Control-Allow-Origin", ServerConfigs::AccessControl.value());
     this->Response->addHeaderValue("Access-Control-Allow-Credentials", QStringLiteral("true"));
     this->Response->addHeaderValue("Access-Control-Allow-Methods",
@@ -725,8 +648,7 @@ void clsRequestHandler::sendCORSOptions()
     this->deleteLater();
 }
 
-void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet)
-{
+void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet) {
     QString Path = _appendBase ? ServerConfigs::BasePathWithVersion + _path : _path;
     Path = Path.replace(QRegularExpression("//+"), "/");
 
@@ -795,9 +717,8 @@ void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
     this->deleteLater();
 }
 
-void clsRequestHandler::slotSendFileData()
-{
-    if(this->FileHandler.isNull() || this->FileHandler->atEnd()){
+void clsRequestHandler::slotSendFileData() {
+    if (this->FileHandler.isNull() || this->FileHandler->atEnd()) {
 //        this->Response->end();
         this->deleteLater();
         return;
@@ -810,9 +731,9 @@ void clsRequestHandler::slotSendFileData()
 /**************************************************************************/
 void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders& _headers, void *_userData) {
     clsMultipartFormDataRequestHandler *Self = static_cast<clsMultipartFormDataRequestHandler*>(_userData);
-    try{
+    try {
         std::string ContentDisposition = _headers["Content-Disposition"];
-        if(ContentDisposition.size()){
+        if (ContentDisposition.size()) {
             const char* pContentDisposition = ContentDisposition.c_str();
             const char* pBufferStart = pContentDisposition;
             enum enuLooking4{
@@ -826,66 +747,66 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
             std::string* pLastFieldValue = nullptr;
             std::string Dummy;
 
-            while(pContentDisposition && *pContentDisposition != '\0'){
-                if (*pContentDisposition == StopChar)
-                    switch(Looking4){
-                    case L4Type:
-                        if(strncmp(pBufferStart, "form-data", static_cast<size_t>(pContentDisposition - pBufferStart)))
-                            throw exHTTPBadRequest("Just form-data is allowed in multi-part request according to RFC7578");
-                        Looking4 = L4Field;
-                        pBufferStart = pContentDisposition+1;
-                        StopChar = '=';
-                        break;
-                    case L4Field:
-                        if(strncmp(pBufferStart, " name", static_cast<size_t>(pContentDisposition - pBufferStart)) == 0)
-                            pLastFieldValue = &Self->LastItemName;
-                        else if(strncmp(pBufferStart, " filename", static_cast<size_t>(pContentDisposition - pBufferStart)) == 0)
-                            pLastFieldValue = &Self->LastFileName;
-                        else
-                            pLastFieldValue = &Dummy;
-                        Looking4 = L4DQuote;
-                        StopChar = '"';
-                        break;
-                    case L4NextField:
-                        Looking4 = L4Field;
-                        pBufferStart = pContentDisposition+1;
-                        StopChar = '=';
-                        break;
-                    case L4DQuote:
-                        Looking4 = L4Value;
-                        StopChar = '"';
-                        pBufferStart = pContentDisposition+1;
-                        break;
-                    case L4Value:
-                        *pLastFieldValue = pBufferStart;
-                        pLastFieldValue->erase(static_cast<size_t>(pContentDisposition - pBufferStart), std::string::npos);
-                        StopChar=';';
-                        Looking4 = L4NextField;
-                        pBufferStart = pContentDisposition+2;
-                        break;
+            while (pContentDisposition && *pContentDisposition != '\0') {
+                if (*pContentDisposition == StopChar) {
+                    switch (Looking4) {
+                        case L4Type:
+                            if (strncmp(pBufferStart, "form-data", static_cast<size_t>(pContentDisposition - pBufferStart)))
+                                throw exHTTPBadRequest("Just form-data is allowed in multi-part request according to RFC7578");
+                            Looking4 = L4Field;
+                            pBufferStart = pContentDisposition+1;
+                            StopChar = '=';
+                            break;
+                        case L4Field:
+                            if (strncmp(pBufferStart, " name", static_cast<size_t>(pContentDisposition - pBufferStart)) == 0)
+                                pLastFieldValue = &Self->LastItemName;
+                            else if (strncmp(pBufferStart, " filename", static_cast<size_t>(pContentDisposition - pBufferStart)) == 0)
+                                pLastFieldValue = &Self->LastFileName;
+                            else
+                                pLastFieldValue = &Dummy;
+                            Looking4 = L4DQuote;
+                            StopChar = '"';
+                            break;
+                        case L4NextField:
+                            Looking4 = L4Field;
+                            pBufferStart = pContentDisposition+1;
+                            StopChar = '=';
+                            break;
+                        case L4DQuote:
+                            Looking4 = L4Value;
+                            StopChar = '"';
+                            pBufferStart = pContentDisposition+1;
+                            break;
+                        case L4Value:
+                            *pLastFieldValue = pBufferStart;
+                            pLastFieldValue->erase(static_cast<size_t>(pContentDisposition - pBufferStart), std::string::npos);
+                            StopChar=';';
+                            Looking4 = L4NextField;
+                            pBufferStart = pContentDisposition+2;
+                            break;
                     }
-                else if (*pContentDisposition == '\r')
+                } else if (*pContentDisposition == '\r')
                     break;
                 ++pContentDisposition;
             }
 
-            if(Self->LastItemName.empty())
+            if (Self->LastItemName.empty())
                 throw exHTTPBadRequest(QString("No name provided for form field: ") + ContentDisposition.c_str());
-            if(Self->ToBeStoredItemName.empty())
+            if (Self->ToBeStoredItemName.empty())
                 Self->ToBeStoredItemName = Self->LastItemName;
 
-            if(Self->LastFileName.size()){
+            if (Self->LastFileName.size()) {
                 Self->LastTempFile.reset(new QTemporaryFile);
-                if(Self->LastTempFile.isNull() || Self->LastTempFile->open() == false)
+                if (Self->LastTempFile.isNull() || Self->LastTempFile->open() == false)
                     throw exHTTPInternalServerError("unable to create temporary file");
                 Self->LastTempFile->setAutoRemove(false);
                 Self->LastMime = _headers["Content-Type"];
             }
-        }else
+        } else
             throw exHTTPBadRequest("No Content-Disposition header provided");
-    }catch(exHTTPError& ex){
+    } catch (exHTTPError& ex) {
         Self->pRequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what(), {}, ex.code() >= 500);
-    }catch(exTargomanBase& ex){
+    } catch (exTargomanBase& ex) {
         Self->pRequestHandler->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
     }
 
@@ -893,22 +814,22 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
 
 void clsMultipartFormDataRequestHandler::onMultiPartData(const char *_buffer, long long _size, void *_userData) {
     clsMultipartFormDataRequestHandler *Self = static_cast<clsMultipartFormDataRequestHandler*>(_userData);
-    if(Self->LastTempFile.isNull() == false){
+    if (Self->LastTempFile.isNull() == false) {
         Self->LastWrittenBytes += Self->LastTempFile->write(_buffer, _size);
-        if(Self->LastWrittenBytes > ServerConfigs::MaxUploadedFileSize.value())
+        if (Self->LastWrittenBytes > ServerConfigs::MaxUploadedFileSize.value())
             throw exHTTPPayloadTooLarge("Max file size limit reached");
-    }else
+    } else
         Self->LastValue = QString::fromUtf8(_buffer, static_cast<int>(_size));
 }
 
 void clsMultipartFormDataRequestHandler::onMultiPartEnd(void *_userData) {
     clsMultipartFormDataRequestHandler *Self = static_cast<clsMultipartFormDataRequestHandler*>(_userData);
-    if(Self->ToBeStoredItemName != Self->LastItemName){
+    if (Self->ToBeStoredItemName != Self->LastItemName) {
         Self->storeDataInRequest();
         Self->SameNameItems.clear();
         Self->ToBeStoredItemName = Self->LastItemName;
     }
-    if(Self->LastTempFile.isNull() == false){
+    if (Self->LastTempFile.isNull() == false) {
         Self->SameNameItems.append(
                     QJsonDocument(QJsonObject::fromVariantMap(TAPI::stuFileInfo(
                                                                   Self->LastFileName.c_str(),
@@ -916,7 +837,7 @@ void clsMultipartFormDataRequestHandler::onMultiPartEnd(void *_userData) {
                                                                   static_cast<quint64>(Self->LastWrittenBytes),
                                                                   Self->LastMime.c_str()).toVariant().toMap())).toJson(QJsonDocument::Compact));
         Self->LastTempFile.reset();
-    }else
+    } else
         Self->SameNameItems.append(Self->LastValue);
 
 
@@ -926,32 +847,29 @@ void clsMultipartFormDataRequestHandler::onMultiPartEnd(void *_userData) {
     Self->LastWrittenBytes = 0;
 }
 
-void clsMultipartFormDataRequestHandler::onDataEnd(void *_userData){
+void clsMultipartFormDataRequestHandler::onDataEnd(void *_userData) {
     clsMultipartFormDataRequestHandler *Self = static_cast<clsMultipartFormDataRequestHandler*>(_userData);
-    if(Self->SameNameItems.size())
+    if (Self->SameNameItems.size())
         Self->storeDataInRequest();
 }
 
-void clsMultipartFormDataRequestHandler::storeDataInRequest()
-{
-    if(this->SameNameItems.size() > 1)
+void clsMultipartFormDataRequestHandler::storeDataInRequest() {
+    if (this->SameNameItems.size() > 1)
         this->pRequestHandler->Request->addUserDefinedData(this->ToBeStoredItemName.c_str(), QString("[%1]").arg(this->SameNameItems.join(',')));
     else
         this->pRequestHandler->Request->addUserDefinedData(this->ToBeStoredItemName.c_str(), this->SameNameItems.at(0));
 }
 
-QString  clsRequestHandler::toIPv4(const QString _ip)
-{
-    if(_ip.startsWith("::"))
+QString  clsRequestHandler::toIPv4(const QString _ip) {
+    if (_ip.startsWith("::"))
         return _ip.mid(_ip.lastIndexOf(':') + 1);
     return _ip;
 }
 
-void clsUpdateAndPruneThread::run()
-{
+void clsUpdateAndPruneThread::run() {
 
     QTimer Timer;
-    QObject::connect(&Timer, &QTimer::timeout, [](){
+    QObject::connect(&Timer, &QTimer::timeout, []() {
         gServerStats.Connections.snapshot(ServerConfigs::StatisticsInterval.value());
         gServerStats.WSConnections.snapshot(ServerConfigs::StatisticsInterval.value());
         gServerStats.Errors.snapshot(ServerConfigs::StatisticsInterval.value());
@@ -968,13 +886,13 @@ void clsUpdateAndPruneThread::run()
             ListIter->snapshot(ServerConfigs::StatisticsInterval.value());
 
         QList<Cache_t::const_iterator> ToDeleteIters;
-        for(auto CacheIter = InternalCache::Cache.begin();
+        for (auto CacheIter = InternalCache::Cache.begin();
             CacheIter != InternalCache::Cache.end();
             ++CacheIter)
-            if(CacheIter->InsertionTime.secsTo(QTime::currentTime()) > CacheIter->TTL)
+            if (CacheIter->InsertionTime.secsTo(QTime::currentTime()) > CacheIter->TTL)
                 ToDeleteIters.append(CacheIter);
 
-        if(ToDeleteIters.size()){
+        if (ToDeleteIters.size()) {
             QMutexLocker Locker(&InternalCache::Lock);
             foreach(auto Iter, ToDeleteIters)
                 InternalCache::Cache.erase(Iter);

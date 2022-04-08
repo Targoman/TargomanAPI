@@ -159,15 +159,13 @@ protected slots:
 
 protected:
     virtual void digestPrivs(TAPI::JWT_t _JWT,
-                             INOUT stuAssetItem& _assetItem)
-    {
+                             INOUT stuAssetItem& _assetItem) {
         Q_UNUSED(_JWT);
         Q_UNUSED(_assetItem)
     };
     virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
                                      INOUT stuAssetItem& _assetItem,
-                                     const OrderAdditives_t& _orderAdditives)
-    {
+                                     const OrderAdditives_t& _orderAdditives) {
         Q_UNUSED(_JWT);
         Q_UNUSED(_assetItem)
         Q_UNUSED(_orderAdditives)
@@ -175,8 +173,7 @@ protected:
     virtual void applyReferrer(TAPI::JWT_t _JWT,
                                INOUT stuAssetItem& AssetItem,
                                QString _referrer,
-                               TAPI::JSON_t _extraReferrerParams)
-    {
+                               TAPI::JSON_t _extraReferrerParams) {
         Q_UNUSED(_JWT);
         Q_UNUSED(AssetItem);
         Q_UNUSED(_referrer);

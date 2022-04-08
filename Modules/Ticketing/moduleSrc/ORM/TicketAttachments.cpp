@@ -56,10 +56,9 @@ TicketAttachments::TicketAttachments() :
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
     )
-{}
+{ ; }
 
-QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")

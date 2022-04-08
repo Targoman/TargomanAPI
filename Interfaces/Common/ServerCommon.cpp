@@ -39,8 +39,7 @@ tmplConfigurable<QString> ServerCommonConfigs::DBPrefix(
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-const QString PrependSchema(const QString &_schema)
-{
+const QString PrependSchema(const QString &_schema) {
     return ServerCommonConfigs::DBPrefix.value() + _schema;
 }
 

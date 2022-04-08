@@ -37,7 +37,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
         [](const QList<clsORMField>& _fields) {
     QStringList Cols;
     foreach(auto Col, _fields)
-        if(Col.isVirtual() == false)
+        if (Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
     return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
                    "you can also use aggregation functions: (ex. COUNT(%3))\n"
@@ -53,7 +53,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
 
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
                                    QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
+                                   [](const QList<clsORMField>& _fields) {
     return "Filtering rules where '+'=AND, '|'=OR, '*'=XOR. All parenthesis and logical operators must be bounded by space.\n"
            "Equality/Inequality operators are\n"
            "* =: equal\n"
@@ -66,20 +66,20 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Filter_t,
 });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, OrderBy_t,
                                    QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
+                                   [](const QList<clsORMField>& _fields) {
     QStringList Cols;
     foreach(auto Col, _fields)
-        if(Col.isSortable() && Col.isVirtual() == false)
+        if (Col.isSortable() && Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
     return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
     //                                            return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")";
 });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
                                    QFieldValidator::allwaysValid(), _value,
-                                   [](const QList<clsORMField>& _fields){
+                                   [](const QList<clsORMField>& _fields) {
     QStringList Cols;
     foreach(auto Col, _fields)
-        if(Col.isFilterable())
+        if (Col.isFilterable())
             Cols.append(clsTable::finalColName(Col));
     return "Comma separated columns: \n* " + Cols.join(",\n* ");
     //                                               return "Comma separated columns" ;
@@ -93,13 +93,11 @@ intfPureModule::intfPureModule(
     ) :
     intfModule(_parent),
     ModuleName(_moduleName)
-{
-}
+{ ; }
 
-//intfPureModule::~intfPureModule(){}
+//intfPureModule::~intfPureModule() { ; }
 
-void intfPureModule::addResponseHeaderNameToExpose(const QString &_header)
-{
+void intfPureModule::addResponseHeaderNameToExpose(const QString &_header) {
     addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
 
@@ -110,7 +108,7 @@ intfPureModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _ho
     User(_user),
     Pass(_pass),
     Schema(_schema)
-{}
+{ ; }
 
 QString intfPureModule::stuDBInfo::toConnStr(const QString &_dbPrefix, bool _noSchema) {
     return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5")

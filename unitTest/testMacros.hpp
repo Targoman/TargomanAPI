@@ -16,8 +16,7 @@ class testMacros: public QObject
     Q_OBJECT
 
 private slots:
-    void testOptional()
-    {
+    void testOptional() {
         optional<quint32> a;
         a = 1234;
 
@@ -34,22 +33,19 @@ private slots:
 //            }
     }
 
-    void testQSharedPointer()
-    {
+    void testQSharedPointer() {
         QSharedPointer<quint32> a = QSharedPointer<quint32>::create();
         *a = 1234;
     }
 
-    void testNullable()
-    {
+    void testNullable() {
         NULLABLE_TYPE(quint32) a;
         a = 1234;
 
         TAPI::setFromVariant(a, QVariant());
     }
 
-    void testJSON_t()
-    {
+    void testJSON_t() {
         TAPI::JSON_t a;
 //        a = 1234;
 

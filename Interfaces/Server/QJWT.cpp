@@ -100,10 +100,8 @@ tmplConfigurable<quint32> QJWT::RememberLoginTTL(
 
 thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
 
-static clsSimpleCrypt* simpleCryptInstance()
-{
-    if (Q_UNLIKELY(!SimpleCryptInstance))
-    {
+static clsSimpleCrypt* simpleCryptInstance() {
+    if (Q_UNLIKELY(!SimpleCryptInstance)) {
         SimpleCryptInstance = new clsSimpleCrypt(QJWT::SimpleCryptKey.value());
         SimpleCryptInstance->setIntegrityProtectionMode(clsSimpleCrypt::ProtectionHash);
     }
@@ -181,8 +179,7 @@ void QJWT::extractAndDecryptPayload(
     if (_jWTPayload.empty())
         throw exHTTPForbidden("Invalid JWT payload: empty object");
 
-    if (_jWTPayload.contains("prv"))
-    {
+    if (_jWTPayload.contains("prv")) {
         QString Decrypted = simpleCryptInstance()->decryptToString(_jWTPayload.value("prv").toString());
 
         if (Decrypted.isEmpty())
@@ -208,8 +205,7 @@ void QJWT::verifyJWT(
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     // check client ip ---------------
-    if (_jWTPayload.contains("prv"))
-    {
+    if (_jWTPayload.contains("prv")) {
         QJsonObject PrivateObject = _jWTPayload["prv"].toObject();
 
         if (PrivateObject.contains("cip") && (PrivateObject["cip"].toString() != _remoteIP))
@@ -227,10 +223,8 @@ void QJWT::verifyJWT(
         throw exJWTExpired("JWT expired");
 }
 
-QByteArray QJWT::hash(const QByteArray& _data)
-{
-    switch (QJWT::HashAlgorithm.value())
-    {
+QByteArray QJWT::hash(const QByteArray& _data) {
+    switch (QJWT::HashAlgorithm.value()) {
         case enuJWTHashAlgs::HS256:
             return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);
 

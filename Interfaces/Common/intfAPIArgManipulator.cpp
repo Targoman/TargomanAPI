@@ -25,7 +25,7 @@
 
 namespace Targoman::API::Common {
 
-intfAPIObject::~intfAPIObject() {}
+intfAPIObject::~intfAPIObject() { ; }
 
 intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName) {
     Q_ASSERT_X(_realTypeName.startsWith("QSharedPointer") == false, "intfAPIArgManipulator::ctor()", "aah!! ooh!!");
@@ -39,6 +39,6 @@ intfAPIArgManipulator::intfAPIArgManipulator(const QString& _realTypeName) {
     this->RealTypeName[RealTypeByteArray.size()] = 0;
 }
 
-intfAPIArgManipulator::~intfAPIArgManipulator() {}
+intfAPIArgManipulator::~intfAPIArgManipulator() { ; }
 
 } //namespace Targoman::API::Common

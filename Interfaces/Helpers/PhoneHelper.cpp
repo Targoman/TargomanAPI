@@ -27,10 +27,8 @@
 
 namespace Targoman::API::Helpers {
 
-QString PhoneHelper::GetErrorTypeAsString(const i18n::phonenumbers::PhoneNumberUtil::ErrorType& _errorType)
-{
-    switch (_errorType)
-    {
+QString PhoneHelper::GetErrorTypeAsString(const i18n::phonenumbers::PhoneNumberUtil::ErrorType& _errorType) {
+    switch (_errorType) {
         case i18n::phonenumbers::PhoneNumberUtil::ErrorType::INVALID_COUNTRY_CODE_ERROR:
             return "Invalid Country Code";
         case i18n::phonenumbers::PhoneNumberUtil::ErrorType::NOT_A_NUMBER:
@@ -46,8 +44,7 @@ QString PhoneHelper::GetErrorTypeAsString(const i18n::phonenumbers::PhoneNumberU
     }
 }
 
-QString PhoneHelper::NormalizePhoneNumber(QString _number, const QString& _country)
-{
+QString PhoneHelper::NormalizePhoneNumber(QString _number, const QString& _country) {
     i18n::phonenumbers::PhoneNumberUtil* phoneNumberUtil = i18n::phonenumbers::PhoneNumberUtil::GetInstance();
 
     i18n::phonenumbers::PhoneNumber number_proto;

@@ -25,8 +25,7 @@
 #include "testQueryBuilders.hpp"
 #include "App/Server/RESTAPIRegistry.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     //---------------------
 //    QString DBPrefix;
 //    int progArgsCount = 0;
@@ -40,13 +39,10 @@ int main(int argc, char *argv[])
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
-    try
-    {
+    try {
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    }
-    catch(std::exception &exp)
-    {
+    } catch (std::exception &exp) {
         qDebug()<<exp.what();
     }
 

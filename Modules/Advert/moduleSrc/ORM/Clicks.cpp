@@ -32,8 +32,7 @@ namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
 
-QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
 
@@ -62,7 +61,6 @@ Clicks::Clicks() :
                 {tblClicks::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::binID},
                 {tblClicks::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::locID },
               })
-{
-}
+{ ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

@@ -50,21 +50,19 @@ Voucher::Voucher() :
             { tblVoucher::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::usrID },
         }
     )
-{}
+{ ; }
 
-QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false){
+    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::toStr(Targoman::API::AccountModule::enuVoucherType::Withdrawal));
 
         ExtraFilters.insert(tblVoucher::vch_usrID, clsJWT(_JWT).usrID());
@@ -97,14 +95,10 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
                                                 { tblVoucher::vchTotalAmount, Voucher.Info.ToPay }
                                               }));
 
-    try
-    {
-        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
-        {
+    try {
+        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
             //Do nothing as it will be created after information upload.
-        }
-        else
-        {
+        } else {
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
@@ -117,9 +111,7 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
                                       );
             Voucher.PaymentMD5 = PaymentMD5;
         }
-    }
-    catch (...)
-    {
+    } catch (...) {
         /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -135,8 +127,7 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
     return Voucher;
 }
 
-quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, quint64 _walID, const QString& _desc)
-{
+quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, quint64 _walID, const QString& _desc) {
     return this->callSP("spWithdrawal_Request", {
                             {"iWalletID",_walID},
                             {"iForUsrID", clsJWT(_JWT).usrID()},
@@ -146,8 +137,7 @@ quint64 Voucher::apiCREATErequestWithdraw(TAPI::JWT_t _JWT, quint64 _amount, qui
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc)
-{
+quint64 Voucher::apiCREATErequestWithdrawFor(TAPI::JWT_t _JWT, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc) {
     Authorization::checkPriv(_JWT, {"AAA:RequestWithdraw"});
 
     return this->callSP("spWithdrawal_Request", {

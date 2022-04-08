@@ -43,8 +43,7 @@ using namespace Common::Configuration;
 using namespace AAA;
 using namespace NLP;
 
-TranslationDispatcher::~TranslationDispatcher()
-{ ; }
+TranslationDispatcher::~TranslationDispatcher() {/*KZ*/ ; }
 
 QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  QString _text,
@@ -54,44 +53,43 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  bool _detailed,
                                                  bool _detokenize,
                                                  int& _preprocessTime,
-                                                 int& _translationTime)
-{
-    if(_detailed && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
+                                                 int& _translationTime) {/*KZ*/
+    if (_detailed && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought priviledges to get detailed translation response.");
     QTime CacheLookupTime; CacheLookupTime.start();
     QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();
     QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
-    if(CachedTranslation.isEmpty()){
+    if (CachedTranslation.isEmpty()) {
         QTime Timer;Timer.start();
         QString Class;
 
         intfTranslatorEngine* TranslationEngine  = nullptr;
-        if(_useSpecialClass){
+        if (_useSpecialClass) {
             Class = this->detectClass(_engine, _text, _dir.first);
             TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
         }
-        if(TranslationEngine == nullptr)
+        if (TranslationEngine == nullptr)
             TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
 
-        if(TranslationEngine == nullptr)
+        if (TranslationEngine == nullptr)
             throw exHTTPInternalServerError("Unable to find generic translator engine");
 
         _text = this->preprocessText(_text, _dir.first);
         _preprocessTime = Timer.elapsed();Timer.restart();
 
-        if(TranslationEngine->specs().SupportsIXML == false)
+        if (TranslationEngine->specs().SupportsIXML == false)
             _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
 
         CachedTranslation = TranslationEngine->doTranslation(_text, _detailed, _detokenize);
 
         _translationTime = Timer.elapsed();
-        if(Class.size() && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "ReportClass"}))
+        if (Class.size() && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "ReportClass"}))
             CachedTranslation[RESULTItems::CLASS] = Class;
 
-        if(CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
+        if (CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
             this->TranslationCache.insert(CacheKey, CachedTranslation);
-        else{
-            switch(CachedTranslation.value(RESULTItems::ERRNO, 0).toInt()){
+        else {
+            switch (CachedTranslation.value(RESULTItems::ERRNO, 0).toInt()) {
             case enuTranslationError::Ok:
                 break;
             case enuTranslationError::OperationTimedOut:
@@ -105,28 +103,26 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                 throw exHTTPExpectationFailed(CachedTranslation.value(RESULTItems::MESSAGE).toString());
             }
         }
-    }else{
+    } else {
         CachedTranslation[RESULTItems::CACHE] = CacheLookupTime.elapsed();
     }
     return CachedTranslation;
 }
 
-QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang)
-{
+QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {/*KZ*/
     Q_UNUSED(_engine);
-    if(gConfigs::Classifier::SupportsIXML.value()== false)
+    if (gConfigs::Classifier::SupportsIXML.value()== false)
         return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, false, false,false));
     else
         return FormalityChecker::instance().check(_lang, _text);
 }
 
-QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang)
-{
+QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang) {/*KZ*/
     Q_UNUSED (_lang)
     clsDAC DAC;//TODO find moduleName
-    if(this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600){
+    if (this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600) {
         clsDACResult Result = DAC.execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
-        if(Result.isValid()){
+        if (Result.isValid()) {
             this->CorrectionRule.clear();
             while(Result.next())
                 this->CorrectionRule.append(
@@ -146,8 +142,7 @@ QString TranslationDispatcher::preprocessText(const QString& _text, const QStrin
     return Text;
 }
 
-QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang)
-{
+QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang) {/*KZ*/
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -167,44 +162,38 @@ QString TranslationDispatcher::tokenize(const QString& _text, const QString& _la
                 );
 }
 
-QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang)
-{
+QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang) {/*KZ*/
     return TargomanTextProcessor::instance().ixml2Text(_text, true, _lang=="fa" || _lang=="ar", false);
 }
 
-QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang)
-{
+QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang) {/*KZ*/
     Q_UNUSED(_text); Q_UNUSED (_lang);
     return QVariantMap();
 }
 
-void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text)
-{
+void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text) {/*KZ*/
     Q_UNUSED(_text); Q_UNUSED (_lang); Q_UNUSED (_wordCount)
 }
 
-void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode)
-{
+void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode) {/*KZ*/
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID); Q_UNUSED (_errorCode);Q_UNUSED (_engine)
 }
 
-void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime)
-{
+void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {/*KZ*/
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
 
-void TranslationDispatcher::registerEngines()
-{
-    foreach (const QString& Key, this->TranslationServers.keys()){
+void TranslationDispatcher::registerEngines() {/*KZ*/
+    foreach (const QString& Key, this->TranslationServers.keys()) {
         const tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
                 this->TranslationServers.values(Key);
-        for(size_t i=0; i<ServersConfig.size(); ++i){
+        for (size_t i=0; i<ServersConfig.size(); ++i) {
             stuTrServerConfig Server = ServersConfig.at(i);
-            if(Server.Active.value() == false)
+            if (Server.Active.value() == false)
                 continue;
 
             intfTranslatorEngine* Engine = nullptr;
-            switch(enuEngine::toEnum(Key)){
+            switch (enuEngine::toEnum(Key)) {
             case enuEngine::NMT:
                 Engine = new Engines::clsBaseNMT(stuEngineSpecs(enuEngine::toEnum(Key),
                                                                    Server.SourceLang.value(),
@@ -218,7 +207,7 @@ void TranslationDispatcher::registerEngines()
                 throw exTargomanInitialization("Invalid engine type");
             }
 
-            if(Engine)
+            if (Engine)
                 this->RegisteredEngines.insert(stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value()),
                                                Engine
                                                );
@@ -228,14 +217,12 @@ void TranslationDispatcher::registerEngines()
     }
 }
 
-TranslationDispatcher::TranslationDispatcher()
-{
+TranslationDispatcher::TranslationDispatcher() {/*KZ*/
     FormalityChecker::instance();
 }
 
 /********************************************/
-intfTranslatorEngine::~intfTranslatorEngine()
-{;}
+intfTranslatorEngine::~intfTranslatorEngine() {/*KZ*/;}
 
 }
 }

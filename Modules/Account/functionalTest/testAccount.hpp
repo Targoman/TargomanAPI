@@ -42,7 +42,7 @@ class testAccount : public clsBaseTest
     Q_OBJECT
 
 public:
-    testAccount(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testAccount(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
 private slots:
     void initTestCase() {
@@ -56,8 +56,7 @@ private slots:
     }
 
     //-------------------------------------------------------
-    void NormalizePhoneNumber()
-    {
+    void NormalizePhoneNumber() {
         QVariant Result = callUserAPI(
                               RESTClientHelper::POST,
                               "Account/normalizePhoneNumber",
@@ -71,8 +70,7 @@ private slots:
         QVERIFY(Result.toString() == "+989998881010");
     }
 
-    void SignupByMobileOnly_0999_888_1010()
-    {
+    void SignupByMobileOnly_0999_888_1010() {
         QVariant Result = callUserAPI(
                               RESTClientHelper::POST,
                               "Account/loginByMobileOnly",
@@ -88,8 +86,7 @@ private slots:
 //        QVERIFY(UserID > 0);
     }
 
-    void ApproveMobile_And_Login_0999_888_1010()
-    {
+    void ApproveMobile_And_Login_0999_888_1010() {
         clsDAC DAC;
         QJsonObject AprInfo = DAC.execQuery("",
                                             "SELECT aprID"
@@ -150,8 +147,7 @@ private slots:
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void Logout__0999_888_1010()
-    {
+    void Logout__0999_888_1010() {
         QVERIFY(callUserAPI(RESTClientHelper::POST, "Account/logout").toBool());
 
         gEncodedJWT = "";
@@ -159,8 +155,7 @@ private slots:
     }
 
     //-------------------------------------------------------
-    void Signup()
-    {
+    void Signup() {
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVERIFY((gUserID = callUserAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
@@ -193,8 +188,7 @@ private slots:
         DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
     }
 
-    void ResendEmailApproveCode()
-    {
+    void ResendEmailApproveCode() {
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/resendApprovalCode",
                                   {},
@@ -204,8 +198,7 @@ private slots:
         QVERIFY(Result.toBool());
     }
 
-    void ApprovalRequest_timerInfo_before_send()
-    {
+    void ApprovalRequest_timerInfo_before_send() {
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/ApprovalRequest/timerInfo",
                                   {},
@@ -216,8 +209,7 @@ private slots:
         QVERIFY(Result.isValid() == false);
     }
 
-    void ApprovalRequest_timerInfo_after_send()
-    {
+    void ApprovalRequest_timerInfo_after_send() {
         clsDAC DAC;
         DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = DATE_SUB(NOW(), INTERVAL 10 SECOND) WHERE apr_usrID=?",
         {gUserID});
@@ -231,9 +223,8 @@ private slots:
         qDebug() << Result;
         QVERIFY(Result.isValid());
     }
-//private:
-    void ApproveEmail()
-    {
+
+    void ApproveEmail() {
         clsDAC DAC;
         QString Code = DAC.execQuery("",
                                      "SELECT aprApprovalCode"
@@ -260,8 +251,7 @@ private slots:
                                   });
     }
 
-    void ApproveAdminEmail()
-    {
+    void ApproveAdminEmail() {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
         {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
@@ -278,8 +268,7 @@ private slots:
                                   });
     }
 
-    void Login()
-    {
+    void Login() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{}, {
@@ -297,21 +286,21 @@ private slots:
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void Logout(){
+    void Logout() {
         QVERIFY(callUserAPI(RESTClientHelper::POST, "Account/logout").toBool());
 
         gEncodedJWT = "";
         gJWT = {};
     }
 
-//    void loginAsGuest(){
+//    void loginAsGuest() {
 //        QVERIFY((callUserAPI(RESTClientHelper::POST,
 //                         "Account/loginAsGuest",{}, {
 //                             {"sessionInfo", "{\"a\":1}"},
 //                        }).toString()).size());
 //    }
 
-    void LoginAgain(){
+    void LoginAgain() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{}, {
@@ -337,14 +326,14 @@ private slots:
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
     }
 
-//    void RefreshJWT(){
+//    void RefreshJWT() {
 //        QJsonObject MultiJWT;
 
 //        QVERIFY((MultiJWT = callRefreshAPI().toJsonObject()).size());
 //        gEncodedJWT = MultiJWT.value("ssn").toString();
 //    }
 
-    void CreateForgotPasswordLink(){
+    void CreateForgotPasswordLink() {
         QVERIFY(callUserAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink",{}, {
                             {"emailOrMobile", UT_UserEmail},
@@ -352,7 +341,7 @@ private slots:
                         }).toBool());
     }
 
-    void ChangePassByUUID(){
+    void ChangePassByUUID() {
         clsDAC DAC;
         QString Code = DAC.execQuery("", "SELECT fprUUID FROM tblForgotPassRequest WHERE fpr_usrID=?",
         {gUserID}).toJson(true).object().value("fprUUID").toString();
@@ -371,7 +360,7 @@ private slots:
 
     //d769dd673f86addfe039dc2d2dab4f73 = MD5(1234 + 827ccb0eea8a706c4c34a16891f84e7b # 12345)
     //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-    void ChangePass(){
+    void ChangePass() {
         QVERIFY(callUserAPI(RESTClientHelper::POST,
                         "Account/changePass", {}, {
                             { "oldPass", "d769dd673f86addfe039dc2d2dab4f73" },
@@ -380,8 +369,7 @@ private slots:
                         }).toBool());
     }
 
-    void ResendMobileApproveCode()
-    {
+    void ResendMobileApproveCode() {
         clsDAC DAC;
 
         try {
@@ -408,13 +396,12 @@ private slots:
                                           { "emailOrMobile", "+989998882020" },
                                       });
             QVERIFY(Result.toBool());
-        }
-        catch(std::exception &e) {
+        } catch (std::exception &e) {
             QFAIL (e.what());
         }
     }
 
-    void ApproveMobile(){
+    void ApproveMobile() {
         clsDAC DAC;
 
         try {
@@ -445,7 +432,7 @@ private slots:
             {gUserID}).toJson(true).object().value("usrMobile").toString();
 
             QVERIFY(Mobile == "+989998882020");
-        }catch(std::exception &e){
+        } catch (std::exception &e) {
             QFAIL (e.what());
         }
     }
@@ -567,18 +554,15 @@ private slots:
     }
 
 private slots:
-//private:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-    void cleanupAll()
-    {
+    void cleanupAll() {
         QVariantMap Result;
 
         clsDAC DAC;
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE wb
                   FROM tblWalletBalances wb
@@ -593,13 +577,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE wt
                   FROM tblWalletsTransactions wt
@@ -612,13 +592,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE uw
                   FROM tblUserWallets uw
@@ -629,13 +605,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE op
                   FROM tblOnlinePayments op
@@ -648,13 +620,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE fp
                   FROM tblOfflinePayments fp
@@ -667,13 +635,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE vch
                   FROM tblVoucher vch
@@ -684,13 +648,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE apr
                   FROM tblApprovalRequest apr
@@ -701,13 +661,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE sn
                   FROM tblActiveSessions sn
@@ -718,13 +674,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE u
                   FROM tblUser u
@@ -733,13 +685,9 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE r
                   FROM tblRoles r
@@ -747,10 +695,7 @@ private slots:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        }
-        catch(...)
-        {
-        }
+        } catch (...) { ; }
 
         qDebug() << Result;
     }

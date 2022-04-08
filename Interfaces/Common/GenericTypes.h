@@ -58,14 +58,14 @@ struct stuStatistics {
     QHash<QByteArray, Targoman::Common::clsCountAndSpeed> APIInternalCacheStats;
     QHash<QByteArray, Targoman::Common::clsCountAndSpeed> APICentralCacheStats;
 
-    QJsonObject toJson(bool _full = false){
-        auto count2Json = [](const Targoman::Common::clsCountAndSpeed& _value){
+    QJsonObject toJson(bool _full = false) {
+        auto count2Json = [](const Targoman::Common::clsCountAndSpeed& _value) {
             return QJsonObject({
                                    {"count", static_cast<double>(_value.count())},
                                    {"cps", _value.countPerSecond()}
                                });
         };
-        auto hashToJson = [count2Json](const QHash<QByteArray, Targoman::Common::clsCountAndSpeed>& _hash){
+        auto hashToJson = [count2Json](const QHash<QByteArray, Targoman::Common::clsCountAndSpeed>& _hash) {
             QJsonObject RetObj;
             for (auto Iter=_hash.begin(); Iter != _hash.end(); ++Iter)
                 RetObj.insert(Iter.key(), count2Json(Iter.value()));
@@ -79,7 +79,7 @@ struct stuStatistics {
             {"Success", count2Json(this->Success)},
         };
 
-        if(_full){
+        if (_full) {
             Stats.insert("APICallsStats",           hashToJson(APICallsStats));
             Stats.insert("APIInternalCacheStats",   hashToJson(APIInternalCacheStats));
             Stats.insert("APICentralCacheStats",    hashToJson(APICentralCacheStats));
@@ -95,10 +95,10 @@ struct stuStatistics {
 struct stuTable {
     qint64 TotalRows;
     QVariantList Rows;
-    stuTable(qint64 _totalRows = -1, const QVariantList& _rows = QVariantList()):
+    stuTable(qint64 _totalRows = -1, const QVariantList& _rows = QVariantList()) :
         TotalRows(_totalRows),
         Rows(_rows)
-    {}
+    { ; }
     QVariant toVariant() const{
       return QVariantMap({
                            {"rows", this->Rows},
@@ -118,14 +118,14 @@ struct stuFileInfo {
     TempName(_tmpName),
     Size(_size),
     Mime(_mime)
-  {}
+  { ; }
 
   stuFileInfo(const stuFileInfo& _other) :
       Name(_other.Name),
       TempName(_other.TempName),
       Size(_other.Size),
       Mime(_other.Mime)
-  {}
+  { ; }
 
   QVariant toVariant() const;
 

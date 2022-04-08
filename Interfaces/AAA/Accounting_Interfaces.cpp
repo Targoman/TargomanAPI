@@ -44,8 +44,7 @@ TAPI_REGISTER_METATYPE(
     },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuVoucherItem {
 //        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
-        if (_value.isValid() == false)
-        {
+        if (_value.isValid() == false) {
 //            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
             return stuVoucherItem();
         }
@@ -53,15 +52,13 @@ TAPI_REGISTER_METATYPE(
         if (_value.canConvert<QVariantMap>()
 //                || _value.canConvert<QVariantList>()
 //                || _value.canConvert<double>()
-            )
-        {
+            ) {
             auto ret = QJsonDocument::fromVariant(_value);
 //            qDebug() << "stuVoucherItem(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
             return stuVoucherItem().fromJson(ret.object());
         }
 
-        if (_value.toString().isEmpty())
-        {
+        if (_value.toString().isEmpty()) {
 //            qDebug() << "stuVoucherItem(2.3) =================================" << _paramName << ":" << _value;
             return stuVoucherItem();
         }
@@ -89,8 +86,7 @@ TAPI_REGISTER_METATYPE(
     },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher {
 //        qDebug() << "stuPreVoucher(2) =================================" << _paramName << ":" << _value;
-        if (_value.isValid() == false)
-        {
+        if (_value.isValid() == false) {
 //            qDebug() << "stuPreVoucher(2.1) =================================" << _paramName << ":" << _value;
             return stuPreVoucher();
         }
@@ -98,15 +94,13 @@ TAPI_REGISTER_METATYPE(
         if (_value.canConvert<QVariantMap>()
 //                || _value.canConvert<QVariantList>()
 //                || _value.canConvert<double>()
-            )
-        {
+            ) {
             auto ret = QJsonDocument::fromVariant(_value);
 //            qDebug() << "stuPreVoucher(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
             return stuPreVoucher().fromJson(ret.object());
         }
 
-        if (_value.toString().isEmpty())
-        {
+        if (_value.toString().isEmpty()) {
 //            qDebug() << "stuPreVoucher(2.3) =================================" << _paramName << ":" << _value;
             return stuPreVoucher();
         }
@@ -139,7 +133,7 @@ TAPI_REGISTER_METATYPE(
     [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
         OrderAdditives_t Additives;
-        for(auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
+        for (auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
             Additives.insert(Iter.key(), Iter.value().toString());
         return Additives;
     }
@@ -218,32 +212,28 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdUpdatedBy_usrID },
         }) + _exclusiveIndexes
     )
-{}
+{ ; }
 
-QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
 }
 
-quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -305,10 +295,9 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbUpdatedBy_usrID },
         }) + _exclusiveIndexes
     )
-{}
+{ ; }
 
-QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
@@ -328,22 +317,19 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
 }
 
-quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -399,17 +385,16 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID },
         }) + _exclusiveIndexes
     )
-{}
+{ ; }
 
-QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
+bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath) {
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
@@ -422,7 +407,7 @@ bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsBy
   return false;
 }
 
-bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath){
+bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath) {
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
@@ -458,10 +443,9 @@ intfAccountAssetUsage::intfAccountAssetUsage(
         }) + _exclusiveRelations,
         _exclusiveIndexes
     )
-{}
+{ ; }
 
-QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
@@ -516,10 +500,9 @@ intfAccountCoupons::intfAccountCoupons(
             { tblAccountCouponsBase::cpnUpdatedBy_usrID },
         }
     )
-{}
+{ ; }
 
-QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -529,22 +512,19 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -563,10 +543,9 @@ intfAccountPrizes::intfAccountPrizes(
         _cols,
         _relations
     )
-{}
+{ ; }
 
-QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -576,22 +555,19 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -609,30 +585,28 @@ stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent
   IsFromParent(_isFromParent),
   MyLimitsOnParent(_myLimitsOnParent),
   TTL(_ttl)
-{}
+{ ; }
 
-QJsonObject stuActiveCredit::toJson(bool _full)
-{
+QJsonObject stuActiveCredit::toJson(bool _full) {
   QJsonObject Account = {
     { ASA_PACKAGE, this->Credit.toJson(_full) },
     { ASA_TTL, static_cast<double>(this->TTL) },
   };
-  if(this->IsFromParent)
+  if (this->IsFromParent)
     Account.insert(ASA_ISFROMPARENT, true);
-  for(auto LimitIter = this->MyLimitsOnParent.begin();
+  for (auto LimitIter = this->MyLimitsOnParent.begin();
       LimitIter != this->MyLimitsOnParent.end();
       LimitIter++)
     Account.insert(LimitIter.key(), LimitIter->toJson());
   return Account;
 }
 
-stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj)
-{
+stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj) {
   this->Credit = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
   this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
   this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
   QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
-  for(auto LimitIter = Limits.begin();
+  for (auto LimitIter = Limits.begin();
       LimitIter != Limits.end();
       LimitIter++)
     this->MyLimitsOnParent.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
@@ -652,25 +626,24 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     ParentID(_parentID),
     MyLimitsOnParent(_myLimitsOnParent),
     DBCurrentDateTime(_dbCurrentDateTime)
-{}
+{ ; }
 
-QJsonObject stuAssetItem::toJson(bool _full)
-{
+QJsonObject stuAssetItem::toJson(bool _full) {
     ///TODO: very important: Complete this
   QJsonObject Info;
 /*
-  if(this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
-  if(this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
-  if(this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
-  if(this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
-  if(this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
-  if(this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
-  if(this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
-  if(this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
-  if(this->Properties.size())   Info[PKG_PROPS] = this->Properties;
-  if(_full){
+  if (this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
+  if (this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
+  if (this->RemainingDays > -1)  Info[PKG_REMAININGDAYS] = this->RemainingDays;
+  if (this->RemainingHours > -1) Info[PKG_REMAININGHOURS] = this->RemainingHours;
+  if (this->StartDate.isValid()) Info[PKG_STARTDATE] = this->StartDate.toString();
+  if (this->EndDate.isValid())   Info[PKG_ENDDATE] = this->EndDate.toString();
+  if (this->StartTime.isValid()) Info[PKG_STARTTIME] = this->StartTime.toString();
+  if (this->EndTime.isValid())   Info[PKG_ENDTIME] = this->EndTime.toString();
+  if (this->Properties.size())   Info[PKG_PROPS] = this->Properties;
+  if (_full) {
     QJsonObject Limits;
-    for(auto LimitIter = this->Remaining.begin();
+    for (auto LimitIter = this->Remaining.begin();
         LimitIter != this->Remaining.end();
         LimitIter++)
       Limits.insert(LimitIter.key(), LimitIter->toJson());
@@ -679,8 +652,7 @@ QJsonObject stuAssetItem::toJson(bool _full)
   return Info;
 }
 
-stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
-{
+stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj) {
     ///TODO: very important: Complete this
     /*
   this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
@@ -693,7 +665,7 @@ stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
   this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
   this->Properties = _obj.value(PKG_PROPS).toObject();
   QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
-  for(auto LimitIter = Limits.begin();
+  for (auto LimitIter = Limits.begin();
       LimitIter != Limits.end();
       LimitIter++)
     this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
@@ -701,8 +673,7 @@ stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj)
   return *this;
 }
 
-void stuAssetItem::fromVariantMap(const QVariantMap& _info)
-{
+void stuAssetItem::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->prdID,                  _info, tblAccountProductsBase,  prdID);
     SET_FIELD_FROM_VARIANT_MAP(this->prdCode,                _info, tblAccountProductsBase,  prdCode);
     SET_FIELD_FROM_VARIANT_MAP(this->prdName,                _info, tblAccountProductsBase,  prdName);
@@ -732,8 +703,7 @@ void stuAssetItem::fromVariantMap(const QVariantMap& _info)
     SET_FIELD_FROM_VARIANT_MAP(this->slbStatus,              _info, tblAccountSaleablesBase, slbStatus);
 }
 
-void stuFullDiscount::fromVariantMap(const QVariantMap& _info)
-{
+void stuFullDiscount::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->cpnID,                         _info, tblAccountCouponsBase, cpnID);
     SET_FIELD_FROM_VARIANT_MAP(this->cpnCode,                       _info, tblAccountCouponsBase, cpnCode);
     SET_FIELD_FROM_VARIANT_MAP(this->cpnPrimaryCount,               _info, tblAccountCouponsBase, cpnPrimaryCount);
@@ -754,18 +724,18 @@ void stuFullDiscount::fromVariantMap(const QVariantMap& _info)
 /******************************************************************/
 /*QVariant stuAssetItemReq_t::toVariant() const{
     QVariantMap Value;
-    for(auto Iter = this->begin(); Iter != this->end(); ++Iter)
+    for (auto Iter = this->begin(); Iter != this->end(); ++Iter)
         Value.insert(Iter.key(), Iter.value());
 
     return Value;
 }
 
-stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const QByteArray& _paramName){
-    if(_value.canConvert<QMap<QString, QVariant>>() == false)
+stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
+    if (_value.canConvert<QMap<QString, QVariant>>() == false)
         throw exHTTPBadRequest("Invalid value specified for parameter:" + _paramName);
     this->clear();
     const QMap<QString, QVariant>& Map = _value.toMap();
-    for(auto Iter = Map.begin (); Iter != Map.end (); ++Iter)
+    for (auto Iter = Map.begin (); Iter != Map.end (); ++Iter)
         this->insert(Iter.key(), static_cast<qint16>(Iter.value().toInt()));
     return  *this;
 }*/

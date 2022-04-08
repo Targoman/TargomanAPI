@@ -64,8 +64,7 @@ struct __static_s3_initializer__ {
     static inline bool Initialized = false;
     static inline SDKOptions options;
 
-    __static_s3_initializer__()
-    {
+    __static_s3_initializer__() {
         if (Initialized)
             return;
 
@@ -81,8 +80,7 @@ struct __static_s3_initializer__ {
 
         Initialized = true;
     }
-    ~__static_s3_initializer__()
-    {
+    ~__static_s3_initializer__() {
         if (Initialized == false)
             return;
 

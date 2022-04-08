@@ -40,7 +40,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
             throw exHTTPBadRequest("Service " + Service + " was not registered.");
 
     qint64 MinTTL = LLONG_MAX;
-    foreach(auto Priv, _privs){
+    foreach(auto Priv, _privs) {
         QJsonObject PrivObj = Priv.toObject();
         for (auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
             if (PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())) {
@@ -58,27 +58,27 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
 
     if (Privs.contains("ALL") == false)
         foreach (auto Service, _services)
-            if(Privs.contains(Service) == false)
+            if (Privs.contains(Service) == false)
                 throw exAuthorization("Not enough priviledges to access <"+Service+">");
 
     return  { MinTTL, Privs };
 }
 
-bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf){
+bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf) {
     QStringList AccessItemParts = _requiredAccess.split(":");
     QJsonObject CurrCheckingPriv = _privs;
-    foreach(auto Part, AccessItemParts){
-        if(Part.startsWith("CRUD~")){
+    foreach(auto Part, AccessItemParts) {
+        if (Part.startsWith("CRUD~")) {
             QString RequiredAccess = Part.split('~').last();
-            if(RequiredAccess.size() != 4)
+            if (RequiredAccess.size() != 4)
                 throw exAAA("Invalid access format for CRUD must be of CRUD~ACCESS");
 
             QString CheckingPriv = CurrCheckingPriv.value(PRIVItems::CRUD).toString();
-            for(quint8 i=0; i<4; ++i)
+            for (quint8 i=0; i<4; ++i)
                 if (RequiredAccess[i] == '1' ||
                     RequiredAccess[i].toUpper() == 'T'
-                    ){
-                    if(CheckingPriv[i] == '0' || CheckingPriv[i].toUpper() == 'F')
+                    ) {
+                    if (CheckingPriv[i] == '0' || CheckingPriv[i].toUpper() == 'F')
                         return false;
                     else
                         return (CheckingPriv[i].toUpper() == 'T' || _isSelf);
@@ -88,16 +88,16 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
             return true;
         }
         bool Found = false;
-        for (auto PrivIter = CurrCheckingPriv.begin(); PrivIter != CurrCheckingPriv.end(); ++PrivIter){
-            if(PrivIter.key() == "ALL" && PrivIter.value().toInt() != 0)
+        for (auto PrivIter = CurrCheckingPriv.begin(); PrivIter != CurrCheckingPriv.end(); ++PrivIter) {
+            if (PrivIter.key() == "ALL" && PrivIter.value().toInt() != 0)
                 return true;
-            if(PrivIter.key().toLower() == Part.toLower()){
+            if (PrivIter.key().toLower() == Part.toLower()) {
                 CurrCheckingPriv = PrivIter.value().toObject();
                 Found = true;
                 break;
             }
 
-            if(Found == false)
+            if (Found == false)
                 return false;
         }
     }
@@ -105,32 +105,32 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
     return true;
 }
 
-QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess){
+QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess) {
     if (_requiredAccess.isEmpty())
         return _privs;
 
-    if(_privs.isEmpty())
+    if (_privs.isEmpty())
         throw exAAA("Seems that Privs has not been set");
 
     foreach(auto AccessItem, _requiredAccess)
-        if(AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
+        if (AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
             throw exAuthorization("Not enough priviledges on <"+AccessItem+">");
     return _privs;
 }
 
-void PrivHelpers::validateToken(const QString& _token){
+void PrivHelpers::validateToken(const QString& _token) {
     static QRegularExpression rxTokenValidator = QRegularExpression("^[a-zA-Z0-9\\-_ ]{8,32}$");
-    if(_token.isEmpty())
+    if (_token.isEmpty())
         throw exNoTokenProvided("No token provided");
-    if(rxTokenValidator.match(_token).hasMatch() == false)
+    if (rxTokenValidator.match(_token).hasMatch() == false)
         throw exInvalidToken("Invalid token provided");
 }
 
-QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector){
+QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector) {
     QStringList AccessItemParts = _selector.split(":");
     QJsonObject CurrCheckingPriv = _privs;
-    foreach(auto Part, AccessItemParts){
-        if(CurrCheckingPriv.contains(Part) == false)
+    foreach(auto Part, AccessItemParts) {
+        if (CurrCheckingPriv.contains(Part) == false)
             return QVariant();
         CurrCheckingPriv = CurrCheckingPriv.value(Part).toObject();
     }
@@ -141,7 +141,7 @@ stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QSt
     if (_userObj.contains(DBM_SPRESULT_ROWS))
         _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
-    if(_userObj.size()){
+    if (_userObj.size()) {
         stuActiveAccount ActiveAccount =
                 PrivHelpers::digestPrivileges(
                     _userObj[AAACommonItems::privs].toArray(),
@@ -149,11 +149,11 @@ stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QSt
                     _services);
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
         return { ActiveAccount.TTL, _userObj };
-    }else
+    } else
         return { -1, _userObj };
 }
 
-QByteArray PrivHelpers::getURL(const QString& _url){
+QByteArray PrivHelpers::getURL(const QString& _url) {
     QtCUrl CUrl;
     CUrl.setTextCodec("UTF-8");
 
@@ -165,17 +165,16 @@ QByteArray PrivHelpers::getURL(const QString& _url){
 
     if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT)
         throw exAccounting("Connection to <" + _url +"> timed out.");
-    else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
+    else if (CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
         throw exAccounting("Connection to <" + _url +"> failed.");
-    else if(CUrl.lastError().isOk() == false)
+    else if (CUrl.lastError().isOk() == false)
         throw exAccounting("Connection to <" + _url + "> error: " + CUrl.lastError().text());
     else
         return CUrlResult.toUtf8();
 }
 
 /******************************************************************************/
-TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint64 _expiry, const QString& _sessionID)
-{
+TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint64 _expiry, const QString& _sessionID) {
     return Server::QJWT::createSigned(_payload,
                                       _privatePayload,
                                       _expiry < 0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),

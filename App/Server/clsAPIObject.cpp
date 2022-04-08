@@ -51,10 +51,9 @@ clsAPIObject::clsAPIObject(intfPureModule* _module,
     TTL(_ttl ? _ttl : ServerConfigs::APICallTimeout.value()),
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
-    Parent(_module)
-{
+    Parent(_module) {
     quint8 i = 0;
-    foreach(const QByteArray& ParamName, _method.parameterNames()){
+    foreach(const QByteArray& ParamName, _method.parameterNames()) {
         this->ParamNames.append(ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
         this->ParamTypes.append(QMetaType::typeName(_method.parameterType(i)));
         ++i;
@@ -62,7 +61,7 @@ clsAPIObject::clsAPIObject(intfPureModule* _module,
 }
 
 clsAPIObject::~clsAPIObject()
-{}
+{ ; }
 
 intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
     if (this->BaseMethod.parameterType(_paramIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
@@ -86,20 +85,20 @@ QVariant clsAPIObject::invoke(
     Q_ASSERT_X(this->parent(), "parent module", "Parent module not found to invoke method");
 
     int ExtraArgCount = 0;
-    if(this->ParamTypes.contains(PARAM_COOKIES))
+    if (this->ParamTypes.contains(PARAM_COOKIES))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_HEADERS))
+    if (this->ParamTypes.contains(PARAM_HEADERS))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_JWT))
+    if (this->ParamTypes.contains(PARAM_JWT))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_REMOTE_IP))
+    if (this->ParamTypes.contains(PARAM_REMOTE_IP))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_PKSBYPATH))
+    if (this->ParamTypes.contains(PARAM_PKSBYPATH))
         ExtraArgCount++;
-    if(this->ParamTypes.contains(PARAM_ORMFIELDS))
+    if (this->ParamTypes.contains(PARAM_ORMFIELDS))
         ExtraArgCount++;
 
-    if(_args.size() + _bodyArgs.size() + ExtraArgCount < this->RequiredParamsCount)
+    if (_args.size() + _bodyArgs.size() + ExtraArgCount < this->RequiredParamsCount)
         throw exHTTPBadRequest("Not enough arguments");
 
     QVariantList Arguments;
@@ -107,50 +106,50 @@ QVariant clsAPIObject::invoke(
     qint8 FirstArgumentWithValue = -1;
     qint8 LastArgumentWithValue = -1;
 
-    for(quint8 i=0; i< this->ParamNames.count(); ++i ){
+    for (quint8 i=0; i< this->ParamNames.count(); ++i) {
         bool ParamNotFound = true;
         QVariant ArgumentValue;
 
         static auto parseArgValue = [ArgumentValue](const QString& _paramName, QString _value) -> QVariant {
             _value = _value.trimmed();
             if ((_value.startsWith('[') && _value.endsWith(']')) ||
-               (_value.startsWith('{') && _value.endsWith('}'))){
+               (_value.startsWith('{') && _value.endsWith('}'))) {
                 QJsonParseError Error;
                 QJsonDocument JSON = QJsonDocument::fromJson(_value.toUtf8(), &Error);
-                if(JSON.isNull())
+                if (JSON.isNull())
                     throw exHTTPBadRequest(QString("Invalid value for %1: %2").arg(_paramName).arg(Error.errorString()));
                 return JSON.toVariant();
-            }else{
+            } else {
                 return _value;
             }
         };
 
-        if(this->ParamTypes.at(i) == PARAM_COOKIES){
+        if (this->ParamTypes.at(i) == PARAM_COOKIES) {
             ParamNotFound = false;
             ArgumentValue = _cookies.toVariant();
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_HEADERS){
+        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_HEADERS) {
             ParamNotFound = false;
             ArgumentValue = _headers.toVariant();
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_JWT){
+        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_JWT) {
             ParamNotFound = false;
             ArgumentValue = _jwt;
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_REMOTE_IP){
+        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_REMOTE_IP) {
             ParamNotFound = false;
             ArgumentValue = _remoteIP;
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_PKSBYPATH){
+        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_PKSBYPATH) {
             ParamNotFound = false;
             ArgumentValue = _extraAPIPath;
         }
 
-        if(ParamNotFound && this->ParamTypes.at(i) == PARAM_ORMFIELDS){
+        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_ORMFIELDS) {
             ParamNotFound = false;
             TAPI::ORMFields_t ORMFields;
             foreach (const QString& Arg, _args)
@@ -161,9 +160,9 @@ QVariant clsAPIObject::invoke(
             ArgumentValue = ORMFields;
         }
 
-        if(ParamNotFound)
-            foreach (const QString& Arg, _args){
-                if(Arg.startsWith(this->ParamNames.at(i)+ '=')){
+        if (ParamNotFound)
+            foreach (const QString& Arg, _args) {
+                if (Arg.startsWith(this->ParamNames.at(i)+ '=')) {
                     ParamNotFound = false;
                     ArgumentValue = parseArgValue(this->ParamNames.at(i), QUrl::fromPercentEncoding(Arg.mid(Arg.indexOf('=') + 1).toUtf8()));
                     break;
@@ -181,15 +180,14 @@ QVariant clsAPIObject::invoke(
             }
 
         if (ParamNotFound) {
-            if(i < this->RequiredParamsCount)
+            if (i < this->RequiredParamsCount)
                 throw exHTTPBadRequest(QString("Required parameter <%1> not specified").arg(this->ParamNames.at(i).constData()));
             else if (_isUpdateMethod)
                 Arguments.append(QVariant());
             else
                 Arguments.append(this->defaultValue(i));
             continue;
-        }
-        else if(ArgumentValue.isValid() == false)
+        } else if (ArgumentValue.isValid() == false)
             throw exHTTPBadRequest(QString("Invalid value for %1: no conversion to QVariant defined").arg(this->ParamNames.at(i).constData()));
 
         if (FirstArgumentWithValue < 0)
@@ -201,8 +199,7 @@ QVariant clsAPIObject::invoke(
             Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
             Arguments.push_back(ArgumentValue);
-        }
-        else {
+        } else {
             Q_ASSERT(this->BaseMethod.parameterType(i) < gOrderedMetaTypeInfo.size());
             Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.parameterType(i)) != nullptr);
 
@@ -232,7 +229,7 @@ QVariant clsAPIObject::invoke(
 
     if (this->Cache4SecsCentral) {
         QVariant CachedValue =  CentralCache::storedValue(CacheKey);
-        if(CachedValue.isValid()){
+        if (CachedValue.isValid()) {
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
@@ -248,8 +245,7 @@ QVariant clsAPIObject::invoke(
         Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
         APIMethod = gUserDefinedTypesInfo.at(this->BaseMethod.returnType() - TAPI_BASE_USER_DEFINED_TYPEID);
-    }
-    else {
+    } else {
         Q_ASSERT(this->BaseMethod.returnType() < gOrderedMetaTypeInfo.size());
         Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.returnType()) != nullptr);
 
@@ -289,9 +285,8 @@ void clsAPIObject::invokeMethod(
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
 #ifdef QT_DEBUG
-    if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup")
-    {
-        int i = 0;
+    if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup") {
+        int i; i = 0;
     }
 #endif
 
@@ -299,15 +294,13 @@ void clsAPIObject::invokeMethod(
 
     QMetaObject::Connection Conn_addResponseHeader;
 
-    try
-    {
+    try {
         if (_arguments.size() > 10)
             throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
 
         QGenericArgument Arguments[10];
 
-        for (int i=0; i<10; ++i)
-        {
+        for (int i=0; i<10; ++i) {
             if (i < _arguments.size())
                 Arguments[i] = USE_ARG_AT(i);
             else
@@ -348,28 +341,27 @@ void clsAPIObject::invokeMethod(
 
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
-    }
-    catch(...)
-    {
+    } catch (...) {
         QObject::disconnect(Conn_addResponseHeader);
 
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
+
         throw;
     }
 }
 
 bool clsAPIObject::isPolymorphic(const QMetaMethodExtended& _method) {
-       if(_method.parameterCount() == 0)
+       if (_method.parameterCount() == 0)
            return false;
-       for(int i=0; i< qMin(_method.parameterCount(), this->BaseMethod.parameterCount()); ++i)
-           if(this->BaseMethod.parameterType(i) != _method.parameterType(i))
+       for (int i=0; i< qMin(_method.parameterCount(), this->BaseMethod.parameterCount()); ++i)
+           if (this->BaseMethod.parameterType(i) != _method.parameterType(i))
                return true;
        return false;
 }
 
 void clsAPIObject::updateDefaultValues(const QMetaMethodExtended& _method) {
-    if(_method.parameterNames().size() < this->RequiredParamsCount){
+    if (_method.parameterNames().size() < this->RequiredParamsCount) {
         this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size());
         this->LessArgumentMethods.append(_method);
     }

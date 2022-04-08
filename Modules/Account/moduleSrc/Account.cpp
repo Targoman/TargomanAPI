@@ -130,10 +130,8 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile)
-{
-    if (QFV.email().isValid(_emailOrMobile))
-    {
+QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile) {
+    if (QFV.email().isValid(_emailOrMobile)) {
         if (QFV.emailNotFake().isValid(_emailOrMobile) == false)
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
 
@@ -141,8 +139,7 @@ QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile)
         return "E";
     }
 
-    if (QFV.mobile().isValid(_emailOrMobile))
-    {
+    if (QFV.mobile().isValid(_emailOrMobile)) {
         _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
         return "M";
     }
@@ -157,8 +154,7 @@ TARGOMAN_IMPL_API_MODULE(Account)
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 
 Account::Account() :
-    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
-{
+    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema) {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());
@@ -198,8 +194,7 @@ Account::Account() :
 //    return clsJWT::createSignedLogin(_remember, { { JWTItems::usrLogin, _login } }, QJsonObject({ { "svc", _services } }), _ssid);
 //}
 
-TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services)
-{
+TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services) {
     return clsJWT::createSigned({
                                     { JWTItems::usrLogin,       _login },
                                     { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
@@ -528,8 +523,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
     Authentication::stuOAuthInfo OAuthInfo;
     ///TODO: validate _oAuthToken
 
-    switch(_type)
-    {
+    switch (_type) {
         case TAPI::enuOAuthType::Google:
             OAuthInfo = Authentication::retrieveGoogleUserInfo(_oAuthToken);
             break;
@@ -579,7 +573,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 
 //    clsJWT LoginJWT(_loginJWT);
 //    QString Services = _services;
-//    if(_services.isEmpty())
+//    if (_services.isEmpty())
 //        Services = LoginJWT.privatePart().value("svc").toString();
 
 //    auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
@@ -589,8 +583,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //                             });
 //}
 
-bool Account::apilogout(TAPI::JWT_t _JWT)
-{
+bool Account::apilogout(TAPI::JWT_t _JWT) {
     clsJWT JWT(_JWT);
 
     this->callSP("spLogout", {
@@ -644,8 +637,7 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
         throw exHTTPNotFound("No UUID could be found");
 
     QString fprStatus = Data.value(tblForgotPassRequest::fprStatus).toString();
-    if (fprStatus != "Sent")
-    {
+    if (fprStatus != "Sent") {
         quint64 RowsCount = UpdateQuery(ForgotPassRequest::instance())
                             .set(tblForgotPassRequest::fprStatus, enuFPRStatus::Sent)
                             .where({ tblForgotPassRequest::fprUUID, enuConditionOperator::Equal, UUID })
@@ -709,8 +701,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         quint64 _voucherID
     )
 {
-    try
-    {
+    try {
         QVariant VoucherDesc = SelectQuery(Voucher::instance())
                                .addCol(tblVoucher::vchDesc)
                                .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
@@ -738,21 +729,17 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError("There is no services registered.");
 
         //1: process voucher items
-        foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
-        {
+        foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items) {
             //lookup services
-            foreach (QVariant Service, Services)
-            {
+            foreach (QVariant Service, Services) {
                 QVariantMap ServiceInfo = Service.toMap();
 
-                if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
-                {
+                if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
                     NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
                     TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
 
                     //bypass process by end point?
-                    if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
-                    {
+                    if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
                         QString OldEncodedJWT = _JWT["encodedJWT"].toString();
 
                         QVariant Result = RESTClientHelper::callAPI(
@@ -798,9 +785,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     QString(),
                     Targoman::API::AAA::enuVoucherStatus::Finished
                     );
-    }
-    catch (...)
-    {
+    } catch (...) {
         Account::tryCancelVoucher(_JWT, _voucherID);
         throw;
     }
@@ -813,8 +798,7 @@ void Account::tryCancelVoucher(
     )
 {
     //1: cancel voucher items
-    try
-    {
+    try {
         QVariant VoucherDesc = SelectQuery(Voucher::instance())
                                .addCol(tblVoucher::vchDesc)
                                .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
@@ -828,33 +812,26 @@ void Account::tryCancelVoucher(
         else if (VoucherDesc.canConvert<QVariantMap>())
             PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
 
-        if (PreVoucher.Items.length())
-        {
+        if (PreVoucher.Items.length()) {
             QVariantList Services = SelectQuery(Service::instance())
                     .addCol(tblService::svcID)
                     .addCol(tblService::svcName)
                     .addCol(tblService::svcCancelVoucherItemEndPoint)
                     .all();
 
-            if (Services.isEmpty() == false)
-            {
-                foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
-                {
+            if (Services.isEmpty() == false) {
+                foreach(Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items) {
                     //lookup services
-                    foreach (QVariant Service, Services)
-                    {
+                    foreach (QVariant Service, Services) {
                         QVariantMap ServiceInfo = Service.toMap();
 
-                        if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service)
-                        {
+                        if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
                             NULLABLE_TYPE(QString) CancelVoucherItemEndPoint;
                             TAPI::setFromVariant(CancelVoucherItemEndPoint, ServiceInfo.value(tblService::svcCancelVoucherItemEndPoint));
 
                             //bypass process by end point?
-                            if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint))
-                            {
-                                try
-                                {
+                            if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint)) {
+                                try {
                                     QString OldEncodedJWT = _JWT["encodedJWT"].toString();
 
                                     QVariant Result = RESTClientHelper::callAPI(
@@ -869,10 +846,8 @@ void Account::tryCancelVoucher(
 
                                     if (OldEncodedJWT != _JWT["encodedJWT"].toString())
                                         Account::instance()->addResponseHeader("x-auth-new-token", _JWT["encodedJWT"].toString());
-                                }
-                                catch (...)
-                                {
-                                }
+                                } catch (...)
+                                { ; }
                             }
 
                             break;
@@ -881,10 +856,8 @@ void Account::tryCancelVoucher(
                 }
             } //if (Services.isEmpty() == false)
         } //if (PreVoucher.Items.length())
-    }
-    catch (...)
-    {
-    }
+    } catch (...)
+    { ; }
 
     //2: cancel voucher
 
@@ -924,8 +897,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
     ///2.1: process voucher
     ///2.2: create online/offline payment
 
-    if (_gatewayType != Targoman::API::AccountModule::enuPaymentGatewayType::COD)
-    {
+    if (_gatewayType != Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
         QFV.url().validate(_paymentVerifyCallback, "callBack");
@@ -958,12 +930,10 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
                                        })
                      );
 
-    try
-    {
+    try {
         //2: compute wallet remaining
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
-        if ((_walletID >= 0) && (RemainingAfterWallet > 0))
-        {
+        if ((_walletID >= 0) && (RemainingAfterWallet > 0)) {
             clsDACResult Result = this->callSP("spWalletTransaction_Create", {
                                                    { "iWalletID", _walletID },
                                                    { "iVoucherID", Voucher.ID },
@@ -978,12 +948,9 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
             return Account::processVoucher(_JWT, Voucher.ID);
 
         //2.2: create online/offline payment
-        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
-        {
+        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
             //Do nothing as it will be created after information upload.
-        }
-        else
-        {
+        } else {
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       _gatewayType,
@@ -996,8 +963,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
                                       );
             Voucher.PaymentMD5 = PaymentMD5;
         }
-    }
-    catch (std::exception &exp) {
+    } catch (std::exception &exp) {
         qDebug() << "**********************************" << exp.what();
 
         Account::tryCancelVoucher(_JWT, Voucher.ID, true);
@@ -1033,16 +999,13 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
 
-    try
-    {
+    try {
         this->callSP("spWalletTransactionOnPayment_Create", {
                          { "iVoucherID", VoucherID },
                          { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
         return Account::processVoucher(_JWT, VoucherID);
-    }
-    catch(...)
-    {
+    } catch (...) {
         /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -1069,7 +1032,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     )
 {
     qint64 ApprovalLimit = Authorization::getPrivValue(_JWT, "AAA:approveOffline:maxAmount").toLongLong();
-    if(ApprovalLimit == 0)
+    if (ApprovalLimit == 0)
         throw exAuthorization("Not enough access for offline approval");
 
     if (ApprovalLimit > 0) {
@@ -1133,10 +1096,10 @@ bool Account::apiPOSTaddPrizeTo(
     )
 {
     qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addPrizeTo:maxAmount").toLongLong();
-    if(Limit == 0)
+    if (Limit == 0)
         throw exAuthorization("Not enough access to add prize");
 
-    if(Limit > 0 && _amount > static_cast<quint64>(Limit))
+    if (Limit > 0 && _amount > static_cast<quint64>(Limit))
         throw exAuthorization("Prize amount is greater than your limits");
 
     QFV.hasKey("desc").validate(_desc, "desc");
@@ -1231,15 +1194,12 @@ QVariant Account::apiPOSTfixtureSetup(
             UserEmail
         });
 
-    if (UserDACResult.isValid())
-    {
+    if (UserDACResult.isValid()) {
         Result.insert("User", QVariantMap({
                                               { "usrID", UserDACResult.value("usrID") },
                                               { "email", UserEmail },
                                           }));
-    }
-    else
-    {
+    } else {
         //-- create user --------------------------------------
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVariantMap SignupUserResult = this->apiPUTsignup(
@@ -1291,15 +1251,12 @@ QVariant Account::apiPOSTfixtureSetup(
             AdminUserEmail
         });
 
-    if (AdminDACResult.isValid())
-    {
+    if (AdminDACResult.isValid()) {
         Result.insert("Admin", QVariantMap({
                                                { "usrID", AdminDACResult.value("usrID") },
                                                { "email", AdminUserEmail },
                                            }));
-    }
-    else
-    {
+    } else {
         //-- create admin --------------------------------------
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVariantMap SignupAdminUserResult = this->apiPUTsignup(
@@ -1370,14 +1327,11 @@ QVariant Account::apiPOSTfixtureSetup(
         { "RowsCount", pgwTotalRows }
     };
 
-    if (pgwTotalRows < 3)
-    {
+    if (pgwTotalRows < 3) {
 //        QVariantMap CreatedPaymentGateways;
 
-        for (int i=pgwTotalRows; i<3; ++i)
-        {
-            try
-            {
+        for (int i=pgwTotalRows; i<3; ++i) {
+            try {
                 QVariantMap PaymentGatewayValues = {
                     { tblPaymentGateways::pgwName,     FixtureHelper::MakeRandomizeName(_random, " ", "fixture.devtest") },
                     { tblPaymentGateways::pgwType,     enuPaymentGatewayType::toStr(enuPaymentGatewayType::_DeveloperTest) },
@@ -1414,9 +1368,7 @@ QVariant Account::apiPOSTfixtureSetup(
 
                 PaymentGatewayValues.insert(tblPaymentGateways::pgwID, PaymentGatewayID);
 //                CreatedPaymentGateways.in(PaymentGatewayValues);
-            }
-            catch(std::exception &exp)
-            {
+            } catch (std::exception &exp) {
                 qDebug() << exp.what();
             }
         }
@@ -1446,8 +1398,7 @@ QVariant Account::apiPOSTfixtureCleanup(
 
 //    OR u.usrMobile LIKE '+98999887%'
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE wb
               FROM tblWalletBalances wb
@@ -1467,13 +1418,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblWalletBalances", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE wt
               FROM tblWalletsTransactions wt
@@ -1491,13 +1438,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblWalletsTransactions", QVariantMap({
                                                                 { "numRowsAffected", DACResult.numRowsAffected() },
                                                             }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE uw
               FROM tblUserWallets uw
@@ -1513,13 +1456,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblUserWallets", QVariantMap({
                                                         { "numRowsAffected", DACResult.numRowsAffected() },
                                                     }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE op
               FROM tblOnlinePayments op
@@ -1537,13 +1476,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblOnlinePayments", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE fp
               FROM tblOfflinePayments fp
@@ -1561,13 +1496,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblOfflinePayments", QVariantMap({
                                                             { "numRowsAffected", DACResult.numRowsAffected() },
                                                         }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE vch
               FROM tblVoucher vch
@@ -1583,13 +1514,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblVoucher", QVariantMap({
                                                     { "numRowsAffected", DACResult.numRowsAffected() },
                                                 }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE apr
               FROM tblApprovalRequest apr
@@ -1605,13 +1532,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblApprovalRequest", QVariantMap({
                                                             { "numRowsAffected", DACResult.numRowsAffected() },
                                                         }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE sn
               FROM tblActiveSessions sn
@@ -1627,13 +1550,9 @@ QVariant Account::apiPOSTfixtureCleanup(
         Result.insert("tblActiveSessions", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString QueryString = R"(
             DELETE u
               FROM tblUser u
@@ -1648,13 +1567,9 @@ QVariant Account::apiPOSTfixtureCleanup(
                                                  { "items", QStringList({ UserEmail, AdminUserEmail }).join(",") },
                                                  { "numRowsAffected", DACResult.numRowsAffected() },
                                              }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
-    try
-    {
+    try {
         QString RoleName = FixtureHelper::MakeRandomizeName(_random, "-", "fixture", "role");
         QString QueryString = R"(
             DELETE r
@@ -1668,10 +1583,7 @@ QVariant Account::apiPOSTfixtureCleanup(
                                                   { "items", RoleName },
                                                   { "numRowsAffected", DACResult.numRowsAffected() },
                                               }));
-    }
-    catch(...)
-    {
-    }
+    } catch (...) { ; }
 
     return Result;
 }

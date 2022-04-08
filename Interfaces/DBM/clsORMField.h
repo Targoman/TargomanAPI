@@ -72,7 +72,7 @@ public:
                     bool _isSelectable,
                     const QString& _renameAs);
     clsORMFieldData(const clsORMFieldData& _o);
-    ~clsORMFieldData() {}
+    ~clsORMFieldData() { ; }
 
     inline bool isSortable()        { return this->Privs & 0x01; }
     inline bool isFilterable()      { return this->Privs & 0x02; }

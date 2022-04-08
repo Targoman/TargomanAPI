@@ -27,8 +27,7 @@
 
 namespace Targoman::API::Helpers {
 
-QString URLHelper::domain(QString _url)
-{
+QString URLHelper::domain(QString _url) {
     if (!_url.startsWith("http://") && !_url.startsWith("https://") && (_url.indexOf("://") < 0))
         _url = "http://" + _url;
 
@@ -42,8 +41,7 @@ QString URLHelper::domain(QString _url)
     return Domain;
 };
 
-QString URLHelper::addParameter(const QString &_url, const QString& _paramName, const QVariant& _value)
-{
+QString URLHelper::addParameter(const QString &_url, const QString& _paramName, const QVariant& _value) {
     QUrl Url = QUrl(_url);
 
     QUrlQuery UrlQuery = QUrlQuery(Url);

@@ -29,7 +29,7 @@ Auth::Auth() :
     intfPureModule(
         "Account"
     )
-{}
+{ ; }
 
 bool Auth::apivalidateJWT(
         TAPI::JWT_t _JWT

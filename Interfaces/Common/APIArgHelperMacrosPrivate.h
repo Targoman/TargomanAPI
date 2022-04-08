@@ -138,8 +138,7 @@
 #define TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT20(t,n,d,i,to,fr, ...) n(_##n), TAPI_HELEPER_VARIANTSTRUCT_CONS_INIT19(__VA_ARGS__)
 
 //extern QString toCammel(const QString& _name);
-inline QString toCammel(const QString& _name)
-{
+inline QString toCammel(const QString& _name) {
     return _name.mid(0,1).toLower() + _name.mid(1);
 }
 
@@ -216,7 +215,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _fromORMValueLambda; \
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
         template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toVariantLambda = \
-            [](NULLABLE_TYPE(_namespace::_type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
+            [](NULLABLE_TYPE(_namespace::_type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
         template<> std::function<NULLABLE_TYPE(_namespace::_type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromVariantLambda = \
             [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_type) { \
                 if (!_value.isValid() || _value.isNull()) \
@@ -266,7 +265,7 @@ inline QString toCammel(const QString& _name)
         template<> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::optionsLambda = _lambdaOptions; \
         template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
         template<> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toVariantLambda = \
-            [](NULLABLE_TYPE(_namespace::_enum::Type) _value){return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
+            [](NULLABLE_TYPE(_namespace::_enum::Type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
         template<> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
             [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
                 if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
@@ -290,8 +289,8 @@ inline QString toCammel(const QString& _name)
 #define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
     class _typeName : public _baseType { \
     public: \
-        _typeName() {} \
-        _typeName(const _baseType& _other):_baseType(_other) {} \
+        _typeName() { ; } \
+        _typeName(const _baseType& _other) :_baseType(_other) { ; } \
         void customFromVariant(const QVariant& _value) { _setFromVariantLambda(_value); } \
         static _typeName fromVariant(const QVariant& _value) { \
             _typeName _var; \

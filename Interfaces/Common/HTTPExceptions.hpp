@@ -35,15 +35,15 @@ namespace API {
 
 class exHTTPError : public Targoman::Common::exTargomanBase {
 public:
-    exHTTPError(const QString& _definition, quint16 _errorCode, const QString& _message):
+    exHTTPError(const QString& _definition, quint16 _errorCode, const QString& _message) :
         Targoman::Common::exTargomanBase(_message, _errorCode),
         Definition(_definition)
-    {}
+    { ; }
 
     virtual void toEnsureAvoidanceOfUsingBaseClass()=0;
 
     inline const QString definition() const{return this->Definition;}
-    inline const QString fullError(){
+    inline const QString fullError() {
         return QString("%1(%2): %3").arg(
                     this->definition()).arg(
                     this->code()).arg(
@@ -59,7 +59,7 @@ protected:
     public: _name (const QString& _message = "") : \
             exHTTPError (QString(TARGOMAN_M2STR(_name)).mid(2), _code, _message) \
             {} \
-            void toEnsureAvoidanceOfUsingBaseClass(){} \
+            void toEnsureAvoidanceOfUsingBaseClass() { ; } \
     }
 
 /*******************************************************************************/

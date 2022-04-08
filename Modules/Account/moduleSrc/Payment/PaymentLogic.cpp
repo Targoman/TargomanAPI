@@ -51,16 +51,14 @@ tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile(
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver)
-{
+void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver) {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName))
         throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
 
     qDebug() << "registering payment gateway driver:" << _driverName;
     PaymentLogic::RegisteredDrivers.insert(_driverName,  _driver);
 }
-intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
-{
+intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
         throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
 
@@ -200,10 +198,8 @@ QString PaymentLogic::createOnlinePaymentLink(
     //3: create payment
     TAPI::MD5_t onpMD5;
     quint8 Retries = 0;
-    while (true)
-    {
-        try
-        {
+    while (true) {
+        try {
             onpMD5 = OnlinePayments::instance()
                      .callSP("spOnlinePayment_Create", {
                                  { "iVoucherID", _vchID },
@@ -215,16 +211,13 @@ QString PaymentLogic::createOnlinePaymentLink(
                      .toString()
             ;
             break;
-        }
-        catch (...)
-        {
+        } catch (...) {
             if (++Retries > 3)
                 throw;
         }
     }
 
-    try
-    {
+    try {
         _outPaymentMD5 = onpMD5;
 
         QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentMD5", onpMD5);
@@ -238,8 +231,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                                                  _invDesc
                                                  );
 
-        if (PaymentResponse.ErrorCode)
-        {
+        if (PaymentResponse.ErrorCode) {
             /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                         OnlinePayments::instance(),
                         SYSTEM_USER_ID,
@@ -268,32 +260,23 @@ QString PaymentLogic::createOnlinePaymentLink(
                     });
 
         //increase pgwSumRequestCount and pgwSumRequestAmount
-        try
-        {
+        try {
             Targoman::API::AccountModule::ORM::PaymentGateways::instance()
                      .callSP("spPaymentGateway_UpdateRequestCounters", {
                                  { "iPgwID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
                              })
             ;
-        }
-        catch (...)
-        {
-        }
+        } catch (...)
+        { ; }
 
         //5: return result for client redirecting
         return PaymentResponse.PaymentLink;
-    }
-    catch(exPayment&)
-    {
+    } catch (exPayment&) {
         throw;
-    }
-    catch(exHTTPBadRequest&)
-    {
+    } catch (exHTTPBadRequest&) {
         throw;
-    }
-    catch(std::exception &e)
-    {
+    } catch (std::exception &e) {
         /*Targoman::API::Query::*/OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
@@ -391,18 +374,15 @@ quint64 PaymentLogic::approveOnlinePayment(
 
     //update pgwLastPaymentDateTime and pgwSumTodayPaidAmount
     //increase pgwSumOkCount and pgwSumPaidAmount
-    try
-    {
+    try {
         Targoman::API::AccountModule::ORM::PaymentGateways::instance()
                  .callSP("spPaymentGateway_UpdateOkCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
                          })
         ;
-    }
-    catch (...)
-    {
-    }
+    } catch (...)
+    { ; }
 
     /*Targoman::API::Query::*/Targoman::API::AccountModule::ORM::PaymentGateways::instance().Update(
                 Targoman::API::AccountModule::ORM::PaymentGateways::instance(),

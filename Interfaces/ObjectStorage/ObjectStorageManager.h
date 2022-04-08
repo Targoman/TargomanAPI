@@ -119,7 +119,7 @@ private:
             UploadGateways(_uploadGateways),
             UploadedFileID(_uploadedFileID),
             MaxItemsCount(_maxItemsCount)
-        {}
+        { ; }
     };
 
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);

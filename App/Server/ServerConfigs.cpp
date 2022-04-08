@@ -280,7 +280,7 @@ tmplConfigurable<QString> ServerConfigs::MasterDB::Schema(
 
 /****************************************************************************/
 /*static auto langValidator = [](const intfConfigurable& _item, QString& _errorMessage) -> bool{
-    if(ISO639isValid(_item.toVariant().toString().toLatin1().constData()))
+    if (ISO639isValid(_item.toVariant().toString().toLatin1().constData()))
         return true;
     _errorMessage = QString("Invalid language code <%1> on <%2>").arg(
                 _item.toVariant().toString()).arg(
@@ -332,8 +332,7 @@ gConfigs::Server::Server(const QString& _basePath) :
          "","","",
          enuConfigSource::File
          ),
-    Statistics(gConfigs::Server::stuStatistics(_basePath))
-{}
+    Statistics(gConfigs::Server::stuStatistics(_basePath)) { ; }
 
 gConfigs::Server::stuStatistics::stuStatistics(const QString& _basePath) :
     OkResponses(_basePath + "Stats/OkResponses",
@@ -349,8 +348,7 @@ gConfigs::Server::stuStatistics::stuStatistics(const QString& _basePath) :
                      ReturnTrueCrossValidator(),
                      "","","",
                      enuConfigSource::ReadOnly
-                     )
-  {}
+                     ) { ; }
 
 tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
         clsConfigPath("TranslationServers"),

@@ -72,22 +72,22 @@
 
 #define ORMGET(_doc) \
     apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
-    QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET() { return _doc; }
 
 #define ORMGETPureVirtual(_doc) \
     apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
-    virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    virtual QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     virtual QString docOfGET() { return _doc; }
 
 #define ORMGETWithBody(_doc, _body) \
     apiGET(GET_METHOD_ARGS_HEADER_APICALL) _body \
-    virtual QString signOfGET(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    virtual QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     virtual QString docOfGET() { return _doc; }
 
 #define ORMGETByName(_name, _doc) \
     apiGET##_name(GET_METHOD_ARGS_HEADER_APICALL); \
-    QString signOfGET##_name(){ return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString signOfGET##_name() { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET##_name() { return _doc; }
 
 //used by ApiQuery
@@ -143,7 +143,7 @@
 #define CREATE_METHOD_ARGS_IMPL_APICALL     TAPI::JWT_t _JWT, TAPI::ORMFields_t _createInfo
 //#define CREATE_METHOD_CALL_ARGS_APICALL     _JWT, _createInfo
 #define ORMCREATE(_doc)                     apiCREATE(CREATE_METHOD_ARGS_HEADER_APICALL); \
-    QString signOfCREATE(){ return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString signOfCREATE() { return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfCREATE() { return _doc; }
 //used by ApiQuery
 #define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::ORMFields_t _createInfo = {}
@@ -158,7 +158,7 @@
 #define UPDATE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 //#define UPDATE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
 #define ORMUPDATE(_doc)                   apiUPDATE(UPDATE_METHOD_ARGS_HEADER_APICALL); \
-    QString signOfUPDATE(){ return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfUPDATE() { return _doc; }
 //used by ApiQuery
 #define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
@@ -173,7 +173,7 @@
 #define DELETE_METHOD_ARGS_IMPL_APICALL   TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath
 //#define DELETE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath
 #define ORMDELETE(_doc)                   apiDELETE(DELETE_METHOD_ARGS_HEADER_APICALL); \
-    QString signOfDELETE(){ return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
+    QString signOfDELETE() { return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfDELETE() { return _doc; }
 //used by ApiQuery
 #define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
@@ -250,8 +250,8 @@ namespace Targoman::API::API {
 #  define APITIMEOUT_30S
 #endif
 
-#define REST(_method, _name, _sig, _doc)            api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
-#define ASYNC_REST(_method, _name, _sig, _doc)      asyncApi##_method##_name _sig;QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return #_doc; }
+#define REST(_method, _name, _sig, _doc)            api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return #_doc; }
+#define ASYNC_REST(_method, _name, _sig, _doc)      asyncApi##_method##_name _sig;QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return #_doc; }
 
 #define REST_GET_OR_POST(_name, _sig, _doc)         REST(, _name, _sig, _doc)
 #define ASYNC_REST_GET_OR_POST(_name, _sig, _doc)   ASYNC_REST(, _name, _sig, _doc)
@@ -301,7 +301,7 @@ public:
         stuModuleMethod(intfPureModule* _module, const QMetaMethod& _method) :
             Module(_module),
             Method(_method)
-        {}
+        { ; }
     };
 
     typedef QList<stuModuleMethod> ModuleMethods_t;
@@ -317,10 +317,9 @@ public:
     virtual stuDBInfo requiredDB() const { return {}; }
 
     virtual bool init() { return true; }
-    virtual void setInstancePointer() { };
+    virtual void setInstancePointer() { ; };
 
-    virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL)
-    {
+    virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
         if (PTHIS == nullptr)
             return {};
@@ -328,8 +327,7 @@ public:
         PTHIS->prepareFiltersList();
         return PTHIS->filterItems(_method);
     }
-    virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID)
-    {
+    virtual void updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
         if (PTHIS == nullptr)
             return;

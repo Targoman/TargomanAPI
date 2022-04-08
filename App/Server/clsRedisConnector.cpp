@@ -35,52 +35,47 @@ namespace Server {
 
 clsRedisConnector::clsRedisConnector(const QUrl& _connector) :
     intfCacheConnector(_connector)
-{
-}
+{ ; }
 
-void clsRedisConnector::connect()
-{
+void clsRedisConnector::connect() {
     struct timeval Timeout = { 1, 500000 }; // 1.5 seconds
-    if(this->ConnectorURL.port() == 1)
+    if (this->ConnectorURL.port() == 1)
         this->Connection.reset(redisConnectUnixWithTimeout(this->ConnectorURL.host().toLatin1().constData(), Timeout));
     else
         this->Connection.reset(redisConnectWithTimeout(this->ConnectorURL.host().toLatin1().constData(), this->ConnectorURL.port(), Timeout));
 
-    if(this->Connection.isNull() || this->Connection->err)
+    if (this->Connection.isNull() || this->Connection->err)
         throw exCacheConnector(this->Connection.isNull() ? "can't allocate Redis context" : this->Connection->errstr);
 
     redisSetTimeout(this->Connection.data(), Timeout);
 }
 
-bool clsRedisConnector::reconnect()
-{
-    try{
-        if(this->Connection.isNull()){
+bool clsRedisConnector::reconnect() {
+    try {
+        if (this->Connection.isNull()) {
             this->connect();
-        }else
+        } else
             return redisReconnect(this->Connection.data());
-    }catch(exCacheConnector& ex){
+    } catch (exCacheConnector& ex) {
         TargomanLogWarn(1, ex.what());
         return false;
     }
     return true;
 }
 
-void clsRedisConnector::setKeyValImpl(const QString& _key, const QString& _value, qint32 _ttl)
-{
-    if(this->Connection.isNull() || this->Connection->err)
+void clsRedisConnector::setKeyValImpl(const QString& _key, const QString& _value, qint32 _ttl) {
+    if (this->Connection.isNull() || this->Connection->err)
         this->reconnect();
 
     if (!redisCommand(this->Connection.data(), "SETEX %s %d %s", qPrintable(_key), _ttl, _value.toUtf8().constData()))
         TargomanWarn(1, this->Connection->errstr);
 }
 
-QString clsRedisConnector::getValueImpl(const QString& _key)
-{
+QString clsRedisConnector::getValueImpl(const QString& _key) {
     void *Reply = nullptr;
 
     Reply = redisCommand(this->Connection.data(), "GET %s", qPrintable(_key)); // You must define "context" previously
-    if (!Reply){
+    if (!Reply) {
         TargomanWarn(1, this->Connection->errstr);
         return "";
     }

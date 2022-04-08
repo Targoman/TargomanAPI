@@ -57,28 +57,24 @@ Service::Service() :
               }, enuDBIndex::Unique },
         }
     )
-{}
+{ ; }
 
-QVariant Service::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant Service::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-quint64 Service::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint64 Service::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Service::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool Service::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool Service::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

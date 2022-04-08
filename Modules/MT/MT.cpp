@@ -39,23 +39,22 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                              bool _detailed,
                              bool _detok,
                              bool _dic,
-                             bool _dicFull)
-{
+                             bool _dicFull) {/*KZ*/
     QTime Timer, OverallTime;
 
     int PreprocessTime = 0;
     Timer.start();OverallTime.start();
 
     _text = _text.trimmed();
-    if(_text.isEmpty())
+    if (_text.isEmpty())
         throw exHTTPBadRequest("Input text must not be empty");
     _dir = _dir.replace('_', '2');
 
     TranslationDir_t Dir = TranslationDispatcher::dirLangs(_dir);
-    if(Dir.first.isNull())
+    if (Dir.first.isNull())
         throw exHTTPBadRequest("Invalid translation direction format");
 
-    if(!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
+    if (!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
     QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
@@ -79,7 +78,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     }
     ).toJson(true).object ();
 
-    if(Stats.isEmpty())
+    if (Stats.isEmpty())
         this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
         {TokenInfo[TOKENItems::tokID]},
         {_engine},
@@ -101,15 +100,15 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
     Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 */
-    if(_dic){
-        if(Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})){
-            if(_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
+    if (_dic) {
+        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})) {
+            if (_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
                 throw exAuthorization("Not enought priviledges to retrieve dictionary full response.");
 
             PreprocessTime = Timer.elapsed();Timer.restart();
             QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
-            if(DicResponse.size()){
-                if(_detailed){
+            if (DicResponse.size()) {
+                if (_detailed) {
                     DicResponse[RESULTItems::TIMES]= QVariantMap({
                                                                      {RESULTItems::TIMESItems::PRE, PreprocessTime},
                                                                      {RESULTItems::TIMESItems::TR, Timer.elapsed()},
@@ -120,13 +119,13 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                 TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
                 return DicResponse;
             }
-        }else
+        } else
             throw exAuthorization("Not enought priviledges to retrieve dictionary response.");
     }
 
     PreprocessTime += Timer.elapsed();
 
-    try{
+    try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
         QVariantMap Translation = TranslationDispatcher::instance().doTranslation(Privs,
                                                                                   _text,
@@ -139,38 +138,36 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                                                                                   InternalTranslationTime
                                                                                   );
         Timer.restart();
-        if(_detailed){
+        if (_detailed) {
             Translation[RESULTItems::TIMES]= QVariantMap({
                                                              {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
                                                              {RESULTItems::TIMESItems::TR, InternalTranslationTime},
                                                              {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
                                                              {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
                                                          });
-        }else
+        } else
             Translation[RESULTItems::TIME]= OverallTime.elapsed();
 
         TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
-        if(Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "ReportServer"}) == false)
+        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "ReportServer"}) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
-    }catch(Common::exTargomanBase& ex){
+    } catch (Common::exTargomanBase& ex) {
         TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
         throw;
     }
 }
 
-QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg)
-{
+QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg) {/*KZ*/
     return {
         {"inputArg", _arg},
         {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
     };
 }
 
-MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT")
-{
+MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {/*KZ*/
     // Register translation engines
     TranslationDispatcher::instance().registerEngines();
 }

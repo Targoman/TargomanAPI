@@ -95,8 +95,7 @@ User::User() :
     ;
 }
 
-QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_JWT, { "Account:User:CRUD~0100" });
 
@@ -145,8 +144,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
@@ -157,22 +155,19 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 /*
  * this method only can call by admin user
  */
-bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
-{
+TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     if (CurrentUserID != _usrID)
@@ -190,8 +185,7 @@ TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID)
     return TAPI::Base64Image_t(Photo);
 }
 
-bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
-{
+bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     QString qry = QString()
@@ -216,8 +210,7 @@ bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image)
     return Result.numRowsAffected() > 0;
 }
 
-bool User::apiPOSTdeletePhoto(TAPI::JWT_t _JWT)
-{
+bool User::apiPOSTdeletePhoto(TAPI::JWT_t _JWT) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     QString qry = QString()
@@ -341,20 +334,17 @@ bool User::apiUPDATEfinancialInfo(
     QStringList ToUpdate;
     QVariantList Params;
 
-    if (_iban.isNull() == false)
-    {
+    if (_iban.isNull() == false) {
         ToUpdate.append(tblUserExtraInfo::ueiIBAN);
         Params.append(_iban);
     }
 
-    if (_ether.isNull() == false)
-    {
+    if (_ether.isNull() == false) {
         ToUpdate.append(tblUserExtraInfo::ueiEther);
         Params.append(_ether);
     }
 
-    if (ToUpdate.size())
-    {
+    if (ToUpdate.size()) {
         QString qry = QString()
               + "INSERT INTO"
               + " " + tblUserExtraInfo::Name
@@ -394,22 +384,19 @@ bool User::apiUPDATEextraInfo(
     QStringList ToRemoveJson;
 
     //userExtra info json field
-    if (_job.isNull() == false)
-    {
+    if (_job.isNull() == false) {
         if (_job.isEmpty())
             ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job));
         else
             ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Job), _job);
     }
-    if (_education.isNull() == false)
-    {
+    if (_education.isNull() == false) {
         if (_education.isEmpty())
             ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education));
         else
             ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Education), _education);
     }
-    if (_fieldOfStudy.isNull() == false)
-    {
+    if (_fieldOfStudy.isNull() == false) {
         if (_fieldOfStudy.isEmpty())
             ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::FieldOfStudy));
         else
@@ -422,8 +409,7 @@ bool User::apiUPDATEextraInfo(
 //        else
 //            ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Language), _language);
 //    }
-    if (_theme.isNull() == false)
-    {
+    if (_theme.isNull() == false) {
         if (_theme.isEmpty())
             ToRemoveJson.append(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Theme));
         else
@@ -435,24 +421,18 @@ bool User::apiUPDATEextraInfo(
     if (ToUpdateJson.size())
         updateQuery = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdateJson)).toJson(QJsonDocument::Compact) + "'";
 
-    if (ToRemoveJson.length())
-    {
-        if (ToUpdateJson.size())
-        {
+    if (ToRemoveJson.length()) {
+        if (ToUpdateJson.size()) {
             jsonQry = QString()
                   + "JSON_MERGE_PATCH("
                   + "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "'),"
                   + updateQuery
                   + ")";
-        }
-        else
-        {
+        } else {
             jsonQry = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "')";
         }
 
-    }
-    else if (ToUpdateJson.size())
-    {
+    } else if (ToUpdateJson.size()) {
         jsonQry = QString()
               + "JSON_MERGE_PATCH(COALESCE(ueiExtraInfo, '{}'),"
               + updateQuery
@@ -470,20 +450,17 @@ bool User::apiUPDATEextraInfo(
 //        ToUpdate.append(tblUserExtraInfo::ueiBirthDate);
 //        Params.append(_birthDate);
 //    }
-    if (NULLABLE_HAS_VALUE(_birthDate))
-    {
+    if (NULLABLE_HAS_VALUE(_birthDate)) {
         ToUpdate.append(tblUserExtraInfo::ueiBirthDate);
         Params.append(NULLABLE_GET(_birthDate));
     }
 
     //--------------------------------------
     Params.append(CurrentUserID);
-    if ((ToUpdate.isEmpty() == false) || (jsonQry.isEmpty() == false))
-    {
+    if ((ToUpdate.isEmpty() == false) || (jsonQry.isEmpty() == false)) {
         QString qry = QString("INSERT INTO %1 SET").arg(tblUserExtraInfo::Name);
 
-        if (ToUpdate.isEmpty() == false)
-        {
+        if (ToUpdate.isEmpty() == false) {
             qry += " " + ToUpdate.join("=? ,") + "=?";
             if (jsonQry.isEmpty() == false)
                 qry += ",";
@@ -495,8 +472,7 @@ bool User::apiUPDATEextraInfo(
               + ", uei_usrID=?"
               + " ON DUPLICATE KEY UPDATE";
 
-        if (ToUpdate.isEmpty() == false)
-        {
+        if (ToUpdate.isEmpty() == false) {
             qry += " " + ToUpdate.join("=? ,") + "=?";
             if (jsonQry.isEmpty() == false)
                 qry += ",";
@@ -540,7 +516,7 @@ UserExtraInfo::UserExtraInfo() :
             ORM_RELATION_OF_UPDATER(tblUserExtraInfo::ueiUpdatedBy_usrID),
         }
     )
-{}
+{ ; }
 
 //bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba)
 //{

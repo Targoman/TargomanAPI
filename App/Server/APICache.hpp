@@ -41,27 +41,27 @@ struct stuCacheValue {
     QVariant Value;
     qint32   TTL;
 
-    stuCacheValue(){}
-    stuCacheValue(const QVariant& _value, qint32 _ttl) : InsertionTime(QTime::currentTime()),Value(_value), TTL(_ttl){}
-    stuCacheValue(const stuCacheValue& _other) : InsertionTime(_other.InsertionTime),Value(_other.Value), TTL(_other.TTL){}
+    stuCacheValue() { ; }
+    stuCacheValue(const QVariant& _value, qint32 _ttl) : InsertionTime(QTime::currentTime()),Value(_value), TTL(_ttl) { ; }
+    stuCacheValue(const stuCacheValue& _other) : InsertionTime(_other.InsertionTime),Value(_other.Value), TTL(_other.TTL) { ; }
 };
 typedef QHash<QString, stuCacheValue> Cache_t;
 
 class InternalCache
 {
 public:
-    static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl){
+    static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl) {
         QMutexLocker Locker(&InternalCache::Lock);
-        if(InternalCache::Cache.size() < static_cast<qint32>(ServerConfigs::MaxCachedItems.value()))
+        if (InternalCache::Cache.size() < static_cast<qint32>(ServerConfigs::MaxCachedItems.value()))
            InternalCache::Cache.insert(_key, stuCacheValue(_value, _ttl));
     }
-    static QVariant storedValue(const QString& _key){
+    static QVariant storedValue(const QString& _key) {
         QMutexLocker Locker(&InternalCache::Lock);
         auto StoredValue = InternalCache::Cache.find(_key);
-        if(StoredValue == InternalCache::Cache.end())
+        if (StoredValue == InternalCache::Cache.end())
             return QVariant();
         Locker.unlock();
-        if(StoredValue->InsertionTime.secsTo(QTime::currentTime()) > StoredValue->TTL)
+        if (StoredValue->InsertionTime.secsTo(QTime::currentTime()) > StoredValue->TTL)
             return QVariant();
         return StoredValue->Value;
     }
@@ -76,13 +76,13 @@ public:
 class CentralCache
 {
 public:
-    static bool isValid(){return CentralCache::Connector.isNull() == false;}
-    static void setup(intfCacheConnector* _connector){ CentralCache::Connector.reset(_connector); }
-    static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl){
-        if(CentralCache::Connector.isNull() == false)
+    static bool isValid() {return CentralCache::Connector.isNull() == false;}
+    static void setup(intfCacheConnector* _connector) { CentralCache::Connector.reset(_connector); }
+    static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl) {
+        if (CentralCache::Connector.isNull() == false)
             CentralCache::Connector->setKeyVal(_key, _value, _ttl);
     }
-    static QVariant storedValue(const QString& _key){
+    static QVariant storedValue(const QString& _key) {
         return CentralCache::Connector.isNull() ? QVariant() : CentralCache::Connector->getValue(_key);
     }
 

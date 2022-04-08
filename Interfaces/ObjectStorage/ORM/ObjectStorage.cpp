@@ -37,8 +37,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayS
 namespace Targoman::API::ObjectStorage::ORM {
 
 namespace Private {
-void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info)
-{
+void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info) {
     //Upload Queue
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uquID                  , _info, tblUploadQueue);
     SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uqu_uflID              , _info, tblUploadQueue);
@@ -104,7 +103,7 @@ intfUploadFiles::intfUploadFiles(
             ORM_RELATION_OF_UPDATER(tblUploadFiles::uflUpdatedBy_usrID),
         }
     )
-{}
+{ ; }
 
 /******************************************************************/
 /******************************************************************/
@@ -133,7 +132,7 @@ intfUploadQueue::intfUploadQueue(
             ORM_RELATION_OF_UPDATER(tblUploadQueue::uquUpdatedBy_usrID),
         }
     )
-{}
+{ ; }
 
 /******************************************************************/
 /******************************************************************/
@@ -178,16 +177,14 @@ intfUploadGateways::intfUploadGateways(
             ORM_RELATION_OF_UPDATER(tblUploadGateways::ugwUpdatedBy_usrID),
         }
     )
-{}
+{ ; }
 
-QVariant intfUploadGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant intfUploadGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-quint32 intfUploadGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint32 intfUploadGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    if (_createInfo.contains(tblintfUploadGateways::ugwAllowedDomainName))
@@ -196,14 +193,12 @@ quint32 intfUploadGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfUploadGateways::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfUploadGateways::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfUploadGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool intfUploadGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

@@ -32,7 +32,7 @@ class testActionLogs: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void unprivActionLogs(){
+    void unprivActionLogs() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, "Account/ActionLogs").toString().isEmpty());
     }
 };

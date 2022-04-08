@@ -32,13 +32,13 @@ class testRoles: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void Roles_CREATE_Unprivileged(){
+    void Roles_CREATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
     }
 
-    void Roles_CREATE_Admin(){
+    void Roles_CREATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Roles/"),{},{
                                 {"rolName", UT_ServiceRoleName},
                              }) == gInvalid);
@@ -60,13 +60,13 @@ private slots:
                              }).toUInt()) > 0);
     }
 
-    void Roles_UPDATE_Unprivileged(){
+    void Roles_UPDATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                                  {"rolPrivileges", QJsonObject({{UT_ServiceName,QJsonObject({{"All", 1}})}})}
                              }) == gInvalid);
     }
 
-    void Roles_UPDATE_Admin(){
+    void Roles_UPDATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
                              }) == gInvalid);
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Roles/%1").arg(gServiceRoleID),{},{
@@ -83,16 +83,16 @@ private slots:
                              }).toBool());
     }
 
-    void Roles_DELETE_Unprivileged(){
+    void Roles_DELETE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)) == gInvalid);
     }
 
-    void Roles_DELETE_Admin(){
+    void Roles_DELETE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Roles/")) == gInvalid);
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)).toBool());
     }
 
-    void Roles_GET_Unpriviledged(){
+    void Roles_GET_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Roles/")) == gInvalid);
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
@@ -100,7 +100,7 @@ private slots:
                         }) == gInvalid);
     }
 
-    void Roles_GET_Admin(){
+    void Roles_GET_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/Roles/"),{{"cols", "rolName"}}).toMap().size());
         QVERIFY(callAdminAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {
