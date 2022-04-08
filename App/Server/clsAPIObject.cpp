@@ -276,6 +276,9 @@ void clsAPIObject::invokeMethod(
         /*OUT*/ QVariantMap &_responseHeaders
     ) const
 {
+    if (_arguments.size() > 10)
+        throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+
     bool InvocationResult = true;
     QMetaMethod InvokableMethod;
 
@@ -284,20 +287,10 @@ void clsAPIObject::invokeMethod(
     else
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
-#ifdef QT_DEBUG
-    if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup") {
-        int i; i = 0;
-    }
-#endif
-
     QVector<void*> ArgStorage(_arguments.size(), {});
 
     QMetaObject::Connection Conn_addResponseHeader;
-
     try {
-        if (_arguments.size() > 10)
-            throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
-
         QGenericArgument Arguments[10];
 
         for (int i=0; i<10; ++i) {
