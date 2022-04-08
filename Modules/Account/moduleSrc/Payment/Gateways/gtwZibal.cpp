@@ -42,8 +42,7 @@ stuPaymentResponse gtwZibal::request(
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
 
-    try
-    {
+    try {
         QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
                                  gtwZibal::URL_GTW_REQUEST,
                                  QJsonDocument(QJsonObject({
@@ -78,9 +77,7 @@ stuPaymentResponse gtwZibal::request(
             QString(URL_GTW_PAY).replace("{{track_id}}", Response.value("trackId").toString())
         );
 
-    }
-    catch(std::exception &e)
-    {
+    } catch (std::exception &e) {
         PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
         throw;
     }
@@ -96,8 +93,7 @@ stuPaymentResponse gtwZibal::verify(
     QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
-    try
-    {
+    try {
         QString OrderMD5 = _pgResponse.object().value("orderId").toString();
         QString TrackID = _pgResponse.object().value("trackId").toString();
 
@@ -139,17 +135,14 @@ stuPaymentResponse gtwZibal::verify(
             );
 
         return {};
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
         PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
         throw;
     }
 }
 
-QString gtwZibal::errorString(int _errCode)
-{
-    switch (_errCode)
-    {
+QString gtwZibal::errorString(int _errCode) {
+    switch (_errCode) {
         case 100 : return "Ok";
         case 102 : return "Invalid API Key";
         case 103 : return "Erroneous API Key";

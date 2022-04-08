@@ -27,8 +27,7 @@
 
 TAPI_MARSHAL_TEST_VARIABLES
 
-int main(int _argc, char *_argv[])
-{
+int main(int _argc, char *_argv[]) {
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Ticketing ------------------------";
     qDebug() << "--------------------------------------------------";
@@ -78,7 +77,7 @@ int main(int _argc, char *_argv[])
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testTicketing(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
-    } catch(std::exception &e) {
+    } catch (std::exception &e) {
         qDebug()<<e.what();
     }
     if (FailedTests > 0) {

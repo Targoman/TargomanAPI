@@ -41,7 +41,7 @@ template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullabl
 class tmplAPIArg : public intfAPIArgManipulator
 {
 public:
-    virtual ~tmplAPIArg(){}
+    virtual ~tmplAPIArg() { ; }
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) final
     {
@@ -104,11 +104,11 @@ public:
 
     inline QVariant defaultVariant() const
     {
-        _itmplType Default;
+        _itmplType Default = {};
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Default) : this->toVariantLambda(Default);
     }
 
-    inline void cleanup (void* _argStorage) final {if(_argStorage) delete (reinterpret_cast<_itmplType*>(_argStorage));}
+    inline void cleanup (void* _argStorage) final {if (_argStorage) delete (reinterpret_cast<_itmplType*>(_argStorage));}
     inline bool hasFromVariantMethod() const final {return this->fromVariantLambda != nullptr;}
     inline bool hasToVariantMethod() const final {return this->toVariantLambda != nullptr;}
     inline bool isPrimitiveType() const final { return _itmplVarType == COMPLEXITY_Integral;}
@@ -119,7 +119,7 @@ public:
         return this->descriptionLambda ? this->descriptionLambda(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);
     }
     inline QString toString(const QVariant _val) const final {
-        if(this->hasFromVariantMethod() && this->hasToVariantMethod())
+        if (this->hasFromVariantMethod() && this->hasToVariantMethod())
             return this->toVariantLambda(this->fromVariantLambda(_val, {})).toString();
         return QString();
     }
@@ -133,19 +133,19 @@ public:
     inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fromORMValueLambda;}
     inline std::function<QVariant(const QVariant& _val)> toORMValueConverter() const final {return this->toORMValueLambda;}
 
-    static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}){
-        if(tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda)
+    static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}) {
+        if (tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda)
             return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fromVariantLambda(_value, _paramName);
         return _value.value<_itmplType>();
     }
 
-    static QVariant toVariant(_itmplType _value){
-        if(tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariantLambda)
+    static QVariant toVariant(_itmplType _value) {
+        if (tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariantLambda)
             return tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::toVariantLambda(_value);
         return QVariant::fromValue(_value);
     }
 
-    static tmplAPIArg* instance(const char* _typeStr){
+    static tmplAPIArg* instance(const char* _typeStr) {
         static tmplAPIArg* Instance = nullptr; return Q_LIKELY(Instance) ? Instance : (Instance = new tmplAPIArg(_typeStr));
     }
 private:

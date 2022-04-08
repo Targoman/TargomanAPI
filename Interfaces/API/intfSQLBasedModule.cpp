@@ -53,7 +53,7 @@ intfSQLBasedModule::intfSQLBasedModule(
         _indexes,
         _dbProperties
     )
-{}
+{ ; }
 
 intfSQLBasedModule::intfSQLBasedModule(
         const QString& _schema,
@@ -72,7 +72,7 @@ intfSQLBasedModule::intfSQLBasedModule(
         _indexes,
         _dbProperties
     )
-{}
+{ ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
         clsTable& _table,
@@ -167,8 +167,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
         GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
         const clsCondition& _extraFilters,
         quint16 _cacheTime,
-        std::function<void(SelectQuery &_query)> _lambda_TouchQuery)
-{
+        std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 
@@ -204,10 +203,8 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     return Result;
 }
 
-QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery)
-{
-    if (_pksByPath.isEmpty())
-    {
+QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
+    if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery)
                     .toVariant()
@@ -219,8 +216,7 @@ QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTER
     return this->SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
 }
 
-quint64 intfSQLBasedModule::Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL)
-{
+quint64 intfSQLBasedModule::Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL) {
     _table.prepareFiltersList();
 
     CreateQuery query = CreateQuery(_table);
@@ -233,8 +229,7 @@ quint64 intfSQLBasedModule::Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INT
     return query.execute(_userID);
 }
 
-bool intfSQLBasedModule::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters)
-{
+bool intfSQLBasedModule::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -266,8 +261,7 @@ bool intfSQLBasedModule::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERN
     return query.execute(_userID) > 0;
 }
 
-bool intfSQLBasedModule::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete)
-{
+bool intfSQLBasedModule::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())

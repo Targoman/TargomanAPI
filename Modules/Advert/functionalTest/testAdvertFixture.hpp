@@ -53,7 +53,7 @@ class testAdvertFixture : public clsBaseTest
     Q_OBJECT
 
 public:
-    testAdvertFixture(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testAdvertFixture(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
     QString LastRandomNumber;
     QString CreatedUserEmail;
@@ -71,20 +71,17 @@ public:
 //    Targoman::API::AAA::stuVoucher Voucher;
 //    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
 
-    void cleanupUnitTestData()
-    {
+    void cleanupUnitTestData() {
         clsDAC DAC;
         DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
     }
 
 private slots:
-    void initTestCase()
-    {
+    void initTestCase() {
         initUnitTestData(false);
     }
 
-    void cleanupTestCase()
-    {
+    void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
         cleanupUnitTestData();
@@ -93,8 +90,7 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
-    void setupAccountFixture()
-    {
+    void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -121,8 +117,7 @@ private slots:
         }
     }
 
-    void login_user()
-    {
+    void login_user() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -139,8 +134,7 @@ private slots:
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void login_admin()
-    {
+    void login_admin() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -157,8 +151,7 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void setupAdvertFixture()
-    {
+    void setupAdvertFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -182,8 +175,7 @@ private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-    void cleanupAdvertFixture()
-    {
+    void cleanupAdvertFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -202,8 +194,7 @@ private slots:
         }
     }
 
-    void cleanupAccountFixture()
-    {
+    void cleanupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,

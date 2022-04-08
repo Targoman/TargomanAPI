@@ -35,7 +35,7 @@ namespace Targoman::API::DBM {
 
 clsORMFieldData::clsORMFieldData() :
     ParameterType(QMetaType::UnknownType)
-{}
+{ ; }
 
 clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
     QSharedData(_o),
@@ -46,8 +46,7 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
     ExtraValidator(_o.ExtraValidator),
     RenameAs(_o.RenameAs),
     UpdatableBy(_o.UpdatableBy),
-    Privs(_o.Privs)
-{
+    Privs(_o.Privs) {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
             .replace("(", "<")
@@ -98,13 +97,11 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
 /****************************************************************/
 clsORMField::clsORMField() :
     Data(new clsORMFieldData)
-{}
+{ ; }
 
 clsORMField::clsORMField(const clsORMField& _other, const QString& _newName) :
-    Data(_other.Data)
-{
-    if (_newName.length() && (this->Data->Name != _newName))
-    {
+    Data(_other.Data) {
+    if (_newName.length() && (this->Data->Name != _newName)) {
 //        print_stacktrace();
         this->Data.detach();
         this->Data->MasterName = this->Data->Name;
@@ -142,10 +139,9 @@ clsORMField::clsORMField(
              _renameAs
              )
     )
-{}
+{ ; }
 
-void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module)
-{
+void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module) {
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)) {
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toLatin1()));
         if (this->Data->ParameterType == QMetaType::UnknownType)
@@ -154,18 +150,15 @@ void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module)
     }
 }
 
-void clsORMField::updateTypeID(QMetaType::Type _type)
-{
+void clsORMField::updateTypeID(QMetaType::Type _type) {
     this->Data->ParameterType = _type;
 }
 
-void clsORMField::validate(const QVariant _value)
-{
+void clsORMField::validate(const QVariant _value) {
     this->argSpecs().validate(_value, this->Data->Name.toLatin1());
 }
 
-const intfAPIArgManipulator& clsORMField::argSpecs()
-{
+const intfAPIArgManipulator& clsORMField::argSpecs() {
     if (this->Data->ParameterType == QMetaType::UnknownType)
         qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
 
@@ -179,13 +172,11 @@ const intfAPIArgManipulator& clsORMField::argSpecs()
         : *gUserDefinedTypesInfo.at(this->Data->ParameterType - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
-QString  clsORMField::toString(const QVariant& _value)
-{
+QString  clsORMField::toString(const QVariant& _value) {
     return this->argSpecs().toString(_value);
 }
 
-QVariant clsORMField::toDB(const QVariant& _value)
-{
+QVariant clsORMField::toDB(const QVariant& _value) {
 //    qDebug() << "***********************" << __FUNCTION__ << _value << this->name() << this->parameterType() << this->paramTypeName()
 //             << (this->argSpecs().fromORMValueConverter() ? "has fromORMValueConverter" : "return _value")
 //             << QMetaType::QChar << _value.toString();
@@ -198,8 +189,7 @@ QVariant clsORMField::toDB(const QVariant& _value)
     ;
 }
 
-QVariant clsORMField::fromDB(const QString& _value)
-{
+QVariant clsORMField::fromDB(const QString& _value) {
     return this->argSpecs().toORMValue(_value);
 }
 

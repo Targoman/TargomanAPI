@@ -42,11 +42,11 @@ namespace Targoman::API::Server {
 
 class QMetaMethodExtended : public QMetaMethod {
 public:
-    QMetaMethodExtended(QMetaMethod _metaMethod, QVariantList _defaultValues, QString _doc):
+    QMetaMethodExtended(QMetaMethod _metaMethod, QVariantList _defaultValues, QString _doc) :
         QMetaMethod(_metaMethod),
         Doc(_doc),
         DefaultValues(_defaultValues)
-    {}
+    { ; }
 
     QString Doc;
     QVariantList DefaultValues;

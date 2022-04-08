@@ -33,13 +33,13 @@ class testActionLogs: public clsBaseTest
     Q_OBJECT
 
 public:
-    testActionLogs(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testActionLogs(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
 private slots:
-    void unprivActionLogs(){
+    void unprivActionLogs() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
     }
-    void privActionLogs(){
+    void privActionLogs() {
         QVERIFY(callAdminAPI(RESTClientHelper::GET, "Advert/ActionLogs").toString().isEmpty());
     }
 };

@@ -484,7 +484,7 @@ public:
 //    QVariant execute(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
 
 private:
-    virtual void iAmAbstract() {}
+    virtual void iAmAbstract() { ; }
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, bool _checkStatusCol = false);
 
     friend clsSelectQueryData;
@@ -520,7 +520,7 @@ public:
 
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 private:
-    virtual void iAmAbstract() {}
+    virtual void iAmAbstract() { ; }
     friend testQueryBuilders;
 };
 
@@ -548,7 +548,7 @@ public:
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
 private:
-    virtual void iAmAbstract() {}
+    virtual void iAmAbstract() { ; }
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
     friend tmplQueryJoinTrait<UpdateQuery>;
     friend testQueryBuilders;
@@ -573,7 +573,7 @@ public:
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _realDelete = false);
 
 private:
-    virtual void iAmAbstract() {}
+    virtual void iAmAbstract() { ; }
     QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {});
     friend tmplQueryJoinTrait<DeleteQuery>;
     friend testQueryBuilders;

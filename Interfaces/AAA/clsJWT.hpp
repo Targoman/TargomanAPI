@@ -49,7 +49,7 @@ TARGOMAN_CREATE_CONSTEXPR(rolName);
 
 class clsJWT{
 public:
-    clsJWT(const QJsonObject& _token) : Token(_token){}
+    clsJWT(const QJsonObject& _token) : Token(_token) { ; }
     inline QString login() const {return this->Token.value(JWTItems::usrLogin).toString();}
     inline QString name() const {return this->Token.value(JWTItems::usrName).toString();}
     inline QString family() const {return this->Token.value(JWTItems::usrFamily).toString();}

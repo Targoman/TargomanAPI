@@ -30,8 +30,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
 namespace Targoman::API::AccountModule {
 
-void stuOnlinePayment::fromVariantMap(const QVariantMap& _info)
-{
+void stuOnlinePayment::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, ORM::tblOnlinePayments, onpID);
     SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, ORM::tblOnlinePayments, onpMD5);
     SET_FIELD_FROM_VARIANT_MAP(this->onp_vchID,  _info, ORM::tblOnlinePayments, onp_vchID);
@@ -70,10 +69,9 @@ OnlinePayments::OnlinePayments() :
             { "paymentGateway", { tblOnlinePayments::onp_pgwID, R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID } },
         }
     )
-{}
+{ ; }
 
-QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
@@ -110,10 +108,9 @@ OfflinePayments::OfflinePayments() :
             ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
         }
     )
-{}
+{ ; }
 
-QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
@@ -124,8 +121,7 @@ QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
 }
 
-bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

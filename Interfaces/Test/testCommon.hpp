@@ -73,26 +73,20 @@ extern quint64 gUserID;
 extern quint64 gAdminUserID;
 extern QVariant gInvalid;
 
-inline char **findDBPrefixFromArguments(int argc, char *argv[], QString &_dbPrefix, int &_outArgsCount)
-{
+inline char **findDBPrefixFromArguments(int argc, char *argv[], QString &_dbPrefix, int &_outArgsCount) {
     std::list<std::string> commandList;
     commandList.push_back(argv[0]);
-    if (argc > 1)
-    {
-        for (int idx=1; idx<argc; idx++)
-        {
+    if (argc > 1) {
+        for (int idx=1; idx<argc; idx++) {
             if ((qstricmp(argv[idx], "dbprefix") == 0)
                     || (qstricmp(argv[idx], "-dbprefix") == 0)
                     || (qstricmp(argv[idx], "--dbprefix") == 0)
-                )
-            {
-                if (argc-1 > idx)
-                {
+                ) {
+                if (argc-1 > idx) {
                     _dbPrefix = argv[idx+1];
                     ++idx;
                 }
-            }
-            else
+            } else
                 commandList.push_back(argv[idx]);
         }
     }
@@ -100,8 +94,7 @@ inline char **findDBPrefixFromArguments(int argc, char *argv[], QString &_dbPref
     char **OutArgs = (char**)malloc(sizeof(char*) * commandList.size());
     _outArgsCount = 0;
 
-    for(std::list<std::string>::iterator it=commandList.begin(); it!=commandList.end(); ++it)
-    {
+    for (std::list<std::string>::iterator it=commandList.begin(); it!=commandList.end(); ++it) {
         char *item = new char[strlen((*it).c_str()) + 1];
         strcpy(item, (*it).c_str());
         OutArgs[_outArgsCount] = item;
@@ -114,12 +107,11 @@ inline char **findDBPrefixFromArguments(int argc, char *argv[], QString &_dbPref
 class clsBaseTest : public QObject
 {
 public:
-    clsBaseTest(const QString &_dbPrefix) : DBPrefix(_dbPrefix) {}
+    clsBaseTest(const QString &_dbPrefix) : DBPrefix(_dbPrefix) { ; }
     QString DBPrefix;
 
 protected:
-    void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true)
-    {
+    void initUnitTestData(bool _createUsers = true, bool _deleteOldTestData = true) {
         if (_deleteOldTestData)
             cleanupUnitTestData();
 //            deleteOldTestData();
@@ -193,8 +185,7 @@ protected:
             const QVariantMap& _postOrFormFields = {},
             const QVariantMap& _formFiles = {},
             QVariantMap *_outResponseHeaders = nullptr
-        )
-    {
+        ) {
         QVariantMap ResponseHeaders;
 
         QVariant Result = RESTClientHelper::callAPI(
@@ -212,8 +203,7 @@ protected:
                  << "  Response Headers:" << ResponseHeaders << endl
                  << "  Result:" << Result;
 
-        if (ResponseHeaders.contains("x-auth-new-token"))
-        {
+        if (ResponseHeaders.contains("x-auth-new-token")) {
 //            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
 
 //            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << endl << NewJWT;
@@ -237,8 +227,7 @@ protected:
             const QVariantMap& _postOrFormFields = {},
             const QVariantMap& _formFiles = {},
             QVariantMap *_outResponseHeaders = nullptr
-        )
-    {
+        ) {
         return callAPI(
                     false,
                     _method,
@@ -257,8 +246,7 @@ protected:
             const QVariantMap& _postOrFormFields = {},
             const QVariantMap& _formFiles = {},
             QVariantMap *_outResponseHeaders = nullptr
-        )
-    {
+        ) {
         return callAPI(
                     true,
                     _method,
@@ -271,8 +259,7 @@ protected:
     }
 
 private:
-    void deleteOldTestData() //bool _createUsers=false)
-    {
+    void deleteOldTestData() { //bool _createUsers=false)
         clsDAC DAC("AAA");
 
         DAC.execQuery("", QString("DELETE FROM %1AAA.tblAPITokens WHERE aptToken IN(?,?)").arg(this->DBPrefix), { UT_NormalToken, UT_AdminToken });

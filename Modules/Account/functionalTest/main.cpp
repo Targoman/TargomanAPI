@@ -33,8 +33,7 @@ TAPI_MARSHAL_TEST_VARIABLES
 
 /*
 //https://cpp.hotexamples.com/examples/-/QString/toLongLong/cpp-qstring-tolonglong-method-examples.html
-QVariant readNumber(const QString& _str, bool *ok)
-{
+QVariant readNumber(const QString& _str, bool *ok) {
     //m_settings->locale()
     QString negativeSign = "-";
     QString decimalSymbol = ".";
@@ -118,18 +117,15 @@ QVariant readNumber(const QString& _str, bool *ok)
     return isInt ? QVariant(tot.toLongLong(ok)) : QVariant(tot.toDouble(ok));
 }
 
-QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage)
-{
+QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) {
     bool Result = true;
     *_argStorage = new quint32;
 
     quint32 ConvertedVal;
-    if (_val.userType() == QMetaType::QString)
-    {
+    if (_val.userType() == QMetaType::QString) {
         QString StrVal = _val.toString();
         ConvertedVal = static_cast<quint32>(readNumber(StrVal, &Result).toUInt(&Result));
-    }
-    else
+    } else
         ConvertedVal = static_cast<quint32>(_val.toUInt(&Result));
 
     *(reinterpret_cast<quint32*>(*_argStorage)) = ConvertedVal;
@@ -140,8 +136,7 @@ QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _pa
     return QGenericArgument("quint32", *_argStorage);
 }
 
-QGenericArgument makeGenericArgument_NULLABLE(const QVariant& _val, const QByteArray& _paramName, void** _argStorage)
-{
+QGenericArgument makeGenericArgument_NULLABLE(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) {
     bool Result = true;
     *_argStorage = new NULLABLE_TYPE(quint32);
 
@@ -154,8 +149,7 @@ QGenericArgument makeGenericArgument_NULLABLE(const QVariant& _val, const QByteA
     return QGenericArgument("quint32", *_argStorage);
 }
 
-void testMakeGenericArgument()
-{
+void testMakeGenericArgument() {
     QVariant _val0 = "2.05762e+09";
     QByteArray _paramName0 = "hello 1";
 
@@ -170,9 +164,9 @@ void testMakeGenericArgument()
     void* _argStorage1;
     QGenericArgument aaa1 = makeGenericArgument_NULLABLE(_val1, _paramName1, &_argStorage1);
 }
-/**/
-int main(int _argc, char *_argv[])
-{
+*/
+
+int main(int _argc, char *_argv[]) {
 //    testMakeGenericArgument(); return 0;
     qDebug() << "--------------------------------------------------";
     qDebug() << "-- test module: Account --------------------------";
@@ -209,8 +203,7 @@ int main(int _argc, char *_argv[])
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens(DBPrefix), progArgsCount, progArgs);
-    }
-    catch(std::exception &e) {
+    } catch (std::exception &e) {
         qDebug()<<e.what();
     }
 

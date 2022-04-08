@@ -53,10 +53,9 @@ ActiveSessions::ActiveSessions() :
             { tblActiveSessions::ssnUpdatedBy_usrID,    R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true }
         }
     )
-{}
+{ ; }
 
-QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //  QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -69,8 +68,7 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   TAPI::ORMFields_t ExtraFilters;
 
   if (_pksByPath.trimmed() == clsJWT(_JWT).session())

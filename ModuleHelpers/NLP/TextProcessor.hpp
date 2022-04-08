@@ -39,7 +39,7 @@ class TextProcessor
 public:
     instanceGetter (TextProcessor)
 
-    inline void init() { //QSharedPointer<QSettings> _configSettings = QSharedPointer<QSettings>()){
+    inline void init() { //QSharedPointer<QSettings> _configSettings = QSharedPointer<QSettings>()) {
         NLPLibs::TargomanTextProcessor::instance().init(
                     Targoman::Common::Configuration::ConfigManager::instance().configSettings());
     }
@@ -74,7 +74,7 @@ public:
     }
 
 private:
-    TextProcessor(){}
+    TextProcessor() { ; }
     TAPI_DISABLE_COPY(TextProcessor)
 };
 

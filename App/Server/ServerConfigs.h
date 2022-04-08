@@ -38,7 +38,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exTargomanAPI, Targoman::Common::exTargomanBase);
 
 struct ServerConfigs
 {
-    static inline QString makeConfig(const QString& _name){return "/Server/" + _name;}
+    static inline QString makeConfig(const QString& _name) {return "/Server/" + _name;}
 
     static Targoman::Common::Configuration::tmplConfigurable<QString>       BasePath;
     static Targoman::Common::Configuration::tmplConfigurable<QString>       Version;

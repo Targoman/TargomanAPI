@@ -52,7 +52,7 @@ public:
                 { "rel_a",   { "colC1", R("test", "t2"), "colA2" } },
             }
         )
-    {}
+    { ; }
 
 //    ModuleMethods_t listOfMethods() final
 //    {
@@ -85,7 +85,7 @@ public:
                 { ORM_INVALIDATED_AT_FIELD },
             }
         )
-    {}
+    { ; }
 
 //    ModuleMethods_t listOfMethods() final
 //    {
@@ -111,10 +111,10 @@ public:
 
 
 /*
-void f1(QVariant v) {}
-//    void f1(QString v) {}
-void f1(const DBExpression& v) {}
-void f1(const clsColSpecs& v) {}
+void f1(QVariant v) { ; }
+//    void f1(QString v) { ; }
+void f1(const DBExpression& v) { ; }
+void f1(const clsColSpecs& v) { ; }
 
 void test_overloaded_function() {
     QString s1;
@@ -184,8 +184,7 @@ private slots:
                     .isEmpty() == false);
     };
 
-    void condition_buildString_simple()
-    {
+    void condition_buildString_simple() {
         QT_TRY {
             clsCondition cnd =
                 clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
@@ -211,8 +210,7 @@ t1.colA1 = 101
         }
     }
 
-    void condition_buildString_multi()
-    {
+    void condition_buildString_multi() {
         QT_TRY {
             clsCondition cnd =
                 clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
@@ -240,8 +238,7 @@ t1.colA1 = 101
         }
     }
 
-    void condition_buildString_complex()
-    {
+    void condition_buildString_complex() {
         QT_TRY {
             clsCondition cnd =
                 clsCondition({ "colA1", enuConditionOperator::Equal, 101 })
@@ -289,8 +286,7 @@ t1.colA1 = 101
         }
     }
 
-    void condition_buildString_DBExpression()
-    {
+    void condition_buildString_DBExpression() {
 //        auto v = QVariant::fromValue(
 //                     stuDBExpressionWithValue(
 //                         DBExpression::instance()["DATE_ADD"])

@@ -43,13 +43,13 @@ class intfCacheConnector{
 public:
     intfCacheConnector(const QUrl& _connector) :
         ConnectorURL(_connector)
-    {}
+    { ; }
     virtual ~intfCacheConnector();
 
     virtual void connect() = 0;
     void setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl);
 
-    QVariant getValue(const QString& _key){
+    QVariant getValue(const QString& _key) {
         return this->getValueImpl (_key);
     }
 

@@ -40,7 +40,7 @@ namespace Server {
 
 class WebSocketServer : public QObject{
     Q_OBJECT
-    static inline QString makeConfig(const QString& _name){return "/WebSocketServer/" + _name;}
+    static inline QString makeConfig(const QString& _name) {return "/WebSocketServer/" + _name;}
     static Targoman::Common::Configuration::tmplConfigurable<QString>      Name;
     static Targoman::Common::Configuration::tmplRangedConfigurable<quint16>Port;
     static Targoman::Common::Configuration::tmplConfigurable<bool>         JustLocal;
@@ -49,7 +49,7 @@ class WebSocketServer : public QObject{
 public:
     void start();
     void stopListening();
-    inline bool isActive(){return Name.value().size() && Port.value() > 0;}
+    inline bool isActive() {return Name.value().size() && Port.value() > 0;}
 signals:
     void sigNewConnection(QWebSocket* _connection);
     void closed();

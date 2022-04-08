@@ -29,8 +29,7 @@
 
 namespace Targoman::API::Helpers {
 
-const QString SecurityHelper::UUIDtoMD5()
-{
+const QString SecurityHelper::UUIDtoMD5() {
     QByteArray data;
 
     data.append(QRandomGenerator::global()->generate());

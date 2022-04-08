@@ -178,10 +178,10 @@ public:
 
         stuObjectStorageConfigs(const stuObjectStorageConfigs &_other) :
             TempLocalStoragePath(_other.TempLocalStoragePath)
-        {}
+        { ; }
         stuObjectStorageConfigs(const QString &_localStoragePath) :
             TempLocalStoragePath(_localStoragePath)
-        {}
+        { ; }
     };
 
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;

@@ -50,8 +50,7 @@ public:
     clsMultipartFormDataRequestHandler(clsRequestHandler* _parent, const QByteArray& _marker) :
         MultipartReader(_marker.toStdString()),
         pRequestHandler(_parent),
-        LastWrittenBytes(0)
-    {
+        LastWrittenBytes(0) {
         this->onPartBegin = clsMultipartFormDataRequestHandler::onMultiPartBegin;
         this->onPartData = clsMultipartFormDataRequestHandler::onMultiPartData;
         this->onPartEnd = clsMultipartFormDataRequestHandler::onMultiPartEnd;
@@ -59,8 +58,7 @@ public:
         this->userData = reinterpret_cast<void*>(this);
     }
 
-    size_t feed(const char *_buffer, long long  _len)
-    {
+    size_t feed(const char *_buffer, long long  _len) {
         return static_cast<size_t>(MultipartReader::feed(_buffer, _len));
     }
 
@@ -103,7 +101,7 @@ class clsRequestHandler : public QObject
             StatusCode(_code),
             Result(_result),
             ResponseHeader(_responseHeaders)
-        {}
+        { ; }
     };
 
 public:

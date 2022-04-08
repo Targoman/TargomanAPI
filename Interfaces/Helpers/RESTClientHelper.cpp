@@ -90,8 +90,7 @@ QVariant RESTClientHelper::callAPI(
     if (_outResponseHeaders != nullptr)
         *_outResponseHeaders = ResponseHeaders;
 
-    if (EncodedJWT != _JWT["encodedJWT"].toString())
-    {
+    if (EncodedJWT != _JWT["encodedJWT"].toString()) {
         QJWT::extractAndDecryptPayload(EncodedJWT, _JWT);
         _JWT["encodedJWT"] = EncodedJWT;
     }
@@ -132,8 +131,7 @@ QVariant RESTClientHelper::callAPI(
     };
 
     bool HasForm = false;
-    if (_formFiles.isEmpty() == false)
-    {
+    if (_formFiles.isEmpty() == false) {
         HasForm = true;
         for (auto iter=_formFiles.begin(); iter!=_formFiles.end(); ++iter)
             CUrl.mime_addFile(iter.key(), iter.value().toString());
@@ -145,20 +143,15 @@ QVariant RESTClientHelper::callAPI(
     Opt[CURLOPT_FAILONERROR] = true;
     QStringList Headers;
 
-    if (HasForm)
-    {
-        if (_postOrFormFields.isEmpty() == false)
-        {
+    if (HasForm) {
+        if (_postOrFormFields.isEmpty() == false) {
             for (auto iter = _postOrFormFields.begin(); iter != _postOrFormFields.end(); ++iter)
                 CUrl.mime_addData(iter.key(), iter.value().toString());
         }
-    }
-    else
-    {
+    } else {
         Headers.append("Content-Type: application/json");
 
-        switch (_method)
-        {
+        switch (_method) {
             case GET:
             case DELETE:
                 break;
@@ -174,8 +167,7 @@ QVariant RESTClientHelper::callAPI(
 
     Opt[CURLOPT_HTTPHEADER] = Headers;
 
-    switch (_method)
-    {
+    switch (_method) {
         case GET:
             Opt[CURLOPT_CUSTOMREQUEST] = "GET";
             break;
@@ -201,8 +193,7 @@ QVariant RESTClientHelper::callAPI(
         *_outResponseHeaders = ResponseHeaders;
 
     //replace JWT by x-auth-new-token
-    if (ResponseHeaders.contains("x-auth-new-token"))
-    {
+    if (ResponseHeaders.contains("x-auth-new-token")) {
         _encodedJWT = ResponseHeaders.value("x-auth-new-token").toString();
 
         qDebug() << "**********************************" << "JWT replaced by" << endl
@@ -212,8 +203,7 @@ QVariant RESTClientHelper::callAPI(
         //Account::instance()->addResponseHeader("x-auth-new-token", _encodedJWT);
     }
 
-    if (CUrl.lastError().isOk() == false)
-    {
+    if (CUrl.lastError().isOk() == false) {
         auto LastError = CUrl.lastError();
         qDebug().noquote().nospace()
                 << "-- CURL ERROR: (" << LastError.code() << ") " << LastError.text() << endl

@@ -45,8 +45,7 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
-    intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema)
-{
+    intfSQLBasedWithActionLogsModule(TicketingDomain, TicketingSchema) {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
 
@@ -89,17 +88,14 @@ quint64 Ticketing::insertTicket(
 
     quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
 
-    if (_files.isEmpty() == false)
-    {
+    if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
                                              .addCol(tblTicketAttachments::tat_tktID)
                                              .addCol(tblTicketAttachments::tat_uplID)
                                              ;
 
-        foreach(auto _file, _files)
-        {
-            try
-            {
+        foreach(auto _file, _files) {
+            try {
                 quint64 UploadedFileID = ObjectStorageManager::saveFile(
                                              _createdBy,
                                              UploadFiles::instance(),
@@ -112,9 +108,7 @@ quint64 Ticketing::insertTicket(
                                                                   { tblTicketAttachments::tat_tktID, TicketID },
                                                                   { tblTicketAttachments::tat_uplID, UploadedFileID },
                                                               }));
-            }
-            catch (std::exception &exp)
-            {
+            } catch (std::exception &exp) {
                 TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
             }
         }

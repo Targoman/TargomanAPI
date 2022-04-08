@@ -29,8 +29,7 @@ namespace Apps {
 using namespace Common;
 using namespace Targoman::Common::Configuration;
 
-QString gConfigs::Classifier::makeConfig(const QString& _name)
-{
+QString gConfigs::Classifier::makeConfig(const QString& _name) {
     return "/Classifier/" + _name;
 }
 

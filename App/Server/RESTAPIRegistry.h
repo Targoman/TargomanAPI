@@ -43,8 +43,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 
 /*****************************************************/
 class OpenAPIGenerator;
-class RESTAPIRegistry
-{
+class RESTAPIRegistry {
 public:
     static inline QString makeRESTAPIKey(const QString& _httpMethod, const QString& _path) {
         return _httpMethod.toUpper() + " " + (_path.endsWith('/') ? _path.mid(0, _path.size() - 1) : _path);
@@ -55,7 +54,7 @@ public:
     }
 
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-    static inline clsAPIObject* getWSAPIObject(const QString& _path){
+    static inline clsAPIObject* getWSAPIObject(const QString& _path) {
         return RESTAPIRegistry::WSRegistry.value(RESTAPIRegistry::makeRESTAPIKey("WS", _path));
     }
 #endif

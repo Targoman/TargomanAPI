@@ -39,7 +39,7 @@ struct stuActiveAccount{
     stuActiveAccount(qint64 _ttl, const QJsonObject& _privs) :
         TTL(_ttl),
         Privs(_privs)
-    {}
+    { ; }
 };
 
 class PrivHelpers{

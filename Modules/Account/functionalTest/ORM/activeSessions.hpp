@@ -32,7 +32,7 @@ class testActiveSessions: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void ActiveSessions_GET_Unpriviledged(){
+    void ActiveSessions_GET_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toString().isEmpty());
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session()), {
@@ -46,7 +46,7 @@ private slots:
         QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool() == false);
     }
 
-    void ActiveSessions_GET_Admin(){
+    void ActiveSessions_GET_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toMap().value("rows").toList().size() > 0);
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session())).toBool());
     }

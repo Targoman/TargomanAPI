@@ -60,8 +60,9 @@ stuPaymentResponse gtwMellatBank::verify(
     return {};
 }
 
-QString gtwMellatBank::errorString(int _errCode)
-{
+QString gtwMellatBank::errorString(int _errCode) {
+    Q_UNUSED(_errCode);
+
     return "UNKNOWN";
 }
 

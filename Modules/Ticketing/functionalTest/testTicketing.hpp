@@ -49,10 +49,9 @@ class testTicketing : public clsBaseTest
     Q_OBJECT
 
 public:
-    testTicketing(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testTicketing(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
-    void cleanupUnitTestData()
-    {
+    void cleanupUnitTestData() {
         clsDAC DAC;
         DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
     }
@@ -66,13 +65,11 @@ public:
     quint64 Reply2TicketID;
 
 private slots:
-    void initTestCase()
-    {
+    void initTestCase() {
         initUnitTestData(false);
     }
 
-    void cleanupTestCase()
-    {
+    void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
         cleanupUnitTestData();
@@ -81,8 +78,7 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
-    void setupAccountFixture()
-    {
+    void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -109,8 +105,7 @@ private slots:
         }
     }
 
-    void login_user()
-    {
+    void login_user() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -127,8 +122,7 @@ private slots:
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void login_admin()
-    {
+    void login_admin() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -165,8 +159,7 @@ private slots:
 //        }
 //    }
 
-    void Ticket_newMessage()
-    {
+    void Ticket_newMessage() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
@@ -193,8 +186,7 @@ private slots:
         }
     }
 
-    void Ticket_newFeedback_1()
-    {
+    void Ticket_newFeedback_1() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
@@ -223,8 +215,7 @@ private slots:
         }
     }
 
-    void Ticket_newFeedback_2()
-    {
+    void Ticket_newFeedback_2() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
@@ -253,8 +244,7 @@ private slots:
         }
     }
 
-    void Tickets_Get()
-    {
+    void Tickets_Get() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::GET,
@@ -271,9 +261,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-    void Tickets_List()
-
-    {
+    void Tickets_List() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::GET,
@@ -291,8 +279,7 @@ private slots:
         }
     }
 
-    void Tickets_List_by_baseTicketID()
-    {
+    void Tickets_List_by_baseTicketID() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::GET,
@@ -312,8 +299,7 @@ private slots:
         }
     }
 
-    void Tickets_List_by_inReplyTicketID()
-    {
+    void Tickets_List_by_inReplyTicketID() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::GET,
@@ -333,8 +319,7 @@ private slots:
         }
     }
 
-    void TicketAttachments_List()
-    {
+    void TicketAttachments_List() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::GET,
@@ -357,13 +342,11 @@ private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-    void cleanupTickets()
-    {
+    void cleanupTickets() {
 return;
         clsDAC DAC("Ticketing");
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE t
                   FROM tblTickets t
@@ -373,14 +356,11 @@ return;
                                                        this->Reply2TicketID
                                                    });
             qDebug() << QVariantMap({{ "(2) numRowsAffected", DACResult.numRowsAffected() }});
-        }
-        catch(std::exception &exp)
-        {
+        } catch (std::exception &exp) {
             qDebug() << "(2)" << exp.what();
         }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE t
                   FROM tblTickets t
@@ -390,14 +370,11 @@ return;
                                                        this->Reply1TicketID
                                                    });
             qDebug() << QVariantMap({{ "(1) numRowsAffected", DACResult.numRowsAffected() }});
-        }
-        catch(std::exception &exp)
-        {
+        } catch (std::exception &exp) {
             qDebug() << "(1)" << exp.what();
         }
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE t
                   FROM tblTickets t
@@ -407,19 +384,15 @@ return;
                                                        this->MainTicketID
                                                    });
             qDebug() << QVariantMap({{ "(MAIN) numRowsAffected", DACResult.numRowsAffected() }});
-        }
-        catch(std::exception &exp)
-        {
+        } catch (std::exception &exp) {
             qDebug() << "(MAIN)" << exp.what();
         }
     }
 
-    void cleanupOrphanUploadedFiles()
-    {
+    void cleanupOrphanUploadedFiles() {
         clsDAC DAC("Ticketing");
 
-        try
-        {
+        try {
             QString QueryString = R"(
                 DELETE tblUploadFiles
                   FROM tblUploadFiles
@@ -434,15 +407,12 @@ return;
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             qDebug() << QVariantMap({{ "(ORPHAN) numRowsAffected", DACResult.numRowsAffected() }});
-        }
-        catch(std::exception &exp)
-        {
+        } catch (std::exception &exp) {
             qDebug() << "(ORPHAN)" << exp.what();
         }
     }
 
-    void cleanupAccountFixture()
-    {
+    void cleanupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,

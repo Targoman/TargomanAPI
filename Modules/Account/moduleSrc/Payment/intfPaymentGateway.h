@@ -67,20 +67,20 @@ struct stuPaymentResponse {
         ///TODO: why -1????
 //        ErrorCode(-1)
         ErrorCode(0)
-    {}
+    { ; }
 
     stuPaymentResponse(const QString& _trackID, const QString& _paymentLink) :
         ErrorCode(0),
         TrackID(_trackID),
         PaymentLink(_paymentLink)
-    {}
+    { ; }
 
     stuPaymentResponse(const QString _orderMD5, const QString& _result, int _errorCode, const QString& _errStr) :
         ErrorCode(_errorCode),
         ErrorString(_errStr),
         Result(_result),
         OrderMD5(_orderMD5)
-    {}
+    { ; }
 };
 
 namespace Payment {
@@ -127,7 +127,7 @@ private: \
 //PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name);
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
-    _gatewayClassName::_gatewayClassName() {}
+    _gatewayClassName::_gatewayClassName() { ; }
 
 /**
  * @brief The intfPaymentGateway class is base class of gateway drivers
@@ -153,8 +153,7 @@ protected:
             ) = 0;
     virtual QString errorString(int _errCode) { return QString("unknown error %1").arg(_errCode); }
 
-    static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true)
-    {
+    static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true) {
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
@@ -174,9 +173,9 @@ protected:
 
         if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT)
             throw exPayment("Connection to <" + _url +"> timed out.");
-        else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
+        else if (CUrl.lastError().code() == CURLE_COULDNT_CONNECT)
             throw exPayment("Connection to <" + _url +"> failed.");
-        else if(CUrl.lastError().isOk() == false)
+        else if (CUrl.lastError().isOk() == false)
             throw exPayment("Connection to <" + _url + "> error: " + CUrl.lastError().text());
 
         if (_jsonDecode) {
@@ -201,8 +200,7 @@ protected:
             CallBackDomain(_basePath + "CallBackdomain", "Domain used for callback"),
             Gateway(_basePath + "Gateway", "Gateway to be used for this callback"),
             CustomerID(_basePath + "Gateway", "Customer ID on the gateway"),
-            PrivateToken(_basePath + "Gateway", "PrivateToken for gateway if required")
-        {}
+            PrivateToken(_basePath + "Gateway", "PrivateToken for gateway if required") { ; }
 
         Targoman::Common::Configuration::tmplConfigurable<QString>    CallBackDomain;
         Targoman::Common::Configuration::tmplConfigurable<TAPI::enuPaymentGateway::Type> Gateway;

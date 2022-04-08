@@ -68,7 +68,7 @@ private:
     static Common::Configuration::tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
 
 public:
-    static TranslationDispatcher& instance(){static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
+    static TranslationDispatcher& instance() {static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
     ~TranslationDispatcher();
 
     QVariantMap doTranslation(const QJsonObject& _privInfo,
@@ -91,14 +91,14 @@ public:
     void addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, int _trTime);
     void registerEngines();
 
-    inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir){
+    inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir) {
         return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
     }
 
-    static inline TranslationDir_t dirLangs(const QString& _dir){
-        if(_dir.contains("2"))
+    static inline TranslationDir_t dirLangs(const QString& _dir) {
+        if (_dir.contains("2"))
             return qMakePair(_dir.split("2").first(), _dir.split("2").last());
-        else if(_dir.contains("_"))
+        else if (_dir.contains("_"))
             return qMakePair(_dir.split("_").first(), _dir.split("_").last());
         return  qMakePair(QString(),QString());
     }

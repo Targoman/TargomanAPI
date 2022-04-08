@@ -59,8 +59,7 @@ stuActiveAccount login(
 }
 
 /*
-stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices)
-{
+stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices) {
     makeAAADAC(DAC);
 
     QJsonObject UserInfo = DAC.callSP({},
@@ -120,10 +119,8 @@ QString renewJWT(
     );
 }
 
-QString retrievePhoto(const QString _url)
-{
-    try
-    {
+QString retrievePhoto(const QString _url) {
+    try {
         QByteArray Photo = PrivHelpers::getURL(_url);
 
         if (_url.endsWith(".jpg") || _url.endsWith(".jpeg"))
@@ -131,15 +128,12 @@ QString retrievePhoto(const QString _url)
 
         if (_url.endsWith(".png"))
             return  "data:image/png;base64," + Photo.toBase64();
-    }
-    catch(...)
-    {}
+    } catch (...) { ; }
 
     return QByteArray();
 }
 
-stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
-{
+stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken) {
     stuOAuthInfo Info;
     QByteArray Json = PrivHelpers::getURL("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + _authToken);
     QJsonParseError JsonError;
@@ -164,8 +158,7 @@ stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
     return Info;
 }
 
-stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
-{
+stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken) {
     stuOAuthInfo Info;
     QByteArray Json = PrivHelpers::getURL("https://api.linkedin.com/v1/people/~?format=json&oauth_token=" + _authToken);
     QJsonParseError JsonError;
@@ -188,14 +181,12 @@ stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
     return Info;
 }
 
-stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken)
-{
+stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken) {
     throw exAuthentication("Authentication by Yahoo is not implemented yet");
     Q_UNUSED(_authToken);
 }
 
-stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken)
-{
+stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken) {
     Q_UNUSED(_authToken);
     throw exAuthentication("Authentication by Github is not implemented yet");
 }

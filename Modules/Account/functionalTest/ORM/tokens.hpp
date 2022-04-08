@@ -31,13 +31,13 @@ class testAPITokens: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void APITokens_CREATE_Unpriviledged(){
+    void APITokens_CREATE_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                 {"aptToken", UT_NormalToken},
                              }) == gInvalid);
     }
 
-    void APITokens_CREATE_Admin(){
+    void APITokens_CREATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                                {"aptToken", UT_NormalToken},
                              }) == gInvalid);
@@ -76,7 +76,7 @@ private slots:
                                              }).toUInt()) > 0);
     }
 
-    void APITokens_UPDATE_Unprivileged(){
+    void APITokens_UPDATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH, QString("Account/APITokens/%1").arg(gAPITokenID),{},{
                                  {"aptStatus", "Removed"}
                              })== gInvalid);
@@ -85,18 +85,18 @@ private slots:
                              })== gInvalid);
     }
 
-    void APITokens_UPDATE_Admin(){
+    void APITokens_UPDATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/APITokens/%1").arg(gAPIAdminTokenID),{},{
                                  {"aptStatus", "Removed"}
                              }).toBool());
     }
 
-    void APITokens_DELETE_Unprivileged(){
+    void APITokens_DELETE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/APITokens/%1").arg(gAPIAdminTokenID)).toBool() == false);
         QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool());
     }
 
-    void APITokens_DELETE_Admin(){
+    void APITokens_DELETE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/APITokens/")) == gInvalid);
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/APITokens/%1").arg(gAPITokenID)).toBool() == false);
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/APITokens/%1").arg(gAPITokenID),{},{
@@ -108,7 +108,7 @@ private slots:
                              }).toBool());
     }
 
-    void APITokens_CREATE_recreate(){
+    void APITokens_CREATE_recreate() {
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                                  {"aptToken", UT_NormalToken},
                                                  {"apt_svcID", gServiceID},
@@ -116,13 +116,13 @@ private slots:
                                              }) == gInvalid);
     }
 
-    void APITokens_GET_Unpriviledged(){
+    void APITokens_GET_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/")).toMap().size() == 1);
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPITokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_NormalToken);
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPIAdminTokenID), {{"cols", "aptToken"}}).toMap().isEmpty());
     }
 
-    void APITokens_GET_Admin(){
+    void APITokens_GET_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/APITokens/"),{{"cols", "aptToken"}}).toMap().size());
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPITokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_NormalToken);
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPIAdminTokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_AdminToken);

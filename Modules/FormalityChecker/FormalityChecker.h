@@ -29,7 +29,7 @@ namespace Targoman {
 namespace API {
 
 #ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name(){ return #_sig; } QString docOf##_method##_name(){ return _doc; }
+#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return _doc; }
 #endif
 
 class FormalityChecker : public intfPureModule

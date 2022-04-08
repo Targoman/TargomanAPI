@@ -53,7 +53,7 @@ class testAdvert : public clsBaseTest
     Q_OBJECT
 
 public:
-    testAdvert(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testAdvert(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
     QString LastRandomNumber;
     QString CreatedUserEmail;
@@ -71,20 +71,17 @@ public:
     Targoman::API::AAA::stuVoucher Voucher;
     Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
 
-    void cleanupUnitTestData()
-    {
+    void cleanupUnitTestData() {
         clsDAC DAC;
         DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
     }
 
 private slots:
-    void initTestCase()
-    {
+    void initTestCase() {
         initUnitTestData(false);
     }
 
-    void cleanupTestCase()
-    {
+    void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
         cleanupUnitTestData();
@@ -93,8 +90,7 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
-    void setupAccountFixture()
-    {
+    void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -121,8 +117,7 @@ private slots:
         }
     }
 
-    void login_user()
-    {
+    void login_user() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -139,8 +134,7 @@ private slots:
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void login_admin()
-    {
+    void login_admin() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
                                 "Account/login",{},{
@@ -157,8 +151,7 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
-    void createLocation()
-    {
+    void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
         QT_TRY {
@@ -181,8 +174,7 @@ private slots:
         }
     }
 
-    void createProduct_banner()
-    {
+    void createProduct_banner() {
         this->BannerProductCode = QString("p%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
@@ -208,8 +200,7 @@ private slots:
         }
     }
 
-    void createSaleable_banner()
-    {
+    void createSaleable_banner() {
         this->BannerSaleableCode = QString("%1-s%2").arg(this->BannerProductCode).arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
@@ -239,8 +230,7 @@ private slots:
         }
     }
 /*
-    void createPaymentGateway_devtest()
-    {
+    void createPaymentGateway_devtest() {
         auto ret = callAdminAPI(
             RESTClientHelper::GET,
             "Account/PaymentGateways",
@@ -256,10 +246,8 @@ private slots:
 //        qDebug() << "--------- PaymentGateways: " << ret;
 
         auto totalRows = ret["totalRows"].toUInt();
-        if (totalRows < 3)
-        {
-            for (int i=totalRows; i<3; ++i)
-            {
+        if (totalRows < 3) {
+            for (int i=totalRows; i<3; ++i) {
                 QT_TRY {
                     auto paymentGatewayID = callAdminAPI(
                         RESTClientHelper::PUT,
@@ -305,8 +293,7 @@ private slots:
         }
     }
 //*/
-    void addToBasket_invalid_saleable_code()
-    {
+    void addToBasket_invalid_saleable_code() {
         QT_TRY {
 //            QVERIFY_EXCEPTION_THROWN
             QVariant result = callAdminAPI(
@@ -335,8 +322,7 @@ private slots:
         }
     }
 
-    void addToBasket_invalid_coupon_qty_not_available()
-    {
+    void addToBasket_invalid_coupon_qty_not_available() {
         QT_TRY {
             QVariant result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -360,8 +346,7 @@ private slots:
         }
     }
 
-    void addToBasket_invalid_coupon_code()
-    {
+    void addToBasket_invalid_coupon_code() {
         QT_TRY {
             QVariant result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -385,8 +370,7 @@ private slots:
         }
     }
 
-    void createDiscount()
-    {
+    void createDiscount() {
         this->CouponCode = QString("cpn-code-%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
@@ -429,8 +413,7 @@ private slots:
         }
     }
 
-    void addToBasket_valid_coupon_code_1()
-    {
+    void addToBasket_valid_coupon_code_1() {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();
 
@@ -462,8 +445,7 @@ private slots:
 
     ///TODO: removeBasketItem
 
-    void addToBasket_valid_coupon_code_2()
-    {
+    void addToBasket_valid_coupon_code_2() {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();
 
@@ -495,8 +477,7 @@ private slots:
 
     ///TODO: updateBasketItem
 
-    void addToBasket_valid_coupon_code_3()
-    {
+    void addToBasket_valid_coupon_code_3() {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();
 
@@ -526,8 +507,7 @@ private slots:
         }
     }
 
-    void finalizeBasket_empty_items()
-    {
+    void finalizeBasket_empty_items() {
         QT_TRY {
             QVariant result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -549,8 +529,7 @@ private slots:
         }
     }
 
-    void finalizeBasket()
-    {
+    void finalizeBasket() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -576,10 +555,8 @@ private slots:
         }
     }
 
-    void approveOnlinePayment()
-    {
-        if (this->Voucher.PaymentMD5.isEmpty() == false)
-        {
+    void approveOnlinePayment() {
+        if (this->Voucher.PaymentMD5.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     RESTClientHelper::POST,
@@ -638,8 +615,7 @@ private slots:
 //    Targoman::API::AAA::stuVoucher voucher;
 //    Targoman::API::AAA::stuPreVoucher lastPreVoucher;
 
-    void deleteDiscount()
-    {
+    void deleteDiscount() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::DELETE,
@@ -675,10 +651,8 @@ private slots:
 //        }
 //    }
 
-    void deleteSaleable_banner()
-    {
-        if (this->BannerSaleableID > 0)
-        {
+    void deleteSaleable_banner() {
+        if (this->BannerSaleableID > 0) {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     RESTClientHelper::DELETE,
@@ -695,10 +669,8 @@ private slots:
         }
     }
 
-    void deleteProduct_banner()
-    {
-        if (this->BannerProductID > 0)
-        {
+    void deleteProduct_banner() {
+        if (this->BannerProductID > 0) {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     RESTClientHelper::DELETE,
@@ -715,10 +687,8 @@ private slots:
         }
     }
 
-    void deleteLocation()
-    {
-        if (this->LocationID > 0)
-        {
+    void deleteLocation() {
+        if (this->LocationID > 0) {
             QT_TRY {
                 QVariant Result = callAdminAPI(
                     RESTClientHelper::DELETE,
@@ -736,8 +706,7 @@ private slots:
     }
 
     /***************************************************************************************/
-    void cleanupAccountFixture()
-    {
+    void cleanupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,

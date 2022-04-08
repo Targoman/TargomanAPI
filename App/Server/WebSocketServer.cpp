@@ -74,8 +74,7 @@ tmplConfigurable<bool> WebSocketServer::Secure(
 
 
 
-void WebSocketServer::start()
-{
+void WebSocketServer::start() {
     this->WS.reset(new QWebSocketServer(this->Name.value(),
                                         this->Secure.value()?
                                             QWebSocketServer::SecureMode :
@@ -91,14 +90,12 @@ void WebSocketServer::start()
     }
 }
 
-void WebSocketServer::stopListening()
-{
+void WebSocketServer::stopListening() {
     this->WS->close ();
     qDeleteAll(this->Clients.begin(), this->Clients.end());
 }
 
-void WebSocketServer::onNewConnection()
-{
+void WebSocketServer::onNewConnection() {
 
     QWebSocket *pSocket = this->WS->nextPendingConnection();
 
@@ -111,14 +108,13 @@ void WebSocketServer::onNewConnection()
     emit sigNewConnection(pSocket);
 }
 
-void WebSocketServer::processTextMessage(QString _message)
-{
+void WebSocketServer::processTextMessage(QString _message) {
 
     QWebSocket *pSocket = qobject_cast<QWebSocket *>(sender());
     TargomanDebug(5, "Text Message Received:" << _message);
 
     if (pSocket) {
-        auto sendError = [pSocket](qhttp::TStatusCode _code, QString _message){
+        auto sendError = [pSocket](qhttp::TStatusCode _code, QString _message) {
             QJsonObject ErrorInfo = QJsonObject({
                                                     {"code", _code},
                                                     {"message", _message}
@@ -130,22 +126,22 @@ void WebSocketServer::processTextMessage(QString _message)
                                                                                 QJsonDocument::Compact).data());
         };
 
-        try{
+        try {
             QJsonParseError Error;
             QJsonDocument JSON = QJsonDocument::fromJson(_message.toUtf8(), &Error);
-            if(JSON.isNull())
+            if (JSON.isNull())
                 throw exHTTPBadRequest(QString("Invalid JSON request: %1").arg(Error.errorString()));
 
             QString ExtraAPIPath;
             QJsonObject JSONReqObject = JSON.object();
             QString API = JSONReqObject.begin().key();
-            if(API.isEmpty())
+            if (API.isEmpty())
                 return sendError(qhttp::ESTATUS_BAD_REQUEST, "No API path specified");
 
             clsAPIObject* APIObject = RESTAPIRegistry::getWSAPIObject (API);
             if (!APIObject) {
                 QString Path = API;
-                if(Path.endsWith('/'))
+                if (Path.endsWith('/'))
                     Path.truncate(Path.size() - 1);
                 ExtraAPIPath = Path.mid(Path.lastIndexOf('/'));
                 Path = Path.mid(0, Path.lastIndexOf('/'));
@@ -157,10 +153,10 @@ void WebSocketServer::processTextMessage(QString _message)
 
             QVariantMap APIArgs = JSONReqObject.begin().value().toObject().toVariantMap();
             QStringList Queries;
-            for(auto Map = APIArgs.begin(); Map != APIArgs.end(); ++Map)
+            for (auto Map = APIArgs.begin(); Map != APIArgs.end(); ++Map)
                 Queries.append(Map.key() + '=' + Map.value().toString());
 
-            /*if(ExtraAPIPath)
+            /*if (ExtraAPIPath)
                 Queries.append(REQUES)*/
 
 
@@ -170,20 +166,19 @@ void WebSocketServer::processTextMessage(QString _message)
                                                                          QJsonDocument::Indented :
                                                                          QJsonDocument::Compact);
             pSocket->sendTextMessage(Data.data());
-        }catch(Targoman::Common::exTargomanBase& ex){
+        } catch (Targoman::Common::exTargomanBase& ex) {
             sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what());
-        }catch(exQFVRequiredParam &ex){
+        } catch (exQFVRequiredParam &ex) {
             sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what());
-        }catch(exQFVInvalidValue &ex){
+        } catch (exQFVInvalidValue &ex) {
             sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what());
-        }catch(std::exception &ex){
+        } catch (std::exception &ex) {
             sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what());
         }
     }
 }
 
-void WebSocketServer::processBinaryMessage(QByteArray _message)
-{
+void WebSocketServer::processBinaryMessage(QByteArray _message) {
     QWebSocket *pSocket = qobject_cast<QWebSocket *>(sender());
     TargomanDebug(5, "Binary Message Received:" << _message);
     if (pSocket) {
@@ -191,8 +186,7 @@ void WebSocketServer::processBinaryMessage(QByteArray _message)
     }
 }
 
-void WebSocketServer::socketDisconnected()
-{
+void WebSocketServer::socketDisconnected() {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient) {
         TargomanLogDebug(5, "Client Disconnected: "<<pClient)

@@ -53,10 +53,9 @@ class testAccountFixture : public clsBaseTest
     Q_OBJECT
 
 public:
-    testAccountFixture(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) {}
+    testAccountFixture(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
-    void cleanupUnitTestData()
-    {
+    void cleanupUnitTestData() {
         clsDAC DAC;
         DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
     }
@@ -79,13 +78,11 @@ public:
 //    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
 
 private slots:
-    void initTestCase()
-    {
+    void initTestCase() {
         initUnitTestData(false);
     }
 
-    void cleanupTestCase()
-    {
+    void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
         cleanupUnitTestData();
@@ -94,8 +91,7 @@ private slots:
     /***************************************************************************************/
     /***************************************************************************************/
     /***************************************************************************************/
-    void setupAccountFixture_no_random()
-    {
+    void setupAccountFixture_no_random() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -108,8 +104,7 @@ private slots:
         }
     }
 
-    void cleanupAccountFixture_no_random()
-    {
+    void cleanupAccountFixture_no_random() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -127,8 +122,7 @@ private slots:
         }
     }
 
-    void setupAccountFixture_random()
-    {
+    void setupAccountFixture_random() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -147,8 +141,7 @@ private slots:
         }
     }
 
-    void cleanupAccountFixture_random()
-    {
+    void cleanupAccountFixture_random() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,

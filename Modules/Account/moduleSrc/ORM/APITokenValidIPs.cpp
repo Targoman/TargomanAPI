@@ -29,8 +29,7 @@
 
 namespace Targoman::API::AccountModule::ORM {
 
-QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, clsJWT(_JWT).usrID()}}, _filters);
 
@@ -41,15 +40,13 @@ QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
 }
 
-quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
-{
+quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
-{
+bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
         ExtraFilters.insert(tblAPITokens::apt_usrID, clsJWT(_JWT).usrID());
@@ -59,8 +56,7 @@ bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
@@ -99,6 +95,6 @@ APITokenValidIPs::APITokenValidIPs() :
               }, enuDBIndex::Unique },
         }
     )
-{}
+{ ; }
 
 } //namespace Targoman::API::AccountModule::ORM

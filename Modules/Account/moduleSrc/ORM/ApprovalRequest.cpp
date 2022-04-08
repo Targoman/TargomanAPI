@@ -83,10 +83,9 @@ ApprovalRequest::ApprovalRequest() :
               }, enuDBIndex::Unique },
         }
     )
-{}
+{ ; }
 
-QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-{
+QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -96,8 +95,7 @@ QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
-{
+bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
@@ -113,19 +111,15 @@ QVariant ApprovalRequest::apitimerInfo(
 
     enuApprovalType::Type Type;
 
-    if (QFV.email().isValid(_emailOrMobile))
-    {
+    if (QFV.email().isValid(_emailOrMobile)) {
         if (QFV.emailNotFake().isValid(_emailOrMobile))
             Type = enuApprovalType::Email;
         else
             throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-    }
-    else if (QFV.mobile().isValid(_emailOrMobile))
-    {
+    } else if (QFV.mobile().isValid(_emailOrMobile)) {
         Type = enuApprovalType::Mobile;
         _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
-    }
-    else
+    } else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
     QVariantMap Info = SelectQuery(*this)

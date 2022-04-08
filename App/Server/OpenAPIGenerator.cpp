@@ -31,22 +31,18 @@ using namespace DBM;
 
 QJsonObject OpenAPIGenerator::CachedJson;
 
-QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _port = 80)
-{
+QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _port = 80) {
 
-    if (ServerConfigs::BaseOpenAPIObjectFile.value().size())
-    {
+    if (ServerConfigs::BaseOpenAPIObjectFile.value().size()) {
         QFile File(ServerConfigs::BaseOpenAPIObjectFile.value());
         File.open(QIODevice::ReadOnly);
         if (File.isReadable() == false)
             throw exTargomanAPI("Unable to open: <" + ServerConfigs::BaseOpenAPIObjectFile.value() + "> for reading");
         QJsonDocument JsonDoc = QJsonDocument::fromBinaryData(File.readAll());
-        if(JsonDoc.isNull() || JsonDoc.isObject() == false)
+        if (JsonDoc.isNull() || JsonDoc.isObject() == false)
             throw exTargomanAPI("Invalid json reading from: <" + ServerConfigs::BaseOpenAPIObjectFile.value() + ">");
         return JsonDoc.object();
-    }
-    else
-    {
+    } else {
         QString HostPort;
         if (_port == 80)
             HostPort = _host;
@@ -83,10 +79,8 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
     }
 }
 
-QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _port)
-{
-    if (OpenAPIGenerator::CachedJson.isEmpty() == false)
-    {
+QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _port) {
+    if (OpenAPIGenerator::CachedJson.isEmpty() == false) {
         QJsonObject Return = OpenAPIGenerator::CachedJson;
 
         QString HostPort;
@@ -107,7 +101,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
     QJsonObject PathsObject;
     QJsonArray TagsArray;
-    foreach(const QString& Key, RESTAPIRegistry::Registry.keys()){
+    foreach(const QString& Key, RESTAPIRegistry::Registry.keys()) {
         QString PathString = Key.split(" ").last();
         QString HTTPMethod = Key.split(" ").first().toLower();
         QStringList PKInPathStorage;
@@ -125,12 +119,11 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                         APIObject->BaseMethod.parameterNames().at(i);
         };
 
-        auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, QString _typeName){
+        auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, QString _typeName) {
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
-            switch(_complexity)
-            {
+            switch (_complexity) {
                 case COMPLEXITY_Number:
                 case COMPLEXITY_Boolean:
                 case COMPLEXITY_Integral:
@@ -149,7 +142,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 case COMPLEXITY_Object:
                     return "object";
                 case COMPLEXITY_File:
-                    if(_typeName == "TAPI::Files_t")
+                    if (_typeName == "TAPI::Files_t")
                         return "string";
                     return "file";
             }
@@ -160,31 +153,26 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
 
-            switch(_complexity)
-            {
+            switch (_complexity) {
                 case COMPLEXITY_Number:
                 case COMPLEXITY_Integral:
                     if (_typeName.endsWith("int8")) {
                         _paramSpecs["format"] = "int32";
                         _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -128;
                         _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 255 : 127;
-                    }
-                    else if (_typeName.endsWith("int16")) {
+                    } else if (_typeName.endsWith("int16")) {
                         _paramSpecs["format"] = "int32";
                         _paramSpecs["minimum"] = _typeName.startsWith("uint") ? 0 : -32768 ;
                         _paramSpecs["maximum"] = _typeName.startsWith("uint") ? 65535 : 32767;
-                    }
-                    else if (_typeName.endsWith("int32")) {
+                    } else if (_typeName.endsWith("int32")) {
                         _paramSpecs["format"] = "int32";
                         if (_typeName.startsWith("uint"))
                             _paramSpecs["minimum"] = 0;
-                    }
-                    else if (_typeName.endsWith("int64")) {
+                    } else if (_typeName.endsWith("int64")) {
                         _paramSpecs["format"] = "int64";
                         if (_typeName.startsWith("uint"))
                             _paramSpecs["minimum"] = 0;
-                    }
-                    else if (_typeName.endsWith("float")) _paramSpecs["format"] = "int64";
+                    } else if (_typeName.endsWith("float")) _paramSpecs["format"] = "int64";
                     else if (_typeName.endsWith("double")) _paramSpecs["format"] = "double";
                     break;
                 case COMPLEXITY_Complex:
@@ -214,31 +202,31 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             ParamSpecs["description"] = (_argMan->isNullable() ? "Null to keep as is or "  : "") + _argMan->description(_fields);
             ParamSpecs["type"] = mapTypeToValidOpenAPIType(_argMan->complexity(), _typeName);
             addExtraParamsByType(ParamSpecs, _argMan->complexity(), _typeName);
-            if(_argMan->isNullable())
+            if (_argMan->isNullable())
                 ParamSpecs["nullable"] = true;
-            if(_argMan->complexity() == COMPLEXITY_Enum)
+            if (_argMan->complexity() == COMPLEXITY_Enum)
                 ParamSpecs["enum"] = QJsonArray::fromStringList(_argMan->options());
 
-            if(_defaultValue.isValid() && _defaultValue != QRequired){
+            if (_defaultValue.isValid() && _defaultValue != QRequired) {
                 ParamSpecs["default"] = _defaultValue == QNull || _argMan->isNullable() ? QJsonValue() : _defaultValue.toString();
-                if(addExample){
-                    if(_argMan->isNullable())
+                if (addExample) {
+                    if (_argMan->isNullable())
                         ParamSpecs["example"] = QJsonValue();
-                    if(_argMan->complexity() == COMPLEXITY_Object)
+                    if (_argMan->complexity() == COMPLEXITY_Object)
                         ParamSpecs["example"] = QJsonObject();
                     else
                         ParamSpecs["example"] = _defaultValue.toString();
                 }
-            }else{
-                if(_argMan->isNullable() == false){
-                    if(addExample){
+            } else {
+                if (_argMan->isNullable() == false) {
+                    if (addExample) {
                         ParamSpecs["required"] = true;
                         ParamSpecs["example"] = _argMan->defaultVariant().toString();
-                    }else
+                    } else
                         ParamSpecs["example"] = QJsonValue();
-                }else if (addExample)
+                } else if (addExample)
                     ParamSpecs["example"] = QJsonValue();
-                if(_defaultValue == QRequired)
+                if (_defaultValue == QRequired)
                     ParamSpecs["required"] = true;
             }
         };
@@ -254,16 +242,16 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 return;
             QJsonObject ParamSpecs;
 
-            if(ParamType == PARAM_PKSBYPATH){
-                if(_pksByPathsStorage){
+            if (ParamType == PARAM_PKSBYPATH) {
+                if (_pksByPathsStorage) {
                     QList<clsORMField> PKs;
                     foreach(auto Item, APIObject->Parent->filterItems(qhttp::EHTTP_DELETE))
-                        if(Item.isPrimaryKey())
+                        if (Item.isPrimaryKey())
                             PKs.append(Item);
-                    foreach(auto PK, PKs){
+                    foreach(auto PK, PKs) {
                         _pksByPathsStorage->append(PK.name());
                         intfAPIArgManipulator* ArgSpecs;
-                        if(PK.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
+                        if (PK.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                             ArgSpecs = gOrderedMetaTypeInfo.at(PK.parameterType());
                         else
                             ArgSpecs = gUserDefinedTypesInfo.at(PK.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
@@ -280,17 +268,17 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 return;
             }
 
-            if(HTTPMethod == "get" || HTTPMethod == "delete"){
-                if(_pksByPathsStorage){
-                    if(ParamType == PARAM_ORMFIELDS){
-                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "get" ? qhttp::EHTTP_GET : qhttp::EHTTP_DELETE)){
-                            if(Item.isFilterable()== false || Item.isPrimaryKey())
+            if (HTTPMethod == "get" || HTTPMethod == "delete") {
+                if (_pksByPathsStorage) {
+                    if (ParamType == PARAM_ORMFIELDS) {
+                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "get" ? qhttp::EHTTP_GET : qhttp::EHTTP_DELETE)) {
+                            if (Item.isFilterable()== false || Item.isPrimaryKey())
                                 continue;
                             QJsonObject ParamSpecs;
                             ParamSpecs["in"] = "query";
                             ParamSpecs["name"] = Item.name();
                             intfAPIArgManipulator* ArgSpecs;
-                            if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
+                            if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                                 ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
                             else
                                 ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
@@ -307,7 +295,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                     }
                     return ;
                 }
-                if(ParamType == PARAM_ORMFIELDS)
+                if (ParamType == PARAM_ORMFIELDS)
                     return;
 
                 ParamSpecs["in"] = "query";
@@ -334,7 +322,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
             PathInfo["tags"] = QJsonArray({TagName});
             PathInfo["produces"] = QJsonArray({"application/json"});
-            if (HTTPMethod != "get" && HTTPMethod != "delete"){
+            if (HTTPMethod != "get" && HTTPMethod != "delete") {
                 quint8 RequiredFiles = 0;
                 for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
                     if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILE))
@@ -343,7 +331,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                         RequiredFiles += 2;
 
                 QJsonObject Properties;
-                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i){
+                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i) {
                     QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(i));
                     if (     ParamType == PARAM_HEADERS
                           || ParamType == PARAM_REMOTE_IP
@@ -353,23 +341,23 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                           )
                         continue;
 
-                    if (ParamType == PARAM_ORMFIELDS){
+                    if (ParamType == PARAM_ORMFIELDS) {
                         auto Items = APIObject->Parent->filterItems(HTTPMethod == "put"
                                                                     ? qhttp::EHTTP_PUT
                                                                     : HTTPMethod == "patch"
                                                                       ? qhttp::EHTTP_PATCH
                                                                       : qhttp::EHTTP_BIND);
-                        foreach(auto Item, Items){
+                        foreach(auto Item, Items) {
                             QJsonObject ParamSpecs;
                             intfAPIArgManipulator* ArgSpecs;
-                            if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
+                            if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                                 ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
                             else
                                 ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
 
-                            if (!ArgSpecs){
+                            if (!ArgSpecs) {
                                 Item.registerTypeIfNotRegisterd(APIObject->Parent);
-                                if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
+                                if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                                     ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
                                 else
                                     ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
@@ -377,18 +365,18 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
                             Q_ASSERT(ArgSpecs);
                             QVariant DefaultValue = QVariant();
-                            if(Item.defaultValue() == QAuto)
+                            if (Item.defaultValue() == QAuto)
                                 continue;
-                            if(Item.defaultValue() == QInvalid)
+                            if (Item.defaultValue() == QInvalid)
                                 throw exTargomanAPI("Invalid Item exported for PUT method: " + Item.name());
-                            if(HTTPMethod == "put"){
-                                if(Item.defaultValue() == QNull)
+                            if (HTTPMethod == "put") {
+                                if (Item.defaultValue() == QNull)
                                     DefaultValue = QNull;
                                 else if (Item.defaultValue() == QRequired)
                                     DefaultValue = QRequired;
                                 else
                                     DefaultValue = Item.toString(Item.defaultValue());
-                            }else if(Item.isReadOnly())
+                            } else if (Item.isReadOnly())
                                 continue;
 
                             fillParamTypeSpec(ArgSpecs,
@@ -400,8 +388,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                               );
                             Properties[Item.name()] = ParamSpecs;
                         }
-                    }
-                    else {
+                    } else {
                         QJsonObject ParamSpecs;
                         fillParamTypeSpec(APIObject->argSpecs(i),
                                           APIObject->Parent->filterItems(),
@@ -414,25 +401,25 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 }
 
                 QJsonArray Parameters;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
+                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
                     addParamSpecs( Parameters, i, _pksByPathsStorage);
 
 
-                if(RequiredFiles > 0){
+                if (RequiredFiles > 0) {
                     PathInfo["consumes"] = QJsonArray({"multipart/form-data"});
-                    for(auto Prop = Properties.begin(); Prop != Properties.end(); ++Prop){
+                    for (auto Prop = Properties.begin(); Prop != Properties.end(); ++Prop) {
                         QJsonObject PropVal = Prop.value().toObject();
                         PropVal.insert("name", Prop.key());
                         PropVal.insert("in", "formData");
                         Parameters.append(PropVal);
                     }
-                }else{
+                } else {
                     QJsonArray RequiredFields;
-                    for(auto PropertyIter = Properties.begin();
+                    for (auto PropertyIter = Properties.begin();
                         PropertyIter != Properties.end();
                         PropertyIter++
                         )
-                        if(PropertyIter->toObject().value("required").toBool())
+                        if (PropertyIter->toObject().value("required").toBool())
                             RequiredFields.append(PropertyIter.key());
                     PathInfo["consumes"] = QJsonArray({"application/json"});
                     Parameters.append(QJsonObject({
@@ -448,13 +435,12 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                                   }));
                 }
                 PathInfo["parameters"] = Parameters;
-            }
-            else {
+            } else {
                 QJsonArray Parameters;
-                for(quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
+                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
                     addParamSpecs(Parameters, i, _pksByPathsStorage);
 
-                if(Parameters.size())
+                if (Parameters.size())
                     PathInfo["parameters"] = Parameters;
             }
 
@@ -465,12 +451,12 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                                                   //{"5XX", QJsonObject({{"description", "Unexpected error"}})},
                                                               });
             QJsonObject ResponseModel = DefaultResponses;
-            if(HTTPMethod == "get"){
+            if (HTTPMethod == "get") {
                 QJsonObject Properties;
-                foreach(auto Item, APIObject->Parent->filterItems()){
+                foreach(auto Item, APIObject->Parent->filterItems()) {
                     QJsonObject ParamSpecs;
                     intfAPIArgManipulator* ArgSpecs;
-                    if(Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
+                    if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
                         ArgSpecs = gOrderedMetaTypeInfo.at(Item.parameterType());
                     else
                         ArgSpecs = gUserDefinedTypesInfo.at(Item.parameterType()- TAPI_BASE_USER_DEFINED_TYPEID);
@@ -484,7 +470,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
                     Properties.insert(Item.name(), ParamSpecs);
                 }
-                if(Properties.size())
+                if (Properties.size())
                     ResponseModel["200"] =
                             QJsonObject({
                                             {"description", "Success"},
@@ -495,14 +481,14 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                         });
             }
 
-            if(APIObject->requiresJWT()){
+            if (APIObject->requiresJWT()) {
                 ResponseModel["401"] = QJsonObject({{"description", "Authorization information is missing or invalid"}});
                 ResponseModel["403"] = QJsonObject({{"description", "Access forbidden"}});
             }
 
             PathInfo["responses"] = ResponseModel;
 
-            if(APIObject->requiresJWT()){
+            if (APIObject->requiresJWT()) {
                 PathInfo["security"] =  QJsonArray({
                                                        QJsonObject({
                                                            {"Bearer", QJsonArray()}
@@ -512,28 +498,28 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             return PathInfo;
         };
 
-        auto add2Paths = [PathString, HTTPMethod](QJsonObject& PathsObject, const QJsonObject& _currPathMethodInfo, QStringList* _pksByPathsStorage, bool _multiPK = false){
-            if(HTTPMethod == "delete" && _currPathMethodInfo.value("parameters").toArray().isEmpty())
+        auto add2Paths = [PathString, HTTPMethod](QJsonObject& PathsObject, const QJsonObject& _currPathMethodInfo, QStringList* _pksByPathsStorage, bool _multiPK = false) {
+            if (HTTPMethod == "delete" && _currPathMethodInfo.value("parameters").toArray().isEmpty())
                 return;
             QString Path = PathString;
-            if(_pksByPathsStorage){
+            if (_pksByPathsStorage) {
                 if (_multiPK)
                     Path += "/{" + _pksByPathsStorage->join("_1};{") + "_1},{" + _pksByPathsStorage->join("_2};{") + "_2},...";
                 else
                     Path += "/{" + _pksByPathsStorage->join("};{") + "}";
             }
 
-            if(PathsObject.contains(Path)){
+            if (PathsObject.contains(Path)) {
                 QJsonObject CurrPathObject = PathsObject.value(Path).toObject();
                 CurrPathObject[HTTPMethod] = _currPathMethodInfo;
                 PathsObject[Path] = CurrPathObject;
-            }else
+            } else
                 PathsObject[Path] = QJsonObject({ {HTTPMethod, _currPathMethodInfo} });
         };
 
-        if(APIObject->requiresPrimaryKey()){
+        if (APIObject->requiresPrimaryKey()) {
             add2Paths(PathsObject, createPathInfo(&PKInPathStorage), &PKInPathStorage, false);
-           /* if(HTTPMethod == "delete"){
+           /* if (HTTPMethod == "delete") {
                 PKInPathStorage.clear();
                 add2Paths(PathsObject, createPathInfo(&PKInPathStorage), &PKInPathStorage, true);
             }*/
@@ -544,20 +530,20 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
         QList<clsORMField> Filters = APIObject->Parent->filterItems();
         QStringList ModelDescription;
-        foreach(auto Filter, Filters){
+        foreach(auto Filter, Filters) {
             QString FilterInfo = "* " + Filter.name();
             QStringList Flags;
-            if(Filter.isSortable()) Flags.append("Sortable");
-            if(Filter.isFilterable()) Flags.append("Filterable");
-            if(Filter.isPrimaryKey()) Flags.append("*PrimaryKey*");
-            if(Filter.isSelfIdentifier()) Flags.append("**SelfIdentifier**");
-            if(Filter.isVirtual()) Flags.append("Virtual");
-            if(Flags.size())
+            if (Filter.isSortable()) Flags.append("Sortable");
+            if (Filter.isFilterable()) Flags.append("Filterable");
+            if (Filter.isPrimaryKey()) Flags.append("*PrimaryKey*");
+            if (Filter.isSelfIdentifier()) Flags.append("**SelfIdentifier**");
+            if (Filter.isVirtual()) Flags.append("Virtual");
+            if (Flags.size())
                 FilterInfo += " (" + Flags.join("|") + ")";
             ModelDescription.append(FilterInfo);
         }
 
-        /*if(false && ModelDescription.size()){
+        /*if (false && ModelDescription.size()) {
             TagsArray.append(QJsonObject({
                                              {"name", TagName},
                                              {"description", QString("Model:\n" + ModelDescription.join("\n"))}

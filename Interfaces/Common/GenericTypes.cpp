@@ -97,10 +97,10 @@ TAPI_REGISTER_METATYPE(
     /* toVariantLambda    */ nullptr,
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JWT_t {
         QJsonObject Obj;
-        if(_value.canConvert<QVariantMap>())
+        if (_value.canConvert<QVariantMap>())
             Obj = Obj.fromVariantMap(_value.value<QVariantMap>());
 
-        if(Obj.isEmpty())
+        if (Obj.isEmpty())
             throw exHTTPBadRequest(_paramName + " is not a valid JWT object");
         return  *reinterpret_cast<JWT_t*>(&Obj);
     }
@@ -128,50 +128,50 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 /*
     [](const PrivObject_t& _value) -> QVariant {return _value;}
     [](const QVariant& _value, const QByteArray& _paramName) -> PrivObject_t {
-        if(_value.isValid() == false)
+        if (_value.isValid() == false)
             return QJsonDocument();
 
         QJsonDocument Doc;
-        if(_value.canConvert<QVariantMap>() ||
+        if (_value.canConvert<QVariantMap>() ||
            _value.canConvert<QVariantList>() ||
            _value.canConvert<double>())
             Doc = QJsonDocument::fromVariant(_value);
-        else if(_value.toString().isEmpty())
+        else if (_value.toString().isEmpty())
             return QJsonDocument();
         else {
             QJsonParseError Error;
             QJsonDocument Doc;
             Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
-            if(Error.error != QJsonParseError::NoError)
+            if (Error.error != QJsonParseError::NoError)
                 throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
         }
 
-        if(Doc.isNull() || Doc.isEmpty())
+        if (Doc.isNull() || Doc.isEmpty())
             return Doc;
-        if(Doc.isArray())
+        if (Doc.isArray())
             throw exHTTPBadRequest(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> must be object not array");
 
         QJsonObject PrivObj = Doc.object();
-        if(PrivObj.contains("ALL"))
+        if (PrivObj.contains("ALL"))
             throw exHTTPUnauthorized(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> top level allowance is not valid");
 
         return  Doc;
     },
-    [](const QList<DBM::clsORMField>&){ return "A valid Privilege JSON object"; },
+    [](const QList<DBM::clsORMField>&) { return "A valid Privilege JSON object"; },
     [](const QVariant& _value) {
-        if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
+        if (_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
             return QJsonDocument();
         QJsonParseError Error;
         QJsonDocument Doc;
-        if(_value.canConvert<QVariantMap>() ||
+        if (_value.canConvert<QVariantMap>() ||
            _value.canConvert<QVariantList>() ||
            _value.canConvert<double>())
             Doc = QJsonDocument::fromVariant(_value);
         else
           Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
-        if(Error.error != QJsonParseError::NoError)
+        if (Error.error != QJsonParseError::NoError)
             throw exHTTPBadRequest("is not a valid Privilege: <"+_value.toString()+">" + Error.errorString());
         return Doc;
     },
@@ -189,28 +189,28 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 /*
             [](const SaleableAdditive_t& _value) -> QVariant {return _value;}
             [](const QVariant& _value, const QByteArray& _paramName) -> SaleableAdditive_t {
-                if(_value.isValid() == false)
+                if (_value.isValid() == false)
                     return QJsonDocument();
 
                 QJsonDocument Doc;
-                if(_value.canConvert<QVariantMap>() ||
+                if (_value.canConvert<QVariantMap>() ||
                    _value.canConvert<QVariantList>() ||
                    _value.canConvert<double>())
                     Doc = QJsonDocument::fromVariant(_value);
-                else if(_value.toString().isEmpty())
+                else if (_value.toString().isEmpty())
                     return QJsonDocument();
                 else {
                     QJsonParseError Error;
                     QJsonDocument Doc;
                     Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
-                    if(Error.error != QJsonParseError::NoError)
+                    if (Error.error != QJsonParseError::NoError)
                         throw exHTTPBadRequest(_paramName + " is not a valid Json: <"+_value.toString()+">" + Error.errorString());
                 }
 
-                if(Doc.isNull() || Doc.isEmpty())
+                if (Doc.isNull() || Doc.isEmpty())
                     return Doc;
-                if(Doc.isArray())
+                if (Doc.isArray())
                     throw exHTTPBadRequest(_paramName + " is not a valid PrivObject: <"+_value.toString()+"> must be object not array");
 
                 QJsonObject PrivObj = Doc.object();
@@ -229,7 +229,7 @@ throw Targoman::Common::exTargomanMustBeImplemented("SaleableAdditive_t not impl
 
                 return  Doc;
             },
-            [](const QList<DBM::clsORMField>&){ return "A valid Saleable Additive JSON object"; },
+            [](const QList<DBM::clsORMField>&) { return "A valid Saleable Additive JSON object"; },
             [](const QVariant& _value) {
 
 
@@ -242,18 +242,18 @@ throw Targoman::Common::exTargomanMustBeImplemented("SaleableAdditive_t not impl
 
 
 
-                if(_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
+                if (_value.isNull() || _value.toString().isEmpty()) //OJO why?!!!
                     return QJsonDocument();
                 QJsonParseError Error;
                 QJsonDocument Doc;
-                if(_value.canConvert<QVariantMap>() ||
+                if (_value.canConvert<QVariantMap>() ||
                    _value.canConvert<QVariantList>() ||
                    _value.canConvert<double>())
                     Doc = QJsonDocument::fromVariant(_value);
                 else
                   Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
 
-                if(Error.error != QJsonParseError::NoError)
+                if (Error.error != QJsonParseError::NoError)
                     throw exHTTPBadRequest("is not a valid Saleable Additive: <"+_value.toString()+">" + Error.errorString());
                 return Doc;
             },
@@ -269,7 +269,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ EncodedJWT_t,
     /* toVariantLambda    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
     /* fromVariantLambda  */ nullptr,
-    [](const QList<DBM::clsORMField>&){ return "A signed JsonWebToken string"; }
+    [](const QList<DBM::clsORMField>&) { return "A signed JsonWebToken string"; }
 );
 
 TAPI_REGISTER_METATYPE(
@@ -310,7 +310,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ Date_t,
     /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
-        if(_value.canConvert<QDate>() == false)
+        if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
         return _value.toDate();
     }
@@ -322,7 +322,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ Time_t,
     /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
-        if(_value.canConvert<QDate>() == false)
+        if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
         return _value.toTime();
     }
@@ -334,8 +334,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ DateTime_t,
     /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
-        if (_value.canConvert<QDate>() == false)
-        {
+        if (_value.canConvert<QDate>() == false) {
             print_stacktrace();
             throw exHTTPBadRequest(_paramName + " is not a valid DateTime: <" + _value.toString() + ">");
         }
@@ -343,31 +342,30 @@ TAPI_REGISTER_METATYPE(
     }
 )
 
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, MD5_t,                      optional(QFV.md5()),                                                       _value, [](const QList<clsORMField>&){ return "A valid MD5 string"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, CommaSeparatedStringList_t, optional(QFV.asciiAlNum(false, ",")),                                      _value, [](const QList<clsORMField>&){ return "A valid comma separated string list"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Email_t,                    optional(QFV.email()),                                                     _value, [](const QList<clsORMField>&){ return "A valid email"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Mobile_t,                   optional(QFV.mobile()),                                                    _value, [](const QList<clsORMField>&){ return "A valid mobile number with/without country code"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,                     optional(QFV.ipv4()),                                                      _value, [](const QList<clsORMField>&){ return "A valid IP version 4"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](const QList<clsORMField>&){ return "A valid ISO639 two-letter language code"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](const QList<clsORMField>&){ return "A valid base64 encoded png/jpg image"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](const QList<clsORMField>&){ return "A valid Iranian sheba code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, MD5_t,                      optional(QFV.md5()),                                                       _value, [](const QList<clsORMField>&) { return "A valid MD5 string"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, CommaSeparatedStringList_t, optional(QFV.asciiAlNum(false, ",")),                                      _value, [](const QList<clsORMField>&) { return "A valid comma separated string list"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Email_t,                    optional(QFV.email()),                                                     _value, [](const QList<clsORMField>&) { return "A valid email"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Mobile_t,                   optional(QFV.mobile()),                                                    _value, [](const QList<clsORMField>&) { return "A valid mobile number with/without country code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,                     optional(QFV.ipv4()),                                                      _value, [](const QList<clsORMField>&) { return "A valid IP version 4"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](const QList<clsORMField>&) { return "A valid ISO639 two-letter language code"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](const QList<clsORMField>&) { return "A valid base64 encoded png/jpg image"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](const QList<clsORMField>&) { return "A valid Iranian sheba code"; });
 ///TODO: Ether/Bitcoin validator
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](const QList<clsORMField>&){ return "A valid ethercoin address"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](const QList<clsORMField>&){ return "A valid URL"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t,              optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&){ return "A valid ProductCode"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, SaleableCode_t,             optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&){ return "A valid SaleableCode"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBTinyText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(255)),        _value, [](const QList<clsORMField>&){ return "A valid tiny text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBText_t,                   optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(65535)),      _value, [](const QList<clsORMField>&){ return "A valid text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBMediumText_t,             optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(16777215)),   _value, [](const QList<clsORMField>&){ return "A valid medium text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBLongText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(4294967295)), _value, [](const QList<clsORMField>&){ return "A valid long text"; });
-TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,                   optional(QFV.matches(QRegularExpression("(?s).*"))),                       _value, [](const QList<clsORMField>&){ return "A valid String"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](const QList<clsORMField>&) { return "A valid ethercoin address"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](const QList<clsORMField>&) { return "A valid URL"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t,              optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&) { return "A valid ProductCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, SaleableCode_t,             optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&) { return "A valid SaleableCode"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBTinyText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(255)),        _value, [](const QList<clsORMField>&) { return "A valid tiny text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBText_t,                   optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(65535)),      _value, [](const QList<clsORMField>&) { return "A valid text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBMediumText_t,             optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(16777215)),   _value, [](const QList<clsORMField>&) { return "A valid medium text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBLongText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(4294967295)), _value, [](const QList<clsORMField>&) { return "A valid long text"; });
+TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,                   optional(QFV.matches(QRegularExpression("(?s).*"))),                       _value, [](const QList<clsORMField>&) { return "A valid String"; });
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 
-stuFileInfo stuFileInfo::fromVariant(const QVariant& _value, const QByteArray& _paramName)
-{
+stuFileInfo stuFileInfo::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
      QVariantMap Value = _value.toMap();
-     if(Value.isEmpty() || !Value.contains("name") || !Value.contains("tmpname") || !Value.contains("size") || !Value.contains("mime"))
+     if (Value.isEmpty() || !Value.contains("name") || !Value.contains("tmpname") || !Value.contains("size") || !Value.contains("mime"))
          throw exHTTPBadRequest(_paramName + " is not valid File information");
 
      return stuFileInfo(
@@ -395,8 +393,7 @@ QVariant Files_t::toVariant() const
     return Files;
 }
 
-Files_t& Files_t::fromVariant(const QVariant& _value, const QByteArray& _paramName)
-{
+Files_t& Files_t::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
     foreach(auto ListItem, _value.toList())
         this->append(TAPI::stuFileInfo::fromVariant(ListItem, _paramName));
     return *this;
@@ -405,8 +402,7 @@ Files_t& Files_t::fromVariant(const QVariant& _value, const QByteArray& _paramNa
 RawData_t::RawData_t(const QByteArray& _data, const QString& _mime) :
   Mime(_mime),
   Data(_data)
-{
-}
+{ ; }
 
 QVariant RawData_t::toVariant() const
 {

@@ -50,12 +50,10 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exAPIModuleInitiailization, exModuleLoader);
 #pragma clang diagnostic pop
 
 appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
-{}
+{ ; }
 
-void appTargomanAPI::slotExecute()
-{
-    try
-    {
+void appTargomanAPI::slotExecute() {
+    try {
         // Load modules
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
@@ -63,8 +61,7 @@ void appTargomanAPI::slotExecute()
         if (LoadedModules.isEmpty())
             throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
-        foreach (auto Plugin, LoadedModules)
-        {
+        foreach (auto Plugin, LoadedModules) {
             intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
             Module->setInstancePointer();
 
@@ -86,15 +83,13 @@ void appTargomanAPI::slotExecute()
         }
 
         //Prepare database connections
-        if (RequiredDBs.size())
-        {
+        if (RequiredDBs.size()) {
             TargomanDebug(0, "Registering db connections");
 
             QSet<QString> ConnectionStrings;
 
             if (ServerConfigs::MasterDB::Host.value().size()
-                    && ServerConfigs::MasterDB::Schema.value().size())
-            {
+                    && ServerConfigs::MasterDB::Schema.value().size()) {
                 intfPureModule::stuDBInfo MasterDBInfo = {
                     ServerConfigs::MasterDB::Schema.value(),
                     ServerConfigs::MasterDB::Port.value(),
@@ -111,14 +106,12 @@ void appTargomanAPI::slotExecute()
                 DBManager::clsDAC::setConnectionString(ConnStr);
             }
 
-            for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter)
-            {
+            for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
                 QString ConnStr = DBInfoIter->toConnStr(ServerCommonConfigs::DBPrefix.value()/*true*/);
 
                 if (DBInfoIter->Host.size()
                         && DBInfoIter->Schema.size()
-                        && ConnectionStrings.contains(ConnStr) == false)
-                {
+                        && ConnectionStrings.contains(ConnStr) == false) {
                     ConnectionStrings.insert(ConnStr);
 
                     TargomanDebug(0, "Registering <" << DBInfoIter.key() << "> " << ConnStr);
@@ -137,9 +130,7 @@ void appTargomanAPI::slotExecute()
         OpenAPIGenerator::retrieveJson();
 
         TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
-    }
-    catch(Targoman::Common::exTargomanBase& e)
-    {
+    } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);
     }

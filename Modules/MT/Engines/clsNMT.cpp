@@ -47,22 +47,20 @@ namespace NMTResponse{
 }
 
 clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs& _specs) :
-    Classes::intfTranslatorEngine(_specs)
-{ ; }
+    Classes::intfTranslatorEngine(_specs) {/*KZ*/ ; }
 
-QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize)
-{
+QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {/*KZ*/
     int Retries = 0;
     QVariantMap Result;
 
-    auto makeSourceArray = [](const QString& _text){
+    auto makeSourceArray = [](const QString& _text) {
         QVariantList  List;
         foreach(auto Line, _text.split("\n", QString::SkipEmptyParts))
             List.append(QVariantMap({{"src", Line}}));
         return List;
     };
 
-    while(Retries < 5){
+    while(Retries < 5) {
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
@@ -77,22 +75,22 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
         Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(makeSourceArray(_text)).toJson(QJsonDocument::Compact);
         QString CUrlResult = CUrl.exec(Opt);
 
-        if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT){
+        if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT) {
             Result[RESULTItems::ERRNO]   = enuTranslationError::OperationTimedOut;
             Result[RESULTItems::MESSAGE] = "Unable to translate with NMT after 5 retries.";
             ++Retries;
-        }else if(CUrl.lastError().code() == CURLE_COULDNT_CONNECT){
+        } else if (CUrl.lastError().code() == CURLE_COULDNT_CONNECT) {
             Result[RESULTItems::ERRNO]   = enuTranslationError::ConnectionRefused;
             Result[RESULTItems::MESSAGE] = "Unable to translate with NMT after 5 retries.";
             ++Retries;
-        }else if(CUrl.lastError().isOk() == false){
+        } else if (CUrl.lastError().isOk() == false) {
             Result[RESULTItems::ERRNO] = enuTranslationError::CURLError + CUrl.lastError().code();
             Result[RESULTItems::MESSAGE] = CUrl.lastError().text();
             return Result;
-        }else{
+        } else {
             QJsonParseError JsonError;
             QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
-            if(JsonError.error != QJsonParseError::NoError){
+            if (JsonError.error != QJsonParseError::NoError) {
                 Result[RESULTItems::ERRNO] = enuTranslationError::JsonParseError;
                 Result[RESULTItems::MESSAGE] = "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
                 ++Retries;
@@ -106,8 +104,7 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
     return  Result;
 }
 
-QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok)
-{
+QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {/*KZ*/
     Q_UNUSED(_detailed)
 
     auto invalidResponse = [_doc]() -> QVariantMap{
@@ -117,37 +114,37 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
             };
     };
 
-    if(_doc.isObject() == false)
+    if (_doc.isObject() == false)
         return invalidResponse();
 
     QVariantMap BaseMap = _doc.toVariant().toMap();
     QVariantMap Result;
 
-    if(BaseMap.isEmpty()) return invalidResponse();
+    if (BaseMap.isEmpty()) return invalidResponse();
 
-    if(BaseMap.contains(NMTResponse::serverName))
+    if (BaseMap.contains(NMTResponse::serverName))
         Result[RESULTItems::SERVERID] = BaseMap[NMTResponse::serverName].toString();
 
-    static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults){
+    static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults) {
         QStringList TrTokens;
-        foreach(auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()){
+        foreach(auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()) {
             TrTokens.append(Phrase.toList().at(0).toString());
         }
-        if(_detok)
+        if (_detok)
             return TranslationDispatcher::instance().detokenize(TrTokens.join(" "), this->EngineSpecs.DestLang);
         else
             return  TrTokens.join(" ");
     };
 
-    if(!_detailed){
+    if (!_detailed) {
         QStringList TrSentences;
         foreach(QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
             TrSentences.append (baseTranslation(SentenceResults.toMap()));
         Result[RESULTItems::SIMPLE] = TrSentences.join('\n');
-    }else{
+    } else {
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
 
-        foreach(auto SentenceResults, BaseMap[NMTResponse::rslt].toList()){
+        foreach(auto SentenceResults, BaseMap[NMTResponse::rslt].toList()) {
             QStringList TempStringList;
             QVariantList TempList;
             QVariantMap SentenceResultMap = SentenceResults.toMap();
@@ -169,11 +166,11 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
             Index = 0; TempList.clear();
 
-            static auto buildAlignments = [this, _detok](const QVariantList& _phrases){
+            static auto buildAlignments = [this, _detok](const QVariantList& _phrases) {
                 QVariantList Result;
                 bool IsFirst = true;
-                foreach(auto Phrase, _phrases){
-                    if(Phrase.toString().size())
+                foreach(auto Phrase, _phrases) {
+                    if (Phrase.toString().size())
                         Result.push_back(QVariantList({
                                                           {_detok ?
                                                            TranslationDispatcher::instance().detokenize(Phrase.toString(), this->EngineSpecs.DestLang) :
@@ -185,7 +182,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
                 return Result;
             };
 
-            foreach(auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()){
+            foreach(auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()) {
                 TempStringList.clear();
 
                 foreach(auto AlignmentItem, Alignment.toList())

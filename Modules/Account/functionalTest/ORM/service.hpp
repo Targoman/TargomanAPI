@@ -31,13 +31,13 @@ class testService: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void Service_CREATE_Unpriviledged(){
+    void Service_CREATE_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
                                 {"svcName", UT_ServiceName},
                              }) == gInvalid);
     }
 
-    void Service_CREATE_Admin(){
+    void Service_CREATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
                                                {"svcName", UT_ServiceName},
                              }) == gInvalid);
@@ -51,23 +51,23 @@ private slots:
                              }).toUInt()) > 0);
     }
 
-    void Service_UPDATE_Unprivileged(){
+    void Service_UPDATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH, QString("Account/Service/%1").arg(gServiceID),{},{
                                  {"svcStatus", "Removed"}
                              }) == gInvalid);
     }
 
-    void Service_UPDATE_Admin(){
+    void Service_UPDATE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Service/%1").arg(gServiceID),{},{
                                  {"svcStatus", "Removed"}
                              }).toBool());
     }
 
-    void Service_DELETE_Unprivileged(){
+    void Service_DELETE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::DELETE, QString("Account/Service/%1").arg(gServiceID)) == gInvalid);
     }
 
-    void Service_DELETE_Admin(){
+    void Service_DELETE_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Service/")) == gInvalid);
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Service/%1").arg(gServiceID)).toBool() == false);
         QVERIFY(callAdminAPI(RESTClientHelper::PATCH, QString("Account/Service/%1").arg(gServiceID),{},{
@@ -79,14 +79,14 @@ private slots:
                              }).toBool());
     }
 
-    void Service_CREATE_recreate(){
+    void Service_CREATE_recreate() {
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
                                                {"svcName", UT_ServiceName},
                                                {"svc_rolID", gServiceRoleID},
                              }) == gInvalid);
     }
 
-    void Service_GET_Unpriviledged(){
+    void Service_GET_Unpriviledged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Service/")).toMap().isEmpty());
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Service/%1").arg(gServiceID), {
@@ -94,7 +94,7 @@ private slots:
                         }) == gInvalid);
     }
 
-    void Service_GET_Admin(){
+    void Service_GET_Admin() {
         QVERIFY(callAdminAPI(RESTClientHelper::GET, QString("Account/Service/"),{{"cols", "svcName"}}).toMap().size());
         QVERIFY(callAdminAPI(RESTClientHelper::GET,
                         QString("Account/Service/%1").arg(gServiceID), {
