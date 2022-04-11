@@ -397,8 +397,10 @@ QVariant Advert::apiPOSTfixtureSetup(
             { "paymentVerifyCallback",  "http://www.a.com" },
         }
     );
+    Result.insert("_finalizeBasket", res.toJsonObject());
     Voucher.fromJson(res.toJsonObject());
-    Result.insert("Voucher", Voucher.toJson());
+    auto vv = Voucher.toJson();
+    Result.insert("Voucher", vv);
 
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentMD5.isEmpty() == false) {

@@ -150,7 +150,7 @@
 
 /************************************************************/
 #define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
-#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
+#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, _type::toStr(v), static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
 ///TODO: complete this and test with stuPaymentGateway
