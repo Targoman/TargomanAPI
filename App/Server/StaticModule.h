@@ -31,13 +31,12 @@ using namespace Targoman::API::API;
 
 namespace Targoman::API::Server {
 
-//class intfAPISession
-//{
-//public:
+class intfAPISession
+{
+public:
+    virtual bool needJWT() = 0;
 //    virtual QVariant toVariant() const = 0;
-//    virtual bool needJWT() = 0;
-//    virtual bool needIP() = 0;
-//};
+};
 
 //template <bool _needJWT, bool _needIP>
 //struct APISessionTypes
@@ -46,11 +45,10 @@ namespace Targoman::API::Server {
 //    typedef std::conditional<_needIP, TAPI::RemoteIP_t, QVariant> IP_Type;
 //};
 
-//template <class T_APISessionTypes>
-class APISession //: public intfAPISession
+template <bool _needJWT>
+class APISession : public intfAPISession
 {
 public:
-
     APISession() = default;
     virtual ~APISession() = default;
     APISession(const APISession &) = default;
@@ -74,7 +72,7 @@ public:
 
 public:
 //    QVariant toVariant() const { return QVariant(); }
-    virtual bool needJWT() { return false; }
+    virtual bool needJWT() { return _needJWT; }
 
     QString requestAPIPath() const
     {
@@ -113,18 +111,18 @@ public:
     QString RequestAPIPath;
     qhttp::THeaderHash RequestHeaders;
     qhttp::THeaderHash RequestCookies;
+    TAPI::JWT_t JWT;
     TAPI::RemoteIP_t IP;
     qhttp::THeaderHash ResponseHeaders;
 };
 
-class APISession_JWT : public APISession
-{
-public:
-    virtual bool needJWT() { return true; }
+//class APISession_JWT : public APISession
+//{
+//public:
+//    virtual bool needJWT() { return true; }
 
-public:
-    typename TAPI::JWT_t JWT;
-};
+//public:
+//};
 
 //typedef APISession<APISessionTypes<false, false>> APISession;
 //typedef APISession<APISessionTypes<false, true>> APISession_ip;
@@ -143,7 +141,7 @@ private slots:
         openAPI_json,
         "openAPI.json",
         (
-            APISession_JWT &_SESSION,
+            APISession<true> &_SESSION,
             int i = 345
         ),
         ""
@@ -153,7 +151,7 @@ private slots:
         openAPI_yaml,
         "openAPI.yaml",
         (
-            APISession &_SESSION
+            APISession<false> &_SESSION
         ),
         ""
     );
@@ -161,7 +159,7 @@ private slots:
     TAPI::FileData_t REST_GET_OR_POST(
         swaggerui,
         (
-            APISession &_SESSION
+            APISession<false> &_SESSION
         ),
         ""
     );
@@ -170,7 +168,7 @@ private slots:
         stats_json,
         "stats.json",
         (
-            APISession &_SESSION,
+            APISession<false> &_SESSION,
             bool _full = false
         ),
         ""
@@ -179,7 +177,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         version,
         (
-            APISession &_SESSION
+            APISession<false> &_SESSION
         ),
         ""
     );
@@ -187,7 +185,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         ping,
         (
-            APISession &_SESSION
+            APISession<false> &_SESSION
         ),
         ""
     );

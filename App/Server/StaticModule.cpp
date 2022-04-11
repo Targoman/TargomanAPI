@@ -50,7 +50,7 @@ StaticModule::StaticModule() :
 { ; }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APISession_JWT &_SESSION,
+    APISession<true> &_SESSION,
     int i
 )) {
     gServerStats.Success.inc();
@@ -62,7 +62,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
-    APISession &_SESSION
+    APISession<false> &_SESSION
 )) {
     Q_UNUSED(_SESSION)
 
@@ -70,7 +70,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
 }
 
 TAPI::FileData_t IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
-        APISession &_SESSION
+        APISession<false> &_SESSION
 )) {
     if (ServerConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
@@ -84,7 +84,7 @@ TAPI::FileData_t IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
-    APISession &_SESSION,
+    APISession<false> &_SESSION,
     bool _full
 )) {
     Q_UNUSED(_SESSION)
@@ -95,7 +95,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
-    APISession &_SESSION
+    APISession<false> &_SESSION
 )) {
     Q_UNUSED(_SESSION)
 
@@ -113,7 +113,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
-    APISession &_SESSION
+    APISession<false> &_SESSION
 )) {
     Q_UNUSED(_SESSION)
 

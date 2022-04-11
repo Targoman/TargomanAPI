@@ -70,7 +70,7 @@ public:
         return (this->BaseMethod.name() + QJsonValue::fromVariant(_args).toString().toUtf8()).constData();
     }
 
-    inline bool requiresJWT() const {
+    inline _GLIBCXX_CONSTEXPR bool requiresJWT() const {
         return this->ParamTypesName.contains(PARAM_JWT);
     }
 

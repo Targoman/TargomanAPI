@@ -266,11 +266,18 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath) {
+clsRequestHandler::stuResult clsRequestHandler::run(
+    clsAPIObject* _apiObject,
+    QStringList& _queries,
+    const QString& _pksByPath
+) {
     QVariantMap ResponseHeaders;
 
-//    APISession &SESSION =
-//    std::conditional<_apiObject->requiresJWT(), APISession_JWT, APISession>();
+    QScopedPointer<intfAPISession> SESSION;
+    if (_apiObject->requiresJWT())
+        SESSION.reset(new APISession<true>());
+    else
+        SESSION.reset(new APISession<false>());
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
