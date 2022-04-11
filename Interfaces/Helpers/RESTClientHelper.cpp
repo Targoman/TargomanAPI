@@ -112,6 +112,8 @@ QVariant RESTClientHelper::callAPI(
     if (_aPIURL.isEmpty())
         _aPIURL = ClientConfigs::RESTServerAddress.value();
 
+    qDebug() << "***** calling API:" << _aPIURL << _api;
+
     QtCUrl CUrl;
     CUrl.setTextCodec("UTF-8");
 
