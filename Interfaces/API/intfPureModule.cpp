@@ -36,7 +36,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(
         _value,
         [](const QList<clsORMField>& _fields) {
     QStringList Cols;
-    foreach(auto Col, _fields)
+    foreach (auto Col, _fields)
         if (Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
     return QString("Nothing for all or comma separated columns: (ex. %1,%2) \n"
@@ -68,7 +68,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, OrderBy_t,
                                    QFieldValidator::allwaysValid(), _value,
                                    [](const QList<clsORMField>& _fields) {
     QStringList Cols;
-    foreach(auto Col, _fields)
+    foreach (auto Col, _fields)
         if (Col.isSortable() && Col.isVirtual() == false)
             Cols.append(clsTable::finalColName(Col));
     return "Comma separated list of columns with +/- for ASC/DESC order prefix: (ex. +"+Cols.first()+",-"+Cols.last()+")\n* " + Cols.join("\n* ");
@@ -78,7 +78,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, GroupBy_t,
                                    QFieldValidator::allwaysValid(), _value,
                                    [](const QList<clsORMField>& _fields) {
     QStringList Cols;
-    foreach(auto Col, _fields)
+    foreach (auto Col, _fields)
         if (Col.isFilterable())
             Cols.append(clsTable::finalColName(Col));
     return "Comma separated columns: \n* " + Cols.join(",\n* ");
@@ -92,8 +92,7 @@ intfPureModule::intfPureModule(
         Targoman::Common::Configuration::intfModule *_parent
     ) :
     intfModule(_parent),
-    ModuleName(_moduleName)
-{ ; }
+    ModuleName(_moduleName) { ; }
 
 //intfPureModule::~intfPureModule() { ; }
 
@@ -107,8 +106,7 @@ intfPureModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _ho
     Port(_port),
     User(_user),
     Pass(_pass),
-    Schema(_schema)
-{ ; }
+    Schema(_schema) { ; }
 
 QString intfPureModule::stuDBInfo::toConnStr(const QString &_dbPrefix, bool _noSchema) {
     return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5")

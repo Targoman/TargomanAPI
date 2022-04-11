@@ -32,7 +32,6 @@ using namespace DBM;
 QJsonObject OpenAPIGenerator::CachedJson;
 
 QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _port = 80) {
-
     if (ServerConfigs::BaseOpenAPIObjectFile.value().size()) {
         QFile File(ServerConfigs::BaseOpenAPIObjectFile.value());
         File.open(QIODevice::ReadOnly);
@@ -79,7 +78,10 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
     }
 }
 
-QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _port) {
+QJsonObject OpenAPIGenerator::retrieveJson(
+    const QString &_host,
+    const quint16 _port
+) {
     if (OpenAPIGenerator::CachedJson.isEmpty() == false) {
         QJsonObject Return = OpenAPIGenerator::CachedJson;
 
@@ -101,24 +103,21 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
     QJsonObject PathsObject;
     QJsonArray TagsArray;
-    foreach(const QString& Key, RESTAPIRegistry::Registry.keys()) {
+
+    foreach (const QString& Key, RESTAPIRegistry::Registry.keys()) {
         QString PathString = Key.split(" ").last();
         QString HTTPMethod = Key.split(" ").first().toLower();
         QStringList PKInPathStorage;
 
-//        if (PathString != "/Account/User/photo")
-//        {
-//            continue;
-//        }
-
         clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
 
-        auto paramName = [APIObject](quint8 i) {
-            return APIObject->BaseMethod.parameterNames().at(i).startsWith('_') ?
-                        APIObject->BaseMethod.parameterNames().at(i).mid(1) :
-                        APIObject->BaseMethod.parameterNames().at(i);
-        };
+//        auto paramName = [APIObject](quint8 i) {
+//            return APIObject->ParamNames.at(i).startsWith('_') ?
+//                        APIObject->ParamNames.at(i).mid(1) :
+//                        APIObject->ParamNames.at(i);
+//        };
 
+        /******************************************************************/
         auto mapTypeToValidOpenAPIType = [](enuVarComplexity _complexity, QString _typeName) {
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
@@ -149,6 +148,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             return "ERROR";
         };
 
+        /******************************************************************/
         auto addExtraParamsByType = [](QJsonObject& _paramSpecs, enuVarComplexity _complexity, QString _typeName) {
             if (_typeName.startsWith(TAPI_HELEPER_QSP_M2STR_PREFIX))
                 _typeName = _typeName.mid(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX), _typeName.size() - static_cast<int>(sizeof(TAPI_HELEPER_QSP_M2STR_PREFIX)) - 1);
@@ -190,6 +190,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             }
         };
 
+        /******************************************************************/
         auto fillParamTypeSpec = [mapTypeToValidOpenAPIType, addExtraParamsByType](
                 intfAPIArgManipulator* _argMan,
                 const QList<clsORMField>& _fields,
@@ -231,9 +232,11 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             }
         };
 
-        auto addParamSpecs = [APIObject, paramName, HTTPMethod, fillParamTypeSpec, mapTypeToValidOpenAPIType](
+        /******************************************************************/
+        auto addParamSpecs = [APIObject/*, paramName*/, HTTPMethod, fillParamTypeSpec, mapTypeToValidOpenAPIType](
                              QJsonArray& _parameters, quint8 _i, QStringList* _pksByPathsStorage) -> void {
-            QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(_i));
+            QString ParamType = /*QMetaType::typeName(APIObject->BaseMethod.parameterType(i))*/APIObject->ParamTypesName.at(_i);
+            QString ParamName = APIObject->ParamNames.at(_i);
             if (   ParamType == PARAM_HEADERS
                   || ParamType == PARAM_REMOTE_IP
                   || ParamType == PARAM_COOKIES
@@ -245,10 +248,10 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             if (ParamType == PARAM_PKSBYPATH) {
                 if (_pksByPathsStorage) {
                     QList<clsORMField> PKs;
-                    foreach(auto Item, APIObject->Parent->filterItems(qhttp::EHTTP_DELETE))
+                    foreach (auto Item, APIObject->Parent->filterItems(qhttp::EHTTP_DELETE))
                         if (Item.isPrimaryKey())
                             PKs.append(Item);
-                    foreach(auto PK, PKs) {
+                    foreach (auto PK, PKs) {
                         _pksByPathsStorage->append(PK.name());
                         intfAPIArgManipulator* ArgSpecs;
                         if (PK.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
@@ -271,7 +274,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             if (HTTPMethod == "get" || HTTPMethod == "delete") {
                 if (_pksByPathsStorage) {
                     if (ParamType == PARAM_ORMFIELDS) {
-                        foreach(auto Item, APIObject->Parent->filterItems(HTTPMethod == "get" ? qhttp::EHTTP_GET : qhttp::EHTTP_DELETE)) {
+                        foreach (auto Item, APIObject->Parent->filterItems(HTTPMethod == "get" ? qhttp::EHTTP_GET : qhttp::EHTTP_DELETE)) {
                             if (Item.isFilterable()== false || Item.isPrimaryKey())
                                 continue;
                             QJsonObject ParamSpecs;
@@ -299,12 +302,12 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                     return;
 
                 ParamSpecs["in"] = "query";
-                ParamSpecs["name"] = QString(paramName(_i));
+                ParamSpecs["name"] = QString(ParamName);
                 ParamSpecs["required"] = APIObject->isRequiredParam(_i);
 
                 fillParamTypeSpec(APIObject->argSpecs(_i),
                                   APIObject->Parent->filterItems(),
-                                  QMetaType::typeName(APIObject->BaseMethod.parameterType(_i)),
+                                  /*QMetaType::typeName(APIObject->BaseMethod.parameterType(_i))*/ ParamType,
                                   ParamSpecs,
                                   APIObject->defaultValue(_i)
                                   );
@@ -315,24 +318,29 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
         QStringList PathStringParts = PathString.split("/", QString::SkipEmptyParts);
         if (APIObject->HasExtraMethodName)
             PathStringParts.pop_back();
-        QString TagName  =  PathStringParts.join("_");
+        QString TagName = PathStringParts.join("_");
 
-        auto createPathInfo = [TagName, APIObject, HTTPMethod, addParamSpecs, paramName, fillParamTypeSpec](QStringList* _pksByPathsStorage)->QJsonObject{
+        /******************************************************************/
+        auto createPathInfo = [TagName, APIObject, HTTPMethod, addParamSpecs/*, paramName*/, fillParamTypeSpec]
+                              (QStringList* _pksByPathsStorage) -> QJsonObject {
             QJsonObject PathInfo = QJsonObject({{"summary", APIObject->BaseMethod.Doc}});
 
             PathInfo["tags"] = QJsonArray({TagName});
             PathInfo["produces"] = QJsonArray({"application/json"});
             if (HTTPMethod != "get" && HTTPMethod != "delete") {
                 quint8 RequiredFiles = 0;
-                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
-                    if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILE))
+                for (quint8 i=0; i</*APIObject->BaseMethod.parameterCount()*/APIObject->ParamNames.count(); ++i) {
+                    QString ParamType = /*QMetaType::typeName(APIObject->BaseMethod.parameterType(i))*/APIObject->ParamTypesName.at(i);
+                    if (ParamType == QStringLiteral(PARAM_FILE))
                         RequiredFiles++;
-                    else if (QMetaType::typeName(APIObject->BaseMethod.parameterType(i)) == QStringLiteral(PARAM_FILES))
+                    else if (ParamType == QStringLiteral(PARAM_FILES))
                         RequiredFiles += 2;
+                }
 
                 QJsonObject Properties;
-                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i) {
-                    QString ParamType = QMetaType::typeName(APIObject->BaseMethod.parameterType(i));
+                for (quint8 i=0; i</*APIObject->BaseMethod.parameterCount()*/APIObject->ParamNames.count(); ++i) {
+                    QString ParamType = /*QMetaType::typeName(APIObject->BaseMethod.parameterType(i))*/APIObject->ParamTypesName.at(i);
+                    QString ParamName = APIObject->ParamNames.at(i);
                     if (     ParamType == PARAM_HEADERS
                           || ParamType == PARAM_REMOTE_IP
                           || ParamType == PARAM_COOKIES
@@ -347,7 +355,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                                                     : HTTPMethod == "patch"
                                                                       ? qhttp::EHTTP_PATCH
                                                                       : qhttp::EHTTP_BIND);
-                        foreach(auto Item, Items) {
+                        foreach (auto Item, Items) {
                             QJsonObject ParamSpecs;
                             intfAPIArgManipulator* ArgSpecs;
                             if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
@@ -392,16 +400,16 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                         QJsonObject ParamSpecs;
                         fillParamTypeSpec(APIObject->argSpecs(i),
                                           APIObject->Parent->filterItems(),
-                                          QMetaType::typeName(APIObject->BaseMethod.parameterType(i)),
+                                          ParamType,
                                           ParamSpecs,
                                           APIObject->defaultValue(i),
                                           true);
-                        Properties[paramName(i)] = ParamSpecs;
+                        Properties[ParamName] = ParamSpecs;
                     }
                 }
 
                 QJsonArray Parameters;
-                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
+                for (quint8 i=0; i< /*APIObject->BaseMethod.parameterCount()*/APIObject->ParamNames.count(); ++i)
                     addParamSpecs( Parameters, i, _pksByPathsStorage);
 
 
@@ -437,7 +445,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 PathInfo["parameters"] = Parameters;
             } else {
                 QJsonArray Parameters;
-                for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i)
+                for (quint8 i=0; i< /*APIObject->BaseMethod.parameterCount()*/APIObject->ParamNames.count(); ++i)
                     addParamSpecs(Parameters, i, _pksByPathsStorage);
 
                 if (Parameters.size())
@@ -453,7 +461,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
             QJsonObject ResponseModel = DefaultResponses;
             if (HTTPMethod == "get") {
                 QJsonObject Properties;
-                foreach(auto Item, APIObject->Parent->filterItems()) {
+                foreach (auto Item, APIObject->Parent->filterItems()) {
                     QJsonObject ParamSpecs;
                     intfAPIArgManipulator* ArgSpecs;
                     if (Item.parameterType()< TAPI_BASE_USER_DEFINED_TYPEID)
@@ -496,9 +504,11 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                                                    });
             }
             return PathInfo;
-        };
+        }; // lambda createPathInfo
 
-        auto add2Paths = [PathString, HTTPMethod](QJsonObject& PathsObject, const QJsonObject& _currPathMethodInfo, QStringList* _pksByPathsStorage, bool _multiPK = false) {
+        /******************************************************************/
+        auto add2Paths = [PathString, HTTPMethod]
+                         (QJsonObject& PathsObject, const QJsonObject& _currPathMethodInfo, QStringList* _pksByPathsStorage, bool _multiPK = false) {
             if (HTTPMethod == "delete" && _currPathMethodInfo.value("parameters").toArray().isEmpty())
                 return;
             QString Path = PathString;
@@ -515,7 +525,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
                 PathsObject[Path] = CurrPathObject;
             } else
                 PathsObject[Path] = QJsonObject({ {HTTPMethod, _currPathMethodInfo} });
-        };
+        }; // lambda add2Paths
 
         if (APIObject->requiresPrimaryKey()) {
             add2Paths(PathsObject, createPathInfo(&PKInPathStorage), &PKInPathStorage, false);
@@ -530,7 +540,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(const QString &_host, const quint16 _
 
         QList<clsORMField> Filters = APIObject->Parent->filterItems();
         QStringList ModelDescription;
-        foreach(auto Filter, Filters) {
+        foreach (auto Filter, Filters) {
             QString FilterInfo = "* " + Filter.name();
             QStringList Flags;
             if (Filter.isSortable()) Flags.append("Sortable");

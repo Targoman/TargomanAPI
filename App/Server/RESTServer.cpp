@@ -206,8 +206,7 @@ bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _p
 }
 
 RESTServer::RESTServer() :
-    IsStarted(false)
-{ ; }
+    IsStarted(false) { ; }
 
 } //namespace Server
 

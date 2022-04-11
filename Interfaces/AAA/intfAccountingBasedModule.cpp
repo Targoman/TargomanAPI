@@ -94,7 +94,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols) {
-    foreach(auto Col, this->AssetUsageLimitsCols) {
+    foreach (auto Col, this->AssetUsageLimitsCols) {
         if (Col.PerDay.size())
             this->AssetUsageLimitsColsName.append(Col.PerDay);
 
@@ -316,8 +316,7 @@ bool intfAccountingBasedModule::increaseDiscountUsage(
 
 bool intfAccountingBasedModule::decreaseDiscountUsage(
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
+    ) {
     if (_voucherItem.DisAmount > 0) {
         clsDACResult Result = this->AccountCoupons->callSP("spCoupon_DecreaseStats", {
             { "iDiscountID", _voucherItem.Discount.ID },
@@ -332,8 +331,7 @@ bool intfAccountingBasedModule::activateUserAsset(
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
-    )
-{
+    ) {
     return /*Targoman::API::Query::*/this->Update(
         *this->AccountUserAssets,
         _userID,
@@ -351,8 +349,7 @@ bool intfAccountingBasedModule::activateUserAsset(
 bool intfAccountingBasedModule::removeFromUserAssets(
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
+    ) {
     return /*Targoman::API::Query::*/this->DeleteByPks(
         *this->AccountUserAssets,
         _userID,
@@ -368,8 +365,7 @@ bool intfAccountingBasedModule::processVoucherItem(
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
-    )
-{
+    ) {
     if (!this->preProcessVoucherItem(_userID, _voucherItem, _voucherID))
         return false;
 
@@ -387,8 +383,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
-    )
-{
+    ) {
     if (!this->preCancelVoucherItem(_userID, _voucherItem))
         return false;
 
@@ -452,8 +447,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams,
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     clsJWT JWT(_JWT);
@@ -886,8 +880,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 //        quint64 _orderID, //it is uasID
         TAPI::MD5_t _itemUUID,
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
@@ -959,8 +952,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
@@ -1072,8 +1064,7 @@ bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
         TAPI::JWT_t _JWT,
         Targoman::API::AAA::stuVoucherItem _voucherItem,
         quint64 _voucherID
-    )
-{
+    ) {
     clsJWT JWT(_JWT);
     quint64 CurrentUserID = JWT.usrID();
 
@@ -1083,8 +1074,7 @@ bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
         TAPI::JWT_t _JWT,
         Targoman::API::AAA::stuVoucherItem _voucherItem
-    )
-{
+    ) {
     clsJWT JWT(_JWT);
     quint64 CurrentUserID = JWT.usrID();
 

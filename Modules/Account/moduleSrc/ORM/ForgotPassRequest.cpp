@@ -46,8 +46,7 @@ ForgotPassRequest::ForgotPassRequest() :
         {///< Col                                Reference Table                 ForeignCol
             { tblForgotPassRequest::Relation::User, { tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID } },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant ForgotPassRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

@@ -222,8 +222,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
         /* name        */ Items,
         /* def         */ InvItems_t(),
         /* validator   */ v.size(),
-        /* fromVariant */ [](auto v) {QJsonArray A; foreach(auto a, v) A.append(a.toJson()); return A;}(v),
-        /* toVariant   */ [](auto v) {InvItems_t L; foreach(auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+        /* fromVariant */ [](auto v) {QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A;}(v),
+        /* toVariant   */ [](auto v) {InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L;}(v)
     ),
     SF_Struct(stuPrize, Prize, v.Desc.size()),
     SF_QString(Summary),

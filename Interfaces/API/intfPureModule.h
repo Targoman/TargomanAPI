@@ -250,12 +250,45 @@ namespace Targoman::API::API {
 #  define APITIMEOUT_30S
 #endif
 
-#define REST(_method, _name, _sig, _doc)            api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return #_doc; }
-#define ASYNC_REST(_method, _name, _sig, _doc)      asyncApi##_method##_name _sig;QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return #_doc; }
+//-- REST BASE MACROS
+#define REST(_method, _name, _sig, _doc) \
+    api##_method##_name _sig; \
+    QString signOf##_method##_name() { return #_sig; } \
+    QString docOf##_method##_name() { return #_doc; }
+#define IMPL_REST(_method, _module, _name, _params) \
+    _module::api##_method##_name _params
 
-#define REST_GET_OR_POST(_name, _sig, _doc)         REST(, _name, _sig, _doc)
-#define ASYNC_REST_GET_OR_POST(_name, _sig, _doc)   ASYNC_REST(, _name, _sig, _doc)
+#define ASYNC_REST(_method, _name, _sig, _doc) \
+    asyncApi##_method##_name _sig; \
+    QString signOf##_method##_name() { return #_sig; } \
+    QString docOf##_method##_name() { return #_doc; }
+#define IMPL_ASYNC_REST(_method, _module, _name, _params) \
+    _module::asyncApi##_method##_name _params
 
+#define REST_ALIAS(_method, _name, _alias, _sig, _doc) \
+    api##_method##_name _sig; \
+    QString aliasOf##_method##_name() { return #_method _alias; } \
+    QString signOf##_method##_name() { return #_sig; } \
+    QString docOf##_method##_name() { return #_doc; }
+
+#define ASYNC_REST_ALIAS(_method, _name, _alias, _sig, _doc) \
+    asyncApi##_method##_name _sig; \
+    QString aliasOf##_method##_name() { return #_method _alias; } \
+    QString signOf##_method##_name() { return #_sig; } \
+    QString docOf##_method##_name() { return #_doc; }
+
+//-- REST MACROS
+#define            REST_GET_OR_POST(_name, _sig, _doc)                              REST(, _name, _sig, _doc)
+#define      ASYNC_REST_GET_OR_POST(_name, _sig, _doc)                        ASYNC_REST(, _name, _sig, _doc)
+#define       IMPL_REST_GET_OR_POST(_module, _name, _params)                   IMPL_REST(, _module, _name, _params)
+#define IMPL_ASYNC_REST_GET_OR_POST(_module, _name, _params)             IMPL_ASYNC_REST(, _module, _name, _params)
+
+//#define            REST_GET_OR_POST_EX(_name, _ex, _sig, _doc)                   REST_EX(, _name, _ex, _sig, _doc)
+//#define      ASYNC_REST_GET_OR_POST_EX(_name, _ex, _sig, _doc)             ASYNC_REST_EX(, _name, _ex, _sig, _doc)
+//#define       IMPL_REST_GET_OR_POST_EX(_module, _name, _ex, _params)        IMPL_REST_EX(, _module, _name, _ex, _params)
+//#define IMPL_ASYNC_REST_GET_OR_POST_EX(_module, _name, _ex, _params)  IMPL_ASYNC_REST_EX(, _module, _name, _ex, _params)
+
+//TODO: create IMPL_REST_... for other cases
 #define REST_GET(_name, _sig, _doc)                 REST(GET, _name, _sig, _doc)
 #define ASYNC_GET(_name, _sig, _doc)                ASYNC_REST(GET, _name, _sig, _doc)
 
@@ -276,6 +309,31 @@ namespace Targoman::API::API {
 #define REST_DELETE(_name, _sig, _doc)              REST(DELETE, _name, _sig, _doc)
 #define ASYNC_DELETE(_name, _sig, _doc)             ASYNC_REST(DELETE, _name, _sig, _doc)
 
+// REST ALIAS MACROS (DO NOT NEED IMPL_REST_..._ALIAS: USE IMPL_REST_... WITHOUT _ALIAS)
+#define REST_GET_OR_POST_ALIAS(_name, _alias, _sig, _doc)       REST_ALIAS(, _name, _alias, _sig, _doc)
+#define ASYNC_REST_GET_OR_POST_ALIAS(_name, _alias, _sig, _doc) ASYNC_REST_ALIAS(, _name, _alias, _sig, _doc)
+
+#define REST_GET_ALIAS(_name, _alias, _sig, _doc)               REST_ALIAS(GET, _name, _alias, _sig, _doc)
+#define ASYNC_GET_ALIAS(_name, _alias, _sig, _doc)              ASYNC_REST_ALIAS(GET, _name, _alias, _sig, _doc)
+
+#define REST_PUT_ALIAS(_name, _alias, _sig, _doc)               REST_ALIAS(PUT, _name, _alias, _sig, _doc)
+#define ASYNC_PUT_ALIAS(_name, _alias, _sig, _doc)              ASYNC_REST_ALIAS(PUT, _name, _alias, _sig, _doc)
+
+#define REST_POST_ALIAS(_name, _alias, _sig, _doc)              REST_ALIAS(POST, _name, _alias, _sig, _doc)
+#define ASYNC_POST_ALIAS(_name, _alias, _sig, _doc)             ASYNC_REST_ALIAS(POST, _name, _alias, _sig, _doc)
+
+#define REST_CREATE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(CREATE, _name, _alias, _sig, _doc)
+#define ASYNC_CREATE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(CREATE, _name, _alias, _sig, _doc)
+
+#define REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(UPDATE, _name, _alias, _sig, _doc)
+#define ASYNC_UPDATE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(UPDATE, _name, _alias, _sig, _doc)
+#define REST_PATCH_ALIAS(_name, _alias, _sig, _doc)             REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)
+#define ASYNC_PATCH_ALIAS(_name, _alias, _sig, _doc)            ASYNC_REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)
+
+#define REST_DELETE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(DELETE, _name, _alias, _sig, _doc)
+#define ASYNC_DELETE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(DELETE, _name, _alias, _sig, _doc)
+
+//
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"
 
 class intfPureModule : public Targoman::Common::Configuration::intfModule
@@ -351,10 +409,12 @@ protected:
 
 Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
+//QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }
+
 #define TARGOMAN_DEFINE_API_MODULE(_name) \
 public: \
     QString parentModuleName() const final { return QString(); } \
-    QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }  \
+    QString moduleBaseName() { return this->ModuleName; }  \
     QString moduleFullName() { return Targoman::Common::demangle(typeid(_name).name()); } \
     ModuleMethods_t listOfMethods() final { \
         if (this->Methods.size()) return this->Methods; \

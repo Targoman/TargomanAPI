@@ -51,8 +51,7 @@ Bin::Bin() :
                 {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},
                 ORM_RELATION_OF_CREATOR(tblBin::binCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(tblBin::binUpdatedBy_usrID),
-              })
-{ ; }
+              }) { ; }
 
 QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -75,7 +74,6 @@ Banners::Banners() :
               {///< Col                           Reference Table             ForeignCol      Rename      LeftJoin
                 ORM_RELATION_OF_UPDATER(tblBanners::bnrUpdatedBy_usrID),
               }
-              )
-{ ; }
+              ) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

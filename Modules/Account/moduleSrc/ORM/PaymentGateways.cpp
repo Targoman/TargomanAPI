@@ -94,8 +94,7 @@ PaymentGateways::PaymentGateways() :
             ORM_RELATION_OF_CREATOR(tblPaymentGateways::pgwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblPaymentGateways::pgwUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant PaymentGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

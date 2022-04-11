@@ -82,8 +82,7 @@ ApprovalRequest::ApprovalRequest() :
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -105,8 +104,7 @@ bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 QVariant ApprovalRequest::apitimerInfo(
       TAPI::RemoteIP_t _REMOTE_IP,
       QString _emailOrMobile
-    )
-{
+    ) {
     Authorization::validateIPAddress(_REMOTE_IP);
 
     enuApprovalType::Type Type;

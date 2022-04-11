@@ -54,8 +54,7 @@ QString ObjectStorageManager::getFileUrl(
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
         const quint64 _uploadedFileID
-    )
-{
+    ) {
     //if not stored yet, return local http server url that serves uflLocalFullFileName
 }
 
@@ -66,8 +65,7 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
 //        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
 //        const QString &_foreignTableName,
 //        const QString &_foreignTableUploadedFileIDFieldName
-    )
-{
+    ) {
     Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
 //    Targoman::API::DBM::clsTable* TBL_uploadQueue = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadQueue);
 
@@ -117,10 +115,9 @@ QVariantMap ObjectStorageManager::saveFiles(
         intfUploadQueue &_uploadQueue,
         intfUploadGateways &_uploadGateways,
         const TAPI::Files_t &_files
-    )
-{
+    ) {
     QVariantMap Result;
-    foreach(auto _file, _files) {
+    foreach (auto _file, _files) {
         try {
             quint64 ID = saveFile(
                              _currentUserID,
@@ -143,8 +140,7 @@ quint64 ObjectStorageManager::saveFile(
         intfUploadQueue &_uploadQueue,
         intfUploadGateways &_uploadGateways,
         const TAPI::stuFileInfo &_file
-    )
-{
+    ) {
     Targoman::API::ObjectStorage::ORM::intfUploadFiles::stuObjectStorageConfigs _objectStorageConfigs
             = _uploadFiles.getObjectStorageConfigs();
 
@@ -318,7 +314,7 @@ bool ObjectStorageManager::processQueue(const stuProcessQueueParams &_processQue
 
     //update Queue Status to Uploading
     QStringList UploadingQueueIDs;
-    foreach(QVariant Var, QueueItems) {
+    foreach (QVariant Var, QueueItems) {
         Targoman::API::ObjectStorage::ORM::Private::stuProcessUploadQueueInfo QueueInfo;
         QueueInfo.fromVariantMap(Var.toMap());
         QueueInfos.append(QueueInfo);
@@ -341,7 +337,7 @@ bool ObjectStorageManager::processQueue(const stuProcessQueueParams &_processQue
 //    QStringList FailedFileIDs;
     QStringList FailedQueueIDs;
 
-    foreach(Targoman::API::ObjectStorage::ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos) {
+    foreach (Targoman::API::ObjectStorage::ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos) {
         bool Stored = false;
         try {
             Stored = ObjectStorageManager::storeFile(
@@ -374,7 +370,7 @@ bool ObjectStorageManager::processQueue(const stuProcessQueueParams &_processQue
 
     //update gateway ststictics
     if (GatewayUploadedFileCount.count()) {
-        foreach(quint64 GatewayID, GatewayUploadedFileCount.keys()) {
+        foreach (quint64 GatewayID, GatewayUploadedFileCount.keys()) {
             UpdateQuery(_processQueueParams.UploadGateways)
                     .increament(tblUploadGateways::ugwCreatedFilesCount, GatewayUploadedFileCount[GatewayID])
                     .increament(tblUploadGateways::ugwCreatedFilesSize, GatewayUploadedFileSize[GatewayID])
@@ -414,8 +410,7 @@ bool ObjectStorageManager::storeFile(
         const QString &_fileName,
         const QString &_fileUUID,
         const QString &_fullFileName
-    )
-{
+    ) {
     switch (_storageType) {
         case enuUploadGatewayType::NFS:
             return Gateways::gtwNFS::storeFile(

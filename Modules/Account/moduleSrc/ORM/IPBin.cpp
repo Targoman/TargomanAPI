@@ -54,8 +54,7 @@ IPBin::IPBin() :
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant IPBin::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

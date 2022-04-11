@@ -88,7 +88,6 @@ Props::Props() :
                 {tblProps::prp_locID,           R(AdvertSchema,tblLocations::Name), tblLocations::locID },
                 ORM_RELATION_OF_CREATOR(tblProps::prpCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(tblProps::prpUpdatedBy_usrID),
-              })
-{ ; }
+              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

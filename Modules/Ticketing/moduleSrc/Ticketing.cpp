@@ -66,8 +66,7 @@ quint64 Ticketing::insertTicket(
         const QString &_body,
         const TAPI::Files_t &_files,
         quint32 _unitID
-    )
-{
+    ) {
     TAPI::ORMFields_t CreateFields({
        { tblTickets::tktType, _ticketType },
        { tblTickets::tktTitle, _title },
@@ -94,7 +93,7 @@ quint64 Ticketing::insertTicket(
                                              .addCol(tblTicketAttachments::tat_uplID)
                                              ;
 
-        foreach(auto _file, _files) {
+        foreach (auto _file, _files) {
             try {
                 quint64 UploadedFileID = ObjectStorageManager::saveFile(
                                              _createdBy,
@@ -127,8 +126,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
         quint64 _targetUserID,
         quint32 _unitID,
         const TAPI::stuFileInfo &_file
-    )
-{
+    ) {
     Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
@@ -159,8 +157,7 @@ QVariantMap Ticketing::apiPUTnewFeedback(
         quint32 _serviceID,
         quint64 _inReplyTicketID,
         const TAPI::stuFileInfo &_file
-    )
-{
+    ) {
   Authorization::checkPriv(_JWT, {});
 
   if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))

@@ -48,8 +48,7 @@ Units::Units() :
             { tblUnits::unt_depID,  R(TicketingSchema, tblDepartments::Name),   tblDepartments::depID },
             ORM_RELATION_OF_CREATOR(tblUnits::untCreatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Units::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

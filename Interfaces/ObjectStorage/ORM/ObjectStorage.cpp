@@ -102,8 +102,7 @@ intfUploadFiles::intfUploadFiles(
             ORM_RELATION_OF_CREATOR(tblUploadFiles::uflCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadFiles::uflUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 /******************************************************************/
 /******************************************************************/
@@ -131,8 +130,7 @@ intfUploadQueue::intfUploadQueue(
             ORM_RELATION_OF_CREATOR(tblUploadQueue::uquCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadQueue::uquUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 /******************************************************************/
 /******************************************************************/
@@ -176,8 +174,7 @@ intfUploadGateways::intfUploadGateways(
             ORM_RELATION_OF_CREATOR(tblUploadGateways::ugwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadGateways::ugwUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfUploadGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

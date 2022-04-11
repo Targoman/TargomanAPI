@@ -13,6 +13,7 @@ include($$QBUILD_PATH/templates/innerAppConfigs.pri)
 HEADERS += \
     Server/RESTServer.h \
     Server/APICache.hpp \
+    Server/StaticModule.h \
     Server/appTargomanAPI.h \
     Server/clsRedisConnector.h \
     Server/clsRequestHandler.h \
@@ -28,6 +29,7 @@ HEADERS += \
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
     Server/ServerConfigs.cpp \
+    Server/StaticModule.cpp \
     Server/clsAPIObject.cpp \
     Server/clsRedisConnector.cpp \
     Server/clsRequestHandler.cpp \
@@ -40,6 +42,7 @@ SOURCES += \
 
 OTHER_FILES += \
     ../conf/api.conf \
+    migrations/.gitkeep \
     migrations/db/* \
     migrations/local/* \
     migrations/local/.migrations

@@ -55,8 +55,7 @@ TicketAttachments::TicketAttachments() :
                          { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::uqu_uflID },
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;

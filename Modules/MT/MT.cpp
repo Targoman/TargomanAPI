@@ -39,7 +39,7 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
                              bool _detailed,
                              bool _detok,
                              bool _dic,
-                             bool _dicFull) {/*KZ*/
+                             bool _dicFull) {
     QTime Timer, OverallTime;
 
     int PreprocessTime = 0;
@@ -160,14 +160,14 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     }
 }
 
-QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg) {/*KZ*/
+QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg) {
     return {
         {"inputArg", _arg},
         {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
     };
 }
 
-MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {/*KZ*/
+MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {
     // Register translation engines
     TranslationDispatcher::instance().registerEngines();
 }

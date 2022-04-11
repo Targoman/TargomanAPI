@@ -45,8 +45,7 @@ Departments::Departments() :
         {///< Col                                   Reference Table         ForeignCol      Rename      LeftJoin
             ORM_RELATION_OF_CREATOR(tblDepartments::depCreatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Departments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

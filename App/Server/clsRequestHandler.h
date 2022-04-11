@@ -110,8 +110,8 @@ public:
                       QObject *_parent = nullptr);
     void process(const QString& _api);
 
-private:
-    bool callStaticAPI(QString _api);
+//private:
+//    bool callStaticAPI(QString _api);
 
 public:
     void findAndCallAPI(QString _api);
@@ -121,7 +121,8 @@ public:
             QVariantMap _responseHeaders = {},
             bool _closeConnection = false
         );
-    void sendFile(const QString& _basePath, const QString _path);
+    void sendFile(QString _fullFileName);
+    void sendFile(QString _basePath, const QString &_path);
     void sendResponse(
             qhttp::TStatusCode _code,
             const QVariant &_response,

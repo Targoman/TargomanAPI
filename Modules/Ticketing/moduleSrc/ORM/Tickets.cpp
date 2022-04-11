@@ -93,8 +93,7 @@ Tickets::Tickets() :
             ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Tickets::apiGET(
 //        GET_METHOD_ARGS_IMPL_APICALL,
@@ -111,8 +110,7 @@ QVariant Tickets::apiGET(
 //        const stuTicketScope &_ticketScope
         quint64 _baseTicketID,
         quint64 _inReplyTicketID
-    )
-{
+    ) {
     TAPI::Cols_t _cols;
     TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
@@ -192,7 +190,6 @@ TicketRead::TicketRead() :
             {tblTicketRead::tkrBy_usrID,    S(quint64),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
             {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
         }
-    )
-{ ; }
+    ) { ; }
 
 } //namespace Targoman::API::TicketingModule::ORM

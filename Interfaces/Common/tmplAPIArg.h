@@ -37,7 +37,7 @@ class intfCacheConnector;
 
 namespace Common {
 
-template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
+template <typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
 class tmplAPIArg : public intfAPIArgManipulator
 {
 public:

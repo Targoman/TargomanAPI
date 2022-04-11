@@ -98,8 +98,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         quint32 _amount,
         Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
         const QString& _domain
-    )
-{
+    ) {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
 
     QString Domain = URLHelper::domain(_domain);
@@ -175,8 +174,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         quint32 _toPay,
         const QString _paymentVerifyCallback,
         /*OUT*/ TAPI::MD5_t& _outPaymentMD5
-    )
-{
+    ) {
     ///scenario:
     ///1: find best payment gateway
     ///2: get payment gateway driver
@@ -298,8 +296,7 @@ quint64 PaymentLogic::approveOnlinePayment(
         const QString& _paymentMD5,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain
-    )
-{
+    ) {
     if (_paymentMD5.isEmpty())
         throw exPayment("paymentMD5 is empty");
 

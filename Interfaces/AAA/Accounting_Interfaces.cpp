@@ -162,11 +162,11 @@ constexpr char ASA_LIMITSONPARENT[] = "LP";
 
 /******************************************************************/
 intfAccountProducts::intfAccountProducts(
-        const QString& _schema,
-        const QList<DBM::clsORMField>& _exclusiveCols,
-        const QList<DBM::stuRelation>& _exclusiveRelations,
-        const QList<DBM::stuDBIndex>& _exclusiveIndexes
-    ) :
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
     intfSQLBasedModule(
         _schema,
         tblAccountProductsBase::Name,
@@ -211,8 +211,7 @@ intfAccountProducts::intfAccountProducts(
             { tblAccountProductsBase::prdCreationDateTime },
             { tblAccountProductsBase::prdUpdatedBy_usrID },
         }) + _exclusiveIndexes
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -294,8 +293,7 @@ intfAccountSaleables::intfAccountSaleables(
             { tblAccountSaleablesBase::slbCreationDateTime },
             { tblAccountSaleablesBase::slbUpdatedBy_usrID },
         }) + _exclusiveIndexes
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
@@ -384,8 +382,7 @@ intfAccountUserAssets::intfAccountUserAssets(
             { tblAccountUserAssetsBase::uasStatus },
             { tblAccountUserAssetsBase::uasUpdatedBy_usrID },
         }) + _exclusiveIndexes
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -442,8 +439,7 @@ intfAccountAssetUsage::intfAccountAssetUsage(
             { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
         }) + _exclusiveRelations,
         _exclusiveIndexes
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -499,8 +495,7 @@ intfAccountCoupons::intfAccountCoupons(
             { tblAccountCouponsBase::cpnCreationDateTime },
             { tblAccountCouponsBase::cpnUpdatedBy_usrID },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -542,8 +537,7 @@ intfAccountPrizes::intfAccountPrizes(
         _name,
         _cols,
         _relations
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -584,8 +578,7 @@ stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent
   Credit(_credit),
   IsFromParent(_isFromParent),
   MyLimitsOnParent(_myLimitsOnParent),
-  TTL(_ttl)
-{ ; }
+  TTL(_ttl) { ; }
 
 QJsonObject stuActiveCredit::toJson(bool _full) {
   QJsonObject Account = {
@@ -625,8 +618,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     PreferedCredit(_preferedCredit),
     ParentID(_parentID),
     MyLimitsOnParent(_myLimitsOnParent),
-    DBCurrentDateTime(_dbCurrentDateTime)
-{ ; }
+    DBCurrentDateTime(_dbCurrentDateTime) { ; }
 
 QJsonObject stuAssetItem::toJson(bool _full) {
     ///TODO: very important: Complete this

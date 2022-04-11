@@ -49,8 +49,7 @@ Voucher::Voucher() :
         {///< Col                     Reference Table              ForeignCol
             { tblVoucher::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::usrID },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -73,14 +72,13 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
-        TAPI::JWT_t _JWT,
-        quint32 _amount,
-        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        QString _domain,
-        quint64 _walletID,
-        QString _paymentVerifyCallback
-    )
-{
+    TAPI::JWT_t _JWT,
+    quint32 _amount,
+    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+    QString _domain,
+    quint64 _walletID,
+    QString _paymentVerifyCallback
+) {
     Targoman::API::AAA::stuVoucher Voucher;
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walletID));
     Voucher.Info.ToPay = _amount;

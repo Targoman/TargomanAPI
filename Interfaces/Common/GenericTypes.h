@@ -154,6 +154,22 @@ private:
     QByteArray Data;
 };
 
+class FileData_t {
+public:
+    FileData_t() = default;
+    ~FileData_t() = default;
+    FileData_t(const FileData_t &) = default;
+    FileData_t &operator=(const FileData_t &) = default;
+    FileData_t(const QString &_fileName);
+    QVariant toVariant() const;
+    const QString &fileName() { return this->FileName; }
+//    const QString &mime() { return this->Mime; }
+
+private:
+    QString FileName;
+//    QString Mime;
+};
+
 /**********************************************************************/
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
@@ -289,6 +305,7 @@ TAPI_DECLARE_METATYPE(TAPI::stuTable)
 TAPI_DECLARE_METATYPE(TAPI::stuFileInfo)
 TAPI_DECLARE_METATYPE(TAPI::Files_t)
 TAPI_DECLARE_METATYPE(TAPI::RawData_t)
+TAPI_DECLARE_METATYPE(TAPI::FileData_t)
 TAPI_DECLARE_METATYPE(TAPI::HEADERS_t)
 TAPI_DECLARE_METATYPE(TAPI::COOKIES_t)
 TAPI_DECLARE_METATYPE(TAPI::JWT_t)

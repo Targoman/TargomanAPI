@@ -35,8 +35,7 @@ bool gtwNFS::storeFile(
         const QString &_fileName,
         const QString &_fileUUID,
         const QString &_fullFileName
-    )
-{
+    ) {
     QString StoragePath = _metaInfo[NFSMetaInfoJsonKey::Path].toString();
 
     QDir FullPath(StoragePath);

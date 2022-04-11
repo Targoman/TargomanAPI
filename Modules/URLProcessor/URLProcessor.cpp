@@ -31,8 +31,7 @@ namespace API {
 TARGOMAN_IMPL_API_MODULE(URLProcessor)
 
 URLProcessor::URLProcessor() :
-    intfPureModule("Targoman")
-{ ; }
+    intfPureModule("Targoman") { ; }
 
 QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW) {
     char Normalized[MAX_URL_SIZE+1];

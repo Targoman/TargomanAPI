@@ -64,8 +64,7 @@ APITokens::APITokens() :
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)

@@ -82,8 +82,7 @@ Advert::Advert() :
         &AccountUserAssets::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
-    )
-{
+    ) {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 
@@ -102,8 +101,7 @@ Advert::Advert() :
     this->addSubModule(&Props::instance());
 }
 
-stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID)
-{
+stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
     //TODO: complete this
     return stuServiceCreditsInfo(
                 {},
@@ -129,8 +127,7 @@ void Advert::applyAssetAdditives(
         TAPI::JWT_t _JWT,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
-    )
-{
+    ) {
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 
 //    _assetItem.slbBasePrice *= 1.1;
@@ -169,8 +166,7 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _location,
         Targoman::API::AdvertModule::enuAdvertOrder::Type _order
-    )
-{
+    ) {
 }
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
@@ -178,8 +174,7 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
         QString _location,
         Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
         const QString _keywords
-    )
-{
+    ) {
 }
 
 QString Advert::apiGETretrieveURL(
@@ -187,8 +182,7 @@ QString Advert::apiGETretrieveURL(
         quint64 _id,
         TAPI::IPv4_t _clientIP,
         QString _agent
-    )
-{
+    ) {
 }
 
 /****************************************************************\
@@ -199,8 +193,7 @@ QVariant Advert::apiPOSTfixtureSetup(
         TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::JWT_t _JWT,
         QString _random
-    )
-{
+    ) {
     Q_UNUSED(_REMOTE_IP);
 
     QVariantMap Result;
@@ -397,6 +390,8 @@ QVariant Advert::apiPOSTfixtureSetup(
             { "paymentVerifyCallback",  "http://www.a.com" },
         }
     );
+    Result.insert("_finalizeBasket", res.toJsonObject());
+
     Voucher.fromJson(res.toJsonObject());
     Result.insert("Voucher", Voucher.toJson());
 
@@ -435,8 +430,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 QVariant Advert::apiPOSTfixtureCleanup(
         TAPI::RemoteIP_t _REMOTE_IP,
         QString _random
-    )
-{
+    ) {
     Q_UNUSED(_REMOTE_IP);
 
     QVariantMap Result;

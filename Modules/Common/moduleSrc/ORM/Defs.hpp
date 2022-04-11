@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP
 #define TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP
 
-constexpr char CommonDomain[] = "CommonDomain";
+constexpr char CommonDomain[] = "Common";
 constexpr char CommonSchema[] = "CommonSchema";
 
 #endif // TARGOMAN_API_MODULES_COMMON_ORM_DEFS_HPP

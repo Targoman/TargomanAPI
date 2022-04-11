@@ -94,7 +94,6 @@ APITokenValidIPs::APITokenValidIPs() :
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{ ; }
+    ) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM

@@ -42,6 +42,8 @@
 #include "Interfaces/AAA/Authentication.h"
 using namespace Targoman::API::AAA;
 
+#include "StaticModule.h"
+
 namespace Targoman::API::Server {
 
 using namespace qhttp::server;
@@ -267,12 +269,15 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath) {
     QVariantMap ResponseHeaders;
 
+//    APISession &SESSION =
+//    std::conditional<_apiObject->requiresJWT(), APISession_JWT, APISession>();
+
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
 
         if (!this->Request)
-          throw exHTTPGone("Seems that client has gone");
+            throw exHTTPGone("Seems that client has gone");
 
         qhttp::THeaderHash Headers = this->Request->headers();
         qhttp::THeaderHash Cookies;
@@ -314,6 +319,8 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
         }
 
         Headers.remove("cookie");
+
+
 
         QVariant Result = _apiObject->invoke(
                               this->Request->method() == qhttp::EHTTP_PATCH,
@@ -371,7 +378,7 @@ quint16 clsRequestHandler::port() const
 
     return Host.mid(idx+1).toUInt();
 }
-
+/*
 bool clsRequestHandler::callStaticAPI(QString _api) {
     if (_api == "/openAPI.json") {
         gServerStats.Success.inc();
@@ -434,10 +441,10 @@ bool clsRequestHandler::callStaticAPI(QString _api) {
 
     return false;
 }
-
+*/
 void clsRequestHandler::findAndCallAPI(QString _api) {
-    if (this->callStaticAPI(_api))
-        return;
+//    if (this->callStaticAPI(_api))
+//        return;
 
     //-----------------------------------------------------
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
@@ -485,12 +492,12 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
         run(APIObject, Queries, ExtraAPIPath);
 }
 
-void clsRequestHandler::sendError(qhttp::TStatusCode _code,
-        const QString& _message,
-        QVariantMap _responseHeaders,
-        bool _closeConnection
-    )
-{
+void clsRequestHandler::sendError(
+    qhttp::TStatusCode _code,
+    const QString& _message,
+    QVariantMap _responseHeaders,
+    bool _closeConnection
+) {
     gServerStats.Errors.inc();
     this->sendResponseBase(_code,
                            QJsonObject({
@@ -505,7 +512,27 @@ void clsRequestHandler::sendError(qhttp::TStatusCode _code,
                            _closeConnection);
 }
 
-void clsRequestHandler::sendFile(const QString& _basePath, const QString _path) {
+void clsRequestHandler::sendFile(QString _fullFileName) {
+    _fullFileName = _fullFileName.replace(QRegularExpression("//+"), "/");
+    QString BasePath;
+    QString FileName;
+
+    int Idx = _fullFileName.lastIndexOf("/");
+
+    if (Idx == -1)
+        FileName = _fullFileName;
+    else {
+        BasePath = _fullFileName.left(Idx + 1);
+        FileName = _fullFileName.mid(Idx + 1);
+    }
+
+    this->sendFile(BasePath, FileName);
+}
+
+void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
+    if (_basePath.right(1) != "/")
+        _basePath += "/";
+
     if (QFile::exists(_basePath + _path) == false)
         throw exHTTPNotFound(_path);
 
@@ -560,8 +587,7 @@ void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         const QVariant &_response,
         QVariantMap _responseHeaders
-    )
-{
+    ) {
     gServerStats.Success.inc();
 
     if (_response.isValid() == false)
@@ -611,6 +637,9 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->end(RawData.data());
 
         this->deleteLater();
+    } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
+            TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
+            this->sendFile(FileData.fileName());
     } else
         this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}), _responseHeaders);
 }
@@ -661,12 +690,12 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
     this->deleteLater();
 }
 
-void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
-        QJsonObject _dataObject,
-        QVariantMap _responseHeaders,
-        bool _closeConnection
-    )
-{
+void clsRequestHandler::sendResponseBase(
+    qhttp::TStatusCode _code,
+    QJsonObject _dataObject,
+    QVariantMap _responseHeaders,
+    bool _closeConnection
+) {
     if (!this->Request->connection()->tcpSocket())
       return;
 
@@ -894,7 +923,7 @@ void clsUpdateAndPruneThread::run() {
 
         if (ToDeleteIters.size()) {
             QMutexLocker Locker(&InternalCache::Lock);
-            foreach(auto Iter, ToDeleteIters)
+            foreach (auto Iter, ToDeleteIters)
                 InternalCache::Cache.erase(Iter);
         }
     });

@@ -47,20 +47,20 @@ namespace NMTResponse{
 }
 
 clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs& _specs) :
-    Classes::intfTranslatorEngine(_specs) {/*KZ*/ ; }
+    Classes::intfTranslatorEngine(_specs) { ; }
 
-QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {/*KZ*/
+QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {
     int Retries = 0;
     QVariantMap Result;
 
     auto makeSourceArray = [](const QString& _text) {
         QVariantList  List;
-        foreach(auto Line, _text.split("\n", QString::SkipEmptyParts))
+        foreach (auto Line, _text.split("\n", QString::SkipEmptyParts))
             List.append(QVariantMap({{"src", Line}}));
         return List;
     };
 
-    while(Retries < 5) {
+    while (Retries < 5) {
         QtCUrl CUrl;
         CUrl.setTextCodec("UTF-8");
 
@@ -104,7 +104,7 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
     return  Result;
 }
 
-QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {/*KZ*/
+QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {
     Q_UNUSED(_detailed)
 
     auto invalidResponse = [_doc]() -> QVariantMap{
@@ -127,7 +127,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults) {
         QStringList TrTokens;
-        foreach(auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()) {
+        foreach (auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()) {
             TrTokens.append(Phrase.toList().at(0).toString());
         }
         if (_detok)
@@ -138,24 +138,24 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     if (!_detailed) {
         QStringList TrSentences;
-        foreach(QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
+        foreach (QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
             TrSentences.append (baseTranslation(SentenceResults.toMap()));
         Result[RESULTItems::SIMPLE] = TrSentences.join('\n');
     } else {
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
 
-        foreach(auto SentenceResults, BaseMap[NMTResponse::rslt].toList()) {
+        foreach (auto SentenceResults, BaseMap[NMTResponse::rslt].toList()) {
             QStringList TempStringList;
             QVariantList TempList;
             QVariantMap SentenceResultMap = SentenceResults.toMap();
             QVariantList TokensList = SentenceResultMap[NMTResponse::Result::tokens].toList();
 
-            foreach(auto Token, TokensList)
+            foreach (auto Token, TokensList)
                 TempStringList.append(Token.toString());
             ResultBaseList.push_back(QVariantList({{TempStringList.join(" ")},{baseTranslation(SentenceResultMap)}}));
 
             quint16 Index = 0;
-            foreach(auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
+            foreach (auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
                                                     {_detok ?
                                                      TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang) :
@@ -169,7 +169,7 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
             static auto buildAlignments = [this, _detok](const QVariantList& _phrases) {
                 QVariantList Result;
                 bool IsFirst = true;
-                foreach(auto Phrase, _phrases) {
+                foreach (auto Phrase, _phrases) {
                     if (Phrase.toString().size())
                         Result.push_back(QVariantList({
                                                           {_detok ?
@@ -182,10 +182,10 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
                 return Result;
             };
 
-            foreach(auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()) {
+            foreach (auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()) {
                 TempStringList.clear();
 
-                foreach(auto AlignmentItem, Alignment.toList())
+                foreach (auto AlignmentItem, Alignment.toList())
                     TempStringList.append(TokensList.at(AlignmentItem.toInt()).toString());
                 TempList.push_back(QVariantList({
                                                     {TempStringList.join(' ')},

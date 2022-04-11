@@ -49,8 +49,7 @@ intfActionLogs::intfActionLogs(
         {
             { tblActionLogs::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant intfActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    Authorization::checkPriv(_JWT, { this->ModuleName + ":ActionLogs:CRUD~0100" });

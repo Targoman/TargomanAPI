@@ -57,7 +57,7 @@ bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _
     if ( Privs.isEmpty())
         return false;
 
-    foreach(auto AccessItem, _requiredAccess)
+    foreach (auto AccessItem, _requiredAccess)
         if (PrivHelpers::hasPrivBase(Privs, AccessItem, _isSelf) == false)
             return false;
     return true;

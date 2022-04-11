@@ -115,8 +115,7 @@ QString QJWT::createSigned(
         const qint32 _expiry,
         const QString &_sessionID,
         const QString &_remoteIP
-    )
-{
+    ) {
     const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
     if (_payload.contains("iat") == false)
@@ -158,8 +157,7 @@ QString QJWT::createSigned(
 void QJWT::extractAndDecryptPayload(
         const QString &_jwt,
         TAPI::JWT_t &_jWTPayload
-    )
-{
+    ) {
     QStringList JWTParts = _jwt.split('.');
 
     if (JWTParts.length() != 3)
@@ -200,8 +198,7 @@ void QJWT::verifyJWT(
         const QString &_jwt,
         const QString &_remoteIP,
         TAPI::JWT_t &_jWTPayload
-    )
-{
+    ) {
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     // check client ip ---------------

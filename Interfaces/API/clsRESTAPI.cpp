@@ -42,7 +42,6 @@ clsRESTAPI::clsRESTAPI(
         _indexes,
         _dbProperties
     ),
-    Module(_module)
-{/*KZ*/;/*KZ*/}
+    Module(_module) { ; }
 
 } // namespace Targoman::API::ORM

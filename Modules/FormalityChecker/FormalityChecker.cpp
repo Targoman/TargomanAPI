@@ -31,8 +31,7 @@ using namespace Targoman::API::ModuleHelpers;
 TARGOMAN_IMPL_API_MODULE(FormalityChecker)
 
 FormalityChecker::FormalityChecker() :
-    intfPureModule("Targoman")
-{ ; }
+    intfPureModule("Targoman") { ; }
 
 bool FormalityChecker::init() {
     NLP::FormalityChecker::instance();

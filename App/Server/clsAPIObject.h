@@ -31,6 +31,8 @@
 
 namespace Targoman::API::Server {
 
+#define APISESSION_TYPE_NAME "APISession"
+#define APISESSION_JWT_TYPE_NAME "APISession_JWT"
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
 #define PARAM_REMOTE_IP "TAPI::RemoteIP_t"
@@ -69,34 +71,34 @@ public:
     }
 
     inline bool requiresJWT() const {
-        return this->ParamTypes.contains(PARAM_JWT);
+        return this->ParamTypesName.contains(PARAM_JWT);
     }
 
     inline bool requiresCookies() const {
-        return this->ParamTypes.contains(PARAM_COOKIES);
+        return this->ParamTypesName.contains(PARAM_COOKIES);
     }
 
     inline bool requiresRemoteIP() const {
-        return this->ParamTypes.contains(PARAM_REMOTE_IP);
+        return this->ParamTypesName.contains(PARAM_REMOTE_IP);
     }
 
     inline bool requiresPrimaryKey() const {
-        return this->ParamTypes.contains(PARAM_PKSBYPATH);
+        return this->ParamTypesName.contains(PARAM_PKSBYPATH);
     }
 
     inline bool requiresHeaders() const {
-        return this->ParamTypes.contains(PARAM_HEADERS);
+        return this->ParamTypesName.contains(PARAM_HEADERS);
     }
 
     inline bool requiresORMFields() const {
-        return this->ParamTypes.contains(PARAM_ORMFIELDS);
+        return this->ParamTypesName.contains(PARAM_ORMFIELDS);
     }
 
     inline bool ttl() const {return this->TTL;}
 
     inline QString paramType(quint8 _paramIndex) const {
-        Q_ASSERT(_paramIndex < this->BaseMethod.parameterTypes().size());
-        return this->BaseMethod.parameterTypes().at(_paramIndex).constData();
+        Q_ASSERT(_paramIndex < this->/*BaseMethod.parameterType()*/ParamTypesID.size());
+        return this->/*BaseMethod.parameterTypes()*/ParamTypesName.at(_paramIndex)/*.constData()*/;
     }
 
     intfAPIArgManipulator* argSpecs(quint8 _paramIndex) const;
@@ -138,7 +140,8 @@ private:
     qint32                      Cache4SecsCentral;
     qint32                      TTL;
     QList<QByteArray>           ParamNames;
-    QList<QString>              ParamTypes;
+    QList<QString>              ParamTypesName;
+    QList<int>                  ParamTypesID;
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
     intfPureModule*              Parent;

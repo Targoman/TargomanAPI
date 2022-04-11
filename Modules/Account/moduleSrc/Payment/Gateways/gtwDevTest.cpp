@@ -33,8 +33,7 @@ stuPaymentResponse gtwDevTest::request(
         qint64 _amount,
         const QString& _callback,
         const QString& _desc
-    )
-{
+    ) {
     Q_UNUSED(_orderMD5);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
@@ -69,8 +68,7 @@ stuPaymentResponse gtwDevTest::verify(
         const stuPaymentGateway& _paymentGateway,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain
-    )
-{
+    ) {
     Q_UNUSED(_pgResponse);
     Q_UNUSED(_domain);
 

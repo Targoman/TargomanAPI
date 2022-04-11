@@ -79,8 +79,7 @@ User::User() :
                   ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{
+    ) {
     this
         ->addDBProperty(
             ORM_TABLE_DBPROPERTY_INVALIDATE_QUERY,
@@ -236,8 +235,7 @@ bool User::apiUPDATEemail(
         TAPI::Email_t   _email,
         TAPI::MD5_t     _psw,
         QString         _salt
-    )
-{
+    ) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     _email = _email.toLower().trimmed();
@@ -269,8 +267,7 @@ bool User::apiUPDATEmobile(
         TAPI::Mobile_t  _mobile,
         TAPI::MD5_t     _psw,
         QString         _salt
-    )
-{
+    ) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
@@ -303,8 +300,7 @@ bool User::apiUPDATEpersonalInfo(
         QString             _family,
         TAPI::ISO639_2_t    _language,
         NULLABLE_TYPE(TAPI::enuGender::Type) _gender
-    )
-{
+    ) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     QVariantMap ToUpdate;
@@ -327,8 +323,7 @@ bool User::apiUPDATEfinancialInfo(
         TAPI::JWT_t     _JWT,
         TAPI::Sheba_t   _iban,
         TAPI::Ether_t   _ether
-    )
-{
+    ) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     QStringList ToUpdate;
@@ -376,8 +371,7 @@ bool User::apiUPDATEextraInfo(
         QString         _fieldOfStudy,
 //        QString         _language,
         QString         _theme
-    )
-{
+    ) {
     quint64 CurrentUserID = clsJWT(_JWT).usrID();
 
     QVariantMap ToUpdateJson;
@@ -515,8 +509,7 @@ UserExtraInfo::UserExtraInfo() :
         {///< Col                                   Reference Table                 ForeignCol      Rename  LeftJoin
             ORM_RELATION_OF_UPDATER(tblUserExtraInfo::ueiUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 //bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba)
 //{

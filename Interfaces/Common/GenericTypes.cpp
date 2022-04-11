@@ -77,6 +77,13 @@ TAPI_REGISTER_METATYPE(
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
+    /* type               */ FileData_t,
+    /* toVariantLambda    */ [](const FileData_t &_value) -> QVariant { return _value.toVariant(); }
+);
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
     /* type               */ HEADERS_t,
     /* toVariantLambda    */ [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
@@ -388,23 +395,34 @@ QVariant stuFileInfo::toVariant() const{
 QVariant Files_t::toVariant() const
 {
     QVariantList Files;
-    foreach(auto Val, *this)
+    foreach (auto Val, *this)
         Files.append(Val.toVariant());
     return Files;
 }
 
 Files_t& Files_t::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
-    foreach(auto ListItem, _value.toList())
+    foreach (auto ListItem, _value.toList())
         this->append(TAPI::stuFileInfo::fromVariant(ListItem, _paramName));
     return *this;
 }
 
+/**********************************************************************************/
 RawData_t::RawData_t(const QByteArray& _data, const QString& _mime) :
-  Mime(_mime),
-  Data(_data)
-{ ; }
+    Mime(_mime),
+    Data(_data) { ; }
 
 QVariant RawData_t::toVariant() const
+{
+    return QVariant::fromValue(*this);
+}
+
+/**********************************************************************************/
+FileData_t::FileData_t(const QString &_fileName) :
+    FileName(_fileName) {
+    FileName = FileName.replace(QRegularExpression("//+"), "/");
+}
+
+QVariant FileData_t::toVariant() const
 {
     return QVariant::fromValue(*this);
 }

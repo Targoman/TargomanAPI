@@ -67,8 +67,7 @@ UserWallets::UserWallets() :
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -109,8 +108,7 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 bool UserWallets::apiUPDATEsetAsDefault(
         TAPI::JWT_t _JWT,
         quint64 _walID
-    )
-{
+    ) {
     bool IsPrivileged = Authorization::hasPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
 //    clsDACResult Result = this->execQuery(
@@ -156,8 +154,7 @@ bool UserWallets::apiCREATEtransfer(
         const TAPI::MD5_t& _pass,
         const QString& _salt,
         quint64 _walID
-    )
-{
+    ) {
 
     QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destLogin, "login");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");

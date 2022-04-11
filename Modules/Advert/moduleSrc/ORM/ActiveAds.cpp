@@ -60,7 +60,6 @@ ActiveAds::ActiveAds() :
               { ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin
                 {tblActiveAds::act_binID,    R(AdvertSchema,tblBin::Name),   tblBin::binID},
                 {tblActiveAds::act_locID,    R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-              })
-{ ; }
+              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

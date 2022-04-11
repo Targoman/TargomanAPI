@@ -64,8 +64,7 @@ QVariant RESTClientHelper::callAPI(
         const QVariantMap &_formFiles,
         QString _aPIURL,
         QVariantMap *_outResponseHeaders
-    )
-{
+    ) {
 //    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
 //        {},
 //        300, //Targoman::API::Server::QJWT::TTL.value(),
@@ -107,8 +106,7 @@ QVariant RESTClientHelper::callAPI(
         const QVariantMap &_formFiles,
         QString _aPIURL,
         QVariantMap *_outResponseHeaders
-    )
-{
+    ) {
     if (_aPIURL.isEmpty())
         _aPIURL = ClientConfigs::RESTServerAddress.value();
 

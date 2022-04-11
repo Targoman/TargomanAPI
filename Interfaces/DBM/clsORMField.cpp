@@ -34,8 +34,7 @@ using namespace Targoman::API::Server;
 namespace Targoman::API::DBM {
 
 clsORMFieldData::clsORMFieldData() :
-    ParameterType(QMetaType::UnknownType)
-{ ; }
+    ParameterType(QMetaType::UnknownType) { ; }
 
 clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
     QSharedData(_o),
@@ -82,8 +81,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
           (_isPrimaryKey ? 0x8 : 0) +
           (_isVirtual ? 0x10 : 0) +
           (_isSelectable ? 0x20 : 0)
-    )
-{
+    ) {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
             .replace("(", "<")
@@ -96,8 +94,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
 
 /****************************************************************/
 clsORMField::clsORMField() :
-    Data(new clsORMFieldData)
-{ ; }
+    Data(new clsORMFieldData) { ; }
 
 clsORMField::clsORMField(const clsORMField& _other, const QString& _newName) :
     Data(_other.Data) {
@@ -138,8 +135,7 @@ clsORMField::clsORMField(
              _isSelectable,
              _renameAs
              )
-    )
-{ ; }
+    ) { ; }
 
 void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module) {
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)) {

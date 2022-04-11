@@ -95,8 +95,7 @@ clsTable::clsTable(const QString& _schema,
         _relations,
         _indexes,
         _dbProperties
-    )
-{ ; }
+    ) { ; }
 
 clsTable* clsTable::addDBProperty(const QString& _key, const QVariant& _value) {
     this->DBProperties.insert(_key, _value);
@@ -115,21 +114,21 @@ QList<clsORMField> clsTable::filterItems(THttpMethod _method) {
     case qhttp::EHTTP_GET:
     case qhttp::EHTTP_DELETE:
         this->prepareFiltersList();
-        foreach(auto Filter, this->BaseCols)
+        foreach (auto Filter, this->BaseCols)
             if (Filter.isPrimaryKey())
                 Filters.append(Filter);
         if (_method == qhttp::EHTTP_GET)
             Filters.append(clsORMField(COLS_KEY, S(TAPI::Cols_t), QFV, ORM_SELF_VIRTUAL));
         break;
     case qhttp::EHTTP_PATCH:
-        foreach(auto Filter, this->BaseCols)
+        foreach (auto Filter, this->BaseCols)
             if (Filter.updatableBy() != enuUpdatableBy::__CREATOR__
                && Filter.updatableBy() != enuUpdatableBy::__UPDATER__
                && (Filter.isPrimaryKey() || Filter.isReadOnly() == false))
                 Filters.append(Filter);
         break;
     case qhttp::EHTTP_PUT:
-        foreach(auto Filter, this->BaseCols)
+        foreach (auto Filter, this->BaseCols)
             if (Filter.updatableBy() != enuUpdatableBy::__CREATOR__
                && Filter.updatableBy() != enuUpdatableBy::__UPDATER__
                && Filter.defaultValue() != QInvalid
@@ -147,7 +146,7 @@ QList<clsORMField> clsTable::filterItems(THttpMethod _method) {
 }
 
 void clsTable::updateFilterParamType(const QString& _fieldTypeName, QMetaType::Type _typeID) {
-    foreach(auto Col, this->BaseCols) {
+    foreach (auto Col, this->BaseCols) {
         if (Col.paramTypeName() == _fieldTypeName)
             Col.updateTypeID(_typeID);
     }
@@ -354,7 +353,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     QStringList RequiredCols = _requiredCols.size() ? _requiredCols.split(",", QString::SkipEmptyParts) : QStringList("*");
 
     auto addCol = [this, _groupBy, RequiredCols](clsTable::stuSelectItems& _selectItems, auto _col, const stuRelation& _relation = InvalidRelation) {
-        foreach(auto RequiredCol, RequiredCols) {
+        foreach (auto RequiredCol, RequiredCols) {
             QString ColName;
             QString Function;
             if (RequiredCol.contains('(')) {
@@ -390,7 +389,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         }
         return false;
     };
-    foreach(auto Col, this->BaseCols) {
+    foreach (auto Col, this->BaseCols) {
         if (RequiredCols.isEmpty() || RequiredCols.contains("*"))
             SelectItems.Cols.append(makeColName(this->Name, Col, true));
         else
@@ -398,13 +397,13 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     }
 
     QSet<stuRelation> UsedJoins;
-    foreach(auto Relation, this->Relations) {
+    foreach (auto Relation, this->Relations) {
         clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
         if (ForeignTable == nullptr)
             throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 
         bool Joined = false;
-        foreach(auto Col, ForeignTable->BaseCols) {
+        foreach (auto Col, ForeignTable->BaseCols) {
             if (RequiredCols.isEmpty() || RequiredCols.contains("*")) {
                 SelectItems.Cols.append(makeColName(this->Name, Col, true, Relation));
                 Joined = true;
@@ -430,7 +429,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     bool CanStartWithLogical = false;
     QString LastLogical = "";
     _filters = _filters.replace("\\ ", "$SPACE$");
-    foreach(auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
+    foreach (auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
         QString Rule;
         Filter = Filter.trimmed ();
         if (Filter == "(") {
@@ -521,7 +520,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         SelectItems.Where.append("TRUE");
 
     if (StatusColHasCriteria == false)
-        foreach(auto FCol, this->FilterableColsMap)
+        foreach (auto FCol, this->FilterableColsMap)
             if (FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__) {
                 if (FCol.Relation.IsLeftJoin)
                     SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
@@ -533,7 +532,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 
     //-----------------------------------------------------
     SelectItems.From.append(this->Schema + "." + this->Name);
-    foreach(auto Join, UsedJoins) {
+    foreach (auto Join, UsedJoins) {
         SelectItems.From.append((Join.IsLeftJoin ? "LEFT JOIN " : "JOIN ")
                                 + Join.ReferenceTable
                                 + (Join.RenamingPrefix.size() ? " `" + Join.RenamingPrefix + "`" : "")
@@ -548,7 +547,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
         SelectItems.From.append(_extraJoins);
 
     //-----------------------------------------------------
-    foreach(auto OrderByCriteria, _orderBy.split(",", QString::SkipEmptyParts)) {
+    foreach (auto OrderByCriteria, _orderBy.split(",", QString::SkipEmptyParts)) {
         QString Direction = "ASC";
         if (OrderByCriteria.startsWith("-")) {
             Direction = "DESC";
@@ -563,7 +562,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
     }
 
     //-----------------------------------------------------
-    foreach(auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
+    foreach (auto GroupByCriteria, _groupBy.split(",", QString::SkipEmptyParts)) {
         stuRelatedORMField Filter = this->FilterableColsMap.value(GroupByCriteria.trimmed());
         if (Filter.isValid())
             SelectItems.GroupBy.append(makeColName(this->Name, Filter.Col, false, Filter.Relation));
@@ -631,8 +630,8 @@ QVariant clsTable::selectFromTable(const QStringList& _extraJoins,
     } else {
         QStringList PrimaryKeyQueries = _pksByPath.split(";");
         QStringList Filters;
-        foreach(auto Query, PrimaryKeyQueries)
-            foreach(auto Col, this->BaseCols)
+        foreach (auto Query, PrimaryKeyQueries)
+            foreach (auto Col, this->BaseCols)
                 if (Col.isPrimaryKey()) {
                     if (Query.size())
                         Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
@@ -681,7 +680,7 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
                 || (_value.canConvert<QString>() && _value.toString().isEmpty());
     };
 
-    foreach(auto Item, this->BaseCols)
+    foreach (auto Item, this->BaseCols)
         if (Item.defaultValue() == QRequired && (_createInfo.contains(Item.name()) == false || isEmpty(_createInfo.value(Item.name()))))
             throw exHTTPBadRequest("Required field <"+ Item.name() +"> not provided: ");
 
@@ -699,7 +698,7 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
         Values.append(relatedORMField.Col.toDB(InfoIter.value()));
     }
 
-    foreach(auto Col, this->BaseCols)
+    foreach (auto Col, this->BaseCols)
         if (Col.updatableBy() == enuUpdatableBy::__CREATOR__) {
             CreateCommands.append(makeColName(this->Name, Col) + "=?");
             Values.append(Col.toDB(_actorUserID));
@@ -717,7 +716,7 @@ QVariant clsTable::create(quint64 _actorUserID, const TAPI::ORMFields_t& _create
         return Result.lastInsertId();
     } catch (DBManager::exTargomanDBMUnableToExecuteQuery &e) {
         QStringList FKs;
-        foreach(auto FK, this->Relations)
+        foreach (auto FK, this->Relations)
             if (FK.RenamingPrefix.isEmpty())
                 FKs.append(FK.Column);
 
@@ -745,8 +744,8 @@ bool clsTable::update(quint64 _actorUserID,
 
     QStringList PrimaryKeyQueries = _pksByPath.split(";");
     QStringList Filters;
-    foreach(auto Query, PrimaryKeyQueries)
-        foreach(auto Col, this->BaseCols)
+    foreach (auto Query, PrimaryKeyQueries)
+        foreach (auto Col, this->BaseCols)
             if (Col.isPrimaryKey()) {
                 if (Query.size())
                     Filters.append(makeColName(this->Name, Col) + " = \"" + Query + "\"");
@@ -767,7 +766,7 @@ bool clsTable::update(quint64 _actorUserID,
         Values.append(relatedORMField.Col.toDB(InfoIter.value()));
     }
 
-    foreach(auto FCol, this->FilterableColsMap)
+    foreach (auto FCol, this->FilterableColsMap)
         if (FCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__) {
             if (FCol.Relation.Column.isEmpty()) {
                 UpdateCommands.append(makeColName(this->Name, FCol.Col) + "=?");
@@ -802,7 +801,7 @@ bool clsTable::update(quint64 _actorUserID,
 
     } catch (DBManager::exTargomanDBMUnableToExecuteQuery &e) {
         QStringList FKs;
-        foreach(auto FK, this->Relations)
+        foreach (auto FK, this->Relations)
             if (FK.RenamingPrefix.isEmpty())
                 FKs.append(FK.Column);
 
@@ -829,8 +828,8 @@ bool clsTable::deleteByPKs(quint64 _actorUserID, const TAPI::PKsByPath_t& _pksBy
     QStringList PrimaryKeyQueries = _pksByPath.split(";");
     QStringList Filters;
     QVariantList Values;
-    foreach(auto Query, PrimaryKeyQueries)
-        foreach(auto Col, this->BaseCols)
+    foreach (auto Query, PrimaryKeyQueries)
+        foreach (auto Col, this->BaseCols)
             if (Col.isPrimaryKey()) {
                 if (Query.size())
                     _extraFilters.insert(this->finalColName(Col), Query);

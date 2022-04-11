@@ -49,8 +49,7 @@ QString makeColName(
         const clsORMField& _col,
         bool _appendAs = false,
         const stuRelation& _relation = InvalidRelation
-    )
-{
+    ) {
 //    qDebug() << _col.masterName() << _col.name() << _col.renameAs() << _appendAs;
 
     QStringList ret;
@@ -171,16 +170,12 @@ public:
 
 /***************************************************************************************/
 DBExpression::DBExpression() :
-    Data(nullptr)
-{ ; }
+    Data(nullptr) { ; }
 DBExpression::DBExpression(const DBExpression& _other) :
-    Data(_other.Data)
-{ ; }
+    Data(_other.Data) { ; }
 DBExpression::DBExpression(const QString& _name, enuDBExpressionType::Type _exprType, const QStringList& _values) :
-    Data(new DBExpressionData(_name, _exprType, _values))
-{ ; }
-DBExpression::~DBExpression()
-{ ; }
+    Data(new DBExpressionData(_name, _exprType, _values)) { ; }
+DBExpression::~DBExpression() { ; }
 
 DBExpression::operator QVariant() const {
     return QVariant::fromValue(*this);
@@ -379,8 +374,7 @@ QString clsColSpecs::buildColNameString(
         bool _appendAs,
         const stuRelation &_relation,
         /*OUT*/ bool *_isStatusColumn
-    )
-{
+    ) {
     auto applyRenameAs = [this, &_appendAs](QString _fieldString) {
         if ((_appendAs == false) || this->Data->RenameAs.isEmpty())
             return _fieldString;
@@ -822,8 +816,7 @@ bool clsCondition::hasMany() const { return (this->Data->Conditions.length() > 1
 clsCondition& clsCondition::parse(
         const QString& _filters,
         const clsTable& _table
-    )
-{
+    ) {
     return clsCondition::parse(_filters, _table.Name, _table.FilterableColsMap);
 }
 
@@ -831,8 +824,7 @@ clsCondition& clsCondition::parse(
         const QString& _filters,
         const QString& _mainTableNameOrAlias,
         const QMap<QString, stuRelatedORMField>& _filterables
-    )
-{
+    ) {
     QSharedPointer<clsCondition> condition = QSharedPointer<clsCondition>::create();
 
     QStringList Filters = _filters
@@ -868,8 +860,7 @@ QString clsCondition::buildConditionString(
         const QString& _tableNameOrAlias,
         clsColSpecs& _colSpecs,
         bool *_statusColHasCriteria
-    )
-{
+    ) {
 //        if (_tableNameOrAlias.length() && (_tableNameOrAlias != _mainTableNameOrAlias))
 //            return QString("%1.%2")
 //                .arg(_tableNameOrAlias)
@@ -1152,13 +1143,11 @@ public:
 /***************************************************************************************/
 template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery() :
-    Data(nullptr)
-{ ; }
+    Data(nullptr) { ; }
 
 template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other) :
-    Data(_other.Data)
-{ ; }
+    Data(_other.Data) { ; }
 
 template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(clsTable& _table, const QString& _alias) :
@@ -1330,10 +1319,10 @@ public:
 
 //                    bool Joined = false;
 //                    if (this->RequiredCols.isEmpty())
-//                        foreach(auto Col, ForeignTable->BaseCols)
+//                        foreach (auto Col, ForeignTable->BaseCols)
 //                            this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true, Relation));
 //                    else
-//                        foreach(auto RequiredCol, this->RequiredCols)
+//                        foreach (auto RequiredCol, this->RequiredCols)
 //                            if (addCol(RequiredCol, Relation))
 //                                Joined = true;
 
@@ -1355,17 +1344,14 @@ public:
 /***************************************************************************************/
 template <class itmplDerived>
 tmplQueryJoinTrait<itmplDerived>::tmplQueryJoinTrait(const tmplQueryJoinTrait<itmplDerived>& _other) :
-    JoinTraitData(_other.JoinTraitData)
-{ ; }
+    JoinTraitData(_other.JoinTraitData) { ; }
 
 template <class itmplDerived>
 tmplQueryJoinTrait<itmplDerived>::tmplQueryJoinTrait(itmplDerived* _owner) :
-    JoinTraitData(new clsQueryJoinTraitData<itmplDerived>(_owner))
-{ ; }
+    JoinTraitData(new clsQueryJoinTraitData<itmplDerived>(_owner)) { ; }
 
 template <class itmplDerived>
-tmplQueryJoinTrait<itmplDerived>::~tmplQueryJoinTrait()
-{ ; }
+tmplQueryJoinTrait<itmplDerived>::~tmplQueryJoinTrait() { ; }
 
 /***********************\
 |* Join                *|
@@ -1455,7 +1441,8 @@ template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::in
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
 
 //-- nested -------------------------
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
+template <class itmplDerived>
+itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
     if (_alias.length())
         this->JoinTraitData->Owner->Data->BaseQueryPreparedItems.RenamedCols.append(_alias);
 
@@ -1785,17 +1772,14 @@ public:
 /***************************************************************************************/
 template <class itmplDerived>
 tmplQueryWhereTrait<itmplDerived>::tmplQueryWhereTrait(const tmplQueryWhereTrait<itmplDerived>& _other) :
-    WhereTraitData(_other.WhereTraitData)
-{ ; }
+    WhereTraitData(_other.WhereTraitData) { ; }
 
 template <class itmplDerived>
 tmplQueryWhereTrait<itmplDerived>::tmplQueryWhereTrait(itmplDerived* _owner) :
-    WhereTraitData(new clsQueryWhereTraitData<itmplDerived>(_owner))
-{ ; }
+    WhereTraitData(new clsQueryWhereTraitData<itmplDerived>(_owner)) { ; }
 
 template <class itmplDerived>
-tmplQueryWhereTrait<itmplDerived>::~tmplQueryWhereTrait()
-{ ; }
+tmplQueryWhereTrait<itmplDerived>::~tmplQueryWhereTrait() { ; }
 
 /***********************\
 |* Where               *|
@@ -1951,17 +1935,14 @@ public:
 /***************************************************************************************/
 template <class itmplDerived>
 tmplQueryGroupAndHavingTrait<itmplDerived>::tmplQueryGroupAndHavingTrait(const tmplQueryGroupAndHavingTrait<itmplDerived>& _other) :
-    GroupAndHavingTraitData(_other.GroupAndHavingTraitData)
-{ ; }
+    GroupAndHavingTraitData(_other.GroupAndHavingTraitData) { ; }
 
 template <class itmplDerived>
 tmplQueryGroupAndHavingTrait<itmplDerived>::tmplQueryGroupAndHavingTrait(itmplDerived* _owner) :
-    GroupAndHavingTraitData(new clsQueryGroupAndHavingTraitData<itmplDerived>(_owner))
-{ ; }
+    GroupAndHavingTraitData(new clsQueryGroupAndHavingTraitData<itmplDerived>(_owner)) { ; }
 
 template <class itmplDerived>
-tmplQueryGroupAndHavingTrait<itmplDerived>::~tmplQueryGroupAndHavingTrait()
-{ ; }
+tmplQueryGroupAndHavingTrait<itmplDerived>::~tmplQueryGroupAndHavingTrait() { ; }
 
 /***********************\
 |* Group               *|
@@ -1978,7 +1959,7 @@ itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::groupBy(const QString&
 template <class itmplDerived>
 itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::groupBy(const QStringList& _cols) {
     if (_cols.length()) {
-        foreach(auto Col, _cols)
+        foreach (auto Col, _cols)
             this->groupBy(Col);
     }
 
@@ -2074,14 +2055,14 @@ public:
         }; //addCol
 
         if (this->RequiredCols.isEmpty()) {
-            foreach(stuRelatedORMField baseCol, this->Table.AllCols) {
+            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
                 if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isSelectable())
                     this->SelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, true));
             }
         } else {
 //            qDebug() << MainTableNameOrAlias << "has RequiredCols";
 //            int i = 0;
-            foreach(clsColSpecs Col, this->RequiredCols) {
+            foreach (clsColSpecs Col, this->RequiredCols) {
 //                qDebug() << i++;
                 addCol(Col);
             }
@@ -2095,10 +2076,10 @@ public:
 
 //            bool Joined = false;
 //            if (this->RequiredCols.isEmpty())
-//                foreach(auto Col, ForeignTable->BaseCols)
+//                foreach (auto Col, ForeignTable->BaseCols)
 //                    this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
 //            else
-//                foreach(auto RequiredCol, this->RequiredCols)
+//                foreach (auto RequiredCol, this->RequiredCols)
 //                    if (addCol(RequiredCol, Relation))
 //                        Joined = true;
 
@@ -2119,7 +2100,7 @@ public:
         bool CanStartWithLogical = false;
         QString LastLogical = "";
         _filters = _filters.replace("\\ ", "$SPACE$");
-        foreach(auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
+        foreach (auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
             QString Rule;
             Filter = Filter.trimmed ();
             if (Filter == ")") {
@@ -2210,7 +2191,7 @@ public:
             SelectItems.Where.append("TRUE");
 
         if (StatusColHasCriteria == false)
-            foreach(auto FCol, this->FilterableColsMap)
+            foreach (auto FCol, this->FilterableColsMap)
                 if (FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__) {
                     if (FCol.Relation.LeftJoin)
                         SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
@@ -2300,8 +2281,7 @@ SelectQuery::SelectQuery(clsTable& _table, const QString& _alias) :
     tmplBaseQuery<SelectQuery, clsSelectQueryData>(_table, _alias),
     tmplQueryJoinTrait<SelectQuery>(this),
     tmplQueryWhereTrait<SelectQuery>(this),
-    tmplQueryGroupAndHavingTrait<SelectQuery>(this)
-{ ; }
+    tmplQueryGroupAndHavingTrait<SelectQuery>(this) { ; }
 SelectQuery::~SelectQuery() { ; }
 
 /***********************\
@@ -2330,7 +2310,7 @@ SelectQuery& SelectQuery::addCSVCols(const QString& _commaSeperatedCols, const Q
 
 SelectQuery& SelectQuery::addCols(const QStringList& _cols) {
     if (_cols.length()) {
-        foreach(QString col, _cols) {
+        foreach (QString col, _cols) {
             if (col.isEmpty() == false)
                 this->addCol(col);
         }
@@ -2656,7 +2636,8 @@ quint64 SelectQuery::count(QVariantMap _args) {
 }
 */
 
-//template<typename T> T SelectQuery::one(QVariantMap _args)
+//template <typename T>
+//T SelectQuery::one(QVariantMap _args)
 //{
 //    QVariantMap info = this->one(_args);
 //    T t;
@@ -2969,12 +2950,10 @@ public:
 /* CreateQuery *************************************************************************/
 /***************************************************************************************/
 CreateQuery::CreateQuery(const CreateQuery& _other) :
-    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_other)
-{ ; }
+    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_other) { ; }
 
 CreateQuery::CreateQuery(clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_table, _alias)
-{ ; }
+    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_table, _alias) { ; }
 
 CreateQuery::~CreateQuery() { ; }
 
@@ -2996,7 +2975,7 @@ CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
 //    if (this->Data->Select != nullptr)
 //        throw new exQueryBuilder("Columns must be defined before select query");
 
-    foreach(auto Col, _cols)
+    foreach (auto Col, _cols)
         this->addCol(Col);
     return *this;
 }
@@ -3418,8 +3397,7 @@ UpdateQuery::UpdateQuery(const UpdateQuery& _other) :
 UpdateQuery::UpdateQuery(clsTable& _table, const QString& _alias) :
     tmplBaseQuery<UpdateQuery, clsUpdateQueryData>(_table, _alias),
     tmplQueryJoinTrait<UpdateQuery>(this),
-    tmplQueryWhereTrait<UpdateQuery>(this)
-{ ; }
+    tmplQueryWhereTrait<UpdateQuery>(this) { ; }
 UpdateQuery::~UpdateQuery() { ; }
 
 /***********************\
@@ -3617,8 +3595,7 @@ DeleteQuery::DeleteQuery(const DeleteQuery& _other) :
 DeleteQuery::DeleteQuery(clsTable& _table, const QString& _alias) :
     tmplBaseQuery<DeleteQuery, clsDeleteQueryData>(_table, _alias),
     tmplQueryJoinTrait<DeleteQuery>(this),
-    tmplQueryWhereTrait<DeleteQuery>(this)
-{ ; }
+    tmplQueryWhereTrait<DeleteQuery>(this) { ; }
 DeleteQuery::~DeleteQuery() { ; }
 
 /***********************\

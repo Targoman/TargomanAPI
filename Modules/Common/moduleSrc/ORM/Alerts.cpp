@@ -37,8 +37,7 @@ Alerts::Alerts() :
 //        CommonSchema,
 //        ""
     ),
-    intfAlerts()
-{ ; }
+    intfAlerts() { ; }
 
 QVariant Alerts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

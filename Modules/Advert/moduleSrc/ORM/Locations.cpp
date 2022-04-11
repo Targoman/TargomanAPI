@@ -59,8 +59,7 @@ Locations::Locations() :
             { tblLocations::locCreationDateTime },
             { tblLocations::locUpdatedBy_usrID },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Locations::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));

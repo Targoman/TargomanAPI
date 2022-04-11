@@ -60,7 +60,6 @@ Clicks::Clicks() :
               { ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
                 {tblClicks::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::binID},
                 {tblClicks::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-              })
-{ ; }
+              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

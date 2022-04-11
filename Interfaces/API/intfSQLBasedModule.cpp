@@ -52,8 +52,7 @@ intfSQLBasedModule::intfSQLBasedModule(
         _relations,
         _indexes,
         _dbProperties
-    )
-{ ; }
+    ) { ; }
 
 intfSQLBasedModule::intfSQLBasedModule(
         const QString& _schema,
@@ -71,8 +70,7 @@ intfSQLBasedModule::intfSQLBasedModule(
         _relations,
         _indexes,
         _dbProperties
-    )
-{ ; }
+    ) { ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
         clsTable& _table,
@@ -80,8 +78,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
         const clsCondition& _extraFilters,
         quint16 _cacheTime,
         std::function<void(SelectQuery &_query)> _lambda_TouchQuery
-    )
-{
+    ) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 
@@ -125,8 +122,7 @@ QVariantList intfSQLBasedModule::SelectAll(
         const clsCondition& _extraFilters,
         quint16 _cacheTime,
         std::function<void(SelectQuery &_query)> _lambda_TouchQuery
-    )
-{
+    ) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 

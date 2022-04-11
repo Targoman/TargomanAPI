@@ -52,8 +52,7 @@ ActiveSessions::ActiveSessions() :
             { tblActiveSessions::ssn_usrID,             R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
             { tblActiveSessions::ssnUpdatedBy_usrID,    R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true }
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //  QVariantMap ExtraFilters;

@@ -68,8 +68,7 @@ OnlinePayments::OnlinePayments() :
             { "voucher",        { tblOnlinePayments::onp_vchID, R(AAASchema, tblVoucher::Name),            tblVoucher::vchID } },
             { "paymentGateway", { tblOnlinePayments::onp_pgwID, R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID } },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -107,8 +106,7 @@ OfflinePayments::OfflinePayments() :
             ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)

@@ -47,8 +47,7 @@ intfAlerts::intfAlerts() :
             { tblAlerts::alrSentDate,           S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrStatus,             ORM_STATUS_FIELD(Targoman::API::ORM::enuAlertStatus,                    Targoman::API::ORM::enuAlertStatus::New) },
         }
-    )
-{
+    ) {
     /**
      * VALIDATION:
      * one of the alr_usrID, alrEmail, alrMobile must be provided
@@ -62,8 +61,7 @@ intfAlerts::intfAlerts() :
         QString _replacedContactInfo,
         QString _altCode,
         QString _replacements
-    )
-{
+    ) {
     ///TODO: complete this
 
 //    auto Query = CreateQuery(Alerts::instance())

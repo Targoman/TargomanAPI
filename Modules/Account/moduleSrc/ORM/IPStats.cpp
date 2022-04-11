@@ -48,7 +48,6 @@ IPStats::IPStats() :
               },
               { ///< Col                  Reference Table                  ForeignCol
                 {tblIPStats::ips_ipbIP,   R(AAASchema,tblIPBin::Name),     tblIPBin::ipbIP },
-              })
-{ ; }
+              }) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM
