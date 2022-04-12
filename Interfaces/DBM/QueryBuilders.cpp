@@ -27,9 +27,9 @@
 //#include "Interfaces/AAA/clsJWT.hpp"
 //using namespace Targoman::API::AAA;
 #include "Interfaces/Common/intfAPIArgManipulator.h"
-#include "Interfaces/Common/ServerCommon.h"
+#include "Interfaces/Server/ServerCommon.h"
 
-using namespace Targoman::API::Common;
+using namespace Targoman::API::Server;
 
 namespace Targoman::API::DBM {
 

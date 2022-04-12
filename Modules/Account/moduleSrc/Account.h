@@ -58,14 +58,14 @@ public:
 
 public:
     static Targoman::API::AAA::stuVoucher processVoucher(
-            INOUT TAPI::JWT_t &_JWT,
-            quint64 _voucherID
-            );
+        intfAPISession &_SESSION,
+        quint64 _voucherID
+    );
     static void tryCancelVoucher(
-            INOUT TAPI::JWT_t &_JWT,
-            quint64 _voucherID,
-            bool _setAsError = false
-            );
+        intfAPISession &_SESSION,
+        quint64 _voucherID,
+        bool _setAsError = false
+    );
 
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
@@ -242,7 +242,7 @@ private slots:
     bool REST_GET_OR_POST(
         logout,
         (
-            TAPI::JWT_t _JWT
+            APISession<true> &_SESSION
         ),
         "Logout logged in user"
     )
@@ -281,7 +281,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePass,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             TAPI::MD5_t _oldPass,
             QString     _oldPassSalt,
             TAPI::MD5_t _newPass
@@ -295,7 +295,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
@@ -311,7 +311,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
 //            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,
@@ -323,7 +323,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             quint64 _vchID,
             const QString& _bank,
             const QString& _receiptCode,
@@ -340,7 +340,7 @@ private slots:
     bool REST_POST(
         addPrizeTo,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             quint64 _targetUsrID,
             quint64 _amount,
             TAPI::JSON_t _desc
@@ -352,7 +352,7 @@ private slots:
     bool REST_POST(
         addIncomeTo,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             quint64 _targetUsrID,
             quint64 _amount,
             TAPI::JSON_t _desc
@@ -364,7 +364,7 @@ private slots:
     bool REST_POST(
         checkVoucherTTL,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             quint64 _voucherID
         ),
         "Check voucher and items for ttl"

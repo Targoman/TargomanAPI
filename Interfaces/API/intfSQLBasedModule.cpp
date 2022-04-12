@@ -73,13 +73,12 @@ intfSQLBasedModule::intfSQLBasedModule(
     ) { ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
-        clsTable& _table,
-        GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
-        const clsCondition& _extraFilters,
-        quint16 _cacheTime,
-        std::function<void(SelectQuery &_query)> _lambda_TouchQuery
-    ) {
-    Q_UNUSED(_userID)
+    clsTable& _table,
+    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const clsCondition& _extraFilters,
+    quint16 _cacheTime,
+    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+) {
     Q_UNUSED(_reportCount)
 
     _table.prepareFiltersList();
@@ -103,27 +102,26 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     QVariantMap Result = Query.one();
 
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
 
 QVariantList intfSQLBasedModule::SelectAll(
-        clsTable& _table,
-        GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
-        const clsCondition& _extraFilters,
-        quint16 _cacheTime,
-        std::function<void(SelectQuery &_query)> _lambda_TouchQuery
-    ) {
-    Q_UNUSED(_userID)
+    clsTable& _table,
+    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const clsCondition& _extraFilters,
+    quint16 _cacheTime,
+    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+) {
     Q_UNUSED(_reportCount)
 
     _table.prepareFiltersList();
@@ -145,26 +143,26 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     QVariantList Result = Query.all();
 
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
-        clsTable& _table,
-        GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
-        const clsCondition& _extraFilters,
-        quint16 _cacheTime,
-        std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
-    Q_UNUSED(_userID)
+    clsTable& _table,
+    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const clsCondition& _extraFilters,
+    quint16 _cacheTime,
+    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+) {
     Q_UNUSED(_reportCount)
 
     _table.prepareFiltersList();
@@ -186,33 +184,60 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     TAPI::stuTable Result = Query.allWithCount();
 
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-    this->addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+    _SESSION.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-    this->addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+    _SESSION.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
 
-QVariant intfSQLBasedModule::Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
+QVariant intfSQLBasedModule::Select(
+    clsTable& _table,
+    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const clsCondition& _extraFilters,
+    quint16 _cacheTime,
+    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+) {
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
-            return this->SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery)
+            return this->SelectAllWithCount(
+                        _table,
+                        GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                        _extraFilters,
+                        _cacheTime,
+                        _lambda_TouchQuery
+                        )
                     .toVariant()
                 ;
 
-        return this->SelectAll(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
+        return this->SelectAll(
+                    _table,
+                    GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                    _extraFilters,
+                    _cacheTime,
+                    _lambda_TouchQuery
+                    );
     }
 
-    return this->SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
+    return this->SelectOne(
+                _table,
+                GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                _extraFilters,
+                _cacheTime,
+                _lambda_TouchQuery
+                );
 }
 
-quint64 intfSQLBasedModule::Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL) {
+quint64 intfSQLBasedModule::Create(
+    clsTable& _table,
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL
+) {
     _table.prepareFiltersList();
 
     CreateQuery query = CreateQuery(_table);
@@ -222,10 +247,14 @@ quint64 intfSQLBasedModule::Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INT
 
     query.values(_createInfo);
 
-    return query.execute(_userID);
+    return query.execute(_SESSION.getUserID());
 }
 
-bool intfSQLBasedModule::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters) {
+bool intfSQLBasedModule::Update(
+    clsTable& _table,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const QVariantMap& _extraFilters
+) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -254,10 +283,15 @@ bool intfSQLBasedModule::Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERN
         }
     }
 
-    return query.execute(_userID) > 0;
+    return query.execute(_SESSION.getUserID()) > 0;
 }
 
-bool intfSQLBasedModule::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete) {
+bool intfSQLBasedModule::DeleteByPks(
+    clsTable& _table,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const QVariantMap& _extraFilters,
+    bool _realDelete
+) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -288,7 +322,7 @@ bool intfSQLBasedModule::DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_I
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_userID, {}, _realDelete) > 0;
+    return query.execute(_SESSION.getUserID(), {}, _realDelete) > 0;
 }
 
 } // namespace Targoman::API::API

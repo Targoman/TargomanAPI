@@ -28,11 +28,12 @@
 #include <QMetaMethod>
 
 #include "Interfaces/API/intfPureModule.h"
+#include "Interfaces/Server/APISession.h"
 
 namespace Targoman::API::Server {
 
-#define APISESSION_TYPE_NAME "APISession"
-#define APISESSION_JWT_TYPE_NAME "APISession_JWT"
+#define APISESSION_TYPE_NAME        "APISession<false>"
+#define APISESSION_JWT_TYPE_NAME    "APISession<true>"
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
 #define PARAM_REMOTE_IP "TAPI::RemoteIP_t"
@@ -112,21 +113,25 @@ public:
     }
 
     QVariant invoke(
-            bool _isUpdateMethod,
-            const QStringList& _args,
-            /*OUT*/ QVariantMap &_responseHeaders,
-            QList<QPair<QString, QString>> _bodyArgs = {},
-            qhttp::THeaderHash _headers = {},
-            qhttp::THeaderHash _cookies = {},
-            QJsonObject _jwt = {},
-            QString _remoteIP = {},
-            QString _extraAPIPath = {}
-        ) const;
+        intfAPISession* _SESSION,
+        bool _isUpdateMethod,
+        const QStringList& _args,
+//        /*OUT*/ QVariantMap &_responseHeaders,
+        QList<QPair<QString, QString>> _bodyArgs = {},
+        qhttp::THeaderHash _headers = {},
+        qhttp::THeaderHash _cookies = {},
+//        QJsonObject _jwt = {},
+        QString _remoteIP = {},
+        QString _extraAPIPath = {}
+    ) const;
 
     void invokeMethod(
-            const QVariantList& _arguments,
-            QGenericReturnArgument _returnArg,
-            /*OUT*/ QVariantMap &_responseHeaders) const;
+        intfAPISession* _SESSION,
+        const QVariantList& _arguments,
+        QGenericReturnArgument _returnArg
+//        /*OUT*/ QVariantMap &_responseHeaders
+    ) const;
+
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
 private:

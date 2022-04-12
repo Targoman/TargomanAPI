@@ -50,8 +50,8 @@ BlockingRules::BlockingRules() :
         }
     ) { ; }
 
-QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant BlockingRules::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -60,20 +60,20 @@ QVariant BlockingRules::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 BlockingRules::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint64 BlockingRules::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool BlockingRules::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool BlockingRules::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool BlockingRules::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool BlockingRules::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

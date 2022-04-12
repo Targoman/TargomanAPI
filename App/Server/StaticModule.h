@@ -25,109 +25,10 @@
 #define ARGOMAN_API_SERVER_STATICMODULE_H
 
 #include "Interfaces/API/intfPureModule.h"
-#include "ServerConfigs.h"
 
 using namespace Targoman::API::API;
 
 namespace Targoman::API::Server {
-
-class intfAPISession
-{
-public:
-    virtual bool needJWT() = 0;
-//    virtual QVariant toVariant() const = 0;
-};
-
-//template <bool _needJWT, bool _needIP>
-//struct APISessionTypes
-//{
-//    typedef std::conditional<_needJWT, TAPI::JWT_t, QVariant> JWT_Type;
-//    typedef std::conditional<_needIP, TAPI::RemoteIP_t, QVariant> IP_Type;
-//};
-
-template <bool _needJWT>
-class APISession : public intfAPISession
-{
-public:
-    APISession() = default;
-    virtual ~APISession() = default;
-    APISession(const APISession &) = default;
-    APISession &operator=(const APISession &) = default;
-
-//    APISession(
-//            QString &_requestAPIPath,
-//            qhttp::THeaderHash &_requestHeaders,
-//            qhttp::THeaderHash &_requestCookies,
-//            typename T_APISessionTypes::JWT_Type &_JWT,
-//            typename T_APISessionTypes::IP_Type &_IP,
-//            qhttp::THeaderHash &_responseHeaders
-//        ) :
-//        RequestAPIPath(_requestAPIPath),
-//        RequestHeaders(_requestHeaders),
-//        RequestCookies(_requestCookies),
-//        JWT(_JWT),
-//        IP(_IP),
-//        ResponseHeaders(_responseHeaders)
-//    { ; }
-
-public:
-//    QVariant toVariant() const { return QVariant(); }
-    virtual bool needJWT() { return _needJWT; }
-
-    QString requestAPIPath() const
-    {
-        return RequestAPIPath;
-    }
-    QString host() const
-    {
-        if (RequestHeaders.has("host") == false)
-            return "127.0.0.1";
-
-        QString Host = RequestHeaders["host"];
-
-        int idx;
-        if ((idx = Host.indexOf(":")) >= 0)
-            Host = Host.left(idx);
-
-        return Host;
-    }
-    quint16 port() const
-    {
-        if (RequestHeaders.has("host") == false)
-            return ServerConfigs::ListenPort.value();
-
-        QString Host = RequestHeaders["host"];
-
-        int idx;
-        if ((idx = Host.indexOf(":")) < 0)
-            return 80;
-
-        return Host.mid(idx+1).toUInt();
-    }
-
-public:
-//    clsRequestHandler *RequestHandler;
-    ///@TODO: complete this
-    QString RequestAPIPath;
-    qhttp::THeaderHash RequestHeaders;
-    qhttp::THeaderHash RequestCookies;
-    TAPI::JWT_t JWT;
-    TAPI::RemoteIP_t IP;
-    qhttp::THeaderHash ResponseHeaders;
-};
-
-//class APISession_JWT : public APISession
-//{
-//public:
-//    virtual bool needJWT() { return true; }
-
-//public:
-//};
-
-//typedef APISession<APISessionTypes<false, false>> APISession;
-//typedef APISession<APISessionTypes<false, true>> APISession_ip;
-//typedef APISession<APISessionTypes<true, false>> APISession_JWT;
-//typedef APISession<APISessionTypes<true, true>> APISession_JWT_ip;
 
 class StaticModule : public intfPureModule
 {
@@ -191,20 +92,6 @@ private slots:
     );
 };
 
-//typedef APISession APISession;
-//typedef APISession<APISessionTypes<false, true>> APISession_ip;
-//typedef APISession<APISessionTypes<true, false>> APISession_JWT;
-//typedef APISession<APISessionTypes<true, true>> APISession_JWT_ip;
-
 } //namespace Targoman::API::Server
-
-//typedef Targoman::API::Server::APISession<false, false> APISession_f_f;
-
-//Q_DECLARE_METATYPE_TEMPLATE_1ARG(Targoman::API::Server::APISession)
-
-//TAPI_DECLARE_METATYPE(Targoman::API::Server::APISession);
-//TAPI_DECLARE_METATYPE(Targoman::API::Server::APISession_ip);
-//TAPI_DECLARE_METATYPE(Targoman::API::Server::APISession_JWT);
-//TAPI_DECLARE_METATYPE(Targoman::API::Server::APISession_JWT_ip);
 
 #endif // ARGOMAN_API_SERVER_STATICMODULE_H

@@ -9,6 +9,7 @@
 LibName=TargomanAPIInterface
 
 DIST_HEADERS += \
+    Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
     Common/GenericTypes.h \
@@ -18,7 +19,6 @@ DIST_HEADERS += \
     Common/GenericEnums.hpp \
     Common/APIArgHelperMacros.hpp \
     Common/QtTypes.hpp \
-    Common/ServerCommon.h \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Authentication.h \
@@ -41,9 +41,10 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Server/APISession.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
-    Common/ServerCommon.h \
+    Server/ServerCommon.h \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
@@ -74,9 +75,10 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    Server/APISession.cpp \
     Server/clsSimpleCrypt.cpp \
     Server/QJWT.cpp \
-    Common/ServerCommon.cpp \
+    Server/ServerCommon.cpp \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \

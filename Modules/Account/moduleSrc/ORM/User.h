@@ -51,7 +51,7 @@ private slots:
     TAPI::Base64Image_t REST_GET(
         photo,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             quint64 _usrID
         ),
         "Get user photo as base64"
@@ -59,7 +59,7 @@ private slots:
     bool REST_UPDATE(
         photo,
         (
-            TAPI::JWT_t _JWT,
+            APISession<true> &_SESSION,
             TAPI::Base64Image_t _image
         ),
         "Updates user image based using a base64 encoded image"
@@ -67,7 +67,7 @@ private slots:
     bool REST_POST(
         deletePhoto,
         (
-            TAPI::JWT_t _JWT
+            APISession<true> &_SESSION
         ),
         "Delete user image"
     )
@@ -175,7 +175,7 @@ private slots:
 //    bool REST_UPDATE(
 //        birthDate,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            QString _birthDate
 //        ),
 //        "Updates users birth date"
@@ -184,7 +184,7 @@ private slots:
 //    bool REST_UPDATE(
 //        photo,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            TAPI::Base64Image_t _image
 //        ),
 //        "Updates user image based using a base64 encoded image"
@@ -193,7 +193,7 @@ private slots:
 //    bool REST_UPDATE(
 //        sheba,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            TAPI::Sheba_t _sheba
 //        ),
 //        "Updates user Sheba address"
@@ -202,7 +202,7 @@ private slots:
 //    bool REST_UPDATE(
 //        etherAddress,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            TAPI::Ether_t _etherAddress
 //        ),
 //        "Updates user ethercoin address"

@@ -31,9 +31,9 @@ Auth::Auth() :
     ) { ; }
 
 bool Auth::apivalidateJWT(
-        TAPI::JWT_t _JWT
-    ) {
-    Q_UNUSED(_JWT);
+    APISession<true> &_SESSION
+) {
+    Q_UNUSED(_SESSION);
 
     return true;
 }

@@ -42,8 +42,6 @@
 #include "Interfaces/AAA/Authentication.h"
 using namespace Targoman::API::AAA;
 
-#include "StaticModule.h"
-
 namespace Targoman::API::Server {
 
 using namespace qhttp::server;
@@ -271,7 +269,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
     QStringList& _queries,
     const QString& _pksByPath
 ) {
-    QVariantMap ResponseHeaders;
+//    QVariantMap ResponseHeaders;
 
     QScopedPointer<intfAPISession> SESSION;
     if (_apiObject->requiresJWT())
@@ -311,12 +309,14 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 );
 
                     BearerToken = NewToken;
-                    ResponseHeaders.insert("x-auth-new-token", BearerToken);
+                    SESSION->addResponseHeader("x-auth-new-token", BearerToken);
                 }
                 JWT["encodedJWT"] = BearerToken;
             } else
                 throw exHTTPForbidden("No valid authentication header is present");
-        }
+
+            SESSION->setJWT(JWT);
+        } // if (_apiObject->requiresJWT())
 
         if (_apiObject->requiresCookies() && Headers.value("cookie").size()) {
             foreach (auto Cookie, Headers.value("cookie").split(';')) {
@@ -330,28 +330,29 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
 
         QVariant Result = _apiObject->invoke(
+                              SESSION.data(),
                               this->Request->method() == qhttp::EHTTP_PATCH,
                               _queries,
-                              ResponseHeaders,
+//                              ResponseHeaders,
                               this->Request->userDefinedValues(),
                               Headers,
                               Cookies,
-                              JWT,
+//                              JWT,
                               this->toIPv4(this->Request->remoteAddress()),
                               _pksByPath
                               );
 
-        return stuResult(Result, ResponseHeaders);
+        return stuResult(Result, SESSION->getResponseHeaders());
     } catch (exTargomanBase& ex) {
-        return stuResult(ex.what(), ResponseHeaders, static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), SESSION->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exQFVRequiredParam &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (exQFVInvalidValue &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (std::exception &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     } catch (...) {
-        return stuResult("INTERNAL SERVER ERROR!!!", ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", SESSION->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -375,7 +376,7 @@ quint16 clsRequestHandler::port() const
     const qhttp::THeaderHash headers = this->Request->headers();
 
     if (headers.has("host") == false)
-        return ServerConfigs::ListenPort.value();
+        return ServerCommonConfigs::ListenPort.value();
 
     QString Host = headers["host"];
 
@@ -491,7 +492,7 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
                 this->sendError(Result.StatusCode, Result.Result.toString(), Result.ResponseHeader, Result.StatusCode >= 500);
         });
 
-        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
+//        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
 
         if (ServerConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());

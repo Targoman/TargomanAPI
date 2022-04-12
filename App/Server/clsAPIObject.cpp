@@ -91,13 +91,14 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
 }
 
 QVariant clsAPIObject::invoke(
+    intfAPISession* _SESSION,
     bool _isUpdateMethod,
     const QStringList& _args,
-    /*OUT*/ QVariantMap &_responseHeaders,
+//    /*OUT*/ QVariantMap &_responseHeaders,
     QList<QPair<QString, QString>> _bodyArgs,
     qhttp::THeaderHash _headers,
     qhttp::THeaderHash _cookies,
-    QJsonObject _jwt,
+//    QJsonObject _jwt,
     QString _remoteIP,
     QString _extraAPIPath
 ) const {
@@ -131,8 +132,8 @@ QVariant clsAPIObject::invoke(
 
         static auto parseArgValue = [ArgumentValue](const QString& _paramName, QString _value) -> QVariant {
             _value = _value.trimmed();
-            if ((_value.startsWith('[') && _value.endsWith(']')) ||
-               (_value.startsWith('{') && _value.endsWith('}'))) {
+            if ((_value.startsWith('[') && _value.endsWith(']'))
+                    || (_value.startsWith('{') && _value.endsWith('}'))) {
                 QJsonParseError Error;
                 QJsonDocument JSON = QJsonDocument::fromJson(_value.toUtf8(), &Error);
                 if (JSON.isNull())
@@ -153,10 +154,10 @@ QVariant clsAPIObject::invoke(
             ArgumentValue = _headers.toVariant();
         }
 
-        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_JWT) {
-            ParamNotFound = false;
-            ArgumentValue = _jwt;
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_JWT) {
+//            ParamNotFound = false;
+//            ArgumentValue = _jwt;
+//        }
 
         if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_REMOTE_IP) {
             ParamNotFound = false;
@@ -241,7 +242,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _responseHeaders = Map.value("headers").toMap();
+            _SESSION->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -252,7 +253,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _responseHeaders = Map.value("headers").toMap();
+            _SESSION->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -273,12 +274,14 @@ QVariant clsAPIObject::invoke(
 
     QVariant Result = APIMethod->invokeMethod(
                           this,
-                          Arguments,
-                          _responseHeaders);
+                          _SESSION,
+                          Arguments
+//                          _responseHeaders
+                          );
 
     QVariantMap ResultWithHeader = QVariantMap({
                                                    { "result", Result },
-                                                   { "headers", _responseHeaders },
+                                                   { "headers", _SESSION->getResponseHeaders() },
                                                });
     if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
@@ -286,15 +289,16 @@ QVariant clsAPIObject::invoke(
         CentralCache::setValue(CacheKey, ResultWithHeader, this->Cache4SecsCentral);
 
     gServerStats.APICallsStats[this->BaseMethod.name()].inc();
+
     return Result;
 }
 
 void clsAPIObject::invokeMethod(
-        const QVariantList& _arguments,
-        QGenericReturnArgument _returnArg,
-        /*OUT*/ QVariantMap &_responseHeaders
-    ) const
-{
+    intfAPISession* _SESSION,
+    const QVariantList& _arguments,
+    QGenericReturnArgument _returnArg
+//    /*OUT*/ QVariantMap &_responseHeaders
+) const {
     if (_arguments.size() > 10)
         throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
 
@@ -308,7 +312,6 @@ void clsAPIObject::invokeMethod(
 
     QVector<void*> ArgStorage(_arguments.size(), {});
 
-    QMetaObject::Connection Conn_addResponseHeader;
     try {
         QGenericArgument Arguments[10];
 
@@ -320,15 +323,7 @@ void clsAPIObject::invokeMethod(
         }
 
         QObject *parent = this->parent();
-        intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
-        Conn_addResponseHeader = QObject::connect(pureModule, &intfPureModule::addResponseHeader,
-                         [&_responseHeaders](const QString &_header, const QString &_value, bool _multiValue) {
-                            if (_multiValue && _responseHeaders.contains(_header))
-                                _responseHeaders[_header] = _responseHeaders[_header].toString() + "," + _value;
-                            else
-                                _responseHeaders.insert(_header, _value);
-                         }
-                        );
+//        intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
 
         InvocationResult = InvokableMethod.invoke(
             parent,
@@ -349,12 +344,9 @@ void clsAPIObject::invokeMethod(
         if (InvocationResult == false)
             throw exHTTPInternalServerError(QString("Unable to invoke method"));
 
-        QObject::disconnect(Conn_addResponseHeader);
-
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);
     } catch (...) {
-        QObject::disconnect(Conn_addResponseHeader);
 
         for (int i=0; i<_arguments.size(); ++i)
             CLEAN_ARG_AT(i);

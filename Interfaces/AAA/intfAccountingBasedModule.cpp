@@ -117,13 +117,16 @@ stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
     return this->findBestMatchedCredit(_usrID);
 }
 
-void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage) {
-    QJsonObject Privs = _jwt.privsObject();
+void intfAccountingBasedModule::checkUsageIsAllowed(
+    intfAPISession &_SESSION,
+    const ServiceUsage_t &_requestedUsage
+) {
+    QJsonObject Privs = _SESSION.getJWTPrivsObject();
 
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(_SESSION.getUserID(), _requestedUsage);
 
     if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -173,7 +176,10 @@ void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const Se
     }
 }
 
-stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage) {
+stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
+    quint64 _usrID,
+    const ServiceUsage_t& _requestedUsage
+) {
     stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
     if (ServiceCreditsInfo.ActiveCredits.isEmpty())
         return stuActiveCredit();
@@ -328,13 +334,13 @@ bool intfAccountingBasedModule::decreaseDiscountUsage(
 }
 
 bool intfAccountingBasedModule::activateUserAsset(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
-    ) {
+    intfAPISession &_SESSION,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    quint64 _voucherID
+) {
     return /*Targoman::API::Query::*/this->Update(
         *this->AccountUserAssets,
-        _userID,
+        _SESSION,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         TAPI::ORMFields_t({
             { tblAccountUserAssetsBase::uas_vchID, _voucherID },
@@ -347,12 +353,12 @@ bool intfAccountingBasedModule::activateUserAsset(
 }
 
 bool intfAccountingBasedModule::removeFromUserAssets(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    ) {
+    intfAPISession &_SESSION,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem
+) {
     return /*Targoman::API::Query::*/this->DeleteByPks(
         *this->AccountUserAssets,
-        _userID,
+        _SESSION,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         {
             { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
@@ -362,29 +368,29 @@ bool intfAccountingBasedModule::removeFromUserAssets(
 }
 
 bool intfAccountingBasedModule::processVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
-    ) {
-    if (!this->preProcessVoucherItem(_userID, _voucherItem, _voucherID))
+    intfAPISession &_SESSION,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    quint64 _voucherID
+) {
+    if (!this->preProcessVoucherItem(_SESSION, _voucherItem, _voucherID))
         return false;
 
-    if (this->activateUserAsset(_userID, _voucherItem, _voucherID) == false)
+    if (this->activateUserAsset(_SESSION, _voucherItem, _voucherID) == false)
         return false;
 
     this->increaseDiscountUsage(_voucherItem);
 
-    this->postProcessVoucherItem(_userID, _voucherItem, _voucherID);
+    this->postProcessVoucherItem(_SESSION, _voucherItem, _voucherID);
 
     return true;
 }
 
 bool intfAccountingBasedModule::cancelVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
-    ) {
-    if (!this->preCancelVoucherItem(_userID, _voucherItem))
+    intfAPISession &_SESSION,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
+) {
+    if (!this->preCancelVoucherItem(_SESSION, _voucherItem))
         return false;
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
@@ -409,7 +415,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     //-- un-reserve saleable & product ------------------------------------
     this->AccountSaleables->callSP("spSaleable_unReserve", {
         { "iSaleableID", SaleableID },
-        { "iUserID", _userID },
+        { "iUserID", _SESSION.getUserID() },
         { "iQty", _voucherItem.Qty },
     });
 
@@ -431,27 +437,26 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 //        .execute(_userID);
 
     //-----------------------------------------------------------
-    this->removeFromUserAssets(_userID, _voucherItem);
+    this->removeFromUserAssets(_SESSION, _voucherItem);
 
-    this->postCancelVoucherItem(_userID, _voucherItem);
+    this->postCancelVoucherItem(_SESSION, _voucherItem);
 
     return true;
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
-        TAPI::JWT_t _JWT,
-        TAPI::SaleableCode_t _saleableCode,
-        Targoman::API::AAA::OrderAdditives_t _orderAdditives,
-        qreal _qty,
-        TAPI::CouponCode_t _discountCode,
-        QString _referrer,
-        TAPI::JSON_t _extraReferrerParams,
-        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    ) {
+    APISession<true> &_SESSION,
+    TAPI::SaleableCode_t _saleableCode,
+    Targoman::API::AAA::OrderAdditives_t _orderAdditives,
+    qreal _qty,
+    TAPI::CouponCode_t _discountCode,
+    QString _referrer,
+    TAPI::JSON_t _extraReferrerParams,
+    Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+) {
     checkPreVoucherSanity(_lastPreVoucher);
 
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+    quint64 currentUserID = _SESSION.getUserID();
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
@@ -545,12 +550,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     qDebug() << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
-    this->digestPrivs(_JWT, AssetItem);
+    this->digestPrivs(_SESSION.getJWT(), AssetItem);
 
-    this->applyAssetAdditives(_JWT, AssetItem, _orderAdditives);
+    this->applyAssetAdditives(_SESSION, AssetItem, _orderAdditives);
     qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
-    this->applyReferrer(_JWT, AssetItem, _referrer, _extraReferrerParams);
+    this->applyReferrer(_SESSION, AssetItem, _referrer, _extraReferrerParams);
 
     //-- --------------------------------
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
@@ -876,18 +881,17 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
-        TAPI::JWT_t _JWT,
-//        quint64 _orderID, //it is uasID
-        TAPI::MD5_t _itemUUID,
-        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    ) {
+    APISession<true> &_SESSION,
+//    quint64 _orderID, //it is uasID
+    TAPI::MD5_t _itemUUID,
+    Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPInternalServerError("pre-voucher items is empty.");
 
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+//    quint64 currentUserID = _SESSION.getUserID();
 
     bool Found = false;
     qint64 FinalPrice = 0;
@@ -900,7 +904,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
             Found = true;
 
             //delete voucher item
-            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
+            if (this->cancelVoucherItem(_SESSION, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
                 {
                     TAPI::enuAuditableStatus::Type UserAssetStatus = _userAssetInfo
                                                                      .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
@@ -948,7 +952,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 }
 /*
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
-        TAPI::JWT_t _JWT,
+        APISession<true> &_SESSION,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -1061,24 +1065,18 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
 */
 
 bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuVoucherItem _voucherItem,
-        quint64 _voucherID
-    ) {
-    clsJWT JWT(_JWT);
-    quint64 CurrentUserID = JWT.usrID();
-
-    return this->processVoucherItem(CurrentUserID, _voucherItem, _voucherID);
+    APISession<true> &_SESSION,
+    Targoman::API::AAA::stuVoucherItem _voucherItem,
+    quint64 _voucherID
+) {
+    return this->processVoucherItem(_SESSION, _voucherItem, _voucherID);
 }
 
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuVoucherItem _voucherItem
-    ) {
-    clsJWT JWT(_JWT);
-    quint64 CurrentUserID = JWT.usrID();
-
-    return this->cancelVoucherItem(CurrentUserID, _voucherItem);
+    APISession<true> &_SESSION,
+    Targoman::API::AAA::stuVoucherItem _voucherItem
+) {
+    return this->cancelVoucherItem(_SESSION, _voucherItem);
 }
 
 } //namespace Targoman::API::AAA

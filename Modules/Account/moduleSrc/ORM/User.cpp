@@ -94,9 +94,9 @@ User::User() :
     ;
 }
 
-QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (clsJWT(_JWT).usrID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(_JWT, { "Account:User:CRUD~0100" });
+QVariant User::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+    if (_SESSION.getUserID() != _pksByPath.toULongLong())
+        Authorization::checkPriv(_SESSION.getJWT(), { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -143,8 +143,8 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint64 User::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -154,23 +154,26 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
 /*
  * this method only can call by admin user
  */
-bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool User::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool User::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+TAPI::Base64Image_t User::apiGETphoto(
+    APISession<true> &_SESSION,
+    quint64 _usrID
+) {
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     if (CurrentUserID != _usrID)
-        Authorization::checkPriv(_JWT, { "Account:User:photo:CRUD~0100" });
+        Authorization::checkPriv(_SESSION.getJWT(), { "Account:User:photo:CRUD~0100" });
 
     UserExtraInfo::instance().prepareFiltersList();
 
@@ -184,8 +187,11 @@ TAPI::Base64Image_t User::apiGETphoto(TAPI::JWT_t _JWT, quint64 _usrID) {
     return TAPI::Base64Image_t(Photo);
 }
 
-bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+bool User::apiUPDATEphoto(
+    APISession<true> &_SESSION,
+    TAPI::Base64Image_t _image
+) {
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QString qry = QString()
           + "INSERT INTO"
@@ -209,8 +215,10 @@ bool User::apiUPDATEphoto(TAPI::JWT_t _JWT, TAPI::Base64Image_t _image) {
     return Result.numRowsAffected() > 0;
 }
 
-bool User::apiPOSTdeletePhoto(TAPI::JWT_t _JWT) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+bool User::apiPOSTdeletePhoto(
+    APISession<true> &_SESSION
+) {
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QString qry = QString()
           + "UPDATE"
@@ -236,7 +244,7 @@ bool User::apiUPDATEemail(
         TAPI::MD5_t     _psw,
         QString         _salt
     ) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     _email = _email.toLower().trimmed();
 
@@ -268,7 +276,7 @@ bool User::apiUPDATEmobile(
         TAPI::MD5_t     _psw,
         QString         _salt
     ) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -301,7 +309,7 @@ bool User::apiUPDATEpersonalInfo(
         TAPI::ISO639_2_t    _language,
         NULLABLE_TYPE(TAPI::enuGender::Type) _gender
     ) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QVariantMap ToUpdate;
 
@@ -324,7 +332,7 @@ bool User::apiUPDATEfinancialInfo(
         TAPI::Sheba_t   _iban,
         TAPI::Ether_t   _ether
     ) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QStringList ToUpdate;
     QVariantList Params;
@@ -372,7 +380,7 @@ bool User::apiUPDATEextraInfo(
 //        QString         _language,
         QString         _theme
     ) {
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QVariantMap ToUpdateJson;
     QStringList ToRemoveJson;
@@ -511,7 +519,7 @@ UserExtraInfo::UserExtraInfo() :
         }
     ) { ; }
 
-//bool UserExtraInfo::apiUPDATEsheba(TAPI::JWT_t _JWT, TAPI::Sheba_t _sheba)
+//bool UserExtraInfo::apiUPDATEsheba(APISession<true> &_SESSION, TAPI::Sheba_t _sheba)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -519,13 +527,13 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _sheba, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+//                              { _sheba, _SESSION.getUserID(), _SESSION.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool UserExtraInfo::apiUPDATEetherAddress(TAPI::JWT_t _JWT, TAPI::Ether_t _etherAddress)
+//bool UserExtraInfo::apiUPDATEetherAddress(APISession<true> &_SESSION, TAPI::Ether_t _etherAddress)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -533,7 +541,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _etherAddress, clsJWT(_JWT).usrID(), clsJWT(_JWT).usrID() }
+//                              { _etherAddress, _SESSION.getUserID(), _SESSION.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;

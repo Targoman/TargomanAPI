@@ -55,16 +55,18 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 //    "DELETE"
 //};
 
+///@TODO: callAPI(intfAPISession &_SESSION
+
 QVariant RESTClientHelper::callAPI(
-        INOUT TAPI::JWT_t &_JWT,
-        RESTClientHelper::enuHTTPMethod _method,
-        const QString &_api,
-        const QVariantMap &_urlArgs,
-        const QVariantMap &_postOrFormFields,
-        const QVariantMap &_formFiles,
-        QString _aPIURL,
-        QVariantMap *_outResponseHeaders
-    ) {
+    INOUT TAPI::JWT_t &_JWT,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
 //    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
 //        {},
 //        300, //Targoman::API::Server::QJWT::TTL.value(),
@@ -98,15 +100,15 @@ QVariant RESTClientHelper::callAPI(
 }
 
 QVariant RESTClientHelper::callAPI(
-        INOUT QString &_encodedJWT,
-        RESTClientHelper::enuHTTPMethod _method,
-        const QString &_api,
-        const QVariantMap &_urlArgs,
-        const QVariantMap &_postOrFormFields,
-        const QVariantMap &_formFiles,
-        QString _aPIURL,
-        QVariantMap *_outResponseHeaders
-    ) {
+    INOUT QString &_encodedJWT,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
     if (_aPIURL.isEmpty())
         _aPIURL = ClientConfigs::RESTServerAddress.value();
 
@@ -217,7 +219,7 @@ QVariant RESTClientHelper::callAPI(
     QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
 
     if (JsonError.error != QJsonParseError::NoError)
-        qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+        TargomanDebug(5, "Unable to parse JSON: " + JsonError.errorString() + " \"" + CUrlResult + '"');
 
     QVariant Result = Doc.toVariant().toMap().value("result");
 //    qDebug() << "Result:" << Result;

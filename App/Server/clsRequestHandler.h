@@ -94,10 +94,10 @@ class clsRequestHandler : public QObject
         QVariantMap ResponseHeader;
 
         stuResult(
-                const QVariant &_result = {},
-                const QVariantMap &_responseHeaders = {},
-                qhttp::TStatusCode _code = qhttp::ESTATUS_OK
-            ) :
+            const QVariant &_result = {},
+            const QVariantMap &_responseHeaders = {},
+            qhttp::TStatusCode _code = qhttp::ESTATUS_OK
+        ) :
             StatusCode(_code),
             Result(_result),
             ResponseHeader(_responseHeaders)

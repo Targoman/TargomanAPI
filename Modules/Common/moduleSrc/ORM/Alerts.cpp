@@ -39,8 +39,8 @@ Alerts::Alerts() :
     ),
     intfAlerts() { ; }
 
-QVariant Alerts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant Alerts::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
 //    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
     return QVariant();

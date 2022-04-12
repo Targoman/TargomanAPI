@@ -27,7 +27,7 @@
 #include <QHostAddress>
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/Common/GenericTypes.h"
-#include "Interfaces/Common/ServerCommon.h"
+#include "Interfaces/Server/ServerCommon.h"
 
 namespace Targoman::API::Server {
 
@@ -44,7 +44,6 @@ struct ServerConfigs
     static Targoman::Common::Configuration::tmplConfigurable<QString>       Version;
     static Targoman::Common::Configuration::tmplConfigurable<QString>       ContactEmail;
     static Targoman::Common::Configuration::tmplConfigurable<bool>          JustLocal;
-    static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
     static Targoman::Common::Configuration::tmplConfigurable<bool>          IndentedJson;
     static Targoman::Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
     static Targoman::Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;

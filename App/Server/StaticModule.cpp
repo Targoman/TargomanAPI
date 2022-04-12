@@ -24,24 +24,9 @@
 #include "StaticModule.h"
 #include "ServerConfigs.h"
 #include "OpenAPIGenerator.h"
-#include "Interfaces/Common/intfAPIArgManipulator.h"
-
-//using namespace Targoman::API::Server;
-
-//TAPI_REGISTER_METATYPE(
-//    /* complexity         */ COMPLEXITY_Complex,
-//    /* namespace          */ Targoman::API::Server,
-//    /* type               */ APISession,
-//    /* toVariantLambda    */ [](const APISession& _value) -> QVariant { return _value.toVariant(); }
-//    /* fromVariantLambda  */ // [](const QVariant& _value, const QByteArray&) -> APISession<APISessionTypes<> { APISession<APISessionTypes<> Value; Value=_value.toString(); return Value; }
-//);
+//#include "Interfaces/Common/intfAPIArgManipulator.h"
 
 namespace Targoman::API::Server {
-
-//template class APISession<APISessionTypes<false, false>>;
-//template class APISession<APISessionTypes<false, true>>;
-//template class APISession<APISessionTypes<true, false>>;
-//template class APISession<APISessionTypes<true, true>>;
 
 TARGOMAN_IMPL_API_MODULE(StaticModule)
 

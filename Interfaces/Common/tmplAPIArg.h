@@ -26,6 +26,9 @@
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
+#include "Interfaces/Server/APISession.h"
+
+using namespace Targoman::API::Server;
 
 using namespace Targoman::Common;
 
@@ -79,16 +82,19 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            const QVariantList& _arguments,
-            /*OUT*/ QVariantMap &_responseHeaders
+            intfAPISession* _SESSION,
+            const QVariantList& _arguments
+//            /*OUT*/ QVariantMap &_responseHeaders
         ) final
     {
         _itmplType Result;
 
         _apiObject->invokeMethod(
+                    _SESSION,
                     _arguments,
-                    QReturnArgument<_itmplType>(this->RealTypeName, Result),
-                    _responseHeaders);
+                    QReturnArgument<_itmplType>(this->RealTypeName, Result)
+//                    _responseHeaders
+                    );
 
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
     }

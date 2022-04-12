@@ -96,9 +96,9 @@ intfPureModule::intfPureModule(
 
 //intfPureModule::~intfPureModule() { ; }
 
-void intfPureModule::addResponseHeaderNameToExpose(const QString &_header) {
-    addResponseHeader("Access-Control-Expose-Headers", _header, true);
-}
+//void intfPureModule::addResponseHeaderNameToExpose(const QString &_header) {
+//    addResponseHeader("Access-Control-Expose-Headers", _header, true);
+//}
 
 /***************************************************************/
 intfPureModule::stuDBInfo::stuDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :

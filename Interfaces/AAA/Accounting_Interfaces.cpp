@@ -213,27 +213,27 @@ intfAccountProducts::intfAccountProducts(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant intfAccountProducts::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
 }
 
-quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint32 intfAccountProducts::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool intfAccountProducts::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool intfAccountProducts::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -295,15 +295,15 @@ intfAccountSaleables::intfAccountSaleables(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountSaleables::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
 //                       .arg(tblAccountSaleablesBase::slbAvailableFromDate)
 //                       .arg(tblAccountSaleablesBase::slbAvailableToDate);
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
             .andCond(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
@@ -315,20 +315,20 @@ QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
 }
 
-quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint32 intfAccountSaleables::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool intfAccountSaleables::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool intfAccountSaleables::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -384,34 +384,40 @@ intfAccountUserAssets::intfAccountUserAssets(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+QVariant intfAccountUserAssets::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+  if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _SESSION.getUserID() }}, _filters);
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountUserAssets::apiUPDATEsetAsPrefered(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath) {
+bool intfAccountUserAssets::apiUPDATEsetAsPrefered(
+    APISession<true> &_SESSION,
+    TAPI::PKsByPath_t _pksByPath
+) {
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
 
   this->callSP("spUserAsset_SetAsPrefered", {
-                 {"iUserID", clsJWT(_JWT).usrID()},
+                 {"iUserID", _SESSION.getUserID()},
                  {"iUASID",  UserPackageID},
                });
   return false;
 }
 
-bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsByPath_t _pksByPath) {
+bool intfAccountUserAssets::apiUPDATEdisablePackage(
+    APISession<true> &_SESSION,
+    TAPI::PKsByPath_t _pksByPath
+) {
   bool Ok;
   quint64 UserPackageID = _pksByPath.toUInt(&Ok);
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-  /*return this->update(clsJWT(_JWT).usrID(), {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+  /*return this->update(_SESSION.getUserID(), {
                             {tblAccountUserAssets::uasID, UserPackageID}
                         }, {
                             {tblAccountUserAssets::uasStatus, TAPI::enuAuditableStatus::Banned},
@@ -422,28 +428,29 @@ bool intfAccountUserAssets::apiUPDATEdisablePackage(TAPI::JWT_t _JWT, TAPI::PKsB
 
 /******************************************************************/
 intfAccountAssetUsage::intfAccountAssetUsage(
-        const QString& _schema,
-        const QList<DBM::clsORMField>& _exclusiveCols,
-        const QList<DBM::stuRelation>& _exclusiveRelations,
-        const QList<stuDBIndex>& _exclusiveIndexes
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountAssetUsageBase::Name,
-        QList<DBM::clsORMField>({
-        ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARYKEY_64},
-        }) + _exclusiveCols,
-        QList<DBM::stuRelation>({
-        ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
-            { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
-        }) + _exclusiveRelations,
-        _exclusiveIndexes
-    ) { ; }
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
+) :
+intfSQLBasedModule(
+    _schema,
+    tblAccountAssetUsageBase::Name,
+    QList<DBM::clsORMField>({
+    ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
+        { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARYKEY_64},
+    }) + _exclusiveCols,
+    QList<DBM::stuRelation>({
+    ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
+        { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
+    }) + _exclusiveRelations,
+    _exclusiveIndexes
+)
+{ ; }
 
-QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, clsJWT(_JWT).usrID()}}, _filters);
+QVariant intfAccountAssetUsage::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _SESSION.getUserID()}}, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -497,8 +504,8 @@ intfAccountCoupons::intfAccountCoupons(
         }
     ) { ; }
 
-QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant intfAccountCoupons::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -507,20 +514,20 @@ QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint32 intfAccountCoupons::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool intfAccountCoupons::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool intfAccountCoupons::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -539,8 +546,8 @@ intfAccountPrizes::intfAccountPrizes(
         _relations
     ) { ; }
 
-QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant intfAccountPrizes::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -549,20 +556,20 @@ QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+quint32 intfAccountPrizes::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+bool intfAccountPrizes::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-  Authorization::checkPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+bool intfAccountPrizes::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+  Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

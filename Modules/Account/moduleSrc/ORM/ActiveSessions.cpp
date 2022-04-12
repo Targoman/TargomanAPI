@@ -54,11 +54,11 @@ ActiveSessions::ActiveSessions() :
         }
     ) { ; }
 
-QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant ActiveSessions::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
 //  QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblActiveSessions::ssn_usrID, _SESSION.getUserID()}}, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -67,15 +67,15 @@ QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool ActiveSessions::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
   TAPI::ORMFields_t ExtraFilters;
 
   if (_pksByPath.trimmed() == clsJWT(_JWT).session())
     throw exHTTPForbidden("Deleting current session is not allowed");
 
-  if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-      ExtraFilters.insert(tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID());
-//  this->setSelfFilters({{tblActiveSessions::ssn_usrID, clsJWT(_JWT).usrID()}}, ExtraFilters);
+  if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+      ExtraFilters.insert(tblActiveSessions::ssn_usrID, _SESSION.getUserID());
+//  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _SESSION.getUserID()}}, ExtraFilters);
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

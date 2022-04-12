@@ -575,12 +575,14 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //                             });
 //}
 
-bool Account::apilogout(TAPI::JWT_t _JWT) {
-    clsJWT JWT(_JWT);
+bool Account::apilogout(
+    APISession<true> &_SESSION
+) {
+    clsJWT JWT(_SESSION.getJWT());
 
     this->callSP("spLogout", {
-                     { "iByUserID", clsJWT(_JWT).usrID() },
-                     { "iSessionGUID", clsJWT(_JWT).session() },
+                     { "iByUserID", JWT.usrID() },
+                     { "iSessionGUID", JWT.session() },
                  });
 
     return true;
@@ -662,17 +664,15 @@ bool Account::apichangePassByUUID(
 }
 
 bool Account::apichangePass(
-        TAPI::JWT_t _JWT,
-        TAPI::MD5_t _oldPass,
-        QString _oldPassSalt,
-        TAPI::MD5_t _newPass
-    ) {
+    APISession<true> &_SESSION,
+    TAPI::MD5_t _oldPass,
+    QString _oldPassSalt,
+    TAPI::MD5_t _newPass
+) {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
-    clsJWT CJWT(_JWT);
-
     this->callSP("spPassword_Change", {
-                     { "iUserID", CJWT.usrID() },
+                     { "iUserID", _SESSION.getUserID() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
                      { "iNewPass", _newPass },
@@ -685,9 +685,9 @@ bool Account::apichangePass(
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 Targoman::API::AAA::stuVoucher Account::processVoucher(
-        INOUT TAPI::JWT_t &_JWT,
-        quint64 _voucherID
-    ) {
+    intfAPISession &_SESSION,
+    quint64 _voucherID
+) {
     try {
         QVariant VoucherDesc = SelectQuery(Voucher::instance())
                                .addCol(tblVoucher::vchDesc)
@@ -773,16 +773,16 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     Targoman::API::AAA::enuVoucherStatus::Finished
                     );
     } catch (...) {
-        Account::tryCancelVoucher(_JWT, _voucherID);
+        Account::tryCancelVoucher(_SESSION, _voucherID);
         throw;
     }
 }
 
 void Account::tryCancelVoucher(
-        INOUT TAPI::JWT_t &_JWT,
-        quint64 _voucherID,
-        bool _setAsError
-    ) {
+    intfAPISession &_SESSION,
+    quint64 _voucherID,
+    bool _setAsError
+) {
     //1: cancel voucher items
     try {
         QVariant VoucherDesc = SelectQuery(Voucher::instance())
@@ -869,13 +869,13 @@ void Account::tryCancelVoucher(
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
 Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuPreVoucher _preVoucher,
-        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        QString _domain,
-        qint64 _walletID,
-        QString _paymentVerifyCallback
-    ) {
+    APISession<true> &_SESSION,
+    Targoman::API::AAA::stuPreVoucher _preVoucher,
+    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+    QString _domain,
+    qint64 _walletID,
+    QString _paymentVerifyCallback
+) {
     ///scenario:
     ///1: create voucher
     ///2: compute wallet remaining
@@ -905,9 +905,9 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 
     Voucher.ID = /*Targoman::API::Query::*/this->Create(
                      Voucher::instance(),
-                     clsJWT(_JWT).usrID(),
+                     _SESSION,
                      TAPI::ORMFields_t({
-                                           { tblVoucher::vch_usrID, clsJWT(_JWT).usrID() },
+                                           { tblVoucher::vch_usrID, _SESSION.getUserID() },
                                            { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
                                            { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
                                            { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
@@ -930,7 +930,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 
         //2.1: process voucher
         if (RemainingAfterWallet == 0)
-            return Account::processVoucher(_JWT, Voucher.ID);
+            return Account::processVoucher(_SESSION, Voucher.ID);
 
         //2.2: create online/offline payment
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
@@ -975,12 +975,12 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
  * @return
  */
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
-        TAPI::JWT_t _JWT,
-//        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        const QString _paymentMD5,
-        const QString _domain,
-        TAPI::JSON_t _pgResponse
-    ) {
+    APISession<true> &_SESSION,
+//    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+    const QString _paymentMD5,
+    const QString _domain,
+    TAPI::JSON_t _pgResponse
+) {
     quint64 VoucherID = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
 
     try {
@@ -988,7 +988,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
                          { "iVoucherID", VoucherID },
                          { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
-        return Account::processVoucher(_JWT, VoucherID);
+        return Account::processVoucher(_SESSION, VoucherID);
     } catch (...) {
         /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
@@ -1006,15 +1006,15 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
-        TAPI::JWT_t _JWT,
-        quint64 _vchID,
-        const QString& _bank,
-        const QString& _receiptCode,
-        TAPI::Date_t _receiptDate,
-        quint32 _amount,
-        const QString& _note
-    ) {
-    qint64 ApprovalLimit = Authorization::getPrivValue(_JWT, "AAA:approveOffline:maxAmount").toLongLong();
+    APISession<true> &_SESSION,
+    quint64 _vchID,
+    const QString& _bank,
+    const QString& _receiptCode,
+    TAPI::Date_t _receiptDate,
+    quint32 _amount,
+    const QString& _note
+) {
+    qint64 ApprovalLimit = Authorization::getPrivValue(_SESSION.getJWT(), "AAA:approveOffline:maxAmount").toLongLong();
     if (ApprovalLimit == 0)
         throw exAuthorization("Not enough access for offline approval");
 
@@ -1032,8 +1032,9 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    /*Targoman::API::Query::*/this->Create(OfflinePayments::instance(),
-                                 clsJWT(_JWT).usrID(),
+    /*Targoman::API::Query::*/this->Create(
+                                 OfflinePayments::instance(),
+                                 _SESSION,
                                  TAPI::ORMFields_t({
                                     { "ofp_vchID",_vchID },
                                     { "ofpBank",_bank },
@@ -1042,7 +1043,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
                                     { "ofpAmount",_amount },
                                     { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
                                  }));
-//    OfflinePayments::instance().create(clsJWT(_JWT).usrID(), TAPI::ORMFields_t({
+//    OfflinePayments::instance().create(_SESSION.getUserID(), TAPI::ORMFields_t({
 //                                           {"ofp_vchID",_vchID},
 //                                           {"ofpBank",_bank},
 //                                           {"ofpReceiptCode",_receiptCode},
@@ -1072,12 +1073,12 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
 }
 
 bool Account::apiPOSTaddPrizeTo(
-        TAPI::JWT_t _JWT,
-        quint64 _targetUsrID,
-        quint64 _amount,
-        TAPI::JSON_t _desc
-    ) {
-    qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addPrizeTo:maxAmount").toLongLong();
+    APISession<true> &_SESSION,
+    quint64 _targetUsrID,
+    quint64 _amount,
+    TAPI::JSON_t _desc
+) {
+    qint64 Limit = Authorization::getPrivValue(_SESSION.getJWT(), "AAA:addPrizeTo:maxAmount").toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add prize");
 
@@ -1097,12 +1098,12 @@ bool Account::apiPOSTaddPrizeTo(
 }
 
 bool Account::apiPOSTaddIncomeTo(
-        TAPI::JWT_t _JWT,
-        quint64 _targetUsrID,
-        quint64 _amount,
-        TAPI::JSON_t _desc
-    ) {
-    qint64 Limit = Authorization::getPrivValue(_JWT, "AAA:addIncomeTo:maxAmount").toLongLong();
+    APISession<true> &_SESSION,
+    quint64 _targetUsrID,
+    quint64 _amount,
+    TAPI::JSON_t _desc
+) {
+    qint64 Limit = Authorization::getPrivValue(_SESSION.getJWT(), "AAA:addIncomeTo:maxAmount").toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add income");
 
@@ -1122,9 +1123,9 @@ bool Account::apiPOSTaddIncomeTo(
 }
 
 bool Account::apiPOSTcheckVoucherTTL(
-        TAPI::JWT_t _JWT,
-        quint64 _voucherID
-    ) {
+    APISession<true> &_SESSION,
+    quint64 _voucherID
+) {
 }
 
 /****************************************************************\

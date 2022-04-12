@@ -81,14 +81,17 @@ protected:
     virtual void breakCredit(quint64 _slbID);
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
-    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
-                                     INOUT stuAssetItem& _assetItem,
-                                     const OrderAdditives_t& _orderAdditives);
+    virtual void applyAssetAdditives(
+        intfAPISession &_SESSION,
+        INOUT stuAssetItem& _assetItem,
+        const OrderAdditives_t& _orderAdditives
+    );
+
 protected slots:
 //    bool REST_POST(
 //        processVoucher,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
@@ -97,7 +100,7 @@ protected slots:
 //    bool REST_POST(
 //        cancelVoucher,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APISession<true> &_SESSION,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
@@ -140,9 +143,9 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                TAPI::JWT_t _JWT,
-                QString _random = {}
+            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<true> &_SESSION,
+            QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
     )
@@ -159,7 +162,7 @@ protected slots:
 //        fixtureSetupVoucher,
 //        (
 //                TAPI::RemoteIP_t _REMOTE_IP,
-//                TAPI::JWT_t _JWT
+//                APISession<true> &_SESSION
 //        ),
 //        "Sets up basket and voucher"
 //    )

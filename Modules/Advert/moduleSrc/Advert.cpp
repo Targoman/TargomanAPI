@@ -124,7 +124,7 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 }
 
 void Advert::applyAssetAdditives(
-        TAPI::JWT_t _JWT,
+        intfAPISession &_SESSION,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
     ) {
@@ -135,7 +135,7 @@ void Advert::applyAssetAdditives(
 
 /***************************************************************************************************/
 //bool Advert::apiPOSTprocessVoucher(
-//        TAPI::JWT_t _JWT,
+//        APISession<true> &_SESSION,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -149,7 +149,7 @@ void Advert::applyAssetAdditives(
 //}
 
 //bool Advert::apiPOSTcancelVoucher(
-//        TAPI::JWT_t _JWT,
+//        APISession<true> &_SESSION,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -190,8 +190,8 @@ QString Advert::apiGETretrieveURL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Advert::apiPOSTfixtureSetup(
+        APISession<true> &_SESSION,
         TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::JWT_t _JWT,
         QString _random
     ) {
     Q_UNUSED(_REMOTE_IP);
@@ -390,8 +390,6 @@ QVariant Advert::apiPOSTfixtureSetup(
             { "paymentVerifyCallback",  "http://www.a.com" },
         }
     );
-    Result.insert("_finalizeBasket", res.toJsonObject());
-
     Voucher.fromJson(res.toJsonObject());
     Result.insert("Voucher", Voucher.toJson());
 
@@ -422,7 +420,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 
 //bool Advert::apiPOSTfixtureSetupVoucher(
 //        TAPI::RemoteIP_t _REMOTE_IP,
-//        TAPI::JWT_t _JWT
+//        APISession<true> &_SESSION
 //    )
 //{
 //}
