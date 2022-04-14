@@ -80,10 +80,7 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuPreVoucher,
-    /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant {
-//        qDebug() << "stuPreVoucher(1) ================================= round:" << _value.Round;
-        return _value.toJson().toVariantMap();
-    },
+    /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher {
 //        qDebug() << "stuPreVoucher(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
@@ -119,18 +116,57 @@ TAPI_REGISTER_METATYPE(
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    Targoman::API::AAA,
-    stuVoucher,
-    [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ Targoman::API::AAA,
+    /* type               */ stuVoucher,
+    /* toVariantLambda    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
-    Targoman::API::AAA,
-    OrderAdditives_t,
-    [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
-    [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ Targoman::API::AAA,
+    /* type               */ stuVoucherItemForTrustedAction,
+    /* toVariantLambda    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuVoucherItemForTrustedAction {
+    //        qDebug() << "stuVoucherItemForTrustedAction(2) =================================" << _paramName << ":" << _value;
+        if (_value.isValid() == false) {
+    //            qDebug() << "stuVoucherItemForTrustedAction(2.1) =================================" << _paramName << ":" << _value;
+            return stuVoucherItemForTrustedAction();
+        }
+
+        if (_value.canConvert<QVariantMap>()
+    //                || _value.canConvert<QVariantList>()
+    //                || _value.canConvert<double>()
+            ) {
+            auto ret = QJsonDocument::fromVariant(_value);
+    //            qDebug() << "stuVoucherItemForTrustedAction(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
+            return stuVoucherItemForTrustedAction().fromJson(ret.object());
+        }
+
+        if (_value.toString().isEmpty()) {
+    //            qDebug() << "stuVoucherItemForTrustedAction(2.3) =================================" << _paramName << ":" << _value;
+            return stuVoucherItemForTrustedAction();
+        }
+
+        QJsonParseError Error;
+        QJsonDocument Doc;
+        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+    //        qDebug() << "stuVoucherItemForTrustedAction(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
+
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_paramName + " is not a valid VoucherItemForTrustedAction: <"+_value.toString()+">" + Error.errorString());
+        if (Doc.isObject() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid VoucherItemForTrustedAction object: <"+_value.toString()+">");
+        return stuVoucherItemForTrustedAction().fromJson(Doc.object());
+    }
+);
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ Targoman::API::AAA,
+    /* type               */ OrderAdditives_t,
+    /* toVariantLambda    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
         OrderAdditives_t Additives;
         for (auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
@@ -213,26 +249,26 @@ intfAccountProducts::intfAccountProducts(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountProducts::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountProducts::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, CACHE_TIME);
 }
 
-quint32 intfAccountProducts::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint32 intfAccountProducts::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountProducts::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountProducts::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountProducts::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -295,7 +331,7 @@ intfAccountSaleables::intfAccountSaleables(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountSaleables::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountSaleables::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
@@ -315,19 +351,19 @@ QVariant intfAccountSaleables::apiGET(APISession<true> &_SESSION, GET_METHOD_ARG
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, CACHE_TIME);
 }
 
-quint32 intfAccountSaleables::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint32 intfAccountSaleables::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountSaleables::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountSaleables::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountSaleables::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -384,7 +420,7 @@ intfAccountUserAssets::intfAccountUserAssets(
         }) + _exclusiveIndexes
     ) { ; }
 
-QVariant intfAccountUserAssets::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _SESSION.getUserID() }}, _filters);
 
@@ -448,7 +484,7 @@ intfSQLBasedModule(
 )
 { ; }
 
-QVariant intfAccountAssetUsage::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountAssetUsage::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _SESSION.getUserID()}}, _filters);
 
@@ -504,7 +540,7 @@ intfAccountCoupons::intfAccountCoupons(
         }
     ) { ; }
 
-QVariant intfAccountCoupons::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountCoupons::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -514,19 +550,19 @@ QVariant intfAccountCoupons::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountCoupons::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint32 intfAccountCoupons::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountCoupons::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountCoupons::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountCoupons::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -546,7 +582,7 @@ intfAccountPrizes::intfAccountPrizes(
         _relations
     ) { ; }
 
-QVariant intfAccountPrizes::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant intfAccountPrizes::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
@@ -556,19 +592,19 @@ QVariant intfAccountPrizes::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_I
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 intfAccountPrizes::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint32 intfAccountPrizes::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountPrizes::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool intfAccountPrizes::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool intfAccountPrizes::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
   Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);

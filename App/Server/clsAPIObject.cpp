@@ -26,15 +26,15 @@
 
 namespace Targoman::API::Server {
 
-#define USE_ARG_AT(_i) \
-    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
-    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
+//#define USE_ARG_AT(_i) \
+//    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+//    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
+//    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
 
-#define CLEAN_ARG_AT(_i) \
-    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
-    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
+//#define CLEAN_ARG_AT(_i) \
+//    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+//    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
+//    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
 
 clsAPIObject::clsAPIObject(
     intfPureModule* _module,
@@ -61,14 +61,14 @@ clsAPIObject::clsAPIObject(
     foreach (const QByteArray &ParamName, _method.parameterNames()) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        if (ParameterTypeName.startsWith(APISESSION_JWT_TYPE_NAME)) {
+        /*if (ParameterTypeName.startsWith(APISESSION_JWT_TYPE_NAME)) {
             this->ParamNames.append("JWT");
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
-            _method.DefaultValues[0] = {};
-        } else if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME)) {
+            this->BaseMethod.DefaultValues[0] = {};
+        } else */if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) { //APISESSION_NO_TYPE_NAME)) {
             --this->RequiredParamsCount;
-            _method.DefaultValues.removeAt(0);
+            this->BaseMethod.DefaultValues.removeAt(0);
             //do nothing
         } else {
             QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
@@ -96,23 +96,23 @@ QVariant clsAPIObject::invoke(
     const QStringList& _args,
 //    /*OUT*/ QVariantMap &_responseHeaders,
     QList<QPair<QString, QString>> _bodyArgs,
-    qhttp::THeaderHash _headers,
-    qhttp::THeaderHash _cookies,
+//    qhttp::THeaderHash _headers,
+//    qhttp::THeaderHash _cookies,
 //    QJsonObject _jwt,
-    QString _remoteIP,
+//    QString _remoteIP,
     QString _extraAPIPath
 ) const {
     Q_ASSERT_X(this->parent(), "parent module", "Parent module not found to invoke method");
 
     int ExtraArgCount = 0;
-    if (this->ParamTypesName.contains(PARAM_COOKIES))
-        ExtraArgCount++;
-    if (this->ParamTypesName.contains(PARAM_HEADERS))
-        ExtraArgCount++;
-    if (this->ParamTypesName.contains(PARAM_JWT))
-        ExtraArgCount++;
-    if (this->ParamTypesName.contains(PARAM_REMOTE_IP))
-        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_COOKIES))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_HEADERS))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_JWT))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_REMOTE_IP))
+//        ExtraArgCount++;
     if (this->ParamTypesName.contains(PARAM_PKSBYPATH))
         ExtraArgCount++;
     if (this->ParamTypesName.contains(PARAM_ORMFIELDS))
@@ -144,25 +144,25 @@ QVariant clsAPIObject::invoke(
             }
         };
 
-        if (this->ParamTypesName.at(i) == PARAM_COOKIES) {
-            ParamNotFound = false;
-            ArgumentValue = _cookies.toVariant();
-        }
+//        if (this->ParamTypesName.at(i) == PARAM_COOKIES) {
+//            ParamNotFound = false;
+//            ArgumentValue = _cookies.toVariant();
+//        }
 
-        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_HEADERS) {
-            ParamNotFound = false;
-            ArgumentValue = _headers.toVariant();
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_HEADERS) {
+//            ParamNotFound = false;
+//            ArgumentValue = _headers.toVariant();
+//        }
 
 //        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_JWT) {
 //            ParamNotFound = false;
 //            ArgumentValue = _jwt;
 //        }
 
-        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_REMOTE_IP) {
-            ParamNotFound = false;
-            ArgumentValue = _remoteIP;
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_REMOTE_IP) {
+//            ParamNotFound = false;
+//            ArgumentValue = _remoteIP;
+//        }
 
         if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_PKSBYPATH) {
             ParamNotFound = false;
@@ -312,12 +312,30 @@ void clsAPIObject::invokeMethod(
 
     QVector<void*> ArgStorage(_arguments.size(), {});
 
-    try {
-        QGenericArgument Arguments[10];
+    auto useArgAt = [=, &_arguments, &ArgStorage](int _i) -> QGenericArgument {
+        Targoman::API::Common::intfAPIArgManipulator* ArgMan = (this->ParamTypesID.at(_i) < TAPI_BASE_USER_DEFINED_TYPEID
+            ? gOrderedMetaTypeInfo.at(this->ParamTypesID.at(_i))
+            : gUserDefinedTypesInfo.at(this->ParamTypesID.at(_i) - TAPI_BASE_USER_DEFINED_TYPEID)
+        );
+        return ArgMan->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]);
+    };
 
-        for (int i=0; i<10; ++i) {
+    auto cleanArgAt = [=, &ArgStorage](int _i) {
+        Targoman::API::Common::intfAPIArgManipulator* ArgMan = (this->ParamTypesID.at(_i) < TAPI_BASE_USER_DEFINED_TYPEID
+            ? gOrderedMetaTypeInfo.at(this->ParamTypesID.at(_i))
+            : gUserDefinedTypesInfo.at(this->ParamTypesID.at(_i) - TAPI_BASE_USER_DEFINED_TYPEID)
+        );
+        ArgMan->cleanup(ArgStorage[_i]);
+    };
+
+    try {
+        QGenericArgument _SESSION_ARG("_SESSION", _SESSION);
+
+        QGenericArgument Arguments[9];
+
+        for (int i=0; i<9; ++i) {
             if (i < _arguments.size())
-                Arguments[i] = USE_ARG_AT(i);
+                Arguments[i] = useArgAt(i); //USE_ARG_AT(i);
             else
                 Arguments[i] = QGenericArgument();
         }
@@ -329,6 +347,7 @@ void clsAPIObject::invokeMethod(
             parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
+            _SESSION_ARG, //Q_ARG(intfAPISession, *_SESSION),
             Arguments[0],
             Arguments[1],
             Arguments[2],
@@ -337,19 +356,18 @@ void clsAPIObject::invokeMethod(
             Arguments[5],
             Arguments[6],
             Arguments[7],
-            Arguments[8],
-            Arguments[9]
+            Arguments[8]
         );
 
         if (InvocationResult == false)
             throw exHTTPInternalServerError(QString("Unable to invoke method"));
 
         for (int i=0; i<_arguments.size(); ++i)
-            CLEAN_ARG_AT(i);
+            cleanArgAt(i); //CLEAN_ARG_AT(i);
     } catch (...) {
 
         for (int i=0; i<_arguments.size(); ++i)
-            CLEAN_ARG_AT(i);
+            cleanArgAt(i); //CLEAN_ARG_AT(i);
 
         throw;
     }

@@ -84,6 +84,13 @@ TAPI_REGISTER_METATYPE(
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
+    /* type               */ ResponseRedirect_t,
+    /* toVariantLambda    */ [](const ResponseRedirect_t &_value) -> QVariant { return _value.toVariant(); }
+);
+
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_Complex,
+    /* namespace          */ TAPI,
     /* type               */ HEADERS_t,
     /* toVariantLambda    */ [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
@@ -411,18 +418,28 @@ RawData_t::RawData_t(const QByteArray& _data, const QString& _mime) :
     Mime(_mime),
     Data(_data) { ; }
 
-QVariant RawData_t::toVariant() const
-{
+QVariant RawData_t::toVariant() const {
     return QVariant::fromValue(*this);
 }
 
 /**********************************************************************************/
 FileData_t::FileData_t(const QString &_fileName) :
-    FileName(_fileName) {
+    FileName(_fileName)
+{
     FileName = FileName.replace(QRegularExpression("//+"), "/");
 }
 
-QVariant FileData_t::toVariant() const
+QVariant FileData_t::toVariant() const {
+    return QVariant::fromValue(*this);
+}
+
+/**********************************************************************************/
+ResponseRedirect_t::ResponseRedirect_t(const QString &_url) :
+    Url(_url)
 {
+    Url = Url.replace(QRegularExpression("//+"), "/");
+}
+
+QVariant ResponseRedirect_t::toVariant() const {
     return QVariant::fromValue(*this);
 }

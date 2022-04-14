@@ -51,6 +51,7 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
 //inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
+extern QByteArray voucherSign(const QByteArray& _data);
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     QString,      Desc      , QString()    , v.size(), v, v.toString(),
@@ -111,6 +112,13 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
     SF_quint8   (VATPercent),//quint8       , VATPercent , 0              , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())        ,
     SF_quint32  (VATAmount), //quint32      , VATAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
     SF_QString  (Sign)       //QString      , Sign       , QString()      , v.size() , v          , v.toString()
+);
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemForTrustedAction,
+    SF_quint64(UserID),
+    SF_quint64(VoucherID),
+    SF_Struct(stuVoucherItem, VoucherItem, v.Qty>0),
+    SF_QString(Sign)
 );
 
 /*****************************************************************************/
@@ -380,6 +388,8 @@ TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuUsage)
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPreVoucher)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
+
+TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItemForTrustedAction)   // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp

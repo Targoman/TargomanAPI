@@ -381,8 +381,8 @@ quint64 PaymentLogic::approveOnlinePayment(
     } catch (...)
     { ; }
 
-    /*Targoman::API::Query::*/Targoman::API::AccountModule::ORM::PaymentGateways::instance().Update(
-                Targoman::API::AccountModule::ORM::PaymentGateways::instance(),
+    /*Targoman::API::Query::*/ORM::PaymentGateways::instance().Update(
+                ORM::PaymentGateways::instance(),
                 SYSTEM_USER_ID,
                 {},
                 TAPI::ORMFields_t({

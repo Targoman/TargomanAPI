@@ -42,6 +42,8 @@ class User : public intfSQLBasedModule
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
 
+    SelectQuery getPhotoQuery(quint64 _usrID);
+    
 private slots:
     QVariant ORMGET("Get user information")
     quint64 ORMCREATE("Create a new user by priviledged user. Email or Mobile is required")
@@ -75,7 +77,7 @@ private slots:
     bool REST_UPDATE(
         email,
         (
-            TAPI::JWT_t     _JWT,
+            APISession<true> &_SESSION,
             TAPI::Email_t   _email,
             TAPI::MD5_t     _psw,
             QString         _salt
@@ -86,7 +88,7 @@ private slots:
     bool REST_UPDATE(
         mobile,
         (
-            TAPI::JWT_t     _JWT,
+            APISession<true> &_SESSION,
             TAPI::Mobile_t  _mobile,
             TAPI::MD5_t     _pass,
             QString         _salt
@@ -97,7 +99,7 @@ private slots:
     bool REST_UPDATE(
         personalInfo,
         (
-            TAPI::JWT_t         _JWT,
+            APISession<true> &_SESSION,
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
@@ -109,7 +111,7 @@ private slots:
     bool REST_UPDATE(
         financialInfo,
         (
-            TAPI::JWT_t     _JWT,
+            APISession<true> &_SESSION,
             TAPI::Sheba_t   _iban = {},
             TAPI::Ether_t   _ether = {}
         ),
@@ -119,7 +121,7 @@ private slots:
     bool REST_UPDATE(
         extraInfo,
         (
-            TAPI::JWT_t     _JWT,
+            APISession<true> &_SESSION,
             NULLABLE_TYPE(TAPI::Date_t)    _birthDate = NULLABLE_NULL_VALUE,
             QString         _job = {},
             QString         _education = {},

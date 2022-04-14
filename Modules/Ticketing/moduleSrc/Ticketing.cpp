@@ -57,16 +57,16 @@ Ticketing::Ticketing() :
 }
 
 quint64 Ticketing::insertTicket(
-        quint64 _createdBy,
-        quint64 _targetUserID,
-        quint32 _serviceID,
-        quint64 _inReplyTicketID,
-        enuTicketType::Type _ticketType,
-        const QString &_title,
-        const QString &_body,
-        const TAPI::Files_t &_files,
-        quint32 _unitID
-    ) {
+    quint64 _createdBy,
+    quint64 _targetUserID,
+    quint32 _serviceID,
+    quint64 _inReplyTicketID,
+    enuTicketType::Type _ticketType,
+    const QString &_title,
+    const QString &_body,
+    const TAPI::Files_t &_files,
+    quint32 _unitID
+) {
     TAPI::ORMFields_t CreateFields({
        { tblTickets::tktType, _ticketType },
        { tblTickets::tktTitle, _title },
@@ -85,7 +85,11 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::tkt_untID, _unitID);
 
-    quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
+    quint64 TicketID = this->Create(
+                           Tickets::instance(),
+                           _createdBy,
+                           CreateFields
+                           );
 
     if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
@@ -119,14 +123,14 @@ quint64 Ticketing::insertTicket(
 }
 
 QVariantMap Ticketing::apiPUTnewMessage(
-        APISession<true> &_SESSION,
-        const QString &_title,
-        const QString &_body,
-        quint32 _serviceID,
-        quint64 _targetUserID,
-        quint32 _unitID,
-        const TAPI::stuFileInfo &_file
-    ) {
+    APISession<true> &_SESSION,
+    const QString &_title,
+    const QString &_body,
+    quint32 _serviceID,
+    quint64 _targetUserID,
+    quint32 _unitID,
+    const TAPI::stuFileInfo &_file
+) {
     Authorization::checkPriv(_SESSION.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
@@ -150,41 +154,40 @@ QVariantMap Ticketing::apiPUTnewMessage(
 }
 
 QVariantMap Ticketing::apiPUTnewFeedback(
-        APISession<true> &_SESSION,
-        const QString &_title,
-        const QString &_body,
-        Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
-        quint32 _serviceID,
-        quint64 _inReplyTicketID,
-        const TAPI::stuFileInfo &_file
-    ) {
-  Authorization::checkPriv(_SESSION.getJWT(), {});
+    APISession<true> &_SESSION,
+    const QString &_title,
+    const QString &_body,
+    Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+    quint32 _serviceID,
+    quint64 _inReplyTicketID,
+    const TAPI::stuFileInfo &_file
+) {
+    Authorization::checkPriv(_SESSION.getJWT(), {});
 
-  if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
-    throw exHTTPBadRequest("Reply tickets must have reply type");
+    if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
+        throw exHTTPBadRequest("Reply tickets must have reply type");
 
-  if (_ticketType == enuTicketType::Message ||
-      _ticketType == enuTicketType::Broadcast)
-    throw exHTTPBadRequest(
-        "Message and Broadcast tickets must be sent via newMessage method");
+    if (_ticketType == enuTicketType::Message
+            || _ticketType == enuTicketType::Broadcast)
+        throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
 
-  TAPI::Files_t Files;
-  Files.append(_file);
+    TAPI::Files_t Files;
+    Files.append(_file);
 
-  quint64 ID = this->insertTicket(
-                   _SESSION.getUserID(),
-                   0,
-                   _serviceID,
-                   _inReplyTicketID,
-                   _ticketType,
-                   _title,
-                   _body,
-                   Files
-                   );
+    quint64 ID = this->insertTicket(
+                     _SESSION.getUserID(),
+                     0,
+                     _serviceID,
+                     _inReplyTicketID,
+                     _ticketType,
+                     _title,
+                     _body,
+                     Files
+                     );
 
-  return QVariantMap({
-                         { "id", ID },
-                     });
+    return QVariantMap({
+                           { "id", ID },
+                       });
 }
 
 }  // namespace Targoman::API::TicketingModule

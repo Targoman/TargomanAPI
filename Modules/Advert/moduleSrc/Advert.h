@@ -109,7 +109,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
@@ -119,7 +119,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
@@ -130,7 +130,7 @@ protected slots:
     QString REST_GET(
         retrieveURL,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             quint64 _id,
             TAPI::IPv4_t _clientIP,
             QString _agent
@@ -143,7 +143,6 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
             APISession<true> &_SESSION,
             QString _random = {}
         ),
@@ -153,15 +152,14 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _random = {}
+            APISession<true> &_SESSION,
+            QString _random = {}
         ),
         "Cleanup sample data"
     )
 //    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
-//                TAPI::RemoteIP_t _REMOTE_IP,
 //                APISession<true> &_SESSION
 //        ),
 //        "Sets up basket and voucher"

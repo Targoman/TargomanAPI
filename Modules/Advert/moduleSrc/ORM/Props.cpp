@@ -31,7 +31,7 @@ namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
 
-QVariant Props::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, _filters);
 
@@ -42,7 +42,7 @@ QVariant Props::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL)
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
 }
 
-quint64 Props::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         _createInfo.insert(tblBin::binID, _SESSION.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, _createInfo);
@@ -50,7 +50,7 @@ quint64 Props::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_API
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Props::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())))
@@ -60,7 +60,7 @@ bool Props::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICAL
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-bool Props::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     QVariantMap ExtraFilters;
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblBin::binID, _SESSION.getUserID());

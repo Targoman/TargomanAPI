@@ -25,8 +25,11 @@
 #include "ServerCommon.h"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/clsJWT.hpp"
+//#include "App/Server/clsRequestHandler.h"
 
 namespace Targoman::API::Server {
+
+class clsRequestHandler;
 
 class APISessionData : public QSharedData
 {
@@ -35,6 +38,7 @@ public:
 
     APISessionData(const APISessionData &_other) :
         QSharedData(_other),
+//        RequestHandler(_other.RequestHandler),
         RequestAPIPath(_other.RequestAPIPath),
         RequestHeaders(_other.RequestHeaders),
         RequestCookies(_other.RequestCookies),
@@ -43,10 +47,10 @@ public:
         ResponseHeaders(_other.ResponseHeaders)
     { ; }
 
-    virtual ~APISessionData()
-    { ; }
+    virtual ~APISessionData() { ; }
 
 public:
+//    clsRequestHandler *RequestHandler;
     QString RequestAPIPath;
     QVariantMap RequestHeaders;
     QVariantMap RequestCookies;
@@ -58,6 +62,20 @@ public:
 intfAPISession::intfAPISession() : Data(new APISessionData) { ; }
 intfAPISession::intfAPISession(const intfAPISession& _other) : Data(_other.Data) { ; }
 intfAPISession::~intfAPISession() { ; }
+
+void intfAPISession::initialize(
+    const QString &_apiPath,
+    const QJsonObject &_JWT,
+    const QVariantMap &_headers,
+    const QVariantMap &_cookies,
+    const QString &_ip
+) {
+    this->Data->RequestAPIPath = _apiPath;
+    this->Data->RequestHeaders = _headers;
+    this->Data->RequestCookies = _cookies;
+    this->Data->JWT = _JWT;
+    this->Data->IP = _ip;
+}
 
 void intfAPISession::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
     this->Data->JWT = _JWT;
@@ -72,15 +90,22 @@ QJsonObject intfAPISession::getJWTPrivsObject() {
     return Targoman::API::AAA::clsJWT(this->Data->JWT).privsObject();
 }
 
+QString intfAPISession::getIP() {
+    return this->Data->IP;
+}
+
+//void intfAPISession::setRequestAPIPath(const QString &_path) {
+//    this->Data->RequestAPIPath = _path;
+//}
 QString intfAPISession::requestAPIPath() const {
-    return Data->RequestAPIPath;
+    return this->Data->RequestAPIPath;
 }
 
 QString intfAPISession::host() const {
-    if (Data->RequestHeaders.contains("host") == false)
+    if (this->Data->RequestHeaders.contains("host") == false)
         return "127.0.0.1";
 
-    QString Host = Data->RequestHeaders["host"].toString();
+    QString Host = this->Data->RequestHeaders["host"].toString();
 
     int idx;
     if ((idx = Host.indexOf(":")) >= 0)
@@ -90,10 +115,10 @@ QString intfAPISession::host() const {
 }
 
 quint16 intfAPISession::port() const {
-    if (Data->RequestHeaders.contains("host") == false)
+    if (this->Data->RequestHeaders.contains("host") == false)
         return ServerCommonConfigs::ListenPort.value();
 
-    QString Host = Data->RequestHeaders["host"].toString();
+    QString Host = this->Data->RequestHeaders["host"].toString();
 
     int idx;
     if ((idx = Host.indexOf(":")) < 0)
@@ -103,17 +128,17 @@ quint16 intfAPISession::port() const {
 }
 
 //void intfAPISession::setResponseHeaders(const QVariantMap &_headers) {
-//    this->Data->RequestHeaders.clear();
+//    this->Data->ResponseHeaders.clear();
 
 //    for (QVariantMap::const_iterator it=_headers.constBegin(); it!=_headers.constEnd(); it++) {
-//        this->Data->RequestHeaders.insert(it.key().toLatin1(), it->toByteArray());
+//        this->Data->ResponseHeaders.insert(it.key().toLatin1(), it->toByteArray());
 //    }
 //}
 void intfAPISession::setResponseHeaders(const QVariantMap &_headers) {
-    this->Data->RequestHeaders = _headers;
+    this->Data->ResponseHeaders = _headers;
 }
 QVariantMap intfAPISession::getResponseHeaders() {
-    return this->Data->RequestHeaders;
+    return this->Data->ResponseHeaders;
 }
 void intfAPISession::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
     if (_multiValue && this->Data->ResponseHeaders.contains(_header))
@@ -124,5 +149,8 @@ void intfAPISession::addResponseHeader(const QString &_header, const QVariant &_
 void intfAPISession::addResponseHeaderNameToExpose(const QString &_header) {
     this->addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
+
+template class APISession<false>;
+template class APISession<true>;
 
 } //namespace Targoman::API::Server

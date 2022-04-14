@@ -102,6 +102,26 @@ public:
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
+
+    //overloads by _SESSION
+    quint64 Create(
+            clsTable& _table,
+            CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1
+        );
+
+    bool Update(
+            clsTable& _table,
+            UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1,
+            const QVariantMap& _extraFilters = {}
+        );
+
+    bool DeleteByPks(
+            clsTable& _table,
+            DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL_1,
+            const QVariantMap& _extraFilters = {},
+            bool _realDelete = false
+        );
+
 };
 
 } // namespace Targoman::API::API

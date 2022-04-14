@@ -64,12 +64,12 @@ private slots:
                               {
                                   { "phone", "0999-888-1010" },
                                   { "country", "IR" },
-                               })
+                              })
                           ;
 
         QVERIFY(Result.toString() == "+989998881010");
     }
-
+private:
     void SignupByMobileOnly_0999_888_1010() {
         QVariant Result = callUserAPI(
                               RESTClientHelper::POST,

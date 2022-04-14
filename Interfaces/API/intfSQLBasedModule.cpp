@@ -247,7 +247,7 @@ quint64 intfSQLBasedModule::Create(
 
     query.values(_createInfo);
 
-    return query.execute(_SESSION.getUserID());
+    return query.execute(_userID);
 }
 
 bool intfSQLBasedModule::Update(
@@ -283,7 +283,7 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(_SESSION.getUserID()) > 0;
+    return query.execute(_userID) > 0;
 }
 
 bool intfSQLBasedModule::DeleteByPks(
@@ -322,7 +322,46 @@ bool intfSQLBasedModule::DeleteByPks(
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_SESSION.getUserID(), {}, _realDelete) > 0;
+    return query.execute(_userID, {}, _realDelete) > 0;
+}
+
+
+
+
+quint64 intfSQLBasedModule::Create(
+    clsTable& _table,
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1
+) {
+    return this->Create(
+        _table,
+        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL
+    );
+}
+
+bool intfSQLBasedModule::Update(
+    clsTable& _table,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1,
+    const QVariantMap& _extraFilters
+) {
+    return this->Update(
+        _table,
+        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL,
+        _extraFilters
+    );
+}
+
+bool intfSQLBasedModule::DeleteByPks(
+    clsTable& _table,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_1,
+    const QVariantMap& _extraFilters,
+    bool _realDelete
+) {
+    return this->DeleteByPks(
+        _table,
+        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL,
+        _extraFilters,
+        _realDelete
+    );
 }
 
 } // namespace Targoman::API::API

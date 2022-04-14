@@ -97,9 +97,8 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     gHTTPServer.listen(ListenAddress, ServerCommonConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res) {
         clsRequestHandler* RequestHandler = new clsRequestHandler(_req, _res);
         try {
-            QString Path = _req->url().adjusted(QUrl::NormalizePathSegments |
-                                                QUrl::RemoveAuthority
-                                                ).path(QUrl::PrettyDecoded);
+            QString Path = _req->url().adjusted(QUrl::NormalizePathSegments | QUrl::RemoveAuthority).path(QUrl::PrettyDecoded);
+
             if (Path != _req->url().path())
                 return  RequestHandler->redirect(Path, false);
 

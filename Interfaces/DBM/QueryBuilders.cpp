@@ -2407,6 +2407,10 @@ SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime) {
     return *this;
 }
 
+void SelectQuery::clearCache() {
+    ///@TODO: call DBM::invalidateCache(Qry)
+}
+
 /***********************\
 |* Execute             *|
 \***********************/

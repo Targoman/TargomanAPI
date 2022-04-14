@@ -40,12 +40,23 @@ public:
     virtual ~intfAPISession();
 
 public:
+    void initialize(
+        const QString &_apiPath,
+        const QJsonObject &_JWT,
+        const QVariantMap &_headers,
+        const QVariantMap &_cookies,
+        const QString &_ip
+    );
+
     virtual bool needJWT() = 0;
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
     quint64 getUserID();
     QJsonObject getJWTPrivsObject();
 
+    QString getIP();
+
+//    void setRequestAPIPath(const QString &_path);
     QString requestAPIPath() const;
     QString host() const;
     quint16 port() const;

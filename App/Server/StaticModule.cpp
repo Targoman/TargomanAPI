@@ -34,15 +34,17 @@ StaticModule::StaticModule() :
     intfPureModule("")
 { ; }
 
-QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APISession<true> &_SESSION,
-    int i
+TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
+    APISession<false> &_SESSION
 )) {
     gServerStats.Success.inc();
 
-    return OpenAPIGenerator::retrieveJson(
-                _SESSION.host(),
-                _SESSION.port()
+    return TAPI::RawData_t(
+                QJsonDocument(OpenAPIGenerator::retrieveJson(
+                    _SESSION.host(),
+                    _SESSION.port()
+                )).toJson(QJsonDocument::Compact),
+                "application/json; charset=utf-8"
                 );
 }
 
@@ -54,18 +56,25 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
     throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 }
 
-TAPI::FileData_t IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
-        APISession<false> &_SESSION
+//TAPI::ResponseRedirect_t
+//TAPI::FileData_t
+QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
+    APISession<false> &_SESSION
 )) {
     if (ServerConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
 
-    QString File = _SESSION.requestAPIPath().mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
+    QString API = _SESSION.requestAPIPath();
 
-    if (File.isEmpty() || (File == "/"))
+    QString File = API.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
+
+    if (File.isEmpty())
+        return TAPI::ResponseRedirect_t(API + "/").toVariant();
+
+    if (File == "/")
         File = "index.html";
 
-    return TAPI::FileData_t(ServerConfigs::SwaggerUI.value() + "/" + File);
+    return TAPI::FileData_t(ServerConfigs::SwaggerUI.value() + "/" + File).toVariant();
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (

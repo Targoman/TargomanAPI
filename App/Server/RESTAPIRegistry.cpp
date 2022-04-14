@@ -154,7 +154,10 @@ void RESTAPIRegistry::registerMetaTypeInfoMap() {
     }
 }
 
-void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method) {
+void RESTAPIRegistry::registerRESTAPI(
+    intfPureModule* _module,
+    const QMetaMethod& _method
+) {
     if ((_method.name().startsWith("api") == false
             && _method.name().startsWith("asyncApi") == false)
             || _method.typeName() == nullptr)
@@ -240,6 +243,14 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
         QList<QByteArray> parameterTypes = _method.parameterTypes();
         auto ParamsParts = CommaReplacedMethodSignature.split(',');
 
+#ifdef QT_DEBUG
+        QString MethodKey = "/" + _module->moduleBaseName().replace(":", "/") + '/' + _method.name();
+        MethodKey = MethodKey.replace(QRegularExpression("//+"), "/");
+        if (MethodKey == "/Account/OfflinePayments/apiGET") {
+            int ii; ii = 0;
+        }
+#endif
+
         for (quint8 ParamIndex=0; ParamIndex<ParamsParts.length(); ParamIndex++) {
             QString Param = ParamsParts[ParamIndex];
 
@@ -249,7 +260,7 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
             QString ParameterTypeName = parameterTypes.at(ParamIndex);
 
             //check APISession
-            if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME)) {
+            if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) {
                 DefaultValues.append(QVariant());
                 continue;
             }
@@ -492,7 +503,7 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         QString ParameterTypeName = parameterTypes.at(i);
 
         //check APISession
-        if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME)) {
+        if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) {
             if (HasSessionParam)
                 throw exRESTRegistry(QString("Invalid duplicate SESSION parameter (%1) at %2 of %3")
                                      .arg(_method.parameterNames().at(i).constData())
@@ -508,17 +519,17 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
             continue;
         }
 
-//        if (ParameterTypeName == PARAM_JWT)
-//            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+        if (ParameterTypeName == PARAM_JWT)
+            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
 
-//        if (ParameterTypeName == PARAM_REMOTE_IP)
-//            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+        if (ParameterTypeName == PARAM_REMOTE_IP)
+            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
 
-//        if (ParameterTypeName == PARAM_COOKIES)
-//            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+        if (ParameterTypeName == PARAM_COOKIES)
+            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
 
-//        if (ParameterTypeName == PARAM_HEADERS)
-//            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+        if (ParameterTypeName == PARAM_HEADERS)
+            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
 
         //-- others
         if ((ErrMessage = RESTAPIRegistry::isValidType(_method.parameterType(i), true)).size())
@@ -540,8 +551,8 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         }
     }
 
-//    if (HasSessionParam == false)
-//        throw exRESTRegistry(QString("SESSION parameter not defined in %1").arg(FullMethodName));
+    if (HasSessionParam == false)
+        throw exRESTRegistry(QString("SESSION parameter not defined in %1").arg(FullMethodName));
 }
 
 constexpr char CACHE_INTERNAL[] = "CACHEABLE_";

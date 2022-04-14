@@ -28,9 +28,9 @@
 namespace Targoman {
 namespace API {
 
-#ifndef API
-#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return _doc; }
-#endif
+//#ifndef API
+//#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return _doc; }
+//#endif
 
 class FormalityChecker : public intfPureModule
 {
@@ -43,8 +43,15 @@ public:
     bool init();
 
 private slots:
-    QString API(, Check, (const QString _text, const TAPI::ISO639_2_t& _lang),
-                "Normalizes input text")
+    QString REST_GET_OR_POST(
+        check,
+        (
+            APISession<false> &_SESSION,
+            const QString _text,
+            const TAPI::ISO639_2_t& _lang
+        ),
+        "Normalizes input text"
+    )
 
 };
 

@@ -58,11 +58,13 @@ public:
 
 public:
     static Targoman::API::AAA::stuVoucher processVoucher(
-        intfAPISession &_SESSION,
+//        intfAPISession &_SESSION,
+        quint64 _userID,
         quint64 _voucherID
     );
     static void tryCancelVoucher(
-        intfAPISession &_SESSION,
+//        intfAPISession &_SESSION,
+        quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
     );
@@ -78,6 +80,7 @@ private slots:
     QString REST_GET_OR_POST(
         normalizePhoneNumber,
         (
+            APISession<false> &_SESSION,
             QString _phone,
             QString _country
         ),
@@ -87,7 +90,7 @@ private slots:
     QVariantMap REST_PUT(
         signup,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _role = "BaseUser",
@@ -103,7 +106,7 @@ private slots:
     QVariantMap REST_PUT(
         signupByMobileOnly,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             TAPI::Mobile_t _mobile,
             QString _role = "BaseUser",
             QString _name = "",
@@ -120,7 +123,7 @@ private slots:
     TAPI::EncodedJWT_t REST_POST(
         approveEmail,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _email,
             TAPI::MD5_t _uuid,
             bool _autoLogin = false,
@@ -135,7 +138,7 @@ private slots:
     TAPI::EncodedJWT_t REST_POST(
         approveMobile,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             TAPI::Mobile_t _mobile,
             quint32 _code,
             bool _autoLogin = false,
@@ -150,7 +153,7 @@ private slots:
     TAPI::EncodedJWT_t REST_GET_OR_POST(
         login,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _salt,
@@ -166,7 +169,7 @@ private slots:
     bool REST_GET_OR_POST(
         loginByMobileOnly,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             TAPI::Mobile_t _mobile,
             bool _signupIfNotExists = false,
             QString _signupRole = "BaseUser"
@@ -187,7 +190,7 @@ private slots:
     bool REST_GET_OR_POST(
         resendApprovalCode,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _emailOrMobile
         ),
         "Recreate (if expired) approval code and resend last valid code to the email or mobile."
@@ -196,7 +199,7 @@ private slots:
 //    bool REST_PUT(
 //        requestMobileVerifyCode,
 //        (
-//            TAPI::RemoteIP_t _REMOTE_IP,
+//            APISession<false> &_SESSION,
 //            TAPI::Mobile_t _mobile
 //        ),
 //        "Send verification code for provided mobile."
@@ -205,7 +208,7 @@ private slots:
 //    TAPI::EncodedJWT_t REST_PUT(
 //        verifyLoginByMobileCode,
 //        (
-//            TAPI::RemoteIP_t _REMOTE_IP,
+//            APISession<false> &_SESSION,
 //            TAPI::Mobile_t _mobile,
 //            quint32 _code,
 //            TAPI::CommaSeparatedStringList_t _services = {},
@@ -219,7 +222,7 @@ private slots:
     TAPI::EncodedJWT_t REST_GET_OR_POST(
         loginByOAuth,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             TAPI::enuOAuthType::Type _type,
             QString _oAuthToken,
             TAPI::CommaSeparatedStringList_t _services,
@@ -232,7 +235,7 @@ private slots:
 //    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
 //        refreshJWT,
 //        (
-//            TAPI::RemoteIP_t _REMOTE_IP,
+//            APISession<false> &_SESSION,
 //            TAPI::JWT_t _loginJWT,
 //            QString _services = {}
 //        ),
@@ -250,7 +253,7 @@ private slots:
     QString REST_GET_OR_POST(
         createForgotPasswordLink,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _emailOrMobile
         ),
         "Create a forgot password request returning a UUID for the requiest"
@@ -260,8 +263,8 @@ private slots:
     QString REST_POST(
         fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _emailOrMobile
+            APISession<false> &_SESSION,
+            QString _emailOrMobile
         ),
         "fixture: Get Last Forgot Password UUID And Make As Sent"
     )
@@ -270,7 +273,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePassByUUID,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APISession<false> &_SESSION,
             QString _emailOrMobile,
             TAPI::MD5_t _uuid,
             TAPI::MD5_t _newPass
@@ -374,8 +377,8 @@ private slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _random = {}
+            APISession<false> &_SESSION,
+            QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
     )
@@ -383,24 +386,24 @@ private slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _random = {}
+            APISession<false> &_SESSION,
+            QString _random = {}
         ),
         "Cleanup sample data"
     )
     bool REST_POST(
         fixtureApproveEmail,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _email
+            APISession<false> &_SESSION,
+            QString _email
         ),
         "Approve Email Address directly"
     )
     bool REST_POST(
         fixtureApproveMobile,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                TAPI::Mobile_t _mobile
+            APISession<false> &_SESSION,
+            TAPI::Mobile_t _mobile
         ),
         "Approve Mobile directly"
     )

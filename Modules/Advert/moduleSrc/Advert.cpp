@@ -124,10 +124,10 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 }
 
 void Advert::applyAssetAdditives(
-        intfAPISession &_SESSION,
-        INOUT stuAssetItem& _assetItem,
-        const OrderAdditives_t& _orderAdditives
-    ) {
+    intfAPISession &_SESSION,
+    INOUT stuAssetItem& _assetItem,
+    const OrderAdditives_t& _orderAdditives
+) {
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 
 //    _assetItem.slbBasePrice *= 1.1;
@@ -163,26 +163,26 @@ void Advert::applyAssetAdditives(
 //}
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _location,
-        Targoman::API::AdvertModule::enuAdvertOrder::Type _order
-    ) {
+    APISession<false> &_SESSION,
+    QString _location,
+    Targoman::API::AdvertModule::enuAdvertOrder::Type _order
+) {
 }
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _location,
-        Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
-        const QString _keywords
-    ) {
+    APISession<false> &_SESSION,
+    QString _location,
+    Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
+    const QString _keywords
+) {
 }
 
 QString Advert::apiGETretrieveURL(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        quint64 _id,
-        TAPI::IPv4_t _clientIP,
-        QString _agent
-    ) {
+    APISession<false> &_SESSION,
+    quint64 _id,
+    TAPI::IPv4_t _clientIP,
+    QString _agent
+) {
 }
 
 /****************************************************************\
@@ -190,12 +190,9 @@ QString Advert::apiGETretrieveURL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Advert::apiPOSTfixtureSetup(
-        APISession<true> &_SESSION,
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _random
-    ) {
-    Q_UNUSED(_REMOTE_IP);
-
+    APISession<true> &_SESSION,
+    QString _random
+) {
     QVariantMap Result;
 
     if (_random == "1")
@@ -365,7 +362,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 
     //-- add to basket --------------------------------------
     LastPreVoucher = this->apiPOSTaddToBasket(
-        _JWT,
+        _SESSION,
         /* saleableCode        */ SaleableCode,
         /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
         /* qty                 */ 1,
@@ -378,7 +375,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 
     //-- finalize basket --------------------------------------
     QVariant res = RESTClientHelper::callAPI(
-        _JWT,
+        _SESSION,
         RESTClientHelper::POST,
         "Account/finalizeBasket",
         {},
@@ -396,7 +393,7 @@ QVariant Advert::apiPOSTfixtureSetup(
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentMD5.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
-            _JWT,
+            _SESSION,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},
@@ -419,18 +416,15 @@ QVariant Advert::apiPOSTfixtureSetup(
 }
 
 //bool Advert::apiPOSTfixtureSetupVoucher(
-//        TAPI::RemoteIP_t _REMOTE_IP,
 //        APISession<true> &_SESSION
 //    )
 //{
 //}
 
 QVariant Advert::apiPOSTfixtureCleanup(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _random
-    ) {
-    Q_UNUSED(_REMOTE_IP);
-
+    APISession<true> &_SESSION,
+    QString _random
+) {
     QVariantMap Result;
 
     //online payment

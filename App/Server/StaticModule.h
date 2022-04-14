@@ -38,12 +38,11 @@ class StaticModule : public intfPureModule
     TARGOMAN_DEFINE_API_MODULE(StaticModule);
 
 private slots:
-    QVariant REST_GET_OR_POST_ALIAS(
+    TAPI::RawData_t REST_GET_OR_POST_ALIAS(
         openAPI_json,
         "openAPI.json",
         (
-            APISession<true> &_SESSION,
-            int i = 345
+            APISession<false> &_SESSION
         ),
         ""
     );
@@ -57,7 +56,9 @@ private slots:
         ""
     );
 
-    TAPI::FileData_t REST_GET_OR_POST(
+    //TAPI::ResponseRedirect_t
+    //TAPI::FileData_t
+    QVariant REST_GET_OR_POST(
         swaggerui,
         (
             APISession<false> &_SESSION

@@ -170,6 +170,20 @@ private:
 //    QString Mime;
 };
 
+class ResponseRedirect_t {
+public:
+    ResponseRedirect_t() = default;
+    ~ResponseRedirect_t() = default;
+    ResponseRedirect_t(const ResponseRedirect_t &) = default;
+    ResponseRedirect_t &operator=(const ResponseRedirect_t &) = default;
+    ResponseRedirect_t(const QString &_url);
+    QVariant toVariant() const;
+    const QString &url() { return this->Url; }
+
+private:
+    QString Url;
+};
+
 /**********************************************************************/
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
@@ -306,6 +320,7 @@ TAPI_DECLARE_METATYPE(TAPI::stuFileInfo)
 TAPI_DECLARE_METATYPE(TAPI::Files_t)
 TAPI_DECLARE_METATYPE(TAPI::RawData_t)
 TAPI_DECLARE_METATYPE(TAPI::FileData_t)
+TAPI_DECLARE_METATYPE(TAPI::ResponseRedirect_t)
 TAPI_DECLARE_METATYPE(TAPI::HEADERS_t)
 TAPI_DECLARE_METATYPE(TAPI::COOKIES_t)
 TAPI_DECLARE_METATYPE(TAPI::JWT_t)

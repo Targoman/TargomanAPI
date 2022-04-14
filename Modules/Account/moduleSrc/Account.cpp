@@ -219,23 +219,24 @@ TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccou
 |* User **********************************************************|
 \*****************************************************************/
 QString Account::apinormalizePhoneNumber(
-        QString _phone,
-        QString _country
-    ) {
+    APISession<false> &_SESSION,
+    QString _phone,
+    QString _country
+) {
     return PhoneHelper::NormalizePhoneNumber(_phone, _country);
 }
 
 QVariantMap Account::apiPUTsignup(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile,
-        TAPI::MD5_t _pass,
-        QString _role,
-        QString _name,
-        QString _family,
-        TAPI::JSON_t _specialPrivs,
-        qint8 _maxSessions
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _emailOrMobile,
+    TAPI::MD5_t _pass,
+    QString _role,
+    QString _name,
+    QString _family,
+    TAPI::JSON_t _specialPrivs,
+    qint8 _maxSessions
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -255,7 +256,7 @@ QVariantMap Account::apiPUTsignup(
             { "iLogin", _emailOrMobile },
             { "iPass", _pass },
             { "iRole", _role },
-            { "iIP", _REMOTE_IP },
+            { "iIP", _SESSION.getIP() },
             { "iName", _name.isEmpty()? QVariant() : _name },
             { "iFamily", _family.isEmpty()? QVariant() : _family },
             { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
@@ -273,7 +274,6 @@ QVariantMap Account::apiPUTsignup(
 }
 /*
 QVariantMap Account::apiPUTsignupByMobileOnly(
-        TAPI::RemoteIP_t _REMOTE_IP,
         TAPI::Mobile_t _mobile,
 //        quint32 _verifyCode,
 //        TAPI::MD5_t _pass,
@@ -283,7 +283,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
         TAPI::JSON_t _specialPrivs,
         qint8 _maxSessions
     ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Incorrect mobile.");
@@ -300,7 +300,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
             { "iLogin", _mobile },
             { "iPass", "" },
             { "iRole", _role },
-            { "iIP", _REMOTE_IP },
+            { "iIP", _SESSION.getIP() },
             { "iName", _name.isEmpty()? QVariant() : _name },
             { "iFamily", _family.isEmpty()? QVariant() : _family },
             { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
@@ -318,16 +318,16 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
 }
 */
 TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _email,
-        TAPI::MD5_t _uuid,
-        bool _autoLogin,
-        TAPI::CommaSeparatedStringList_t _services,
-        bool _rememberMe,
-        TAPI::JSON_t _sessionInfo,
-        TAPI::MD5_t _fingerprint
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _email,
+    TAPI::MD5_t _uuid,
+    bool _autoLogin,
+    TAPI::CommaSeparatedStringList_t _services,
+    bool _rememberMe,
+    TAPI::JSON_t _sessionInfo,
+    TAPI::MD5_t _fingerprint
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     _email = _email.toLower().trimmed();
 
@@ -336,7 +336,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
             { "iKey", _email },
             { "iCode", _uuid },
             { "iLogin", _autoLogin ? 1 : 0 },
-            { "iLoginIP", _REMOTE_IP },
+            { "iLoginIP", _SESSION.getIP() },
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
@@ -361,16 +361,16 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
 }
 
 TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile,
-        quint32 _code,
-        bool _autoLogin,
-        TAPI::CommaSeparatedStringList_t _services,
-        bool _rememberMe,
-        TAPI::JSON_t _sessionInfo,
-        TAPI::MD5_t _fingerprint
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    TAPI::Mobile_t _mobile,
+    quint32 _code,
+    bool _autoLogin,
+    TAPI::CommaSeparatedStringList_t _services,
+    bool _rememberMe,
+    TAPI::JSON_t _sessionInfo,
+    TAPI::MD5_t _fingerprint
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -379,7 +379,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
             { "iKey", _mobile },
             { "iCode", _code },
             { "iLogin", _autoLogin ? 1 : 0 },
-            { "iLoginIP", _REMOTE_IP },
+            { "iLoginIP", _SESSION.getIP() },
             { "iLoginInfo", _sessionInfo.object() },
             { "iLoginRemember", _rememberMe ? 1 : 0 },
             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
@@ -404,16 +404,16 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
 }
 
 TAPI::EncodedJWT_t Account::apilogin(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile,
-        TAPI::MD5_t _pass,
-        QString _salt,
-        TAPI::CommaSeparatedStringList_t _services,
-        bool _rememberMe,
-        TAPI::JSON_t _sessionInfo,
-        TAPI::MD5_t _fingerprint
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _emailOrMobile,
+    TAPI::MD5_t _pass,
+    QString _salt,
+    TAPI::CommaSeparatedStringList_t _services,
+    bool _rememberMe,
+    TAPI::JSON_t _sessionInfo,
+    TAPI::MD5_t _fingerprint
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
 //    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
 //    if (QFV.mobile().isValid(_emailOrMobile))
@@ -422,7 +422,7 @@ TAPI::EncodedJWT_t Account::apilogin(
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    stuActiveAccount LoginInfo = Authentication::login(_REMOTE_IP,
+    stuActiveAccount LoginInfo = Authentication::login(_SESSION.getIP(),
                                                        _emailOrMobile,
                                                        _pass,
                                                        _salt,
@@ -439,12 +439,12 @@ TAPI::EncodedJWT_t Account::apilogin(
 }
 
 bool Account::apiloginByMobileOnly(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile,
-        bool _signupIfNotExists,
-        QString _signupRole
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    TAPI::Mobile_t _mobile,
+    bool _signupIfNotExists,
+    QString _signupRole
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QFV/*.asciiAlNum()*/.maxLenght(50).validate(_signupRole);
 
@@ -469,17 +469,17 @@ bool Account::apiloginByMobileOnly(
 }
 
 bool Account::apiresendApprovalCode(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _emailOrMobile
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
 //    this->callSP("spApprovalRequestAgain", {
 //                     { "iBy", Type },
 //                     { "iKey", _emailOrMobile },
-//                     { "iIP", _REMOTE_IP },
+//                     { "iIP", _SESSION.getIP() },
 //                     { "iRecreateIfExpired", true },
 //                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
 //                 });
@@ -489,7 +489,7 @@ bool Account::apiresendApprovalCode(
                      { "iUserID", {} },
                      { "iPass", {} },
                      { "iSalt", {} }
-//                     { "iIP", _REMOTE_IP },
+//                     { "iIP", _SESSION.getIP() },
 //                     { "iRecreateIfExpired", true },
 //                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
                  });
@@ -501,14 +501,14 @@ bool Account::apiresendApprovalCode(
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
 TAPI::EncodedJWT_t Account::apiloginByOAuth(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::enuOAuthType::Type _type,
-        QString _oAuthToken,
-        TAPI::CommaSeparatedStringList_t _services,
-        TAPI::JSON_t _sessionInfo,
-        TAPI::MD5_t _fingerprint
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    TAPI::enuOAuthType::Type _type,
+    QString _oAuthToken,
+    TAPI::CommaSeparatedStringList_t _services,
+    TAPI::JSON_t _sessionInfo,
+    TAPI::MD5_t _fingerprint
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QString Login;
 
@@ -537,7 +537,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
     }
 
     auto LoginInfo = Authentication::login(
-                         _REMOTE_IP,
+                         _SESSION.getIP(),
                          OAuthInfo.Email,
                          nullptr,
                          nullptr,
@@ -554,12 +554,11 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 }
 
 //Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(
-//        TAPI::RemoteIP_t _REMOTE_IP,
 //        TAPI::JWT_t _loginJWT,
 //        QString _services
 //    )
 //{
-//    Authorization::validateIPAddress(_REMOTE_IP);
+//    Authorization::validateIPAddress(_SESSION.getIP());
 
 //    QJsonObject Obj;
 
@@ -568,7 +567,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //    if (_services.isEmpty())
 //        Services = LoginJWT.privatePart().value("svc").toString();
 
-//    auto NewPrivs = Authentication::updatePrivs(_REMOTE_IP, LoginJWT.session(), Services);
+//    auto NewPrivs = Authentication::updatePrivs(_SESSION.getIP(), LoginJWT.session(), Services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
 //                                 this->createJWT(LoginJWT.login(), NewPrivs, Services)
@@ -589,10 +588,10 @@ bool Account::apilogout(
 }
 
 QString Account::apicreateForgotPasswordLink(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _emailOrMobile
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -606,11 +605,9 @@ QString Account::apicreateForgotPasswordLink(
 
 #ifdef QT_DEBUG
 QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile
-    ) {
-    Q_UNUSED(_REMOTE_IP);
-
+    APISession<false> &_SESSION,
+    QString _emailOrMobile
+) {
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
@@ -644,12 +641,12 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
 #endif
 
 bool Account::apichangePassByUUID(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _emailOrMobile,
-        TAPI::MD5_t _uuid,
-        TAPI::MD5_t _newPass
-    ) {
-    Authorization::validateIPAddress(_REMOTE_IP);
+    APISession<false> &_SESSION,
+    QString _emailOrMobile,
+    TAPI::MD5_t _uuid,
+    TAPI::MD5_t _newPass
+) {
+    Authorization::validateIPAddress(_SESSION.getIP());
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -685,7 +682,8 @@ bool Account::apichangePass(
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 Targoman::API::AAA::stuVoucher Account::processVoucher(
-    intfAPISession &_SESSION,
+//    intfAPISession &_SESSION,
+    quint64 _userID,
     quint64 _voucherID
 ) {
     try {
@@ -727,21 +725,21 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
                     //bypass process by end point?
                     if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
-                        QString OldEncodedJWT = _JWT["encodedJWT"].toString();
+                        stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
+                        VoucherItemForTrustedAction.UserID = _userID;
+                        VoucherItemForTrustedAction.VoucherID = _voucherID;
+                        VoucherItemForTrustedAction.VoucherItem = VoucherItem;
+                        VoucherItemForTrustedAction.Sign.clear();
+                        VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
 
                         QVariant Result = RESTClientHelper::callAPI(
-                            _JWT,
                             RESTClientHelper::POST,
                             NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
                             {},
                             {
-                                { "voucherItem", VoucherItem.toJson().toVariantMap() },
-                                { "voucherID", _voucherID },
+                                { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
                             }
                         );
-
-                        if (OldEncodedJWT != _JWT["encodedJWT"].toString())
-                            Account::instance()->addResponseHeader("x-auth-new-token", _JWT["encodedJWT"].toString());
 
                         if ((Result.isValid() == false) || (Result.toBool() == false))
                             throw exHTTPInternalServerError("error in process voucher");
@@ -773,13 +771,17 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     Targoman::API::AAA::enuVoucherStatus::Finished
                     );
     } catch (...) {
-        Account::tryCancelVoucher(_SESSION, _voucherID);
+        Account::tryCancelVoucher(
+//                    _SESSION,
+                    _userID,
+                    _voucherID);
         throw;
     }
 }
 
 void Account::tryCancelVoucher(
-    intfAPISession &_SESSION,
+//    intfAPISession &_SESSION,
+    quint64 _userID,
     quint64 _voucherID,
     bool _setAsError
 ) {
@@ -818,22 +820,22 @@ void Account::tryCancelVoucher(
                             //bypass process by end point?
                             if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint)) {
                                 try {
-                                    QString OldEncodedJWT = _JWT["encodedJWT"].toString();
+                                    stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
+                                    VoucherItemForTrustedAction.UserID = _userID;
+                                    VoucherItemForTrustedAction.VoucherID = _voucherID;
+                                    VoucherItemForTrustedAction.VoucherItem = VoucherItem;
+                                    VoucherItemForTrustedAction.Sign.clear();
+                                    VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
 
                                     QVariant Result = RESTClientHelper::callAPI(
-                                        _JWT,
                                         RESTClientHelper::POST,
                                         NULLABLE_GET_OR_DEFAULT(CancelVoucherItemEndPoint, ""),
                                         {},
                                         {
-                                            { "voucherItem", VoucherItem.toJson().toVariantMap() },
+                                            { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
                                         }
                                     );
-
-                                    if (OldEncodedJWT != _JWT["encodedJWT"].toString())
-                                        Account::instance()->addResponseHeader("x-auth-new-token", _JWT["encodedJWT"].toString());
-                                } catch (...)
-                                { ; }
+                                } catch (...) { ; }
                             }
 
                             break;
@@ -842,8 +844,7 @@ void Account::tryCancelVoucher(
                 }
             } //if (Services.isEmpty() == false)
         } //if (PreVoucher.Items.length())
-    } catch (...)
-    { ; }
+    } catch (...) { ; }
 
     //2: cancel voucher
 
@@ -930,7 +931,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 
         //2.1: process voucher
         if (RemainingAfterWallet == 0)
-            return Account::processVoucher(_SESSION, Voucher.ID);
+            return Account::processVoucher(_SESSION.getUserID(), Voucher.ID);
 
         //2.2: create online/offline payment
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
@@ -951,7 +952,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
     } catch (std::exception &exp) {
         qDebug() << "**********************************" << exp.what();
 
-        Account::tryCancelVoucher(_JWT, Voucher.ID, true);
+        Account::tryCancelVoucher(_SESSION.getUserID(), Voucher.ID, true);
 //        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
 //                                     SYSTEM_USER_ID,
 //                                     {},
@@ -988,7 +989,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
                          { "iVoucherID", VoucherID },
                          { "iPaymentType", QChar(enuPaymentType::Online) }
                      });
-        return Account::processVoucher(_SESSION, VoucherID);
+        return Account::processVoucher(_SESSION.getUserID(), VoucherID);
     } catch (...) {
         /*Targoman::API::Query::*/this->Update(Voucher::instance(),
                                      SYSTEM_USER_ID,
@@ -1057,17 +1058,17 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
                          { "iVoucherID", _vchID },
                          { "iPaymentType", QChar(enuPaymentType::Offline) }
                      });
-        return Account::processVoucher(_JWT, _vchID);
+        return Account::processVoucher(_SESSION.getUserID(), _vchID);
     }  catch (...) {
         /*Targoman::API::Query::*/this->Update(Voucher::instance(),
-                                     SYSTEM_USER_ID,
-                                     {},
-                                     TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                                     }),
-                                     {
-                                        { tblVoucher::vchID, _vchID }
-                                     });
+                    SYSTEM_USER_ID,
+                    {},
+                    TAPI::ORMFields_t({
+                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                    }),
+                    {
+                        { tblVoucher::vchID, _vchID }
+                    });
         throw;
     }
 }
@@ -1133,9 +1134,9 @@ bool Account::apiPOSTcheckVoucherTTL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Account::apiPOSTfixtureSetup(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _random
-    ) {
+    APISession<false> &_SESSION,
+    QString _random
+) {
     QVariantMap Result;
 
     if (_random == "1")
@@ -1183,7 +1184,7 @@ QVariant Account::apiPOSTfixtureSetup(
         //-- create user --------------------------------------
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVariantMap SignupUserResult = this->apiPUTsignup(
-                                        _REMOTE_IP,
+                                        _SESSION,
                                         UserEmail,
                                         { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                         RoleName,
@@ -1217,7 +1218,7 @@ QVariant Account::apiPOSTfixtureSetup(
                           UserID
                       });
 
-        this->apiPOSTapproveEmail(_REMOTE_IP, UserEmail, Code);
+        this->apiPOSTapproveEmail(_SESSION, UserEmail, Code);
     }
 
     //-- admin --------------------------------------
@@ -1240,7 +1241,7 @@ QVariant Account::apiPOSTfixtureSetup(
         //-- create admin --------------------------------------
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVariantMap SignupAdminUserResult = this->apiPUTsignup(
-                                                _REMOTE_IP,
+                                                _SESSION,
                                                 AdminUserEmail,
                                                 { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                                 RoleName,
@@ -1283,7 +1284,7 @@ QVariant Account::apiPOSTfixtureSetup(
                           AdminUserID
                       });
 
-        this->apiPOSTapproveEmail(_REMOTE_IP, AdminUserEmail, Code);
+        this->apiPOSTapproveEmail(_SESSION, AdminUserEmail, Code);
     }
 
     //-- payment gateway --------------------------------------
@@ -1363,11 +1364,9 @@ QVariant Account::apiPOSTfixtureSetup(
 }
 
 QVariant Account::apiPOSTfixtureCleanup(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _random
-    ) {
-    Q_UNUSED(_REMOTE_IP);
-
+    APISession<false> &_SESSION,
+    QString _random
+) {
     QVariantMap Result;
 
     clsDAC DAC;
@@ -1569,9 +1568,9 @@ QVariant Account::apiPOSTfixtureCleanup(
 
 ///TODO: not tested
 bool Account::apiPOSTfixtureApproveEmail(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        QString _email
-    ) {
+    APISession<false> &_SESSION,
+    QString _email
+) {
     clsDAC DAC;
 
     QJsonObject Result = DAC.execQuery("",
@@ -1602,16 +1601,16 @@ bool Account::apiPOSTfixtureApproveEmail(
                       UserID
                   });
 
-    this->apiPOSTapproveEmail(_REMOTE_IP, _email, Code);
+    this->apiPOSTapproveEmail(_SESSION, _email, Code);
 
     return true;
 }
 
 ///TODO: not tested
 bool Account::apiPOSTfixtureApproveMobile(
-        TAPI::RemoteIP_t _REMOTE_IP,
-        TAPI::Mobile_t _mobile
-    ) {
+    APISession<false> &_SESSION,
+    TAPI::Mobile_t _mobile
+) {
     clsDAC DAC;
 
     QJsonObject Result = DAC.execQuery("",
@@ -1640,7 +1639,7 @@ bool Account::apiPOSTfixtureApproveMobile(
                       UserID
                   });
 
-    this->apiPOSTapproveMobile(_REMOTE_IP, _mobile, Code.toUInt());
+    this->apiPOSTapproveMobile(_SESSION, _mobile, Code.toUInt());
 
     return true;
 }

@@ -57,7 +57,7 @@ TicketAttachments::TicketAttachments() :
         }
     ) { ; }
 
-QVariant TicketAttachments::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")

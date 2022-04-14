@@ -69,14 +69,14 @@ UserWallets::UserWallets() :
         }
     ) { ; }
 
-QVariant UserWallets::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({ { tblUserWallets::wal_usrID, _SESSION.getUserID() } }, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-quint64 UserWallets::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::walDefault, 0);
 
@@ -87,13 +87,13 @@ quint64 UserWallets::apiCREATE(APISession<true> &_SESSION, CREATE_METHOD_ARGS_IM
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool UserWallets::apiUPDATE(APISession<true> &_SESSION, UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool UserWallets::apiDELETE(APISession<true> &_SESSION, DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
@@ -126,8 +126,7 @@ bool UserWallets::apiUPDATEsetAsDefault(
 //                              );
 //    return Result.numRowsAffected() > 0;
 
-    clsJWT JWT(_JWT);
-    quint64 CurrentUserID = JWT.usrID();
+    quint64 CurrentUserID = _SESSION.getUserID();
 
     QVariantMap ExtraFilters;
 
@@ -136,7 +135,7 @@ bool UserWallets::apiUPDATEsetAsDefault(
         ExtraFilters.insert(tblUserWallets::wal_usrID, CurrentUserID);
 
     return /*Targoman::API::Query::*/this->Update(*this,
-                                 CurrentUserID,
+                                 _SESSION,
                                  {},
                                  TAPI::ORMFields_t({
                                     { tblUserWallets::walDefault, 1 },

@@ -53,7 +53,7 @@ Bin::Bin() :
                 ORM_RELATION_OF_UPDATER(tblBin::binUpdatedBy_usrID),
               }) { ; }
 
-QVariant Bin::apiGET(APISession<true> &_SESSION, GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant Bin::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);

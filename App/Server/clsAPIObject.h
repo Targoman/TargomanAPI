@@ -32,8 +32,11 @@
 
 namespace Targoman::API::Server {
 
-#define APISESSION_TYPE_NAME        "APISession<false>"
+#define APISESSION_TYPE_NAME_BASE   "APISession<"
+#define APISESSION_NO_TYPE_NAME     "APISession<false>"
 #define APISESSION_JWT_TYPE_NAME    "APISession<true>"
+#define APISESSION_PARAM_NAME       "_SESSION"
+
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
 #define PARAM_REMOTE_IP "TAPI::RemoteIP_t"
@@ -71,25 +74,25 @@ public:
         return (this->BaseMethod.name() + QJsonValue::fromVariant(_args).toString().toUtf8()).constData();
     }
 
-    inline _GLIBCXX_CONSTEXPR bool requiresJWT() const {
+    inline bool requiresJWT() const {
         return this->ParamTypesName.contains(PARAM_JWT);
     }
 
-    inline bool requiresCookies() const {
-        return this->ParamTypesName.contains(PARAM_COOKIES);
-    }
+//    inline bool requiresCookies() const {
+//        return this->ParamTypesName.contains(PARAM_COOKIES);
+//    }
 
-    inline bool requiresRemoteIP() const {
-        return this->ParamTypesName.contains(PARAM_REMOTE_IP);
-    }
+//    inline bool requiresRemoteIP() const {
+//        return this->ParamTypesName.contains(PARAM_REMOTE_IP);
+//    }
 
     inline bool requiresPrimaryKey() const {
         return this->ParamTypesName.contains(PARAM_PKSBYPATH);
     }
 
-    inline bool requiresHeaders() const {
-        return this->ParamTypesName.contains(PARAM_HEADERS);
-    }
+//    inline bool requiresHeaders() const {
+//        return this->ParamTypesName.contains(PARAM_HEADERS);
+//    }
 
     inline bool requiresORMFields() const {
         return this->ParamTypesName.contains(PARAM_ORMFIELDS);
@@ -118,10 +121,10 @@ public:
         const QStringList& _args,
 //        /*OUT*/ QVariantMap &_responseHeaders,
         QList<QPair<QString, QString>> _bodyArgs = {},
-        qhttp::THeaderHash _headers = {},
-        qhttp::THeaderHash _cookies = {},
+//        qhttp::THeaderHash _headers = {},
+//        qhttp::THeaderHash _cookies = {},
 //        QJsonObject _jwt = {},
-        QString _remoteIP = {},
+//        QString _remoteIP = {},
         QString _extraAPIPath = {}
     ) const;
 

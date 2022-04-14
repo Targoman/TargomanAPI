@@ -15,6 +15,8 @@ HEADERS += \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/Authentication.h \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/intfAccountingBasedModule.h \
     $$BASE_PROJECT_PATH/Interfaces/Server/QJWT.h \
+    $$BASE_PROJECT_PATH/Interfaces/Server/ServerCommon.h \
+    $$BASE_PROJECT_PATH/Interfaces/Server/APISession.h \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.h \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.h \
 
@@ -24,6 +26,8 @@ SOURCES += \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/Authentication.cpp \
 #    $$BASE_PROJECT_PATH/Interfaces/AAA/intfAccountingBasedModule.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Server/QJWT.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Server/ServerCommon.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Server/APISession.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.cpp \
 

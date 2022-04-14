@@ -55,7 +55,68 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 //    "DELETE"
 //};
 
-///@TODO: callAPI(intfAPISession &_SESSION
+QVariant RESTClientHelper::callAPI(
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
+    QString temp;
+
+    QVariant Result = RESTClientHelper::callAPI(
+        temp,
+        _method,
+        _api,
+        _urlArgs,
+        _postOrFormFields,
+        _formFiles,
+        _aPIURL,
+        _outResponseHeaders
+    );
+
+    return Result;
+}
+
+QVariant RESTClientHelper::callAPI(
+    intfAPISession &_SESSION,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
+    TAPI::JWT_t JWT = _SESSION.getJWT();
+
+    QString OldEncodedJWT = JWT["encodedJWT"].toString();
+    QVariantMap ResponseHeaders;
+
+    QVariant Result = RESTClientHelper::callAPI(
+        JWT,
+        _method,
+        _api,
+        _urlArgs,
+        _postOrFormFields,
+        _formFiles,
+        _aPIURL,
+        &ResponseHeaders
+    );
+
+    if (OldEncodedJWT != JWT["encodedJWT"].toString())
+    {
+        _SESSION.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
+        _SESSION.setJWT(JWT);
+    }
+
+    if (_outResponseHeaders != nullptr)
+        *_outResponseHeaders = ResponseHeaders;
+
+    return Result;
+}
 
 QVariant RESTClientHelper::callAPI(
     INOUT TAPI::JWT_t &_JWT,

@@ -267,7 +267,8 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 clsRequestHandler::stuResult clsRequestHandler::run(
     clsAPIObject* _apiObject,
     QStringList& _queries,
-    const QString& _pksByPath
+    const QString& _pksByPath,
+    const QString& _api
 ) {
 //    QVariantMap ResponseHeaders;
 
@@ -315,10 +316,10 @@ clsRequestHandler::stuResult clsRequestHandler::run(
             } else
                 throw exHTTPForbidden("No valid authentication header is present");
 
-            SESSION->setJWT(JWT);
+//            SESSION->setJWT(JWT);
         } // if (_apiObject->requiresJWT())
 
-        if (_apiObject->requiresCookies() && Headers.value("cookie").size()) {
+        if (/*_apiObject->requiresCookies() && */Headers.value("cookie").size()) {
             foreach (auto Cookie, Headers.value("cookie").split(';')) {
                 auto CookieParts = Cookie.split('=');
                 Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
@@ -327,7 +328,13 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
         Headers.remove("cookie");
 
-
+        SESSION->initialize(
+                    _api,
+                    JWT,
+                    Headers.toVariant().toMap(),
+                    Cookies.toVariant().toMap(),
+                    this->toIPv4(this->Request->remoteAddress())
+                    );
 
         QVariant Result = _apiObject->invoke(
                               SESSION.data(),
@@ -335,10 +342,10 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                               _queries,
 //                              ResponseHeaders,
                               this->Request->userDefinedValues(),
-                              Headers,
-                              Cookies,
+//                              Headers,
+//                              Cookies,
 //                              JWT,
-                              this->toIPv4(this->Request->remoteAddress()),
+//                              this->toIPv4(this->Request->remoteAddress()),
                               _pksByPath
                               );
 
@@ -492,12 +499,12 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
                 this->sendError(Result.StatusCode, Result.Result.toString(), Result.ResponseHeader, Result.StatusCode >= 500);
         });
 
-//        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
+        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath, _api));
 
         if (ServerConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());
     } else
-        run(APIObject, Queries, ExtraAPIPath);
+        run(APIObject, Queries, ExtraAPIPath, _api);
 }
 
 void clsRequestHandler::sendError(
@@ -563,13 +570,15 @@ void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
 
 #ifdef QT_DEBUG
     this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
 #endif
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
-void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
+void clsRequestHandler::addHeaderValues(
+    const QVariantMap &_responseHeaders
+) {
     if (_responseHeaders.isEmpty() == false) {
         TargomanLogInfo(7, "Response Custom Header Values:");
 
@@ -593,13 +602,14 @@ void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
 }
 
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
-        const QVariant &_response,
-        QVariantMap _responseHeaders
-    ) {
+    const QVariant &_response,
+    QVariantMap _responseHeaders
+) {
     gServerStats.Success.inc();
 
     if (_response.isValid() == false)
         this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue(QJsonValue::Undefined) } }), _responseHeaders);
+
     else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
 
@@ -635,7 +645,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         funcAddToHeaderArray("x-debug-time-elapsed");
 
         if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-            _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+            _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
         funcAddToHeaderArray("x-auth-new-token");
@@ -645,11 +655,17 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->end(RawData.data());
 
         this->deleteLater();
+
+    } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
+        TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
+        this->redirect(ResponseRedirect.url());
+
     } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
-            TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
-            this->sendFile(FileData.fileName());
+        TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
+        this->sendFile(FileData.fileName());
+
     } else
-        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}), _responseHeaders);
+        this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue::fromVariant(_response) } }), _responseHeaders);
 }
 
 void clsRequestHandler::sendCORSOptions() {
@@ -677,7 +693,7 @@ void clsRequestHandler::sendCORSOptions() {
 
 #ifdef QT_DEBUG
     this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
 #endif
 
     this->Response->end();
@@ -742,7 +758,7 @@ void clsRequestHandler::sendResponseBase(
     funcAddToHeaderArray("x-debug-time-elapsed");
 
     if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-        _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+        _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
     funcAddToHeaderArray("x-auth-new-token");

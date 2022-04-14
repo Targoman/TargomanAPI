@@ -130,7 +130,7 @@ public:
         );
     void sendCORSOptions();
 
-    void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
+    void redirect(const QString _path, bool _appendBase = true, bool _permananet = false);
 
     QString host() const;
     quint16 port() const;
@@ -143,7 +143,7 @@ private:
             QVariantMap _responseHeaders = {},
             bool _closeConnection = false
         );
-    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath);
+    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath, const QString& _api);
     QString toIPv4(const QString _ip);
 
 private slots:
