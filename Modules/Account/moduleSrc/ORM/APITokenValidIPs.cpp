@@ -30,8 +30,8 @@
 namespace Targoman::API::AccountModule::ORM {
 
 QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::apt_usrID, _SESSION.getUserID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblAPITokens::Name);
@@ -41,17 +41,17 @@ QVariant APITokenValidIPs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 quint64 APITokenValidIPs::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::apt_usrID, _SESSION.getUserID());
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 
-//    this->setSelfFilters({{tblAPITokens::apt_usrID, _SESSION.getUserID()}}, ExtraFilters);
+//    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
@@ -59,9 +59,9 @@ bool APITokenValidIPs::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
 bool APITokenValidIPs::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::apt_usrID, _SESSION.getUserID());
-//    this->setSelfFilters({{tblAPITokens::apt_usrID, _SESSION.getUserID()}}, ExtraFilters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

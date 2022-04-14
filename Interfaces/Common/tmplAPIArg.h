@@ -26,7 +26,7 @@
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
-#include "Interfaces/Server/APISession.h"
+#include "Interfaces/Server/APICallBoom.h"
 
 using namespace Targoman::API::Server;
 
@@ -82,7 +82,7 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            intfAPISession* _SESSION,
+            intfAPICallBoom* _APICALLBOOM,
             const QVariantList& _arguments
 //            /*OUT*/ QVariantMap &_responseHeaders
         ) final
@@ -90,7 +90,7 @@ public:
         _itmplType Result;
 
         _apiObject->invokeMethod(
-                    _SESSION,
+                    _APICALLBOOM,
                     _arguments,
                     QReturnArgument<_itmplType>(this->RealTypeName, Result)
 //                    _responseHeaders

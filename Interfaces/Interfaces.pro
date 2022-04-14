@@ -12,7 +12,7 @@ DIST_HEADERS += \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
-    Server/APISession.h \
+    Server/APICallBoom.h \
     Common/GenericTypes.h \
     Common/tmplAPIArg.h \
     Common/intfAPIArgManipulator.h \
@@ -42,10 +42,10 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Server/APICallBoom.h \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
-    Server/APISession.h \
     Common/base.h \
     Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
@@ -76,10 +76,10 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    Server/APICallBoom.cpp \
     Server/ServerCommon.cpp \
     Server/clsSimpleCrypt.cpp \
     Server/QJWT.cpp \
-    Server/APISession.cpp \
     Common/base.cpp \
     Common/GenericTypes.cpp \
     Common/intfAPIArgManipulator.cpp \

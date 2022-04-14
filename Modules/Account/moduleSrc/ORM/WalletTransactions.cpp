@@ -53,8 +53,8 @@ WalletTransactions::WalletTransactions() :
     ) { ; }
 
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, _SESSION.getUserID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblUserWallets::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblUserWallets::Name);

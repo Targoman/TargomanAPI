@@ -97,7 +97,7 @@ Tickets::Tickets() :
 
 QVariant Tickets::apiGET(
 //        GET_METHOD_ARGS_IMPL_APICALL,
-        APISession<true> &_SESSION,
+        APICallBoom<true> &_APICALLBOOM,
         TAPI::PKsByPath_t _pksByPath,
         quint64 _pageIndex,
         quint16 _pageSize,
@@ -115,10 +115,10 @@ QVariant Tickets::apiGET(
     TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
 
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
     clsCondition ExtraFilters = {};
 
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
             .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })

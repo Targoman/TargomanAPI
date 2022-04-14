@@ -97,12 +97,12 @@ PaymentGateways::PaymentGateways() :
     ) { ; }
 
 QVariant PaymentGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 quint32 PaymentGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     if (_createInfo.contains(tblPaymentGateways::pgwAllowedDomainName))
         _createInfo[tblPaymentGateways::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::pgwAllowedDomainName].toString());
@@ -111,12 +111,12 @@ quint32 PaymentGateways::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 bool PaymentGateways::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool PaymentGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 

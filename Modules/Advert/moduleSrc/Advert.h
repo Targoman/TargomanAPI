@@ -82,7 +82,7 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
     virtual void applyAssetAdditives(
-        intfAPISession &_SESSION,
+        intfAPICallBoom &_APICALLBOOM,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
     );
@@ -91,7 +91,7 @@ protected slots:
 //    bool REST_POST(
 //        processVoucher,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
@@ -100,7 +100,7 @@ protected slots:
 //    bool REST_POST(
 //        cancelVoucher,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
@@ -109,7 +109,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
@@ -119,7 +119,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
@@ -130,7 +130,7 @@ protected slots:
     QString REST_GET(
         retrieveURL,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             quint64 _id,
             TAPI::IPv4_t _clientIP,
             QString _agent
@@ -143,7 +143,7 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -152,7 +152,7 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             QString _random = {}
         ),
         "Cleanup sample data"
@@ -160,7 +160,7 @@ protected slots:
 //    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
-//                APISession<true> &_SESSION
+//                APICallBoom<true> &_APICALLBOOM
 //        ),
 //        "Sets up basket and voucher"
 //    )

@@ -33,8 +33,8 @@ namespace Targoman::API::AdvertModule::ORM {
 //using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);

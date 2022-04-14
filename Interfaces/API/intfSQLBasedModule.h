@@ -103,7 +103,7 @@ public:
             bool _realDelete = false
         );
 
-    //overloads by _SESSION
+    //overloads by _APICALLBOOM
     quint64 Create(
             clsTable& _table,
             CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1

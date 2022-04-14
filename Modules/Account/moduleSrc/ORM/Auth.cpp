@@ -31,9 +31,9 @@ Auth::Auth() :
     ) { ; }
 
 bool Auth::apivalidateJWT(
-    APISession<true> &_SESSION
+    APICallBoom<true> &_APICALLBOOM
 ) {
-    Q_UNUSED(_SESSION);
+    Q_UNUSED(_APICALLBOOM);
 
     return true;
 }

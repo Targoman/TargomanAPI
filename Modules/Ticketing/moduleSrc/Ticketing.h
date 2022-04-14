@@ -63,7 +63,7 @@ private slots:
     QVariantMap REST_PUT(
         newMessage,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             const QString &_title,
             const QString &_body,
             quint32 _serviceID,
@@ -77,7 +77,7 @@ private slots:
     QVariantMap REST_PUT(
         newFeedback,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             const QString &_title,
             const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,

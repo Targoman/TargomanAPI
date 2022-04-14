@@ -272,11 +272,11 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 ) {
 //    QVariantMap ResponseHeaders;
 
-    QScopedPointer<intfAPISession> SESSION;
+    QScopedPointer<intfAPICallBoom> APICALLBOOM;
     if (_apiObject->requiresJWT())
-        SESSION.reset(new APISession<true>());
+        APICALLBOOM.reset(new APICallBoom<true>());
     else
-        SESSION.reset(new APISession<false>());
+        APICALLBOOM.reset(new APICallBoom<false>());
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -310,13 +310,13 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 );
 
                     BearerToken = NewToken;
-                    SESSION->addResponseHeader("x-auth-new-token", BearerToken);
+                    APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
                 }
                 JWT["encodedJWT"] = BearerToken;
             } else
                 throw exHTTPForbidden("No valid authentication header is present");
 
-//            SESSION->setJWT(JWT);
+//            APICALLBOOM->setJWT(JWT);
         } // if (_apiObject->requiresJWT())
 
         if (/*_apiObject->requiresCookies() && */Headers.value("cookie").size()) {
@@ -328,7 +328,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
         Headers.remove("cookie");
 
-        SESSION->initialize(
+        APICALLBOOM->initialize(
                     _api,
                     JWT,
                     Headers.toVariant().toMap(),
@@ -337,7 +337,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     );
 
         QVariant Result = _apiObject->invoke(
-                              SESSION.data(),
+                              APICALLBOOM.data(),
                               this->Request->method() == qhttp::EHTTP_PATCH,
                               _queries,
 //                              ResponseHeaders,
@@ -349,17 +349,17 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                               _pksByPath
                               );
 
-        return stuResult(Result, SESSION->getResponseHeaders());
+        return stuResult(Result, APICALLBOOM->getResponseHeaders());
     } catch (exTargomanBase& ex) {
-        return stuResult(ex.what(), SESSION->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exQFVRequiredParam &ex) {
-        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (exQFVInvalidValue &ex) {
-        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (std::exception &ex) {
-        return stuResult(ex.what(), SESSION->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     } catch (...) {
-        return stuResult("INTERNAL SERVER ERROR!!!", SESSION->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 

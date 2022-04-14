@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "APISession.h"
+#include "APICallBoom.h"
 #include "ServerCommon.h"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/clsJWT.hpp"
@@ -31,12 +31,12 @@ namespace Targoman::API::Server {
 
 class clsRequestHandler;
 
-class APISessionData : public QSharedData
+class APICallBoomData : public QSharedData
 {
 public:
-    APISessionData() : QSharedData() { ; }
+    APICallBoomData() : QSharedData() { ; }
 
-    APISessionData(const APISessionData &_other) :
+    APICallBoomData(const APICallBoomData &_other) :
         QSharedData(_other),
 //        RequestHandler(_other.RequestHandler),
         RequestAPIPath(_other.RequestAPIPath),
@@ -47,7 +47,7 @@ public:
         ResponseHeaders(_other.ResponseHeaders)
     { ; }
 
-    virtual ~APISessionData() { ; }
+    virtual ~APICallBoomData() { ; }
 
 public:
 //    clsRequestHandler *RequestHandler;
@@ -59,11 +59,11 @@ public:
     QVariantMap ResponseHeaders;
 };
 
-intfAPISession::intfAPISession() : Data(new APISessionData) { ; }
-intfAPISession::intfAPISession(const intfAPISession& _other) : Data(_other.Data) { ; }
-intfAPISession::~intfAPISession() { ; }
+intfAPICallBoom::intfAPICallBoom() : Data(new APICallBoomData) { ; }
+intfAPICallBoom::intfAPICallBoom(const intfAPICallBoom& _other) : Data(_other.Data) { ; }
+intfAPICallBoom::~intfAPICallBoom() { ; }
 
-void intfAPISession::initialize(
+void intfAPICallBoom::initialize(
     const QString &_apiPath,
     const QJsonObject &_JWT,
     const QVariantMap &_headers,
@@ -77,31 +77,31 @@ void intfAPISession::initialize(
     this->Data->IP = _ip;
 }
 
-void intfAPISession::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
+void intfAPICallBoom::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
     this->Data->JWT = _JWT;
 }
-/*TAPI::JWT_t*/QJsonObject &intfAPISession::getJWT() {
+/*TAPI::JWT_t*/QJsonObject &intfAPICallBoom::getJWT() {
     return this->Data->JWT;
 }
-quint64 intfAPISession::getUserID() {
+quint64 intfAPICallBoom::getUserID() {
     return Targoman::API::AAA::clsJWT(this->Data->JWT).usrID();
 }
-QJsonObject intfAPISession::getJWTPrivsObject() {
+QJsonObject intfAPICallBoom::getJWTPrivsObject() {
     return Targoman::API::AAA::clsJWT(this->Data->JWT).privsObject();
 }
 
-QString intfAPISession::getIP() {
+QString intfAPICallBoom::getIP() {
     return this->Data->IP;
 }
 
-//void intfAPISession::setRequestAPIPath(const QString &_path) {
+//void intfAPICallBoom::setRequestAPIPath(const QString &_path) {
 //    this->Data->RequestAPIPath = _path;
 //}
-QString intfAPISession::requestAPIPath() const {
+QString intfAPICallBoom::requestAPIPath() const {
     return this->Data->RequestAPIPath;
 }
 
-QString intfAPISession::host() const {
+QString intfAPICallBoom::host() const {
     if (this->Data->RequestHeaders.contains("host") == false)
         return "127.0.0.1";
 
@@ -114,7 +114,7 @@ QString intfAPISession::host() const {
     return Host;
 }
 
-quint16 intfAPISession::port() const {
+quint16 intfAPICallBoom::port() const {
     if (this->Data->RequestHeaders.contains("host") == false)
         return ServerCommonConfigs::ListenPort.value();
 
@@ -127,30 +127,30 @@ quint16 intfAPISession::port() const {
     return Host.mid(idx+1).toUInt();
 }
 
-//void intfAPISession::setResponseHeaders(const QVariantMap &_headers) {
+//void intfAPICallBoom::setResponseHeaders(const QVariantMap &_headers) {
 //    this->Data->ResponseHeaders.clear();
 
 //    for (QVariantMap::const_iterator it=_headers.constBegin(); it!=_headers.constEnd(); it++) {
 //        this->Data->ResponseHeaders.insert(it.key().toLatin1(), it->toByteArray());
 //    }
 //}
-void intfAPISession::setResponseHeaders(const QVariantMap &_headers) {
+void intfAPICallBoom::setResponseHeaders(const QVariantMap &_headers) {
     this->Data->ResponseHeaders = _headers;
 }
-QVariantMap intfAPISession::getResponseHeaders() {
+QVariantMap intfAPICallBoom::getResponseHeaders() {
     return this->Data->ResponseHeaders;
 }
-void intfAPISession::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
+void intfAPICallBoom::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
     if (_multiValue && this->Data->ResponseHeaders.contains(_header))
         this->Data->ResponseHeaders[_header] = this->Data->ResponseHeaders[_header].toString() + _value.toString();
     else
         this->Data->ResponseHeaders.insert(_header, _value.toString());
 }
-void intfAPISession::addResponseHeaderNameToExpose(const QString &_header) {
+void intfAPICallBoom::addResponseHeaderNameToExpose(const QString &_header) {
     this->addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
 
-template class APISession<false>;
-template class APISession<true>;
+template class APICallBoom<false>;
+template class APICallBoom<true>;
 
 } //namespace Targoman::API::Server

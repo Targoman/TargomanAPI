@@ -53,7 +53,7 @@ private slots:
     TAPI::Base64Image_t REST_GET(
         photo,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             quint64 _usrID
         ),
         "Get user photo as base64"
@@ -61,7 +61,7 @@ private slots:
     bool REST_UPDATE(
         photo,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::Base64Image_t _image
         ),
         "Updates user image based using a base64 encoded image"
@@ -69,7 +69,7 @@ private slots:
     bool REST_POST(
         deletePhoto,
         (
-            APISession<true> &_SESSION
+            APICallBoom<true> &_APICALLBOOM
         ),
         "Delete user image"
     )
@@ -77,7 +77,7 @@ private slots:
     bool REST_UPDATE(
         email,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::Email_t   _email,
             TAPI::MD5_t     _psw,
             QString         _salt
@@ -88,7 +88,7 @@ private slots:
     bool REST_UPDATE(
         mobile,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::Mobile_t  _mobile,
             TAPI::MD5_t     _pass,
             QString         _salt
@@ -99,7 +99,7 @@ private slots:
     bool REST_UPDATE(
         personalInfo,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
@@ -111,7 +111,7 @@ private slots:
     bool REST_UPDATE(
         financialInfo,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::Sheba_t   _iban = {},
             TAPI::Ether_t   _ether = {}
         ),
@@ -121,7 +121,7 @@ private slots:
     bool REST_UPDATE(
         extraInfo,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             NULLABLE_TYPE(TAPI::Date_t)    _birthDate = NULLABLE_NULL_VALUE,
             QString         _job = {},
             QString         _education = {},
@@ -177,7 +177,7 @@ private slots:
 //    bool REST_UPDATE(
 //        birthDate,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            QString _birthDate
 //        ),
 //        "Updates users birth date"
@@ -186,7 +186,7 @@ private slots:
 //    bool REST_UPDATE(
 //        photo,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            TAPI::Base64Image_t _image
 //        ),
 //        "Updates user image based using a base64 encoded image"
@@ -195,7 +195,7 @@ private slots:
 //    bool REST_UPDATE(
 //        sheba,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            TAPI::Sheba_t _sheba
 //        ),
 //        "Updates user Sheba address"
@@ -204,7 +204,7 @@ private slots:
 //    bool REST_UPDATE(
 //        etherAddress,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            TAPI::Ether_t _etherAddress
 //        ),
 //        "Updates user ethercoin address"

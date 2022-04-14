@@ -59,7 +59,7 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-    void checkUsageIsAllowed(intfAPISession &_SESSION, const ServiceUsage_t& _requestedUsage);
+    void checkUsageIsAllowed(intfAPICallBoom &_APICALLBOOM, const ServiceUsage_t& _requestedUsage);
 
     virtual bool increaseDiscountUsage(
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
@@ -124,7 +124,7 @@ protected slots:
     Targoman::API::AAA::stuPreVoucher REST_POST(
         addToBasket,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::SaleableCode_t _saleableCode,
             Targoman::API::AAA::OrderAdditives_t _orderAdditives = {},
             qreal _qty = 1,
@@ -139,7 +139,7 @@ protected slots:
     Targoman::API::AAA::stuPreVoucher REST_POST(
         removeBasketItem,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::MD5_t _itemUUID,
             Targoman::API::AAA::stuPreVoucher _lastPreVoucher
         ),
@@ -150,7 +150,7 @@ protected slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        updateBasketItem,
 //        (
-//            APISession<true> &_SESSION,
+//            APICallBoom<true> &_APICALLBOOM,
 //            TAPI::MD5_t _itemUUID,
 //            quint16 _new_qty,
 //            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -162,7 +162,7 @@ protected slots:
     bool REST_POST(
         processVoucherItem,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Process voucher item"
@@ -171,7 +171,7 @@ protected slots:
     bool REST_POST(
         cancelVoucherItem,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Cancel voucher item"
@@ -186,21 +186,21 @@ protected:
         Q_UNUSED(_assetItem)
     };
     virtual void applyAssetAdditives(
-        intfAPISession &_SESSION,
+        intfAPICallBoom &_APICALLBOOM,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
     ) {
-        Q_UNUSED(_SESSION);
+        Q_UNUSED(_APICALLBOOM);
         Q_UNUSED(_assetItem)
         Q_UNUSED(_orderAdditives)
     };
     virtual void applyReferrer(
-        intfAPISession &_SESSION,
+        intfAPICallBoom &_APICALLBOOM,
         INOUT stuAssetItem& AssetItem,
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams
     ) {
-        Q_UNUSED(_SESSION);
+        Q_UNUSED(_APICALLBOOM);
         Q_UNUSED(AssetItem);
         Q_UNUSED(_referrer);
         Q_UNUSED(_extraReferrerParams);

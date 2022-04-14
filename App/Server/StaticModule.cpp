@@ -35,23 +35,23 @@ StaticModule::StaticModule() :
 { ; }
 
 TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APISession<false> &_SESSION
+    APICallBoom<false> &_APICALLBOOM
 )) {
     gServerStats.Success.inc();
 
     return TAPI::RawData_t(
                 QJsonDocument(OpenAPIGenerator::retrieveJson(
-                    _SESSION.host(),
-                    _SESSION.port()
+                    _APICALLBOOM.host(),
+                    _APICALLBOOM.port()
                 )).toJson(QJsonDocument::Compact),
                 "application/json; charset=utf-8"
                 );
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
-    APISession<false> &_SESSION
+    APICallBoom<false> &_APICALLBOOM
 )) {
-    Q_UNUSED(_SESSION)
+    Q_UNUSED(_APICALLBOOM)
 
     throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 }
@@ -59,12 +59,12 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
 //TAPI::ResponseRedirect_t
 //TAPI::FileData_t
 QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
-    APISession<false> &_SESSION
+    APICallBoom<false> &_APICALLBOOM
 )) {
     if (ServerConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
 
-    QString API = _SESSION.requestAPIPath();
+    QString API = _APICALLBOOM.requestAPIPath();
 
     QString File = API.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
 
@@ -78,10 +78,10 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     bool _full
 )) {
-    Q_UNUSED(_SESSION)
+    Q_UNUSED(_APICALLBOOM)
 
     gServerStats.Success.inc();
 
@@ -89,9 +89,9 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
-    APISession<false> &_SESSION
+    APICallBoom<false> &_APICALLBOOM
 )) {
-    Q_UNUSED(_SESSION)
+    Q_UNUSED(_APICALLBOOM)
 
     gServerStats.Success.inc();
 
@@ -107,9 +107,9 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
-    APISession<false> &_SESSION
+    APICallBoom<false> &_APICALLBOOM
 )) {
-    Q_UNUSED(_SESSION)
+    Q_UNUSED(_APICALLBOOM)
 
     gServerStats.Success.inc();
 

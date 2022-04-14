@@ -123,7 +123,7 @@ quint64 Ticketing::insertTicket(
 }
 
 QVariantMap Ticketing::apiPUTnewMessage(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     const QString &_title,
     const QString &_body,
     quint32 _serviceID,
@@ -131,13 +131,13 @@ QVariantMap Ticketing::apiPUTnewMessage(
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
 ) {
-    Authorization::checkPriv(_SESSION.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _SESSION.getUserID(),
+                     _APICALLBOOM.getUserID(),
                      _targetUserID,
                      _serviceID,
                      0,
@@ -154,7 +154,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
 }
 
 QVariantMap Ticketing::apiPUTnewFeedback(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     const QString &_title,
     const QString &_body,
     Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -162,7 +162,7 @@ QVariantMap Ticketing::apiPUTnewFeedback(
     quint64 _inReplyTicketID,
     const TAPI::stuFileInfo &_file
 ) {
-    Authorization::checkPriv(_SESSION.getJWT(), {});
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
         throw exHTTPBadRequest("Reply tickets must have reply type");
@@ -175,7 +175,7 @@ QVariantMap Ticketing::apiPUTnewFeedback(
     Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _SESSION.getUserID(),
+                     _APICALLBOOM.getUserID(),
                      0,
                      _serviceID,
                      _inReplyTicketID,

@@ -42,7 +42,7 @@ private slots:
     QString REST_GET_OR_POST(
         normalize,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             const QString _text,
             const TAPI::ISO639_2_t& _lang,
             bool _useSpellCorrector = true
@@ -53,7 +53,7 @@ private slots:
     QString REST_GET_OR_POST(
         text2IXML,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             const QString& _text,
             const TAPI::ISO639_2_t& _lang,
             bool _useSpellCorrector = true
@@ -64,7 +64,7 @@ private slots:
     QString REST_GET_OR_POST(
         ixml2Text,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             const QString& _ixml,
             bool _detokenize = true,
             bool _hinidiDigits = false,
@@ -77,7 +77,7 @@ private slots:
     QString REST_GET_OR_POST(
         tokenize,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             const QString& _text,
             const TAPI::ISO639_2_t& _lang,
             bool _useSpellCorrector = true,

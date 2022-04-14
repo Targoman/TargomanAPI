@@ -32,8 +32,8 @@ namespace Targoman::API::AdvertModule::ORM {
 //using namespace ORM;
 
 QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -43,9 +43,9 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        _createInfo.insert(tblBin::binID, _SESSION.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, _createInfo);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        _createInfo.insert(tblBin::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _createInfo);
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -53,18 +53,18 @@ quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
 bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())))
-        ExtraFilters.insert(tblBin::binID, _SESSION.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, ExtraFilters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())))
+        ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     QVariantMap ExtraFilters;
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblBin::binID, _SESSION.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _SESSION.getUserID()}}, ExtraFilters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }

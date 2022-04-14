@@ -124,7 +124,7 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 }
 
 void Advert::applyAssetAdditives(
-    intfAPISession &_SESSION,
+    intfAPICallBoom &_APICALLBOOM,
     INOUT stuAssetItem& _assetItem,
     const OrderAdditives_t& _orderAdditives
 ) {
@@ -135,7 +135,7 @@ void Advert::applyAssetAdditives(
 
 /***************************************************************************************************/
 //bool Advert::apiPOSTprocessVoucher(
-//        APISession<true> &_SESSION,
+//        APICallBoom<true> &_APICALLBOOM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -149,7 +149,7 @@ void Advert::applyAssetAdditives(
 //}
 
 //bool Advert::apiPOSTcancelVoucher(
-//        APISession<true> &_SESSION,
+//        APICallBoom<true> &_APICALLBOOM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -163,14 +163,14 @@ void Advert::applyAssetAdditives(
 //}
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order
 ) {
 }
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
     const QString _keywords
@@ -178,7 +178,7 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
 }
 
 QString Advert::apiGETretrieveURL(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     quint64 _id,
     TAPI::IPv4_t _clientIP,
     QString _agent
@@ -190,7 +190,7 @@ QString Advert::apiGETretrieveURL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Advert::apiPOSTfixtureSetup(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     QString _random
 ) {
     QVariantMap Result;
@@ -362,7 +362,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 
     //-- add to basket --------------------------------------
     LastPreVoucher = this->apiPOSTaddToBasket(
-        _SESSION,
+        _APICALLBOOM,
         /* saleableCode        */ SaleableCode,
         /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
         /* qty                 */ 1,
@@ -375,7 +375,7 @@ QVariant Advert::apiPOSTfixtureSetup(
 
     //-- finalize basket --------------------------------------
     QVariant res = RESTClientHelper::callAPI(
-        _SESSION,
+        _APICALLBOOM,
         RESTClientHelper::POST,
         "Account/finalizeBasket",
         {},
@@ -393,7 +393,7 @@ QVariant Advert::apiPOSTfixtureSetup(
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentMD5.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
-            _SESSION,
+            _APICALLBOOM,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},
@@ -416,13 +416,13 @@ QVariant Advert::apiPOSTfixtureSetup(
 }
 
 //bool Advert::apiPOSTfixtureSetupVoucher(
-//        APISession<true> &_SESSION
+//        APICallBoom<true> &_APICALLBOOM
 //    )
 //{
 //}
 
 QVariant Advert::apiPOSTfixtureCleanup(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     QString _random
 ) {
     QVariantMap Result;

@@ -70,25 +70,25 @@ UserWallets::UserWallets() :
     ) { ; }
 
 QVariant UserWallets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({ { tblUserWallets::wal_usrID, _SESSION.getUserID() } }, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({ { tblUserWallets::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 quint64 UserWallets::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::walDefault, 0);
 
-//        this->setSelfFilters({ { tblUserWallets::wal_usrID, _SESSION.getUserID() } }, _createInfo);
-        _createInfo.insert(tblUserWallets::wal_usrID, _SESSION.getUserID());
+//        this->setSelfFilters({ { tblUserWallets::wal_usrID, _APICALLBOOM.getUserID() } }, _createInfo);
+        _createInfo.insert(tblUserWallets::wal_usrID, _APICALLBOOM.getUserID());
     }
 
     return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -96,9 +96,9 @@ bool UserWallets::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
 bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblUserWallets::walDefault, 0);
-        ExtraFilters.insert(tblUserWallets::wal_usrID, _SESSION.getUserID());
+        ExtraFilters.insert(tblUserWallets::wal_usrID, _APICALLBOOM.getUserID());
     }
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
@@ -106,10 +106,10 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 
 //bool UserWallets::apiUPDATEdefaultWallet(
 bool UserWallets::apiUPDATEsetAsDefault(
-        APISession<true> &_SESSION,
+        APICallBoom<true> &_APICALLBOOM,
         quint64 _walID
     ) {
-    bool IsPrivileged = Authorization::hasPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
 //    clsDACResult Result = this->execQuery(
 //                              "UPDATE " + this->Name
@@ -120,13 +120,13 @@ bool UserWallets::apiUPDATEsetAsDefault(
 //                              + (IsPrivileged ? "TRUE" : (tblUserWallets::wal_usrID + QStringLiteral(" = ? ")))
 //                              + " AND walID = ?",
 //                              (IsPrivileged ?
-//                                   QVariantList({ _SESSION.getUserID(), _walID }) :
-//                                   QVariantList({ _SESSION.getUserID(), _SESSION.getUserID(), _walID })
+//                                   QVariantList({ _APICALLBOOM.getUserID(), _walID }) :
+//                                   QVariantList({ _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID(), _walID })
 //                                   )
 //                              );
 //    return Result.numRowsAffected() > 0;
 
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ExtraFilters;
 
@@ -135,7 +135,7 @@ bool UserWallets::apiUPDATEsetAsDefault(
         ExtraFilters.insert(tblUserWallets::wal_usrID, CurrentUserID);
 
     return /*Targoman::API::Query::*/this->Update(*this,
-                                 _SESSION,
+                                 _APICALLBOOM,
                                  {},
                                  TAPI::ORMFields_t({
                                     { tblUserWallets::walDefault, 1 },
@@ -147,7 +147,7 @@ bool UserWallets::apiUPDATEsetAsDefault(
 }
 
 bool UserWallets::apiCREATEtransfer(
-        APISession<true> &_SESSION,
+        APICallBoom<true> &_APICALLBOOM,
         const QString& _destLogin,
         quint32 _amount,
         const TAPI::MD5_t& _pass,
@@ -160,7 +160,7 @@ bool UserWallets::apiCREATEtransfer(
 
     this->callSP("spWallet_Transfer",
                  {
-                     { "iFromUserID", _SESSION.getUserID() },
+                     { "iFromUserID", _APICALLBOOM.getUserID() },
                      { "iFromWalID", _walID },
                      { "iToUserLogin", _destLogin },
                      { "iAmount", _amount },

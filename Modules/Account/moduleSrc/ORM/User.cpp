@@ -96,8 +96,8 @@ User::User() :
 }
 
 QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (_SESSION.getUserID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(_SESSION.getJWT(), { "Account:User:CRUD~0100" });
+    if (_APICALLBOOM.getUserID() != _pksByPath.toULongLong())
+        Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -145,7 +145,7 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -156,13 +156,13 @@ quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
  * this method only can call by admin user
  */
 bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
 bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
@@ -175,13 +175,13 @@ SelectQuery User::getPhotoQuery(quint64 _usrID) {
 }
 
 TAPI::Base64Image_t User::apiGETphoto(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     quint64 _usrID
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     if (CurrentUserID != _usrID)
-        Authorization::checkPriv(_SESSION.getJWT(), { "Account:User:photo:CRUD~0100" });
+        Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:photo:CRUD~0100" });
 
     UserExtraInfo::instance().prepareFiltersList();
 
@@ -195,10 +195,10 @@ TAPI::Base64Image_t User::apiGETphoto(
 }
 
 bool User::apiUPDATEphoto(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     TAPI::Base64Image_t _image
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QString qry = QString()
           + "INSERT INTO"
@@ -228,9 +228,9 @@ bool User::apiUPDATEphoto(
 }
 
 bool User::apiPOSTdeletePhoto(
-    APISession<true> &_SESSION
+    APICallBoom<true> &_APICALLBOOM
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QString qry = QString()
           + "UPDATE"
@@ -256,12 +256,12 @@ bool User::apiPOSTdeletePhoto(
 }
 
 bool User::apiUPDATEemail(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _psw,
     QString         _salt
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     _email = _email.toLower().trimmed();
 
@@ -288,12 +288,12 @@ bool User::apiUPDATEemail(
 }
 
 bool User::apiUPDATEmobile(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _psw,
     QString         _salt
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -320,13 +320,13 @@ bool User::apiUPDATEmobile(
 }
 
 bool User::apiUPDATEpersonalInfo(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
     NULLABLE_TYPE(TAPI::enuGender::Type) _gender
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ToUpdate;
 
@@ -337,7 +337,7 @@ bool User::apiUPDATEpersonalInfo(
 
     if (ToUpdate.size())
         this->Update(*this,
-                     _SESSION,
+                     _APICALLBOOM,
                      QString("%1").arg(CurrentUserID),
                      ToUpdate
                      );
@@ -346,11 +346,11 @@ bool User::apiUPDATEpersonalInfo(
 }
 
 bool User::apiUPDATEfinancialInfo(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QStringList ToUpdate;
     QVariantList Params;
@@ -390,7 +390,7 @@ bool User::apiUPDATEfinancialInfo(
 }
 
 bool User::apiUPDATEextraInfo(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
     QString         _education,
@@ -398,7 +398,7 @@ bool User::apiUPDATEextraInfo(
 //        QString         _language,
     QString         _theme
 ) {
-    quint64 CurrentUserID = _SESSION.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ToUpdateJson;
     QStringList ToRemoveJson;
@@ -538,7 +538,7 @@ UserExtraInfo::UserExtraInfo() :
     )
 { ; }
 
-//bool UserExtraInfo::apiUPDATEsheba(APISession<true> &_SESSION, TAPI::Sheba_t _sheba)
+//bool UserExtraInfo::apiUPDATEsheba(APICallBoom<true> &_APICALLBOOM, TAPI::Sheba_t _sheba)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -546,13 +546,13 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _sheba, _SESSION.getUserID(), _SESSION.getUserID() }
+//                              { _sheba, _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool UserExtraInfo::apiUPDATEetherAddress(APISession<true> &_SESSION, TAPI::Ether_t _etherAddress)
+//bool UserExtraInfo::apiUPDATEetherAddress(APICallBoom<true> &_APICALLBOOM, TAPI::Ether_t _etherAddress)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -560,7 +560,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::ueiEther +" = ?, " +tblUserExtraInfo::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _etherAddress, _SESSION.getUserID(), _SESSION.getUserID() }
+//                              { _etherAddress, _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;

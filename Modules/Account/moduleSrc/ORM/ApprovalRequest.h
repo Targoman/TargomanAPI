@@ -81,7 +81,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         timerInfo,
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             QString _emailOrMobile
         ),
         "Returns TTL remained for Approval Request based on email or mobile"

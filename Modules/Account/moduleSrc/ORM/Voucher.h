@@ -71,7 +71,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_CREATE(
         requestIncrease,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             quint32 _amount,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
@@ -87,7 +87,7 @@ private slots:
     quint64 REST_CREATE(
         requestWithdraw,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             quint64 _amount,
             quint64 _walID,
             const QString& _desc = {}
@@ -98,7 +98,7 @@ private slots:
     quint64 REST_CREATE(
         requestWithdrawFor,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             quint64 _targetUsrID,
             quint64 _amount,
             TAPI::JSON_t _desc

@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_SERVER_APISESSION_H
-#define TARGOMAN_API_SERVER_APISESSION_H
+#ifndef TARGOMAN_API_SERVER_APICALLBOOM_H
+#define TARGOMAN_API_SERVER_APICALLBOOM_H
 
 #include "QString"
 #include "QSharedDataPointer"
@@ -30,14 +30,14 @@
 
 namespace Targoman::API::Server {
 
-class APISessionData;
+class APICallBoomData;
 
-class intfAPISession
+class intfAPICallBoom
 {
 public:
-    intfAPISession();
-    intfAPISession(const intfAPISession& _other);
-    virtual ~intfAPISession();
+    intfAPICallBoom();
+    intfAPICallBoom(const intfAPICallBoom& _other);
+    virtual ~intfAPICallBoom();
 
 public:
     void initialize(
@@ -67,11 +67,11 @@ public:
     void addResponseHeaderNameToExpose(const QString &_header);
 
 protected:
-    QSharedDataPointer<APISessionData> Data;
+    QSharedDataPointer<APICallBoomData> Data;
 };
 
 template <bool _needJWT>
-class APISession : public intfAPISession
+class APICallBoom : public intfAPICallBoom
 {
 public:
     virtual bool needJWT() { return _needJWT; }
@@ -79,4 +79,4 @@ public:
 
 } //namespace Targoman::API::Server
 
-#endif // TARGOMAN_API_SERVER_APISESSION_H
+#endif // TARGOMAN_API_SERVER_APICALLBOOM_H

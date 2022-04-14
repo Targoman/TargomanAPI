@@ -28,14 +28,14 @@
 #include <QMetaMethod>
 
 #include "Interfaces/API/intfPureModule.h"
-#include "Interfaces/Server/APISession.h"
+#include "Interfaces/Server/APICallBoom.h"
 
 namespace Targoman::API::Server {
 
-#define APISESSION_TYPE_NAME_BASE   "APISession<"
-#define APISESSION_NO_TYPE_NAME     "APISession<false>"
-#define APISESSION_JWT_TYPE_NAME    "APISession<true>"
-#define APISESSION_PARAM_NAME       "_SESSION"
+#define APICALLBOOM_TYPE_NAME_BASE   "APICallBoom<"
+#define APICALLBOOM_NO_TYPE_NAME     "APICallBoom<false>"
+#define APICALLBOOM_JWT_TYPE_NAME    "APICallBoom<true>"
+#define APICALLBOOM_PARAM_NAME       "_APICALLBOOM"
 
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
@@ -75,7 +75,7 @@ public:
     }
 
     inline bool requiresJWT() const {
-        return this->ParamTypesName.contains(PARAM_JWT);
+        return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
     }
 
 //    inline bool requiresCookies() const {
@@ -116,7 +116,7 @@ public:
     }
 
     QVariant invoke(
-        intfAPISession* _SESSION,
+        intfAPICallBoom* _APICALLBOOM,
         bool _isUpdateMethod,
         const QStringList& _args,
 //        /*OUT*/ QVariantMap &_responseHeaders,
@@ -129,7 +129,7 @@ public:
     ) const;
 
     void invokeMethod(
-        intfAPISession* _SESSION,
+        intfAPICallBoom* _APICALLBOOM,
         const QVariantList& _arguments,
         QGenericReturnArgument _returnArg
 //        /*OUT*/ QVariantMap &_responseHeaders
@@ -152,7 +152,8 @@ private:
     QList<int>                  ParamTypesID;
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
-    intfPureModule*              Parent;
+    intfPureModule*             Parent;
+    bool                        RequiresJWT;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

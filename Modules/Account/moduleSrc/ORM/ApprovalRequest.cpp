@@ -85,7 +85,7 @@ ApprovalRequest::ApprovalRequest() :
     ) { ; }
 
 QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
@@ -95,17 +95,17 @@ QVariant ApprovalRequest::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_SESSION.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
 }
 
 QVariant ApprovalRequest::apitimerInfo(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     QString _emailOrMobile
 ) {
-    Authorization::validateIPAddress(_SESSION.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     enuApprovalType::Type Type;
 

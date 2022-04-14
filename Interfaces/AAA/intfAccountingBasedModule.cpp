@@ -118,15 +118,15 @@ stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
 }
 
 void intfAccountingBasedModule::checkUsageIsAllowed(
-    intfAPISession &_SESSION,
+    intfAPICallBoom &_APICALLBOOM,
     const ServiceUsage_t &_requestedUsage
 ) {
-    QJsonObject Privs = _SESSION.getJWTPrivsObject();
+    QJsonObject Privs = _APICALLBOOM.getJWTPrivsObject();
 
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(_SESSION.getUserID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(_APICALLBOOM.getUserID(), _requestedUsage);
 
     if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -309,7 +309,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
     TAPI::SaleableCode_t _saleableCode,
     Targoman::API::AAA::OrderAdditives_t _orderAdditives,
     qreal _qty,
@@ -320,7 +320,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 currentUserID = _SESSION.getUserID();
+    quint64 currentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
@@ -414,12 +414,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     qDebug() << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
-    this->digestPrivs(_SESSION.getJWT(), AssetItem);
+    this->digestPrivs(_APICALLBOOM.getJWT(), AssetItem);
 
-    this->applyAssetAdditives(_SESSION, AssetItem, _orderAdditives);
+    this->applyAssetAdditives(_APICALLBOOM, AssetItem, _orderAdditives);
     qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
-    this->applyReferrer(_SESSION, AssetItem, _referrer, _extraReferrerParams);
+    this->applyReferrer(_APICALLBOOM, AssetItem, _referrer, _extraReferrerParams);
 
     //-- --------------------------------
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
@@ -745,7 +745,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
-    APISession<true> &_SESSION,
+    APICallBoom<true> &_APICALLBOOM,
 //    quint64 _orderID, //it is uasID
     TAPI::MD5_t _itemUUID,
     Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -755,7 +755,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPInternalServerError("pre-voucher items is empty.");
 
-//    quint64 currentUserID = _SESSION.getUserID();
+//    quint64 currentUserID = _APICALLBOOM.getUserID();
 
     bool Found = false;
     qint64 FinalPrice = 0;
@@ -768,7 +768,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
             Found = true;
 
             //delete voucher item
-            if (this->cancelVoucherItem(_SESSION.getUserID(), PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool {
+            if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool {
                 TAPI::enuAuditableStatus::Type UserAssetStatus =
                                     _userAssetInfo
                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
@@ -811,7 +811,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 }
 /*
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
-        APISession<true> &_SESSION,
+        APICallBoom<true> &_APICALLBOOM,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -1084,7 +1084,7 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 }
 
 bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 ) {
     checkVoucherItemForTrustedActionSanity(_data);
@@ -1093,7 +1093,7 @@ bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
 }
 
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
-    APISession<false> &_SESSION,
+    APICallBoom<false> &_APICALLBOOM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 ) {
     checkVoucherItemForTrustedActionSanity(_data);

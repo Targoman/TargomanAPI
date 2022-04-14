@@ -53,7 +53,8 @@ clsAPIObject::clsAPIObject(
     TTL(_ttl ? _ttl : ServerConfigs::APICallTimeout.value()),
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
-    Parent(_module)
+    Parent(_module),
+    RequiresJWT(false)
 {
     QList<QByteArray> parameterTypes = _method.parameterTypes();
     quint8 i = 0;
@@ -61,20 +62,24 @@ clsAPIObject::clsAPIObject(
     foreach (const QByteArray &ParamName, _method.parameterNames()) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        /*if (ParameterTypeName.startsWith(APISESSION_JWT_TYPE_NAME)) {
+        /*if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME)) {
             this->ParamNames.append("JWT");
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
             this->BaseMethod.DefaultValues[0] = {};
-        } else */if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) { //APISESSION_NO_TYPE_NAME)) {
+        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) { //APICALLBOOM_NO_TYPE_NAME)) {
             --this->RequiredParamsCount;
             this->BaseMethod.DefaultValues.removeAt(0);
-            //do nothing
+            if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME))
+                this->RequiresJWT = true;
         } else {
             QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
             this->ParamNames.append(ParamNameNoUnderScore);
             this->ParamTypesName.append(QMetaType::typeName(_method.parameterType(i)));
             this->ParamTypesID.append(_method.parameterType(i));
+
+//            if (/*this->BaseMethod*/_method.DefaultValues.at(i).isValid())
+//                --this->RequiredParamsCount;
         }
 
         ++i;
@@ -91,7 +96,7 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
 }
 
 QVariant clsAPIObject::invoke(
-    intfAPISession* _SESSION,
+    intfAPICallBoom* _APICALLBOOM,
     bool _isUpdateMethod,
     const QStringList& _args,
 //    /*OUT*/ QVariantMap &_responseHeaders,
@@ -242,7 +247,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _SESSION->setResponseHeaders(Map.value("headers").toMap());
+            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -253,7 +258,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _SESSION->setResponseHeaders(Map.value("headers").toMap());
+            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -274,14 +279,14 @@ QVariant clsAPIObject::invoke(
 
     QVariant Result = APIMethod->invokeMethod(
                           this,
-                          _SESSION,
+                          _APICALLBOOM,
                           Arguments
 //                          _responseHeaders
                           );
 
     QVariantMap ResultWithHeader = QVariantMap({
                                                    { "result", Result },
-                                                   { "headers", _SESSION->getResponseHeaders() },
+                                                   { "headers", _APICALLBOOM->getResponseHeaders() },
                                                });
     if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
@@ -294,7 +299,7 @@ QVariant clsAPIObject::invoke(
 }
 
 void clsAPIObject::invokeMethod(
-    intfAPISession* _SESSION,
+    intfAPICallBoom* _APICALLBOOM,
     const QVariantList& _arguments,
     QGenericReturnArgument _returnArg
 //    /*OUT*/ QVariantMap &_responseHeaders
@@ -329,7 +334,7 @@ void clsAPIObject::invokeMethod(
     };
 
     try {
-        QGenericArgument _SESSION_ARG("_SESSION", _SESSION);
+        QGenericArgument _APICALLBOOM_ARG("_APICALLBOOM", _APICALLBOOM);
 
         QGenericArgument Arguments[9];
 
@@ -347,7 +352,7 @@ void clsAPIObject::invokeMethod(
             parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
-            _SESSION_ARG, //Q_ARG(intfAPISession, *_SESSION),
+            _APICALLBOOM_ARG, //Q_ARG(intfAPICallBoom, *_APICALLBOOM),
             Arguments[0],
             Arguments[1],
             Arguments[2],
@@ -374,27 +379,24 @@ void clsAPIObject::invokeMethod(
 }
 
 bool clsAPIObject::isPolymorphic(const QMetaMethodExtended& _method) {
-
-    ///@TODO: fix compare with _method.parameterType(i)
-    return false;
-
-
-
-
     if (_method.parameterCount() == 0)
         return false;
 
     for (int i=0; i< qMin(_method.parameterCount(), this->BaseMethod.parameterCount()); ++i)
-        if (this->/*BaseMethod.parameterType*/ParamTypesID.at(i) != _method.parameterType(i))
+        if (this->BaseMethod.parameterType(i) != _method.parameterType(i))
             return true;
 
     return false;
 }
 
 void clsAPIObject::updateDefaultValues(const QMetaMethodExtended& _method) {
-    if (_method.parameterNames().size() < this->RequiredParamsCount) {
-        this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size());
-        this->LessArgumentMethods.append(_method);
+    ///-1: for _APICALLBOOM
+    if ((_method.parameterNames().size() - 1) < this->RequiredParamsCount) {
+        this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size() - 1);
+
+        QMetaMethodExtended Method = _method;
+        Method.DefaultValues.removeAt(0); //for _APICALLBOOM
+        this->LessArgumentMethods.append(Method);
     }
 }
 

@@ -42,7 +42,7 @@ private slots:
         openAPI_json,
         "openAPI.json",
         (
-            APISession<false> &_SESSION
+            APICallBoom<false> &_APICALLBOOM
         ),
         ""
     );
@@ -51,7 +51,7 @@ private slots:
         openAPI_yaml,
         "openAPI.yaml",
         (
-            APISession<false> &_SESSION
+            APICallBoom<false> &_APICALLBOOM
         ),
         ""
     );
@@ -61,7 +61,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         swaggerui,
         (
-            APISession<false> &_SESSION
+            APICallBoom<false> &_APICALLBOOM
         ),
         ""
     );
@@ -70,7 +70,7 @@ private slots:
         stats_json,
         "stats.json",
         (
-            APISession<false> &_SESSION,
+            APICallBoom<false> &_APICALLBOOM,
             bool _full = false
         ),
         ""
@@ -79,7 +79,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         version,
         (
-            APISession<false> &_SESSION
+            APICallBoom<false> &_APICALLBOOM
         ),
         ""
     );
@@ -87,7 +87,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         ping,
         (
-            APISession<false> &_SESSION
+            APICallBoom<false> &_APICALLBOOM
         ),
         ""
     );

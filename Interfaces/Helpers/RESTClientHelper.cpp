@@ -81,7 +81,7 @@ QVariant RESTClientHelper::callAPI(
 }
 
 QVariant RESTClientHelper::callAPI(
-    intfAPISession &_SESSION,
+    intfAPICallBoom &_APICALLBOOM,
     RESTClientHelper::enuHTTPMethod _method,
     const QString &_api,
     const QVariantMap &_urlArgs,
@@ -90,7 +90,7 @@ QVariant RESTClientHelper::callAPI(
     QString _aPIURL,
     QVariantMap *_outResponseHeaders
 ) {
-    TAPI::JWT_t JWT = _SESSION.getJWT();
+    TAPI::JWT_t JWT = _APICALLBOOM.getJWT();
 
     QString OldEncodedJWT = JWT["encodedJWT"].toString();
     QVariantMap ResponseHeaders;
@@ -108,8 +108,8 @@ QVariant RESTClientHelper::callAPI(
 
     if (OldEncodedJWT != JWT["encodedJWT"].toString())
     {
-        _SESSION.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
-        _SESSION.setJWT(JWT);
+        _APICALLBOOM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
+        _APICALLBOOM.setJWT(JWT);
     }
 
     if (_outResponseHeaders != nullptr)

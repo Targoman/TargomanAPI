@@ -83,7 +83,7 @@ private slots:
     bool REST_UPDATE(
         disablePackage,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset banned by priviledged user"
@@ -92,7 +92,7 @@ private slots:
     bool REST_UPDATE(
         setAsPrefered,
         (
-            APISession<true> &_SESSION,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset as prefered"

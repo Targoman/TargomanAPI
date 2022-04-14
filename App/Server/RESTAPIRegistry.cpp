@@ -259,8 +259,8 @@ void RESTAPIRegistry::registerRESTAPI(
 
             QString ParameterTypeName = parameterTypes.at(ParamIndex);
 
-            //check APISession
-            if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) {
+            //check APICallBoom
+            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
                 DefaultValues.append(QVariant());
                 continue;
             }
@@ -368,6 +368,9 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
 
         clsAPIObject* APIObject = _registry.value(Key);
         QStringList Parameters;
+
+        if (APIObject->requiresJWT())
+            Parameters.append(QString(_showTypes ? "TAPI::JWT_t" : "") + " JWT");
 
         for (quint8 i=0; i<APIObject->/*BaseMethod.parameterCount()*/ParamTypesName.count(); ++i) {
 
@@ -497,39 +500,39 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
                              ;
 
     QList<QByteArray> parameterTypes = _method.parameterTypes();
-    bool HasSessionParam = false;
+    bool HasApiCallBoomParam = false;
 
     for (int i=0; i<_method.parameterCount(); ++i) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        //check APISession
-        if (ParameterTypeName.startsWith(APISESSION_TYPE_NAME_BASE)) {
-            if (HasSessionParam)
-                throw exRESTRegistry(QString("Invalid duplicate SESSION parameter (%1) at %2 of %3")
+        //check APICallBoom
+        if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
+            if (HasApiCallBoomParam)
+                throw exRESTRegistry(QString("Invalid duplicate APICALLBOOM parameter (%1) at %2 of %3")
                                      .arg(_method.parameterNames().at(i).constData())
                                      .arg(i)
                                      .arg(FullMethodName));
 
             if (i > 0)
-                throw exRESTRegistry(QString("SESSION parameter must be first argument of %1")
+                throw exRESTRegistry(QString("APICALLBOOM parameter must be first argument of %1")
                                      .arg(FullMethodName));
 
-            HasSessionParam = true;
+            HasApiCallBoomParam = true;
 
             continue;
         }
 
         if (ParameterTypeName == PARAM_JWT)
-            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_REMOTE_IP)
-            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_COOKIES)
-            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_HEADERS)
-            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APISession instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
 
         //-- others
         if ((ErrMessage = RESTAPIRegistry::isValidType(_method.parameterType(i), true)).size())
@@ -551,8 +554,8 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         }
     }
 
-    if (HasSessionParam == false)
-        throw exRESTRegistry(QString("SESSION parameter not defined in %1").arg(FullMethodName));
+    if (HasApiCallBoomParam == false)
+        throw exRESTRegistry(QString("APICALLBOOM parameter not defined in %1").arg(FullMethodName));
 }
 
 constexpr char CACHE_INTERNAL[] = "CACHEABLE_";

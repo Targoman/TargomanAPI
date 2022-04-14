@@ -69,7 +69,7 @@ private slots:
 
         QVERIFY(Result.toString() == "+989998881010");
     }
-private:
+
     void SignupByMobileOnly_0999_888_1010() {
         QVariant Result = callUserAPI(
                               RESTClientHelper::POST,
