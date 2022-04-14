@@ -56,16 +56,78 @@ tmplConfigurable<QString> ClientConfigs::RESTServerAddress(
 //};
 
 QVariant RESTClientHelper::callAPI(
-        INOUT TAPI::JWT_t &_JWT,
-        RESTClientHelper::enuHTTPMethod _method,
-        const QString &_api,
-        const QVariantMap &_urlArgs,
-        const QVariantMap &_postOrFormFields,
-        const QVariantMap &_formFiles,
-        QString _aPIURL,
-        QVariantMap *_outResponseHeaders
-    )
-{
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
+    QString temp;
+
+    QVariant Result = RESTClientHelper::callAPI(
+        temp,
+        _method,
+        _api,
+        _urlArgs,
+        _postOrFormFields,
+        _formFiles,
+        _aPIURL,
+        _outResponseHeaders
+    );
+
+    return Result;
+}
+
+QVariant RESTClientHelper::callAPI(
+    intfAPICallBoom &_APICALLBOOM,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
+    TAPI::JWT_t JWT = _APICALLBOOM.getJWT();
+
+    QString OldEncodedJWT = JWT["encodedJWT"].toString();
+    QVariantMap ResponseHeaders;
+
+    QVariant Result = RESTClientHelper::callAPI(
+        JWT,
+        _method,
+        _api,
+        _urlArgs,
+        _postOrFormFields,
+        _formFiles,
+        _aPIURL,
+        &ResponseHeaders
+    );
+
+    if (OldEncodedJWT != JWT["encodedJWT"].toString())
+    {
+        _APICALLBOOM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
+        _APICALLBOOM.setJWT(JWT);
+    }
+
+    if (_outResponseHeaders != nullptr)
+        *_outResponseHeaders = ResponseHeaders;
+
+    return Result;
+}
+
+QVariant RESTClientHelper::callAPI(
+    INOUT TAPI::JWT_t &_JWT,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
 //    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
 //        {},
 //        300, //Targoman::API::Server::QJWT::TTL.value(),
@@ -99,16 +161,15 @@ QVariant RESTClientHelper::callAPI(
 }
 
 QVariant RESTClientHelper::callAPI(
-        INOUT QString &_encodedJWT,
-        RESTClientHelper::enuHTTPMethod _method,
-        const QString &_api,
-        const QVariantMap &_urlArgs,
-        const QVariantMap &_postOrFormFields,
-        const QVariantMap &_formFiles,
-        QString _aPIURL,
-        QVariantMap *_outResponseHeaders
-    )
-{
+    INOUT QString &_encodedJWT,
+    RESTClientHelper::enuHTTPMethod _method,
+    const QString &_api,
+    const QVariantMap &_urlArgs,
+    const QVariantMap &_postOrFormFields,
+    const QVariantMap &_formFiles,
+    QString _aPIURL,
+    QVariantMap *_outResponseHeaders
+) {
     if (_aPIURL.isEmpty())
         _aPIURL = ClientConfigs::RESTServerAddress.value();
 
@@ -219,7 +280,7 @@ QVariant RESTClientHelper::callAPI(
     QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
 
     if (JsonError.error != QJsonParseError::NoError)
-        qDebug() << "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';
+        TargomanDebug(5, "Unable to parse JSON: " + JsonError.errorString() + " \"" + CUrlResult + '"');
 
     QVariant Result = Doc.toVariant().toMap().value("result");
 //    qDebug() << "Result:" << Result;

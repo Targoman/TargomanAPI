@@ -47,8 +47,7 @@ Common::Common() :
         CommonDomain,
         CommonSchema,
         ""
-    )
-{
+    ) {
     this->addSubModule(&Alerts::instance());
 }
 

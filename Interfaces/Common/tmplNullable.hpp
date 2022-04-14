@@ -33,7 +33,7 @@ using namespace std;
 namespace TAPI {
 
 /************************************************************/
-//template<class itmplType>
+//template <class itmplType>
 //class tmplNullable : public QSharedPointer<itmplType> {
 //public:
 //    tmplNullable()                                    : QSharedPointer<itmplType>(nullptr) { ; }
@@ -47,7 +47,7 @@ namespace TAPI {
 //    }
 //};
 
-//template<class itmplType>
+//template <class itmplType>
 //class tmplNullable : public optional<itmplType> {
 //public:
 //    tmplNullable()                                    : optional<itmplType>() { ; }

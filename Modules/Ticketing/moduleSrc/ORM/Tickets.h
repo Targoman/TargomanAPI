@@ -81,7 +81,7 @@ private slots:
         ,
         (
 //            GET_METHOD_ARGS_HEADER_APICALL,
-            TAPI::JWT_t _JWT,
+            APICallBoom<true> &_APICALLBOOM,
             TAPI::PKsByPath_t _pksByPath = {},
             quint64 _pageIndex = 0,
             quint16 _pageSize = 20,

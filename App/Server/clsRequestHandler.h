@@ -94,10 +94,10 @@ class clsRequestHandler : public QObject
         QVariantMap ResponseHeader;
 
         stuResult(
-                const QVariant &_result = {},
-                const QVariantMap &_responseHeaders = {},
-                qhttp::TStatusCode _code = qhttp::ESTATUS_OK
-            ) :
+            const QVariant &_result = {},
+            const QVariantMap &_responseHeaders = {},
+            qhttp::TStatusCode _code = qhttp::ESTATUS_OK
+        ) :
             StatusCode(_code),
             Result(_result),
             ResponseHeader(_responseHeaders)
@@ -110,8 +110,8 @@ public:
                       QObject *_parent = nullptr);
     void process(const QString& _api);
 
-private:
-    bool callStaticAPI(QString _api);
+//private:
+//    bool callStaticAPI(QString _api);
 
 public:
     void findAndCallAPI(QString _api);
@@ -121,7 +121,8 @@ public:
             QVariantMap _responseHeaders = {},
             bool _closeConnection = false
         );
-    void sendFile(const QString& _basePath, const QString _path);
+    void sendFile(QString _fullFileName);
+    void sendFile(QString _basePath, const QString &_path);
     void sendResponse(
             qhttp::TStatusCode _code,
             const QVariant &_response,
@@ -129,7 +130,7 @@ public:
         );
     void sendCORSOptions();
 
-    void redirect(const QString _path, bool _appendBase = true, bool _permananet = true);
+    void redirect(const QString _path, bool _appendBase = true, bool _permananet = false);
 
     QString host() const;
     quint16 port() const;
@@ -142,7 +143,7 @@ private:
             QVariantMap _responseHeaders = {},
             bool _closeConnection = false
         );
-    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath);
+    stuResult run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath, const QString& _api);
     QString toIPv4(const QString _ip);
 
 private slots:

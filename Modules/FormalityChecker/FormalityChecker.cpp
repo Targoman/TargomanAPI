@@ -31,7 +31,7 @@ using namespace Targoman::API::ModuleHelpers;
 TARGOMAN_IMPL_API_MODULE(FormalityChecker)
 
 FormalityChecker::FormalityChecker() :
-    intfPureModule("Targoman")
+    intfPureModule("FormalityChecker")
 { ; }
 
 bool FormalityChecker::init() {
@@ -40,7 +40,11 @@ bool FormalityChecker::init() {
     return true;
 }
 
-QString FormalityChecker::apiCheck(const QString _text, const TAPI::ISO639_2_t& _lang) {
+QString FormalityChecker::apicheck(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString _text,
+    const TAPI::ISO639_2_t& _lang
+) {
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 

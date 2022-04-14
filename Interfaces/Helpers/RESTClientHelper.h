@@ -29,6 +29,9 @@
 #include "QtCUrl.h"
 #include "Interfaces/Common/GenericTypes.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
+#include "Interfaces/Server/APICallBoom.h"
+
+using namespace Targoman::API::Server;
 
 namespace Targoman::API::Helpers {
 
@@ -48,6 +51,27 @@ public:
         PATCH,
         DELETE,
     };
+
+    static QVariant callAPI(
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString &_api,
+        const QVariantMap &_urlArgs = {},
+        const QVariantMap &_postOrFormFields = {},
+        const QVariantMap &_formFiles = {},
+        QString _aPIURL = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    );
+
+    static QVariant callAPI(
+        intfAPICallBoom &_APICALLBOOM,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString &_api,
+        const QVariantMap &_urlArgs = {},
+        const QVariantMap &_postOrFormFields = {},
+        const QVariantMap &_formFiles = {},
+        QString _aPIURL = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    );
 
     static QVariant callAPI(
         INOUT TAPI::JWT_t &_JWT,

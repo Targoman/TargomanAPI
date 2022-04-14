@@ -81,8 +81,8 @@ private slots:
     QVariant REST_GET_OR_POST(
         timerInfo,
         (
-          TAPI::RemoteIP_t _REMOTE_IP,
-          QString _emailOrMobile
+            APICallBoom<false> &_APICALLBOOM,
+            QString _emailOrMobile
         ),
         "Returns TTL remained for Approval Request based on email or mobile"
     )

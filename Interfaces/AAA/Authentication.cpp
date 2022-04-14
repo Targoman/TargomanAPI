@@ -37,8 +37,7 @@ stuActiveAccount login(
         bool               _rememberMe,
         const QJsonObject& _info,
         const QString&     _fingerPrint
-    )
-{
+    ) {
     makeAAADAC(DAC);
 
     QJsonObject UserInfo = DAC.callSP({},
@@ -73,11 +72,10 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
 */
 
 QString renewJWT(
-        INOUT TAPI::JWT_t &_JWTPayload,
+    INOUT TAPI::JWT_t &_JWTPayload,
 //        const QString &_jwt,
-        const QString &_ip
-    )
-{
+    const QString &_ip
+) {
 //    QStringList JWTParts = _jwt.split('.');
 
 //    if (JWTParts.length() != 3)

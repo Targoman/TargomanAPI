@@ -18,46 +18,81 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
-#define TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
+#ifndef ARGOMAN_API_SERVER_STATICMODULE_H
+#define ARGOMAN_API_SERVER_STATICMODULE_H
 
 #include "Interfaces/API/intfPureModule.h"
 
-namespace Targoman {
-namespace API {
+using namespace Targoman::API::API;
 
-class URLProcessor : public intfPureModule
+namespace Targoman::API::Server {
+
+class StaticModule : public intfPureModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_DEFINE_API_MODULE(URLProcessor);
+    TARGOMAN_DEFINE_API_MODULE(StaticModule);
 
 private slots:
-    QString REST_GET(
-        canonicalize,
+    TAPI::RawData_t REST_GET_OR_POST_ALIAS(
+        openAPI_json,
+        "openAPI.json",
         (
-            APICallBoom<false> &_APICALLBOOM,
-            const QString _url,
-            bool _removeWWW = true
+            APICallBoom<false> &_APICALLBOOM
         ),
-        "normalizes url in a common format to be canonical"
-    )
+        ""
+    );
 
-    QString REST_GET(
-        convertHexCodes,
+    QVariant REST_GET_OR_POST_ALIAS(
+        openAPI_yaml,
+        "openAPI.yaml",
+        (
+            APICallBoom<false> &_APICALLBOOM
+        ),
+        ""
+    );
+
+    //TAPI::ResponseRedirect_t
+    //TAPI::FileData_t
+    QVariant REST_GET_OR_POST(
+        swaggerui,
+        (
+            APICallBoom<false> &_APICALLBOOM
+        ),
+        ""
+    );
+
+    QVariant REST_GET_OR_POST_ALIAS(
+        stats_json,
+        "stats.json",
         (
             APICallBoom<false> &_APICALLBOOM,
-            const QString _url,
-            bool _convertAll = false
+            bool _full = false
         ),
-        "helper method which converts URL encoded strings to normal strings"
-    )
+        ""
+    );
+
+    QVariant REST_GET_OR_POST(
+        version,
+        (
+            APICallBoom<false> &_APICALLBOOM
+        ),
+        ""
+    );
+
+    QVariant REST_GET_OR_POST(
+        ping,
+        (
+            APICallBoom<false> &_APICALLBOOM
+        ),
+        ""
+    );
 };
 
-}
-}
+} //namespace Targoman::API::Server
 
-#endif // TARGOMAN_API_MODULES_URLProcessor_URLProcessor_H
+#endif // ARGOMAN_API_SERVER_STATICMODULE_H

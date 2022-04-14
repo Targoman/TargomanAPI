@@ -35,7 +35,6 @@ intfSQLBasedWithActionLogsModule::intfSQLBasedWithActionLogsModule(
         _module,
         _schema,
         ""
-    )
-{ ; }
+    ) { ; }
 
 } // namespace Targoman::API::API

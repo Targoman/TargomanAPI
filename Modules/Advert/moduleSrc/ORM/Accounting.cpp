@@ -51,8 +51,7 @@ AccountProducts::AccountProducts()
         {///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
             { tblAccountProducts::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::locID },
         }
-    )
-{ ; }
+    ) { ; }
 
 /******************************************************/
 AccountSaleables::AccountSaleables()
@@ -64,16 +63,14 @@ AccountSaleables::AccountSaleables()
             { tblAccountSaleables::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
             { tblAccountSaleables::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
         }
-    )
-{ ; }
+    ) { ; }
 
 /******************************************************/
 AccountUserAssets::AccountUserAssets()
     : intfAccountUserAssets(AdvertSchema,
         {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("uas")
-        })
-{ ; }
+        }) { ; }
 
 /******************************************************/
 AccountAssetUsage::AccountAssetUsage()
@@ -81,12 +78,10 @@ AccountAssetUsage::AccountAssetUsage()
         {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("usg")
         }
-    )
-{ ; }
+    ) { ; }
 
 /******************************************************/
 AccountCoupons::AccountCoupons()
-    : intfAccountCoupons(AdvertSchema)
-{ ; }
+    : intfAccountCoupons(AdvertSchema) { ; }
 
 } // namespace Targoman::API::AdvertModule::ORM

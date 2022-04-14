@@ -58,7 +58,7 @@ struct stuEngineSpecs{
         DestLang(_destLang),
         Class(_class),
         SupportsIXML(_supportsIXML),
-        URL(_url) {/*KZ*/;}
+        URL(_url) { ; }
 
     inline QString fullName() {
         return this->makeFullName(enuEngine::toStr(this->Engine), this->SourceLang, this->DestLang, this->Class);
@@ -79,7 +79,7 @@ class intfTranslatorEngine{
 public:
     explicit intfTranslatorEngine(const stuEngineSpecs& _specs) :
        EngineSpecs(_specs)
-    {/*KZ*/;/*KZ*/}
+    { ; }
 
     virtual ~intfTranslatorEngine();
     virtual QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokinize) = 0;

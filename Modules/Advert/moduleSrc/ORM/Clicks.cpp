@@ -33,8 +33,8 @@ namespace Targoman::API::AdvertModule::ORM {
 //using namespace ORM;
 
 QVariant Clicks::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, clsJWT(_JWT).usrID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -60,7 +60,6 @@ Clicks::Clicks() :
               { ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
                 {tblClicks::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::binID},
                 {tblClicks::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-              })
-{ ; }
+              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

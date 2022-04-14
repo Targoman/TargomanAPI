@@ -32,8 +32,7 @@ QString FixtureHelper::MakeRandomizeName(
         const QString &_sep,
         const QString &_prefix,
         const QString &_suffix
-    )
-{
+    ) {
     QStringList List;
 
     List.append(_prefix);

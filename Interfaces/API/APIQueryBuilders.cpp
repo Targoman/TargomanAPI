@@ -30,7 +30,7 @@ using namespace Targoman::API::AAA;
 
 namespace Targoman::API::Query {
 
-QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {/*KZ*/
+QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 
@@ -56,7 +56,7 @@ QVariantMap SelectOne(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, cons
     return Query.one();
 }
 
-QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {/*KZ*/
+QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 
@@ -80,7 +80,7 @@ QVariantList SelectAll(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, con
     return Query.all();
 }
 
-TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {/*KZ*/
+TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
     Q_UNUSED(_userID)
     Q_UNUSED(_reportCount)
 
@@ -104,7 +104,7 @@ TAPI::stuTable SelectAllWithCount(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNA
     return Query.allWithCount();
 }
 
-QVariant Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {/*KZ*/
+QVariant Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsCondition& _extraFilters, quint16 _cacheTime, std::function<void(SelectQuery &_query)> _lambda_TouchQuery) {
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return SelectAllWithCount(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery).toVariant();
@@ -115,7 +115,7 @@ QVariant Select(clsTable& _table, GET_METHOD_ARGS_IMPL_INTERNAL_CALL, const clsC
     return SelectOne(_table, GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW, _extraFilters, _cacheTime, _lambda_TouchQuery);
 }
 
-quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL) {/*KZ*/
+quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL) {
     _table.prepareFiltersList();
 
     CreateQuery query = CreateQuery(_table);
@@ -128,7 +128,7 @@ quint64 Create(clsTable& _table, CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL) {/*KZ*/
     return query.execute(_userID);
 }
 
-bool Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters) {/*KZ*/
+bool Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -160,7 +160,7 @@ bool Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVari
     return query.execute(_userID) > 0;
 }
 
-bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete) {/*KZ*/
+bool DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete) {
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())

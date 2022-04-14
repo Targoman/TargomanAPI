@@ -50,12 +50,11 @@ WalletTransactions::WalletTransactions() :
             { tblWalletsTransactions::wlt_vchID, R(AAASchema,tblVoucher::Name),          tblVoucher::vchID },
             { tblWalletsTransactions::wltID,     R(AAASchema,tblWalletBalances::Name),   tblWalletBalances::wbl_wltID },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblUserWallets::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblUserWallets::Name);
@@ -76,7 +75,6 @@ WalletBalances::WalletBalances() :
             { tblWalletBalances::wblSumIncome,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
             { tblWalletBalances::wblSumExpense, S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
         }
-    )
-{ ; }
+    ) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM

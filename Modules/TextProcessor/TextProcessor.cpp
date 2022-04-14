@@ -35,16 +35,31 @@ using namespace Targoman::API::ModuleHelpers;
 TARGOMAN_IMPL_API_MODULE(TextProcessor)
 
 TextProcessor::TextProcessor() :
-    intfPureModule("Targoman")
+    intfPureModule("TextProcessor")
 { ; }
 
-QString TextProcessor::apinormalize(const QString _text, const TAPI::ISO639_2_t& _lang, bool _useSpellCorrector) {
+bool TextProcessor::init() {
+    NLP::TextProcessor::instance().init();
+        //Targoman::Common::Configuration::ConfigManager::instance().configSettings());
+
+    return true;
+}
+
+QString TextProcessor::apinormalize(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString _text,
+    const TAPI::ISO639_2_t& _lang,
+    bool _useSpellCorrector
+) {
     return NLP::TextProcessor::instance().normalizeText(_text, _useSpellCorrector ? _lang : TAPI::ISO639_2_t());
 }
 
-QString TextProcessor::apitext2IXML (const QString& _text,
-                                     const TAPI::ISO639_2_t& _lang,
-                                     bool _useSpellCorrector) {
+QString TextProcessor::apitext2IXML(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString& _text,
+    const TAPI::ISO639_2_t& _lang,
+    bool _useSpellCorrector
+) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -62,19 +77,25 @@ QString TextProcessor::apitext2IXML (const QString& _text,
                 );
 }
 
-QString TextProcessor::apiixml2Text(const QString& _ixml,
-                                    bool _detokenize,
-                                    bool _hinidiDigits,
-                                    bool _arabicPunctuations,
-                                    bool _breakSentences) {
+QString TextProcessor::apiixml2Text(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString& _ixml,
+    bool _detokenize,
+    bool _hinidiDigits,
+    bool _arabicPunctuations,
+    bool _breakSentences
+) {
     return NLP::TextProcessor::instance().ixml2Text(_ixml, _detokenize, _hinidiDigits, _arabicPunctuations, _breakSentences);
 }
 
-QString TextProcessor::apitokenize(const QString& _text,
-                                   const TAPI::ISO639_2_t& _lang,
-                                   bool _useSpellCorrector,
-                                   bool _hindiNumerals,
-                                   bool _arabicPunctuations) {
+QString TextProcessor::apitokenize(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString& _text,
+    const TAPI::ISO639_2_t& _lang,
+    bool _useSpellCorrector,
+    bool _hindiNumerals,
+    bool _arabicPunctuations
+) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -92,13 +113,6 @@ QString TextProcessor::apitokenize(const QString& _text,
                             );
 
     return NLP::TextProcessor::instance().ixml2Text(Tokenized, false, _hindiNumerals, _arabicPunctuations, false);
-}
-
-bool TextProcessor::init() {
-    NLP::TextProcessor::instance().init();
-        //Targoman::Common::Configuration::ConfigManager::instance().configSettings());
-
-    return true;
 }
 
 }

@@ -26,6 +26,9 @@
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
+#include "Interfaces/Server/APICallBoom.h"
+
+using namespace Targoman::API::Server;
 
 using namespace Targoman::Common;
 
@@ -37,7 +40,7 @@ class intfCacheConnector;
 
 namespace Common {
 
-template<typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
+template <typename _itmplType, enuVarComplexity _itmplVarType, bool _itmplNullable, bool _isQtType = false>
 class tmplAPIArg : public intfAPIArgManipulator
 {
 public:
@@ -79,16 +82,19 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            const QVariantList& _arguments,
-            /*OUT*/ QVariantMap &_responseHeaders
+            intfAPICallBoom* _APICALLBOOM,
+            const QVariantList& _arguments
+//            /*OUT*/ QVariantMap &_responseHeaders
         ) final
     {
         _itmplType Result;
 
         _apiObject->invokeMethod(
+                    _APICALLBOOM,
                     _arguments,
-                    QReturnArgument<_itmplType>(this->RealTypeName, Result),
-                    _responseHeaders);
+                    QReturnArgument<_itmplType>(this->RealTypeName, Result)
+//                    _responseHeaders
+                    );
 
         return this->toVariantLambda == nullptr ? QVariant::fromValue(Result) : this->toVariantLambda(Result);
     }

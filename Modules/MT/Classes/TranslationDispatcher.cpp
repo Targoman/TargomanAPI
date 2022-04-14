@@ -43,7 +43,7 @@ using namespace Common::Configuration;
 using namespace AAA;
 using namespace NLP;
 
-TranslationDispatcher::~TranslationDispatcher() {/*KZ*/ ; }
+TranslationDispatcher::~TranslationDispatcher() { ; }
 
 QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  QString _text,
@@ -53,7 +53,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
                                                  bool _detailed,
                                                  bool _detokenize,
                                                  int& _preprocessTime,
-                                                 int& _translationTime) {/*KZ*/
+                                                 int& _translationTime) {
     if (_detailed && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought priviledges to get detailed translation response.");
     QTime CacheLookupTime; CacheLookupTime.start();
@@ -109,7 +109,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
     return CachedTranslation;
 }
 
-QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {/*KZ*/
+QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
     Q_UNUSED(_engine);
     if (gConfigs::Classifier::SupportsIXML.value()== false)
         return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, false, false,false));
@@ -117,14 +117,14 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
         return FormalityChecker::instance().check(_lang, _text);
 }
 
-QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang) {/*KZ*/
+QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang) {
     Q_UNUSED (_lang)
     clsDAC DAC;//TODO find moduleName
     if (this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600) {
         clsDACResult Result = DAC.execQueryCacheable(3600,QString(), "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'");
         if (Result.isValid()) {
             this->CorrectionRule.clear();
-            while(Result.next())
+            while (Result.next())
                 this->CorrectionRule.append(
                         qMakePair(
                             QRegularExpression(Result.value(0).toString(),
@@ -136,13 +136,13 @@ QString TranslationDispatcher::preprocessText(const QString& _text, const QStrin
         }
     }
     QString Text = _text;
-    foreach(auto Rule, this->CorrectionRule)
+    foreach (auto Rule, this->CorrectionRule)
         Text = Text.replace(Rule.first, Rule.second);
 
     return Text;
 }
 
-QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang) {/*KZ*/
+QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -162,28 +162,28 @@ QString TranslationDispatcher::tokenize(const QString& _text, const QString& _la
                 );
 }
 
-QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang) {/*KZ*/
+QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang) {
     return TargomanTextProcessor::instance().ixml2Text(_text, true, _lang=="fa" || _lang=="ar", false);
 }
 
-QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang) {/*KZ*/
+QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang) {
     Q_UNUSED(_text); Q_UNUSED (_lang);
     return QVariantMap();
 }
 
-void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text) {/*KZ*/
+void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text) {
     Q_UNUSED(_text); Q_UNUSED (_lang); Q_UNUSED (_wordCount)
 }
 
-void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode) {/*KZ*/
+void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode) {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID); Q_UNUSED (_errorCode);Q_UNUSED (_engine)
 }
 
-void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {/*KZ*/
+void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
 
-void TranslationDispatcher::registerEngines() {/*KZ*/
+void TranslationDispatcher::registerEngines() {
     foreach (const QString& Key, this->TranslationServers.keys()) {
         const tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
                 this->TranslationServers.values(Key);
@@ -217,12 +217,12 @@ void TranslationDispatcher::registerEngines() {/*KZ*/
     }
 }
 
-TranslationDispatcher::TranslationDispatcher() {/*KZ*/
+TranslationDispatcher::TranslationDispatcher() {
     FormalityChecker::instance();
 }
 
 /********************************************/
-intfTranslatorEngine::~intfTranslatorEngine() {/*KZ*/;}
+intfTranslatorEngine::~intfTranslatorEngine() { ; }
 
 }
 }

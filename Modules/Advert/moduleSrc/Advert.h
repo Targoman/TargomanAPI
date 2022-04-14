@@ -81,14 +81,17 @@ protected:
     virtual void breakCredit(quint64 _slbID);
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
-    virtual void applyAssetAdditives(TAPI::JWT_t _JWT,
-                                     INOUT stuAssetItem& _assetItem,
-                                     const OrderAdditives_t& _orderAdditives);
+    virtual void applyAssetAdditives(
+        intfAPICallBoom &_APICALLBOOM,
+        INOUT stuAssetItem& _assetItem,
+        const OrderAdditives_t& _orderAdditives
+    );
+
 protected slots:
 //    bool REST_POST(
 //        processVoucher,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APICallBoom<true> &_APICALLBOOM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
@@ -97,7 +100,7 @@ protected slots:
 //    bool REST_POST(
 //        cancelVoucher,
 //        (
-//            TAPI::JWT_t _JWT,
+//            APICallBoom<true> &_APICALLBOOM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
@@ -106,7 +109,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APICallBoom<false> &_APICALLBOOM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
@@ -116,7 +119,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APICallBoom<false> &_APICALLBOOM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
@@ -127,7 +130,7 @@ protected slots:
     QString REST_GET(
         retrieveURL,
         (
-            TAPI::RemoteIP_t _REMOTE_IP,
+            APICallBoom<false> &_APICALLBOOM,
             quint64 _id,
             TAPI::IPv4_t _clientIP,
             QString _agent
@@ -140,9 +143,8 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                TAPI::JWT_t _JWT,
-                QString _random = {}
+            APICallBoom<true> &_APICALLBOOM,
+            QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
     )
@@ -150,16 +152,15 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-                TAPI::RemoteIP_t _REMOTE_IP,
-                QString _random = {}
+            APICallBoom<true> &_APICALLBOOM,
+            QString _random = {}
         ),
         "Cleanup sample data"
     )
 //    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
-//                TAPI::RemoteIP_t _REMOTE_IP,
-//                TAPI::JWT_t _JWT
+//                APICallBoom<true> &_APICALLBOOM
 //        ),
 //        "Sets up basket and voucher"
 //    )

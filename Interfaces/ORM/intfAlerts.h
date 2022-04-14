@@ -38,7 +38,8 @@ TARGOMAN_DEFINE_ENUM(enuAlertType,
 
 TARGOMAN_DEFINE_ENUM(enuAlertStatus,
                      New = 'N',
-                     Sent = 'S'
+                     Sent = 'S',
+                     Error = 'E'
                      )
 
 #pragma GCC diagnostic push
@@ -55,6 +56,8 @@ TARGOMAN_CREATE_CONSTEXPR(alrReplacedContactInfo);
 TARGOMAN_CREATE_CONSTEXPR(alr_altCode);
 TARGOMAN_CREATE_CONSTEXPR(alrReplacements);
 TARGOMAN_CREATE_CONSTEXPR(alrCreateDate);
+TARGOMAN_CREATE_CONSTEXPR(alrLockedAt);
+TARGOMAN_CREATE_CONSTEXPR(alrLastTryAt);
 TARGOMAN_CREATE_CONSTEXPR(alrSentDate);
 TARGOMAN_CREATE_CONSTEXPR(alrStatus);
 }

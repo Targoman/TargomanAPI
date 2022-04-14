@@ -26,23 +26,25 @@
 
 namespace Targoman::API::Server {
 
-#define USE_ARG_AT(_i) \
-    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
-    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
+//#define USE_ARG_AT(_i) \
+//    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+//    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) : \
+//    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]) \
 
-#define CLEAN_ARG_AT(_i) \
-    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
-    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
-    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
+//#define CLEAN_ARG_AT(_i) \
+//    InvokableMethod.parameterType(_i) < TAPI_BASE_USER_DEFINED_TYPEID ? \
+//    gOrderedMetaTypeInfo.at(InvokableMethod.parameterType(_i))->cleanup(ArgStorage[_i]) : \
+//    gUserDefinedTypesInfo.at(InvokableMethod.parameterType(_i) - TAPI_BASE_USER_DEFINED_TYPEID)->cleanup(ArgStorage[_i])
 
-clsAPIObject::clsAPIObject(intfPureModule* _module,
-                           QMetaMethodExtended _method,
-                           bool _async,
-                           qint32 _cache4Internal,
-                           qint32 _cache4Central,
-                           qint32 _ttl,
-                           bool _hasExtraMethodName) :
+clsAPIObject::clsAPIObject(
+    intfPureModule* _module,
+    QMetaMethodExtended _method,
+    bool _async,
+    qint32 _cache4Internal,
+    qint32 _cache4Central,
+    qint32 _ttl,
+    bool _hasExtraMethodName
+) :
     QObject(_module),
     BaseMethod(_method),
     IsAsync(_async),
@@ -51,51 +53,74 @@ clsAPIObject::clsAPIObject(intfPureModule* _module,
     TTL(_ttl ? _ttl : ServerConfigs::APICallTimeout.value()),
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
-    Parent(_module) {
+    Parent(_module),
+    RequiresJWT(false)
+{
+    QList<QByteArray> parameterTypes = _method.parameterTypes();
     quint8 i = 0;
-    foreach(const QByteArray& ParamName, _method.parameterNames()) {
-        this->ParamNames.append(ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
-        this->ParamTypes.append(QMetaType::typeName(_method.parameterType(i)));
+
+    foreach (const QByteArray &ParamName, _method.parameterNames()) {
+        QString ParameterTypeName = parameterTypes.at(i);
+
+        /*if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME)) {
+            this->ParamNames.append("JWT");
+            this->ParamTypesName.append(PARAM_JWT);
+            this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
+            this->BaseMethod.DefaultValues[0] = {};
+        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) { //APICALLBOOM_NO_TYPE_NAME)) {
+            --this->RequiredParamsCount;
+            this->BaseMethod.DefaultValues.removeAt(0);
+            if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME))
+                this->RequiresJWT = true;
+        } else {
+            QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
+            this->ParamNames.append(ParamNameNoUnderScore);
+            this->ParamTypesName.append(QMetaType::typeName(_method.parameterType(i)));
+            this->ParamTypesID.append(_method.parameterType(i));
+
+//            if (/*this->BaseMethod*/_method.DefaultValues.at(i).isValid())
+//                --this->RequiredParamsCount;
+        }
+
         ++i;
     }
 }
 
-clsAPIObject::~clsAPIObject()
-{ ; }
+clsAPIObject::~clsAPIObject() { ; }
 
 intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
-    if (this->BaseMethod.parameterType(_paramIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
-        return gOrderedMetaTypeInfo.at(this->BaseMethod.parameterType(_paramIndex));
+    if (/*this->BaseMethod.parameterType*/this->ParamTypesID.at(_paramIndex) < TAPI_BASE_USER_DEFINED_TYPEID)
+        return gOrderedMetaTypeInfo.at(/*this->BaseMethod.parameterType*/this->ParamTypesID.at(_paramIndex));
     else
-        return gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(_paramIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
+        return gUserDefinedTypesInfo.at(/*this->BaseMethod.parameterType*/this->ParamTypesID.at(_paramIndex) - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
 QVariant clsAPIObject::invoke(
-        bool _isUpdateMethod,
-        const QStringList& _args,
-        /*OUT*/ QVariantMap &_responseHeaders,
-        QList<QPair<QString, QString>> _bodyArgs,
-        qhttp::THeaderHash _headers,
-        qhttp::THeaderHash _cookies,
-        QJsonObject _jwt,
-        QString _remoteIP,
-        QString _extraAPIPath
-    ) const
-{
+    intfAPICallBoom* _APICALLBOOM,
+    bool _isUpdateMethod,
+    const QStringList& _args,
+//    /*OUT*/ QVariantMap &_responseHeaders,
+    QList<QPair<QString, QString>> _bodyArgs,
+//    qhttp::THeaderHash _headers,
+//    qhttp::THeaderHash _cookies,
+//    QJsonObject _jwt,
+//    QString _remoteIP,
+    QString _extraAPIPath
+) const {
     Q_ASSERT_X(this->parent(), "parent module", "Parent module not found to invoke method");
 
     int ExtraArgCount = 0;
-    if (this->ParamTypes.contains(PARAM_COOKIES))
+//    if (this->ParamTypesName.contains(PARAM_COOKIES))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_HEADERS))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_JWT))
+//        ExtraArgCount++;
+//    if (this->ParamTypesName.contains(PARAM_REMOTE_IP))
+//        ExtraArgCount++;
+    if (this->ParamTypesName.contains(PARAM_PKSBYPATH))
         ExtraArgCount++;
-    if (this->ParamTypes.contains(PARAM_HEADERS))
-        ExtraArgCount++;
-    if (this->ParamTypes.contains(PARAM_JWT))
-        ExtraArgCount++;
-    if (this->ParamTypes.contains(PARAM_REMOTE_IP))
-        ExtraArgCount++;
-    if (this->ParamTypes.contains(PARAM_PKSBYPATH))
-        ExtraArgCount++;
-    if (this->ParamTypes.contains(PARAM_ORMFIELDS))
+    if (this->ParamTypesName.contains(PARAM_ORMFIELDS))
         ExtraArgCount++;
 
     if (_args.size() + _bodyArgs.size() + ExtraArgCount < this->RequiredParamsCount)
@@ -112,8 +137,8 @@ QVariant clsAPIObject::invoke(
 
         static auto parseArgValue = [ArgumentValue](const QString& _paramName, QString _value) -> QVariant {
             _value = _value.trimmed();
-            if ((_value.startsWith('[') && _value.endsWith(']')) ||
-               (_value.startsWith('{') && _value.endsWith('}'))) {
+            if ((_value.startsWith('[') && _value.endsWith(']'))
+                    || (_value.startsWith('{') && _value.endsWith('}'))) {
                 QJsonParseError Error;
                 QJsonDocument JSON = QJsonDocument::fromJson(_value.toUtf8(), &Error);
                 if (JSON.isNull())
@@ -124,32 +149,32 @@ QVariant clsAPIObject::invoke(
             }
         };
 
-        if (this->ParamTypes.at(i) == PARAM_COOKIES) {
-            ParamNotFound = false;
-            ArgumentValue = _cookies.toVariant();
-        }
+//        if (this->ParamTypesName.at(i) == PARAM_COOKIES) {
+//            ParamNotFound = false;
+//            ArgumentValue = _cookies.toVariant();
+//        }
 
-        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_HEADERS) {
-            ParamNotFound = false;
-            ArgumentValue = _headers.toVariant();
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_HEADERS) {
+//            ParamNotFound = false;
+//            ArgumentValue = _headers.toVariant();
+//        }
 
-        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_JWT) {
-            ParamNotFound = false;
-            ArgumentValue = _jwt;
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_JWT) {
+//            ParamNotFound = false;
+//            ArgumentValue = _jwt;
+//        }
 
-        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_REMOTE_IP) {
-            ParamNotFound = false;
-            ArgumentValue = _remoteIP;
-        }
+//        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_REMOTE_IP) {
+//            ParamNotFound = false;
+//            ArgumentValue = _remoteIP;
+//        }
 
-        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_PKSBYPATH) {
+        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_PKSBYPATH) {
             ParamNotFound = false;
             ArgumentValue = _extraAPIPath;
         }
 
-        if (ParamNotFound && this->ParamTypes.at(i) == PARAM_ORMFIELDS) {
+        if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_ORMFIELDS) {
             ParamNotFound = false;
             TAPI::ORMFields_t ORMFields;
             foreach (const QString& Arg, _args)
@@ -194,14 +219,14 @@ QVariant clsAPIObject::invoke(
             FirstArgumentWithValue = static_cast<qint8>(i);
         LastArgumentWithValue = static_cast<qint8>(i);
 
-        if (this->BaseMethod.parameterType(i) >= TAPI_BASE_USER_DEFINED_TYPEID) {
-            Q_ASSERT(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID < gUserDefinedTypesInfo.size());
-            Q_ASSERT(gUserDefinedTypesInfo.at(this->BaseMethod.parameterType(i) - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
+        if (this->/*BaseMethod.parameterType*/ParamTypesID.at(i) >= TAPI_BASE_USER_DEFINED_TYPEID) {
+            Q_ASSERT(this->/*BaseMethod.parameterType*/ParamTypesID.at(i) - TAPI_BASE_USER_DEFINED_TYPEID < gUserDefinedTypesInfo.size());
+            Q_ASSERT(gUserDefinedTypesInfo.at(this->/*BaseMethod.parameterType*/ParamTypesID.at(i) - TAPI_BASE_USER_DEFINED_TYPEID) != nullptr);
 
             Arguments.push_back(ArgumentValue);
         } else {
-            Q_ASSERT(this->BaseMethod.parameterType(i) < gOrderedMetaTypeInfo.size());
-            Q_ASSERT(gOrderedMetaTypeInfo.at(this->BaseMethod.parameterType(i)) != nullptr);
+            Q_ASSERT(this->/*BaseMethod.parameterType*/ParamTypesID.at(i) < gOrderedMetaTypeInfo.size());
+            Q_ASSERT(gOrderedMetaTypeInfo.at(this->/*BaseMethod.parameterType*/ParamTypesID.at(i)) != nullptr);
 
             Arguments.push_back(ArgumentValue);
         }
@@ -222,7 +247,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _responseHeaders = Map.value("headers").toMap();
+            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -233,7 +258,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _responseHeaders = Map.value("headers").toMap();
+            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -254,12 +279,14 @@ QVariant clsAPIObject::invoke(
 
     QVariant Result = APIMethod->invokeMethod(
                           this,
-                          Arguments,
-                          _responseHeaders);
+                          _APICALLBOOM,
+                          Arguments
+//                          _responseHeaders
+                          );
 
     QVariantMap ResultWithHeader = QVariantMap({
                                                    { "result", Result },
-                                                   { "headers", _responseHeaders },
+                                                   { "headers", _APICALLBOOM->getResponseHeaders() },
                                                });
     if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
@@ -267,15 +294,19 @@ QVariant clsAPIObject::invoke(
         CentralCache::setValue(CacheKey, ResultWithHeader, this->Cache4SecsCentral);
 
     gServerStats.APICallsStats[this->BaseMethod.name()].inc();
+
     return Result;
 }
 
 void clsAPIObject::invokeMethod(
-        const QVariantList& _arguments,
-        QGenericReturnArgument _returnArg,
-        /*OUT*/ QVariantMap &_responseHeaders
-    ) const
-{
+    intfAPICallBoom* _APICALLBOOM,
+    const QVariantList& _arguments,
+    QGenericReturnArgument _returnArg
+//    /*OUT*/ QVariantMap &_responseHeaders
+) const {
+    if (_arguments.size() > 10)
+        throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+
     bool InvocationResult = true;
     QMetaMethod InvokableMethod;
 
@@ -284,44 +315,44 @@ void clsAPIObject::invokeMethod(
     else
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
-#ifdef QT_DEBUG
-    if (InvokableMethod.name().toStdString() == "apiPOSTfixtureCleanup") {
-        int i; i = 0;
-    }
-#endif
-
     QVector<void*> ArgStorage(_arguments.size(), {});
 
-    QMetaObject::Connection Conn_addResponseHeader;
+    auto useArgAt = [=, &_arguments, &ArgStorage](int _i) -> QGenericArgument {
+        Targoman::API::Common::intfAPIArgManipulator* ArgMan = (this->ParamTypesID.at(_i) < TAPI_BASE_USER_DEFINED_TYPEID
+            ? gOrderedMetaTypeInfo.at(this->ParamTypesID.at(_i))
+            : gUserDefinedTypesInfo.at(this->ParamTypesID.at(_i) - TAPI_BASE_USER_DEFINED_TYPEID)
+        );
+        return ArgMan->makeGenericArgument(_arguments.at(_i), this->ParamNames.at(_i), &ArgStorage[_i]);
+    };
+
+    auto cleanArgAt = [=, &ArgStorage](int _i) {
+        Targoman::API::Common::intfAPIArgManipulator* ArgMan = (this->ParamTypesID.at(_i) < TAPI_BASE_USER_DEFINED_TYPEID
+            ? gOrderedMetaTypeInfo.at(this->ParamTypesID.at(_i))
+            : gUserDefinedTypesInfo.at(this->ParamTypesID.at(_i) - TAPI_BASE_USER_DEFINED_TYPEID)
+        );
+        ArgMan->cleanup(ArgStorage[_i]);
+    };
 
     try {
-        if (_arguments.size() > 10)
-            throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+        QGenericArgument _APICALLBOOM_ARG("_APICALLBOOM", _APICALLBOOM);
 
-        QGenericArgument Arguments[10];
+        QGenericArgument Arguments[9];
 
-        for (int i=0; i<10; ++i) {
+        for (int i=0; i<9; ++i) {
             if (i < _arguments.size())
-                Arguments[i] = USE_ARG_AT(i);
+                Arguments[i] = useArgAt(i); //USE_ARG_AT(i);
             else
                 Arguments[i] = QGenericArgument();
         }
 
         QObject *parent = this->parent();
-        intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
-        Conn_addResponseHeader = QObject::connect(pureModule, &intfPureModule::addResponseHeader,
-                         [&_responseHeaders](const QString &_header, const QString &_value, bool _multiValue) {
-                            if (_multiValue && _responseHeaders.contains(_header))
-                                _responseHeaders[_header] = _responseHeaders[_header].toString() + "," + _value;
-                            else
-                                _responseHeaders.insert(_header, _value);
-                         }
-                        );
+//        intfPureModule* pureModule = dynamic_cast<intfPureModule*>(parent);
 
         InvocationResult = InvokableMethod.invoke(
             parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
+            _APICALLBOOM_ARG, //Q_ARG(intfAPICallBoom, *_APICALLBOOM),
             Arguments[0],
             Arguments[1],
             Arguments[2],
@@ -330,40 +361,42 @@ void clsAPIObject::invokeMethod(
             Arguments[5],
             Arguments[6],
             Arguments[7],
-            Arguments[8],
-            Arguments[9]
+            Arguments[8]
         );
 
         if (InvocationResult == false)
             throw exHTTPInternalServerError(QString("Unable to invoke method"));
 
-        QObject::disconnect(Conn_addResponseHeader);
-
         for (int i=0; i<_arguments.size(); ++i)
-            CLEAN_ARG_AT(i);
+            cleanArgAt(i); //CLEAN_ARG_AT(i);
     } catch (...) {
-        QObject::disconnect(Conn_addResponseHeader);
 
         for (int i=0; i<_arguments.size(); ++i)
-            CLEAN_ARG_AT(i);
+            cleanArgAt(i); //CLEAN_ARG_AT(i);
 
         throw;
     }
 }
 
 bool clsAPIObject::isPolymorphic(const QMetaMethodExtended& _method) {
-       if (_method.parameterCount() == 0)
-           return false;
-       for (int i=0; i< qMin(_method.parameterCount(), this->BaseMethod.parameterCount()); ++i)
-           if (this->BaseMethod.parameterType(i) != _method.parameterType(i))
-               return true;
-       return false;
+    if (_method.parameterCount() == 0)
+        return false;
+
+    for (int i=0; i< qMin(_method.parameterCount(), this->BaseMethod.parameterCount()); ++i)
+        if (this->BaseMethod.parameterType(i) != _method.parameterType(i))
+            return true;
+
+    return false;
 }
 
 void clsAPIObject::updateDefaultValues(const QMetaMethodExtended& _method) {
-    if (_method.parameterNames().size() < this->RequiredParamsCount) {
-        this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size());
-        this->LessArgumentMethods.append(_method);
+    ///-1: for _APICALLBOOM
+    if ((_method.parameterNames().size() - 1) < this->RequiredParamsCount) {
+        this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size() - 1);
+
+        QMetaMethodExtended Method = _method;
+        Method.DefaultValues.removeAt(0); //for _APICALLBOOM
+        this->LessArgumentMethods.append(Method);
     }
 }
 

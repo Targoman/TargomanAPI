@@ -34,8 +34,7 @@ namespace API {
 namespace Server {
 
 clsRedisConnector::clsRedisConnector(const QUrl& _connector) :
-    intfCacheConnector(_connector)
-{ ; }
+    intfCacheConnector(_connector) { ; }
 
 void clsRedisConnector::connect() {
     struct timeval Timeout = { 1, 500000 }; // 1.5 seconds

@@ -72,17 +72,6 @@ tmplConfigurable<bool> ServerConfigs::JustLocal(
         "just-local",
         enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<quint16> ServerConfigs::ListenPort(
-        ServerConfigs::makeConfig("ListenPort"),
-        "Listen port for main REST server",
-        1000,65000,
-        10000,
-        ReturnTrueCrossValidator(),
-        "p",
-        "PORT",
-        "listen-port",
-        enuConfigSource::Arg | enuConfigSource::File);
-
 tmplRangedConfigurable<quint8> ServerConfigs::StatisticsInterval(
         ServerConfigs::makeConfig("StatisticsInterval"),
         "Listen port for main REST server",

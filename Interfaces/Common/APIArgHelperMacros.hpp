@@ -150,7 +150,7 @@
 
 /************************************************************/
 #define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
-#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, v, static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
+#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, _type::toStr(v), static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
 ///TODO: complete this and test with stuPaymentGateway
@@ -184,7 +184,7 @@
     TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
     _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
         TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
-    {} \
+    { ; } \
     QJsonObject toJson() const { \
         QJsonObject Obj; \
         TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
@@ -199,8 +199,7 @@
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
     QT_TRY { \
         TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
-    } \
-    QT_CATCH (const std::exception &exp) { \
+    } QT_CATCH (const std::exception &exp) { \
         TargomanDebug(5, "*** SET_FIELD_FROM_VARIANT_MAP *** ERROR: fieldName:" << #_tableFieldName << exp.what()); \
         QT_RETHROW; \
     }

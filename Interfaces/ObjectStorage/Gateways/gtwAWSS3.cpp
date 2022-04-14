@@ -39,8 +39,7 @@ bool gtwAWSS3::storeFile(
         const QString &_fileName,
         const QString &_fileUUID,
         const QString &_fullFileName
-    )
-{
+    ) {
     QString Bucket = _metaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
     QString EndpointUrl = _metaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
     QString SecretKey = _metaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();

@@ -42,7 +42,7 @@ private slots:
     bool REST_GET_OR_POST(
         validateJWT,
         (
-            TAPI::JWT_t _JWT
+            APICallBoom<true> &_APICALLBOOM
         ),
         "Check JWT"
     )

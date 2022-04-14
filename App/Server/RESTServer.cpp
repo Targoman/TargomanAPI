@@ -94,12 +94,11 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 
     QHostAddress ListenAddress = ServerConfigs::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
 
-    gHTTPServer.listen(ListenAddress, ServerConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res) {
+    gHTTPServer.listen(ListenAddress, ServerCommonConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res) {
         clsRequestHandler* RequestHandler = new clsRequestHandler(_req, _res);
         try {
-            QString Path = _req->url().adjusted(QUrl::NormalizePathSegments |
-                                                QUrl::RemoveAuthority
-                                                ).path(QUrl::PrettyDecoded);
+            QString Path = _req->url().adjusted(QUrl::NormalizePathSegments | QUrl::RemoveAuthority).path(QUrl::PrettyDecoded);
+
             if (Path != _req->url().path())
                 return  RequestHandler->redirect(Path, false);
 
@@ -144,9 +143,9 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     });
 
     if (gHTTPServer.isListening()) {
-        TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value()<<ServerConfigs::BasePathWithVersion);
+        TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerCommonConfigs::ListenPort.value()<<ServerConfigs::BasePathWithVersion);
     } else {
-        TargomanLogError("Unable to start server to listen on "<<ListenAddress.toString()<<":"<<ServerConfigs::ListenPort.value());
+        TargomanLogError("Unable to start server to listen on "<<ListenAddress.toString()<<":"<<ServerCommonConfigs::ListenPort.value());
         QCoreApplication::exit(-1);
     }
 
@@ -206,8 +205,7 @@ bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _p
 }
 
 RESTServer::RESTServer() :
-    IsStarted(false)
-{ ; }
+    IsStarted(false) { ; }
 
 } //namespace Server
 

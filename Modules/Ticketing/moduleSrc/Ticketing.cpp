@@ -57,17 +57,16 @@ Ticketing::Ticketing() :
 }
 
 quint64 Ticketing::insertTicket(
-        quint64 _createdBy,
-        quint64 _targetUserID,
-        quint32 _serviceID,
-        quint64 _inReplyTicketID,
-        enuTicketType::Type _ticketType,
-        const QString &_title,
-        const QString &_body,
-        const TAPI::Files_t &_files,
-        quint32 _unitID
-    )
-{
+    quint64 _createdBy,
+    quint64 _targetUserID,
+    quint32 _serviceID,
+    quint64 _inReplyTicketID,
+    enuTicketType::Type _ticketType,
+    const QString &_title,
+    const QString &_body,
+    const TAPI::Files_t &_files,
+    quint32 _unitID
+) {
     TAPI::ORMFields_t CreateFields({
        { tblTickets::tktType, _ticketType },
        { tblTickets::tktTitle, _title },
@@ -86,7 +85,11 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::tkt_untID, _unitID);
 
-    quint64 TicketID = this->Create(Tickets::instance(), _createdBy, CreateFields);
+    quint64 TicketID = this->Create(
+                           Tickets::instance(),
+                           _createdBy,
+                           CreateFields
+                           );
 
     if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
@@ -94,7 +97,7 @@ quint64 Ticketing::insertTicket(
                                              .addCol(tblTicketAttachments::tat_uplID)
                                              ;
 
-        foreach(auto _file, _files) {
+        foreach (auto _file, _files) {
             try {
                 quint64 UploadedFileID = ObjectStorageManager::saveFile(
                                              _createdBy,
@@ -120,22 +123,21 @@ quint64 Ticketing::insertTicket(
 }
 
 QVariantMap Ticketing::apiPUTnewMessage(
-        TAPI::JWT_t _JWT,
-        const QString &_title,
-        const QString &_body,
-        quint32 _serviceID,
-        quint64 _targetUserID,
-        quint32 _unitID,
-        const TAPI::stuFileInfo &_file
-    )
-{
-    Authorization::checkPriv(_JWT, { this->moduleBaseName() + ":canPUTNewMessage" });
+    APICallBoom<true> &_APICALLBOOM,
+    const QString &_title,
+    const QString &_body,
+    quint32 _serviceID,
+    quint64 _targetUserID,
+    quint32 _unitID,
+    const TAPI::stuFileInfo &_file
+) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     clsJWT(_JWT).usrID(),
+                     _APICALLBOOM.getUserID(),
                      _targetUserID,
                      _serviceID,
                      0,
@@ -152,42 +154,40 @@ QVariantMap Ticketing::apiPUTnewMessage(
 }
 
 QVariantMap Ticketing::apiPUTnewFeedback(
-        TAPI::JWT_t _JWT,
-        const QString &_title,
-        const QString &_body,
-        Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
-        quint32 _serviceID,
-        quint64 _inReplyTicketID,
-        const TAPI::stuFileInfo &_file
-    )
-{
-  Authorization::checkPriv(_JWT, {});
+    APICallBoom<true> &_APICALLBOOM,
+    const QString &_title,
+    const QString &_body,
+    Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
+    quint32 _serviceID,
+    quint64 _inReplyTicketID,
+    const TAPI::stuFileInfo &_file
+) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), {});
 
-  if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
-    throw exHTTPBadRequest("Reply tickets must have reply type");
+    if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
+        throw exHTTPBadRequest("Reply tickets must have reply type");
 
-  if (_ticketType == enuTicketType::Message ||
-      _ticketType == enuTicketType::Broadcast)
-    throw exHTTPBadRequest(
-        "Message and Broadcast tickets must be sent via newMessage method");
+    if (_ticketType == enuTicketType::Message
+            || _ticketType == enuTicketType::Broadcast)
+        throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
 
-  TAPI::Files_t Files;
-  Files.append(_file);
+    TAPI::Files_t Files;
+    Files.append(_file);
 
-  quint64 ID = this->insertTicket(
-                   clsJWT(_JWT).usrID(),
-                   0,
-                   _serviceID,
-                   _inReplyTicketID,
-                   _ticketType,
-                   _title,
-                   _body,
-                   Files
-                   );
+    quint64 ID = this->insertTicket(
+                     _APICALLBOOM.getUserID(),
+                     0,
+                     _serviceID,
+                     _inReplyTicketID,
+                     _ticketType,
+                     _title,
+                     _body,
+                     Files
+                     );
 
-  return QVariantMap({
-                         { "id", ID },
-                     });
+    return QVariantMap({
+                           { "id", ID },
+                       });
 }
 
 }  // namespace Targoman::API::TicketingModule

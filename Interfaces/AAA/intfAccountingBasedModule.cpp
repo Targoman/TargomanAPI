@@ -44,7 +44,7 @@ Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
         "Secret to be used for signing voucher and prevoucher",
         "fcy^E?a*4<;auY?>^6s@");
 
-QByteArray hash(const QByteArray& _data) {
+QByteArray voucherSign(const QByteArray& _data) {
    return QMessageAuthenticationCode::hash(_data, Secret.value().toUtf8(), QCryptographicHash::Sha256);
 }
 
@@ -54,14 +54,14 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
 
     QString Sign = _preVoucher.Sign;
     _preVoucher.Sign.clear();
-    if (Sign != QString(hash(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
+    if (Sign != QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
         throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
 
     foreach (auto VoucherItem, _preVoucher.Items) {
         QString Sign = VoucherItem.Sign;
         VoucherItem.Sign.clear();
 
-        if (Sign != QString(hash(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
+        if (Sign != QString(voucherSign(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
 }
@@ -94,7 +94,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols) {
-    foreach(auto Col, this->AssetUsageLimitsCols) {
+    foreach (auto Col, this->AssetUsageLimitsCols) {
         if (Col.PerDay.size())
             this->AssetUsageLimitsColsName.append(Col.PerDay);
 
@@ -117,13 +117,16 @@ stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
     return this->findBestMatchedCredit(_usrID);
 }
 
-void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const ServiceUsage_t& _requestedUsage) {
-    QJsonObject Privs = _jwt.privsObject();
+void intfAccountingBasedModule::checkUsageIsAllowed(
+    intfAPICallBoom &_APICALLBOOM,
+    const ServiceUsage_t &_requestedUsage
+) {
+    QJsonObject Privs = _APICALLBOOM.getJWTPrivsObject();
 
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(clsJWT(_jwt).usrID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(_APICALLBOOM.getUserID(), _requestedUsage);
 
     if (BestMatchedCredit.TTL == 0) ///TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -173,7 +176,10 @@ void intfAccountingBasedModule::checkUsageIsAllowed(const clsJWT& _jwt, const Se
     }
 }
 
-stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage) {
+stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
+    quint64 _usrID,
+    const ServiceUsage_t& _requestedUsage
+) {
     stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
     if (ServiceCreditsInfo.ActiveCredits.isEmpty())
         return stuActiveCredit();
@@ -302,162 +308,19 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(quint64 _usrID,
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-bool intfAccountingBasedModule::increaseDiscountUsage(
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem) {
-    if (_voucherItem.DisAmount > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_IncreaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
-    }
-    return true;
-}
-
-bool intfAccountingBasedModule::decreaseDiscountUsage(
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
-    if (_voucherItem.DisAmount > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_DecreaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
-    }
-    return true;
-}
-
-bool intfAccountingBasedModule::activateUserAsset(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
-    )
-{
-    return /*Targoman::API::Query::*/this->Update(
-        *this->AccountUserAssets,
-        _userID,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
-        TAPI::ORMFields_t({
-            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
-            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
-        }),
-        {
-            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
-        });
-}
-
-bool intfAccountingBasedModule::removeFromUserAssets(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
-    )
-{
-    return /*Targoman::API::Query::*/this->DeleteByPks(
-        *this->AccountUserAssets,
-        _userID,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
-        {
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
-        },
-        false
-    );
-}
-
-bool intfAccountingBasedModule::processVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
-    )
-{
-    if (!this->preProcessVoucherItem(_userID, _voucherItem, _voucherID))
-        return false;
-
-    if (this->activateUserAsset(_userID, _voucherItem, _voucherID) == false)
-        return false;
-
-    this->increaseDiscountUsage(_voucherItem);
-
-    this->postProcessVoucherItem(_userID, _voucherItem, _voucherID);
-
-    return true;
-}
-
-bool intfAccountingBasedModule::cancelVoucherItem(
-        quint64 _userID,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
-    )
-{
-    if (!this->preCancelVoucherItem(_userID, _voucherItem))
-        return false;
-
-    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
-                                .addCol(tblAccountUserAssetsBase::uasID)
-                                .addCol(tblAccountUserAssetsBase::uas_slbID)
-                                .addCol(tblAccountUserAssetsBase::uasStatus)
-                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-                                .one();
-
-    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
-        return false;
-
-    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
-                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                     .value<TAPI::enuAuditableStatus::Type>();
-
-    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
-        this->decreaseDiscountUsage(_voucherItem);
-
-    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
-
-    //-- un-reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP("spSaleable_unReserve", {
-        { "iSaleableID", SaleableID },
-        { "iUserID", _userID },
-        { "iQty", _voucherItem.Qty },
-    });
-
-    //-- un-reserve saleable ------------------------------------
-//    UpdateQuery(*this->AccountSaleables)
-//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountSaleablesBase::slbReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-//        .execute(_userID);
-
-    //-- un-reserve product -------------------------------------
-//    UpdateQuery(*this->AccountProducts)
-//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
-//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountProductsBase::prdReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
-//        .execute(_userID);
-
-    //-----------------------------------------------------------
-    this->removeFromUserAssets(_userID, _voucherItem);
-
-    this->postCancelVoucherItem(_userID, _voucherItem);
-
-    return true;
-}
-
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
-        TAPI::JWT_t _JWT,
-        TAPI::SaleableCode_t _saleableCode,
-        Targoman::API::AAA::OrderAdditives_t _orderAdditives,
-        qreal _qty,
-        TAPI::CouponCode_t _discountCode,
-        QString _referrer,
-        TAPI::JSON_t _extraReferrerParams,
-        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    APICallBoom<true> &_APICALLBOOM,
+    TAPI::SaleableCode_t _saleableCode,
+    Targoman::API::AAA::OrderAdditives_t _orderAdditives,
+    qreal _qty,
+    TAPI::CouponCode_t _discountCode,
+    QString _referrer,
+    TAPI::JSON_t _extraReferrerParams,
+    Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+) {
     checkPreVoucherSanity(_lastPreVoucher);
 
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+    quint64 currentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
@@ -551,12 +414,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     qDebug() << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
-    this->digestPrivs(_JWT, AssetItem);
+    this->digestPrivs(_APICALLBOOM.getJWT(), AssetItem);
 
-    this->applyAssetAdditives(_JWT, AssetItem, _orderAdditives);
+    this->applyAssetAdditives(_APICALLBOOM, AssetItem, _orderAdditives);
     qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
-    this->applyReferrer(_JWT, AssetItem, _referrer, _extraReferrerParams);
+    this->applyReferrer(_APICALLBOOM, AssetItem, _referrer, _extraReferrerParams);
 
     //-- --------------------------------
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
@@ -856,7 +719,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     qry.values(values);
 
     PreVoucherItem.OrderID = qry.execute(currentUserID);
-    PreVoucherItem.Sign = QString(hash(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
+    PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
     ///TODO: PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
@@ -876,25 +739,23 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
     return _lastPreVoucher;
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
-        TAPI::JWT_t _JWT,
-//        quint64 _orderID, //it is uasID
-        TAPI::MD5_t _itemUUID,
-        Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    APICallBoom<true> &_APICALLBOOM,
+//    quint64 _orderID, //it is uasID
+    TAPI::MD5_t _itemUUID,
+    Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPInternalServerError("pre-voucher items is empty.");
 
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
+//    quint64 currentUserID = _APICALLBOOM.getUserID();
 
     bool Found = false;
     qint64 FinalPrice = 0;
@@ -907,18 +768,13 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
             Found = true;
 
             //delete voucher item
-            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
-                {
-                    TAPI::enuAuditableStatus::Type UserAssetStatus = _userAssetInfo
-                                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                                     .value<TAPI::enuAuditableStatus::Type>();
-
-                    if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
-                        return false;
-
-                    return true;
-                }) == false) //not pending
-            {
+            if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool {
+                TAPI::enuAuditableStatus::Type UserAssetStatus =
+                                    _userAssetInfo
+                                    .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                    .value<TAPI::enuAuditableStatus::Type>();
+                return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
+            }) == false) { //not pending
                 throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
             }
 
@@ -946,7 +802,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
         _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
         _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
         _lastPreVoucher.Sign.clear();
-        _lastPreVoucher.Sign = QString(hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+        _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
         return _lastPreVoucher;
     }
@@ -955,12 +811,11 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 }
 /*
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
-        TAPI::JWT_t _JWT,
+        APICallBoom<true> &_APICALLBOOM,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    )
-{
+    ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
@@ -1059,7 +914,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
         _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
         _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
         _lastPreVoucher.Sign.clear();
-        _lastPreVoucher.Sign = QString(Accounting::hash(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+        _lastPreVoucher.Sign = QString(Accounting::voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
         return _lastPreVoucher;
     }
@@ -1068,27 +923,182 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
 }
 */
 
-bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuVoucherItem _voucherItem,
-        quint64 _voucherID
-    )
-{
-    clsJWT JWT(_JWT);
-    quint64 CurrentUserID = JWT.usrID();
+/******************************************************************\
+|** procerss and cancel voucher item ******************************|
+\******************************************************************/
+bool intfAccountingBasedModule::increaseDiscountUsage(
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem
+) {
+    if (_voucherItem.DisAmount > 0) {
+        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_IncreaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+    return true;
+}
 
-    return this->processVoucherItem(CurrentUserID, _voucherItem, _voucherID);
+bool intfAccountingBasedModule::decreaseDiscountUsage(
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem
+) {
+    if (_voucherItem.DisAmount > 0) {
+        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_DecreaseStats", {
+            { "iDiscountID", _voucherItem.Discount.ID },
+            { "iTotalUsedCount", 1 },
+            { "iTotalUsedAmount", _voucherItem.DisAmount },
+        });
+    }
+    return true;
+}
+
+bool intfAccountingBasedModule::activateUserAsset(
+    quint64 _userID,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    quint64 _voucherID
+) {
+    return /*Targoman::API::Query::*/this->Update(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        TAPI::ORMFields_t({
+            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
+            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
+        }),
+        {
+            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        });
+}
+
+bool intfAccountingBasedModule::removeFromUserAssets(
+    quint64 _userID,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem
+) {
+    return /*Targoman::API::Query::*/this->DeleteByPks(
+        *this->AccountUserAssets,
+        _userID,
+        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        {
+            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+        },
+        false
+    );
+}
+
+bool intfAccountingBasedModule::processVoucherItem(
+    quint64 _userID,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    quint64 _voucherID
+) {
+    if (!this->preProcessVoucherItem(_voucherItem, _voucherID))
+        return false;
+
+    if (this->activateUserAsset(_userID, _voucherItem, _voucherID) == false)
+        return false;
+
+    this->increaseDiscountUsage(_voucherItem);
+
+    this->postProcessVoucherItem(_voucherItem, _voucherID);
+
+    return true;
+}
+
+bool intfAccountingBasedModule::cancelVoucherItem(
+    quint64 _userID,
+    const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+    std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
+) {
+    if (!this->preCancelVoucherItem(_voucherItem))
+        return false;
+
+    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+                                .addCol(tblAccountUserAssetsBase::uasID)
+                                .addCol(tblAccountUserAssetsBase::uas_slbID)
+                                .addCol(tblAccountUserAssetsBase::uasStatus)
+                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+                                .one();
+
+    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
+        return false;
+
+    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
+                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
+                                                     .value<TAPI::enuAuditableStatus::Type>();
+
+    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
+        this->decreaseDiscountUsage(_voucherItem);
+
+    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
+
+    //-- un-reserve saleable & product ------------------------------------
+    this->AccountSaleables->callSP("spSaleable_unReserve", {
+        { "iSaleableID", SaleableID },
+        { "iUserID", _userID },
+        { "iQty", _voucherItem.Qty },
+    });
+
+    //-- un-reserve saleable ------------------------------------
+//    UpdateQuery(*this->AccountSaleables)
+//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountSaleablesBase::slbReturnedQty, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
+
+    //-- un-reserve product -------------------------------------
+//    UpdateQuery(*this->AccountProducts)
+//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
+//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
+//        .increament(tblAccountProductsBase::prdReturnedQty, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .execute(_userID);
+
+    //-----------------------------------------------------------
+    this->removeFromUserAssets(_userID, _voucherItem);
+
+    this->postCancelVoucherItem(_voucherItem);
+
+    return true;
+}
+
+void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_data) {
+    if (_data.UserID <= 0)
+        throw exHTTPBadRequest("Invalid user id");
+
+    if (_data.VoucherID <= 0)
+        throw exHTTPBadRequest("Invalid voucher id");
+
+    QString Sign = _data.Sign;
+    _data.Sign.clear();
+    if (Sign != QString(voucherSign(QJsonDocument(_data.toJson()).toJson()).toBase64()))
+        throw exHTTPBadRequest("Invalid sign");
+
+    //--------------------
+    Sign = _data.VoucherItem.Sign;
+    _data.VoucherItem.Sign.clear();
+
+    if (Sign != QString(voucherSign(QJsonDocument(_data.VoucherItem.toJson()).toJson()).toBase64()))
+        throw exHTTPBadRequest("Invalid voucher item sign");
+}
+
+bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
+    APICallBoom<false> &_APICALLBOOM,
+    Targoman::API::AAA::stuVoucherItemForTrustedAction _data
+) {
+    checkVoucherItemForTrustedActionSanity(_data);
+
+    return this->processVoucherItem(_data.UserID, _data.VoucherItem, _data.VoucherID);
 }
 
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
-        TAPI::JWT_t _JWT,
-        Targoman::API::AAA::stuVoucherItem _voucherItem
-    )
-{
-    clsJWT JWT(_JWT);
-    quint64 CurrentUserID = JWT.usrID();
+    APICallBoom<false> &_APICALLBOOM,
+    Targoman::API::AAA::stuVoucherItemForTrustedAction _data
+) {
+    checkVoucherItemForTrustedActionSanity(_data);
 
-    return this->cancelVoucherItem(CurrentUserID, _voucherItem);
+    return this->cancelVoucherItem(_data.UserID, _data.VoucherItem);
 }
 
 } //namespace Targoman::API::AAA

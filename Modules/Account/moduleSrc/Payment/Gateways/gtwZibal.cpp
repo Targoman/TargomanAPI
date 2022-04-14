@@ -35,8 +35,7 @@ stuPaymentResponse gtwZibal::request(
         qint64 _amount,
         const QString& _callback,
         const QString& _desc
-    )
-{
+    ) {
     TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
@@ -87,8 +86,7 @@ stuPaymentResponse gtwZibal::verify(
         const stuPaymentGateway& _paymentGateway,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain
-    )
-{
+    ) {
     TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 

@@ -93,12 +93,11 @@ Tickets::Tickets() :
             ORM_RELATION_OF_CREATOR(tblTickets::tktCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblTickets::tktUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant Tickets::apiGET(
 //        GET_METHOD_ARGS_IMPL_APICALL,
-        TAPI::JWT_t _JWT,
+        APICallBoom<true> &_APICALLBOOM,
         TAPI::PKsByPath_t _pksByPath,
         quint64 _pageIndex,
         quint16 _pageSize,
@@ -111,16 +110,15 @@ QVariant Tickets::apiGET(
 //        const stuTicketScope &_ticketScope
         quint64 _baseTicketID,
         quint64 _inReplyTicketID
-    )
-{
+    ) {
     TAPI::Cols_t _cols;
     TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
 
-    quint64 CurrentUserID = clsJWT(_JWT).usrID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
     clsCondition ExtraFilters = {};
 
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
             .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })
@@ -192,7 +190,6 @@ TicketRead::TicketRead() :
             {tblTicketRead::tkrBy_usrID,    S(quint64),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
             {tblTicketRead::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
         }
-    )
-{ ; }
+    ) { ; }
 
 } //namespace Targoman::API::TicketingModule::ORM

@@ -28,8 +28,14 @@
 #include <QMetaMethod>
 
 #include "Interfaces/API/intfPureModule.h"
+#include "Interfaces/Server/APICallBoom.h"
 
 namespace Targoman::API::Server {
+
+#define APICALLBOOM_TYPE_NAME_BASE   "APICallBoom<"
+#define APICALLBOOM_NO_TYPE_NAME     "APICallBoom<false>"
+#define APICALLBOOM_JWT_TYPE_NAME    "APICallBoom<true>"
+#define APICALLBOOM_PARAM_NAME       "_APICALLBOOM"
 
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
@@ -69,34 +75,34 @@ public:
     }
 
     inline bool requiresJWT() const {
-        return this->ParamTypes.contains(PARAM_JWT);
+        return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
     }
 
-    inline bool requiresCookies() const {
-        return this->ParamTypes.contains(PARAM_COOKIES);
-    }
+//    inline bool requiresCookies() const {
+//        return this->ParamTypesName.contains(PARAM_COOKIES);
+//    }
 
-    inline bool requiresRemoteIP() const {
-        return this->ParamTypes.contains(PARAM_REMOTE_IP);
-    }
+//    inline bool requiresRemoteIP() const {
+//        return this->ParamTypesName.contains(PARAM_REMOTE_IP);
+//    }
 
     inline bool requiresPrimaryKey() const {
-        return this->ParamTypes.contains(PARAM_PKSBYPATH);
+        return this->ParamTypesName.contains(PARAM_PKSBYPATH);
     }
 
-    inline bool requiresHeaders() const {
-        return this->ParamTypes.contains(PARAM_HEADERS);
-    }
+//    inline bool requiresHeaders() const {
+//        return this->ParamTypesName.contains(PARAM_HEADERS);
+//    }
 
     inline bool requiresORMFields() const {
-        return this->ParamTypes.contains(PARAM_ORMFIELDS);
+        return this->ParamTypesName.contains(PARAM_ORMFIELDS);
     }
 
     inline bool ttl() const {return this->TTL;}
 
     inline QString paramType(quint8 _paramIndex) const {
-        Q_ASSERT(_paramIndex < this->BaseMethod.parameterTypes().size());
-        return this->BaseMethod.parameterTypes().at(_paramIndex).constData();
+        Q_ASSERT(_paramIndex < this->/*BaseMethod.parameterType()*/ParamTypesID.size());
+        return this->/*BaseMethod.parameterTypes()*/ParamTypesName.at(_paramIndex)/*.constData()*/;
     }
 
     intfAPIArgManipulator* argSpecs(quint8 _paramIndex) const;
@@ -110,21 +116,25 @@ public:
     }
 
     QVariant invoke(
-            bool _isUpdateMethod,
-            const QStringList& _args,
-            /*OUT*/ QVariantMap &_responseHeaders,
-            QList<QPair<QString, QString>> _bodyArgs = {},
-            qhttp::THeaderHash _headers = {},
-            qhttp::THeaderHash _cookies = {},
-            QJsonObject _jwt = {},
-            QString _remoteIP = {},
-            QString _extraAPIPath = {}
-        ) const;
+        intfAPICallBoom* _APICALLBOOM,
+        bool _isUpdateMethod,
+        const QStringList& _args,
+//        /*OUT*/ QVariantMap &_responseHeaders,
+        QList<QPair<QString, QString>> _bodyArgs = {},
+//        qhttp::THeaderHash _headers = {},
+//        qhttp::THeaderHash _cookies = {},
+//        QJsonObject _jwt = {},
+//        QString _remoteIP = {},
+        QString _extraAPIPath = {}
+    ) const;
 
     void invokeMethod(
-            const QVariantList& _arguments,
-            QGenericReturnArgument _returnArg,
-            /*OUT*/ QVariantMap &_responseHeaders) const;
+        intfAPICallBoom* _APICALLBOOM,
+        const QVariantList& _arguments,
+        QGenericReturnArgument _returnArg
+//        /*OUT*/ QVariantMap &_responseHeaders
+    ) const;
+
     bool isPolymorphic(const QMetaMethodExtended& _method);
 
 private:
@@ -138,10 +148,12 @@ private:
     qint32                      Cache4SecsCentral;
     qint32                      TTL;
     QList<QByteArray>           ParamNames;
-    QList<QString>              ParamTypes;
+    QList<QString>              ParamTypesName;
+    QList<int>                  ParamTypesID;
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
-    intfPureModule*              Parent;
+    intfPureModule*             Parent;
+    bool                        RequiresJWT;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

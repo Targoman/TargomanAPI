@@ -18,8 +18,8 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-
 
 #ifndef TARGOMAN_API_SERVER_RESTAPIREGISTRY_H
 #define TARGOMAN_API_SERVER_RESTAPIREGISTRY_H
@@ -30,9 +30,7 @@
 #include "Interfaces/API/intfPureModule.h"
 #include "clsAPIObject.h"
 
-namespace Targoman {
-namespace API {
-namespace Server {
+namespace Targoman::API::Server {
 
 class clsAPIObject;
 
@@ -43,6 +41,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 
 /*****************************************************/
 class OpenAPIGenerator;
+
 class RESTAPIRegistry {
 public:
     static inline QString makeRESTAPIKey(const QString& _httpMethod, const QString& _path) {
@@ -67,7 +66,7 @@ private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
     static void addRegistryEntry(QHash<QString, clsAPIObject*>& _registry, intfPureModule* _module, const QMetaMethodExtended& _method, const QString& _httpMethod, const QString& _methodName);
-    static int  getTagSeconds(const QMetaMethod& _method, const char* _type);
+    static int getTagSeconds(const QMetaMethod& _method, const char* _type);
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 
 private:
@@ -76,11 +75,10 @@ private:
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
     static QHash<QString, clsAPIObject*>  WSRegistry;
 #endif
+
     friend class OpenAPIGenerator;
 };
 
-}
-}
-}
+} //namespace Targoman::API::Server
 
 #endif // TARGOMAN_API_SERVER_RESTAPIREGISTRY_H

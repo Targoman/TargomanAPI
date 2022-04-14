@@ -25,6 +25,9 @@
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include "Interfaces/Server/APICallBoom.h"
+
+using namespace Targoman::API::Server;
 
 namespace Targoman::API {
 
@@ -54,10 +57,11 @@ class intfAPIObject {
 public:
     virtual ~intfAPIObject();
     virtual void invokeMethod(
-            const QVariantList& _arguments,
-            QGenericReturnArgument _returnArg,
-            /*OUT*/ QVariantMap &_responseHeaders
-        ) const = 0;
+        intfAPICallBoom* _APICALLBOOM,
+        const QVariantList& _arguments,
+        QGenericReturnArgument _returnArg
+//        /*OUT*/ QVariantMap &_responseHeaders
+    ) const = 0;
 };
 
 /**********************************************************************/
@@ -99,7 +103,12 @@ public:
     virtual ~intfAPIArgManipulator();
 
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) = 0;
-    virtual QVariant invokeMethod(const intfAPIObject* _apiObject, const QVariantList& _arguments, /*OUT*/ QVariantMap &_responseHeaders) = 0;
+    virtual QVariant invokeMethod(
+        const intfAPIObject* _apiObject,
+        intfAPICallBoom* _APICALLBOOM,
+        const QVariantList& _arguments
+//        /*OUT*/ QVariantMap &_responseHeaders
+    ) = 0;
     virtual QVariant defaultVariant() const = 0;
     virtual void cleanup (void* _argStorage) = 0;
     virtual bool hasFromVariantMethod() const = 0;

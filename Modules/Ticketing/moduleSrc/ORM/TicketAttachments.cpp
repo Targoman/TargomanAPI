@@ -55,25 +55,24 @@ TicketAttachments::TicketAttachments() :
                          { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::uqu_uflID },
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
-//    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-//                       .arg(tblTicketAttachments::tktTarget_usrID).arg(clsJWT(_JWT).usrID())
-//                       .arg(tblTicketAttachments::tktCreatedBy_usrID).arg(clsJWT(_JWT).usrID())
+//                       .arg(tblTicketAttachments::tktTarget_usrID).arg(_APICALLBOOM.getUserID())
+//                       .arg(tblTicketAttachments::tktCreatedBy_usrID).arg(_APICALLBOOM.getUserID())
 //                       .arg(tblTicketAttachments::tktTarget_usrID)
 //                       .arg(tblTicketAttachments::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
-            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, clsJWT(_JWT).usrID() })
+            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
+            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
             .orCond(
                 clsCondition({ tblTickets::tktTarget_usrID, enuConditionOperator::Null })
                 .andCond({ tblTickets::tktType,

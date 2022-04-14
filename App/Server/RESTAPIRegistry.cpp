@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include <QMap>
@@ -28,8 +29,7 @@
 
 #include "Interfaces/DBM/clsORMField.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API {
 
 using namespace TAPI;
 
@@ -43,7 +43,6 @@ using namespace TAPI;
 #define MAKE_INFO_FOR_VALID_COMPLEX_METATYPE(_typeName, _id, _baseType)  { _id, { DO_ON_TYPE(COMPLEXITY_Complex, _typeName, _baseType) } },
 #define MAKE_INVALID_METATYPE(_typeName, _id, _baseType) { _id, { nullptr } },
 #define DIRECT_INFO_FOR_QT_PRIMITIVES(_type) {qMetaTypeId<_type>(), DO_ON_TYPE_VALID(COMPLEXITY_Integral, _type)},
-
 
 const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     //QT_FOR_EACH_STATIC_PRIMITIVE_TYPE(MAKE_INFO_FOR_VALID_INTEGRAL_METATYPE)
@@ -67,26 +66,26 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
 };
 
 #define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fromVariantLambda, _toORMValueLambda, _descriptionLambda) \
-    template<> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
-    template<> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
-    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
-    template<> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
+    template <> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
+    template <> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
+    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
+    template <> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
     \
-    template<> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toVariantLambda = \
+    template <> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toVariantLambda = \
         [](NULLABLE_TYPE(_baseType) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
-    template<> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
+    template <> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
             if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
             NULLABLE_VAR(_baseType, Value); \
             Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
-    template<> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
-    template<> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
-    template<> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
+    template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
+    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
     static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
 //NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
 
@@ -154,62 +153,70 @@ void RESTAPIRegistry::registerMetaTypeInfoMap() {
         }
     }
 }
-void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method) {
-    if ((_method.name().startsWith("api") == false &&
-         _method.name().startsWith("asyncApi") == false)||
-        _method.typeName() == nullptr)
+
+void RESTAPIRegistry::registerRESTAPI(
+    intfPureModule* _module,
+    const QMetaMethod& _method
+) {
+    if ((_method.name().startsWith("api") == false
+            && _method.name().startsWith("asyncApi") == false)
+            || _method.typeName() == nullptr)
         return;
 
-    foreach(auto Item, _module->filterItems())
+    foreach (auto Item, _module->filterItems())
         Item.registerTypeIfNotRegisterd(_module);
 
     RESTAPIRegistry::registerMetaTypeInfoMap();
 
     try {
         RESTAPIRegistry::validateMethodInputAndOutput(_method);
-        QString MethodName = _method.name().constData();
-        MethodName = MethodName.mid(MethodName.indexOf("api",0,Qt::CaseInsensitive) + 3);
 
-        QString MethodSignature, MethodDoc;
-        bool Found = false;
-        for (int i=0; i<_module->metaObject()->methodCount(); ++i)
+        QString MethodName = _method.name().constData();
+        MethodName = MethodName.mid(MethodName.indexOf("api", 0, Qt::CaseInsensitive) + 3);
+
+        QString MethodAlias = MethodName, MethodSignature, MethodDoc;
+        bool FoundAlias = false, FoundSignature = false, FoundDoc = false;
+
+        for (int i=0; i<_module->metaObject()->methodCount(); ++i) {
+            if (_module->metaObject()->method(i).name() == "aliasOf" + MethodName) {
+                _module->metaObject()->method(i).invoke(_module,
+                                                        Qt::DirectConnection,
+                                                        Q_RETURN_ARG(QString, MethodAlias)
+                                                        );
+                FoundAlias = true;
+            }
+
             if (_module->metaObject()->method(i).name() == "signOf" + MethodName) {
                 _module->metaObject()->method(i).invoke(_module,
                                                         Qt::DirectConnection,
                                                         Q_RETURN_ARG(QString, MethodSignature)
                                                         );
-                Found = true;
-                break;
+                FoundSignature = true;
+//                break;
             }
 
-        if (!Found)
-            throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
-
-        for (int i=0; i<_module->metaObject()->methodCount(); ++i)
             if (_module->metaObject()->method(i).name() == "docOf" + MethodName) {
                 _module->metaObject()->method(i).invoke(_module,
                                                         Qt::DirectConnection,
                                                         Q_RETURN_ARG(QString, MethodDoc)
                                                         );
-                Found = true;
-                break;
+                FoundDoc = true;
+//                break;
             }
+        }
 
-        if (!Found)
+        if (!FoundSignature)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
-
-        auto makeMethodName = [MethodName](int _start) -> QString{
-            if (MethodName.size() >= _start)
-                return MethodName.at(_start-1).toLower() + MethodName.mid(_start);
-            return "";
-        };
+        if (!FoundDoc)
+            throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
         constexpr char COMMA_SIGN[] = "$_COMMA_$";
 
         MethodSignature = MethodSignature.trimmed().replace("','", QString("'%1'").arg(COMMA_SIGN));
         bool DQuoteStarted = false, BackslashFound = false;
         QString CommaReplacedMethodSignature;
+
         for (int i=0; i< MethodSignature.size(); ++i) {
             if (DQuoteStarted) {
                 if (MethodSignature.at(i).toLatin1() == ',')
@@ -231,16 +238,35 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
                 CommaReplacedMethodSignature += MethodSignature.at(i);
         }
 
-
         QVariantList DefaultValues;
-        quint8 ParamIndex = 0;
         bool ContainsFileInput = false;
-        foreach(auto Param, CommaReplacedMethodSignature.split(',')) {
+        QList<QByteArray> parameterTypes = _method.parameterTypes();
+        auto ParamsParts = CommaReplacedMethodSignature.split(',');
+
+#ifdef QT_DEBUG
+        QString MethodKey = "/" + _module->moduleBaseName().replace(":", "/") + '/' + _method.name();
+        MethodKey = MethodKey.replace(QRegularExpression("//+"), "/");
+        if (MethodKey == "/Account/OfflinePayments/apiGET") {
+            int ii; ii = 0;
+        }
+#endif
+
+        for (quint8 ParamIndex=0; ParamIndex<ParamsParts.length(); ParamIndex++) {
+            QString Param = ParamsParts[ParamIndex];
+
             if (ParamIndex >= _method.parameterCount())
                 break;
 
-            if (_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>() ||
-               _method.parameterType(ParamIndex) == qMetaTypeId<TAPI::Files_t>())
+            QString ParameterTypeName = parameterTypes.at(ParamIndex);
+
+            //check APICallBoom
+            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
+                DefaultValues.append(QVariant());
+                continue;
+            }
+
+            if (_method.parameterType(ParamIndex) == qMetaTypeId<TAPI::stuFileInfo>()
+                    || _method.parameterType(ParamIndex) == qMetaTypeId<TAPI::Files_t>())
                 ContainsFileInput = true;
 
             intfAPIArgManipulator* ArgSpecs;
@@ -272,11 +298,15 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
                 throw exRESTRegistry("Nullable parameter: <"+_method.parameterNames().value(ParamIndex)+"> on method: <" + MethodName + "> must have default value" );
             else
                 DefaultValues.append(QVariant());
-
-            ParamIndex++;
         }
 
         QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
+
+        auto makeMethodName = [MethodAlias](int _start = 1) -> QString {
+            if (MethodAlias.size() >= _start)
+                return MethodAlias.at(_start-1).toLower() + MethodAlias.mid(_start);
+            return "";
+        };
 
         if (MethodName.startsWith("GET")) {
             if (ContainsFileInput)
@@ -307,8 +337,8 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
         } else if (ContainsFileInput)
             throw exRESTRegistry("methods with file input must specifically contain HTTP method: " + MethodName);
         else {
-            RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", MethodName.at(0).toLower() + MethodName.mid(1));
-            RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", MethodName.at(0).toLower() + MethodName.mid(1));
+            RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName());
+            RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", makeMethodName());
         }
     } catch (Targoman::Common::exTargomanBase& ex) {
         TargomanError("Fatal Error: "<<ex.what());
@@ -316,7 +346,12 @@ void RESTAPIRegistry::registerRESTAPI(intfPureModule* _module, const QMetaMethod
     }
 }
 
-QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes) {
+QMap<QString, QString> RESTAPIRegistry::extractMethods(
+    QHash<QString, clsAPIObject*>& _registry,
+    const QString& _module,
+    bool _showTypes,
+    bool _prettifyTypes
+) {
     static auto type2Str = [_prettifyTypes](int _typeID) {
         if (_prettifyTypes == false || _typeID > QMetaType::User)
             return QString(QMetaType::typeName(_typeID));
@@ -324,57 +359,76 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(QHash<QString, clsAPIObje
         return gOrderedMetaTypeInfo.at(_typeID)->PrettyTypeName;
     };
 
-
     QMap<QString, QString> Methods;
-    foreach(const QString& Key, _registry.keys()) {
+    foreach (const QString& Key, _registry.keys()) {
         QString Path = Key.split(" ").last();
+
         if (Path.startsWith(_module) == false)
             continue;
 
         clsAPIObject* APIObject = _registry.value(Key);
         QStringList Parameters;
-        for (quint8 i=0; i< APIObject->BaseMethod.parameterCount(); ++i) {
-            static auto defaultValue = [](clsAPIObject* _apiObject, quint8 i) -> QString{
+
+        if (APIObject->requiresJWT())
+            Parameters.append(QString(_showTypes ? "TAPI::JWT_t" : "") + " JWT");
+
+        for (quint8 i=0; i<APIObject->/*BaseMethod.parameterCount()*/ParamTypesName.count(); ++i) {
+
+            static auto defaultValue = [](clsAPIObject* _apiObject, quint8 i) -> QString {
                 if (_apiObject->RequiredParamsCount > i)
                     return "";
+
                 intfAPIArgManipulator* ArgManipulator = _apiObject->argSpecs(i);
+
                 if (ArgManipulator) {
                     switch (ArgManipulator->complexity()) {
-                    case COMPLEXITY_Number:
-                    case COMPLEXITY_Boolean:
-                    case COMPLEXITY_Integral:
-                        return QString(" = %1").arg(_apiObject->defaultValue(i).toString());
-                    case COMPLEXITY_String:
-                    case COMPLEXITY_Complex:
-                    case COMPLEXITY_Enum:
-                        return QString(" = \"%1\"").arg(_apiObject->defaultValue(i).toString().replace("\"", "\\\""));
-                    case COMPLEXITY_Object:
-                        return  "null"; ///TODO: update this
-                    case COMPLEXITY_File:
-                        return "";
+                        case COMPLEXITY_Number:
+                        case COMPLEXITY_Boolean:
+                        case COMPLEXITY_Integral:
+                            return QString(" = %1").arg(_apiObject->defaultValue(i).toString());
+
+                        case COMPLEXITY_String:
+                        case COMPLEXITY_Complex:
+                        case COMPLEXITY_Enum:
+                            return QString(" = \"%1\"").arg(_apiObject->defaultValue(i).toString().replace("\"", "\\\""));
+
+                        case COMPLEXITY_Object:
+                            return "null"; ///TODO: update this
+
+                        case COMPLEXITY_File:
+                            return "";
                     }
-                    return " = " + (ArgManipulator->isPrimitiveType() ? QString("%1") : (QString("\"%1\""))).arg(
-                                _apiObject->defaultValue(i).toString().replace("\"", "\\\""));
+
+                    return " = " + (ArgManipulator->isPrimitiveType()
+                                    ? QString("%1")
+                                    : (QString("\"%1\"")))
+                                .arg(_apiObject->defaultValue(i).toString().replace("\"", "\\\""));
                 }
+
                 return "";
             };
 
-            Parameters.append((_showTypes ? type2Str(APIObject->BaseMethod.parameterType(i)) + " " : "" ) + (
-                                  APIObject->BaseMethod.parameterNames().at(i).startsWith('_') ?
-                                      APIObject->BaseMethod.parameterNames().at(i).mid(1) :
-                                      APIObject->BaseMethod.parameterNames().at(i)) +
-                              defaultValue(APIObject, i)
+            Parameters.append((_showTypes
+                               ? type2Str(APIObject->/*BaseMethod.parameterType*/ParamTypesID.at(i)) + " "
+                               : "")
+                              + /*(APIObject->BaseMethod.parameterNames().at(i).startsWith('_')
+                                 ? APIObject->BaseMethod.parameterNames().at(i).mid(1)
+                                 : APIObject->BaseMethod.parameterNames().at(i))*/
+                                APIObject->ParamNames.at(i)
+                              + defaultValue(APIObject, i)
                               );
         }
 
         Methods.insert(Path + Key.split(" ").first(),
-                       QString("%1(%2) %3 %4").arg(
-                           Key).arg(
-                           Parameters.join(", ")).arg(
-                           _showTypes ? QString("-> %1").arg(
-                                            type2Str(APIObject->BaseMethod.returnType())) : "").arg(
-                           APIObject->IsAsync ? "[async]" : ""
-                                                )
+                       QString("%1(%2) %3 %4")
+                       .arg(Key)
+                       .arg(Parameters.join(", "))
+                       .arg(_showTypes
+                            ? QString("-> %1").arg(type2Str(APIObject->BaseMethod.returnType()))
+                            : "")
+                       .arg(APIObject->IsAsync
+                            ? "[async]"
+                            : "")
                        );
     }
 
@@ -402,6 +456,7 @@ QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showPa
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input) {
     if (_typeID == 0 || _typeID == QMetaType::User) // || _typeID == QMetaType::User)
         return  "is not registered with Qt MetaTypes";
+
     if (_typeID < TAPI_BASE_USER_DEFINED_TYPEID && (_typeID >= gOrderedMetaTypeInfo.size() || gOrderedMetaTypeInfo.at(_typeID) == nullptr))
         return "is complex type and not supported";
 
@@ -433,47 +488,98 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         throw exRESTRegistry("Unable to register methods with more than 10 input args <"+_method.name()+">");
 
     QString ErrMessage;
+
     if ((ErrMessage = RESTAPIRegistry::isValidType(_method.returnType(), false)).size())
         throw exRESTRegistry(QString("Invalid return type(%1): %2").arg(_method.typeName()).arg(ErrMessage));
 
     ErrMessage.clear();
 
+    QString FullMethodName = QString("%1::%2")
+                             .arg(_method.enclosingMetaObject()->className())
+                             .arg(_method.name().toStdString().c_str())
+                             ;
+
+    QList<QByteArray> parameterTypes = _method.parameterTypes();
+    bool HasApiCallBoomParam = false;
+
     for (int i=0; i<_method.parameterCount(); ++i) {
+        QString ParameterTypeName = parameterTypes.at(i);
+
+        //check APICallBoom
+        if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
+            if (HasApiCallBoomParam)
+                throw exRESTRegistry(QString("Invalid duplicate APICALLBOOM parameter (%1) at %2 of %3")
+                                     .arg(_method.parameterNames().at(i).constData())
+                                     .arg(i)
+                                     .arg(FullMethodName));
+
+            if (i > 0)
+                throw exRESTRegistry(QString("APICALLBOOM parameter must be first argument of %1")
+                                     .arg(FullMethodName));
+
+            HasApiCallBoomParam = true;
+
+            continue;
+        }
+
+        if (ParameterTypeName == PARAM_JWT)
+            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+
+        if (ParameterTypeName == PARAM_REMOTE_IP)
+            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+
+        if (ParameterTypeName == PARAM_COOKIES)
+            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+
+        if (ParameterTypeName == PARAM_HEADERS)
+            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+
+        //-- others
         if ((ErrMessage = RESTAPIRegistry::isValidType(_method.parameterType(i), true)).size())
-            throw exRESTRegistry(QString("Invalid parameter (%1 %2): %3").arg(
-                                     _method.parameterTypes().at(i).constData()).arg(
-                                     _method.parameterNames().at(i).constData()).arg(
-                                     ErrMessage));
+            throw exRESTRegistry(QString("Invalid parameter (%1 %2) at %3: %4")
+                                 .arg(ParameterTypeName.constData())
+                                 .arg(_method.parameterNames().at(i).constData())
+                                 .arg(FullMethodName)
+                                 .arg(ErrMessage));
 
         for (int j=i+1; j<_method.parameterCount(); ++j) {
             if (_method.parameterNames().at(j) == _method.parameterNames().at(i))
-                throw exRESTRegistry(QString("Invalid duplicate parameter name %1 at %2 and %3").arg(
-                                         _method.parameterNames().at(i).constData()).arg(
-                                         i).arg(
-                                         j
-                                         ));
+                throw exRESTRegistry(QString("Invalid duplicate parameter (%1) at %2 and %3 of %4")
+                                     .arg(_method.parameterNames()
+                                     .at(i).constData())
+                                     .arg(i)
+                                     .arg(j)
+                                     .arg(FullMethodName)
+                                     );
         }
     }
+
+    if (HasApiCallBoomParam == false)
+        throw exRESTRegistry(QString("APICALLBOOM parameter not defined in %1").arg(FullMethodName));
 }
 
 constexpr char CACHE_INTERNAL[] = "CACHEABLE_";
 constexpr char CACHE_CENTRAL[]  = "CENTRALCACHE_";
 constexpr char API_TIMEOUT[]  = "CENTRALCACHE_";
 
-void RESTAPIRegistry::addRegistryEntry(QHash<QString, clsAPIObject *>& _registry,
-                                       intfPureModule* _module,
-                                       const QMetaMethodExtended& _method,
-                                       const QString& _httpMethod,
-                                       const QString& _methodName) {
-    QString MethodKey = RESTAPIRegistry::makeRESTAPIKey(_httpMethod, "/" + _module->moduleBaseName().replace(":", "/")+ '/' + _methodName);
+void RESTAPIRegistry::addRegistryEntry(
+    QHash<QString, clsAPIObject *>& _registry,
+    intfPureModule* _module,
+    const QMetaMethodExtended& _method,
+    const QString& _httpMethod,
+    const QString& _methodName
+) {
+    QString MethodKey = RESTAPIRegistry::makeRESTAPIKey(_httpMethod, "/" + _module->moduleBaseName().replace(":", "/") + '/' + _methodName);
+    MethodKey = MethodKey.replace(QRegularExpression("//+"), "/");
 
     if (_registry.contains(MethodKey)) {
         if (RESTAPIRegistry::Registry.value(MethodKey)->isPolymorphic(_method))
             throw exRESTRegistry(QString("Polymorphism is not supported: %1").arg(_method.methodSignature().constData()));
+
         _registry.value(MethodKey)->updateDefaultValues(_method);
     } else {
         if (RESTAPIRegistry::getTagSeconds(_method, CACHE_INTERNAL) > 0
-           && RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL) >0)
+               && RESTAPIRegistry::getTagSeconds(_method, CACHE_CENTRAL) > 0)
             throw exRESTRegistry("Both internal and central cache can not be defined on an API");
 
         _registry.insert(MethodKey,
@@ -510,21 +616,19 @@ int RESTAPIRegistry::getTagSeconds(const QMetaMethod& _method, const char* _type
     return 0;
 }
 
-
 Cache_t InternalCache::Cache;
 QMutex InternalCache::Lock;
 
 QScopedPointer<intfCacheConnector> CentralCache::Connector;
-QHash<QString, clsAPIObject*>  RESTAPIRegistry::Registry;
+QHash<QString, clsAPIObject*> RESTAPIRegistry::Registry;
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
 QHash<QString, clsAPIObject*>  RESTAPIRegistry::WSRegistry;
 #endif
 
 /****************************************************/
-intfCacheConnector::~intfCacheConnector()
-{ ; }
+intfCacheConnector::~intfCacheConnector() { ; }
 
-void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl) {
+void intfCacheConnector::setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl) {
     if (_value.type() >= TAPI_BASE_USER_DEFINED_TYPEID)
         this->setKeyValImpl(_key,
                             gUserDefinedTypesInfo.at(static_cast<int>(_value.type() - TAPI_BASE_USER_DEFINED_TYPEID))->toString(_value),
@@ -533,6 +637,5 @@ void Targoman::API::Server::intfCacheConnector::setKeyVal(const QString& _key, c
         this->setKeyValImpl(_key, _value.toString(), _ttl);
 }
 
-}
-}
-}
+} //namespace Server
+} //namespace Targoman::API

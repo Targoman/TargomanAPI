@@ -36,6 +36,7 @@
 #include "RESTAPIRegistry.h"
 #include "ServerConfigs.h"
 #include "OpenAPIGenerator.h"
+#include "StaticModule.h"
 
 using namespace Targoman::Common;
 
@@ -49,63 +50,74 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exInvalidAPIModule, exModuleLoader);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exAPIModuleInitiailization, exModuleLoader);
 #pragma clang diagnostic pop
 
-appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent)
-{ ; }
+appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent) { ; }
 
 void appTargomanAPI::slotExecute() {
     try {
-        // Load modules
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
+        auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {
+            _module->setInstancePointer();
+
+            TargomanDebug(0, "Loading module <" << _module->moduleFullName() << ">");
+
+            foreach (auto ModuleMethod, _module->listOfMethods())
+                RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
+
+            auto DBInfo = _module->requiredDB();
+
+            if (DBInfo.Schema.size())
+                RequiredDBs.insert(_module->moduleBaseName(), DBInfo);
+
+            return _module->init();
+        };
+
+        //-- StaticModule --
+        static StaticModule *StaticModuleInstance = new StaticModule();
+        if (RegisterModule(StaticModuleInstance) == false)
+            throw exAPIModuleInitiailization("Unable to init StaticModule");
+
+        //-- Dynamic Modules --
+//#ifndef QT_DEBUG
         auto LoadedModules = Configuration::ConfigManager::instance().loadedPlugins();
         if (LoadedModules.isEmpty())
             throw exTargomanAPI("No module was loaded. Maybe you forgot to specify --plugins");
 
         foreach (auto Plugin, LoadedModules) {
             intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
-            Module->setInstancePointer();
 
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
-            TargomanDebug(0, "Loading module <" << Module->moduleFullName() << ">");
-
-            foreach(auto ModuleMethod, Module->listOfMethods())
-                RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
-
-            auto DBInfo = Module->requiredDB();
-
-            if (DBInfo.Schema.size())
-                RequiredDBs.insert(Module->moduleBaseName(), DBInfo);
-
-            if (!Module->init())
+            if (RegisterModule(Module) == false)
                 throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
         }
+//#endif
 
-        //Prepare database connections
+        //-- Prepare database connections --
+        TargomanDebug(0, "Registering db connections");
+
+        QSet<QString> ConnectionStrings;
+
+        if (ServerConfigs::MasterDB::Host.value().size()
+                && ServerConfigs::MasterDB::Schema.value().size()) {
+            intfPureModule::stuDBInfo MasterDBInfo = {
+                ServerConfigs::MasterDB::Schema.value(),
+                ServerConfigs::MasterDB::Port.value(),
+                ServerConfigs::MasterDB::Host.value(),
+                ServerConfigs::MasterDB::User.value(),
+                ServerConfigs::MasterDB::Pass.value()
+            };
+
+            QString ConnStr = MasterDBInfo.toConnStr(ServerCommonConfigs::DBPrefix.value()/*, true*/);
+            ConnectionStrings.insert(ConnStr);
+
+            TargomanDebug(0, "Registering " << ConnStr);
+            DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
+            DBManager::clsDAC::setConnectionString(ConnStr);
+        }
+
         if (RequiredDBs.size()) {
-            TargomanDebug(0, "Registering db connections");
-
-            QSet<QString> ConnectionStrings;
-
-            if (ServerConfigs::MasterDB::Host.value().size()
-                    && ServerConfigs::MasterDB::Schema.value().size()) {
-                intfPureModule::stuDBInfo MasterDBInfo = {
-                    ServerConfigs::MasterDB::Schema.value(),
-                    ServerConfigs::MasterDB::Port.value(),
-                    ServerConfigs::MasterDB::Host.value(),
-                    ServerConfigs::MasterDB::User.value(),
-                    ServerConfigs::MasterDB::Pass.value()
-                };
-
-                QString ConnStr = MasterDBInfo.toConnStr(ServerCommonConfigs::DBPrefix.value()/*, true*/);
-                ConnectionStrings.insert(ConnStr);
-
-                TargomanDebug(0, "Registering " << ConnStr);
-                DBManager::clsDAC::addDBEngine(DBManager::enuDBEngines::MySQL);
-                DBManager::clsDAC::setConnectionString(ConnStr);
-            }
-
             for (auto DBInfoIter = RequiredDBs.begin(); DBInfoIter != RequiredDBs.end(); ++DBInfoIter) {
                 QString ConnStr = DBInfoIter->toConnStr(ServerCommonConfigs::DBPrefix.value()/*true*/);
 

@@ -21,26 +21,23 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "ServerCommon.h"
+#ifndef TARGOMAN_API_SERVERCOMMON_H
+#define TARGOMAN_API_SERVERCOMMON_H
 
-using namespace Targoman::Common;
-using namespace Targoman::Common::Configuration;
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
-namespace Targoman::API::Common {
+namespace Targoman::API::Server {
 
-tmplConfigurable<QString> ServerCommonConfigs::DBPrefix(
-    ServerCommonConfigs::makeConfig("DBPrefix"),
-    "Prefix to prepend to all database schemas",
-    "",
-    ReturnTrueCrossValidator(),
-    "",
-    "PREFIX",
-    "dbprefix",
-    enuConfigSource::Arg | enuConfigSource::File
-);
+struct ServerCommonConfigs
+{
+    static inline QString makeConfig(const QString& _name) {return "/Server/" + _name;}
 
-const QString PrependSchema(const QString &_schema) {
-    return ServerCommonConfigs::DBPrefix.value() + _schema;
-}
+    static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
+    static Targoman::Common::Configuration::tmplConfigurable<QString> DBPrefix;
+};
 
-} //namespace Targoman::API::Common
+const QString PrependSchema(const QString &_schema);
+
+} //namespace Targoman::API::Server
+
+#endif // TARGOMAN_API_SERVERCOMMON_H

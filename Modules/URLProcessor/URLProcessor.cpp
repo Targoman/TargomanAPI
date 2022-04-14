@@ -31,16 +31,23 @@ namespace API {
 TARGOMAN_IMPL_API_MODULE(URLProcessor)
 
 URLProcessor::URLProcessor() :
-    intfPureModule("Targoman")
-{ ; }
+    intfPureModule("URLProcessor") { ; }
 
-QString URLProcessor::apiGETcanonicalize(const QString _url, bool _removeWWW) {
+QString URLProcessor::apiGETcanonicalize(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString _url,
+    bool _removeWWW
+) {
     char Normalized[MAX_URL_SIZE+1];
     URLCanonicalizer::doJob (_url.toLatin1().constData(), Normalized, _removeWWW);
     return Normalized;
 }
 
-QString URLProcessor::apiGETconvertHexCodes(const QString _url, bool _convertAll) {
+QString URLProcessor::apiGETconvertHexCodes(
+    APICallBoom<false> &_APICALLBOOM,
+    const QString _url,
+    bool _convertAll
+) {
     char Normalized[MAX_URL_SIZE+1];
     strncpy(Normalized, _url.toLatin1().constData(), MAX_URL_SIZE);
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);

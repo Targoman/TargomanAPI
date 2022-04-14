@@ -44,11 +44,12 @@ intfAlerts::intfAlerts() :
             { tblAlerts::alr_altCode,           S(TAPI::String_t),                          QFV.maxLenght(50),          QRequired,  UPAdmin },
             { tblAlerts::alrReplacements,       S(TAPI::DBText_t),                          QFV,                        QRequired,  UPAdmin },
             { tblAlerts::alrCreateDate,         ORM_CREATED_ON },
+            { tblAlerts::alrLockedAt,           S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
+            { tblAlerts::alrLastTryAt,          S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrSentDate,           S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrStatus,             ORM_STATUS_FIELD(Targoman::API::ORM::enuAlertStatus,                    Targoman::API::ORM::enuAlertStatus::New) },
         }
-    )
-{
+    ) {
     /**
      * VALIDATION:
      * one of the alr_usrID, alrEmail, alrMobile must be provided
@@ -62,8 +63,7 @@ intfAlerts::intfAlerts() :
         QString _replacedContactInfo,
         QString _altCode,
         QString _replacements
-    )
-{
+    ) {
     ///TODO: complete this
 
 //    auto Query = CreateQuery(Alerts::instance())

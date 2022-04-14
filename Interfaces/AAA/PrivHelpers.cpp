@@ -35,12 +35,12 @@ using namespace DBManager;
 stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services) {
     QJsonObject Privs;
 
-    foreach(auto Service, _services)
+    foreach (auto Service, _services)
         if (serviceAccounting(Service) == nullptr)
             throw exHTTPBadRequest("Service " + Service + " was not registered.");
 
     qint64 MinTTL = LLONG_MAX;
-    foreach(auto Priv, _privs) {
+    foreach (auto Priv, _privs) {
         QJsonObject PrivObj = Priv.toObject();
         for (auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
             if (PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())) {
@@ -67,7 +67,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
 bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf) {
     QStringList AccessItemParts = _requiredAccess.split(":");
     QJsonObject CurrCheckingPriv = _privs;
-    foreach(auto Part, AccessItemParts) {
+    foreach (auto Part, AccessItemParts) {
         if (Part.startsWith("CRUD~")) {
             QString RequiredAccess = Part.split('~').last();
             if (RequiredAccess.size() != 4)
@@ -112,7 +112,7 @@ QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const 
     if (_privs.isEmpty())
         throw exAAA("Seems that Privs has not been set");
 
-    foreach(auto AccessItem, _requiredAccess)
+    foreach (auto AccessItem, _requiredAccess)
         if (AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
             throw exAuthorization("Not enough priviledges on <"+AccessItem+">");
     return _privs;
@@ -129,7 +129,7 @@ void PrivHelpers::validateToken(const QString& _token) {
 QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector) {
     QStringList AccessItemParts = _selector.split(":");
     QJsonObject CurrCheckingPriv = _privs;
-    foreach(auto Part, AccessItemParts) {
+    foreach (auto Part, AccessItemParts) {
         if (CurrCheckingPriv.contains(Part) == false)
             return QVariant();
         CurrCheckingPriv = CurrCheckingPriv.value(Part).toObject();

@@ -68,12 +68,11 @@ OnlinePayments::OnlinePayments() :
             { "voucher",        { tblOnlinePayments::onp_vchID, R(AAASchema, tblVoucher::Name),            tblVoucher::vchID } },
             { "paymentGateway", { tblOnlinePayments::onp_pgwID, R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID } },
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
@@ -107,12 +106,11 @@ OfflinePayments::OfflinePayments() :
             ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
         }
-    )
-{ ; }
+    ) { ; }
 
 QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-    if (Authorization::hasPriv(_JWT, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, clsJWT(_JWT).usrID()}}, _filters);
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
@@ -122,7 +120,7 @@ QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
-    Authorization::checkPriv(_JWT, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 

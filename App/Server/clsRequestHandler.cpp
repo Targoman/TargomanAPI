@@ -264,15 +264,26 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QStringList& _queries, const QString& _pksByPath) {
-    QVariantMap ResponseHeaders;
+clsRequestHandler::stuResult clsRequestHandler::run(
+    clsAPIObject* _apiObject,
+    QStringList& _queries,
+    const QString& _pksByPath,
+    const QString& _api
+) {
+//    QVariantMap ResponseHeaders;
+
+    QScopedPointer<intfAPICallBoom> APICALLBOOM;
+    if (_apiObject->requiresJWT())
+        APICALLBOOM.reset(new APICallBoom<true>());
+    else
+        APICALLBOOM.reset(new APICallBoom<false>());
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
             *QueryIter = QueryIter->replace('+', ' ');
 
         if (!this->Request)
-          throw exHTTPGone("Seems that client has gone");
+            throw exHTTPGone("Seems that client has gone");
 
         qhttp::THeaderHash Headers = this->Request->headers();
         qhttp::THeaderHash Cookies;
@@ -299,14 +310,16 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
                                 );
 
                     BearerToken = NewToken;
-                    ResponseHeaders.insert("x-auth-new-token", BearerToken);
+                    APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
                 }
                 JWT["encodedJWT"] = BearerToken;
             } else
                 throw exHTTPForbidden("No valid authentication header is present");
-        }
 
-        if (_apiObject->requiresCookies() && Headers.value("cookie").size()) {
+//            APICALLBOOM->setJWT(JWT);
+        } // if (_apiObject->requiresJWT())
+
+        if (/*_apiObject->requiresCookies() && */Headers.value("cookie").size()) {
             foreach (auto Cookie, Headers.value("cookie").split(';')) {
                 auto CookieParts = Cookie.split('=');
                 Cookies.insert(CookieParts.first(), CookieParts.size() > 1 ? CookieParts.last() : QByteArray());
@@ -315,29 +328,38 @@ clsRequestHandler::stuResult clsRequestHandler::run(clsAPIObject* _apiObject, QS
 
         Headers.remove("cookie");
 
+        APICALLBOOM->initialize(
+                    _api,
+                    JWT,
+                    Headers.toVariant().toMap(),
+                    Cookies.toVariant().toMap(),
+                    this->toIPv4(this->Request->remoteAddress())
+                    );
+
         QVariant Result = _apiObject->invoke(
+                              APICALLBOOM.data(),
                               this->Request->method() == qhttp::EHTTP_PATCH,
                               _queries,
-                              ResponseHeaders,
+//                              ResponseHeaders,
                               this->Request->userDefinedValues(),
-                              Headers,
-                              Cookies,
-                              JWT,
-                              this->toIPv4(this->Request->remoteAddress()),
+//                              Headers,
+//                              Cookies,
+//                              JWT,
+//                              this->toIPv4(this->Request->remoteAddress()),
                               _pksByPath
                               );
 
-        return stuResult(Result, ResponseHeaders);
+        return stuResult(Result, APICALLBOOM->getResponseHeaders());
     } catch (exTargomanBase& ex) {
-        return stuResult(ex.what(), ResponseHeaders, static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exQFVRequiredParam &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (exQFVInvalidValue &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (std::exception &ex) {
-        return stuResult(ex.what(), ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     } catch (...) {
-        return stuResult("INTERNAL SERVER ERROR!!!", ResponseHeaders, qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -361,7 +383,7 @@ quint16 clsRequestHandler::port() const
     const qhttp::THeaderHash headers = this->Request->headers();
 
     if (headers.has("host") == false)
-        return ServerConfigs::ListenPort.value();
+        return ServerCommonConfigs::ListenPort.value();
 
     QString Host = headers["host"];
 
@@ -371,7 +393,7 @@ quint16 clsRequestHandler::port() const
 
     return Host.mid(idx+1).toUInt();
 }
-
+/*
 bool clsRequestHandler::callStaticAPI(QString _api) {
     if (_api == "/openAPI.json") {
         gServerStats.Success.inc();
@@ -434,10 +456,10 @@ bool clsRequestHandler::callStaticAPI(QString _api) {
 
     return false;
 }
-
+*/
 void clsRequestHandler::findAndCallAPI(QString _api) {
-    if (this->callStaticAPI(_api))
-        return;
+//    if (this->callStaticAPI(_api))
+//        return;
 
     //-----------------------------------------------------
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
@@ -477,20 +499,20 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
                 this->sendError(Result.StatusCode, Result.Result.toString(), Result.ResponseHeader, Result.StatusCode >= 500);
         });
 
-        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath));
+        this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath, _api));
 
         if (ServerConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());
     } else
-        run(APIObject, Queries, ExtraAPIPath);
+        run(APIObject, Queries, ExtraAPIPath, _api);
 }
 
-void clsRequestHandler::sendError(qhttp::TStatusCode _code,
-        const QString& _message,
-        QVariantMap _responseHeaders,
-        bool _closeConnection
-    )
-{
+void clsRequestHandler::sendError(
+    qhttp::TStatusCode _code,
+    const QString& _message,
+    QVariantMap _responseHeaders,
+    bool _closeConnection
+) {
     gServerStats.Errors.inc();
     this->sendResponseBase(_code,
                            QJsonObject({
@@ -505,7 +527,27 @@ void clsRequestHandler::sendError(qhttp::TStatusCode _code,
                            _closeConnection);
 }
 
-void clsRequestHandler::sendFile(const QString& _basePath, const QString _path) {
+void clsRequestHandler::sendFile(QString _fullFileName) {
+    _fullFileName = _fullFileName.replace(QRegularExpression("//+"), "/");
+    QString BasePath;
+    QString FileName;
+
+    int Idx = _fullFileName.lastIndexOf("/");
+
+    if (Idx == -1)
+        FileName = _fullFileName;
+    else {
+        BasePath = _fullFileName.left(Idx + 1);
+        FileName = _fullFileName.mid(Idx + 1);
+    }
+
+    this->sendFile(BasePath, FileName);
+}
+
+void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
+    if (_basePath.right(1) != "/")
+        _basePath += "/";
+
     if (QFile::exists(_basePath + _path) == false)
         throw exHTTPNotFound(_path);
 
@@ -528,13 +570,15 @@ void clsRequestHandler::sendFile(const QString& _basePath, const QString _path) 
 
 #ifdef QT_DEBUG
     this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
 #endif
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
-void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
+void clsRequestHandler::addHeaderValues(
+    const QVariantMap &_responseHeaders
+) {
     if (_responseHeaders.isEmpty() == false) {
         TargomanLogInfo(7, "Response Custom Header Values:");
 
@@ -558,14 +602,14 @@ void clsRequestHandler::addHeaderValues(const QVariantMap &_responseHeaders) {
 }
 
 void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
-        const QVariant &_response,
-        QVariantMap _responseHeaders
-    )
-{
+    const QVariant &_response,
+    QVariantMap _responseHeaders
+) {
     gServerStats.Success.inc();
 
     if (_response.isValid() == false)
         this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue(QJsonValue::Undefined) } }), _responseHeaders);
+
     else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
 
@@ -601,7 +645,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         funcAddToHeaderArray("x-debug-time-elapsed");
 
         if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-            _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+            _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
         funcAddToHeaderArray("x-auth-new-token");
@@ -611,8 +655,17 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->end(RawData.data());
 
         this->deleteLater();
+
+    } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
+        TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
+        this->redirect(ResponseRedirect.url());
+
+    } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
+        TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
+        this->sendFile(FileData.fileName());
+
     } else
-        this->sendResponseBase(_code, QJsonObject({{"result", QJsonValue::fromVariant(_response) }}), _responseHeaders);
+        this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue::fromVariant(_response) } }), _responseHeaders);
 }
 
 void clsRequestHandler::sendCORSOptions() {
@@ -640,7 +693,7 @@ void clsRequestHandler::sendCORSOptions() {
 
 #ifdef QT_DEBUG
     this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(this->ElapsedTimer.elapsed()) + " ms");
+    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
 #endif
 
     this->Response->end();
@@ -661,12 +714,12 @@ void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _pe
     this->deleteLater();
 }
 
-void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
-        QJsonObject _dataObject,
-        QVariantMap _responseHeaders,
-        bool _closeConnection
-    )
-{
+void clsRequestHandler::sendResponseBase(
+    qhttp::TStatusCode _code,
+    QJsonObject _dataObject,
+    QVariantMap _responseHeaders,
+    bool _closeConnection
+) {
     if (!this->Request->connection()->tcpSocket())
       return;
 
@@ -705,7 +758,7 @@ void clsRequestHandler::sendResponseBase(qhttp::TStatusCode _code,
     funcAddToHeaderArray("x-debug-time-elapsed");
 
     if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-        _responseHeaders["x-debug-time-elapsed"] = QString::number(this->ElapsedTimer.elapsed()) + " ms";
+        _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
     funcAddToHeaderArray("x-auth-new-token");
@@ -894,7 +947,7 @@ void clsUpdateAndPruneThread::run() {
 
         if (ToDeleteIters.size()) {
             QMutexLocker Locker(&InternalCache::Lock);
-            foreach(auto Iter, ToDeleteIters)
+            foreach (auto Iter, ToDeleteIters)
                 InternalCache::Cache.erase(Iter);
         }
     });

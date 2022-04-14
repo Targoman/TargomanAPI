@@ -64,7 +64,7 @@ private slots:
                               {
                                   { "phone", "0999-888-1010" },
                                   { "country", "IR" },
-                               })
+                              })
                           ;
 
         QVERIFY(Result.toString() == "+989998881010");
