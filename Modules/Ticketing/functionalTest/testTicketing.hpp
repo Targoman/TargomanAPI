@@ -255,7 +255,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isNull() == false);
+            QVERIFY(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -272,7 +272,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isNull() == false);
+            QVERIFY(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -292,7 +292,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isNull() == false);
+            QVERIFY(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -312,7 +312,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isNull() == false);
+            QVERIFY(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -330,14 +330,13 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isNull() == false);
+            QVERIFY(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
-private:
 private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/

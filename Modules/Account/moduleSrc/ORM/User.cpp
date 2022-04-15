@@ -168,6 +168,8 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 SelectQuery User::getPhotoQuery(quint64 _usrID) {
+    UserExtraInfo::instance().prepareFiltersList();
+
     return SelectQuery(UserExtraInfo::instance())
         .addCol(tblUserExtraInfo::ueiPhoto)
         .where({ tblUserExtraInfo::uei_usrID, enuConditionOperator::Equal, _usrID })
