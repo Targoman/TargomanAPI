@@ -67,7 +67,7 @@ public:
     void addResponseHeaderNameToExpose(const QString &_header);
 
 protected:
-    QSharedDataPointer<APICallBoomData> Data;
+    QExplicitlySharedDataPointer<APICallBoomData> Data;
 };
 
 template <bool _needJWT>

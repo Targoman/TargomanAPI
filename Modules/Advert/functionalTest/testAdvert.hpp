@@ -296,7 +296,7 @@ private slots:
     void addToBasket_invalid_saleable_code() {
         QT_TRY {
 //            QVERIFY_EXCEPTION_THROWN
-            QVariant result = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
@@ -311,11 +311,7 @@ private slots:
                 }
             );
 
-            qDebug() << "ZZZZZZZZZZZZZZZZZ" << result;
-
-            //exHTTPNotFound("No item could be found");
-
-            //QEXCEPTION
+            QVERIFY(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -324,7 +320,7 @@ private slots:
 
     void addToBasket_invalid_coupon_qty_not_available() {
         QT_TRY {
-            QVariant result = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
@@ -339,7 +335,7 @@ private slots:
                 }
             );
 
-            //QEXCEPTION
+            QVERIFY(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -348,7 +344,7 @@ private slots:
 
     void addToBasket_invalid_coupon_code() {
         QT_TRY {
-            QVariant result = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
                 "Advert/addToBasket",
                 {},
@@ -363,7 +359,7 @@ private slots:
                 }
             );
 
-            //QEXCEPTION
+            QVERIFY(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -509,7 +505,7 @@ private slots:
 
     void finalizeBasket_empty_items() {
         QT_TRY {
-            QVariant result = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
                 "Account/finalizeBasket",
                 {},
@@ -522,7 +518,7 @@ private slots:
                 }
             );
 
-            //QEXCEPTION
+            QVERIFY(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -585,7 +581,6 @@ private slots:
         }
     }
 
-private:
 private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
@@ -624,7 +619,7 @@ private slots:
 
 //            qDebug() << "--------- DELETE result: " << Result;
 
-            QVERIFY(Result == true);
+            QVERIFY(Result.toBool());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -661,7 +656,7 @@ private slots:
 
 //                qDebug() << "--------- DELETE result: " << Result;
 
-                QVERIFY(Result == true);
+                QVERIFY(Result.toBool());
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -679,7 +674,7 @@ private slots:
 
 //                qDebug() << "--------- DELETE result: " << Result;
 
-                QVERIFY(Result == true);
+                QVERIFY(Result.toBool());
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -697,7 +692,7 @@ private slots:
 
 //                qDebug() << "--------- DELETE result: " << Result;
 
-                QVERIFY(Result == true);
+                QVERIFY(Result.toBool());
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
