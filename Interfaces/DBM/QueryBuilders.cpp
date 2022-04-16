@@ -2407,8 +2407,9 @@ SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime) {
     return *this;
 }
 
-void SelectQuery::clearCache() {
-    ///@TODO: call DBM::invalidateCache(Qry)
+void SelectQuery::clearCache(QVariantMap _args) {
+    QString QueryString = this->buildQueryString(_args, true, false, true);
+    clsDAC::invalidateCache(QueryString);
 }
 
 /***********************\
