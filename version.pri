@@ -29,20 +29,24 @@ defined(QJsonRPC, var) equals(QJsonRPC, 1) {
     DISABLED_DPES += QJsonRPC
 }
 
-!defined(NoWebSockets, var)|equals(NoWebSockets, 1) {
-    QT+= websockets
+!defined(NoWebSockets, var) | equals(NoWebSockets, 1) {
+    QT += websockets
 } else {
-    DEFINES += TARGOMAN_API_WEBSOCKET
+    DEFINES += TARGOMAN_API_ENABLE_WEBSOCKET
 }
 
-!defined(NoRedis, var)|equals(NoRedis, 1) {
-    LIBS+= -lhiredis
-    DEFINES += TARGOMAN_API_REDIS_PROTOCOL
+!defined(NoRedis, var) | equals(NoRedis, 1) {
+    LIBS += -lhiredis
+    DEFINES += TARGOMAN_API_ENABLE_REDIS_PROTOCOL
 }
 
 !defined(NoAwsS3, var) | equals(NoAwsS3, 1) {
     LIBS += -laws-cpp-sdk-s3
-    DEFINES += TARGOMAN_API_AWS_S3
+    DEFINES += TARGOMAN_API_ENABLE_AWS_S3
+}
+
+defined(JWTDastreshte, var) equals(JWTDastreshte, 1) {
+    DEFINES += TARGOMAN_API_ENABLE_JWT_DASTRESHTE
 }
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-

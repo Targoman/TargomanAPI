@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H
 #define TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H
 
-#ifdef TARGOMAN_API_AWS_S3
+#ifdef TARGOMAN_API_ENABLE_AWS_S3
 
 #include "intfObjectStorageGateway.h"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
@@ -117,6 +117,6 @@ public:
 
 } //namespace Targoman::API::ObjectStorage::Gateways
 
-#endif // TARGOMAN_API_AWS_S3
+#endif // TARGOMAN_API_ENABLE_AWS_S3
 
 #endif // TARGOMAN_API_OBJECTSTORAGE_GTWAWSS3_H
