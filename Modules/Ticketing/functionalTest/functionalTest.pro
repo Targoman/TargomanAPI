@@ -10,7 +10,8 @@ TEST_NAME = ticketingFunctionalTest
 
 HEADERS += \
     ORM/actionLogs.hpp \
-    testTicketing.hpp
+    testTicketing.hpp \
+    testTicketingFixture.hpp
 
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \

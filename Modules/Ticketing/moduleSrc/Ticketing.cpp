@@ -34,6 +34,10 @@
 #include "Interfaces/ObjectStorage/ObjectStorageManager.h"
 using namespace Targoman::API::ObjectStorage;
 
+#include "Interfaces/Helpers/RESTClientHelper.h"
+#include "Interfaces/Helpers/FixtureHelper.h"
+using namespace Targoman::API::Helpers;
+
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
 namespace Targoman::API::TicketingModule {
@@ -98,21 +102,23 @@ quint64 Ticketing::insertTicket(
                                              ;
 
         foreach (auto _file, _files) {
-            try {
-                quint64 UploadedFileID = ObjectStorageManager::saveFile(
-                                             _createdBy,
-                                             UploadFiles::instance(),
-                                             UploadQueue::instance(),
-                                             UploadGateways::instance(),
-                                             _file
-                                             );
-                if (UploadedFileID > 0)
-                    QueryCreateAttachments.values(QVariantMap({
-                                                                  { tblTicketAttachments::tat_tktID, TicketID },
-                                                                  { tblTicketAttachments::tat_uplID, UploadedFileID },
-                                                              }));
-            } catch (std::exception &exp) {
-                TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
+            if (_file.Size > 0) {
+                try {
+                    quint64 UploadedFileID = ObjectStorageManager::saveFile(
+                                                 _createdBy,
+                                                 UploadFiles::instance(),
+                                                 UploadQueue::instance(),
+                                                 UploadGateways::instance(),
+                                                 _file
+                                                 );
+                    if (UploadedFileID > 0)
+                        QueryCreateAttachments.values(QVariantMap({
+                                                                      { tblTicketAttachments::tat_tktID, TicketID },
+                                                                      { tblTicketAttachments::tat_uplID, UploadedFileID },
+                                                                  }));
+                } catch (std::exception &exp) {
+                    TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
+                }
             }
         }
 
@@ -134,7 +140,8 @@ QVariantMap Ticketing::apiPUTnewMessage(
     Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
-    Files.append(_file);
+    if (_file.Size > 0)
+        Files.append(_file);
 
     quint64 ID = this->insertTicket(
                      _APICALLBOOM.getUserID(),
@@ -172,7 +179,8 @@ QVariantMap Ticketing::apiPUTnewFeedback(
         throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
 
     TAPI::Files_t Files;
-    Files.append(_file);
+    if (_file.Size > 0)
+        Files.append(_file);
 
     quint64 ID = this->insertTicket(
                      _APICALLBOOM.getUserID(),
@@ -189,5 +197,106 @@ QVariantMap Ticketing::apiPUTnewFeedback(
                            { "id", ID },
                        });
 }
+
+/****************************************************************\
+|** fixture *****************************************************|
+\****************************************************************/
+#ifdef QT_DEBUG
+QVariant Ticketing::apiPOSTfixtureSetup(
+    APICallBoom<true> &_APICALLBOOM,
+    QString _random
+) {
+    QVariantMap Result;
+
+    if (_random == "1")
+        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+
+    if (_random.isEmpty() == false)
+        Result.insert("Random", _random);
+
+    //-- newMessage
+    QVariant res = RESTClientHelper::callAPI(
+        _APICALLBOOM,
+       RESTClientHelper::PUT,
+       "Ticketing/newMessage",
+       {},
+       {
+           { "serviceID", _random },
+           { "title", FixtureHelper::MakeRandomizeName(_random, " ", "ticket", "title") },
+           { "body", FixtureHelper::MakeRandomizeName(_random, " ", "ticket", "body") },
+       },
+       {
+//           { "file", "../../README.md" },
+       }
+    );
+    quint32 TicketID = res.toMap().value("id").toUInt();
+    Result.insert("Ticket", res);
+
+    //-- newFeedback(1)
+    res = RESTClientHelper::callAPI(
+        _APICALLBOOM,
+        RESTClientHelper::PUT,
+        "Ticketing/newFeedback",
+        {},
+        {
+            { "serviceID", _random },
+            { "title", FixtureHelper::MakeRandomizeName(_random, " ", "ticket reply (1)", "title") },
+            { "body", FixtureHelper::MakeRandomizeName(_random, " ", "ticket reply (1)", "body") },
+            { "ticketType", enuTicketType::Reply },
+            { "inReplyTicketID", TicketID },
+        },
+        {
+//            { "file", "../../README.md" },
+        }
+    );
+    quint32 Reply1TicketID = res.toMap().value("id").toUInt();
+    Result.insert("Reply(1)", res);
+
+    //-- newFeedback(2)
+    res = RESTClientHelper::callAPI(
+        _APICALLBOOM,
+        RESTClientHelper::PUT,
+        "Ticketing/newFeedback",
+        {},
+        {
+            { "serviceID", _random },
+            { "title", FixtureHelper::MakeRandomizeName(_random, " ", "ticket reply (2)", "title") },
+            { "body", FixtureHelper::MakeRandomizeName(_random, " ", "ticket reply (2)", "body") },
+            { "ticketType", enuTicketType::Reply },
+            { "inReplyTicketID", Reply1TicketID },
+        },
+        {
+//            { "file", "../../README.md" },
+        }
+    );
+//    quint32 Reply2TicketID = res.toMap().value("id").toUInt();
+    Result.insert("Reply(2)", res);
+
+    //----------------------------------------
+    return Result;
+}
+
+QVariant Ticketing::apiPOSTfixtureCleanup(
+    APICallBoom<true> &_APICALLBOOM,
+    QString _random
+) {
+    QVariantMap Result;
+
+    try {
+        QString QueryString = R"(
+            DELETE t
+              FROM tblTickets t
+             WHERE t.tkt_svcID=?
+        ;)";
+        clsDACResult DACResult = this->execQuery(QueryString, { _random.toInt() });
+        Result.insert("tblTickets", QVariantMap({
+                                                   { "random", _random },
+                                                   { "numRowsAffected", DACResult.numRowsAffected() },
+                                               }));
+    } catch (...) { ; }
+
+    return Result;
+}
+#endif
 
 }  // namespace Targoman::API::TicketingModule

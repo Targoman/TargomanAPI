@@ -88,6 +88,27 @@ private slots:
         "create a new/reply feedback with"
     )
 
+#ifdef QT_DEBUG
+protected slots:
+    QVariant REST_POST(
+        fixtureSetup,
+        (
+            APICallBoom<true> &_APICALLBOOM,
+            QString _random = {}
+        ),
+        "Create sample data. give random=1 to auto generate random number"
+    )
+
+    QVariant REST_POST(
+        fixtureCleanup,
+        (
+            APICallBoom<true> &_APICALLBOOM,
+            QString _random = {}
+        ),
+        "Cleanup sample data"
+    )
+#endif
+
 };
 
 TARGOMAN_ACTIONLOG_POSTPARENT(Ticketing, TicketingSchema);
