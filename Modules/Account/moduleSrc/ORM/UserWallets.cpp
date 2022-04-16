@@ -106,7 +106,7 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 
 //bool UserWallets::apiUPDATEdefaultWallet(
 bool UserWallets::apiUPDATEsetAsDefault(
-        APICallBoom<true> &_APICALLBOOM,
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         quint64 _walID
     ) {
     bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
@@ -147,7 +147,7 @@ bool UserWallets::apiUPDATEsetAsDefault(
 }
 
 bool UserWallets::apiCREATEtransfer(
-        APICallBoom<true> &_APICALLBOOM,
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         const QString& _destLogin,
         quint32 _amount,
         const TAPI::MD5_t& _pass,

@@ -34,7 +34,7 @@ URLProcessor::URLProcessor() :
     intfPureModule("URLProcessor") { ; }
 
 QString URLProcessor::apiGETcanonicalize(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _removeWWW
 ) {
@@ -44,7 +44,7 @@ QString URLProcessor::apiGETcanonicalize(
 }
 
 QString URLProcessor::apiGETconvertHexCodes(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _convertAll
 ) {

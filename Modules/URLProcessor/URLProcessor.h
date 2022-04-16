@@ -39,7 +39,7 @@ private slots:
     QString REST_GET(
         canonicalize,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             const QString _url,
             bool _removeWWW = true
         ),
@@ -49,7 +49,7 @@ private slots:
     QString REST_GET(
         convertHexCodes,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             const QString _url,
             bool _convertAll = false
         ),

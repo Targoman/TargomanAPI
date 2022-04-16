@@ -219,7 +219,7 @@ TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccou
 |* User **********************************************************|
 \*****************************************************************/
 QString Account::apinormalizePhoneNumber(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _phone,
     QString _country
 ) {
@@ -227,7 +227,7 @@ QString Account::apinormalizePhoneNumber(
 }
 
 QVariantMap Account::apiPUTsignup(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
     QString _role,
@@ -318,7 +318,7 @@ QVariantMap Account::apiPUTsignupByMobileOnly(
 }
 */
 TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email,
     TAPI::MD5_t _uuid,
     bool _autoLogin,
@@ -361,7 +361,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
 }
 
 TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     quint32 _code,
     bool _autoLogin,
@@ -404,7 +404,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
 }
 
 TAPI::EncodedJWT_t Account::apilogin(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
     QString _salt,
@@ -439,7 +439,7 @@ TAPI::EncodedJWT_t Account::apilogin(
 }
 
 bool Account::apiloginByMobileOnly(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     bool _signupIfNotExists,
     QString _signupRole
@@ -469,7 +469,7 @@ bool Account::apiloginByMobileOnly(
 }
 
 bool Account::apiresendApprovalCode(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
@@ -501,7 +501,7 @@ bool Account::apiresendApprovalCode(
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
 TAPI::EncodedJWT_t Account::apiloginByOAuth(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::enuOAuthType::Type _type,
     QString _oAuthToken,
     TAPI::CommaSeparatedStringList_t _services,
@@ -575,7 +575,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //}
 
 bool Account::apilogout(
-    APICallBoom<true> &_APICALLBOOM
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 ) {
     clsJWT JWT(_APICALLBOOM.getJWT());
 
@@ -588,7 +588,7 @@ bool Account::apilogout(
 }
 
 QString Account::apicreateForgotPasswordLink(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
@@ -605,7 +605,7 @@ QString Account::apicreateForgotPasswordLink(
 
 #ifdef QT_DEBUG
 QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 ) {
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -641,7 +641,7 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
 #endif
 
 bool Account::apichangePassByUUID(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _uuid,
     TAPI::MD5_t _newPass
@@ -661,7 +661,7 @@ bool Account::apichangePassByUUID(
 }
 
 bool Account::apichangePass(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::MD5_t _oldPass,
     QString _oldPassSalt,
     TAPI::MD5_t _newPass
@@ -682,7 +682,7 @@ bool Account::apichangePass(
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 Targoman::API::AAA::stuVoucher Account::processVoucher(
-//    intfAPICallBoom &_APICALLBOOM,
+//    intfAPICallBoom &APICALLBOOM_PARAM,
     quint64 _userID,
     quint64 _voucherID
 ) {
@@ -780,7 +780,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 }
 
 void Account::tryCancelVoucher(
-//    intfAPICallBoom &_APICALLBOOM,
+//    intfAPICallBoom &APICALLBOOM_PARAM,
     quint64 _userID,
     quint64 _voucherID,
     bool _setAsError
@@ -870,7 +870,7 @@ void Account::tryCancelVoucher(
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
 Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
     Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
@@ -976,7 +976,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
  * @return
  */
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     const QString _paymentMD5,
     const QString _domain,
@@ -1007,7 +1007,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,
     const QString& _receiptCode,
@@ -1074,7 +1074,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
 }
 
 bool Account::apiPOSTaddPrizeTo(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     TAPI::JSON_t _desc
@@ -1099,7 +1099,7 @@ bool Account::apiPOSTaddPrizeTo(
 }
 
 bool Account::apiPOSTaddIncomeTo(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     TAPI::JSON_t _desc
@@ -1124,7 +1124,7 @@ bool Account::apiPOSTaddIncomeTo(
 }
 
 bool Account::apiPOSTcheckVoucherTTL(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 ) {
 }
@@ -1134,7 +1134,7 @@ bool Account::apiPOSTcheckVoucherTTL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Account::apiPOSTfixtureSetup(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;
@@ -1364,7 +1364,7 @@ QVariant Account::apiPOSTfixtureSetup(
 }
 
 QVariant Account::apiPOSTfixtureCleanup(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;
@@ -1568,7 +1568,7 @@ QVariant Account::apiPOSTfixtureCleanup(
 
 ///TODO: not tested
 bool Account::apiPOSTfixtureApproveEmail(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email
 ) {
     clsDAC DAC;
@@ -1608,7 +1608,7 @@ bool Account::apiPOSTfixtureApproveEmail(
 
 ///TODO: not tested
 bool Account::apiPOSTfixtureApproveMobile(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile
 ) {
     clsDAC DAC;

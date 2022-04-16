@@ -428,7 +428,7 @@ QVariant intfAccountUserAssets::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 bool intfAccountUserAssets::apiUPDATEsetAsPrefered(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 ) {
   bool Ok;
@@ -444,7 +444,7 @@ bool intfAccountUserAssets::apiUPDATEsetAsPrefered(
 }
 
 bool intfAccountUserAssets::apiUPDATEdisablePackage(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 ) {
   bool Ok;

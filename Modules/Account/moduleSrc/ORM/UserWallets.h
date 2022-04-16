@@ -76,7 +76,7 @@ private slots:
     bool REST_UPDATE(
         setAsDefault, //defaultWallet,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _walID
         ),
         "change default wallet"
@@ -85,7 +85,7 @@ private slots:
     bool REST_CREATE(
         transfer,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             const QString& _destLogin,
             quint32 _amount,
             const TAPI::MD5_t& _pass,

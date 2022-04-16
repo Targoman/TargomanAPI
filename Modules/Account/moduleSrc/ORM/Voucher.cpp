@@ -72,7 +72,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
@@ -126,7 +126,7 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
     return Voucher;
 }
 
-quint64 Voucher::apiCREATErequestWithdraw(APICallBoom<true> &_APICALLBOOM, quint64 _amount, quint64 _walID, const QString& _desc) {
+quint64 Voucher::apiCREATErequestWithdraw(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, quint64 _amount, quint64 _walID, const QString& _desc) {
     return this->callSP("spWithdrawal_Request", {
                             {"iWalletID",_walID},
                             {"iForUsrID", _APICALLBOOM.getUserID()},
@@ -136,7 +136,7 @@ quint64 Voucher::apiCREATErequestWithdraw(APICallBoom<true> &_APICALLBOOM, quint
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-quint64 Voucher::apiCREATErequestWithdrawFor(APICallBoom<true> &_APICALLBOOM, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc) {
+quint64 Voucher::apiCREATErequestWithdrawFor(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), {"AAA:RequestWithdraw"});
 
     return this->callSP("spWithdrawal_Request", {

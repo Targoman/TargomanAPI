@@ -32,11 +32,6 @@
 
 namespace Targoman::API::Server {
 
-#define APICALLBOOM_TYPE_NAME_BASE   "APICallBoom<"
-#define APICALLBOOM_NO_TYPE_NAME     "APICallBoom<false>"
-#define APICALLBOOM_JWT_TYPE_NAME    "APICallBoom<true>"
-#define APICALLBOOM_PARAM_NAME       "_APICALLBOOM"
-
 #define PARAM_JWT       "TAPI::JWT_t"
 #define PARAM_COOKIES   "TAPI::COOKIES_t"
 #define PARAM_REMOTE_IP "TAPI::RemoteIP_t"

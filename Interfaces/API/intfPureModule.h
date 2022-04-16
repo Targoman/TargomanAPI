@@ -51,7 +51,7 @@ using namespace Targoman::API::Server;
 //used by Api call methods
 //TAPI::JWT_t _JWT,
 #define GET_METHOD_ARGS_HEADER_APICALL \
-    APICallBoom<true> &_APICALLBOOM, \
+    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath = {}, \
     quint64 _pageIndex = 0, \
     quint16 _pageSize = 20, \
@@ -63,7 +63,7 @@ using namespace Targoman::API::Server;
 
 //TAPI::JWT_t _JWT,
 #define GET_METHOD_ARGS_IMPL_APICALL \
-    APICallBoom<true> &_APICALLBOOM, \
+    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath, \
     quint64 _pageIndex, \
     quint16 _pageSize, \
@@ -94,7 +94,7 @@ using namespace Targoman::API::Server;
 //used by ApiQuery
 //quint64 _userID,
 #define GET_METHOD_ARGS_HEADER_INTERNAL_CALL \
-    intfAPICallBoom &_APICALLBOOM, \
+    intfAPICallBoom &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath = {}, \
     quint64 _pageIndex = 0, \
     quint16 _pageSize = 20, \
@@ -106,7 +106,7 @@ using namespace Targoman::API::Server;
 
 //quint64 _userID,
 #define GET_METHOD_ARGS_IMPL_INTERNAL_CALL \
-    intfAPICallBoom &_APICALLBOOM, \
+    intfAPICallBoom &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath, \
     quint64 _pageIndex, \
     quint16 _pageSize, \
@@ -144,8 +144,8 @@ using namespace Targoman::API::Server;
 |** CREATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define CREATE_METHOD_ARGS_HEADER_APICALL   APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_APICALL     APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_ARGS_HEADER_APICALL   APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::ORMFields_t _createInfo
 //#define CREATE_METHOD_CALL_ARGS_APICALL     _JWT, _createInfo
 #define ORMCREATE(_doc)                     apiCREATE(CREATE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfCREATE() { return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER_APICALL)); } \
@@ -155,16 +155,16 @@ using namespace Targoman::API::Server;
 #define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::ORMFields_t _createInfo
 #define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _createInfo
 
-#define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo
 #define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define UPDATE_METHOD_ARGS_HEADER_APICALL APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_APICALL   APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_ARGS_HEADER_APICALL APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_APICALL   APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 //#define UPDATE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath, _updateInfo
 #define ORMUPDATE(_doc)                   apiUPDATE(UPDATE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
@@ -174,15 +174,15 @@ using namespace Targoman::API::Server;
 #define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 #define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
 
-#define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 #define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_pksByPath, _updateInfo
 /**********************************************************************\
 |** DELETE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define DELETE_METHOD_ARGS_HEADER_APICALL APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_APICALL   APICallBoom<true> &_APICALLBOOM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_ARGS_HEADER_APICALL APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_APICALL   APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, /*TAPI::JWT_t _JWT, */TAPI::PKsByPath_t _pksByPath
 //#define DELETE_METHOD_CALL_ARGS_APICALL   clsJWT(_JWT).usrID(), _pksByPath
 #define ORMDELETE(_doc)                   apiDELETE(DELETE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfDELETE() { return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
@@ -192,8 +192,8 @@ using namespace Targoman::API::Server;
 #define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath
 #define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _pksByPath
 
-#define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &_APICALLBOOM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath
 #define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_pksByPath
 
 namespace TAPI {

@@ -46,7 +46,7 @@ private slots:
     QString REST_GET_OR_POST(
         check,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             const QString _text,
             const TAPI::ISO639_2_t& _lang
         ),

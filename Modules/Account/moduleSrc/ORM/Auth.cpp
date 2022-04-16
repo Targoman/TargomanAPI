@@ -28,13 +28,12 @@ namespace Targoman::API::AccountModule::ORM {
 Auth::Auth() :
     intfPureModule(
         "Account"
-    ) { ; }
+    )
+{ ; }
 
 bool Auth::apivalidateJWT(
-    APICallBoom<true> &_APICALLBOOM
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 ) {
-    Q_UNUSED(_APICALLBOOM);
-
     return true;
 }
 

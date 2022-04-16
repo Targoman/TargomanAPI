@@ -102,7 +102,7 @@ bool ApprovalRequest::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 QVariant ApprovalRequest::apitimerInfo(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());

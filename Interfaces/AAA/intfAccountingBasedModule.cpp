@@ -118,7 +118,7 @@ stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
 }
 
 void intfAccountingBasedModule::checkUsageIsAllowed(
-    intfAPICallBoom &_APICALLBOOM,
+    intfAPICallBoom &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage
 ) {
     QJsonObject Privs = _APICALLBOOM.getJWTPrivsObject();
@@ -309,7 +309,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t _saleableCode,
     Targoman::API::AAA::OrderAdditives_t _orderAdditives,
     qreal _qty,
@@ -745,7 +745,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 }
 
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //    quint64 _orderID, //it is uasID
     TAPI::MD5_t _itemUUID,
     Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -811,7 +811,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 }
 /*
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
-        APICallBoom<true> &_APICALLBOOM,
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
@@ -1084,7 +1084,7 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 }
 
 bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 ) {
     checkVoucherItemForTrustedActionSanity(_data);
@@ -1093,7 +1093,7 @@ bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
 }
 
 bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 ) {
     checkVoucherItemForTrustedActionSanity(_data);
