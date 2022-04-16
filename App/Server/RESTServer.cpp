@@ -67,7 +67,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     if (ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
         throw exRESTRegistry("Invalid connector url specified for central cache");
 
-#ifdef TARGOMAN_API_REDIS_PROTOCOL
+#ifdef TARGOMAN_API_ENABLE_REDIS_PROTOCOL
     if (ServerConfigs::CacheConnector.value().startsWith(TARGOMAN_M2STR(QHTTP_REDIS_PROTOCOL)))
         CentralCache::setup(new clsRedisConnector(ServerConfigs::CacheConnector.value()));
 #endif

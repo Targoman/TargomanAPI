@@ -304,8 +304,8 @@ void clsAPIObject::invokeMethod(
     QGenericReturnArgument _returnArg
 //    /*OUT*/ QVariantMap &_responseHeaders
 ) const {
-    if (_arguments.size() > 10)
-        throw exHTTPInternalServerError(QString("At most 10 method params are supported"));
+    if (_arguments.size() > 9)
+        throw exHTTPInternalServerError(QString("At most 9 method params are supported"));
 
     bool InvocationResult = true;
     QMetaMethod InvokableMethod;

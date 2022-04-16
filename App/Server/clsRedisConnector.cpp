@@ -20,7 +20,7 @@
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  */
 
-#ifdef TARGOMAN_API_REDIS_PROTOCOL
+#ifdef TARGOMAN_API_ENABLE_REDIS_PROTOCOL
 
 #include "clsRedisConnector.h"
 #include "libTargomanCommon/Logger.h"

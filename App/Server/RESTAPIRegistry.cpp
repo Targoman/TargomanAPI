@@ -370,7 +370,7 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
         QStringList Parameters;
 
         if (APIObject->requiresJWT())
-            Parameters.append(QString(_showTypes ? "TAPI::JWT_t" : "") + " JWT");
+            Parameters.append(QString(_showTypes ? "TAPI::JWT_t " : "") + "JWT");
 
         for (quint8 i=0; i<APIObject->/*BaseMethod.parameterCount()*/ParamTypesName.count(); ++i) {
 

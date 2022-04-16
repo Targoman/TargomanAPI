@@ -23,7 +23,7 @@
 
 #include "gtwAWSS3.h"
 
-#ifdef TARGOMAN_API_AWS_S3
+#ifdef TARGOMAN_API_ENABLE_AWS_S3
 
 #include <string>
 #include <fstream>
@@ -83,4 +83,4 @@ bool gtwAWSS3::storeFile(
 
 } //namespace Targoman::API::ObjectStorage::Gateways
 
-#endif // TARGOMAN_API_AWS_S3
+#endif // TARGOMAN_API_ENABLE_AWS_S3

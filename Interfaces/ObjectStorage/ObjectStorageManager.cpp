@@ -32,7 +32,7 @@ using namespace Targoman::API::Helpers;
 //#include <fstream>
 
 #include "Gateways/gtwNFS.h"
-#ifdef TARGOMAN_API_AWS_S3
+#ifdef TARGOMAN_API_ENABLE_AWS_S3
 #include "Gateways/gtwAWSS3.h"
 #endif
 

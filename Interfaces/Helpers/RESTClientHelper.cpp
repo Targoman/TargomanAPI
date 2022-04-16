@@ -106,11 +106,13 @@ QVariant RESTClientHelper::callAPI(
         &ResponseHeaders
     );
 
+#ifdef TARGOMAN_API_ENABLE_JWT_DASTRESHTE
     if (OldEncodedJWT != JWT["encodedJWT"].toString())
     {
         _APICALLBOOM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
         _APICALLBOOM.setJWT(JWT);
     }
+#endif
 
     if (_outResponseHeaders != nullptr)
         *_outResponseHeaders = ResponseHeaders;
@@ -152,10 +154,12 @@ QVariant RESTClientHelper::callAPI(
     if (_outResponseHeaders != nullptr)
         *_outResponseHeaders = ResponseHeaders;
 
+#ifdef TARGOMAN_API_ENABLE_JWT_DASTRESHTE
     if (EncodedJWT != _JWT["encodedJWT"].toString()) {
         QJWT::extractAndDecryptPayload(EncodedJWT, _JWT);
         _JWT["encodedJWT"] = EncodedJWT;
     }
+#endif
 
     return Result;
 }
@@ -253,6 +257,7 @@ QVariant RESTClientHelper::callAPI(
     if (_outResponseHeaders != nullptr)
         *_outResponseHeaders = ResponseHeaders;
 
+#ifdef TARGOMAN_API_ENABLE_JWT_DASTRESHTE
     //replace JWT by x-auth-new-token
     if (ResponseHeaders.contains("x-auth-new-token")) {
         _encodedJWT = ResponseHeaders.value("x-auth-new-token").toString();
@@ -263,6 +268,7 @@ QVariant RESTClientHelper::callAPI(
         //TODO: complete this
         //Account::instance()->addResponseHeader("x-auth-new-token", _encodedJWT);
     }
+#endif
 
     if (CUrl.lastError().isOk() == false) {
         auto LastError = CUrl.lastError();
