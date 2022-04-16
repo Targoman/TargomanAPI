@@ -129,7 +129,7 @@ quint64 Ticketing::insertTicket(
 }
 
 QVariantMap Ticketing::apiPUTnewMessage(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
     quint32 _serviceID,
@@ -161,7 +161,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
 }
 
 QVariantMap Ticketing::apiPUTnewFeedback(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
     Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -203,7 +203,7 @@ QVariantMap Ticketing::apiPUTnewFeedback(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Ticketing::apiPOSTfixtureSetup(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;
@@ -277,7 +277,7 @@ QVariant Ticketing::apiPOSTfixtureSetup(
 }
 
 QVariant Ticketing::apiPOSTfixtureCleanup(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;

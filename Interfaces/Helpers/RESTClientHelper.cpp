@@ -81,7 +81,7 @@ QVariant RESTClientHelper::callAPI(
 }
 
 QVariant RESTClientHelper::callAPI(
-    intfAPICallBoom &_APICALLBOOM,
+    intfAPICallBoom &APICALLBOOM_PARAM,
     RESTClientHelper::enuHTTPMethod _method,
     const QString &_api,
     const QVariantMap &_urlArgs,

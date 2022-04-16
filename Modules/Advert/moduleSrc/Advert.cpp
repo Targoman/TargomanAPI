@@ -124,7 +124,7 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 }
 
 void Advert::applyAssetAdditives(
-    intfAPICallBoom &_APICALLBOOM,
+    intfAPICallBoom &APICALLBOOM_PARAM,
     INOUT stuAssetItem& _assetItem,
     const OrderAdditives_t& _orderAdditives
 ) {
@@ -135,7 +135,7 @@ void Advert::applyAssetAdditives(
 
 /***************************************************************************************************/
 //bool Advert::apiPOSTprocessVoucher(
-//        APICallBoom<true> &_APICALLBOOM,
+//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -149,7 +149,7 @@ void Advert::applyAssetAdditives(
 //}
 
 //bool Advert::apiPOSTcancelVoucher(
-//        APICallBoom<true> &_APICALLBOOM,
+//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    )
 //{
@@ -163,14 +163,14 @@ void Advert::applyAssetAdditives(
 //}
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order
 ) {
 }
 
 Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
     const QString _keywords
@@ -178,7 +178,7 @@ Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
 }
 
 QString Advert::apiGETretrieveURL(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _id,
     TAPI::IPv4_t _clientIP,
     QString _agent
@@ -190,7 +190,7 @@ QString Advert::apiGETretrieveURL(
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant Advert::apiPOSTfixtureSetup(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;
@@ -416,13 +416,13 @@ QVariant Advert::apiPOSTfixtureSetup(
 }
 
 //bool Advert::apiPOSTfixtureSetupVoucher(
-//        APICallBoom<true> &_APICALLBOOM
+//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 //    )
 //{
 //}
 
 QVariant Advert::apiPOSTfixtureCleanup(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 ) {
     QVariantMap Result;

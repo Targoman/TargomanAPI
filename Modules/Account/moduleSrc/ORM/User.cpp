@@ -178,7 +178,7 @@ SelectQuery User::getPhotoQuery(quint64 _usrID) {
 }
 
 TAPI::Base64Image_t User::apiGETphoto(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
 ) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
@@ -196,7 +196,7 @@ TAPI::Base64Image_t User::apiGETphoto(
 }
 
 bool User::apiUPDATEphoto(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
 ) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
@@ -229,7 +229,7 @@ bool User::apiUPDATEphoto(
 }
 
 bool User::apiPOSTdeletePhoto(
-    APICallBoom<true> &_APICALLBOOM
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 ) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
@@ -257,7 +257,7 @@ bool User::apiPOSTdeletePhoto(
 }
 
 bool User::apiUPDATEemail(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -289,7 +289,7 @@ bool User::apiUPDATEemail(
 }
 
 bool User::apiUPDATEmobile(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -321,7 +321,7 @@ bool User::apiUPDATEmobile(
 }
 
 bool User::apiUPDATEpersonalInfo(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
@@ -347,7 +347,7 @@ bool User::apiUPDATEpersonalInfo(
 }
 
 bool User::apiUPDATEfinancialInfo(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 ) {
@@ -391,7 +391,7 @@ bool User::apiUPDATEfinancialInfo(
 }
 
 bool User::apiUPDATEextraInfo(
-    APICallBoom<true> &_APICALLBOOM,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
     QString         _education,
@@ -539,7 +539,7 @@ UserExtraInfo::UserExtraInfo() :
     )
 { ; }
 
-//bool UserExtraInfo::apiUPDATEsheba(APICallBoom<true> &_APICALLBOOM, TAPI::Sheba_t _sheba)
+//bool UserExtraInfo::apiUPDATEsheba(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -553,7 +553,7 @@ UserExtraInfo::UserExtraInfo() :
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool UserExtraInfo::apiUPDATEetherAddress(APICallBoom<true> &_APICALLBOOM, TAPI::Ether_t _etherAddress)
+//bool UserExtraInfo::apiUPDATEetherAddress(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress)
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name

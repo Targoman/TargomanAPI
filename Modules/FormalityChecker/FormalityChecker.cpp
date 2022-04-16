@@ -41,7 +41,7 @@ bool FormalityChecker::init() {
 }
 
 QString FormalityChecker::apicheck(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _text,
     const TAPI::ISO639_2_t& _lang
 ) {

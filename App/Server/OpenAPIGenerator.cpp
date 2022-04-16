@@ -112,17 +112,15 @@ QJsonObject OpenAPIGenerator::retrieveJson(
 
         clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
 
-        if (Key == "GET /Account/OfflinePayments")
-            qDebug() << "*******************************************";
-
-        qDebug() << Key << endl
-                 << "    " << APIObject->ParamNames.count() << " : " << APIObject->ParamNames.join(", ") << endl
-                 << "    " << APIObject->ParamTypesName.count() << " : " << APIObject->ParamTypesName.join(", ") << endl
-                 << "    " << APIObject->BaseMethod.DefaultValues.count() << " : " << APIObject->BaseMethod.DefaultValues << endl
-                    ;
-
-        if (APIObject->BaseMethod.DefaultValues.count() != APIObject->ParamNames.count())
-            qDebug() << "<><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+        qDebug().noquote().nospace()
+                << Key << endl
+                << "    ParamNames:     [" << APIObject->ParamNames.count() << "] " << APIObject->ParamNames.join(", ") << endl
+                << "    ParamTypesName: [" << APIObject->ParamTypesName.count() << "] " << APIObject->ParamTypesName.join(", ") << endl
+                << "    DefaultValues:  [" << APIObject->BaseMethod.DefaultValues.count() << "] " << APIObject->BaseMethod.DefaultValues << endl
+                << (APIObject->BaseMethod.DefaultValues.count() != APIObject->ParamNames.count()
+                   ? "    ******************** ERROR IN COUNTERS ********************"
+                   : "")
+                ;
     }
 #endif
 

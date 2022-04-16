@@ -260,7 +260,7 @@ void RESTAPIRegistry::registerRESTAPI(
             QString ParameterTypeName = parameterTypes.at(ParamIndex);
 
             //check APICallBoom
-            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
+            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) {
                 DefaultValues.append(QVariant());
                 continue;
             }
@@ -506,7 +506,7 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         QString ParameterTypeName = parameterTypes.at(i);
 
         //check APICallBoom
-        if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) {
+        if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) {
             if (HasApiCallBoomParam)
                 throw exRESTRegistry(QString("Invalid duplicate APICALLBOOM parameter (%1) at %2 of %3")
                                      .arg(_method.parameterNames().at(i).constData())

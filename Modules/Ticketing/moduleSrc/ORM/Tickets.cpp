@@ -97,7 +97,7 @@ Tickets::Tickets() :
 
 QVariant Tickets::apiGET(
 //        GET_METHOD_ARGS_IMPL_APICALL,
-        APICallBoom<true> &_APICALLBOOM,
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         TAPI::PKsByPath_t _pksByPath,
         quint64 _pageIndex,
         quint16 _pageSize,

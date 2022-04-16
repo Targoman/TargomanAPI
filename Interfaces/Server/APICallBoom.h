@@ -27,6 +27,17 @@
 #include "QString"
 #include "QSharedDataPointer"
 #include "QHttp/qhttpfwd.hpp"
+#include "libTargomanCommon/Macros.h"
+
+#define APICALLBOOM_TYPE_BASE_STR           "APICallBoom<"
+#define APICALLBOOM_TYPE_NO_JWT_DECL        APICallBoom<false>
+#define APICALLBOOM_TYPE_NO_JWT_DECL_STR    TARGOMAN_M2STR(APICALLBOOM_TYPE_NO_JWT_DECL)
+#define APICALLBOOM_TYPE_NO_JWT_IMPL        Q_DECL_UNUSED APICALLBOOM_TYPE_NO_JWT_DECL
+#define APICALLBOOM_TYPE_JWT_DECL           APICallBoom<true>
+#define APICALLBOOM_TYPE_JWT_DECL_STR       TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_DECL)
+#define APICALLBOOM_TYPE_JWT_IMPL           Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_DECL
+#define APICALLBOOM_PARAM                   _APICALLBOOM
+#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
 
 namespace Targoman::API::Server {
 

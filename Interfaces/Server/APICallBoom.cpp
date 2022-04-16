@@ -150,7 +150,7 @@ void intfAPICallBoom::addResponseHeaderNameToExpose(const QString &_header) {
     this->addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
 
-template class APICallBoom<false>;
-template class APICallBoom<true>;
+template class APICALLBOOM_TYPE_NO_JWT_DECL;
+template class APICALLBOOM_TYPE_JWT_DECL;
 
 } //namespace Targoman::API::Server

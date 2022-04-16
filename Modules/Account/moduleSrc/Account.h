@@ -58,12 +58,12 @@ public:
 
 public:
     static Targoman::API::AAA::stuVoucher processVoucher(
-//        intfAPICallBoom &_APICALLBOOM,
+//        intfAPICallBoom &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID
     );
     static void tryCancelVoucher(
-//        intfAPICallBoom &_APICALLBOOM,
+//        intfAPICallBoom &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
@@ -80,7 +80,7 @@ private slots:
     QString REST_GET_OR_POST(
         normalizePhoneNumber,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _phone,
             QString _country
         ),
@@ -90,7 +90,7 @@ private slots:
     QVariantMap REST_PUT(
         signup,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _role = "BaseUser",
@@ -106,7 +106,7 @@ private slots:
     QVariantMap REST_PUT(
         signupByMobileOnly,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t _mobile,
             QString _role = "BaseUser",
             QString _name = "",
@@ -123,7 +123,7 @@ private slots:
     TAPI::EncodedJWT_t REST_POST(
         approveEmail,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _email,
             TAPI::MD5_t _uuid,
             bool _autoLogin = false,
@@ -138,7 +138,7 @@ private slots:
     TAPI::EncodedJWT_t REST_POST(
         approveMobile,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t _mobile,
             quint32 _code,
             bool _autoLogin = false,
@@ -153,7 +153,7 @@ private slots:
     TAPI::EncodedJWT_t REST_GET_OR_POST(
         login,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _salt,
@@ -169,7 +169,7 @@ private slots:
     bool REST_GET_OR_POST(
         loginByMobileOnly,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t _mobile,
             bool _signupIfNotExists = false,
             QString _signupRole = "BaseUser"
@@ -190,7 +190,7 @@ private slots:
     bool REST_GET_OR_POST(
         resendApprovalCode,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile
         ),
         "Recreate (if expired) approval code and resend last valid code to the email or mobile."
@@ -199,7 +199,7 @@ private slots:
 //    bool REST_PUT(
 //        requestMobileVerifyCode,
 //        (
-//            APICallBoom<false> &_APICALLBOOM,
+//            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
 //            TAPI::Mobile_t _mobile
 //        ),
 //        "Send verification code for provided mobile."
@@ -208,7 +208,7 @@ private slots:
 //    TAPI::EncodedJWT_t REST_PUT(
 //        verifyLoginByMobileCode,
 //        (
-//            APICallBoom<false> &_APICALLBOOM,
+//            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
 //            TAPI::Mobile_t _mobile,
 //            quint32 _code,
 //            TAPI::CommaSeparatedStringList_t _services = {},
@@ -222,7 +222,7 @@ private slots:
     TAPI::EncodedJWT_t REST_GET_OR_POST(
         loginByOAuth,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::enuOAuthType::Type _type,
             QString _oAuthToken,
             TAPI::CommaSeparatedStringList_t _services,
@@ -235,7 +235,7 @@ private slots:
 //    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
 //        refreshJWT,
 //        (
-//            APICallBoom<false> &_APICALLBOOM,
+//            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
 //            TAPI::JWT_t _loginJWT,
 //            QString _services = {}
 //        ),
@@ -245,7 +245,7 @@ private slots:
     bool REST_GET_OR_POST(
         logout,
         (
-            APICallBoom<true> &_APICALLBOOM
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
         ),
         "Logout logged in user"
     )
@@ -253,7 +253,7 @@ private slots:
     QString REST_GET_OR_POST(
         createForgotPasswordLink,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile
         ),
         "Create a forgot password request returning a UUID for the requiest"
@@ -263,7 +263,7 @@ private slots:
     QString REST_POST(
         fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile
         ),
         "fixture: Get Last Forgot Password UUID And Make As Sent"
@@ -273,7 +273,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePassByUUID,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile,
             TAPI::MD5_t _uuid,
             TAPI::MD5_t _newPass
@@ -284,7 +284,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePass,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::MD5_t _oldPass,
             QString     _oldPassSalt,
             TAPI::MD5_t _newPass
@@ -298,7 +298,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
@@ -314,7 +314,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
 //            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,
@@ -326,7 +326,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _vchID,
             const QString& _bank,
             const QString& _receiptCode,
@@ -343,7 +343,7 @@ private slots:
     bool REST_POST(
         addPrizeTo,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
             TAPI::JSON_t _desc
@@ -355,7 +355,7 @@ private slots:
     bool REST_POST(
         addIncomeTo,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
             TAPI::JSON_t _desc
@@ -367,7 +367,7 @@ private slots:
     bool REST_POST(
         checkVoucherTTL,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _voucherID
         ),
         "Check voucher and items for ttl"
@@ -377,7 +377,7 @@ private slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -386,7 +386,7 @@ private slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Cleanup sample data"
@@ -394,7 +394,7 @@ private slots:
     bool REST_POST(
         fixtureApproveEmail,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _email
         ),
         "Approve Email Address directly"
@@ -402,7 +402,7 @@ private slots:
     bool REST_POST(
         fixtureApproveMobile,
         (
-            APICallBoom<false> &_APICALLBOOM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t _mobile
         ),
         "Approve Mobile directly"

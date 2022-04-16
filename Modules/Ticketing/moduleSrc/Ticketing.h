@@ -63,7 +63,7 @@ private slots:
     QVariantMap REST_PUT(
         newMessage,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             const QString &_title,
             const QString &_body,
             quint32 _serviceID,
@@ -77,7 +77,7 @@ private slots:
     QVariantMap REST_PUT(
         newFeedback,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             const QString &_title,
             const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -93,7 +93,7 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -102,7 +102,7 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICallBoom<true> &_APICALLBOOM,
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Cleanup sample data"

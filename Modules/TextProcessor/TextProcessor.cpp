@@ -46,7 +46,7 @@ bool TextProcessor::init() {
 }
 
 QString TextProcessor::apinormalize(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
@@ -55,7 +55,7 @@ QString TextProcessor::apinormalize(
 }
 
 QString TextProcessor::apitext2IXML(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
@@ -78,7 +78,7 @@ QString TextProcessor::apitext2IXML(
 }
 
 QString TextProcessor::apiixml2Text(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _ixml,
     bool _detokenize,
     bool _hinidiDigits,
@@ -89,7 +89,7 @@ QString TextProcessor::apiixml2Text(
 }
 
 QString TextProcessor::apitokenize(
-    APICallBoom<false> &_APICALLBOOM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector,

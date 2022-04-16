@@ -274,9 +274,9 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
     if (_apiObject->requiresJWT())
-        APICALLBOOM.reset(new APICallBoom<true>());
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL());
     else
-        APICALLBOOM.reset(new APICallBoom<false>());
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL());
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)

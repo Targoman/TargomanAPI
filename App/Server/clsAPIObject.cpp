@@ -23,6 +23,7 @@
 
 #include "clsAPIObject.h"
 #include "APICache.hpp"
+#include "Interfaces/Server/APICallBoom.h"
 
 namespace Targoman::API::Server {
 
@@ -62,15 +63,15 @@ clsAPIObject::clsAPIObject(
     foreach (const QByteArray &ParamName, _method.parameterNames()) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        /*if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME)) {
+        /*if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_DECL)) {
             this->ParamNames.append("JWT");
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
             this->BaseMethod.DefaultValues[0] = {};
-        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_NAME_BASE)) { //APICALLBOOM_NO_TYPE_NAME)) {
+        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) { //APICALLBOOM_TYPE_NO_JWT_DECL)) {
             --this->RequiredParamsCount;
             this->BaseMethod.DefaultValues.removeAt(0);
-            if (ParameterTypeName.startsWith(APICALLBOOM_JWT_TYPE_NAME))
+            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_DECL_STR))
                 this->RequiresJWT = true;
         } else {
             QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
