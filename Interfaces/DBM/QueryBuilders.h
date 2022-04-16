@@ -473,7 +473,7 @@ public:
     SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
     SelectQuery& setCacheTime(quint16 _cacheTime);
-    void clearCache();
+    void clearCache(QVariantMap _args = {});
 
 //    template <typename T> inline T one(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});

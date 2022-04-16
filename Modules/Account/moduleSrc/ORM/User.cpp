@@ -168,6 +168,7 @@ bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 }
 
 SelectQuery User::getPhotoQuery(quint64 _usrID) {
+
     UserExtraInfo::instance().prepareFiltersList();
 
     return SelectQuery(UserExtraInfo::instance())
@@ -184,8 +185,6 @@ TAPI::Base64Image_t User::apiGETphoto(
 
     if (CurrentUserID != _usrID)
         Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:photo:CRUD~0100" });
-
-    UserExtraInfo::instance().prepareFiltersList();
 
     auto Photo = getPhotoQuery(_usrID)
             .setCacheTime(30)
