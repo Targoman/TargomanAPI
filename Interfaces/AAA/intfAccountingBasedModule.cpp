@@ -768,10 +768,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 
             //delete voucher item
             if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool {
-                TAPI::enuAuditableStatus::Type UserAssetStatus =
-                                    _userAssetInfo
-                                    .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                    .value<TAPI::enuAuditableStatus::Type>();
+                TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
                 return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
             }) == false) { //not pending
                 throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
@@ -846,9 +843,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
                                         .addCol(tblAccountUserAssetsBase::uasStatus)
                                         .where({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
                                         .one();
-            TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
-                                                             .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                             .value<TAPI::enuAuditableStatus::Type>();
+            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
             if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
                 throw exHTTPInternalServerError("only Pending items of pre-voucher can be modify.");
 
@@ -882,9 +877,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
 
             if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
                 {
-                    TAPI::enuAuditableStatus::Type UserAssetStatus = _userAssetInfo
-                                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                                     .value<TAPI::enuAuditableStatus::Type>();
+                    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
 
                     if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
                         return false;
@@ -1021,9 +1014,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
         return false;
 
-    TAPI::enuAuditableStatus::Type UserAssetStatus = UserAssetInfo
-                                                     .value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending)
-                                                     .value<TAPI::enuAuditableStatus::Type>();
+    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
 
     if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
         this->decreaseDiscountUsage(_voucherItem);
