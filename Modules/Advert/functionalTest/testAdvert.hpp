@@ -429,7 +429,28 @@ private slots:
         }
     }
 
-    ///TODO: removeBasketItem
+    void removeBasketItem() {
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Advert/removeBasketItem",
+                {},
+                {
+                    { "itemUUID",       this->LastPreVoucher.Items.at(0).UUID },
+                    { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() < ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 
     void addToBasket_valid_coupon_code_2() {
         QT_TRY {
