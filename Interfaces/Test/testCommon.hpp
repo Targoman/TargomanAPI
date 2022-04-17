@@ -199,9 +199,11 @@ protected:
                               &ResponseHeaders
                               );
 
+        QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{"result", Result}}));
+
         qDebug().noquote() << endl
                  << "  Response Headers:" << ResponseHeaders << endl
-                 << "  Result:" << Result;
+                 << "  Result:" << Doc.toJson();
 
         if (ResponseHeaders.contains("x-auth-new-token")) {
 //            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();

@@ -51,9 +51,10 @@ namespace tblForgotPassRequest {
     namespace Relation {
         constexpr char User[] = "user";
     }
-    TARGOMAN_CREATE_CONSTEXPR(fprUUID);
+    TARGOMAN_CREATE_CONSTEXPR(fprID);
     TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
     TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
+    TARGOMAN_CREATE_CONSTEXPR(fprCode);
     TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
     TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
     TARGOMAN_CREATE_CONSTEXPR(fprStatus);

@@ -100,8 +100,6 @@ private slots:
                     { "random", 1 },
                 });
 
-            qDebug() << "--------- Account fixtureSetup: " << Result;
-
             QVERIFY(Result.isValid());
 
             this->LastRandomNumber = Result.toMap().value("Random").toString();
@@ -165,8 +163,6 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- locationID: " << this->LocationID;
-
             QVERIFY(this->LocationID > 0);
 
         } QT_CATCH (const std::exception &exp) {
@@ -190,8 +186,6 @@ private slots:
                     { tblAccountProducts::prd_locID,            this->LocationID },
                 }
             );
-
-            qDebug() << "--------- bannerProductID: " << this->BannerProductID;
 
             QVERIFY(this->BannerProductID > 0);
 
@@ -221,8 +215,6 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- bannerSaleableID: " << this->BannerSaleableID;
-
             QVERIFY(this->BannerSaleableID > 0);
 
         } QT_CATCH (const std::exception &exp) {
@@ -243,8 +235,6 @@ private slots:
                 { "cols", "pgwID" },
             }
         ).toMap();
-//        qDebug() << "--------- PaymentGateways: " << ret;
-
         auto totalRows = ret["totalRows"].toUInt();
         if (totalRows < 3) {
             for (int i=totalRows; i<3; ++i) {
@@ -281,8 +271,6 @@ private slots:
             //                { "pgwSumPaidAmount",         S(quint64),                                         QFV,                                0,          UPAdmin },
                         }
                     );
-
-                    qDebug() << "--------- paymentGatewayID: " << paymentGatewayID;
 
                     QVERIFY(paymentGatewayID > 0);
 
@@ -400,8 +388,6 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- couponID: " << this->CouponID;
-
             QVERIFY(this->CouponID > 0);
 
         } QT_CATCH (const std::exception &exp) {
@@ -427,8 +413,6 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
-
-            qDebug() << "--------- addToBasket" << Result;
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
@@ -460,8 +444,6 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- addToBasket" << Result;
-
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
@@ -491,8 +473,6 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
-
-            qDebug() << "--------- addToBasket" << Result;
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
@@ -540,8 +520,6 @@ private slots:
                 }
             );
 
-            qDebug() << "--------- voucherInfo" << Result;
-
             this->Voucher.fromJson(Result.toJsonObject());
 
             QVERIFY(this->Voucher.ID > 0);
@@ -569,8 +547,6 @@ private slots:
                     }
                 );
 
-                qDebug() << "--------- approveOnlinePayment Result" << Result;
-
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
                 QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
@@ -596,8 +572,6 @@ private slots:
 //                QString("Account/OnlinePayment"
 //            );
 
-//            qDebug() << "--------- addToBasket" << Result;
-
 //            lastPreVoucher.fromJson(Result.toJsonObject());
 
 //            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
@@ -617,8 +591,6 @@ private slots:
                 QString("Advert/AccountCoupons/%1").arg(this->CouponID.toString())
             );
 
-//            qDebug() << "--------- DELETE result: " << Result;
-
             QVERIFY(Result.toBool());
 
         } QT_CATCH (const std::exception &exp) {
@@ -636,8 +608,6 @@ private slots:
 //                    QString("Advert/PaymentGateways/%1").arg(paymentGatewayID.toString())
 //                );
 
-////                qDebug() << "--------- DELETE result: " << Result;
-
 //                QVERIFY(Result == true);
 
 //            } QT_CATCH (const std::exception &exp) {
@@ -653,8 +623,6 @@ private slots:
                     RESTClientHelper::DELETE,
                     QString("Advert/AccountSaleables/%1").arg(this->BannerSaleableID.toString())
                 );
-
-//                qDebug() << "--------- DELETE result: " << Result;
 
                 QVERIFY(Result.toBool());
 
@@ -672,8 +640,6 @@ private slots:
                     QString("Advert/AccountProducts/%1").arg(this->BannerProductID.toString())
                 );
 
-//                qDebug() << "--------- DELETE result: " << Result;
-
                 QVERIFY(Result.toBool());
 
             } QT_CATCH (const std::exception &exp) {
@@ -689,8 +655,6 @@ private slots:
                     RESTClientHelper::DELETE,
                     QString("Advert/Locations/%1").arg(this->LocationID.toString())
                 );
-
-//                qDebug() << "--------- DELETE result: " << Result;
 
                 QVERIFY(Result.toBool());
 
@@ -710,8 +674,6 @@ private slots:
                 {
                     { "random", this->LastRandomNumber },
                 });
-
-            qDebug() << "--------- Account fixtureCleanup: " << Result;
 
             QVERIFY(Result.isValid());
 

@@ -36,9 +36,10 @@ ForgotPassRequest::ForgotPassRequest() :
         AAASchema,
         tblForgotPassRequest::Name,
         {///< ColName                                   Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblForgotPassRequest::fprUUID,            S(TAPI::MD5_t),         QFV,                        ORM_PRIMARY_KEY },
+            { tblForgotPassRequest::fprID,              ORM_PRIMARYKEY_64 },
             { tblForgotPassRequest::fpr_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblForgotPassRequest::fprRequestedVia,    S(Targoman::API::AccountModule::enuForgotPassLinkVia::Type), QFV, Targoman::API::AccountModule::enuForgotPassLinkVia::Email, UPNone },
+            { tblForgotPassRequest::fprCode,            S(QString),             QFV,                        QRequired,  UPNone },
             { tblForgotPassRequest::fprRequestDate,     ORM_CREATED_ON },
             { tblForgotPassRequest::fprApplyDate,       S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
             { tblForgotPassRequest::fprStatus,          ORM_STATUS_FIELD(Targoman::API::AccountModule::enuFPRStatus, Targoman::API::AccountModule::enuFPRStatus::New) },

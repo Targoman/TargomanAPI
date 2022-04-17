@@ -343,16 +343,15 @@ private slots:
         QVERIFY(callUserAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink",{}, {
                             {"emailOrMobile", UT_UserEmail},
-//                            {"via", "Web"},
                         }).toBool());
     }
 
     void ChangePassByUUID() {
         clsDAC DAC;
-        QString Code = DAC.execQuery("", "SELECT fprUUID FROM tblForgotPassRequest WHERE fpr_usrID=?",
-        {gUserID}).toJson(true).object().value("fprUUID").toString();
+        QString Code = DAC.execQuery("", "SELECT fprCode FROM tblForgotPassRequest WHERE fpr_usrID=?",
+        {gUserID}).toJson(true).object().value("fprCode").toString();
 
-        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprUUID=?",
+        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprCode=?",
         {Code});
 
         //827ccb0eea8a706c4c34a16891f84e7b # 12345

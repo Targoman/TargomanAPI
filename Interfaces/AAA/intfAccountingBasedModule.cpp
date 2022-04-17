@@ -490,7 +490,6 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
                     DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
             )
             .one();
-//        qDebug() << "--------- DiscountInfo:" << DiscountInfo;
 
         if (DiscountInfo.size() == 0)
             throw exHTTPBadRequest("Discount code not found.");

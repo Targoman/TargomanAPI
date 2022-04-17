@@ -98,8 +98,6 @@ private slots:
                 "Account/fixtureSetup"
             );
 
-            qDebug() << "--------- Account fixtureSetup: " << Result;
-
             QVERIFY(Result.isValid());
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -114,8 +112,6 @@ private slots:
                 {},
                 {}
             );
-
-            qDebug() << "--------- Account fixtureCleanup: " << Result;
 
             QVERIFY(Result.isValid());
 
@@ -133,8 +129,6 @@ private slots:
                 {
                     { "random", 1 },
                 });
-
-            qDebug() << "--------- Account fixtureSetup: " << Result;
 
             QVERIFY(Result.isValid());
 
@@ -154,8 +148,6 @@ private slots:
                 {
                     { "random", this->LastRandomNumber },
                 });
-
-            qDebug() << "--------- Account fixtureCleanup: " << Result;
 
             QVERIFY(Result.isValid());
 

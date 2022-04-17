@@ -275,10 +275,10 @@ private slots:
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile,
-            TAPI::MD5_t _uuid,
+            QString _uuid,
             TAPI::MD5_t _newPass
         ),
-        "Changes password based on a UUID provided by createForgotPasswordLink"
+        "Changes password based on a Code provided by createForgotPasswordLink"
     )
 
     bool REST_GET_OR_POST(
