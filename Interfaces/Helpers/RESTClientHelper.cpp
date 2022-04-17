@@ -205,7 +205,7 @@ QVariant RESTClientHelper::callAPI(
     QtCUrl::Options Opt;
     Opt[CURLOPT_URL] = makeURL();
     Opt[CURLOPT_TIMEOUT] = 10000;
-    Opt[CURLOPT_FAILONERROR] = true;
+    Opt[CURLOPT_FAILONERROR] = false;
     QStringList Headers;
 
     if (HasForm) {
@@ -288,7 +288,14 @@ QVariant RESTClientHelper::callAPI(
     if (JsonError.error != QJsonParseError::NoError)
         TargomanDebug(5, "Unable to parse JSON: " + JsonError.errorString() + " \"" + CUrlResult + '"');
 
-    QVariant Result = Doc.toVariant().toMap().value("result");
+    QVariantMap RetAsMap = Doc.toVariant().toMap();
+    if (RetAsMap.contains("error")) {
+        QString ErrorMessage = RetAsMap.value("error").toMap().value("message").toString();
+        int ErrorCode = RetAsMap.value("error").toMap().value("code").toInt();
+        throw exTargomanBase(ErrorMessage, ErrorCode);
+    }
+
+    QVariant Result = RetAsMap.value("result");
 //    qDebug() << "Result:" << Result;
 
     return Result;

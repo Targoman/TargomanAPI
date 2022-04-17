@@ -232,7 +232,7 @@ BEGIN
            SET MESSAGE_TEXT = '401:User not found';
     END IF;
 
-    IF iBy = 'E' THEN
+    IF iVia = 'E' THEN
         SET vApprovalCode = {{dbprefix}}Common.fnCreateRandomMD5();
     ELSE
         SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;

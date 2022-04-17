@@ -60,8 +60,12 @@ int main(int _argc, char *_argv[]) {
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
+    } catch (exTargomanBase &e) {
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());
     } catch (std::exception &e) {
-        qDebug() << e.what();
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << e.what();
     }
 
     if (FailedTests > 0)
