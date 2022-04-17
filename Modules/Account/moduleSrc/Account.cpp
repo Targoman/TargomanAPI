@@ -611,7 +611,7 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
-                       .addCol(tblForgotPassRequest::fprUUID)
+                       .addCol(tblForgotPassRequest::fprCode)
                        .addCol(tblForgotPassRequest::fprStatus)
                        .innerJoinWith(tblForgotPassRequest::Relation::User)
                        .where({ Type == "E" ? tblUser::usrEmail : tblUser::usrMobile, enuConditionOperator::Equal, _emailOrMobile })
@@ -620,40 +620,40 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
                        .one()
                        ;
 
-    QString UUID = Data.value(tblForgotPassRequest::fprUUID).toString();
+    QString Code = Data.value(tblForgotPassRequest::fprCode).toString();
 
-    if (UUID.isEmpty())
-        throw exHTTPNotFound("No UUID could be found");
+    if (Code.isEmpty())
+        throw exHTTPNotFound("No Code could be found");
 
     QString fprStatus = Data.value(tblForgotPassRequest::fprStatus).toString();
     if (fprStatus != "Sent") {
         quint64 RowsCount = UpdateQuery(ForgotPassRequest::instance())
                             .set(tblForgotPassRequest::fprStatus, enuFPRStatus::Sent)
-                            .where({ tblForgotPassRequest::fprUUID, enuConditionOperator::Equal, UUID })
+                            .where({ tblForgotPassRequest::fprCode, enuConditionOperator::Equal, Code })
                             .execute(1)
                             ;
         if (RowsCount == 0)
             throw exHTTPNotFound("error in set as sent");
     }
 
-    return UUID;
+    return Code;
 }
 #endif
 
 bool Account::apichangePassByUUID(
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
-    TAPI::MD5_t _uuid,
+    QString _uuid,
     TAPI::MD5_t _newPass
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("spPassword_ChangeByUUID", {
+    this->callSP("spPassword_ChangeByCode", {
                      { "iVia", Type },
                      { "iLogin", _emailOrMobile },
-                     { "iUUID", _uuid },
+                     { "iCode", _uuid },
                      { "iNewPass", _newPass },
                  });
 

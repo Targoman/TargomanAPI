@@ -46,6 +46,7 @@ public:
 
 private slots:
     void initTestCase() {
+        cleanupAll();
         initUnitTestData(false);
     }
 
@@ -57,17 +58,23 @@ private slots:
 
     //-------------------------------------------------------
     void NormalizePhoneNumber() {
-        QVariant Result = callUserAPI(
-                              RESTClientHelper::POST,
-                              "Account/normalizePhoneNumber",
-                              {},
-                              {
-                                  { "phone", "0999-888-1010" },
-                                  { "country", "IR" },
-                              })
-                          ;
+        try {
+            QVariant Result = callUserAPI(
+                                  RESTClientHelper::POST,
+                                  "Account/normalizePhoneNumber",
+                                  {},
+                                  {
+                                      { "phone", "0999-888-1010" },
+                                      { "country", "IR" },
+                                  })
+                              ;
 
-        QVERIFY(Result.toString() == "+989998881010");
+            QVERIFY(Result.toString() == "+989998881010");
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
     }
 
     void SignupByMobileOnly_0999_888_1010() {
@@ -200,29 +207,43 @@ private slots:
     }
 
     void ApprovalRequest_timerInfo_before_send() {
-        QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                  "Account/ApprovalRequest/timerInfo",
-                                  {},
-                                  {
-                                      { "emailOrMobile", UT_UserEmail },
-                                  });
-        qDebug() << Result;
-        QVERIFY(Result.isValid() == false);
+        try {
+            QVariant Result = callUserAPI(RESTClientHelper::POST,
+                                      "Account/ApprovalRequest/timerInfo",
+                                      {},
+                                      {
+                                          { "emailOrMobile", UT_UserEmail },
+                                      });
+            qDebug() << Result;
+            QVERIFY(Result.isValid() == false);
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+//            QFAIL (e.what());
+            qDebug() << e.what();
+            QVERIFY(true);
+        }
     }
 
     void ApprovalRequest_timerInfo_after_send() {
-        clsDAC DAC;
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = DATE_SUB(NOW(), INTERVAL 10 SECOND) WHERE apr_usrID=?",
-        {gUserID});
+        try {
+            clsDAC DAC;
+            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = DATE_SUB(NOW(), INTERVAL 10 SECOND) WHERE apr_usrID=?",
+            {gUserID});
 
-        QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                  "Account/ApprovalRequest/timerInfo",
-                                  {},
-                                  {
-                                      { "emailOrMobile", UT_UserEmail },
-                                  });
-        qDebug() << Result;
-        QVERIFY(Result.isValid());
+            QVariant Result = callUserAPI(RESTClientHelper::POST,
+                                      "Account/ApprovalRequest/timerInfo",
+                                      {},
+                                      {
+                                          { "emailOrMobile", UT_UserEmail },
+                                      });
+            qDebug() << Result;
+            QVERIFY(Result.isValid());
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
     }
 
     void ApproveEmail() {
@@ -343,16 +364,15 @@ private slots:
         QVERIFY(callUserAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink",{}, {
                             {"emailOrMobile", UT_UserEmail},
-//                            {"via", "Web"},
                         }).toBool());
     }
 
     void ChangePassByUUID() {
         clsDAC DAC;
-        QString Code = DAC.execQuery("", "SELECT fprUUID FROM tblForgotPassRequest WHERE fpr_usrID=?",
-        {gUserID}).toJson(true).object().value("fprUUID").toString();
+        QString Code = DAC.execQuery("", "SELECT fprCode FROM tblForgotPassRequest WHERE fpr_usrID=?",
+        {gUserID}).toJson(true).object().value("fprCode").toString();
 
-        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprUUID=?",
+        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprCode=?",
         {Code});
 
         //827ccb0eea8a706c4c34a16891f84e7b # 12345

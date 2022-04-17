@@ -39,11 +39,16 @@ int main(int argc, char *argv[]) {
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
+
     try {
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
-    } catch (std::exception &exp) {
-        qDebug()<<exp.what();
+    } catch (exTargomanBase &e) {
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());
+    } catch (std::exception &e) {
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << e.what();
     }
 
     if (FailedTests > 0)

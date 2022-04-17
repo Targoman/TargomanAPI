@@ -193,6 +193,7 @@ int main(int _argc, char *_argv[]) {
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
+
     try {
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount(DBPrefix), progArgsCount, progArgs);
@@ -203,8 +204,12 @@ int main(int _argc, char *_argv[]) {
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testRoles(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testService(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens(DBPrefix), progArgsCount, progArgs);
+    } catch (exTargomanBase &e) {
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());
     } catch (std::exception &e) {
-        qDebug()<<e.what();
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << e.what();
     }
 
     if (FailedTests > 0)

@@ -74,14 +74,20 @@ int main(int _argc, char *_argv[]) {
 
     bool BreakOnFirstFail = true;
     int FailedTests = 0;
+
     try {
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testTicketing(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testTicketingFixture(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
+    } catch (exTargomanBase &e) {
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());
     } catch (std::exception &e) {
-        qDebug()<<e.what();
+        ++FailedTests;
+        qDebug() << "*** EXCEPTION ***" << e.what();
     }
+
     if (FailedTests > 0) {
         qDebug() << "total number of failed tests: " << FailedTests;
     } else {

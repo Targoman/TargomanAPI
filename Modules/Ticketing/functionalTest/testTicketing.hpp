@@ -88,8 +88,6 @@ private slots:
                 { "random", 1 },
             });
 
-            qDebug() << "--------- Account fixtureSetup: " << Result;
-
             QVERIFY(Result.isValid());
 
             this->LastRandomNumber = Result.toMap().value("Random").toString();
@@ -419,8 +417,6 @@ private slots:
                 {
                     { "random", this->LastRandomNumber },
                 });
-
-            qDebug() << "--------- Account fixtureCleanup: " << Result;
 
             QVERIFY(Result.isValid());
 
