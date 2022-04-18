@@ -583,6 +583,79 @@ private slots:
                         ).toBool());
     }
 
+    void checkPaymentGateways() {
+        QVariant Result = callAdminAPI(RESTClientHelper::GET,
+                                  "Account/PaymentGateways"
+                                  );
+
+        quint32 totalRows = Result.toMap().value("totalRows").toUInt();
+        if (totalRows < 3) {
+            QString random = QString::number(QRandomGenerator::global()->generate());
+
+            for (int i=totalRows; i<3; ++i) {
+                QVariant Result = callAdminAPI(RESTClientHelper::PUT,
+                    "Account/PaymentGateways",
+                    {},
+                    {
+                       { "pgwName",     "fixture.devtest." + random },
+                       { "pgwType",     "_DeveloperTest" },
+                       { "pgwDriver",   "DevTest" },
+                       { "pgwMetaInfo", QVariantMap({
+                             { "username", "hello" },
+                             { "password", "123" },
+                         })
+                       },
+                       { "pgwAllowedDomainName", "dev.test" },
+                    });
+//                qDebug() << Result;
+            }
+        }
+    }
+
+    void requestIncrease_empty_domain() {
+        try {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/Voucher/requestIncrease",
+                {},
+                {
+                    { "amount", 1234 },
+                    { "gatewayType", "_DeveloperTest" },
+                    { "domain", "" },
+                    { "walletID", 0 },
+                    { "paymentVerifyCallback", "http://www.a.com" }
+                }
+            );
+            qDebug() << Result;
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+
+    void requestIncrease_with_domain() {
+        try {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/Voucher/requestIncrease",
+                {},
+                {
+                    { "amount", 1234 },
+                    { "gatewayType", "_DeveloperTest" },
+                    { "domain", "dev.Test" },
+                    { "walletID", 0 },
+                    { "paymentVerifyCallback", "http://www.a.com" }
+                }
+            );
+            qDebug() << Result;
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+
 private slots:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
