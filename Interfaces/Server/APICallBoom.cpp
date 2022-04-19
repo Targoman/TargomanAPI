@@ -142,7 +142,7 @@ QVariantMap intfAPICallBoom::getResponseHeaders() {
 }
 void intfAPICallBoom::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
     if (_multiValue && this->Data->ResponseHeaders.contains(_header))
-        this->Data->ResponseHeaders[_header] = this->Data->ResponseHeaders[_header].toString() + _value.toString();
+        this->Data->ResponseHeaders[_header] = this->Data->ResponseHeaders[_header].toString() + "," + _value.toString();
     else
         this->Data->ResponseHeaders.insert(_header, _value.toString());
 }

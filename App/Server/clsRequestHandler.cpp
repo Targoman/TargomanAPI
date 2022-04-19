@@ -285,6 +285,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         if (!this->Request)
             throw exHTTPGone("Seems that client has gone");
 
+        QString RemoteIP = this->toIPv4(this->Request->remoteAddress());
         qhttp::THeaderHash Headers = this->Request->headers();
         qhttp::THeaderHash Cookies;
         TAPI::JWT_t JWT;
@@ -295,8 +296,6 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
-                QString RemoteIP = this->toIPv4(this->Request->remoteAddress());
-
                 try {
                     QJWT::verifyJWT(
                                 BearerToken,
@@ -304,13 +303,22 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 JWT
                                 );
                 } catch (exJWTExpired &exp) {
-                    QString NewToken = Authentication::renewJWT(
+                    bool IsRenewed = false;
+                    QString NewToken = Authentication::renewExpiredJWT(
                                 JWT,
-                                RemoteIP
+                                RemoteIP,
+                                IsRenewed
                                 );
 
                     BearerToken = NewToken;
+
                     APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
+                    APICALLBOOM->addResponseHeaderNameToExpose("x-auth-new-token");
+
+                    if (IsRenewed == false) {
+                        APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
+                        APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
+                    }
                 }
                 JWT["encodedJWT"] = BearerToken;
             } else
@@ -333,7 +341,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     JWT,
                     Headers.toVariant().toMap(),
                     Cookies.toVariant().toMap(),
-                    this->toIPv4(this->Request->remoteAddress())
+                    RemoteIP
                     );
 
         QVariant Result = _apiObject->invoke(
@@ -648,8 +656,6 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
             _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
-        funcAddToHeaderArray("x-auth-new-token");
-
         this->addHeaderValues(_responseHeaders);
 
         this->Response->end(RawData.data());
@@ -760,8 +766,6 @@ void clsRequestHandler::sendResponseBase(
     if (_responseHeaders.contains("x-debug-time-elapsed") == false)
         _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
-
-    funcAddToHeaderArray("x-auth-new-token");
 
     this->addHeaderValues(_responseHeaders);
 

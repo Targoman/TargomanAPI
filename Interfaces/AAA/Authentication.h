@@ -60,10 +60,11 @@ extern Targoman::API::AAA::stuActiveAccount login(
 );
 
 //extern Targoman::API::AAA::stuActiveAccount updatePrivs(const QString &_ip, const QString &_ssid, const QString &_requiredServices);
-extern QString renewJWT(
+extern QString renewExpiredJWT(
     INOUT TAPI::JWT_t &_JWTPayload,
 //    const QString &_jwt,
-    const QString &_ip
+    const QString &_ip,
+    /*OUT*/ bool &_isRenewed
 );
 
 extern stuOAuthInfo retrieveGoogleUserInfo(const QString &_authToken);

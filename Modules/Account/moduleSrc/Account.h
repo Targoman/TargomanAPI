@@ -71,7 +71,7 @@ public:
 
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
-    TAPI::EncodedJWT_t createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
+    TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
 
 private slots:
     /*****************************************************************\

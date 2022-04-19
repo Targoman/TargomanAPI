@@ -195,24 +195,40 @@ Account::Account() :
 //    return clsJWT::createSignedLogin(_remember, { { JWTItems::usrLogin, _login } }, QJsonObject({ { "svc", _services } }), _ssid);
 //}
 
-TAPI::EncodedJWT_t Account::createJWT(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services) {
-    return clsJWT::createSigned({
-                                    { JWTItems::usrLogin,       _login },
-                                    { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
-                                    { JWTItems::usrName,        _activeAccount.Privs["usrName"] },
-                                    { JWTItems::usrFamily,      _activeAccount.Privs["usrFamily"] },
-                                    { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
-                                    { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
-                                    { JWTItems::privs,          _activeAccount.Privs["privs"] },
-                                    { JWTItems::usrApproval,    TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
-                                    { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
-                                    { JWTItems::canChangePass,  _activeAccount.Privs["hasPass"] },
-                                    { JWTItems::iat,            _activeAccount.Privs["Issuance"] },
-                                },
-                                QJsonObject({ { "svc", _services } }),
-                                _activeAccount.TTL,
-                                _activeAccount.Privs["ssnKey"].toString()
-            );
+TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
+    const QString _login,
+    const stuActiveAccount& _activeAccount,
+    const QString& _services
+) {
+    QJsonObject Payload = {
+        { JWTItems::usrLogin,       _login },
+        { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
+        { JWTItems::usrName,        _activeAccount.Privs["usrName"] },
+        { JWTItems::usrFamily,      _activeAccount.Privs["usrFamily"] },
+        { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
+        { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
+        { JWTItems::privs,          _activeAccount.Privs["privs"] },
+        { JWTItems::usrApproval,    TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
+        { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
+        { JWTItems::canChangePass,  _activeAccount.Privs["hasPass"] },
+        { JWTItems::iat,            _activeAccount.Privs["Issuance"] },
+    };
+
+    TAPI::EncodedJWT_t JWT = QJWT::createSigned(
+        Payload,
+        QJsonObject({ { "svc", _services } }),
+        _activeAccount.TTL,
+        _activeAccount.Privs["ssnKey"].toString()
+    );
+
+    //-- save to active session -----
+    this->callSP("spSession_UpdateJWT", {
+        { "iSSID", _activeAccount.Privs["ssnKey"].toString() },
+        { "iJWT", JWT },
+        { "iIssuance", Payload["iat"].toInt() },
+    });
+
+    return JWT;
 }
 
 /*****************************************************************\
@@ -354,7 +370,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return this->createJWT(_email, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(_email, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
@@ -397,7 +413,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return this->createJWT(_mobile, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(_mobile, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
@@ -432,7 +448,7 @@ TAPI::EncodedJWT_t Account::apilogin(
                                                        _fingerprint
                                                        );
 
-        return this->createJWT(_emailOrMobile, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(_emailOrMobile, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -547,7 +563,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
                          _fingerprint
                          );
 
-    return this->createJWT(OAuthInfo.Email, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(OAuthInfo.Email, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -570,7 +586,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //    auto NewPrivs = Authentication::updatePrivs(_APICALLBOOM.getIP(), LoginJWT.session(), Services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
-//                                 this->createJWT(LoginJWT.login(), NewPrivs, Services)
+//                                 this->createJWTAndSaveToActiveSession(LoginJWT.login(), NewPrivs, Services)
 //                             });
 //}
 

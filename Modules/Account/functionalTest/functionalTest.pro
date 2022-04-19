@@ -15,7 +15,8 @@ HEADERS += \
     ORM/roles.hpp \
     ORM/tokens.hpp \
     testAccount.hpp \
-    testAccountFixture.hpp
+    testAccountFixture.hpp \
+    testJWT.hpp
 
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \

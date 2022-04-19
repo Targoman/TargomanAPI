@@ -25,12 +25,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
-
 #include "QJWT.h"
-
 #include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
-//#include "ServerConfigs.h"
 #include "Interfaces/Server/clsSimpleCrypt.h"
 
 namespace Targoman::API::Server {
@@ -39,68 +36,69 @@ using namespace Common;
 using namespace Targoman::Common::Configuration;
 
 tmplConfigurable<QString> QJWT::Secret(
-        QJWT::makeConfig("JWTSecret"),
-        "Secret to be used for hashing JWT",
-        "~5KHeTc7.C^Ln^<X~YnE4<Kr",
-        ReturnTrueCrossValidator(),
-        "",
-        "SECRET",
-        "jwt-secret",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("JWTSecret"),
+    "Secret to be used for hashing JWT",
+    "~5KHeTc7.C^Ln^<X~YnE4<Kr",
+    ReturnTrueCrossValidator(),
+    "",
+    "SECRET",
+    "jwt-secret",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<enuJWTHashAlgs::Type> QJWT::HashAlgorithm(
-        QJWT::makeConfig("JWTHashAlgorithm"),
-        "Hash algorithm toe be used for JWT",
-        enuJWTHashAlgs::HS256,
-        ReturnTrueCrossValidator(),
-        "",
-        "ALGORITHM",
-        "jwt-hash-alg",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("JWTHashAlgorithm"),
+    "Hash algorithm toe be used for JWT",
+    enuJWTHashAlgs::HS256,
+    ReturnTrueCrossValidator(),
+    "",
+    "ALGORITHM",
+    "jwt-hash-alg",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<quint64> QJWT::SimpleCryptKey(
-        QJWT::makeConfig("SimpleCryptKey"),
-        "Secret to be used for encrypting private JWT objects",
-        static_cast<quint64>(43121109170974191),
-        ReturnTrueCrossValidator(),
-        "",
-        "SECRET",
-        "jwt-private-key",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("SimpleCryptKey"),
+    "Secret to be used for encrypting private JWT objects",
+    static_cast<quint64>(43121109170974191),
+    ReturnTrueCrossValidator(),
+    "",
+    "SECRET",
+    "jwt-private-key",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<quint16> QJWT::TTL(
-        QJWT::makeConfig("TTL"),
-        "Time to live for the token keep it small enough to be updated by Ux Logic",
-        static_cast<quint16>(300),
-        ReturnTrueCrossValidator(),
-        "",
-        "TTL",
-        "jwt-ttl",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("TTL"),
+    "Time to live for the token keep it small enough to be updated by Ux Logic",
+    static_cast<quint16>(300),
+    ReturnTrueCrossValidator(),
+    "",
+    "TTL",
+    "jwt-ttl",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<quint32> QJWT::NormalLoginTTL(
-        QJWT::makeConfig("NormalLoginTTL"),
-        "Time to live for the login token",
-        static_cast<quint32>(24*60*60),
-        ReturnTrueCrossValidator(),
-        "",
-        "",
-        "jwt-login-ttl",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("NormalLoginTTL"),
+    "Time to live for the login token",
+    static_cast<quint32>(24*60*60),
+    ReturnTrueCrossValidator(),
+    "",
+    "",
+    "jwt-login-ttl",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 tmplConfigurable<quint32> QJWT::RememberLoginTTL(
-        QJWT::makeConfig("RememberLoginTTL"),
-        "Time to live for the login token when remembered",
-        static_cast<quint32>(7*24*60*60),
-        ReturnTrueCrossValidator(),
-        "",
-        "TTL",
-        "jwt-remember-ttl",
-        enuConfigSource::Arg | enuConfigSource::File);
+    QJWT::makeConfig("RememberLoginTTL"),
+    "Time to live for the login token when remembered",
+    static_cast<quint32>(7*24*60*60),
+    ReturnTrueCrossValidator(),
+    "",
+    "TTL",
+    "jwt-remember-ttl",
+    enuConfigSource::Arg | enuConfigSource::File);
 
 thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
 
-static clsSimpleCrypt* simpleCryptInstance() {
+static clsSimpleCrypt* simpleCryptInstance()
+{
     if (Q_UNLIKELY(!SimpleCryptInstance)) {
         SimpleCryptInstance = new clsSimpleCrypt(QJWT::SimpleCryptKey.value());
         SimpleCryptInstance->setIntegrityProtectionMode(clsSimpleCrypt::ProtectionHash);
@@ -110,21 +108,21 @@ static clsSimpleCrypt* simpleCryptInstance() {
 }
 
 QString QJWT::createSigned(
-        INOUT QJsonObject &_payload,
-        QJsonObject _privatePayload,
-        const qint32 _expiry,
-        const QString &_sessionID,
-        const QString &_remoteIP
-    ) {
+    INOUT QJsonObject &_payload,
+    QJsonObject _privatePayload,
+    const qint64 _expiry,
+    const QString &_sessionID,
+    const QString &_remoteIP
+) {
     const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
     if (_payload.contains("iat") == false)
         _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
 
-    if (_expiry >= 0)
-        _payload["exp"] = _payload["iat"].toInt() + _expiry;
-    else
-        _payload.remove("exp");
+//    if (_expiry >= 0)
+        _payload["exp"] = _payload["iat"].toInt() + ((_expiry < 0 || _expiry == LLONG_MAX) ? QJWT::TTL.value() : _expiry);
+//    else
+//        _payload.remove("exp");
 
     bool ssnRemember = true;
     if (_payload.contains("ssnexp") == false)
@@ -155,9 +153,9 @@ QString QJWT::createSigned(
 }
 
 void QJWT::extractAndDecryptPayload(
-        const QString &_jwt,
-        TAPI::JWT_t &_jWTPayload
-    ) {
+    const QString &_jwt,
+    TAPI::JWT_t &_jWTPayload
+) {
     QStringList JWTParts = _jwt.split('.');
 
     if (JWTParts.length() != 3)
@@ -195,13 +193,13 @@ void QJWT::extractAndDecryptPayload(
 }
 
 void QJWT::verifyJWT(
-        const QString &_jwt,
-        const QString &_remoteIP,
-        TAPI::JWT_t &_jWTPayload
-    ) {
+    const QString &_jwt,
+    const QString &_remoteIP,
+    TAPI::JWT_t &_jWTPayload
+) {
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
-    // check client ip ---------------
+    //-- check client ip -----
     if (_jWTPayload.contains("prv")) {
         QJsonObject PrivateObject = _jWTPayload["prv"].toObject();
 
@@ -209,18 +207,25 @@ void QJWT::verifyJWT(
             throw exHTTPForbidden("Invalid client IP");
     }
 
-    //check large expiration
+    uint currentDateTime = QDateTime::currentDateTime().toTime_t();
+
+    //-- check large expiration -----
     if (_jWTPayload.contains("ssnexp") == false)
-        exHTTPForbidden("Invalid ssnexp in JWT");
-    if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+        throw exHTTPForbidden("Invalid ssnexp in JWT");
+
+    if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= currentDateTime)
         throw exHTTPUnauthorized("Session expired");
 
-    if (_jWTPayload.contains("exp")
-            && static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= QDateTime::currentDateTime().toTime_t())
+    //-- check small expiration -----
+    if (_jWTPayload.contains("exp") == false)
+        throw exHTTPForbidden("Invalid exp in JWT");
+
+    if (static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= currentDateTime)
         throw exJWTExpired("JWT expired");
 }
 
-QByteArray QJWT::hash(const QByteArray& _data) {
+QByteArray QJWT::hash(const QByteArray& _data)
+{
     switch (QJWT::HashAlgorithm.value()) {
         case enuJWTHashAlgs::HS256:
             return QMessageAuthenticationCode::hash(_data, QJWT::Secret.value().toUtf8(), QCryptographicHash::Sha256);

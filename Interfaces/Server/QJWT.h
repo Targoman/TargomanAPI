@@ -55,7 +55,7 @@ public:
     static QString createSigned(
         INOUT QJsonObject &_payload,
         QJsonObject _privatePayload = QJsonObject(),
-        const qint32 _expiry = -1,
+        const qint64 _expiry = -1,
         const QString &_sessionID = {},
         const QString &_remoteIP = {}
     );

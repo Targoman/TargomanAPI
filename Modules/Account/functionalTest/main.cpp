@@ -25,6 +25,7 @@
 #include "testBase.hpp"
 #include "testAccount.hpp"
 #include "testAccountFixture.hpp"
+#include "testJWT.hpp"
 
 //#include "Interfaces/Helpers/RESTClientHelper.h"
 //using namespace Targoman::API::Helpers;
@@ -198,6 +199,7 @@ int main(int _argc, char *_argv[]) {
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccount(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAccountFixture(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testJWT(DBPrefix), progArgsCount, progArgs);
 
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActiveSessions(DBPrefix), progArgsCount, progArgs);
