@@ -130,12 +130,6 @@ QVariant RESTClientHelper::callAPI(
     QString _aPIURL,
     QVariantMap *_outResponseHeaders
 ) {
-//    QString EncodedJWT = Targoman::API::Server::QJWT::createSigned(_JWT,
-//        {},
-//        300, //Targoman::API::Server::QJWT::TTL.value(),
-//        {}
-//    );
-
     QString EncodedJWT = _JWT["encodedJWT"].toString();
 
     QVariantMap ResponseHeaders;

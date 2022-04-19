@@ -174,12 +174,17 @@ QByteArray PrivHelpers::getURL(const QString& _url) {
 }
 
 /******************************************************************************/
-TAPI::EncodedJWT_t clsJWT::createSigned(QJsonObject _payload, QJsonObject _privatePayload, const qint64 _expiry, const QString& _sessionID) {
-    return Server::QJWT::createSigned(_payload,
-                                      _privatePayload,
-                                      _expiry < 0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),
-                                      _sessionID);
-}
+//TAPI::EncodedJWT_t clsJWT::createSigned(
+//    QJsonObject _payload,
+//    QJsonObject _privatePayload,
+//    const qint64 _expiry,
+//    const QString& _sessionID
+//) {
+//    return Server::QJWT::createSigned(_payload,
+//                                      _privatePayload,
+//                                      _expiry < 0 || _expiry == LLONG_MAX ? Server::QJWT::TTL.value() : static_cast<qint32>(_expiry),
+//                                      _sessionID);
+//}
 
 //TAPI::EncodedJWT_t clsJWT::createSignedLogin(bool _remember, QJsonObject _payload, QJsonObject _privatePayload, const QString& _sessionID)
 //{

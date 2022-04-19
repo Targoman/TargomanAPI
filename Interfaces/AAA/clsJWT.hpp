@@ -33,6 +33,7 @@ namespace Targoman::API::AAA {
 
 namespace JWTItems{
 TARGOMAN_CREATE_CONSTEXPR(iat);
+TARGOMAN_CREATE_CONSTEXPR(exp);
 TARGOMAN_CREATE_CONSTEXPR(jti);
 TARGOMAN_CREATE_CONSTEXPR(priv);
 TARGOMAN_CREATE_CONSTEXPR(privs);
@@ -64,6 +65,8 @@ public:
     inline QVariantMap privatePart() const {return this->Token.value(JWTItems::priv).toObject().toVariantMap();}
     inline QJsonValue value(const QLatin1String& _key) const {return this->Token.value(_key);}
     inline bool canChangePass() const {return this->Token.value(JWTItems::canChangePass).toBool();}
+    inline quint64 issuedAt() const { return static_cast<quint64>(this->Token.value(JWTItems::iat).toDouble()); }
+    inline quint64 expireAt() const { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
 
     /**
      * @brief createSignedJWT creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard.
@@ -77,10 +80,10 @@ public:
      * @param _sessionID optinally a session key for each user to be stored in `jti`
      * @return a base64 encoded string in form of HEADER.PAYLOAD.SIGNATURE
      */
-    static TAPI::EncodedJWT_t createSigned(QJsonObject _payload,
-                                           QJsonObject _privatePayload = {},
-                                           const qint64 _expiry = -1,
-                                           const QString& _sessionID = {});
+//    static TAPI::EncodedJWT_t createSigned(QJsonObject _payload,
+//                                           QJsonObject _privatePayload = {},
+//                                           const qint64 _expiry = -1,
+//                                           const QString& _sessionID = {});
     /**
      * @brief createSignedLogin creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard used for login
      * @param _payload The payload to include in JWT. The payload object must not include enteries with following keys:

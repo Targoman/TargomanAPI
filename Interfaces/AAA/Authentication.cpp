@@ -29,15 +29,15 @@
 namespace Targoman::API::AAA::Authentication {
 
 stuActiveAccount login(
-        const QString&     _ip,
-        const QString&     _login,
-        const QString&     _pass,
-        const QString&     _salt,
-        const QStringList& _requiredServices,
-        bool               _rememberMe,
-        const QJsonObject& _info,
-        const QString&     _fingerPrint
-    ) {
+    const QString&     _ip,
+    const QString&     _login,
+    const QString&     _pass,
+    const QString&     _salt,
+    const QStringList& _requiredServices,
+    bool               _rememberMe,
+    const QJsonObject& _info,
+    const QString&     _fingerPrint
+) {
     makeAAADAC(DAC);
 
     QJsonObject UserInfo = DAC.callSP({},
@@ -71,53 +71,108 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
 }
 */
 
-QString renewJWT(
+QString renewExpiredJWT(
     INOUT TAPI::JWT_t &_JWTPayload,
-//        const QString &_jwt,
-    const QString &_ip
+    const QString &_ip,
+    /*OUT*/ bool &_isRenewed
 ) {
-//    QStringList JWTParts = _jwt.split('.');
-
-//    if (JWTParts.length() != 3)
-//        throw exHTTPForbidden("Invalid JWT Token");
-
-//    QJsonParseError Error;
-//    QJsonDocument Payload = QJsonDocument::fromJson(QByteArray::fromBase64(JWTParts.at(1).toLatin1()), &Error);
-
-//    if (Payload.isNull())
-//        throw exHTTPForbidden("Invalid JWT payload: " + Error.errorString());
-
-//    TAPI::JWT_t JWTPayload = Payload.object();
-
     clsJWT JWT(_JWTPayload);
+    QString SessionKey =  JWT.session();
     QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
 
     makeAAADAC(DAC);
 
-    quint32 Duration = _JWTPayload["exp"].toInt() - _JWTPayload["iat"].toInt();
+    //check session
+    QString Qry = R"(
+        SELECT ssnJWT
+             , ssnStatus
+             , ssn_usrID
+             , ssnLastRenew
+             , usrStatus
+          FROM tblActiveSessions
+     LEFT JOIN tblUser
+            ON tblUser.usrID = tblActiveSessions.ssn_usrID
+         WHERE ssnKey=?
+)";
+    QJsonDocument Result = DAC.execQuery({}, Qry, { SessionKey }).toJson(true);
+
+    if (Result.object().isEmpty())
+        throw exHTTPUnauthorized("Active session not found");
+
+    QVariantMap SessionInfo = Result.toVariant().toMap();
+
+    QString ssnStatus = SessionInfo["ssnStatus"].toString();
+    QString usrStatus = SessionInfo["usrStatus"].toString();
+    //session status
+    if (ssnStatus.isEmpty())
+        throw exHTTPUnauthorized("Invalid Session");
+    if (ssnStatus == "E")
+        throw exHTTPUnauthorized("Session expired");
+    if (ssnStatus == "F")
+        throw exHTTPUnauthorized("You were fired out. contact admin");
+    if (ssnStatus == "G")
+        throw exHTTPUnauthorized("You were logged out");
+    //user status
+    if (usrStatus == "B")
+        throw exTargomanBase("User Blocked. Ask administrator", 405);
+    if (usrStatus == "R")
+        throw exTargomanBase("User Removed. Ask administrator", 405);
+    if (usrStatus != "A")
+        throw exTargomanBase("Invalid Session State", 501);
+
+    QString ssnJWT = SessionInfo["ssnJWT"].toString();
+    TAPI::JWT_t ssnJWTPayload;
+    QJWT::extractAndDecryptPayload(ssnJWT, ssnJWTPayload);
+
+    if (JWT.expireAt() < static_cast<quint64>(ssnJWTPayload.value("exp").toInt())) {
+        uint currentDateTime = QDateTime::currentDateTime().toTime_t();
+        if (static_cast<quint64>(ssnJWTPayload.value("exp").toInt()) > currentDateTime) {
+            _isRenewed = false;
+            //resend last jwt
+            TargomanDebug(5, "Newer JWT returned to client (j1 -> j0)");
+            _JWTPayload = ssnJWTPayload;
+            return ssnJWT;
+        }
+
+        TargomanDebug(5, "j0 and j1 expired!");
+    }
+
+    //-- else: renew -----
+    _isRenewed = true;
+    quint32 Duration = JWT.expireAt() - JWT.issuedAt();
     QJsonObject UserInfo = DAC.callSP({},
                                       "spSessionRetrieveInfo", {
                                           { "iSSID", JWT.session() },
                                           { "iIP", _ip },
-                                          { "iIssuance", _JWTPayload["iat"].toInt() },
+                                          { "iIssuance", JWT.issuedAt() },
                                       }).toJson(true).object();
-
 
     stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(UserInfo, {}, Services);
 
     _JWTPayload["iat"] = ActiveAccount.Privs["Issuance"];
     _JWTPayload["privs"] = ActiveAccount.Privs["privs"];
 
-    return Server::QJWT::createSigned(
+    QString NewJWT = Server::QJWT::createSigned(
             _JWTPayload,
             _JWTPayload.contains("prv") ? _JWTPayload["prv"].toObject() : QJsonObject(),
             Duration,
             _JWTPayload["jti"].toString(),
             _ip
     );
+
+    //-- save to active session -----
+    DAC.callSP({},
+               "spSession_UpdateJWT", {
+                   { "iSSID", SessionKey },
+                   { "iJWT", NewJWT },
+                   { "iIssuance", _JWTPayload["iat"].toInt() },
+               });
+
+    return NewJWT;
 }
 
-QString retrievePhoto(const QString _url) {
+QString retrievePhoto(const QString _url)
+{
     try {
         QByteArray Photo = PrivHelpers::getURL(_url);
 
@@ -131,7 +186,8 @@ QString retrievePhoto(const QString _url) {
     return QByteArray();
 }
 
-stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken) {
+stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
+{
     stuOAuthInfo Info;
     QByteArray Json = PrivHelpers::getURL("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + _authToken);
     QJsonParseError JsonError;
@@ -156,7 +212,8 @@ stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken) {
     return Info;
 }
 
-stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken) {
+stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
+{
     stuOAuthInfo Info;
     QByteArray Json = PrivHelpers::getURL("https://api.linkedin.com/v1/people/~?format=json&oauth_token=" + _authToken);
     QJsonParseError JsonError;
@@ -179,12 +236,14 @@ stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken) {
     return Info;
 }
 
-stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken) {
+stuOAuthInfo retrieveYahooUserInfo(const QString& _authToken)
+{
     throw exAuthentication("Authentication by Yahoo is not implemented yet");
     Q_UNUSED(_authToken);
 }
 
-stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken) {
+stuOAuthInfo retrieveGitHubUserInfo(const QString& _authToken)
+{
     Q_UNUSED(_authToken);
     throw exAuthentication("Authentication by Github is not implemented yet");
 }
