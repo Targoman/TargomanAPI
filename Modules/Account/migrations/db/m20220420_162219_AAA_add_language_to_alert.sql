@@ -1,81 +1,5 @@
-/* Migration File: m20220417_124700_AAA_make_forgotpass_diff_via_email_or_mobile.sql */
+/* Migration File: m20220420_162219_AAA_add_language_to_alert.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
-
-ALTER TABLE `tblForgotPassRequest`
-    ADD COLUMN `fprID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
-    DROP PRIMARY KEY,
-    ADD PRIMARY KEY (`fprID`);
-
-ALTER TABLE `tblForgotPassRequest`
-    CHANGE COLUMN `fprUUID` `fprCode` CHAR(36) NOT NULL COLLATE 'utf8_general_ci' AFTER `fprRequestedVia`,
-    ADD INDEX `fprCode` (`fprCode`);
-
-DROP PROCEDURE IF EXISTS `spMobileVerifyCode_Request`;
-DELIMITER ;;
-CREATE PROCEDURE `spMobileVerifyCode_Request`(
-    IN `iMobile` VARCHAR(50),
-    IN `iSignupIfNotExists` TINYINT,
-    IN `iSignupRole` VARCHAR(50)
-)
-BEGIN
-    DECLARE UserID BIGINT UNSIGNED;
-    DECLARE ApprovalCode VARCHAR(50);
-
-    IF ISNULL(iMobile) THEN
-        SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Invalid mobile';
-    END IF;
-
-    SELECT usrID
-      INTO UserID
-      FROM tblUser
-     WHERE usrMobile = iMobile
-    ;
-
-    IF ISNULL(UserID) THEN
-        IF iSignupIfNotExists = 1 THEN
-            INSERT
-              INTO tblUser
-               SET tblUser.usrMobile = iMobile,
-                   tblUser.usr_rolID = (
-            SELECT tblRoles.rolID
-              FROM tblRoles
-             WHERE LOWER(tblRoles.rolName) = LOWER(iSignupRole)
---               AND (tblRoles.rolSignupAllowedIPs IS NULL
---                OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
-                   )
-            ;
-
-            SET UserID = LAST_INSERT_ID();
-        ELSE
-            SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:User Not Found';
-        END IF;
-    END IF;
-
-    SET ApprovalCode = FLOOR(RAND() * 90000) + 10000;
-
-    INSERT
-      INTO tblApprovalRequest
-       SET apr_usrID = UserID,
-           aprRequestedFor = 'M',
-           aprApprovalKey = iMobile,
-           aprApprovalCode = ApprovalCode
-    ;
-
-    INSERT
-      INTO {{dbprefix}}Common.tblAlerts
-       SET alr_usrID = UserID,
-           alr_altCode = 'approveMobileOnly',
-           alrReplacedContactInfo = iMobile,
-           alrReplacements = JSON_OBJECT(
---               'usrName', vUserName,
---               'usrFamily', vUserFamily,
-               'ApprovalCode', ApprovalCode
-           )
-    ;
-END;;
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `spApproval_Request`;
 DELIMITER ;;
@@ -90,16 +14,19 @@ BEGIN
     DECLARE vApprovalCode VARCHAR(50);
     DECLARE vUserName VARCHAR(100);
     DECLARE vUserFamily VARCHAR(100);
+    DECLARE vUsrLanguage CHAR(2);
 
     SELECT 1
          , tblUser.usrName
          , tblUser.usrFamily
+         , tblUser.usrLanguage
       INTO vApprovalCode
          , vUserName
          , vUserFamily
+         , vUsrLanguage
       FROM tblUser
      WHERE tblUser.usrID = iUserID
-           ;
+    ;
 
     IF (NOT ISNULL(iPass)) THEN
         IF ISNULL(vApprovalCode) THEN
@@ -110,9 +37,11 @@ BEGIN
         SELECT IF(fnPasswordsAreEqual(iPass, iSalt, tblUser.usrPass), 'Ok', 'Err')
              , tblUser.usrName
              , tblUser.usrFamily
+             , tblUser.usrLanguage
           INTO vApprovalCode
              , vUserName
              , vUserFamily
+             , vUsrLanguage
           FROM tblUser
          WHERE tblUser.usrID = iUserID
         ;
@@ -138,9 +67,11 @@ BEGIN
           SELECT tblApprovalRequest.apr_usrID
                , tblUser.usrName
                , tblUser.usrFamily
+               , tblUser.usrLanguage
             INTO vApprovalCode
                , vUserName
                , vUserFamily
+               , vUsrLanguage
             FROM tblApprovalRequest
        LEFT JOIN tblUser
               ON tblUser.usrID = tblApprovalRequest.apr_usrID
@@ -173,18 +104,17 @@ BEGIN
         SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
     END IF;
 
-    INSERT
-      INTO tblApprovalRequest
+    INSERT INTO tblApprovalRequest
        SET apr_usrID = iUserID,
            aprRequestedFor = iBy,
            aprApprovalKey = iKey,
            aprApprovalCode = vApprovalCode
     ;
 
-    INSERT
-      INTO {{dbprefix}}Common.tblAlerts
+    INSERT INTO {{dbprefix}}Common.tblAlerts
        SET alr_usrID = iUserID,
            alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
+           alrLanguage = vUsrLanguage,
            alrReplacedContactInfo = iKey,
            alrReplacements = JSON_OBJECT(
               'usrName', vUserName,
@@ -205,13 +135,16 @@ BEGIN
     DECLARE vUserName VARCHAR(50);
     DECLARE vUserFamily VARCHAR(50);
     DECLARE vApprovalCode CHAR(32);
+    DECLARE vUsrLanguage CHAR(2);
 
     SELECT tblUser.usrID
          , tblUser.usrName
          , tblUser.usrFamily
+         , tblUser.usrLanguage
       INTO vUserID
          , vUserName
          , vUserFamily
+         , vUsrLanguage
       FROM tblUser
  LEFT JOIN tblForgotPassRequest
         ON tblForgotPassRequest.fpr_usrID = tblUser.usrID
@@ -238,17 +171,16 @@ BEGIN
         SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
     END IF;
 
-    INSERT
-      INTO tblForgotPassRequest
+    INSERT INTO tblForgotPassRequest
        SET tblForgotPassRequest.fpr_usrID = vUserID
          , tblForgotPassRequest.fprRequestedVia = iVia
          , tblForgotPassRequest.fprCode = vApprovalCode
     ;
 
-    INSERT
-      INTO {{dbprefix}}Common.tblAlerts
+    INSERT INTO {{dbprefix}}Common.tblAlerts
        SET alr_usrID = vUserID,
            alr_altCode = IF(iVia = 'E', 'passResetByEmail', 'passResetByMobile'),
+           alrLanguage = vUsrLanguage,
            alrReplacedContactInfo = iLogin,
            alrReplacements = JSON_OBJECT(
              'usrName',   vUserName,
@@ -257,51 +189,76 @@ BEGIN
              IF(iVia = 'E', 'UUID', 'ApprovalCode'), vApprovalCode
            )
     ;
-END ;;
+END;;
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS `spPassword_ChangeByUUID`;
-DROP PROCEDURE IF EXISTS `spPassword_ChangeByCode`;
+DROP PROCEDURE IF EXISTS `spMobileVerifyCode_Request`;
 DELIMITER ;;
-CREATE PROCEDURE `spPassword_ChangeByCode`(
-    IN `iVia` VARCHAR(1),
-    IN `iLogin` VARCHAR(50),
-    IN `iCode` VARCHAR(50),
-    IN `iNewPass` VARCHAR(50)
+CREATE PROCEDURE `spMobileVerifyCode_Request`(
+    IN `iMobile` VARCHAR(50),
+    IN `iSignupIfNotExists` TINYINT,
+    IN `iSignupRole` VARCHAR(50)
 )
 BEGIN
     DECLARE vUserID BIGINT UNSIGNED;
-    DECLARE vIsExpired BOOL;
+    DECLARE vApprovalCode VARCHAR(50);
+    DECLARE vUsrLanguage CHAR(2);
 
-    SELECT tblForgotPassRequest.fpr_usrID
-         , TIMEDIFF(NOW(), tblForgotPassRequest.fprRequestDate) > "00:30:00"
-      INTO vUserID
-         , vIsExpired
-      FROM tblForgotPassRequest
-INNER JOIN tblUser
-        ON tblUser.usrID = tblForgotPassRequest.fpr_usrID
-     WHERE (
-           tblUser.usrEmail = iLogin
-        OR tblUser.usrMobile = iLogin
-           )
-       AND tblForgotPassRequest.fprCode = iCode
-       AND tblForgotPassRequest.fprStatus = 'S'
-    ;
-
-    IF ISNULL (vIsExpired) OR vIsExpired THEN
+    IF ISNULL(iMobile) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = '401:Code is invalid or expired';
+           SET MESSAGE_TEXT = '401:Invalid mobile';
     END IF;
 
-    UPDATE tblForgotPassRequest
-       SET tblForgotPassRequest.fprStatus = IF(tblForgotPassRequest.fprCode = iCode, 'A', 'E')
-     WHERE tblForgotPassRequest.fpr_usrID = vUserID
-       AND tblForgotPassRequest.fprStatus IN ('S', 'N')
+    SELECT usrID
+         , usrLanguage
+      INTO vUserID
+         , vUsrLanguage
+      FROM tblUser
+     WHERE usrMobile = iMobile
     ;
 
-    UPDATE tblUser
-       SET tblUser.usrPass = iNewPass
-     WHERE tblUser.usrID = vUserID
+    IF ISNULL(vUserID) THEN
+        IF iSignupIfNotExists = 1 THEN
+            INSERT INTO tblUser
+               SET tblUser.usrMobile = iMobile,
+                   tblUser.usr_rolID = (
+            SELECT tblRoles.rolID
+              FROM tblRoles
+             WHERE LOWER(tblRoles.rolName) = LOWER(iSignupRole)
+--               AND (tblRoles.rolSignupAllowedIPs IS NULL
+--                OR tblRoles.rolSignupAllowedIPs LIKE CONCAT("%,',iIP,',%"))
+                   )
+            ;
+
+            SET vUserID = LAST_INSERT_ID();
+            SET vUsrLanguage = 'fa';
+        ELSE
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '401:User Not Found';
+        END IF;
+    END IF;
+
+    SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
+
+    INSERT
+      INTO tblApprovalRequest
+       SET apr_usrID = vUserID,
+           aprRequestedFor = 'M',
+           aprApprovalKey = iMobile,
+           aprApprovalCode = vApprovalCode
+    ;
+
+    INSERT
+      INTO {{dbprefix}}Common.tblAlerts
+       SET alr_usrID = vUserID,
+           alr_altCode = 'approveMobileOnly',
+           alrLanguage = vUsrLanguage,
+           alrReplacedContactInfo = iMobile,
+           alrReplacements = JSON_OBJECT(
+--               'usrName', vUserName,
+--               'usrFamily', vUserFamily,
+               'ApprovalCode', vApprovalCode
+           )
     ;
 END;;
 DELIMITER ;

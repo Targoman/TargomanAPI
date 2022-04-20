@@ -126,25 +126,35 @@ Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
     return Voucher;
 }
 
-quint64 Voucher::apiCREATErequestWithdraw(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, quint64 _amount, quint64 _walID, const QString& _desc) {
+quint64 Voucher::apiCREATErequestWithdraw(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _amount,
+    quint64 _walID,
+    const QString& _desc
+) {
     return this->callSP("spWithdrawal_Request", {
-                            {"iWalletID",_walID},
-                            {"iForUsrID", _APICALLBOOM.getUserID()},
-                            {"iByUserID", _APICALLBOOM.getUserID()},
-                            {"iAmount",_amount},
-                            {"iDesc",_desc},
+                            { "iWalletID", _walID },
+                            { "iForUsrID", _APICALLBOOM.getUserID() },
+                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iAmount", _amount },
+                            { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-quint64 Voucher::apiCREATErequestWithdrawFor(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, quint64 _targetUsrID, quint64 _amount, TAPI::JSON_t _desc) {
+quint64 Voucher::apiCREATErequestWithdrawFor(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _targetUsrID,
+    quint64 _amount,
+    TAPI::JSON_t _desc
+) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), {"AAA:RequestWithdraw"});
 
     return this->callSP("spWithdrawal_Request", {
-                            {"iWalletID", 0},
-                            {"iForUsrID", _targetUsrID},
-                            {"iByUserID", _APICALLBOOM.getUserID()},
-                            {"iAmount",_amount},
-                            {"iDesc",_desc},
+                            { "iWalletID", 0 },
+                            { "iForUsrID", _targetUsrID },
+                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iAmount", _amount },
+                            { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
