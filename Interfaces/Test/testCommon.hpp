@@ -178,14 +178,14 @@ protected:
 //    }
 
     QVariant callAPI(
-            bool _useAdminJWT,
-            RESTClientHelper::enuHTTPMethod _method,
-            const QString& _api,
-            const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postOrFormFields = {},
-            const QVariantMap& _formFiles = {},
-            QVariantMap *_outResponseHeaders = nullptr
-        ) {
+        bool _useAdminJWT,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postOrFormFields = {},
+        const QVariantMap& _formFiles = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    ) {
         QVariantMap ResponseHeaders;
 
         QVariant Result = RESTClientHelper::callAPI(
@@ -223,13 +223,13 @@ protected:
     }
 
     QVariant callUserAPI(
-            RESTClientHelper::enuHTTPMethod _method,
-            const QString& _api,
-            const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postOrFormFields = {},
-            const QVariantMap& _formFiles = {},
-            QVariantMap *_outResponseHeaders = nullptr
-        ) {
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postOrFormFields = {},
+        const QVariantMap& _formFiles = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    ) {
         return callAPI(
                     false,
                     _method,
@@ -242,13 +242,13 @@ protected:
     }
 
     QVariant callAdminAPI(
-            RESTClientHelper::enuHTTPMethod _method,
-            const QString& _api,
-            const QVariantMap& _urlArgs = {},
-            const QVariantMap& _postOrFormFields = {},
-            const QVariantMap& _formFiles = {},
-            QVariantMap *_outResponseHeaders = nullptr
-        ) {
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postOrFormFields = {},
+        const QVariantMap& _formFiles = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    ) {
         return callAPI(
                     true,
                     _method,

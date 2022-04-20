@@ -613,25 +613,19 @@ private slots:
     }
 
     void requestIncrease_empty_domain() {
-        try {
-            QVariant Result = callUserAPI(
-                RESTClientHelper::PUT,
-                "Account/Voucher/requestIncrease",
-                {},
-                {
-                    { "amount", 1234 },
-                    { "gatewayType", "_DeveloperTest" },
-                    { "domain", "" },
-                    { "walletID", 0 },
-                    { "paymentVerifyCallback", "http://www.a.com" }
-                }
-            );
-            qDebug() << Result;
-        } catch (exTargomanBase &e) {
-            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
-        } catch (std::exception &e) {
-            QFAIL (e.what());
-        }
+        QVERIFY_EXCEPTION_THROWN(callUserAPI(
+            RESTClientHelper::PUT,
+            "Account/Voucher/requestIncrease",
+            {},
+            {
+                { "amount", 1234 },
+                { "gatewayType", "_DeveloperTest" },
+                { "domain", "" },
+                { "walletID", 0 },
+                { "paymentVerifyCallback", "http://www.a.com" }
+            }
+        ),
+        exTargomanBase);
     }
 
     void requestIncrease_with_domain() {

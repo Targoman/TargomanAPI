@@ -44,22 +44,22 @@ TARGOMAN_DEFINE_ENUM(enuAlertStatus,
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-
 namespace tblAlerts {
-constexpr char Name[] = "tblAlerts";
-TARGOMAN_CREATE_CONSTEXPR(alrID);
-TARGOMAN_CREATE_CONSTEXPR(alrType);
-TARGOMAN_CREATE_CONSTEXPR(alr_usrID);
-TARGOMAN_CREATE_CONSTEXPR(alrReplacedContactInfo);
-TARGOMAN_CREATE_CONSTEXPR(alr_altCode);
-TARGOMAN_CREATE_CONSTEXPR(alrReplacements);
-TARGOMAN_CREATE_CONSTEXPR(alrCreateDate);
-TARGOMAN_CREATE_CONSTEXPR(alrLockedAt);
-TARGOMAN_CREATE_CONSTEXPR(alrLastTryAt);
-TARGOMAN_CREATE_CONSTEXPR(alrSentDate);
-TARGOMAN_CREATE_CONSTEXPR(alrStatus);
+    constexpr char Name[] = "tblAlerts";
+    TARGOMAN_CREATE_CONSTEXPR(alrID);
+    TARGOMAN_CREATE_CONSTEXPR(alrType);
+    TARGOMAN_CREATE_CONSTEXPR(alr_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(alrLanguage);
+    TARGOMAN_CREATE_CONSTEXPR(alrReplacedContactInfo);
+    TARGOMAN_CREATE_CONSTEXPR(alr_altCode);
+    TARGOMAN_CREATE_CONSTEXPR(alrReplacements);
+    TARGOMAN_CREATE_CONSTEXPR(alrCreateDate);
+    TARGOMAN_CREATE_CONSTEXPR(alrLockedAt);
+    TARGOMAN_CREATE_CONSTEXPR(alrLastTryAt);
+    TARGOMAN_CREATE_CONSTEXPR(alrSentDate);
+    TARGOMAN_CREATE_CONSTEXPR(alrStatus);
+    TARGOMAN_CREATE_CONSTEXPR(alrResult);
 }
-
 #pragma GCC diagnostic pop
 
 class intfAlerts : public clsTable

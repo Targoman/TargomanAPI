@@ -1,5 +1,5 @@
 /* Migration File: m20220419_111654_AAA_re_add_jwt_to_session.sql */
-/* CAUTION: don't forgot to use {{dbprefix}} for schemas */
+/* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
 ALTER TABLE `tblActiveSessions`
     ADD COLUMN `ssnJWT` TEXT NULL AFTER `ssnRemember`;
