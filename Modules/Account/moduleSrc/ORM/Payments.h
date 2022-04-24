@@ -89,6 +89,39 @@ private slots:
 };
 
 /*****************************************************************\
+|* OfflinePaymentClaims ******************************************|
+\*****************************************************************/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblOfflinePaymentClaims {
+constexpr char Name[] = "tblOfflinePaymentClaims";
+TARGOMAN_CREATE_CONSTEXPR(ofpcID);
+TARGOMAN_CREATE_CONSTEXPR(ofpc_vchID);
+TARGOMAN_CREATE_CONSTEXPR(ofpcBank);
+TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptCode);
+TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptDate);
+TARGOMAN_CREATE_CONSTEXPR(ofpcAmount);
+TARGOMAN_CREATE_CONSTEXPR(ofpcNotes);
+TARGOMAN_CREATE_CONSTEXPR(ofpcStatus);
+TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
+TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
+TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
+}
+#pragma GCC diagnostic pop
+
+class OfflinePaymentClaims : public intfSQLBasedModule
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaims)
+
+private slots:
+    QVariant ORMGET("Get OfflinePaymentClaim(s) information.")
+//    quint32 ORMCREATE("Create a new OfflinePaymentClaim")
+//    bool ORMUPDATE("Update OfflinePaymentClaim info")
+//    bool ORMDELETE("Delete an OfflinePaymentClaim")
+};
+
+/*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
 #pragma GCC diagnostic push
@@ -119,6 +152,7 @@ private slots:
     bool ORMUPDATE("Update OfflinePayment info by priviledged user")
 };
 
+/*****************************************************************/
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 

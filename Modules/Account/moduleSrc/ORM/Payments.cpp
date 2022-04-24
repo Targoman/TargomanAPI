@@ -82,12 +82,67 @@ QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 }
 
 /*****************************************************************\
+|* OfflinePaymentClaims ******************************************|
+\*****************************************************************/
+OfflinePaymentClaims::OfflinePaymentClaims() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblOfflinePaymentClaims::Name,
+        {///< ColName                                           Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            { tblOfflinePaymentClaims::ofpcID,                  ORM_PRIMARYKEY_64},
+            { tblOfflinePaymentClaims::ofpc_vchID,              S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcBank,                S(TAPI::MD5_t),         QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),             QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
+            { tblOfflinePaymentClaims::ofpcStatus,              ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
+            { tblOfflinePaymentClaims::ofpcCreationDateTime,    ORM_CREATED_ON},
+            { tblOfflinePaymentClaims::ofpcCreatedBy_usrID,     ORM_CREATED_BY},
+            { tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,     ORM_UPDATED_BY},
+        },
+        {///< Col                                               Reference Table                 ForeignCol          Rename     LeftJoin
+            { tblOfflinePaymentClaims::ofpc_vchID,              R(AAASchema,tblVoucher::Name),  tblVoucher::vchID },
+            ORM_RELATION_OF_CREATOR(tblOfflinePaymentClaims::ofpcCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID),
+        }
+    ) { ; }
+
+QVariant OfflinePaymentClaims::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
+
+    auto QueryLambda = [](SelectQuery &_query) {
+        _query.innerJoin(tblVoucher::Name);
+    };
+
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+}
+
+//quint32 OfflinePaymentClaims::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+//    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//}
+
+//bool OfflinePaymentClaims::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+//    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//}
+
+//bool OfflinePaymentClaims::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+
+//    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//}
+
+/*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
 OfflinePayments::OfflinePayments() :
     intfSQLBasedModule(
         AAASchema,
-        tblOnlinePayments::Name,
+        tblOfflinePayments::Name,
         {///< ColName                                  Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { tblOfflinePayments::ofpID,               ORM_PRIMARYKEY_64},
             { tblOfflinePayments::ofp_vchID,           S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
@@ -124,5 +179,6 @@ bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
     return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
+/*****************************************************************/
 } //namespace ORM
 } //namespace Targoman::API::AccountModule

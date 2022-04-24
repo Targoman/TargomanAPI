@@ -534,6 +534,25 @@ private slots:
         }
     }
 
+    void gatewayTypesForFinalizeBasket() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/gatewayTypesForFinalizeBasket",
+                {},
+                {
+                    { "preVoucher", this->LastPreVoucher.toJson().toVariantMap() },
+                    { "domain",     "dev.test" },
+                }
+            );
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void finalizeBasket() {
         QT_TRY {
             QVariant Result = callAdminAPI(

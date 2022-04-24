@@ -51,6 +51,11 @@ public:
     static void registerDriver(const QString& _driverName, intfPaymentGateway* _driver);
     static intfPaymentGateway* getDriver(const QString& _driverName);
 
+    static QVariantList findPaymentGatewayTypesForVoucher(
+        quint32 _amount,
+        const QString& _domain
+    );
+
     static const stuPaymentGateway findBestPaymentGateway(
         quint32 _amount,
         enuPaymentGatewayType::Type _gatewayType,

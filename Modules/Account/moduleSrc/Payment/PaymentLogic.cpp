@@ -84,26 +84,100 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
 //    return InstanceFunc();
 //}
 
-//static inline QString enuPaymentGatewayTypeToCSV(const Targoman::API::AccountModule::enuPaymentGatewayType::Types &_values, const char* _itemSurrounder="") {
+//static inline QString enuPaymentGatewayTypeToCSV(const enuPaymentGatewayType::Types &_values, const char* _itemSurrounder="") {
 //    QStringList out;
 
 //    foreach (auto _value, _values) {
-//        out.append(QString("%1%2%1").arg(_itemSurrounder).arg(Targoman::API::AccountModule::enuPaymentGatewayType::toStr(_value)));
+//        out.append(QString("%1%2%1").arg(_itemSurrounder).arg(enuPaymentGatewayType::toStr(_value)));
 //    }
 
 //    return out.join(",");
 //}
 
+QVariantList PaymentLogic::findPaymentGatewayTypesForVoucher(
+    quint32 _amount,
+    const QString& _domain
+) {
+    QString Domain = URLHelper::domain(_domain);
+
+    SelectQuery qry = SelectQuery(PaymentGateways::instance())
+//        .addCol(tblPaymentGateways::pgwID)
+//        .addCol(tblPaymentGateways::pgwName)
+        .addCol(tblPaymentGateways::pgwType)
+//        .addCol(tblPaymentGateways::pgwDriver)
+//        .addCol(tblPaymentGateways::pgwMetaInfo)
+//        .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
+//        .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
+        .leftJoin(SelectQuery(PaymentGateways::instance())
+            .addCol(tblPaymentGateways::pgwID)
+            .addCol(enuConditionalAggregation::IF,
+                    { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
+                    , DBExpression::VALUE(QString("%1 * %2 / 100").arg(tblPaymentGateways::pgwTransactionFeeValue).arg(_amount))
+                    , DBExpression::VALUE(tblPaymentGateways::pgwTransactionFeeValue)
+                    , "inner_pgwTransactionFeeAmount"
+                   )
+            .addCol(enuConditionalAggregation::IF,
+                    clsCondition({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Null })
+                    .orCond({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Less, DBExpression::CURDATE() })
+                    , 0
+                    , DBExpression::VALUE(tblPaymentGateways::pgwSumTodayPaidAmount)
+                    , "inner_pgwSumTodayPaidAmount"
+                   )
+//            .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
+            .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
+            .andWhere({ tblPaymentGateways::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
+            .andWhere(
+                clsCondition({ tblPaymentGateways::pgwMaxPerDayAmount, enuConditionOperator::Null })
+                .orCond(
+                    clsCondition({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Null })
+                    .orCond({ tblPaymentGateways::pgwLastPaymentDateTime, enuConditionOperator::Less, DBExpression::CURDATE() })
+                    .orCond({
+                        tblPaymentGateways::pgwSumTodayPaidAmount,
+                        enuConditionOperator::LessEqual,
+                        DBExpression::VALUE(QString("%1 - %2").arg(tblPaymentGateways::pgwMaxPerDayAmount).arg(_amount))
+                    })
+                )
+            )
+            .andWhere(
+                clsCondition({ tblPaymentGateways::pgwMaxRequestAmount, enuConditionOperator::Null })
+                .orCond({ tblPaymentGateways::pgwMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
+            )
+//            .groupBy(tblPaymentGateways::pgwID)
+            , "tmptbl_inner"
+            , { "tmptbl_inner", tblPaymentGateways::pgwID,
+                enuConditionOperator::Equal,
+                tblPaymentGateways::Name, tblPaymentGateways::pgwID }
+        )
+//        .where({ tblPaymentGateways::pgwType, enuConditionOperator::Equal, _gatewayType })
+        .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
+//        .orderBy("tmptbl_inner.inner_pgwTransactionFeeAmount")
+//        .orderBy("tmptbl_inner.inner_pgwSumTodayPaidAmount")
+//        .orderBy("RAND()")
+        .groupBy(tblPaymentGateways::pgwType)
+    ;
+
+//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
+    QVariantList Rows = qry.all();
+    return Rows;
+//    QList<enuPaymentGatewayType::Type> Types;
+
+//    foreach (auto Row, Rows) {
+//        Types.append(enuPaymentGatewayType::toEnum(Row.toMap().value(tblPaymentGateways::pgwType).toString()));
+//    }
+
+//    return Types;
+}
+
 const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
-        quint32 _amount,
-        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        const QString& _domain
-    ) {
+    quint32 _amount,
+    enuPaymentGatewayType::Type _gatewayType,
+    const QString& _domain
+) {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
 
     QString Domain = URLHelper::domain(_domain);
 
-    SelectQuery qry = SelectQuery(Targoman::API::AccountModule::ORM::PaymentGateways::instance())
+    SelectQuery qry = SelectQuery(PaymentGateways::instance())
         .addCol(tblPaymentGateways::pgwID)
         .addCol(tblPaymentGateways::pgwName)
         .addCol(tblPaymentGateways::pgwType)
@@ -111,7 +185,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         .addCol(tblPaymentGateways::pgwMetaInfo)
         .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
         .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
-        .leftJoin(SelectQuery(Targoman::API::AccountModule::ORM::PaymentGateways::instance())
+        .leftJoin(SelectQuery(PaymentGateways::instance())
             .addCol(tblPaymentGateways::pgwID)
             .addCol(enuConditionalAggregation::IF,
                     { tblPaymentGateways::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
@@ -167,14 +241,14 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
-        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        const QString& _domain,
-        quint64 _vchID,
-        const QString& _invDesc,
-        quint32 _toPay,
-        const QString _paymentVerifyCallback,
-        /*OUT*/ TAPI::MD5_t& _outPaymentMD5
-    ) {
+    enuPaymentGatewayType::Type _gatewayType,
+    const QString& _domain,
+    quint64 _vchID,
+    const QString& _invDesc,
+    quint32 _toPay,
+    const QString _paymentVerifyCallback,
+    /*OUT*/ TAPI::MD5_t& _outPaymentMD5
+) {
     ///scenario:
     ///1: find best payment gateway
     ///2: get payment gateway driver
@@ -182,7 +256,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     ///4: call driver::request
     ///5: return result for client redirecting
 
-    if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
+    if (_gatewayType == enuPaymentGatewayType::COD)
         throw exPayment("COD not allowed for online payment");
 
     QFV.url().validate(_paymentVerifyCallback, "callBack");
@@ -259,7 +333,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         //increase pgwSumRequestCount and pgwSumRequestAmount
         try {
-            Targoman::API::AccountModule::ORM::PaymentGateways::instance()
+            PaymentGateways::instance()
                      .callSP("spPaymentGateway_UpdateRequestCounters", {
                                  { "iPgwID", PaymentGateway.pgwID },
                                  { "iAmount", _toPay },
@@ -293,10 +367,10 @@ QString PaymentLogic::createOnlinePaymentLink(
 
 ///TODO: settle after verify
 quint64 PaymentLogic::approveOnlinePayment(
-        const QString& _paymentMD5,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    ) {
+    const QString& _paymentMD5,
+    const TAPI::JSON_t& _pgResponse,
+    const QString& _domain
+) {
     if (_paymentMD5.isEmpty())
         throw exPayment("paymentMD5 is empty");
 
@@ -346,7 +420,7 @@ quint64 PaymentLogic::approveOnlinePayment(
                     });
 
         //increase pgwSumFailedCount
-        Targoman::API::AccountModule::ORM::PaymentGateways::instance()
+        PaymentGateways::instance()
                  .callSP("spPaymentGateway_UpdateFailedCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
@@ -372,7 +446,7 @@ quint64 PaymentLogic::approveOnlinePayment(
     //update pgwLastPaymentDateTime and pgwSumTodayPaidAmount
     //increase pgwSumOkCount and pgwSumPaidAmount
     try {
-        Targoman::API::AccountModule::ORM::PaymentGateways::instance()
+        PaymentGateways::instance()
                  .callSP("spPaymentGateway_UpdateOkCounters", {
                              { "iPgwID", OnlinePayment.onp_pgwID },
                              { "iAmount", OnlinePayment.onpAmount },
