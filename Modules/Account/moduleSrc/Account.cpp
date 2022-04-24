@@ -930,6 +930,10 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 
     checkPreVoucherSanity(_preVoucher);
 
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    if (_preVoucher.UserID != CurrentUserID)
+        throw exHTTPBadRequest("invalid pre-Voucher owner");
+
     //1: create voucher
     Targoman::API::AAA::stuVoucher Voucher;
 
@@ -944,7 +948,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
                      Voucher::instance(),
                      _APICALLBOOM,
                      TAPI::ORMFields_t({
-                                           { tblVoucher::vch_usrID, _APICALLBOOM.getUserID() },
+                                           { tblVoucher::vch_usrID, CurrentUserID },
                                            { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
                                            { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
                                            { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
@@ -967,7 +971,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 
         //2.1: process voucher
         if (RemainingAfterWallet == 0)
-            return Account::processVoucher(_APICALLBOOM.getUserID(), Voucher.ID);
+            return Account::processVoucher(CurrentUserID, Voucher.ID);
 
         //2.2: create online/offline payment
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
@@ -988,7 +992,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
     } catch (std::exception &exp) {
         qDebug() << "**********************************" << exp.what();
 
-        Account::tryCancelVoucher(_APICALLBOOM.getUserID(), Voucher.ID, true);
+        Account::tryCancelVoucher(CurrentUserID, Voucher.ID, true);
 //        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
 //                                     SYSTEM_USER_ID,
 //                                     {},

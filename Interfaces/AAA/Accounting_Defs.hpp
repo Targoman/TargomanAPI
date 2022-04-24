@@ -225,6 +225,7 @@ struct stuActiveCredit {
 typedef QList<stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
+    SF_quint64(UserID),
     SF_Generic(
         /* type        */ InvItems_t,
         /* name        */ Items,

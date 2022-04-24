@@ -320,7 +320,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 ) {
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 currentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
+    if (_lastPreVoucher.Items.isEmpty())
+        _lastPreVoucher.UserID = CurrentUserID;
+    else if (_lastPreVoucher.UserID != CurrentUserID)
+        throw exHTTPBadRequest("invalid pre-Voucher owner");
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(QStringList({
@@ -457,7 +462,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(tblAccountUserAssetsBase::uas_vchID)
                       .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::uasID, "_discountUsedCount")
-                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, currentUserID })
+                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
                       .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                                   .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
@@ -472,7 +477,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCol(tblAccountUserAssetsBase::uas_cpnID)
                       .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::uasDiscountAmount, "_discountUsedAmount")
-                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, currentUserID })
+                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
                       .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                                   .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                       .groupBy(tblAccountUserAssetsBase::uas_cpnID)
@@ -660,7 +665,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     //-- reserve saleable & product ------------------------------------
     this->AccountSaleables->callSP("spSaleable_Reserve", {
         { "iSaleableID", AssetItem.slbID },
-        { "iUserID", currentUserID },
+        { "iUserID", CurrentUserID },
         { "iQty", _qty },
     });
 
@@ -695,7 +700,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::uas_usrID, currentUserID },
+        { tblAccountUserAssetsBase::uas_usrID, CurrentUserID },
         { tblAccountUserAssetsBase::uas_slbID, AssetItem.slbID },
         { tblAccountUserAssetsBase::uasQty, _qty },
 //        { tblAccountUserAssetsBase::uas_vchID, ??? },
@@ -717,7 +722,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
 
     qry.values(values);
 
-    PreVoucherItem.OrderID = qry.execute(currentUserID);
+    PreVoucherItem.OrderID = qry.execute(CurrentUserID);
     PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------
@@ -754,7 +759,9 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPInternalServerError("pre-voucher items is empty.");
 
-//    quint64 currentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    if (_lastPreVoucher.UserID != CurrentUserID)
+        throw exHTTPBadRequest("invalid pre-Voucher owner");
 
     bool Found = false;
     qint64 FinalPrice = 0;
