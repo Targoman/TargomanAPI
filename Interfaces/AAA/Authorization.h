@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_AUTHORIZATION_H
@@ -26,10 +27,7 @@
 #include "AAADefs.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Authorization{
+namespace Targoman::API::AAA::Authorization {
 
     extern void validateIPAddress(const QString& _ip);
     extern QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs = {});
@@ -37,9 +35,7 @@ namespace Authorization{
     extern void checkPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
     extern QJsonObject privObjectFromInfo(const QJsonObject& _info);
     extern QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem);
-}
-}
-}
-}
+
+} // namespace Targoman::API::AAA::Authorization
 
 #endif // TARGOMAN_API_AAA_AUTHORIZATION_H

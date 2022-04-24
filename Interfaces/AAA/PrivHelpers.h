@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_AAA_PRIVHELPERS_HPP
@@ -28,9 +29,7 @@
 #include <QStringList>
 #include "Interfaces/AAA/AAADefs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace AAA {
+namespace Targoman::API::AAA {
 
 struct stuActiveAccount{
     qint64 TTL;
@@ -56,8 +55,6 @@ private:
     static stuActiveAccount digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services);
 };
 
-}
-}
-}
+} // namespace Targoman::API::AAA
 
 #endif // TARGOMAN_API_AAA_PRIVHELPERS_HPP

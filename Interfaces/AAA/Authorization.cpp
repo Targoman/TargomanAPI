@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "Authorization.h"
@@ -25,10 +26,7 @@
 #include <QJsonArray>
 #include <arpa/inet.h>
 
-namespace Targoman {
-namespace API {
-namespace AAA {
-namespace Authorization{
+namespace Targoman::API::AAA::Authorization {
 
 void validateIPAddress(const QString& _ip) {
     makeAAADAC(DAC);
@@ -70,17 +68,17 @@ void checkPriv(const TAPI::JWT_t &_jwt, const QStringList &_requiredAccess, bool
 
 QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem) {
     QJsonObject Privs = privObjectFromInfo(_jwt);
-    if ( Privs.isEmpty()) return QVariant();
-    return  PrivHelpers::getPrivValue(Privs, _accessItem);
+
+    if (Privs.isEmpty())
+        return QVariant();
+
+    return PrivHelpers::getPrivValue(Privs, _accessItem);
 }
 
 QJsonObject privObjectFromInfo(const QJsonObject& _info) {
-    return _info.contains(AAACommonItems::privs) ? _info[AAACommonItems::privs].toObject() : _info;
+    return _info.contains(AAACommonItems::privs)
+            ? _info[AAACommonItems::privs].toObject()
+            : _info;
 }
 
-
-}
-}
-}
-}
-
+} // namespace Targoman::API::AAA::Authorization
