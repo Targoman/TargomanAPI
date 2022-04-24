@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "PrivHelpers.h"
@@ -127,14 +128,20 @@ void PrivHelpers::validateToken(const QString& _token) {
 }
 
 QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector) {
+    if (_privs.isEmpty() || _selector.isEmpty())
+        return QVariant();
+
     QStringList AccessItemParts = _selector.split(":");
     QJsonObject CurrCheckingPriv = _privs;
+
     foreach (auto Part, AccessItemParts) {
         if (CurrCheckingPriv.contains(Part) == false)
             return QVariant();
+
         CurrCheckingPriv = CurrCheckingPriv.value(Part).toObject();
     }
-    return QVariant();
+
+    return CurrCheckingPriv;
 }
 
 stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
