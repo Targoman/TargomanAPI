@@ -170,6 +170,7 @@ Account::Account() :
     this->addSubModule(&ORM::PaymentGateways::instance());
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&OfflinePayments::instance());
+    this->addSubModule(&OfflinePaymentClaims::instance());
     this->addSubModule(&Roles::instance());
     this->addSubModule(&Service::instance());
     this->addSubModule(&User::instance());
@@ -883,6 +884,25 @@ void Account::tryCancelVoucher(
 //                                 });
 }
 
+QVariantList Account::apigatewayTypesForFinalizeBasket(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    Targoman::API::AAA::stuPreVoucher _preVoucher,
+    QString _domain
+) {
+    checkPreVoucherSanity(_preVoucher);
+
+    if (_preVoucher.Items.isEmpty())
+        throw exHTTPBadRequest("seems that pre-Voucher is empty");
+
+    if (_preVoucher.ToPay <= 0)
+        throw exHTTPBadRequest("topay is zero");
+
+    return PaymentLogic::findPaymentGatewayTypesForVoucher(
+                _preVoucher.ToPay,
+                _domain
+                );
+}
+
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
 Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
@@ -1022,6 +1042,27 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
+quint64 Account::apiPOSTclaimOfflinePayment(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _vchID,
+    const QString& _bank,
+    const QString& _receiptCode,
+    TAPI::Date_t _receiptDate,
+    quint32 _amount,
+    const QString& _note
+) {
+    return this->Create(OfflinePayments::instance(),
+                        _APICALLBOOM,
+                        TAPI::ORMFields_t({
+                                              { "ofp_vchID",_vchID },
+                                              { "ofpBank",_bank },
+                                              { "ofpReceiptCode",_receiptCode },
+                                              { "ofpReceiptDate",_receiptDate },
+                                              { "ofpAmount",_amount },
+                                              { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
+                                          }));
+}
+
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
@@ -1060,15 +1101,6 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
                                     { "ofpAmount",_amount },
                                     { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
                                  }));
-//    OfflinePayments::instance().create(_APICALLBOOM.getUserID(), TAPI::ORMFields_t({
-//                                           {"ofp_vchID",_vchID},
-//                                           {"ofpBank",_bank},
-//                                           {"ofpReceiptCode",_receiptCode},
-//                                           {"ofpReceiptDate",_receiptDate},
-//                                           {"ofpAmount",_amount},
-//                                           {"ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant()}
-//                                       }));
-
     try {
         this->callSP("spWalletTransactionOnPayment_Create", {
                          { "iVoucherID", _vchID },
