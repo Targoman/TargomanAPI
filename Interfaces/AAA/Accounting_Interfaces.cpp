@@ -76,6 +76,39 @@ TAPI_REGISTER_METATYPE(
     }
 );
 
+#ifdef QT_DEBUG
+TAPI_REGISTER_METATYPE(
+    /* complexity         */ COMPLEXITY_Object,
+    /* namespace          */ Targoman::API::AAA,
+    /* type               */ stuPreVoucher_v1,
+    /* toVariantLambda    */ [](const stuPreVoucher_v1& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher_v1 {
+        if (_value.isValid() == false) {
+            return stuPreVoucher_v1();
+        }
+
+        if (_value.canConvert<QVariantMap>()) {
+            auto ret = QJsonDocument::fromVariant(_value);
+            return stuPreVoucher_v1().fromJson(ret.object());
+        }
+
+        if (_value.toString().isEmpty()) {
+            return stuPreVoucher_v1();
+        }
+
+        QJsonParseError Error;
+        QJsonDocument Doc;
+        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
+
+        if (Error.error != QJsonParseError::NoError)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
+        if (Doc.isObject() == false)
+            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
+        return stuPreVoucher_v1().fromJson(Doc.object());
+    }
+);
+#endif
+
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,

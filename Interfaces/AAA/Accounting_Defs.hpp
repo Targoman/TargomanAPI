@@ -224,6 +224,24 @@ struct stuActiveCredit {
 
 typedef QList<stuVoucherItem> InvItems_t;
 
+#ifdef QT_DEBUG
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher_v1,
+    SF_Generic(
+        /* type        */ InvItems_t,
+        /* name        */ Items,
+        /* def         */ InvItems_t(),
+        /* validator   */ v.size(),
+        /* fromVariant */ [](auto v) {QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A;}(v),
+        /* toVariant   */ [](auto v) {InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+    ),
+    SF_Struct(stuPrize, Prize, v.Desc.size()),
+    SF_QString(Summary),
+    SF_quint16(Round),
+    SF_quint32(ToPay, 0, v>0),
+    SF_QString(Sign)
+);
+#endif
+
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
     SF_quint64(UserID),
     SF_Generic(
@@ -386,6 +404,7 @@ TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuDiscount3)
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuUsage)
 
+TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPreVoucher_v1)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPreVoucher)          // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucher)             // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp

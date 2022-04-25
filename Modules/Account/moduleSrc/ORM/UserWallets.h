@@ -24,6 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 
+#include "ORM/PaymentGateways.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
 
@@ -86,13 +87,61 @@ private slots:
         transfer,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            const QString& _destLogin,
+            QString _destEmailOrMobile,
             quint32 _amount,
-            const TAPI::MD5_t& _pass,
-            const QString& _salt,
+            TAPI::MD5_t _pass,
+            QString _salt,
             quint64 _fromWalID = 0
         ),
         "Transfer money to other user's default wallet. Default wallet will be used if not specified"
+    )
+
+    Targoman::API::AAA::stuVoucher REST_CREATE(
+        requestIncrease,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint32 _amount,
+            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+            QString _domain,
+            quint64 _walletID = 0,
+            QString _paymentVerifyCallback = {}
+        ),
+        "Increase wallet balance by online payment"
+        "Set callbackURL = OFFLINE for offline payment, url for online payment"
+        "Also set walletID >0 to use specified wallet or 0 for using default wallet"
+        "When callback is set to URL you must specify payment gateway"
+    )
+
+    quint64 REST_CREATE(
+        requestWithdrawal,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _amount,
+            quint64 _walID,
+            const QString& _desc = {}
+        ),
+        "Create a new withdrawal request by user."
+    )
+
+    quint64 REST_CREATE(
+        requestWithdrawalFor,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _targetUsrID,
+            quint64 _amount,
+            TAPI::JSON_t _desc
+        ),
+        "Create a new withdrawal request for another user by priviledged user. "
+        "Description object must contain at least an string field named 'desc'"
+    )
+
+    bool REST_POST(
+        acceptWithdrawal,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _voucherID
+        ),
+        "Make a withdrawal as accepted and finished"
     )
 };
 

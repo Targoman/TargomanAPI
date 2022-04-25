@@ -135,7 +135,18 @@ protected slots:
         ),
         "add a package to basket and return updated pre-Voucher"
     )
-
+#ifdef QT_DEBUG
+    Targoman::API::AAA::stuPreVoucher_v1 REST_POST(
+        removeBasketItem_v1,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            TAPI::MD5_t _itemUUID,
+            Targoman::API::AAA::stuPreVoucher_v1 _lastPreVoucher
+        ),
+        "Remove a package from basket and return updated pre-Voucher."
+        "Only Pending items can be removed."
+    )
+#endif
     Targoman::API::AAA::stuPreVoucher REST_POST(
         removeBasketItem,
         (

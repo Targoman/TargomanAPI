@@ -130,23 +130,6 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile) {
-    if (QFV.email().isValid(_emailOrMobile)) {
-        if (QFV.emailNotFake().isValid(_emailOrMobile) == false)
-            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
-
-        _emailOrMobile = _emailOrMobile.toLower();
-        return "E";
-    }
-
-    if (QFV.mobile().isValid(_emailOrMobile)) {
-        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
-        return "M";
-    }
-
-    throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
-}
-
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
@@ -255,7 +238,7 @@ QVariantMap Account::apiPUTsignup(
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
-    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QFV/*.asciiAlNum()*/.maxLenght(50).validate(_role);
 
@@ -435,7 +418,7 @@ TAPI::EncodedJWT_t Account::apilogin(
 //    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
 //    if (QFV.mobile().isValid(_emailOrMobile))
 //        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
-    ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
@@ -491,7 +474,7 @@ bool Account::apiresendApprovalCode(
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
-    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
 //    this->callSP("spApprovalRequestAgain", {
 //                     { "iBy", Type },
@@ -610,7 +593,7 @@ QString Account::apicreateForgotPasswordLink(
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
-    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     this->callSP("spForgotPass_Request", {
                      { "iLogin", _emailOrMobile },
@@ -625,7 +608,7 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 ) {
-    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
                        .addCol(tblForgotPassRequest::fprCode)
@@ -665,7 +648,7 @@ bool Account::apichangePassByUUID(
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
-    QString Type = ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     this->callSP("spPassword_ChangeByCode", {
                      { "iVia", Type },
@@ -884,27 +867,30 @@ void Account::tryCancelVoucher(
 //                                 });
 }
 
-QVariantList Account::apigatewayTypesForFinalizeBasket(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher _preVoucher,
-    QString _domain
-) {
-    checkPreVoucherSanity(_preVoucher);
+//QVariantList Account::apigatewayTypesForFinalizeBasket(
+//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    Targoman::API::AAA::stuPreVoucher _preVoucher,
+//    QString _domain
+//) {
+//    checkPreVoucherSanity(_preVoucher);
 
-    if (_preVoucher.Items.isEmpty())
-        throw exHTTPBadRequest("seems that pre-Voucher is empty");
+//    if (_preVoucher.Items.isEmpty())
+//        throw exHTTPBadRequest("seems that pre-Voucher is empty");
 
-    if (_preVoucher.ToPay <= 0)
-        throw exHTTPBadRequest("topay is zero");
+//    if (_preVoucher.ToPay <= 0)
+//        throw exHTTPBadRequest("topay is zero");
 
-    return PaymentLogic::findPaymentGatewayTypesForVoucher(
-                _preVoucher.ToPay,
-                _domain
-                );
-}
+//    return PaymentLogic::findAvailableGatewayTypes(
+//                _preVoucher.ToPay,
+//                _domain
+//                );
+//}
 
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
+/**
+ * call Account/PaymentGateways/availableGatewayTypes for list of gateway types
+ */
 Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,

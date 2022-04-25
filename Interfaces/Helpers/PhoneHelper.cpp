@@ -23,7 +23,9 @@
 
 #include "PhoneHelper.h"
 #include <string>
+#include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/exTargomanBase.h"
+#include "Common/HTTPExceptions.hpp"
 
 namespace Targoman::API::Helpers {
 
@@ -55,6 +57,23 @@ QString PhoneHelper::NormalizePhoneNumber(QString _number, const QString& _count
     std::string formatted_number;
     phoneNumberUtil->Format(number_proto, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, &formatted_number);
     return formatted_number.c_str();
+}
+
+QString PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile) {
+    if (QFV.email().isValid(_emailOrMobile)) {
+        if (QFV.emailNotFake().isValid(_emailOrMobile) == false)
+            throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
+
+        _emailOrMobile = _emailOrMobile.toLower();
+        return "E";
+    }
+
+    if (QFV.mobile().isValid(_emailOrMobile)) {
+        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
+        return "M";
+    }
+
+    throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 }
 
 } //namespace Targoman::API::Helpers

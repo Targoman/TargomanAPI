@@ -36,19 +36,19 @@ WalletTransactions::WalletTransactions() :
     intfSQLBasedModule(
         AAASchema,
         tblWalletsTransactions::Name,
-        {///< ColName                              Type                           Validation                 Default    UpBy    Sort   Filter Self  Virt   PK
-            { tblWalletsTransactions::wltID,       ORM_PRIMARYKEY_64 },
-            { tblWalletsTransactions::wlt_walID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
-            { tblWalletsTransactions::wlt_vchID,   S(quint64),                    QFV.integer().minValue(1), QRequired, UPNone, true,  true },
-            { tblWalletsTransactions::wlt_vchType, S(Targoman::API::AccountModule::enuVoucherType::Type), QFV,                       Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
-            { tblWalletsTransactions::wltAmount,   S(qint64),                     QFV,                       QInvalid,  UPNone, false, false },
-            { tblWalletsTransactions::wltStatus,   ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
-            { tblWalletsTransactions::wltDateTime, ORM_CREATED_ON },
+        {///< ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
+            { tblWalletsTransactions::wltID,        ORM_PRIMARYKEY_64 },
+            { tblWalletsTransactions::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
+            { tblWalletsTransactions::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
+            { tblWalletsTransactions::wlt_vchType,  S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
+            { tblWalletsTransactions::wltAmount,    S(qint64),                      QFV,                        QInvalid,   UPNone, false, false },
+            { tblWalletsTransactions::wltStatus,    ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
+            { tblWalletsTransactions::wltDateTime,  ORM_CREATED_ON },
         },
-        {///< Col                                Reference Table                         ForeignCol     Rename   LeftJoin
-            { tblWalletsTransactions::wlt_walID, R(AAASchema,tblUserWallets::Name),      tblUserWallets::walID },
-            { tblWalletsTransactions::wlt_vchID, R(AAASchema,tblVoucher::Name),          tblVoucher::vchID },
-            { tblWalletsTransactions::wltID,     R(AAASchema,tblWalletBalances::Name),   tblWalletBalances::wbl_wltID },
+        {///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
+            { tblWalletsTransactions::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::walID },
+            { tblWalletsTransactions::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::vchID },
+            { tblWalletsTransactions::wltID,        R(AAASchema, tblWalletBalances::Name),  tblWalletBalances::wbl_wltID },
         }
     ) { ; }
 
@@ -67,13 +67,16 @@ WalletBalances::WalletBalances() :
     intfSQLBasedModule(
         AAASchema,
         tblWalletBalances::Name,
-        {///< ColName                           Type       Validation            Default   UpBy    Sort   Filter Self  Virt   PK
-            //{tblWalletBalances::wbl_wltID,      ORM_PRIMARYKEY_64},
-            { tblWalletBalances::wblBalance,    S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
-            { tblWalletBalances::wblSumDebit,   S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
-            { tblWalletBalances::wblSumCredit,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
-            { tblWalletBalances::wblSumIncome,  S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
-            { tblWalletBalances::wblSumExpense, S(qint64), QFV.allwaysInvalid(), QInvalid, UPNone, false, false },
+        {///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
+            { tblWalletBalances::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
+            { tblWalletBalances::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletBalances::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletBalances::wblSumCredit,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletBalances::wblSumIncome,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletBalances::wblSumExpense, S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+        },
+        {///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
+            { tblWalletBalances::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::wltID },
         }
     ) { ; }
 

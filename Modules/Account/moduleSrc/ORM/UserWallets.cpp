@@ -23,14 +23,14 @@
 
 #include "UserWallets.h"
 #include "User.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Voucher.h"
+#include "Payment/PaymentLogic.h"
+#include "Interfaces/Helpers/PhoneHelper.h"
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
 namespace Targoman::API::AccountModule::ORM {
-
-//using namespace DBManager;
 
 UserWallets::UserWallets() :
     intfSQLBasedModule(
@@ -104,69 +104,151 @@ bool UserWallets::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
-//bool UserWallets::apiUPDATEdefaultWallet(
+/**
+ * @callby:
+ *     operator
+ *     owner
+ */
 bool UserWallets::apiUPDATEsetAsDefault(
-        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-        quint64 _walID
-    ) {
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _walID
+) {
     bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-//    clsDACResult Result = this->execQuery(
-//                              "UPDATE " + this->Name
-//                              + QUERY_SEPARATOR
-//                              + "SET " + tblUserWallets::walDefault + "= 1, " + tblUserWallets::walUpdatedBy_usrID + " = ?"
-//                              + QUERY_SEPARATOR
-//                              + "WHERE "
-//                              + (IsPrivileged ? "TRUE" : (tblUserWallets::wal_usrID + QStringLiteral(" = ? ")))
-//                              + " AND walID = ?",
-//                              (IsPrivileged ?
-//                                   QVariantList({ _APICALLBOOM.getUserID(), _walID }) :
-//                                   QVariantList({ _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID(), _walID })
-//                                   )
-//                              );
-//    return Result.numRowsAffected() > 0;
+    this->callSP("spWallet_SetAsDefault",
+                 {
+                     { "iUserID", (IsPrivileged ? 0 : _APICALLBOOM.getUserID()) },
+                     { "iWalID", _walID },
+                 });
 
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
-
-    QVariantMap ExtraFilters;
-
-    ExtraFilters.insert(tblUserWallets::walID, _walID);
-    if (IsPrivileged == false)
-        ExtraFilters.insert(tblUserWallets::wal_usrID, CurrentUserID);
-
-    return /*Targoman::API::Query::*/this->Update(*this,
-                                 _APICALLBOOM,
-                                 {},
-                                 TAPI::ORMFields_t({
-                                    { tblUserWallets::walDefault, 1 },
-                                    { tblUserWallets::walUpdatedBy_usrID, CurrentUserID },
-                                 }),
-                                 ExtraFilters);
-
-    ///TODO: important: remove default flag from other user wallets
+    return true;
 }
 
 bool UserWallets::apiCREATEtransfer(
-        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-        const QString& _destLogin,
-        quint32 _amount,
-        const TAPI::MD5_t& _pass,
-        const QString& _salt,
-        quint64 _walID
-    ) {
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _destEmailOrMobile,
+    quint32 _amount,
+    TAPI::MD5_t _pass,
+    QString _salt,
+    quint64 _fromWalID
+) {
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_destEmailOrMobile);
 
-    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destLogin, "login");
+//    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destEmailOrMobile, "destEmailOrMobile");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
     this->callSP("spWallet_Transfer",
                  {
                      { "iFromUserID", _APICALLBOOM.getUserID() },
-                     { "iFromWalID", _walID },
-                     { "iToUserLogin", _destLogin },
-                     { "iAmount", _amount },
                      { "iPass", _pass },
                      { "iSalt", _salt },
+                     { "iFromWalID", _fromWalID },
+                     { "iAmount", _amount },
+                     { "iToUserLogin", _destEmailOrMobile },
                  });
+
+    return true;
+}
+
+Targoman::API::AAA::stuVoucher UserWallets::apiCREATErequestIncrease(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint32 _amount,
+    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+    QString _domain,
+    quint64 _walletID,
+    QString _paymentVerifyCallback
+) {
+    Targoman::API::AAA::stuVoucher Voucher;
+
+    Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walletID));
+    Voucher.Info.ToPay = _amount;
+    Voucher.Info.Summary = "Increase wallet";
+
+    Voucher.ID = /*Targoman::API::Query::*/this->Create(
+                                              Voucher::instance(),
+                                              _APICALLBOOM,
+                                              TAPI::ORMFields_t({
+                                                { tblVoucher::vch_usrID, _APICALLBOOM.getUserID() },
+//                                                { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                                { tblVoucher::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                                { tblVoucher::vchTotalAmount, Voucher.Info.ToPay }
+                                              }));
+
+    try {
+        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
+            //Do nothing as it will be created after information upload.
+        } else {
+            TAPI::MD5_t PaymentMD5;
+            Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
+                                      _gatewayType,
+                                      _domain,
+                                      Voucher.ID,
+                                      Voucher.Info.Summary,
+                                      Voucher.Info.ToPay,
+                                      _paymentVerifyCallback,
+                                      PaymentMD5
+                                      );
+            Voucher.PaymentMD5 = PaymentMD5;
+        }
+    } catch (...) {
+        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
+                                     SYSTEM_USER_ID,
+                                     {},
+                                     TAPI::ORMFields_t({
+                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                                     }),
+                                     {
+                                        { tblVoucher::vchID, Voucher.ID }
+                                     });
+        throw;
+    }
+
+    return Voucher;
+}
+
+quint64 UserWallets::apiCREATErequestWithdrawal(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _amount,
+    quint64 _walID,
+    const QString& _desc
+) {
+    return this->callSP("spWithdrawal_Request", {
+                            { "iWalletID", _walID },
+                            { "iForUsrID", _APICALLBOOM.getUserID() },
+                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iAmount", _amount },
+                            { "iDesc", _desc },
+                        }).spDirectOutputs().value("oVoucherID").toULongLong();
+}
+
+quint64 UserWallets::apiCREATErequestWithdrawalFor(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _targetUsrID,
+    quint64 _amount,
+    TAPI::JSON_t _desc
+) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:requestWithdrawal" });
+
+    return this->callSP("spWithdrawal_Request", {
+                            { "iWalletID", 0 },
+                            { "iForUsrID", _targetUsrID },
+                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iAmount", _amount },
+                            { "iDesc", _desc },
+                        }).spDirectOutputs().value("oVoucherID").toULongLong();
+}
+
+bool UserWallets::apiPOSTacceptWithdrawal(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _voucherID
+) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:acceptWithdrawal" });
+
+    this->callSP("spWithdrawal_Accept", {
+                     { "iVoucherID", _voucherID },
+                     { "iOperator_usrID", _APICALLBOOM.getUserID() },
+                 });
+
     return true;
 }
 

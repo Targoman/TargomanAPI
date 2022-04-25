@@ -139,6 +139,16 @@ private slots:
     quint32 ORMCREATE("Create a new payment gateway by priviledged user")
     bool ORMUPDATE("Update payment gateway info by priviledged user")
     bool ORMDELETE("Delete a payment gateway")
+
+    QVariantList REST_GET_OR_POST(
+        availableGatewayTypes,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint32 _amount,
+            QString _domain
+        ),
+        "get list of payment gateway types valid for amount and domain"
+    )
 };
 
 } //namespace ORM

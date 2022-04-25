@@ -94,7 +94,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
 //    return out.join(",");
 //}
 
-QVariantList PaymentLogic::findPaymentGatewayTypesForVoucher(
+QVariantList PaymentLogic::findAvailableGatewayTypes(
     quint32 _amount,
     const QString& _domain
 ) {

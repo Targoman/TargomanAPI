@@ -34,7 +34,7 @@ class PhoneHelper
 public:
     static QString GetErrorTypeAsString(const i18n::phonenumbers::PhoneNumberUtil::ErrorType& _errorType);
     static QString NormalizePhoneNumber(QString _number, const QString& _country="IR");
-
+    static QString ValidateAndNormalizeEmailOrPhoneNumber(QString &_emailOrMobile);
 };
 
 } //namespace Targoman::API::Helpers

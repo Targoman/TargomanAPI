@@ -615,7 +615,7 @@ private slots:
     void requestIncrease_empty_domain() {
         QVERIFY_EXCEPTION_THROWN(callUserAPI(
             RESTClientHelper::PUT,
-            "Account/Voucher/requestIncrease",
+            "Account/UserWallets/requestIncrease",
             {},
             {
                 { "amount", 1234 },
@@ -632,7 +632,7 @@ private slots:
         try {
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
-                "Account/Voucher/requestIncrease",
+                "Account/UserWallets/requestIncrease",
                 {},
                 {
                     { "amount", 1234 },

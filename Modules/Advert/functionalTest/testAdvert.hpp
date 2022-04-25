@@ -149,6 +149,19 @@ private slots:
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
+    /***************************************************/
+//    void removeBasketItem_v1() {
+//        callUserAPI(
+//            RESTClientHelper::POST,
+//            "Advert/removeBasketItem_v1",
+//            {},
+//            {
+//                { "itemUUID", "4fc1849756f6c4f6b57031a7c6172ccd" },
+//                { "lastPreVoucher", "{\"items\": [{\"desc\": \"fixture saleable 3381473638 name\",\"disAmount\": 0,\"orderID\": 195,\"qty\": 1,\"service\": \"Advert\",\"sign\":\"bA8fP3XLLuzmd5NieJ5JoVu0bRWy6R8duRFGzUrUquY=\",\"subTotal\": 12000,\"uUID\": \"a7875e24c51449e516233d8b001eff04\",\"unitPrice\": 12000,\"vATAmount\": 0,\"vATPercent\":0},{\"desc\": \"fixture saleable 3381473638 name\",\"disAmount\": 0,\"orderID\": 197,\"qty\": 1,\"service\": \"Advert\",\"sign\":\"KPi9KMXoH2Aakbass8WnJiOGWqi+jpR7q9UMJMSCmdU=\",\"subTotal\": 12000,\"uUID\": \"4fc1849756f6c4f6b57031a7c6172ccd\",\"unitPrice\": 12000,\"vATAmount\": 0,\"vATPercent\": 0}],\"round\": 360,\"sign\": \"RJQjl1FiueP+puJzFFXb/+MWt5J71WRq4cr006w/4+g=\",\"summary\": \"3 items\",\"toPay\": 35640}" }
+//            }
+//        );
+//    }
+
     void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
@@ -534,15 +547,15 @@ private slots:
         }
     }
 
-    void gatewayTypesForFinalizeBasket() {
+    void availableGatewayTypes_for_FinalizeBasket() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
-                "Account/gatewayTypesForFinalizeBasket",
+                "Account/PaymentGateways/availableGatewayTypes",
                 {},
                 {
-                    { "preVoucher", this->LastPreVoucher.toJson().toVariantMap() },
-                    { "domain",     "dev.test" },
+                    { "amount", this->LastPreVoucher.ToPay },
+                    { "domain", "dev.test" },
                 }
             );
 
