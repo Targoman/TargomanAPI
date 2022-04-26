@@ -277,6 +277,7 @@ DELETE FROM tblWalletBalances;
 DELETE FROM tblUserWallets;
 DELETE FROM tblOnlinePayments;
 DELETE FROM tblOfflinePayments;
+DELETE FROM tblOfflinePaymentClaims;
 DELETE FROM tblVoucher;
 DELETE FROM tblApprovalRequest;
 DELETE FROM tblActiveSessions;

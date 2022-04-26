@@ -160,9 +160,11 @@ Targoman::API::AAA::stuVoucher UserWallets::apiCREATErequestIncrease(
 ) {
     Targoman::API::AAA::stuVoucher Voucher;
 
+    Voucher.Info.UserID = _APICALLBOOM.getUserID();
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walletID));
-    Voucher.Info.ToPay = _amount;
     Voucher.Info.Summary = "Increase wallet";
+    Voucher.Info.ToPay = _amount;
+    Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
 
     Voucher.ID = /*Targoman::API::Query::*/this->Create(
                                               Voucher::instance(),

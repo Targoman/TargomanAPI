@@ -494,3 +494,168 @@ BEGIN
 
 END;;
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `spWalletTransactionOnPayment_Create`;
+DELIMITER ;;
+CREATE PROCEDURE `spWalletTransactionOnPayment_Create`(
+    IN `iVoucherID` BIGINT UNSIGNED,
+    IN `iPaymentType` CHAR(1)
+)
+BEGIN
+    DECLARE vPaymentID BIGINT UNSIGNED;
+    DECLARE vExpenseVoucherID BIGINT UNSIGNED;
+    DECLARE vCreditVoucherID BIGINT UNSIGNED;
+    DECLARE vAmount BIGINT UNSIGNED;
+    DECLARE vTotalAmount BIGINT UNSIGNED;
+    DECLARE vRemainingAfterWallet BIGINT UNSIGNED;
+    DECLARE vUserID BIGINT UNSIGNED;
+    DECLARE vUserDefaultWallet BIGINT UNSIGNED;
+    DECLARE vErr VARCHAR(500);
+    DECLARE vLastID BIGINT UNSIGNED;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 vErr = MESSAGE_TEXT;
+
+        INSERT INTO tblActionLogs
+           SET tblActionLogs.atlBy_usrID = vUserID,
+               tblActionLogs.atlType = 'VirtWLT.Error',
+               tblActionLogs.atlDescription = JSON_OBJECT(
+                   "err", vErr,
+                   "iVoucherID", iVoucherID,
+                   "iPaymentType", iPaymentType
+               )
+        ;
+
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    IF iPaymentType = 'N' THEN -- Online
+        SELECT tblOnlinePayments.onpID,
+               tblOnlinePayments.onp_vchID,
+               tblOnlinePayments.onpAmount,
+               tblVoucher.vchTotalAmount,
+               tblVoucher.vch_usrID
+          INTO vPaymentID,
+               vExpenseVoucherID,
+               vAmount,
+               vTotalAmount,
+               vUserID
+          FROM tblOnlinePayments
+          JOIN tblVoucher
+            ON tblVoucher.vchID = tblOnlinePayments.onp_vchID
+         WHERE tblOnlinePayments.onp_vchID = iVoucherID
+           AND tblOnlinePayments.onpStatus = 'Y' -- Payed
+        ;
+    ELSEIF iPaymentType = 'F' THEN -- Offline
+        SELECT tblOfflinePayments.ofpID,
+               tblOfflinePayments.ofp_vchID,
+               tblOfflinePayments.ofpAmount,
+               tblVoucher.vchTotalAmount,
+               tblVoucher.vch_usrID
+          INTO vPaymentID,
+               vExpenseVoucherID,
+               vAmount,
+               vTotalAmount,
+               vUserID
+          FROM tblOfflinePayments
+          JOIN tblVoucher
+            ON tblVoucher.vchID = tblOfflinePayments.ofp_vchID
+         WHERE tblOfflinePayments.ofp_vchID = iVoucherID
+           AND tblOfflinePayments.ofpStatus = 'Y' -- Payed
+        ;
+    ELSE
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Invalid payment type';
+    END IF;
+
+    IF ISNULL(vExpenseVoucherID) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Payment not found or is not yet payed';
+    END IF;
+
+    SELECT tblUserWallets.walID INTO vUserDefaultWallet
+      FROM tblUserWallets
+     WHERE tblUserWallets.wal_usrID = vUserID
+       AND tblUserWallets.walDefault = TRUE
+    ;
+
+    IF ISNULL(vUserDefaultWallet) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Default wallet not found';
+    END IF;
+
+    SELECT vTotalAmount - tblWalletsTransactions.wltAmount
+      INTO vRemainingAfterWallet
+      FROM tblWalletsTransactions
+     WHERE tblWalletsTransactions.wlt_vchID = iVoucherID
+       AND tblWalletsTransactions.wltStatus = 'A'
+    ;
+
+    IF (IFNULL(vRemainingAfterWallet, 0) < 0) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Remaining After Wallet can not be negative';
+    END IF;
+
+    INSERT INTO tblVoucher
+       SET tblVoucher.vch_usrID = vUserID,
+           tblVoucher.vchType = 'C',
+           tblVoucher.vchDesc = JSON_OBJECT(
+               "type", IF(iPaymentType = 'N', 'Online', 'Offline'),
+               "paymentID", vPaymentID
+           ),
+           tblVoucher.vchTotalAmount = vAmount,
+           tblVoucher.vchStatus = 'F'
+    ;
+
+    SET vLastID = LAST_INSERT_ID();
+    IF (vLastID IS NULL) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:LastID IS NULL';
+    END IF;
+
+    INSERT INTO tblWalletsTransactions
+       SET tblWalletsTransactions.wlt_walID = vUserDefaultWallet,
+           tblWalletsTransactions.wlt_vchID = vLastID,
+           tblWalletsTransactions.wlt_vchType = 'C', -- Credit
+           tblWalletsTransactions.wltAmount = vAmount
+    ;
+
+    SET vLastID = LAST_INSERT_ID();
+    IF (vLastID IS NULL) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:LastID IS NULL';
+    END IF;
+
+    UPDATE tblWalletsTransactions
+       SET tblWalletsTransactions.wltStatus = 'A'
+     WHERE tblWalletsTransactions.wltID = vLastID
+    ;
+
+    IF (vRemainingAfterWallet > 0) THEN
+        INSERT INTO tblWalletsTransactions
+           SET tblWalletsTransactions.wlt_walID = vUserDefaultWallet,
+               tblWalletsTransactions.wlt_vchID = iVoucherID,
+               tblWalletsTransactions.wlt_vchType = 'E', -- Expense
+               tblWalletsTransactions.wltAmount = vRemainingAfterWallet
+        ;
+
+        SET vLastID = LAST_INSERT_ID();
+        IF (vLastID IS NULL) THEN
+            SIGNAL SQLSTATE '45000'
+               SET MESSAGE_TEXT = '500:vLastID IS NULL';
+        END IF;
+
+        UPDATE tblWalletsTransactions
+           SET tblWalletsTransactions.wltStatus = 'Y'
+         WHERE tblWalletsTransactions.wltID = vLastID
+        ;
+    END IF;
+
+    COMMIT;
+
+END;;
+DELIMITER ;

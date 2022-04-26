@@ -351,6 +351,15 @@ private slots:
         approveOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _offlinePaymentClaimID
+        ),
+        "approve Voucher by offline payment"
+    )
+
+    Targoman::API::AAA::stuVoucher REST_POST(
+        approveOfflinePayment_withBankInfo,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _vchID,
             const QString& _bank,
             const QString& _receiptCode,

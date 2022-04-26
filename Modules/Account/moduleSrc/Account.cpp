@@ -1032,6 +1032,11 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
 
+/**
+ * @callby:
+ *     operator
+ *     owner
+ */
 quint64 Account::apiPOSTclaimOfflinePayment(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
@@ -1041,19 +1046,136 @@ quint64 Account::apiPOSTclaimOfflinePayment(
     quint32 _amount,
     const QString& _note
 ) {
-    return this->Create(OfflinePayments::instance(),
+    QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
+//        .addCol(tblVoucher::vchTotalAmount)
+        .where({ tblVoucher::vchID, enuConditionOperator::Equal, _vchID })
+        .one()
+    );
+    tblVoucher::DTO Voucher;
+    Voucher.fromJson(VoucherInfo);
+
+    //check operator or owner
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:claimOfflinePayment" }) == false) {
+        if (Voucher.vch_usrID != _APICALLBOOM.getUserID())
+            throw exAuthorization("Voucher is not yours");
+    }
+
+    if (Voucher.vchTotalAmount > _amount)
+        throw exAuthorization("Voucher total amount is greater than provided amount");
+
+    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
+    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
+
+    return this->Create(OfflinePaymentClaims::instance(),
                         _APICALLBOOM,
                         TAPI::ORMFields_t({
-                                              { "ofp_vchID",_vchID },
-                                              { "ofpBank",_bank },
-                                              { "ofpReceiptCode",_receiptCode },
-                                              { "ofpReceiptDate",_receiptDate },
-                                              { "ofpAmount",_amount },
-                                              { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
+                                              { "ofpc_vchID", _vchID },
+                                              { "ofpcBank", _bank },
+                                              { "ofpcReceiptCode", _receiptCode },
+                                              { "ofpcReceiptDate", _receiptDate },
+                                              { "ofpcAmount", _amount },
+                                              { "ofpcNotes", _note.trimmed().size() ? _note.trimmed() : QVariant() }
                                           }));
 }
 
+/**
+ * @callby:
+ *     operator
+ *     owner
+ */
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _offlinePaymentClaimID
+) {
+    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
+        .addCol(tblOfflinePaymentClaims::ofpcID)
+        .addCol(tblOfflinePaymentClaims::ofpc_vchID)
+        .addCol(tblOfflinePaymentClaims::ofpcBank)
+        .addCol(tblOfflinePaymentClaims::ofpcReceiptCode)
+        .addCol(tblOfflinePaymentClaims::ofpcReceiptDate)
+        .addCol(tblOfflinePaymentClaims::ofpcAmount)
+        .addCol(tblOfflinePaymentClaims::ofpcNotes)
+        .addCol(tblOfflinePaymentClaims::ofpcStatus)
+        .addCol(tblOfflinePaymentClaims::ofpcCreationDateTime)
+        .addCol(tblOfflinePaymentClaims::ofpcCreatedBy_usrID)
+        .addCol(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID)
+        .addCol(tblVoucher::vchID)
+        .addCol(tblVoucher::vch_usrID)
+        .addCol(tblVoucher::vchDesc)
+        .addCol(tblVoucher::vchType)
+        .addCol(tblVoucher::vchTotalAmount)
+        .addCol(tblVoucher::vchStatus)
+        .addCol(tblVoucher::vchCreationDateTime)
+        .innerJoin(tblVoucher::Name)
+        .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
+        .one()
+    );
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaim;
+    OfflinePaymentClaim.fromJson(PaymentInfo);
+    tblVoucher::DTO Voucher;
+    Voucher.fromJson(PaymentInfo);
+    ///@BUG: vchDesc not filled correctly
+
+    //check operator or owner
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:approveOfflinePayment" }) == false) {
+        if (Voucher.vch_usrID != _APICALLBOOM.getUserID())
+            throw exAuthorization("Voucher is not yours");
+    }
+
+    if (OfflinePaymentClaim.ofpcStatus != Targoman::API::AccountModule::enuPaymentStatus::New)
+        throw exAuthorization("Only new offline payments are approved.");
+
+//    if (ApprovalLimit > 0) {
+//        if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
+//            throw exAuthorization("Voucher total amount is greater than your approval limit");
+//    }
+
+//    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
+//    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
+
+    this->Create(OfflinePayments::instance(),
+                 _APICALLBOOM,
+                 TAPI::ORMFields_t({
+                     { tblOfflinePayments::ofp_vchID, OfflinePaymentClaim.ofpc_vchID },
+                     { tblOfflinePayments::ofpBank, OfflinePaymentClaim.ofpcBank },
+                     { tblOfflinePayments::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
+                     { tblOfflinePayments::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
+                     { tblOfflinePayments::ofpAmount, OfflinePaymentClaim.ofpcAmount },
+                     { tblOfflinePayments::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
+                     { tblOfflinePayments::ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
+                 }));
+
+    this->Update(OfflinePaymentClaims::instance(),
+                 _APICALLBOOM,
+                 {},
+                 TAPI::ORMFields_t({
+                     { tblOfflinePaymentClaims::ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::Succeded }
+                 }),
+                 {
+                     { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                 });
+
+    try {
+        this->callSP("spWalletTransactionOnPayment_Create", {
+                         { "iVoucherID", OfflinePaymentClaim.ofpc_vchID },
+                         { "iPaymentType", QChar(enuPaymentType::Offline) }
+                     });
+        return Account::processVoucher(_APICALLBOOM.getUserID(), OfflinePaymentClaim.ofpc_vchID);
+    }  catch (...) {
+        this->Update(Voucher::instance(),
+                    SYSTEM_USER_ID,
+                    {},
+                    TAPI::ORMFields_t({
+                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                    }),
+                    {
+                        { tblVoucher::vchID, OfflinePaymentClaim.ofpc_vchID }
+                    });
+        throw;
+    }
+}
+
+Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment_withBankInfo(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,

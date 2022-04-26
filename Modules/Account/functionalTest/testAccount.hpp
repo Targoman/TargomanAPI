@@ -34,8 +34,10 @@
 #include <cstdlib>
 #include <unistd.h>
 
-using namespace Targoman::API;
+#include "Interfaces/AAA/Accounting_Defs.hpp"
 using namespace Targoman::API::AAA;
+
+using namespace Targoman::API;
 
 class testAccount : public clsBaseTest
 {
@@ -43,6 +45,12 @@ class testAccount : public clsBaseTest
 
 public:
     testAccount(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
+
+    QVariant NewUserWalletID;
+    Targoman::API::AAA::stuVoucher Voucher;
+    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
+    QVariant OfflinePaymentClaimID;
+    Targoman::API::AAA::stuVoucher ApproveOfflinePaymentVoucher;
 
 private slots:
     void initTestCase() {
@@ -612,7 +620,77 @@ private slots:
         }
     }
 
-    void requestIncrease_empty_domain() {
+    /** userwallets *********************************/
+    void UserWallets_CREATE() {
+//        QT_TRY {
+            this->NewUserWalletID = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets",
+                {},
+                {
+//                    { "wal_usrID", gAdminUserID },
+                    { "walName", "my new wallet" },
+                }
+            );
+
+            QVERIFY(this->NewUserWalletID > 0);
+
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+//        } catch (std::exception &e) {
+//            QFAIL (e.what());
+//        }
+    }
+
+    void UserWallets_setAsDefault() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PATCH,
+                "Account/UserWallets/setAsDefault",
+                {},
+                {
+                    { "walID", this->NewUserWalletID },
+                }
+            );
+
+            QVERIFY(Result.toBool());
+
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+
+//    "Account/UserWallets/transfer",
+
+//    void UserWallets_transfer() {
+//        QT_TRY {
+//            QVariant Result = callUserAPI(
+//                RESTClientHelper::POST,
+//                "Account/UserWallets/transfer",
+//                {},
+//                {
+//QString _destEmailOrMobile,
+//quint32 _amount,
+//TAPI::MD5_t _pass,
+//QString _salt,
+//quint64 _fromWalID = 0
+
+//                    { "walID", this->NewUserWalletID },
+//                }
+//            );
+
+//            QVERIFY(Result.toBool());
+
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+//        } catch (std::exception &e) {
+//            QFAIL (e.what());
+//        }
+//    }
+
+    void requestIncrease_DEVTEST_empty_domain() {
         QVERIFY_EXCEPTION_THROWN(callUserAPI(
             RESTClientHelper::PUT,
             "Account/UserWallets/requestIncrease",
@@ -628,8 +706,11 @@ private slots:
         exTargomanBase);
     }
 
-    void requestIncrease_with_domain() {
+    void requestIncrease_DEVTEST_with_domain() {
         try {
+            this->Voucher.ID = 0;
+            this->Voucher.PaymentMD5 = "";
+
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
                 "Account/UserWallets/requestIncrease",
@@ -638,17 +719,124 @@ private slots:
                     { "amount", 1234 },
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
-                    { "walletID", 0 },
+//                    { "walletID", 0 },
                     { "paymentVerifyCallback", "http://www.a.com" }
                 }
             );
-            qDebug() << Result;
+
+            this->Voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->Voucher.PaymentMD5.isEmpty() == false);
+
         } catch (exTargomanBase &e) {
             QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
         } catch (std::exception &e) {
             QFAIL (e.what());
         }
     }
+    void requestIncrease_DEVTEST_with_domain_approveOnlinePayment() {
+        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentMD5",     this->Voucher.PaymentMD5 },
+                        { "domain",         "this.is.domain" },
+                        { "pgResponse",     QVariantMap({
+                              { "resp_1", 1 },
+                              { "resp_2", 2 },
+                              { "resp_3", 3 },
+                          }) },
+                    }
+                );
+
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void requestIncrease_COD_with_domain() {
+        try {
+            this->Voucher.ID = 0;
+            this->Voucher.PaymentMD5 = "";
+
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets/requestIncrease",
+                {},
+                {
+                    { "amount", 5678 },
+                    { "gatewayType", "COD" },
+                    { "domain", "dev.Test" },
+                }
+            );
+
+            this->Voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->Voucher.ID > 0);
+
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+    void requestIncrease_COD_with_domain_claimOfflinePayment() {
+        if (this->Voucher.ID > 0) {
+            QT_TRY {
+                this->OfflinePaymentClaimID = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/claimOfflinePayment",
+                    {},
+                    {
+                        { "vchID",          this->Voucher.ID },
+                        { "bank",           "bank mellat" },
+                        { "receiptCode",    "809" },
+                        { "receiptDate",    "2022/03/04" },
+                        { "amount",         15000 },
+                        { "note",           "this is note for offline payment" },
+                    }
+                );
+
+                QVERIFY(this->OfflinePaymentClaimID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+    void requestIncrease_COD_with_domain_approveOfflinePayment() {
+        if (this->OfflinePaymentClaimID > 0) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOfflinePayment",
+                    {},
+                    {
+                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                    }
+                );
+
+                this->ApproveOfflinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    //    "Account/UserWallets/requestWithdrawal"
+    //    "Account/UserWallets/requestWithdrawalFor"
+    //    "Account/UserWallets/acceptWithdrawal"
 
 private slots:
     /***************************************************************************************/

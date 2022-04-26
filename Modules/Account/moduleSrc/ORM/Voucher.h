@@ -49,12 +49,23 @@ namespace ORM {
 namespace tblVoucher {
     constexpr char Name[] = "tblVoucher";
     TARGOMAN_CREATE_CONSTEXPR(vchID);
-    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
     TARGOMAN_CREATE_CONSTEXPR(vchType);
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
+    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(vchID),
+        SF_quint64(vch_usrID),
+        SF_QString(vchDesc),
+        SF_Enum(Targoman::API::AccountModule::enuVoucherType, vchType, Targoman::API::AccountModule::enuVoucherType::Expense),
+        SF_quint64(vchTotalAmount),
+        SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
+        SF_QString(vchCreationDateTime)
+    );
+//        SF_DateTime_t(vchCreationDateTime)
 }
 #pragma GCC diagnostic pop
 
