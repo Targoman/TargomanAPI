@@ -64,7 +64,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
 //    SF_QString(pgwName),
 //    SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
 //    SF_Enum(TAPI::enuPaymentGatewayDriver, pgwDriver, TAPI::enuPaymentGatewayDriver::IranMellatBank),
-//    SF_JSON(pgwMetaInfo)
+//    SF_JSON_t(pgwMetaInfo)
 //    SF_NULLABLE_quint32(pgwTransactionFeeValue),
 //    SF_Enum(TAPI::enuPaymentGatewayTransactionFeeType::Type(pgwTransactionFeeType),
 //    SF_quint32(pgwMinRequestAmount),

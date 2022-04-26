@@ -172,6 +172,57 @@ Account::Account() :
             InputFile.close();
         }
     }
+
+/*
+    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(
+    {
+        { "vchID", 99000 },
+        { "vchDesc", QVariantMap({
+            { "sign", "WCB0bSmSpsFGTL0vjOTw0LeScog/82EU3t5H6TGy/lU=" },
+            { "items", QVariantMap({
+                {"qty", 0 },
+                { "orderID", 0 },
+                { "service", "INC_WALLET" },
+                { "subTotal", 0 },
+                { "disAmount", 0 },
+                { "unitPrice", 0 },
+                { "vATAmount", 0 },
+                { "vATPercent", 0 },
+            })},
+            { "round", 0 },
+            { "toPay", 5678 },
+            { "userID", 1223 },
+            { "summary", "Increase wallet"}
+        })},
+        { "vchCreationDateTime", "2022-03-04T12:34:56" },
+    });
+
+    tblVoucher::DTO Voucher;
+    Voucher.fromJson(PaymentInfo);
+
+    qDebug() << "---------------------" << endl << Voucher.toJson();
+
+//    QJsonValue jv = QVariant(Voucher.vchCreationDateTime).toJsonValue();
+//    jv = QVariant(Voucher.vchCreationDateTime.toString()).toJsonValue();
+
+    Voucher.vchCreationDateTime = (PaymentInfo.contains("vchCreationDateTime")
+              ? [](auto v) -> TAPI::DateTime_t {
+        return [](QJsonValue v) {
+            TAPI::DateTime_t t;
+            TAPI::setFromVariant(t, v.toVariant(), "vchCreationDateTime");
+//            QVariant vv = v.toVariant();
+//            t = vv.toDateTime();
+            return t;
+        }(v); }
+            (PaymentInfo.value("vchCreationDateTime"))
+              : TAPI::DateTime_t()
+    );
+    TAPI::DateTime_t doc = Voucher.vchCreationDateTime;
+//    QString ss = doc.toJson();
+
+    throw exTargomanBase("AAAAAAA");
+*/
+
 }
 
 //TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
@@ -1114,7 +1165,6 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     OfflinePaymentClaim.fromJson(PaymentInfo);
     tblVoucher::DTO Voucher;
     Voucher.fromJson(PaymentInfo);
-    ///@BUG: vchDesc not filled correctly
 
     //check operator or owner
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:approveOfflinePayment" }) == false) {

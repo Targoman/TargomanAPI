@@ -59,13 +59,12 @@ namespace tblVoucher {
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(vchID),
         SF_quint64(vch_usrID),
-        SF_QString(vchDesc),
+        SF_JSON_t(vchDesc),
         SF_Enum(Targoman::API::AccountModule::enuVoucherType, vchType, Targoman::API::AccountModule::enuVoucherType::Expense),
         SF_quint64(vchTotalAmount),
         SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
-        SF_QString(vchCreationDateTime)
+        SF_DateTime_t(vchCreationDateTime)
     );
-//        SF_DateTime_t(vchCreationDateTime)
 }
 #pragma GCC diagnostic pop
 

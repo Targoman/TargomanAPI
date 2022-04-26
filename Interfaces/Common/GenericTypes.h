@@ -228,7 +228,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QDateTime,
     /* typeName             */ DateTime_t,
     /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) {
-        Q_UNUSED(_paramName);
+        _DEBUG_TAPI_REGISTER_METATYPE_3(DateTime_t, "***** setFromVariantLambda", _paramName, _value);
         *this = _value.toDateTime();
     }
 );
@@ -239,45 +239,59 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QJsonDocument, \
     /* typeName             */ _type, \
     /* setFromVariantLambda */ [=](const QVariant &_value, const QString &_paramName = {}) { \
-        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "***** setFromVariantLambda", _paramName, _value); \
-        if (_value.isValid() == false) \
-        { \
+        _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "***** setFromVariantLambda", _paramName, _value); \
+        if (_value.isValid() == false) { \
             this->setObject({}); \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "setFromVariantLambda.1", _paramName, _value); \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "setFromVariantLambda.1", _paramName, _value); \
             return; \
         } \
-        if (_value.userType() == QMetaType::QJsonObject) \
-        { \
+        if (_value.userType() == QMetaType::QJsonObject) { \
             auto _val = _value.value<QJsonObject>(); \
             this->setObject(_val); \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.2", _paramName, _val, endl, *this); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.2.1", _paramName, _val, endl, *this); \
             return; \
         } \
-        if (_value.userType() == QMetaType::QJsonArray) \
-        { \
+        if (_value.userType() == QMetaType::QJsonValue && _value.value<QJsonValue>().isObject()) { \
+            auto _val = _value.value<QJsonValue>().toObject(); \
+            this->setObject(_val); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.2.2", _paramName, _val, endl, *this); \
+            return; \
+        } \
+        if (_value.userType() == QMetaType::QJsonArray) { \
             auto _val = _value.value<QJsonArray>(); \
             this->setArray(_val); \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.3", _paramName, _val, endl, *this); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.3.1", _paramName, _val, endl, *this); \
             return; \
         } \
-        if (_value.canConvert<QVariantMap>() || \
-               _value.canConvert<QVariantList>() || \
-               _value.canConvert<double>() \
-            ) \
-        { \
+        if (_value.userType() == QMetaType::QJsonValue && _value.value<QJsonValue>().isArray()) { \
+            auto _val = _value.value<QJsonValue>().toArray(); \
+            this->setArray(_val); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.3.2", _paramName, _val, endl, *this); \
+            return; \
+        } \
+        if (_value.canConvert<QVariantMap>()) { \
             *this = QJsonDocument::fromVariant(_value); \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.4", _paramName, _value, endl, *this); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.4.QVariantMap", _paramName, _value, endl, *this); \
             return; \
         } \
-        if (_value.toString().isEmpty()) \
-        { \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "setFromVariantLambda.5", _paramName, _value); \
+        if (_value.canConvert<QVariantList>()) { \
+            *this = QJsonDocument::fromVariant(_value); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.4.QVariantList", _paramName, _value, endl, *this); \
+            return; \
+        } \
+        if (_value.canConvert<double>()) { \
+            *this = QJsonDocument::fromVariant(_value); \
+            _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.4.double", _paramName, _value, endl, *this); \
+            return; \
+        } \
+        if (_value.toString().isEmpty()) { \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "setFromVariantLambda.5", _paramName, _value); \
             return; \
         } \
         QJsonParseError Error; \
         QJsonDocument Doc; \
         *this = Doc.fromJson(_value.toString().toUtf8(), &Error); \
-        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, "setFromVariantLambda.6", _paramName, _value, endl, *this); \
+        _DEBUG_TAPI_REGISTER_METATYPE_5(_type, "setFromVariantLambda.6", _paramName, _value, endl, *this); \
         if (Error.error != QJsonParseError::NoError) \
             throw Targoman::API::exHTTPBadRequest(_paramName + " is not a valid JSON: <" + _value.toString() + "> " + Error.errorString()); \
         return; \

@@ -57,81 +57,81 @@
     TAPI_REGISTER_METATYPE_MACRO_SELECTOR(TAPI_REGISTER_METATYPE_, __VA_ARGS__)(_complexity, _namespace, _type, __VA_ARGS__)
 
 #ifdef QT_DEBUG
-#define _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
+#define _ENABLE_DEBUG_TAPI_REGISTER_METATYPE
 #endif
-#ifdef _ENABLE_DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                             qDebug() << "==============================" << TARGOMAN_M2STR(_type)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, _a1)                        _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)                         << "(" << _a1 << ")"
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, _a1, _a2)                   _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, _a1)                    << _a2
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, _a1, _a2, _a3)              _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, _a1, _a2)               << _a3
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)         _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, _a1, _a2, _a3)          << _a4
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, _a1, _a2, _a3, _a4, _a5)    _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, _a1, _a2, _a3, _a4)     << _a5
+#ifdef _ENABLE_DEBUG_TAPI_REGISTER_METATYPE
+#define _DEBUG_TAPI_REGISTER_METATYPE_0(_type)                             qDebug() << "==============================" << TARGOMAN_M2STR(_type)
+#define _DEBUG_TAPI_REGISTER_METATYPE_1(_type, _a1)                        _DEBUG_TAPI_REGISTER_METATYPE_0(_type)                         << "(" << _a1 << ")"
+#define _DEBUG_TAPI_REGISTER_METATYPE_2(_type, _a1, _a2)                   _DEBUG_TAPI_REGISTER_METATYPE_1(_type, _a1)                    << _a2
+#define _DEBUG_TAPI_REGISTER_METATYPE_3(_type, _a1, _a2, _a3)              _DEBUG_TAPI_REGISTER_METATYPE_2(_type, _a1, _a2)               << _a3
+#define _DEBUG_TAPI_REGISTER_METATYPE_4(_type, _a1, _a2, _a3, _a4)         _DEBUG_TAPI_REGISTER_METATYPE_3(_type, _a1, _a2, _a3)          << _a4
+#define _DEBUG_TAPI_REGISTER_METATYPE_5(_type, _a1, _a2, _a3, _a4, _a5)    _DEBUG_TAPI_REGISTER_METATYPE_4(_type, _a1, _a2, _a3, _a4)     << _a5
 #else
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_0(_type)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_1(_type, ...)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, ...)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, ...)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_4(_type, ...)
-#define _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_5(_type, ...)
+#define _DEBUG_TAPI_REGISTER_METATYPE_0(_type)
+#define _DEBUG_TAPI_REGISTER_METATYPE_1(_type, ...)
+#define _DEBUG_TAPI_REGISTER_METATYPE_2(_type, ...)
+#define _DEBUG_TAPI_REGISTER_METATYPE_3(_type, ...)
+#define _DEBUG_TAPI_REGISTER_METATYPE_4(_type, ...)
+#define _DEBUG_TAPI_REGISTER_METATYPE_5(_type, ...)
 #endif
 
 #define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
-    TAPI_REGISTER_METATYPE(_complexity, _namespace, _type, \
+    TAPI_REGISTER_METATYPE( \
+        /* complexity         */ _complexity, \
+        /* namespace          */ _namespace, \
+        /* type               */ _type, \
         /* toVariantLambda    */ [](const _type& _value) -> QVariant { \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_2(_type, "toVariantLambda", _value); \
+            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "toVariantLambda", _value); \
             return _value; \
         }, \
         /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _type { \
-            _DEBUG_TAPI_REGISTER_JSON_DERIVED_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
             return _type::fromVariant(_value); \
         }, \
         /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
         /* toORMValueLambda   */ [](const QVariant& _value) { \
-            /*qDebug() << "JSON_t(3) =================================" << _value;*/  \
+            _namespace::_type t; \
+            TAPI::setFromVariant(t, _value); \
+            qDebug() << "toORMValueLambda(4) =================================" << _value << " -> " << t;  \
+            return t; \
+        }, \
+        /* fromORMValueLambda */ [](const QVariant& _value) { \
+            QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData()); \
+            /*qDebug() << "JSON_t(5) =================================" << _value << " -> " << ret;*/  \
+            return ret; \
+        } \
+    )
+/*
             if (_value.isValid() == false) { \
-                /*qDebug() << "JSON_t(3.1) =================================" << _value;*/ \
                 return QJsonDocument(); \
             } \
             if (_value.userType() == QMetaType::QJsonObject) { \
                 auto Doc = QJsonDocument(); \
                 auto _val = _value.value<QJsonObject>(); \
                 Doc.setObject(_val); \
-                /*qDebug() << "JSON_t(3.2) =================================" << _val << endl << "  =" << Doc;*/ \
                 return Doc; \
             } \
             if (_value.userType() == QMetaType::QJsonArray) { \
                 auto Doc = QJsonDocument(); \
                 auto _val = _value.value<QJsonArray>(); \
                 Doc.setArray(_val); \
-                /*qDebug() << "JSON_t(3.3) =================================" << _val << endl << "  =" << Doc;*/ \
                 return Doc; \
             } \
             if (_value.canConvert<QVariantMap>() || \
                    _value.canConvert<QVariantList>() || \
                    _value.canConvert<double>()) { \
                 auto Doc = QJsonDocument::fromVariant(_value); \
-                /*qDebug() << "JSON_t(3.4) =================================" << _value << endl << "  =" << Doc;*/ \
                 return Doc; \
             } \
             if (_value.toString().isNull() || _value.toString().isEmpty()) { \
-                /*qDebug() << "JSON_t(3.5) =================================" << _value;*/  \
                 return QJsonDocument(); \
             } \
             QJsonParseError Error; \
             QJsonDocument Doc = QJsonDocument::fromJson(_value.toString().toUtf8(), &Error); \
-            /*qDebug() << "JSON_t(3.6) =================================" << _value << endl << "  =" << Doc;*/ \
             if (Error.error != QJsonParseError::NoError) \
                 throw exHTTPBadRequest("is not a valid Json: <"+_value.toString()+">" + QString("%1:%2").arg(Error.error).arg(Error.errorString())); \
             return Doc; \
-        }, \
-        /* fromORMValueLambda */ [](const QVariant& _value) { \
-            QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData()); \
-            /*qDebug() << "JSON_t(4) =================================" << _value << " -> " << ret;*/  \
-            return ret; \
-        } \
-    )
-//        QString ret = QString::fromUtf8(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact));
-
+*/
 /************************************************************/
 #define TAPI_VALIDATION_REQUIRED_TYPE_IMPL(_complexity, _namespace, _type, _validationRule, _toVariant, ...) \
     TAPI_REGISTER_METATYPE( \
@@ -149,33 +149,45 @@
     INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum)
 
 /************************************************************/
-#define SF_Generic(_type, _name, _def, _validator, _fromVariant, _toVariant) _type, _name, _def, _validator, _fromVariant, _toVariant
+#define SF_Generic(_type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType) _type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType
 #define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, _type::toStr(v), static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
 #define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 
-///TODO: complete this and test with stuPaymentGateway
-//#define SF_JSON(_name)                  SF_Generic(
-//    /* type        */ TAPI::JSON_t,
-//    /* name        */ _name,
-//    /* def         */ TAPI::JSON_t(),
-//    /* validator   */ v.isEmpty() == false,
-//    /* fromVariant */ [](auto v) { return QJsonValue::fromVariant(v); }(v),
-//    /* toVariant   */ v
-//)
+#define SF_Var_Struct(_type, _name, _validator) \
+    SF_Generic( \
+        /* type              */ _type, \
+        /* name              */ _name, \
+        /* def               */ _type(), \
+        /* validator         */ _validator, \
+        /* type 2 QJsonValue */ v.toJson(), \
+        /* QJsonValue 2 type */ _type().fromJson(v.toObject()) \
+    )
 
-//                                                  _type,                  _name, _typeGroup,        _fromVariant,      _toVariant,           _def, _validator
+///TODO: complete this and test with stuPaymentGateway and tblVoucher::DTO
+#define SF_JSON_t(_name) \
+    SF_Generic( \
+        /* type              */ TAPI::JSON_t, \
+        /* name              */ _name, \
+        /* def               */ TAPI::JSON_t(), \
+        /* validator         */ v.isEmpty() == false, \
+        /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
+        /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { TAPI::JSON_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v) \
+    )
+
+#define SF_DateTime_t(_name) \
+    SF_Generic( \
+        /* type              */ TAPI::DateTime_t, \
+        /* name              */ _name, \
+        /* def               */ TAPI::DateTime_t(), \
+        /* validator         */ v.isValid(), \
+        /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
+        /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { TAPI::DateTime_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v) \
+    )
+
+//                                                  _type,                  _name, _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
 #define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
 #define SF_QString(_name, ...)          SF_String(_name,    QString,      __VA_ARGS__)
 #define SF_MD5_t(_name, ...)            SF_String(_name,    TAPI::MD5_t,  __VA_ARGS__)
-#define SF_DateTime_t(_name, ...) \
-    SF_Generic( \
-        /* type        */ TAPI::DateTime_t, \
-        /* name        */ _name, \
-        /* def         */ TAPI::DateTime_t(), \
-        /* validator   */ v.isValid(), \
-        /* fromVariant */ [](auto v) { return QVariant(v).toJsonValue(); }(v), \
-        /* toVariant   */ [](auto v) { return TAPI::DateTime_t::fromVariant(v); }(v) \
-    )
 
 #define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v), INTERNAL_V2uint8(v),  __VA_ARGS__)
 #define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2uint8(v),  __VA_ARGS__)
@@ -189,21 +201,22 @@
 #define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qreal),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),   INTERNAL_N2DBL(v),    __VA_ARGS__)
 
 /************************************************************/
-#define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) struct _name { \
-    TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
-    _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
-        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
-    { ; } \
-    QJsonObject toJson() const { \
-        QJsonObject Obj; \
-        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
-        return Obj; \
-    } \
-    _name& fromJson(const QJsonObject& _obj) { \
-        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__); \
-        return *this; \
-    } \
-};
+#define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) \
+    struct _name { \
+        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
+        _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
+            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
+        { ; } \
+        QJsonObject toJson() const { \
+            QJsonObject Obj; \
+            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
+            return Obj; \
+        } \
+        _name& fromJson(const QJsonObject& _obj) { \
+            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__); \
+            return *this; \
+        } \
+    };
 
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
     QT_TRY { \
