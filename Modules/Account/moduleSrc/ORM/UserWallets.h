@@ -112,24 +112,24 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    quint64 REST_CREATE(
+    quint64 REST_POST(
         requestWithdrawal,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _amount,
-            quint64 _walID,
-            const QString& _desc = {}
+            quint64 _walID = 0,
+            const QString _desc = {}
         ),
         "Create a new withdrawal request by user."
     )
 
-    quint64 REST_CREATE(
+    quint64 REST_POST(
         requestWithdrawalFor,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _targetUsrID,
             quint64 _amount,
-            TAPI::JSON_t _desc
+            quint64 _targetUsrID,
+            const QString _desc = {}
         ),
         "Create a new withdrawal request for another user by priviledged user. "
         "Description object must contain at least an string field named 'desc'"

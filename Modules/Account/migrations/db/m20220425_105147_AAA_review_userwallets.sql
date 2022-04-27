@@ -81,6 +81,7 @@ BEGIN
     DECLARE vNotTransferable BIGINT;
     DECLARE vMaxTransferPerDay BIGINT;
     DECLARE vTodayTransfers BIGINT;
+    DECLARE vUserID BIGINT;
     DECLARE vIBAN VARCHAR(50);
 
     SELECT tblUserWallets.walID,
@@ -88,14 +89,18 @@ BEGIN
            tblUserWallets.walLastBalance,
            tblUserWallets.walNotTransferableAmount,
            tblUserWallets.walMaxTransferPerDay,
+           tblUser.usrID,
            tblUserExtraInfo.ueiIBAN
       INTO ioWalletID,
            vMinBalance,
            vLastBalance,
            vNotTransferable,
            vMaxTransferPerDay,
+           vUserID,
            vIBAN
       FROM tblUserWallets
+ LEFT JOIN tblUser
+        ON tblUser.usrID = tblUserWallets.wal_usrID
  LEFT JOIN tblUserExtraInfo
         ON tblUserExtraInfo.uei_usrID = tblUserWallets.wal_usrID
      WHERE tblUserWallets.wal_usrID = iUserID
@@ -105,6 +110,11 @@ BEGIN
            )
            )
     ;
+
+    IF ISNULL(vUserID) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:User not found';
+    END IF;
 
     IF ISNULL(ioWalletID) THEN
         SIGNAL SQLSTATE '45000'
@@ -116,7 +126,7 @@ BEGIN
             SET ioAmount = LEAST(ioAmount, GREATEST(0, vLastBalance - vMinBalance)), oMultiplier = -1;
 
         WHEN 'T' THEN -- TransferTo
-            IF vLastBalance - vNotTransferable - vMinBalance - ioAmount < 0 THEN
+            IF vLastBalance - vNotTransferable - vMinBalance - CAST(ioAmount AS SIGNED) < 0 THEN
                 SIGNAL SQLSTATE '45000'
                    SET MESSAGE_TEXT = '401:Not enough credit in wallet to transfer';
             END IF;
@@ -129,7 +139,7 @@ BEGIN
                AND tblWalletsTransactions.wltStatus = 'A'
             ;
 
-            IF MaxTransferable >0 AND vMaxTransferPerDay < ioAmount + vTodayTransfers THEN
+            IF MaxTransferable >0 AND vMaxTransferPerDay < CAST(ioAmount AS SIGNED) + vTodayTransfers THEN
                 SIGNAL SQLSTATE '45000'
                    SET MESSAGE_TEXT = '401:Amount is greater than your per day allowed transfer';
             END IF;
@@ -150,7 +160,7 @@ BEGIN
                    SET MESSAGE_TEXT = '401:IBAN not defined';
             END IF;
 
-            IF vLastBalance - vNotTransferable - vMinBalance - ioAmount < 0 THEN
+            IF vLastBalance - vNotTransferable - vMinBalance - CAST(ioAmount AS SIGNED) < 0 THEN
                 SIGNAL SQLSTATE '45000'
                    SET MESSAGE_TEXT = '401:Not enough credit in wallet to withdraw';
             END IF;
@@ -397,6 +407,7 @@ BEGIN
            tblVoucher.vchType = 'W',
            tblVoucher.vchTotalAmount = iAmount,
            tblVoucher.vchDesc = JSON_OBJECT(
+               "walletID", iWalletID,
                "desc", iDesc
            )
     ;
@@ -439,9 +450,11 @@ BEGIN
 
     -- find voucher
     SELECT vch_usrID,
-           vchTotalAmount
+           vchTotalAmount,
+           JSON_EXTRACT(vchDesc, '$.walletID')
       INTO vUserID,
-           vAmount
+           vAmount,
+           vWalletID
       FROM tblVoucher
      WHERE tblVoucher.vchID = iVoucherID
     ;
@@ -452,16 +465,16 @@ BEGIN
     END IF;
 
     -- find default wallet
-    SELECT walID
+    /*SELECT walID
       INTO vWalletID
       FROM tblUserWallets
      WHERE tblUserWallets.wal_usrID = vUserID
        AND tblUserWallets.walDefault = 1
-    ;
+    ;*/
 
     IF ISNULL(vWalletID) THEN
         SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:Default wallet not found';
+           SET MESSAGE_TEXT = '401:Target wallet not found';
     END IF;
 
     START TRANSACTION;
@@ -487,7 +500,7 @@ BEGIN
 
     UPDATE tblWalletsTransactions
        SET tblWalletsTransactions.wltStatus = 'A' -- Succeded
-     WHERE tblWalletsTransactions.wltID = LastID
+     WHERE tblWalletsTransactions.wltID = vLastID
     ;
 
     COMMIT;

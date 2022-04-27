@@ -208,11 +208,11 @@ Targoman::API::AAA::stuVoucher UserWallets::apiCREATErequestIncrease(
     return Voucher;
 }
 
-quint64 UserWallets::apiCREATErequestWithdrawal(
+quint64 UserWallets::apiPOSTrequestWithdrawal(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _amount,
     quint64 _walID,
-    const QString& _desc
+    const QString _desc
 ) {
     return this->callSP("spWithdrawal_Request", {
                             { "iWalletID", _walID },
@@ -223,13 +223,13 @@ quint64 UserWallets::apiCREATErequestWithdrawal(
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
-quint64 UserWallets::apiCREATErequestWithdrawalFor(
+quint64 UserWallets::apiPOSTrequestWithdrawalFor(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _targetUsrID,
     quint64 _amount,
-    TAPI::JSON_t _desc
+    quint64 _targetUsrID,
+    const QString _desc
 ) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:requestWithdrawal" });
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:requestWithdrawal" });
 
     return this->callSP("spWithdrawal_Request", {
                             { "iWalletID", 0 },
