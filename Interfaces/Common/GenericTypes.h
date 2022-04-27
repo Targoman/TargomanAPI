@@ -233,7 +233,6 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     }
 );
 
-//        *this = QJsonDocument::fromVariant(_value)
 #define TAPI_ADD_TYPE_QJSONDOCUMENT(_type) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT( \
     /* baseType             */ QJsonDocument, \

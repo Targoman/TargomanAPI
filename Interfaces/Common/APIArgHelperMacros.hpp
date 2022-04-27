@@ -91,9 +91,9 @@
         /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
         /* toORMValueLambda   */ [](const QVariant& _value) { \
             _namespace::_type t; \
-            qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)>>> ===========================" << _value << " -> " << t;  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)>>> ===========================" << _value << " -> " << t;*/  \
             TAPI::setFromVariant(t, _value); \
-            qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)<<< ===========================" << _value << " -> " << t;  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)<<< ===========================" << _value << " -> " << t;*/  \
             return t; \
         }, \
         /* fromORMValueLambda */ [](const QVariant& _value) { \

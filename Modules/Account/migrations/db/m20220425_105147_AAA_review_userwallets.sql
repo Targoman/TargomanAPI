@@ -646,7 +646,7 @@ BEGIN
         SET vLastID = LAST_INSERT_ID();
         IF (vLastID IS NULL) THEN
             SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '500:vLastID IS NULL';
+               SET MESSAGE_TEXT = '500:LastID IS NULL';
         END IF;
 
         UPDATE tblWalletsTransactions
