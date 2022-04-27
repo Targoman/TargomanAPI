@@ -82,9 +82,7 @@ TAPI_REGISTER_METATYPE(
     /* type               */ stuPreVoucher,
     /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
     /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher {
-//        qDebug() << "stuPreVoucher(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
-//            qDebug() << "stuPreVoucher(2.1) =================================" << _paramName << ":" << _value;
             return stuPreVoucher();
         }
 
@@ -93,19 +91,16 @@ TAPI_REGISTER_METATYPE(
 //                || _value.canConvert<double>()
             ) {
             auto ret = QJsonDocument::fromVariant(_value);
-//            qDebug() << "stuPreVoucher(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
             return stuPreVoucher().fromJson(ret.object());
         }
 
         if (_value.toString().isEmpty()) {
-//            qDebug() << "stuPreVoucher(2.3) =================================" << _paramName << ":" << _value;
             return stuPreVoucher();
         }
 
         QJsonParseError Error;
         QJsonDocument Doc;
         Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-//        qDebug() << "stuPreVoucher(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
 
         if (Error.error != QJsonParseError::NoError)
             throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());

@@ -22,10 +22,10 @@
  */
 
 #include "Voucher.h"
-#include "User.h"
-#include "Service.h"
-#include "UserWallets.h"
-#include "Payment/PaymentLogic.h"
+//#include "User.h"
+//#include "Service.h"
+//#include "UserWallets.h"
+//#include "Payment/PaymentLogic.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
@@ -69,93 +69,6 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     }
 
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
-}
-
-Targoman::API::AAA::stuVoucher Voucher::apiCREATErequestIncrease(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint32 _amount,
-    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-    QString _domain,
-    quint64 _walletID,
-    QString _paymentVerifyCallback
-) {
-    Targoman::API::AAA::stuVoucher Voucher;
-    Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walletID));
-    Voucher.Info.ToPay = _amount;
-    Voucher.Info.Summary = "Increase wallet";
-
-    Voucher.ID = /*Targoman::API::Query::*/this->Create(
-                                              Voucher::instance(),
-                                              _APICALLBOOM,
-                                              TAPI::ORMFields_t({
-                                                { tblVoucher::vch_usrID, _APICALLBOOM.getUserID() },
-//                                                { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                { tblVoucher::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                { tblVoucher::vchTotalAmount, Voucher.Info.ToPay }
-                                              }));
-
-    try {
-        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
-            //Do nothing as it will be created after information upload.
-        } else {
-            TAPI::MD5_t PaymentMD5;
-            Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
-                                      _gatewayType,
-                                      _domain,
-                                      Voucher.ID,
-                                      Voucher.Info.Summary,
-                                      Voucher.Info.ToPay,
-                                      _paymentVerifyCallback,
-                                      PaymentMD5
-                                      );
-            Voucher.PaymentMD5 = PaymentMD5;
-        }
-    } catch (...) {
-        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
-                                     SYSTEM_USER_ID,
-                                     {},
-                                     TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                                     }),
-                                     {
-                                        { tblVoucher::vchID, Voucher.ID }
-                                     });
-        throw;
-    }
-
-    return Voucher;
-}
-
-quint64 Voucher::apiCREATErequestWithdraw(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _amount,
-    quint64 _walID,
-    const QString& _desc
-) {
-    return this->callSP("spWithdrawal_Request", {
-                            { "iWalletID", _walID },
-                            { "iForUsrID", _APICALLBOOM.getUserID() },
-                            { "iByUserID", _APICALLBOOM.getUserID() },
-                            { "iAmount", _amount },
-                            { "iDesc", _desc },
-                        }).spDirectOutputs().value("oVoucherID").toULongLong();
-}
-
-quint64 Voucher::apiCREATErequestWithdrawFor(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _targetUsrID,
-    quint64 _amount,
-    TAPI::JSON_t _desc
-) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), {"AAA:RequestWithdraw"});
-
-    return this->callSP("spWithdrawal_Request", {
-                            { "iWalletID", 0 },
-                            { "iForUsrID", _targetUsrID },
-                            { "iByUserID", _APICALLBOOM.getUserID() },
-                            { "iAmount", _amount },
-                            { "iDesc", _desc },
-                        }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
 } //namespace Targoman::API::AccountModule::ORM

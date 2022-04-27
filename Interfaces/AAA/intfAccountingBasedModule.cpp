@@ -67,7 +67,6 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
 }
 
 intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
-//    Q_UNUSED(serviceAccounting);
     return ServiceRegistry.value(_serviceName);
 }
 
@@ -774,18 +773,18 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
             Found = true;
 
             //delete voucher item
-            if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool {
-                TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
-                return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
-            }) == false) { //not pending
+            if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem,
+                                        [](const QVariantMap &_userAssetInfo) -> bool {
+                                            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+                                            return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
+                                        }) == false) //not pending
                 throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
-            }
 
             //remove item
             iter = _lastPreVoucher.Items.erase(iter);
 
             //preventing ++iter
-            continue;
+            continue; //continue for computing final price
         } else
             FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
 
@@ -812,6 +811,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 
     throw exHTTPInternalServerError("item not found in pre-voucher items.");
 }
+
 /*
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
         APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,

@@ -31,35 +31,45 @@ namespace Targoman::API::AccountModule {
 
 //structures and enumes goes here
 
+//what is this?
+//TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
+//                     New = 'A',
+//                     Processed = 'P',
+//                     Removed = 'R'
+//                     )
+
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
-                     New = 'A',
-                     Processed = 'P',
-                     Removed = 'R'
+                     New      = 'N',
+                     Pending  = 'P',
+                     Payed    = 'Y',
+                     Succeded = 'A',
+                     Error    = 'E',
+                     Removed  = 'R'
                      )
 
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblWalletsTransactions{
-constexpr char Name[] = "tblWalletsTransactions";
-TARGOMAN_CREATE_CONSTEXPR(wltID);
-TARGOMAN_CREATE_CONSTEXPR(wlt_walID);
-TARGOMAN_CREATE_CONSTEXPR(wlt_vchID);
-TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
-TARGOMAN_CREATE_CONSTEXPR(wlt_vchType);
-TARGOMAN_CREATE_CONSTEXPR(wltAmount);
-TARGOMAN_CREATE_CONSTEXPR(wltStatus);
+namespace tblWalletsTransactions {
+    constexpr char Name[] = "tblWalletsTransactions";
+    TARGOMAN_CREATE_CONSTEXPR(wltID);
+    TARGOMAN_CREATE_CONSTEXPR(wlt_walID);
+    TARGOMAN_CREATE_CONSTEXPR(wlt_vchID);
+    TARGOMAN_CREATE_CONSTEXPR(wlt_vchType);
+    TARGOMAN_CREATE_CONSTEXPR(wltAmount);
+    TARGOMAN_CREATE_CONSTEXPR(wltStatus);
+    TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
 }
 
-namespace tblWalletBalances{
-constexpr char Name[] = "tblWalletBalances";
-TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
-TARGOMAN_CREATE_CONSTEXPR(wblBalance);
-TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
-TARGOMAN_CREATE_CONSTEXPR(wblSumExpense);
-TARGOMAN_CREATE_CONSTEXPR(wblSumCredit);
-TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
+namespace tblWalletBalances {
+    constexpr char Name[] = "tblWalletBalances";
+    TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
+    TARGOMAN_CREATE_CONSTEXPR(wblBalance);
+    TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
+    TARGOMAN_CREATE_CONSTEXPR(wblSumExpense);
+    TARGOMAN_CREATE_CONSTEXPR(wblSumCredit);
+    TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
 }
 #pragma GCC diagnostic pop
 

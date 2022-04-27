@@ -291,20 +291,20 @@ inline QString toCammel(const QString& _name) {
     public: \
         _typeName() { ; } \
         _typeName(const _baseType& _other) :_baseType(_other) { ; } \
-        void customFromVariant(const QVariant& _value) { _setFromVariantLambda(_value); } \
-        static _typeName fromVariant(const QVariant& _value) { \
+        void customFromVariant(const QVariant& _value, const QString &_paramName = {}) { _setFromVariantLambda(_value, _paramName); } \
+        static _typeName fromVariant(const QVariant& _value, const QString &_paramName = {}) { \
             _typeName _var; \
-            _var.customFromVariant(_value); \
+            _var.customFromVariant(_value, _paramName); \
             return _var; \
         } \
     }; \
-    inline void setFromVariant(_typeName& _storage, const QVariant& _val) { \
-        _storage.customFromVariant(_val); \
+    inline void setFromVariant(_typeName& _storage, const QVariant& _val, const QString &_paramName = {}) { \
+        _storage.customFromVariant(_val, _paramName); \
     } \
-    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val) { \
+    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val, const QString &_paramName = {}) { \
         if (_val.isValid() && _val.isNull() == false) { \
             _typeName var; \
-            var.customFromVariant(_val); \
+            var.customFromVariant(_val, _paramName); \
             NULLABLE_SET(_storage, var); \
         } else \
             NULLABLE_RESET(_storage); \

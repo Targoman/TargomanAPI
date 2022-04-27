@@ -64,7 +64,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
 //    SF_QString(pgwName),
 //    SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
 //    SF_Enum(TAPI::enuPaymentGatewayDriver, pgwDriver, TAPI::enuPaymentGatewayDriver::IranMellatBank),
-//    SF_JSON(pgwMetaInfo)
+//    SF_JSON_t(pgwMetaInfo)
 //    SF_NULLABLE_quint32(pgwTransactionFeeValue),
 //    SF_Enum(TAPI::enuPaymentGatewayTransactionFeeType::Type(pgwTransactionFeeType),
 //    SF_quint32(pgwMinRequestAmount),
@@ -139,6 +139,16 @@ private slots:
     quint32 ORMCREATE("Create a new payment gateway by priviledged user")
     bool ORMUPDATE("Update payment gateway info by priviledged user")
     bool ORMDELETE("Delete a payment gateway")
+
+    QVariantList REST_GET_OR_POST(
+        availableGatewayTypes,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint32 _amount,
+            QString _domain
+        ),
+        "get list of payment gateway types valid for amount and domain"
+    )
 };
 
 } //namespace ORM

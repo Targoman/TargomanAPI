@@ -25,7 +25,6 @@
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H
 
 #include "Classes/Defs.hpp"
-#include "ORM/PaymentGateways.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
 
@@ -39,8 +38,8 @@ TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Income         = 'I',
                      Credit         = 'C',
                      Prize          = 'Z',
-                     TransferTo     = 'T',
                      TransferFrom   = 'F',
+                     TransferTo     = 'T',
                      )
 
 namespace ORM {
@@ -50,12 +49,22 @@ namespace ORM {
 namespace tblVoucher {
     constexpr char Name[] = "tblVoucher";
     TARGOMAN_CREATE_CONSTEXPR(vchID);
-    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
     TARGOMAN_CREATE_CONSTEXPR(vchType);
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
+    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(vchID),
+        SF_quint64(vch_usrID),
+        SF_JSON_t(vchDesc),
+        SF_Enum(Targoman::API::AccountModule::enuVoucherType, vchType, Targoman::API::AccountModule::enuVoucherType::Expense),
+        SF_quint64(vchTotalAmount),
+        SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
+        SF_DateTime_t(vchCreationDateTime)
+    );
 }
 #pragma GCC diagnostic pop
 
@@ -67,45 +76,6 @@ class Voucher : public intfSQLBasedModule
 private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete a Voucher. Take note that User can just delete Vouchers with Payoff type")
-
-    Targoman::API::AAA::stuVoucher REST_CREATE(
-        requestIncrease,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint32 _amount,
-            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-            QString _domain,
-            quint64 _walletID = 0,
-            QString _paymentVerifyCallback = {}
-        ),
-        "Increase wallet balance by online payment"
-        "Set callbackURL = OFFLINE for offline payment, url for online payment"
-        "Also set walletID >0 to use specified wallet or 0 for using default wallet"
-        "When callback is set to URL you must specify payment gateway"
-    )
-
-    quint64 REST_CREATE(
-        requestWithdraw,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _amount,
-            quint64 _walID,
-            const QString& _desc = {}
-        ),
-        "Create a new withdraw request by user."
-    )
-
-    quint64 REST_CREATE(
-        requestWithdrawFor,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _targetUsrID,
-            quint64 _amount,
-            TAPI::JSON_t _desc
-        ),
-        "Create a new withdraw request for another user by priviledged user. "
-        "Description object must contain at least an string field named 'desc'"
-    )
 };
 
 } //namespace ORM

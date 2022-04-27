@@ -34,8 +34,10 @@
 #include <cstdlib>
 #include <unistd.h>
 
-using namespace Targoman::API;
+#include "Interfaces/AAA/Accounting_Defs.hpp"
 using namespace Targoman::API::AAA;
+
+using namespace Targoman::API;
 
 class testAccount : public clsBaseTest
 {
@@ -43,6 +45,13 @@ class testAccount : public clsBaseTest
 
 public:
     testAccount(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
+
+    QVariant NewUserWalletID;
+    Targoman::API::AAA::stuVoucher Voucher;
+    Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
+    QVariant OfflinePaymentClaimID;
+    Targoman::API::AAA::stuVoucher ApproveOfflinePaymentVoucher;
+    QVariant WithdrawalID;
 
 private slots:
     void initTestCase() {
@@ -54,9 +63,161 @@ private slots:
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
 //        cleanupUnitTestData();
+
+//        cleanupAll();
     }
 
-    //-------------------------------------------------------
+private:
+    /***************************************************************************************/
+    /* cleanup *****************************************************************************/
+    /***************************************************************************************/
+    void cleanupAll() {
+        QVariantMap Result;
+
+        clsDAC DAC;
+
+        try {
+            QString QueryString = R"(
+                DELETE wb
+                  FROM tblWalletBalances wb
+            INNER JOIN tblWalletsTransactions wt
+                    ON wt.wltID = wb.wbl_wltID
+            INNER JOIN tblUserWallets uw
+                    ON uw.walID = wt.wlt_walID
+            INNER JOIN tblUser u
+                    ON u.usrID = uw.wal_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE wt
+                  FROM tblWalletsTransactions wt
+            INNER JOIN tblUserWallets uw
+                    ON uw.walID = wt.wlt_walID
+            INNER JOIN tblUser u
+                    ON u.usrID = uw.wal_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE uw
+                  FROM tblUserWallets uw
+            INNER JOIN tblUser u
+                    ON u.usrID = uw.wal_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE op
+                  FROM tblOnlinePayments op
+            INNER JOIN tblVoucher vch
+                    ON vch.vchID = op.onp_vchID
+            INNER JOIN tblUser u
+                    ON u.usrID = vch.vch_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE fp
+                  FROM tblOfflinePayments fp
+            INNER JOIN tblVoucher vch
+                    ON vch.vchID = fp.ofp_vchID
+            INNER JOIN tblUser u
+                    ON u.usrID = vch.vch_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE vch
+                  FROM tblVoucher vch
+            INNER JOIN tblUser u
+                    ON u.usrID = vch.vch_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE apr
+                  FROM tblApprovalRequest apr
+            INNER JOIN tblUser u
+                    ON u.usrID = apr.apr_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE sn
+                  FROM tblActiveSessions sn
+            INNER JOIN tblUser u
+                    ON u.usrID = sn.ssn_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE u
+                  FROM tblUser u
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        try {
+            QString QueryString = R"(
+                DELETE r
+                  FROM tblRoles r
+                 WHERE LOWER(r.rolName) LIKE 'unit_test%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (...) { ; }
+
+        qDebug() << Result;
+    }
+
+private slots:
+    /***************************************************************************************/
+    /* tests *******************************************************************************/
+    /***************************************************************************************/
     void NormalizePhoneNumber() {
         try {
             QVariant Result = callUserAPI(
@@ -612,10 +773,80 @@ private slots:
         }
     }
 
-    void requestIncrease_empty_domain() {
+    /** userwallets *********************************/
+    void UserWallets_CREATE() {
+//        QT_TRY {
+            this->NewUserWalletID = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets",
+                {},
+                {
+//                    { "wal_usrID", gAdminUserID },
+                    { "walName", "my new wallet" },
+                }
+            );
+
+            QVERIFY(this->NewUserWalletID > 0);
+
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+//        } catch (std::exception &e) {
+//            QFAIL (e.what());
+//        }
+    }
+
+    void UserWallets_setAsDefault() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PATCH,
+                "Account/UserWallets/setAsDefault",
+                {},
+                {
+                    { "walID", this->NewUserWalletID },
+                }
+            );
+
+            QVERIFY(Result.toBool());
+
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+
+//    "Account/UserWallets/transfer",
+
+//    void UserWallets_transfer() {
+//        QT_TRY {
+//            QVariant Result = callUserAPI(
+//                RESTClientHelper::POST,
+//                "Account/UserWallets/transfer",
+//                {},
+//                {
+//QString _destEmailOrMobile,
+//quint32 _amount,
+//TAPI::MD5_t _pass,
+//QString _salt,
+//quint64 _fromWalID = 0
+
+//                    { "walID", this->NewUserWalletID },
+//                }
+//            );
+
+//            QVERIFY(Result.toBool());
+
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+//        } catch (std::exception &e) {
+//            QFAIL (e.what());
+//        }
+//    }
+
+    void requestIncrease_DEVTEST_empty_domain() {
         QVERIFY_EXCEPTION_THROWN(callUserAPI(
             RESTClientHelper::PUT,
-            "Account/Voucher/requestIncrease",
+            "Account/UserWallets/requestIncrease",
             {},
             {
                 { "amount", 1234 },
@@ -628,260 +859,215 @@ private slots:
         exTargomanBase);
     }
 
-    void requestIncrease_with_domain() {
+    void requestIncrease_DEVTEST_with_domain() {
         try {
+            this->Voucher.ID = 0;
+            this->Voucher.PaymentMD5 = "";
+
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
-                "Account/Voucher/requestIncrease",
+                "Account/UserWallets/requestIncrease",
                 {},
                 {
                     { "amount", 1234 },
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
-                    { "walletID", 0 },
+//                    { "walletID", 0 },
                     { "paymentVerifyCallback", "http://www.a.com" }
                 }
             );
-            qDebug() << Result;
+
+            this->Voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->Voucher.PaymentMD5.isEmpty() == false);
+
         } catch (exTargomanBase &e) {
             QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
         } catch (std::exception &e) {
             QFAIL (e.what());
         }
     }
+    void requestIncrease_DEVTEST_with_domain_approveOnlinePayment() {
+        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentMD5",     this->Voucher.PaymentMD5 },
+                        { "domain",         "this.is.domain" },
+                        { "pgResponse",     QVariantMap({
+                              { "resp_1", 1 },
+                              { "resp_2", 2 },
+                              { "resp_3", 3 },
+                          }) },
+                    }
+                );
 
-private slots:
-    /***************************************************************************************/
-    /* cleanup *****************************************************************************/
-    /***************************************************************************************/
-    void cleanupAll() {
-        QVariantMap Result;
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-        clsDAC DAC;
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
 
-        try {
-            QString QueryString = R"(
-                DELETE wb
-                  FROM tblWalletBalances wb
-            INNER JOIN tblWalletsTransactions wt
-                    ON wt.wltID = wb.wbl_wltID
-            INNER JOIN tblUserWallets uw
-                    ON uw.walID = wt.wlt_walID
-            INNER JOIN tblUser u
-                    ON u.usrID = uw.wal_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE wt
-                  FROM tblWalletsTransactions wt
-            INNER JOIN tblUserWallets uw
-                    ON uw.walID = wt.wlt_walID
-            INNER JOIN tblUser u
-                    ON u.usrID = uw.wal_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE uw
-                  FROM tblUserWallets uw
-            INNER JOIN tblUser u
-                    ON u.usrID = uw.wal_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE op
-                  FROM tblOnlinePayments op
-            INNER JOIN tblVoucher vch
-                    ON vch.vchID = op.onp_vchID
-            INNER JOIN tblUser u
-                    ON u.usrID = vch.vch_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE fp
-                  FROM tblOfflinePayments fp
-            INNER JOIN tblVoucher vch
-                    ON vch.vchID = fp.ofp_vchID
-            INNER JOIN tblUser u
-                    ON u.usrID = vch.vch_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE vch
-                  FROM tblVoucher vch
-            INNER JOIN tblUser u
-                    ON u.usrID = vch.vch_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE apr
-                  FROM tblApprovalRequest apr
-            INNER JOIN tblUser u
-                    ON u.usrID = apr.apr_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE sn
-                  FROM tblActiveSessions sn
-            INNER JOIN tblUser u
-                    ON u.usrID = sn.ssn_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE u
-                  FROM tblUser u
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        try {
-            QString QueryString = R"(
-                DELETE r
-                  FROM tblRoles r
-                 WHERE LOWER(r.rolName) LIKE 'unit_test%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
-
-        qDebug() << Result;
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
     }
-/*
-DELETE wb
-    FROM tblWalletBalances wb
-    INNER JOIN tblWalletsTransactions wt
-    ON wt.wltID = wb.wbl_wltID
-    INNER JOIN tblUserWallets uw
-    ON uw.walID = wt.wlt_walID
-    INNER JOIN tblUser u
-    ON u.usrID = uw.wal_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
 
-DELETE wt
-    FROM tblWalletsTransactions wt
-    INNER JOIN tblUserWallets uw
-    ON uw.walID = wt.wlt_walID
-    INNER JOIN tblUser u
-    ON u.usrID = uw.wal_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+    void requestIncrease_COD_with_domain() {
+        try {
+            this->Voucher.ID = 0;
+            this->Voucher.PaymentMD5 = "";
 
-DELETE uw
-    FROM tblUserWallets uw
-    INNER JOIN tblUser u
-    ON u.usrID = uw.wal_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets/requestIncrease",
+                {},
+                {
+                    { "amount", 5678 },
+                    { "gatewayType", "COD" },
+                    { "domain", "dev.Test" },
+                }
+            );
 
-DELETE op
-    FROM tblOnlinePayments op
-    INNER JOIN tblVoucher vch
-    ON vch.vchID = op.onp_vchID
-    INNER JOIN tblUser u
-    ON u.usrID = vch.vch_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+            this->Voucher.fromJson(Result.toJsonObject());
 
-DELETE fp
-    FROM tblOfflinePayments fp
-    INNER JOIN tblVoucher vch
-    ON vch.vchID = fp.ofp_vchID
-    INNER JOIN tblUser u
-    ON u.usrID = vch.vch_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+            QVERIFY(this->Voucher.ID > 0);
 
-DELETE vch
-    FROM tblVoucher vch
-    INNER JOIN tblUser u
-    ON u.usrID = vch.vch_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+    void requestIncrease_COD_with_domain_claimOfflinePayment() {
+        if (this->Voucher.ID > 0) {
+            QT_TRY {
+                this->OfflinePaymentClaimID = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/claimOfflinePayment",
+                    {},
+                    {
+                        { "vchID",          this->Voucher.ID },
+                        { "bank",           "bank mellat" },
+                        { "receiptCode",    "809" },
+                        { "receiptDate",    "2022/03/04" },
+                        { "amount",         150000 },
+                        { "note",           "this is note for offline payment" },
+                    }
+                );
 
-DELETE apr
-    FROM tblApprovalRequest apr
-    INNER JOIN tblUser u
-    ON u.usrID = apr.apr_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+                QVERIFY(this->OfflinePaymentClaimID > 0);
 
-DELETE sn
-    FROM tblActiveSessions sn
-    INNER JOIN tblUser u
-    ON u.usrID = sn.ssn_usrID
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+    void requestIncrease_COD_with_domain_approveOfflinePayment() {
+        if (this->OfflinePaymentClaimID > 0) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOfflinePayment",
+                    {},
+                    {
+                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                    }
+                );
 
-DELETE u
-    FROM tblUser u
-    WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-    OR u.usrMobile LIKE '+98999888%'
-;
+                this->ApproveOfflinePaymentVoucher.fromJson(Result.toJsonObject());
 
-DELETE r
-    FROM tblRoles r
-    WHERE LOWER(r.rolName) LIKE 'unit_test%'
-;
-*/
+                QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void requestWithdrawal() {
+        QT_TRY {
+            this->WithdrawalID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/UserWallets/requestWithdrawal",
+                {},
+                {
+                    { "amount", 12500 },
+                    { "walID", 0 },
+                    { "desc", "this is description" },
+                }
+            );
+
+            QVERIFY(this->WithdrawalID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+    void acceptWithdrawal() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/UserWallets/acceptWithdrawal",
+                {},
+                {
+                    { "voucherID", this->WithdrawalID },
+                }
+            );
+
+            QVERIFY(Result.toBool());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    //    "Account/UserWallets/requestWithdrawalFor"
+    void requestWithdrawalFor_unknownuser() {
+        this->WithdrawalID = {};
+
+        QT_TRY {
+            this->WithdrawalID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/UserWallets/requestWithdrawalFor",
+                {},
+                {
+                    { "amount", 12500 },
+                    { "targetUsrID", 5000 },
+                    { "desc", "this is description" },
+                }
+            );
+
+            QVERIFY(this->WithdrawalID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+    void requestWithdrawalFor_admin_invalid_iban() {
+        this->WithdrawalID = {};
+
+        QT_TRY {
+            this->WithdrawalID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/UserWallets/requestWithdrawalFor",
+                {},
+                {
+                    { "amount", 12500 },
+                    { "targetUsrID", gAdminUserID },
+                    { "desc", "this is description" },
+                }
+            );
+
+            QVERIFY(this->WithdrawalID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+    //    "Account/UserWallets/acceptWithdrawal"
 
 };
 

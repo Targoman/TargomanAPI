@@ -93,25 +93,18 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    SF_QString  (Service),   //QString      , Service    , QString()      , v.size() , v          , v.toString()                          ,
-    SF_quint64  (OrderID),   //quint64      , OrderID    , 0              , v        , C2DBL(v)   , static_cast<quint64>(v.toDouble())    ,
-    SF_MD5_t    (UUID),      //TAPI::MD5_t  , UUID       , QString()      , v.size() , v          , v.toString()                          ,
-    SF_QString  (Desc),      //QString      , Desc       , QString()      , v.size() , v          , v.toString()                          ,
-    SF_quint32  (UnitPrice), //quint32      , UnitPrice  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    SF_qreal    (Qty),       //qreal        , Qty        , 0              , v        , C2DBL(v)   , v.toDouble()                          ,
-    SF_quint32  (SubTotal),  //quint32      , SubTotal   , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    SF_Generic  (            //stuDiscount3 , Discount   , stuDiscount3() , v.ID>0   , v.toJson() , stuDiscount3().fromJson(v.toObject()) ,
-        /* type        */ stuDiscount3,
-        /* name        */ Discount,
-        /* def         */ stuDiscount3(),
-        /* validator   */ v.ID > 0,
-        /* fromVariant */ v.toJson(),
-        /* toVariant   */ stuDiscount3().fromJson(v.toObject())
-    ),
-    SF_quint32  (DisAmount), //quint32      , DisAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    SF_quint8   (VATPercent),//quint8       , VATPercent , 0              , v        , C2DBL(v)   , static_cast<quint8>(v.toInt())        ,
-    SF_quint32  (VATAmount), //quint32      , VATAmount  , 0              , v        , C2DBL(v)   , static_cast<quint32>(v.toDouble())    ,
-    SF_QString  (Sign)       //QString      , Sign       , QString()      , v.size() , v          , v.toString()
+    SF_QString   (Service),
+    SF_quint64   (OrderID),
+    SF_MD5_t     (UUID),
+    SF_QString   (Desc),
+    SF_quint32   (UnitPrice),
+    SF_qreal     (Qty),
+    SF_quint32   (SubTotal),
+    SF_Var_Struct(stuDiscount3, Discount, v.ID > 0),
+    SF_quint32   (DisAmount),
+    SF_quint8    (VATPercent),
+    SF_quint32   (VATAmount),
+    SF_QString   (Sign)
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemForTrustedAction,
@@ -227,12 +220,12 @@ typedef QList<stuVoucherItem> InvItems_t;
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
     SF_quint64(UserID),
     SF_Generic(
-        /* type        */ InvItems_t,
-        /* name        */ Items,
-        /* def         */ InvItems_t(),
-        /* validator   */ v.size(),
-        /* fromVariant */ [](auto v) {QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A;}(v),
-        /* toVariant   */ [](auto v) {InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L;}(v)
+        /* type              */ InvItems_t,
+        /* name              */ Items,
+        /* def               */ InvItems_t(),
+        /* validator         */ v.size(),
+        /* type 2 QJsonValue */ [](auto v) { QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A; }(v),
+        /* QJsonValue 2 type */ [](auto v) { InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L; }(v)
     ),
     SF_Struct(stuPrize, Prize, v.Desc.size()),
     SF_QString(Summary),

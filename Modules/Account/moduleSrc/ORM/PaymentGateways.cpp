@@ -22,8 +22,10 @@
  */
 
 #include "PaymentGateways.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Payment/PaymentLogic.h"
 #include "Interfaces/Helpers/URLHelper.h"
+
+using namespace Targoman::API::AccountModule::Payment;
 using namespace Targoman::API::Helpers;
 
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
@@ -118,6 +120,20 @@ bool PaymentGateways::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
 bool PaymentGateways::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+}
+
+QVariantList PaymentGateways::apiavailableGatewayTypes(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint32 _amount,
+    QString _domain
+) {
+    if (_amount == 0)
+        throw exHTTPBadRequest("amount is zero");
+
+    return PaymentLogic::findAvailableGatewayTypes(
+                _amount,
+                _domain
+                );
 }
 
 } //namespace ORM

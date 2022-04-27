@@ -94,18 +94,34 @@ private slots:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOfflinePaymentClaims {
-constexpr char Name[] = "tblOfflinePaymentClaims";
-TARGOMAN_CREATE_CONSTEXPR(ofpcID);
-TARGOMAN_CREATE_CONSTEXPR(ofpc_vchID);
-TARGOMAN_CREATE_CONSTEXPR(ofpcBank);
-TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptCode);
-TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptDate);
-TARGOMAN_CREATE_CONSTEXPR(ofpcAmount);
-TARGOMAN_CREATE_CONSTEXPR(ofpcNotes);
-TARGOMAN_CREATE_CONSTEXPR(ofpcStatus);
-TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
+    constexpr char Name[] = "tblOfflinePaymentClaims";
+    TARGOMAN_CREATE_CONSTEXPR(ofpcID);
+    TARGOMAN_CREATE_CONSTEXPR(ofpc_vchID);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcBank);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptCode);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptDate);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcAmount);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcNotes);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcStatus);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(ofpcID),
+        SF_quint64(ofpc_vchID),
+        SF_QString(ofpcBank),
+        SF_QString(ofpcReceiptCode),
+        SF_QString(ofpcReceiptDate),
+        SF_quint32(ofpcAmount),
+        SF_QString(ofpcNotes),
+        SF_Enum(Targoman::API::AccountModule::enuPaymentStatus, ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::New),
+        SF_QString(ofpcCreationDateTime),
+        SF_quint64(ofpcCreatedBy_usrID),
+        SF_quint64(ofpcUpdatedBy_usrID)
+    );
+//        SF_DateTime_t(ofpcReceiptDate),
+//        SF_DateTime_t(ofpcCreationDateTime),
 }
 #pragma GCC diagnostic pop
 
@@ -127,18 +143,34 @@ private slots:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOfflinePayments {
-constexpr char Name[] = "tblOfflinePayments";
-TARGOMAN_CREATE_CONSTEXPR(ofpID);
-TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
-TARGOMAN_CREATE_CONSTEXPR(ofpBank);
-TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
-TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
-TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
-TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
-TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
-TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+    constexpr char Name[] = "tblOfflinePayments";
+    TARGOMAN_CREATE_CONSTEXPR(ofpID);
+    TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
+    TARGOMAN_CREATE_CONSTEXPR(ofpBank);
+    TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
+    TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
+    TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
+    TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
+    TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
+    TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(ofpID),
+        SF_quint64(ofp_vchID),
+        SF_QString(ofpBank),
+        SF_QString(ofpReceiptCode),
+        SF_QString(ofpReceiptDate),
+        SF_quint32(ofpAmount),
+        SF_QString(ofpNotes),
+        SF_Enum(Targoman::API::AccountModule::enuPaymentStatus, ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending),
+        SF_QString(ofpCreationDateTime),
+        SF_quint64(ofpCreatedBy_usrID),
+        SF_quint64(ofpUpdatedBy_usrID)
+    );
+//        SF_DateTime_t(ofpReceiptDate),
+//        SF_DateTime_t(ofpCreationDateTime),
 }
 #pragma GCC diagnostic pop
 

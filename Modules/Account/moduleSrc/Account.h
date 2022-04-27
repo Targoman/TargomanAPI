@@ -295,15 +295,15 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-    QVariantList REST_GET_OR_POST(
-        gatewayTypesForFinalizeBasket,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher _preVoucher,
-            QString _domain
-        ),
-        "get list of payment gateway types valid for voucher and domain"
-    )
+//    QVariantList REST_GET_OR_POST(
+//        gatewayTypesForFinalizeBasket,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            Targoman::API::AAA::stuPreVoucher _preVoucher,
+//            QString _domain
+//        ),
+//        "get list of payment gateway types valid for voucher and domain"
+//    )
 
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
@@ -349,6 +349,15 @@ private slots:
 
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _offlinePaymentClaimID
+        ),
+        "approve Voucher by offline payment"
+    )
+
+    Targoman::API::AAA::stuVoucher REST_POST(
+        approveOfflinePayment_withBankInfo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _vchID,
