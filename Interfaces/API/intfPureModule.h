@@ -40,10 +40,10 @@
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::API::Server;
 
-#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "x-pagination-total-count"
-#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "x-pagination-page-count"
-#define RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE   "x-pagination-current-page"
-#define RESPONSE_HEADER_X_PAGINATION_PER_PAGE       "x-pagination-per-page"
+//#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "x-pagination-total-count"
+//#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "x-pagination-page-count"
+//#define RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE   "x-pagination-current-page"
+//#define RESPONSE_HEADER_X_PAGINATION_PER_PAGE       "x-pagination-per-page"
 
 /**********************************************************************\
 |** GET ***************************************************************|
