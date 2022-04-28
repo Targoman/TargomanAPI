@@ -41,31 +41,33 @@ User::User() :
     intfSQLBasedModule(
         AAASchema,
         tblUser::Name,
-        {///< ColName                       Type                            Validation                             Default    UpBy    Sort  Filter Self  Virt  PK
+        {///< ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
             //ORM_PRIMARYKEY_64 with self:true
-            { tblUser::usrID,               S(quint64),                     QFV.integer().minValue(1),             QAuto,     UPNone, true, true,  true, false, true },
-            { tblUser::usrEmail,            S(TAPI::Email_t),               QFV.emailNotFake(),                    QNull,     UPOwner },
-            { tblUser::usrName,             S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
-            { tblUser::usrFamily,           S(QString),                     QFV.unicodeAlNum().maxLenght(128),     QNull,     UPOwner },
-            { tblUser::usrGender,           S(TAPI::enuGender::Type),   QFV,                                   TAPI::enuGender::NotExpressed, UPOwner },
-            { tblUser::usrMobile,           S(TAPI::Mobile_t),              QFV,                                   QNull,     UPOwner },
-            { tblUser::usrApprovalState,    S(TAPI::enuUserApproval::Type), QFV,                                   TAPI::enuUserApproval::None },
+            { tblUser::usrID,                   S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
+            { tblUser::usrEmail,                S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
+            { tblUser::usrName,                 S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { tblUser::usrFamily,               S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { tblUser::usrGender,               S(TAPI::enuGender::Type),       QFV,                                    TAPI::enuGender::NotExpressed, UPOwner },
+            { tblUser::usrMobile,               S(TAPI::Mobile_t),              QFV,                                    QNull,      UPOwner },
+            { tblUser::usrApprovalState,        S(TAPI::enuUserApproval::Type), QFV,                                    TAPI::enuUserApproval::None },
             //{ tblUser::usrPass,
-            { tblUser::usr_rolID,           S(quint32),                     QFV.integer().minValue(1),             QRequired, UPAdmin },
-            { tblUser::usrSpecialPrivs,     S(TAPI::PrivObject_t),          QFV,                                   QNull,     UPAdmin, false, false },
-            { tblUser::usrLanguage,         S(QString),                     QFV.languageCode(),                    "fa",      UPOwner },
-            { tblUser::usrMaxSessions,      S(qint32),                      QFV.integer().betweenValues(-1, 100),  -1,        UPAdmin },
-            { tblUser::usrActiveSessions,   S(qint32),                      QFV.integer().betweenValues(-1, 1000), QInvalid,  UPNone },
-            { tblUser::usrLastLogin,        S(TAPI::DateTime_t),            QFV,                                   QInvalid,  UPNone },
-            { tblUser::usrStatus,           ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
+            { tblUser::usr_rolID,               S(quint32),                     QFV.integer().minValue(1),              QRequired,  UPAdmin },
+            { tblUser::usrSpecialPrivs,         S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPAdmin, false, false },
+            { tblUser::usrLanguage,             S(QString),                     QFV.languageCode(),                     "fa",       UPOwner },
+            { tblUser::usrEnableEmailAlerts,    S(bool),                        QFV,                                    true,       UPOwner },
+            { tblUser::usrEnableSMSAlerts,      S(bool),                        QFV,                                    true,       UPOwner },
+            { tblUser::usrMaxSessions,          S(qint32),                      QFV.integer().betweenValues(-1, 100),   -1,         UPAdmin },
+            { tblUser::usrActiveSessions,       S(qint32),                      QFV.integer().betweenValues(-1, 1000),  QInvalid,   UPNone },
+            { tblUser::usrLastLogin,            S(TAPI::DateTime_t),            QFV,                                    QInvalid,   UPNone },
+            { tblUser::usrStatus,               ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
             { ORM_INVALIDATED_AT_FIELD },
-            { tblUser::usrCreationDateTime, ORM_CREATED_ON },
-            { tblUser::usrCreatedBy_usrID,  ORM_CREATED_BY_NULLABLE },
-            { tblUser::usrUpdatedBy_usrID,  ORM_UPDATED_BY },
+            { tblUser::usrCreationDateTime,     ORM_CREATED_ON },
+            { tblUser::usrCreatedBy_usrID,      ORM_CREATED_BY_NULLABLE },
+            { tblUser::usrUpdatedBy_usrID,      ORM_UPDATED_BY },
         },
-        {///< Col                          Reference Table                        ForeignCol                    Rename LeftJoin
-            { tblUser::usr_rolID,          R(AAASchema, tblRoles::Name),          tblRoles::rolID },
-            { tblUser::Relation::ExtraInfo, { tblUser::usrID,              R(AAASchema, tblUserExtraInfo::Name),  tblUserExtraInfo::uei_usrID,  "",    true } },
+        {///< Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
+            { tblUser::usr_rolID,               R(AAASchema, tblRoles::Name),                       tblRoles::rolID },
+            { tblUser::Relation::ExtraInfo, { tblUser::usrID, R(AAASchema, tblUserExtraInfo::Name), tblUserExtraInfo::uei_usrID,    "",     true } },
             ORM_RELATION_OF_CREATOR(tblUser::usrCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUser::usrUpdatedBy_usrID),
         },
@@ -110,6 +112,8 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
             tblUser::usr_rolID,
 //            tblUser::usrSpecialPrivs,
             tblUser::usrLanguage,
+            tblUser::usrEnableEmailAlerts,
+            tblUser::usrEnableSMSAlerts,
 //            tblUser::usrMaxSessions,
             tblUser::usrActiveSessions,
             tblUser::usrLastLogin,
@@ -325,16 +329,20 @@ bool User::apiUPDATEpersonalInfo(
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
-    NULLABLE_TYPE(TAPI::enuGender::Type) _gender
+    NULLABLE_TYPE(TAPI::enuGender::Type) _gender,
+    NULLABLE_TYPE(bool) _enableEmailAlerts,
+    NULLABLE_TYPE(bool) _enableSMSAlerts
 ) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ToUpdate;
 
-    if (_name.isNull() == false)        ToUpdate.insert(tblUser::usrName, _name);
-    if (_family.isNull() == false)      ToUpdate.insert(tblUser::usrFamily, _family);
-    if (_language.isNull() == false)    ToUpdate.insert(tblUser::usrLanguage, _language);
-    if (NULLABLE_HAS_VALUE(_gender))    ToUpdate.insert(tblUser::usrGender, *_gender);
+    if (_name.isNull() == false)                    ToUpdate.insert(tblUser::usrName, _name);
+    if (_family.isNull() == false)                  ToUpdate.insert(tblUser::usrFamily, _family);
+    if (_language.isNull() == false)                ToUpdate.insert(tblUser::usrLanguage, _language);
+    if (NULLABLE_HAS_VALUE(_gender))                ToUpdate.insert(tblUser::usrGender, *_gender);
+    if (NULLABLE_HAS_VALUE(_enableEmailAlerts))     ToUpdate.insert(tblUser::usrEnableEmailAlerts, *_enableEmailAlerts ? 1 : 0);
+    if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::usrEnableSMSAlerts, *_enableSMSAlerts ? 1 : 0);
 
     if (ToUpdate.size())
         this->Update(*this,

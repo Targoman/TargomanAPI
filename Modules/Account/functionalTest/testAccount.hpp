@@ -247,6 +247,8 @@ private slots:
                                   { "mobile", "0999-888-1010" },
                                   { "signupIfNotExists", true },
                                   { "signupRole", UT_RoleName },
+                                  { "signupEnableEmailAlerts", false },
+                                  { "signupEnableSMSAlerts", false },
                                })
                           ;
 
@@ -328,11 +330,13 @@ private slots:
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVERIFY((gUserID = callUserAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
-                                            {"emailOrMobile", UT_UserEmail},
-                                            {"name", "unit"},
-                                            {"family", "test"},
-                                            {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                            {"role", UT_RoleName}
+                                            { "emailOrMobile", UT_UserEmail },
+                                            { "name", "unit" },
+                                            { "family", "test" },
+                                            { "pass", "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                            { "role", UT_RoleName },
+                                            { "enableEmailAlerts", false },
+                                            { "enableSMSAlerts", false },
                                         })
                            .toMap()
                            .value("usrID")
@@ -342,11 +346,13 @@ private slots:
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
         QVERIFY((gAdminUserID = callUserAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
-                                            {"emailOrMobile", UT_AdminUserEmail},
-                                            {"name", "admin unit"},
-                                            {"family", "test"},
-                                            {"pass", "df6d2338b2b8fce1ec2f6dda0a630eb0"},
-                                            {"role", UT_RoleName}
+                                            { "emailOrMobile", UT_AdminUserEmail },
+                                            { "name", "admin unit" },
+                                            { "family", "test" },
+                                            { "pass", "df6d2338b2b8fce1ec2f6dda0a630eb0" },
+                                            { "role", UT_RoleName },
+                                            { "enableEmailAlerts", false },
+                                            { "enableSMSAlerts", false },
                                         })
                                 .toMap()
                                 .value("usrID")

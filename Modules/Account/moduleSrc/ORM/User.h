@@ -103,7 +103,9 @@ private slots:
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
-            NULLABLE_TYPE(TAPI::enuGender::Type) _gender = {}
+            NULLABLE_TYPE(TAPI::enuGender::Type) _gender = {},
+            NULLABLE_TYPE(bool) _enableEmailAlerts = {},
+            NULLABLE_TYPE(bool) _enableSMSAlerts = {}
         ),
         "Update User personal info"
     )

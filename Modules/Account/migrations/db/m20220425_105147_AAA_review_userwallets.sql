@@ -1,5 +1,5 @@
 /* Migration File: m20220425_105147_AAA_review_userwallets.sql */
-
+/* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
 ALTER TABLE `tblWalletsTransactions`
     DROP INDEX `wltType`,

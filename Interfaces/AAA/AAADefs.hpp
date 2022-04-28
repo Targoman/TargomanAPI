@@ -69,6 +69,7 @@ namespace tblUser {
     }
 
     constexpr quint64 MinNormalUserID = 100;
+
     TARGOMAN_CREATE_CONSTEXPR(usrID);
     TARGOMAN_CREATE_CONSTEXPR(usrGender);
     TARGOMAN_CREATE_CONSTEXPR(usrName);
@@ -80,6 +81,8 @@ namespace tblUser {
     TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
     TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
     TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
+    TARGOMAN_CREATE_CONSTEXPR(usrEnableEmailAlerts);
+    TARGOMAN_CREATE_CONSTEXPR(usrEnableSMSAlerts);
     TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
     TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
     TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
