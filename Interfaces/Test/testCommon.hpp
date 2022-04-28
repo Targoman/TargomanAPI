@@ -272,17 +272,18 @@ private:
 //        DAC.execQuery("", QString("DELETE FROM %1AAA.tblRoles WHERE rolName IN(?,?)").arg(this->DBPrefix), {UT_ServiceRoleName, UT_RoleName});
 
 /*
-DELETE FROM tblWalletsTransactions;
-DELETE FROM tblWalletBalances;
-DELETE FROM tblUserWallets;
-DELETE FROM tblOnlinePayments;
-DELETE FROM tblOfflinePayments;
-DELETE FROM tblOfflinePaymentClaims;
-DELETE FROM tblVoucher;
-DELETE FROM tblApprovalRequest;
-DELETE FROM tblActiveSessions;
-DELETE FROM tblUser WHERE usrID > 100;
-DELETE FROM tblRoles WHERE LOWER(rolName) LIKE '%test%'
+DELETE FROM dev_AAA.tblWalletsTransactions;
+DELETE FROM dev_AAA.tblWalletBalances;
+DELETE FROM dev_AAA.tblUserWallets;
+DELETE FROM dev_AAA.tblOnlinePayments;
+DELETE FROM dev_AAA.tblOfflinePayments;
+DELETE FROM dev_AAA.tblOfflinePaymentClaims;
+DELETE FROM dev_AAA.tblVoucher;
+DELETE FROM dev_AAA.tblApprovalRequest;
+DELETE FROM dev_AAA.tblActiveSessions;
+DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
+DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
+DELETE FROM dev_Common.tblAlerts;
 */
     }
 };

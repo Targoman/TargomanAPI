@@ -96,29 +96,13 @@ private slots:
             QString _role = "BaseUser",
             QString _name = "",
             QString _family = "",
+            bool _enableEmailAlerts = true,
+            bool _enableSMSAlerts = true,
             TAPI::JSON_t _specialPrivs = {},
             qint8 _maxSessions = -1
         ),
         "Base method for signup with email or mobile. this method can be called just by predefined IPs"
     )
-
-    /*
-    QVariantMap REST_PUT(
-        signupByMobileOnly,
-        (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
-            TAPI::Mobile_t _mobile,
-            QString _role = "BaseUser",
-            QString _name = "",
-            QString _family = "",
-            TAPI::JSON_t _specialPrivs = {},
-            qint8 _maxSessions = -1
-        ),
-        "Base method for signup with mobile only. this method can be called just by predefined IPs"
-    )
-    */
-//    "If verifyCode is empty, a new random code is generated and sent to the user via SMS."
-//    "After the user submits this code, signupByMobile must be called again with verifyCode."
 
     TAPI::EncodedJWT_t REST_POST(
         approveEmail,
@@ -172,7 +156,9 @@ private slots:
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t _mobile,
             bool _signupIfNotExists = false,
-            QString _signupRole = "BaseUser"
+            QString _signupRole = "BaseUser",
+            bool _signupEnableEmailAlerts = true,
+            bool _signupEnableSMSAlerts = true
 //            quint32 _verifyCode = 0/* = {}*/,
 //            TAPI::MD5_t _pass = {},
 //            QString _salt = {},

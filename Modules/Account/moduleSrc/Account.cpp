@@ -284,6 +284,8 @@ QVariantMap Account::apiPUTsignup(
     QString _role,
     QString _name,
     QString _family,
+    bool _enableEmailAlerts,
+    bool _enableSMSAlerts,
     TAPI::JSON_t _specialPrivs,
     qint8 _maxSessions
 ) {
@@ -313,6 +315,8 @@ QVariantMap Account::apiPUTsignup(
             { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
             { "iMaxSessions", _maxSessions },
             { "iCreatorUserID", QVariant() },
+            { "iEnableEmailAlerts", _enableEmailAlerts ? 1 : 0 },
+            { "iEnableSMSAlerts", _enableSMSAlerts ? 1 : 0 },
         })
         .spDirectOutputs()
         .value("oUserID")
@@ -323,51 +327,7 @@ QVariantMap Account::apiPUTsignup(
         { "usrID", UserID },
     };
 }
-/*
-QVariantMap Account::apiPUTsignupByMobileOnly(
-        TAPI::Mobile_t _mobile,
-//        quint32 _verifyCode,
-//        TAPI::MD5_t _pass,
-        QString _role,
-        QString _name,
-        QString _family,
-        TAPI::JSON_t _specialPrivs,
-        qint8 _maxSessions
-    ) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
-    if (QFV.mobile().isValid(_mobile) == false)
-        throw exHTTPBadRequest("Incorrect mobile.");
-
-    _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
-
-    QFV.asciiAlNum().maxLenght(50).validate(_role);
-
-    if (_role.toLower() == "administrator" || _role.toLower() == "system" || _role.toLower() == "baseuser")
-        throw exHTTPForbidden("Selected role is not allowed to signup");
-
-    quint64 UserID = this->callSP("spSignup", {
-            { "iBy", "M" },
-            { "iLogin", _mobile },
-            { "iPass", "" },
-            { "iRole", _role },
-            { "iIP", _APICALLBOOM.getIP() },
-            { "iName", _name.isEmpty()? QVariant() : _name },
-            { "iFamily", _family.isEmpty()? QVariant() : _family },
-            { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
-            { "iMaxSessions", _maxSessions },
-            { "iCreatorUserID", QVariant() },
-        })
-        .spDirectOutputs()
-        .value("oUserID")
-        .toDouble();
-
-    return {
-        { "type", "mobile" },
-        { "usrID", UserID },
-    };
-}
-*/
 TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email,
@@ -493,7 +453,9 @@ bool Account::apiloginByMobileOnly(
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     bool _signupIfNotExists,
-    QString _signupRole
+    QString _signupRole,
+    bool _signupEnableEmailAlerts,
+    bool _signupEnableSMSAlerts
 ) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
@@ -514,6 +476,8 @@ bool Account::apiloginByMobileOnly(
                      { "iMobile", _mobile },
                      { "iSignupIfNotExists", _signupIfNotExists ? 1 : 0 },
                      { "iSignupRole", _signupRole },
+                     { "iSignupEnableEmailAlerts", _signupEnableEmailAlerts ? 1 : 0 },
+                     { "iSignupEnableSMSAlerts", _signupEnableSMSAlerts ? 1 : 0 },
                  });
 
     return true;
@@ -648,7 +612,7 @@ QString Account::apicreateForgotPasswordLink(
 
     this->callSP("spForgotPass_Request", {
                      { "iLogin", _emailOrMobile },
-                     { "iVia", Type },
+                     { "iBy", Type },
                  });
 
     return (Type == "E" ? "email" : "mobile");
@@ -702,7 +666,7 @@ bool Account::apichangePassByUUID(
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     this->callSP("spPassword_ChangeByCode", {
-                     { "iVia", Type },
+                     { "iBy", Type },
                      { "iLogin", _emailOrMobile },
                      { "iCode", _uuid },
                      { "iNewPass", _newPass },
@@ -1399,7 +1363,9 @@ QVariant Account::apiPOSTfixtureSetup(
                                         { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                         RoleName,
                                         "fixture test",
-                                        "user"
+                                        "user",
+                                        false,
+                                        false
                                        );
 
         SignupUserResult.insert("email", UserEmail);
@@ -1456,7 +1422,9 @@ QVariant Account::apiPOSTfixtureSetup(
                                                 { "df6d2338b2b8fce1ec2f6dda0a630eb0" },
                                                 RoleName,
                                                 "fixture test",
-                                                "admin"
+                                                "admin",
+                                                false,
+                                                false
                                                 );
 
         SignupAdminUserResult.insert("email", AdminUserEmail);

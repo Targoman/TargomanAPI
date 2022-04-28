@@ -19,7 +19,7 @@ CREATE TABLE `tblUnits` (
     `untCreatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL,
     PRIMARY KEY (`untID`) USING BTREE,
     INDEX `FK_tblUnits_tblDepartments` (`unt_depID`) USING BTREE,
-    CONSTRAINT `FK_tblUnits_tblDepartments` FOREIGN KEY (`unt_depID`) REFERENCES `dev_Ticketing`.`tblDepartments` (`depID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+    CONSTRAINT `FK_tblUnits_tblDepartments` FOREIGN KEY (`unt_depID`) REFERENCES `{{dbprefix}}Ticketing`.`tblDepartments` (`depID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
