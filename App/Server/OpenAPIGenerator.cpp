@@ -104,26 +104,6 @@ QJsonObject OpenAPIGenerator::retrieveJson(
     QJsonObject PathsObject;
     QJsonArray TagsArray;
 
-#ifdef QT_DEBUG
-    foreach (const QString &Key, RESTAPIRegistry::Registry.keys()) {
-        QString PathString = Key.split(" ").last();
-        QString HTTPMethod = Key.split(" ").first().toLower();
-        QStringList PKInPathStorage;
-
-        clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
-
-        qDebug().noquote().nospace()
-                << Key << endl
-                << "    ParamNames:     [" << APIObject->ParamNames.count() << "] " << APIObject->ParamNames.join(", ") << endl
-                << "    ParamTypesName: [" << APIObject->ParamTypesName.count() << "] " << APIObject->ParamTypesName.join(", ") << endl
-                << "    DefaultValues:  [" << APIObject->BaseMethod.DefaultValues.count() << "] " << APIObject->BaseMethod.DefaultValues << endl
-                << (APIObject->BaseMethod.DefaultValues.count() != APIObject->ParamNames.count()
-                   ? "    ******************** ERROR IN COUNTERS ********************"
-                   : "")
-                ;
-    }
-#endif
-
     foreach (const QString &Key, RESTAPIRegistry::Registry.keys()) {
         QString PathString = Key.split(" ").last();
         QString HTTPMethod = Key.split(" ").first().toLower();

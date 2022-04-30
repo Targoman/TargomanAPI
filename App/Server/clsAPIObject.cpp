@@ -178,17 +178,19 @@ QVariant clsAPIObject::invoke(
         if (ParamNotFound && this->ParamTypesName.at(i) == PARAM_ORMFIELDS) {
             ParamNotFound = false;
             TAPI::ORMFields_t ORMFields;
+
             foreach (const QString& Arg, _args)
                 ORMFields.insert(Arg.mid(0,Arg.indexOf('=')), parseArgValue(Arg.mid(0,Arg.indexOf('=')), QUrl::fromPercentEncoding(Arg.mid(Arg.indexOf('=') + 1).toUtf8())));
 
             foreach (auto BodyArg, _bodyArgs)
                 ORMFields.insert(BodyArg.first, parseArgValue(BodyArg.first, BodyArg.second));
+
             ArgumentValue = ORMFields;
         }
 
         if (ParamNotFound)
             foreach (const QString& Arg, _args) {
-                if (Arg.startsWith(this->ParamNames.at(i)+ '=')) {
+                if (Arg.startsWith(this->ParamNames.at(i) + '=')) {
                     ParamNotFound = false;
                     ArgumentValue = parseArgValue(this->ParamNames.at(i), QUrl::fromPercentEncoding(Arg.mid(Arg.indexOf('=') + 1).toUtf8()));
                     break;

@@ -141,7 +141,8 @@ void appTargomanAPI::slotExecute() {
 
         OpenAPIGenerator::retrieveJson();
 
-        TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
+        RESTAPIRegistry::dumpAPIs();
+
     } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);

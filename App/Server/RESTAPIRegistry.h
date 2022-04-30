@@ -62,6 +62,8 @@ public:
     static void registerRESTAPI(intfPureModule* _module, const QMetaMethod& _method);
     static QStringList registeredAPIs(const QString& _module, bool _showParams = false, bool _showTypes = false, bool _prettifyTypes = true);
 
+    static void dumpAPIs();
+
 private:
     static inline QString isValidType(int _typeID, bool _validate4Input);
     static void validateMethodInputAndOutput(const QMetaMethod& _method);
@@ -70,10 +72,10 @@ private:
     static QMap<QString, QString> extractMethods(QHash<QString, clsAPIObject*>& _registry, const QString& _module, bool _showTypes, bool _prettifyTypes);
 
 private:
-    static QHash<QString, clsAPIObject*>  Registry;
+    static QHash<QString, clsAPIObject*> Registry;
 
 #ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-    static QHash<QString, clsAPIObject*>  WSRegistry;
+    static QHash<QString, clsAPIObject*> WSRegistry;
 #endif
 
     friend class OpenAPIGenerator;
