@@ -1098,6 +1098,67 @@ quint64 Account::apiPOSTclaimOfflinePayment(
  *     operator
  *     owner
  */
+bool Account::apiPOSTrejectOfflinePayment(
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _offlinePaymentClaimID
+) {
+    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
+        .addCol(tblOfflinePaymentClaims::ofpcID)
+        .addCol(tblOfflinePaymentClaims::ofpc_vchID)
+        .addCol(tblOfflinePaymentClaims::ofpcBank)
+        .addCol(tblOfflinePaymentClaims::ofpcReceiptCode)
+        .addCol(tblOfflinePaymentClaims::ofpcReceiptDate)
+        .addCol(tblOfflinePaymentClaims::ofpcAmount)
+        .addCol(tblOfflinePaymentClaims::ofpcNotes)
+        .addCol(tblOfflinePaymentClaims::ofpcStatus)
+        .addCol(tblOfflinePaymentClaims::ofpcCreationDateTime)
+        .addCol(tblOfflinePaymentClaims::ofpcCreatedBy_usrID)
+        .addCol(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID)
+        .addCol(tblVoucher::vchID)
+        .addCol(tblVoucher::vch_usrID)
+        .addCol(tblVoucher::vchDesc)
+        .addCol(tblVoucher::vchType)
+        .addCol(tblVoucher::vchTotalAmount)
+        .addCol(tblVoucher::vchStatus)
+        .addCol(tblVoucher::vchCreationDateTime)
+        .innerJoin(tblVoucher::Name)
+        .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
+        .one()
+    );
+
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaim;
+    OfflinePaymentClaim.fromJson(PaymentInfo);
+
+    tblVoucher::DTO Voucher;
+    Voucher.fromJson(PaymentInfo);
+
+    //check operator or owner
+    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:rejectOfflinePayment" }) == false) {
+        if (Voucher.vch_usrID != _APICALLBOOM.getUserID())
+            throw exAuthorization("Voucher is not yours");
+    }
+
+    if (OfflinePaymentClaim.ofpcStatus != Targoman::API::AccountModule::enuPaymentStatus::New)
+        throw exAuthorization("Only new offline payments are allowed.");
+
+    this->Update(OfflinePaymentClaims::instance(),
+                 _APICALLBOOM,
+                 {},
+                 TAPI::ORMFields_t({
+                     { tblOfflinePaymentClaims::ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::Rejected }
+                 }),
+                 {
+                     { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                 });
+
+    return true;
+}
+
+/**
+ * @callby:
+ *     operator
+ *     owner
+ */
 Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
@@ -1125,8 +1186,10 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
     );
+
     tblOfflinePaymentClaims::DTO OfflinePaymentClaim;
     OfflinePaymentClaim.fromJson(PaymentInfo);
+
     tblVoucher::DTO Voucher;
     Voucher.fromJson(PaymentInfo);
 
@@ -1137,7 +1200,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     }
 
     if (OfflinePaymentClaim.ofpcStatus != Targoman::API::AccountModule::enuPaymentStatus::New)
-        throw exAuthorization("Only new offline payments are approved.");
+        throw exAuthorization("Only new offline payments are allowed.");
 
 //    if (ApprovalLimit > 0) {
 //        if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)

@@ -38,6 +38,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      Payed    = 'Y',
                      Succeded = 'A',
                      Error    = 'E',
+                     Rejected = 'J',
                      Removed  = 'R'
                      )
 
