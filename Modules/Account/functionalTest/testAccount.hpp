@@ -947,7 +947,7 @@ private slots:
             QFAIL (e.what());
         }
     }
-    void requestIncrease_COD_with_domain_claimOfflinePayment() {
+    void requestIncrease_COD_with_domain_claimOfflinePayment_1() {
         if (this->Voucher.ID > 0) {
             QT_TRY {
                 this->OfflinePaymentClaimID = callUserAPI(
@@ -961,6 +961,50 @@ private slots:
                         { "receiptDate",    "2022/03/04" },
                         { "amount",         150000 },
                         { "note",           "this is note for offline payment" },
+                    }
+                );
+
+                QVERIFY(this->OfflinePaymentClaimID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+    void requestIncrease_COD_with_domain_rejectOfflinePayment() {
+        if (this->OfflinePaymentClaimID > 0) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/rejectOfflinePayment",
+                    {},
+                    {
+                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                    }
+                );
+
+                QVERIFY(Result.toBool());
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+            this->OfflinePaymentClaimID = 0;
+        }
+    }
+    void requestIncrease_COD_with_domain_claimOfflinePayment_2() {
+        if (this->Voucher.ID > 0) {
+            QT_TRY {
+                this->OfflinePaymentClaimID = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/claimOfflinePayment",
+                    {},
+                    {
+                        { "vchID",          this->Voucher.ID },
+                        { "bank",           "bank mellat 2" },
+                        { "receiptCode",    "8090" },
+                        { "receiptDate",    "2022/03/04" },
+                        { "amount",         250000 },
+                        { "note",           "this is note for offline payment 2" },
                     }
                 );
 
