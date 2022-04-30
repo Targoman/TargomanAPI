@@ -34,7 +34,7 @@ class appTargomanAPI : public QObject
 
 public:
     explicit appTargomanAPI(QObject *parent = nullptr);
-
+    
 public slots:
     void slotExecute();
 };

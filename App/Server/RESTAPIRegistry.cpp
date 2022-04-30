@@ -435,24 +435,6 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
     return Methods;
 }
 
-QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showParams, bool _showTypes, bool _prettifyTypes) {
-    if (_showParams == false) {
-#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-        QStringList Methods = RESTAPIRegistry::Registry.keys();
-        Methods.append(RESTAPIRegistry::WSRegistry.keys());
-        return  Methods;
-#else
-        return  RESTAPIRegistry::Registry.keys();
-#endif
-    }
-
-    QMap<QString, QString> Methods = RESTAPIRegistry::extractMethods(RESTAPIRegistry::Registry, _module, _showTypes, _prettifyTypes);
-#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
-    Methods.unite(RESTAPIRegistry::extractMethods(RESTAPIRegistry::WSRegistry, _module, _showTypes, _prettifyTypes));
-#endif
-    return Methods.values();
-}
-
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input) {
     if (_typeID == 0 || _typeID == QMetaType::User) // || _typeID == QMetaType::User)
         return  "is not registered with Qt MetaTypes";
@@ -594,7 +576,6 @@ void RESTAPIRegistry::addRegistryEntry(
     }
 }
 
-
 int RESTAPIRegistry::getTagSeconds(const QMetaMethod& _method, const char* _type) {
     if (_method.tag() == nullptr || _method.tag()[0] == '\0')
         return 0;
@@ -616,6 +597,124 @@ int RESTAPIRegistry::getTagSeconds(const QMetaMethod& _method, const char* _type
     return 0;
 }
 
+QStringList RESTAPIRegistry::registeredAPIs(const QString& _module, bool _showParams, bool _showTypes, bool _prettifyTypes) {
+    if (_showParams == false) {
+#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
+        QStringList Methods = RESTAPIRegistry::Registry.keys();
+        Methods.append(RESTAPIRegistry::WSRegistry.keys());
+        return  Methods;
+#else
+        return  RESTAPIRegistry::Registry.keys();
+#endif
+    }
+
+    QMap<QString, QString> Methods = RESTAPIRegistry::extractMethods(RESTAPIRegistry::Registry, _module, _showTypes, _prettifyTypes);
+#ifdef TARGOMAN_API_ENABLE_WEBSOCKET
+    Methods.unite(RESTAPIRegistry::extractMethods(RESTAPIRegistry::WSRegistry, _module, _showTypes, _prettifyTypes));
+#endif
+    return Methods.values();
+}
+
+void RESTAPIRegistry::dumpAPIs()
+{
+//    TargomanInfo(5, "\n" + RESTAPIRegistry::registeredAPIs("", true, true).join("\n"));
+
+    struct stuAPIKey {
+        QString Method;
+        clsAPIObject* APIObject;
+
+        stuAPIKey() { ; }
+
+        stuAPIKey(const stuAPIKey &_other) :
+            Method(_other.Method),
+            APIObject(_other.APIObject) { ; }
+
+        stuAPIKey(QString _method, clsAPIObject* _apiObject) :
+            Method(_method),
+            APIObject(_apiObject) { ; }
+    };
+
+    QHash<QString, QHash<QString, stuAPIKey>> APIs;
+    foreach (const QString Key, RESTAPIRegistry::Registry.keys()) {
+
+        QString Name = Key.split(" ").last();
+        QString Method = Key.split(" ").first().toLower();
+        clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
+
+        APIs[Name].insert(Method, stuAPIKey(Method, APIObject));
+    }
+
+    QStringList Keys = APIs.keys();
+    Keys.sort(); //Qt::CaseSensitivity::CaseInsensitive);
+
+    int index = 1;
+    foreach (const QString Name, Keys) {
+        qDebug().noquote().nospace()
+                << "[" << Name << "]";
+
+        QStringList Methods = APIs[Name].keys();
+        Methods.sort(); //Qt::CaseSensitivity::CaseInsensitive);
+        foreach (const QString Method, Methods) {
+            stuAPIKey &API = APIs[Name][Method];
+
+            qDebug().noquote().nospace()
+                    << QString::number(index++).leftJustified(4) << ": "
+                    << Method.toUpper() << " " << Name;
+
+            if (API.APIObject->ParamTypesName.isEmpty() == false) {
+                int maxLen = 0;
+
+                for (int ParamsIndex = 0; ParamsIndex < API.APIObject->ParamTypesName.count(); ParamsIndex++) {
+                    maxLen = max(maxLen, API.APIObject->ParamTypesName[ParamsIndex].length());
+                }
+
+                for (int ParamsIndex = 0; ParamsIndex < API.APIObject->ParamTypesName.count(); ParamsIndex++) {
+                    QVariant DefVal = API.APIObject->BaseMethod.DefaultValues[ParamsIndex];
+
+//                    bool DefValIsValid = false;
+//                    QString DefValStr;
+//                    qvariant.cpp#4160:
+//                    if (DefVal.userType() != QMetaType::UnknownType) {
+//                        dbg << QMetaType::typeName(typeId) << ", ";
+//                        bool userStream = false;
+//                        bool canConvertToString = false;
+//                        if (typeId >= QMetaType::User) {
+//                            userStream = QMetaType::debugStream(dbg, constData(v.d), typeId);
+//                            canConvertToString = v.canConvert<QString>();
+//                        }
+//                        if (!userStream && canConvertToString)
+//                            dbg << v.toString();
+//                        else if (!userStream)
+//                            handlerManager[typeId]->debugStream(dbg, v);
+//                    } else {
+//                        dbg << "Invalid";
+//                    }
+
+                    qDebug().noquote().nospace()
+                            << "         "
+                            << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxLen)
+                            << " "
+                            << API.APIObject->ParamNames[ParamsIndex]
+                            << " = "
+                            << DefVal
+                            << (ParamsIndex < API.APIObject->ParamTypesName.count()-1 ? "," : "")
+                    ;
+                }
+    //                    << "    ParamTypesName: [" << API.APIObject->ParamTypesName.count() << "] " << API.APIObject->ParamTypesName.join(", ") << endl
+    //                    << "    ParamNames:     [" << API.APIObject->ParamNames.count() << "] " << API.APIObject->ParamNames.join(", ") << endl
+    //                    << "    DefaultValues:  [" << API.APIObject->BaseMethod.DefaultValues.count() << "] " << API.APIObject->BaseMethod.DefaultValues
+    //                    << (API.APIObject->BaseMethod.DefaultValues.count() != API.APIObject->ParamNames.count()
+    //                       ? "    ******************** ERROR IN COUNTERS ********************"
+    //                       : "")
+    //                    ;
+            }
+
+        }
+        qDebug() << "";
+    }
+}
+
+/****************************************************/
 Cache_t InternalCache::Cache;
 QMutex InternalCache::Lock;
 
@@ -625,7 +724,6 @@ QHash<QString, clsAPIObject*> RESTAPIRegistry::Registry;
 QHash<QString, clsAPIObject*>  RESTAPIRegistry::WSRegistry;
 #endif
 
-/****************************************************/
 intfCacheConnector::~intfCacheConnector() { ; }
 
 void intfCacheConnector::setKeyVal(const QString& _key, const QVariant& _value, qint32 _ttl) {

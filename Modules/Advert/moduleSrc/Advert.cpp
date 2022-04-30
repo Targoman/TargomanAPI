@@ -383,7 +383,7 @@ QVariant Advert::apiPOSTfixtureSetup(
             { "preVoucher",             LastPreVoucher.toJson().toVariantMap() },
             { "gatewayType",            "_DeveloperTest" },
             { "domain",                 "dev.test" },
-            { "walletID",               9988 },
+//            { "walletID",               9988 },
             { "paymentVerifyCallback",  "http://www.a.com" },
         }
     );
