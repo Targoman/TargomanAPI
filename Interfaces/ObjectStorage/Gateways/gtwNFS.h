@@ -36,7 +36,7 @@ namespace Targoman::API::ObjectStorage::Gateways {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace NFSMetaInfoJsonKey {
-TARGOMAN_CREATE_CONSTEXPR(Path);
+    TARGOMAN_CREATE_CONSTEXPR(Path);
 }
 #pragma GCC diagnostic pop
 

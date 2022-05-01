@@ -210,9 +210,11 @@ QVariant Advert::apiPOSTfixtureSetup(
     };
 
     quint32 LocationID = CreateQuery(Locations::instance())
-                         .addCol(tblLocations::locURL)
-                         .addCol(tblLocations::locPlaceCode)
-//                         .addCol(tblLocations::locStatus)
+                         .addCols({
+                                      tblLocations::locURL,
+                                      tblLocations::locPlaceCode,
+//                                      tblLocations::locStatus,
+                                  })
                          .values(LocationValues)
                          .execute(1);
 
@@ -231,27 +233,29 @@ QVariant Advert::apiPOSTfixtureSetup(
     };
 
     quint32 ProductID = CreateQuery(*this->AccountProducts)
-//                        .addCol(tblAccountProductsBase::prdID)
-                        .addCol(tblAccountProductsBase::prdCode)
-                        .addCol(tblAccountProductsBase::prdName)
-//                        .addCol(tblAccountProductsBase::prdDesc)
-//                        .addCol(tblAccountProductsBase::prdValidFromDate)
-//                        .addCol(tblAccountProductsBase::prdValidToDate)
-//                        .addCol(tblAccountProductsBase::prdValidFromHour)
-//                        .addCol(tblAccountProductsBase::prdValidToHour)
-//                        .addCol(tblAccountProductsBase::prdPrivs)
-//                        .addCol(tblAccountProductsBase::prdVAT)
-                        .addCol(tblAccountProductsBase::prdInStockQty)
-//                        .addCol(tblAccountProductsBase::prdOrderedQty)
-//                        .addCol(tblAccountProductsBase::prdReturnedQty)
-//                        .addCol(tblAccountProductsBase::prdStatus)
-                        .addCol(tblAccountProducts::prdType)
-                        .addCol(tblAccountProducts::prd_locID)
-//                        .addCol(tblAccountProducts::prdShowPerDay)
-//                        .addCol(tblAccountProducts::prdShowTotal)
-//                        .addCol(tblAccountProducts::prdClicksPerDay)
-//                        .addCol(tblAccountProducts::prdClicksPerMonth)
-//                        .addCol(tblAccountProducts::prdClicksTotal)
+                        .addCols({
+//                                     tblAccountProductsBase::prdID,
+                                     tblAccountProductsBase::prdCode,
+                                     tblAccountProductsBase::prdName,
+//                                     tblAccountProductsBase::prdDesc,
+//                                     tblAccountProductsBase::prdValidFromDate,
+//                                     tblAccountProductsBase::prdValidToDate,
+//                                     tblAccountProductsBase::prdValidFromHour,
+//                                     tblAccountProductsBase::prdValidToHour,
+//                                     tblAccountProductsBase::prdPrivs,
+//                                     tblAccountProductsBase::prdVAT,
+                                     tblAccountProductsBase::prdInStockQty,
+//                                     tblAccountProductsBase::prdOrderedQty,
+//                                     tblAccountProductsBase::prdReturnedQty,
+//                                     tblAccountProductsBase::prdStatus,
+                                     tblAccountProducts::prdType,
+                                     tblAccountProducts::prd_locID,
+//                                     tblAccountProducts::prdShowPerDay,
+//                                     tblAccountProducts::prdShowTotal,
+//                                     tblAccountProducts::prdClicksPerDay,
+//                                     tblAccountProducts::prdClicksPerMonth,
+//                                     tblAccountProducts::prdClicksTotal,
+                                 })
                         .values(ProductValues)
                         .execute(1);
 
@@ -275,32 +279,34 @@ QVariant Advert::apiPOSTfixtureSetup(
     };
 
     quint32 SaleableID = CreateQuery(*this->AccountSaleables)
-//                         .addCol(tblAccountSaleablesBase::slbID)
-                         .addCol(tblAccountSaleablesBase::slb_prdID)
-                         .addCol(tblAccountSaleablesBase::slbCode)
-                         .addCol(tblAccountSaleablesBase::slbName)
-                         .addCol(tblAccountSaleablesBase::slbDesc)
-                         .addCol(tblAccountSaleablesBase::slbType)
-//                         .addCol(tblAccountSaleablesBase::slbAvailableFromDate)
-//                         .addCol(tblAccountSaleablesBase::slbAvailableToDate)
-//                         .addCol(tblAccountSaleablesBase::slbPrivs)
-                         .addCol(tblAccountSaleablesBase::slbBasePrice)
-//                         .addCol(tblAccountSaleablesBase::slbAdditives)
-//                         .addCol(tblAccountSaleablesBase::slbProductCount)
-//                         .addCol(tblAccountSaleablesBase::slbMaxSaleCountPerUser)
-                         .addCol(tblAccountSaleablesBase::slbInStockQty)
-//                         .addCol(tblAccountSaleablesBase::slbOrderedQty)
-//                         .addCol(tblAccountSaleablesBase::slbReturnedQty)
-                         .addCol(tblAccountSaleablesBase::slbVoucherTemplate)
-//                         .addCol(tblAccountSaleablesBase::slbStatus)
-//                         .addCol(tblAccountSaleablesBase::slbCreatedBy_usrID)
-//                         .addCol(tblAccountSaleablesBase::slbCreationDateTime)
-//                         .addCol(tblAccountSaleablesBase::slbUpdatedBy_usrID)
-//                         .addCol(tblAccountSaleables::slbShowPerDay)
-//                         .addCol(tblAccountSaleables::slbShowTotal)
-//                         .addCol(tblAccountSaleables::slbClicksPerDay)
-//                         .addCol(tblAccountSaleables::slbClicksPerMonth)
-//                         .addCol(tblAccountSaleables::slbClicksTotal)
+                         .addCols({
+//                                      tblAccountSaleablesBase::slbID,
+                                      tblAccountSaleablesBase::slb_prdID,
+                                      tblAccountSaleablesBase::slbCode,
+                                      tblAccountSaleablesBase::slbName,
+                                      tblAccountSaleablesBase::slbDesc,
+                                      tblAccountSaleablesBase::slbType,
+//                                      tblAccountSaleablesBase::slbAvailableFromDate,
+//                                      tblAccountSaleablesBase::slbAvailableToDate,
+//                                      tblAccountSaleablesBase::slbPrivs,
+                                      tblAccountSaleablesBase::slbBasePrice,
+//                                      tblAccountSaleablesBase::slbAdditives,
+//                                      tblAccountSaleablesBase::slbProductCount,
+//                                      tblAccountSaleablesBase::slbMaxSaleCountPerUser,
+                                      tblAccountSaleablesBase::slbInStockQty,
+//                                      tblAccountSaleablesBase::slbOrderedQty,
+//                                      tblAccountSaleablesBase::slbReturnedQty,
+                                      tblAccountSaleablesBase::slbVoucherTemplate,
+//                                      tblAccountSaleablesBase::slbStatus,
+//                                      tblAccountSaleablesBase::slbCreatedBy_usrID,
+//                                      tblAccountSaleablesBase::slbCreationDateTime,
+//                                      tblAccountSaleablesBase::slbUpdatedBy_usrID,
+//                                      tblAccountSaleables::slbShowPerDay,
+//                                      tblAccountSaleables::slbShowTotal,
+//                                      tblAccountSaleables::slbClicksPerDay,
+//                                      tblAccountSaleables::slbClicksPerMonth,
+//                                      tblAccountSaleables::slbClicksTotal,
+                                  })
                          .values(SaleableValues)
                          .execute(1);
 
@@ -334,21 +340,23 @@ QVariant Advert::apiPOSTfixtureSetup(
     };
 
     quint32 CouponID = CreateQuery(*this->AccountCoupons)
-//                       .addCol(tblAccountCouponsBase::cpnID)
-                       .addCol(tblAccountCouponsBase::cpnCode)
-                       .addCol(tblAccountCouponsBase::cpnPrimaryCount)
-                       .addCol(tblAccountCouponsBase::cpnTotalMaxAmount)
-                       .addCol(tblAccountCouponsBase::cpnPerUserMaxCount)
-                       .addCol(tblAccountCouponsBase::cpnPerUserMaxAmount)
-                       .addCol(tblAccountCouponsBase::cpnValidFrom)
-//                       .addCol(tblAccountCouponsBase::cpnExpiryTime)
-                       .addCol(tblAccountCouponsBase::cpnAmount)
-                       .addCol(tblAccountCouponsBase::cpnAmountType)
-//                       .addCol(tblAccountCouponsBase::cpnMaxAmount)
-                       .addCol(tblAccountCouponsBase::cpnSaleableBasedMultiplier)
-//                       .addCol(tblAccountCouponsBase::cpnTotalUsedCount)
-//                       .addCol(tblAccountCouponsBase::cpnTotalUsedAmount)
-//                       .addCol(tblAccountCouponsBase::cpnStatus)
+                       .addCols({
+//                                    tblAccountCouponsBase::cpnID,
+                                    tblAccountCouponsBase::cpnCode,
+                                    tblAccountCouponsBase::cpnPrimaryCount,
+                                    tblAccountCouponsBase::cpnTotalMaxAmount,
+                                    tblAccountCouponsBase::cpnPerUserMaxCount,
+                                    tblAccountCouponsBase::cpnPerUserMaxAmount,
+                                    tblAccountCouponsBase::cpnValidFrom,
+//                                    tblAccountCouponsBase::cpnExpiryTime,
+                                    tblAccountCouponsBase::cpnAmount,
+                                    tblAccountCouponsBase::cpnAmountType,
+//                                    tblAccountCouponsBase::cpnMaxAmount,
+                                    tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+//                                    tblAccountCouponsBase::cpnTotalUsedCount,
+//                                    tblAccountCouponsBase::cpnTotalUsedAmount,
+//                                    tblAccountCouponsBase::cpnStatus,
+                                })
                        .values(CouponValues)
                        .execute(1);
 

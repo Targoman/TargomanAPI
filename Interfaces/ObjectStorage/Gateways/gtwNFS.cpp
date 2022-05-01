@@ -31,11 +31,11 @@ using namespace Targoman::API::Common;
 namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwNFS::storeFile(
-        const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
-    ) {
+    const TAPI::JSON_t &_metaInfo,
+    const QString &_fileName,
+    const QString &_fileUUID,
+    const QString &_fullFileName
+) {
     QString StoragePath = _metaInfo[NFSMetaInfoJsonKey::Path].toString();
 
     QDir FullPath(StoragePath);

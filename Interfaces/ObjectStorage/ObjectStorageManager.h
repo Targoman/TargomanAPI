@@ -106,13 +106,13 @@ private:
         quint16 MaxItemsCount = 100;
 
         stuProcessQueueParams(
-                quint64 _currentUserID,
-                Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-                Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
-                Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-                quint64 _uploadedFileID = 0,
-                quint16 _maxItemsCount = 100
-            ) :
+            quint64 _currentUserID,
+            Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+            Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+            Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+            quint64 _uploadedFileID = 0,
+            quint16 _maxItemsCount = 100
+        ) :
             CurrentUserID(_currentUserID),
             UploadFiles(_uploadFiles),
             UploadQueue(_uploadQueue),

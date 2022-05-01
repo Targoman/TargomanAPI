@@ -168,9 +168,9 @@ class intfUploadFiles : public intfSQLBasedModule
 
 public:
     intfUploadFiles(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
 
     struct stuObjectStorageConfigs
     {
@@ -179,6 +179,7 @@ public:
         stuObjectStorageConfigs(const stuObjectStorageConfigs &_other) :
             TempLocalStoragePath(_other.TempLocalStoragePath)
         { ; }
+
         stuObjectStorageConfigs(const QString &_localStoragePath) :
             TempLocalStoragePath(_localStoragePath)
         { ; }
@@ -195,9 +196,9 @@ class intfUploadQueue : public intfSQLBasedModule
 
 public:
     intfUploadQueue(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
 };
 
 class intfUploadGateways : public intfSQLBasedModule
@@ -206,15 +207,15 @@ class intfUploadGateways : public intfSQLBasedModule
 
 public:
     intfUploadGateways(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
 
 private slots:
     QVariant ORMGET("Get object storage gateway information")
     quint32 ORMCREATE("Create a new object storage gateway by priviledged user")
     bool ORMUPDATE("Update object storage gateway info by priviledged user")
-    bool ORMDELETE("Delete a object storage gateway")
+    bool ORMDELETE("Delete an object storage gateway")
 };
 
 } //namespace Targoman::API::ObjectStorage::ORM
@@ -243,7 +244,7 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
     virtual intfUploadFiles::stuObjectStorageConfigs getObjectStorageConfigs() const { \
         return intfUploadFiles::stuObjectStorageConfigs( \
             _module::ObjectStorage::TempLocalStoragePath.value() \
@@ -260,7 +261,7 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
 }; \
 class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
 { \
@@ -272,15 +273,15 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
 };
 
 //put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
 #define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
-    QScopedPointer<UploadFiles>     _UploadFiles;       \
-    QScopedPointer<UploadQueue>     _UploadQueue;       \
-    QScopedPointer<UploadGateways>  _UploadGateways;    \
+    QScopedPointer<UploadFiles>     _UploadFiles;    \
+    QScopedPointer<UploadQueue>     _UploadQueue;    \
+    QScopedPointer<UploadGateways>  _UploadGateways; \
 public: \
     struct ObjectStorage { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/ObjectStorage/%2").arg(TARGOMAN_M2STR(_module), _name); } \
