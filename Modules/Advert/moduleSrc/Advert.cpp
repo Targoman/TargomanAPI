@@ -82,7 +82,7 @@ Advert::Advert() :
         &AccountUserAssets::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
-    ) {
+) {
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 

@@ -32,6 +32,8 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+#include "Interfaces/ObjectStorage/Gateways/gtwNFS.h"
+#include "Interfaces/ObjectStorage/Gateways/gtwAWSS3.h"
 using namespace Targoman::API::ObjectStorage;
 
 #include "Interfaces/Helpers/RESTClientHelper.h"
@@ -109,7 +111,8 @@ quint64 Ticketing::insertTicket(
                                                  UploadFiles::instance(),
                                                  UploadQueue::instance(),
                                                  UploadGateways::instance(),
-                                                 _file
+                                                 _file,
+                                                 "tickets"
                                                  );
                     if (UploadedFileID > 0)
                         QueryCreateAttachments.values(QVariantMap({
@@ -214,6 +217,63 @@ QVariant Ticketing::apiPOSTfixtureSetup(
     if (_random.isEmpty() == false)
         Result.insert("Random", _random);
 
+//    clsDAC DAC;
+/*
+    //-- upload gateways
+    DBManager::clsDACResult ugwData = this->execQuery(R"(
+            SELECT ugwType AS type,
+                   COUNT(*) AS cnt
+              FROM tblUploadGateways
+             WHERE ugwName LIKE '%fixture%'
+          GROUP BY ugwType
+    )");
+    QJsonArray ugwArray = ugwData.toJson(false).array();
+    QVariantMap UploadGatewaysRows;
+    foreach (auto ugwRow, ugwArray) {
+        UploadGatewaysRows.insert(ugwRow["type"].toString(), ugwRow["cnt"].toVariant());
+    }
+
+    if (UploadGatewaysRows.contains(QChar(enuUploadGatewayType::NFS)) == false) {
+        auto res = CreateQuery(UploadGateways::instance())
+                .addCols({
+                             tblUploadGateways::ugwName,
+                             tblUploadGateways::ugwType,
+                             tblUploadGateways::ugwMetaInfo,
+                })
+                .values({
+                            { tblUploadGateways::ugwName, "fixture NFS 1" },
+                            { tblUploadGateways::ugwType, enuUploadGatewayType::NFS },
+                            { tblUploadGateways::ugwMetaInfo, QVariantMap({
+                                { Gateways::NFSMetaInfoJsonKey::Path, ".../ticketing" },
+                            })},
+                        })
+                .execute(_APICALLBOOM.getUserID())
+                ;
+        Result.insert("NFS", res);
+    }
+
+    if (UploadGatewaysRows.contains(QChar(enuUploadGatewayType::AWSS3)) == false) {
+        auto res = CreateQuery(UploadGateways::instance())
+                .addCols({
+                             tblUploadGateways::ugwName,
+                             tblUploadGateways::ugwType,
+                             tblUploadGateways::ugwMetaInfo,
+                })
+                .values({
+                            { tblUploadGateways::ugwName, "fixture S3 1" },
+                            { tblUploadGateways::ugwType, enuUploadGatewayType::AWSS3 },
+                            { tblUploadGateways::ugwMetaInfo, QVariantMap({
+                                  { Gateways::AWSS3MetaInfoJsonKey::Bucket, "dev.tapi-ticketing" },
+                                  { Gateways::AWSS3MetaInfoJsonKey::EndpointUrl, "https://TEST-S3.DOM" },
+                                  { Gateways::AWSS3MetaInfoJsonKey::SecretKey, "0" },
+                                  { Gateways::AWSS3MetaInfoJsonKey::AccessKey, "1" },
+                            })},
+                        })
+                .execute(_APICALLBOOM.getUserID())
+                ;
+        Result.insert("S3", res);
+    }
+*/
     //-- newMessage
     QVariant res = RESTClientHelper::callAPI(
         _APICALLBOOM,

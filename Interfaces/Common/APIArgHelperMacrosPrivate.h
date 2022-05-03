@@ -298,10 +298,10 @@ inline QString toCammel(const QString& _name) {
             return _var; \
         } \
     }; \
-    inline void setFromVariant(_typeName& _storage, const QVariant& _val, const QString &_paramName = {}) { \
+    inline void setFromVariant(_typeName& _storage, const QVariant& _val, const QString &_paramName = "") { \
         _storage.customFromVariant(_val, _paramName); \
     } \
-    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val, const QString &_paramName = {}) { \
+    inline void setFromVariant(NULLABLE_TYPE(_typeName)& _storage, const QVariant& _val, const QString &_paramName = "") { \
         if (_val.isValid() && _val.isNull() == false) { \
             _typeName var; \
             var.customFromVariant(_val, _paramName); \
@@ -318,7 +318,7 @@ inline QString toCammel(const QString& _name) {
         /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant { \
             return _namespace::_enum::toStr(_value); \
         }, \
-        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_enum::Type { \
+        /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_enum::Type { \
             QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
             if (_namespace::_enum::options().contains(_val.toString())) \
                 return _namespace::_enum::toEnum(_val.toString()); \
@@ -326,7 +326,7 @@ inline QString toCammel(const QString& _name) {
                 try { return _namespace::_enum::toEnum(_val.toString(), true); } \
                 catch (...) { \
                     throw exHTTPBadRequest(QString("%1(%2) is not a valid %3") \
-                        .arg(_paramName.size() ? _paramName.constData() : _val.toString()) \
+                        .arg(_paramName) \
                         .arg(_val.toString()) \
                         .arg(QString(TARGOMAN_M2STR(_enum)).startsWith("enu") ? QString(TARGOMAN_M2STR(_enum)).mid(3) : QString(TARGOMAN_M2STR(_enum))) \
                     ); \
@@ -439,14 +439,15 @@ inline QString toCammel(const QString& _name) {
 /************************************************************/
 #define INTERNAL_TAPI_DECLARE_METATYPE_ENUM(_namespace, _enum) \
     TAPI_DECLARE_METATYPE(_namespace::_enum::Type); \
-namespace TAPI { \
-    inline void setFromVariant(_namespace::_enum::Type& _storage, const QVariant& _val) { \
-        _storage = _namespace::_enum::toEnum(_val.toString()); \
-    } \
-    inline void setFromVariant(NULLABLE_TYPE(_namespace::_enum::Type)& _storage, const QVariant& _val) { \
-        if (_val.isValid() && _val.isNull() == false) \
+    namespace TAPI { \
+        inline void setFromVariant(_namespace::_enum::Type& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
             _storage = _namespace::_enum::toEnum(_val.toString()); \
-    } \
-}
+        } \
+        inline void setFromVariant(NULLABLE_TYPE(_namespace::_enum::Type)& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
+            _storage = NULLABLE_NULL_VALUE; \
+            if (_val.isValid() && _val.isNull() == false) \
+                _storage = _namespace::_enum::toEnum(_val.toString()); \
+        } \
+    }
 
 #endif // APIARGHELPERMACROSPRIVATE_H

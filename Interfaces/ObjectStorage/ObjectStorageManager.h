@@ -78,7 +78,8 @@ public:
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const TAPI::Files_t &_files
+        const TAPI::Files_t &_files,
+        const QString &_path = {}
     );
 
     static quint64 saveFile(
@@ -86,7 +87,8 @@ public:
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const TAPI::stuFileInfo &_file
+        const TAPI::stuFileInfo &_file,
+        QString _path = {}
     );
 
 //    static Targoman::API::Helpers::stuSaveFileResult saveFile(
@@ -125,11 +127,12 @@ private:
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);
 
     static bool storeFile(
-        const enuUploadGatewayType::Type &_storageType,
+        const NULLABLE_TYPE(enuUploadGatewayType::Type) &_storageType,
         const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
+//        quint64 _ownerUserID,
+        const QString &_fullFileName,
+        const QString &_path,
+        const QString &_fileName
     );
 };
 

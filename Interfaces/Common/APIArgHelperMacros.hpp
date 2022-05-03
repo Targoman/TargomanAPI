@@ -84,7 +84,7 @@
             _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "toVariantLambda", _value); \
             return _value; \
         }, \
-        /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> _type { \
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
             _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
             return _type::fromVariant(_value); \
         }, \
@@ -150,40 +150,62 @@
     INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum)
 
 /************************************************************/
-#define SF_Generic(_type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType) _type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType
-#define SF_Enum(_type, _name, _def)     _type::Type, _name, _def, v, _type::toStr(v), static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
-#define SF_Struct(_type, _name, ...)    INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
+#define SF_Generic(_type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType) \
+    _type, \
+    _name, \
+    _def, \
+    _validator, \
+    _typeToQJsonValue, \
+    _qJsonValueToType
 
+#define SF_Struct(_type, _name, ...) INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
 #define SF_Var_Struct(_type, _name, _validator) \
-    SF_Generic( \
-        /* type              */ _type, \
-        /* name              */ _name, \
-        /* def               */ _type(), \
-        /* validator         */ _validator, \
-        /* type 2 QJsonValue */ v.toJson(), \
-        /* QJsonValue 2 type */ _type().fromJson(v.toObject()) \
-    )
+    /* type              */ _type, \
+    /* name              */ _name, \
+    /* def               */ _type(), \
+    /* validator         */ _validator, \
+    /* type 2 QJsonValue */ v.toJson(), \
+    /* QJsonValue 2 type */ _type().fromJson(v.toObject())
 
-///TODO: complete this and test with stuPaymentGateway and tblVoucher::DTO
+#define SF_Enum(_type, _name, _def) \
+    /* type              */ _type::Type, \
+    /* name              */ _name, \
+    /* def               */ _def, \
+    /* validator         */ v, \
+    /* type 2 QJsonValue */ _type::toStr(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> _type::Type { _type::Type t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
+//static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
+#define SF_NULLABLE_Enum(_type, _name) \
+    /* type              */ NULLABLE_TYPE(_type::Type), \
+    /* name              */ _name, \
+    /* def               */ NULLABLE_NULL_VALUE, \
+    /* validator         */ v==v, \
+    /* type 2 QJsonValue */ [](NULLABLE_TYPE(_type::Type) v) -> QJsonValue { \
+        if (NULLABLE_IS_NULL(v)) \
+            return QJsonValue(); \
+        return QVariant(NULLABLE_GET(v).toString()).toJsonValue(); \
+    }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> NULLABLE_TYPE(_type::Type) { \
+        NULLABLE_TYPE(_type::Type) t; \
+        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+        return t; \
+    }(v)
+
 #define SF_JSON_t(_name) \
-    SF_Generic( \
-        /* type              */ TAPI::JSON_t, \
-        /* name              */ _name, \
-        /* def               */ TAPI::JSON_t(), \
-        /* validator         */ v.isEmpty() == false, \
-        /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
-        /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { TAPI::JSON_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v) \
-    )
+    /* type              */ TAPI::JSON_t, \
+    /* name              */ _name, \
+    /* def               */ TAPI::JSON_t(), \
+    /* validator         */ v.isEmpty() == false, \
+    /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { TAPI::JSON_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
 
 #define SF_DateTime_t(_name) \
-    SF_Generic( \
-        /* type              */ TAPI::DateTime_t, \
-        /* name              */ _name, \
-        /* def               */ TAPI::DateTime_t(), \
-        /* validator         */ v.isValid(), \
-        /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
-        /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { TAPI::DateTime_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v) \
-    )
+    /* type              */ TAPI::DateTime_t, \
+    /* name              */ _name, \
+    /* def               */ TAPI::DateTime_t(), \
+    /* validator         */ v.isValid(), \
+    /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { TAPI::DateTime_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
 
 //                                                  _type,                  _name, _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
 #define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
@@ -221,7 +243,7 @@
 
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
     QT_TRY { \
-        TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName)); \
+        TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName), #_tableFieldName); \
     } QT_CATCH (const std::exception &exp) { \
         TargomanDebug(5, "*** SET_FIELD_FROM_VARIANT_MAP *** ERROR: fieldName:" << #_tableFieldName << exp.what()); \
         QT_RETHROW; \
@@ -255,6 +277,7 @@
 #define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
 #define NULLABLE_TYPE(_type) std::optional<_type>
 #define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
+#define NULLABLE_VALUE(_value) *_value
 #define NULLABLE_GET(_value) (_value.has_value() ? *_value : QVariant())
 #define NULLABLE_GET_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
 #define NULLABLE_SET(_var, _value) (_var = _value)

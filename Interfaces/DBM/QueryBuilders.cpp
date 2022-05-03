@@ -2975,10 +2975,10 @@ CreateQuery& CreateQuery::options_ignore() {
 \***********************/
 CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
 //    if (this->Data->Values.length())
-//        throw new exQueryBuilder("Columns must be defined before values");
+//        throw exQueryBuilder("Columns must be defined before values");
 
 //    if (this->Data->Select != nullptr)
-//        throw new exQueryBuilder("Columns must be defined before select query");
+//        throw exQueryBuilder("Columns must be defined before select query");
 
     foreach (auto Col, _cols)
         this->addCol(Col);
@@ -2987,10 +2987,10 @@ CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
 
 CreateQuery& CreateQuery::addCol(const QString& _col) {
 //    if (this->Data->Values.length())
-//        throw new exQueryBuilder("Columns must be defined before values");
+//        throw exQueryBuilder("Columns must be defined before values");
 
 //    if (this->Data->Select != nullptr)
-//        throw new exQueryBuilder("Columns must be defined before select query");
+//        throw exQueryBuilder("Columns must be defined before select query");
 
     this->Data->Cols.append(_col);
     return *this;
@@ -3001,10 +3001,10 @@ CreateQuery& CreateQuery::addCol(const QString& _col) {
 CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
 
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before values");
+        throw exQueryBuilder("Columns must be defined before values");
 
     if (this->Data->Select.isValid())
-        throw new exQueryBuilder("Select query is not empty");
+        throw exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_oneRecordValues);
 //    qDebug() << "----------------1:" << _oneRecordValues;
@@ -3014,10 +3014,10 @@ CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
 }
 CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues) {
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before values");
+        throw exQueryBuilder("Columns must be defined before values");
 
     if (this->Data->Select.isValid())
-        throw new exQueryBuilder("Select query is not empty");
+        throw exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_multipleRecordValues);
 
@@ -3028,10 +3028,10 @@ CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues
 \***********************/
 CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery) {
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before select query");
+        throw exQueryBuilder("Columns must be defined before select query");
 
     if (this->Data->Values.length())
-        throw new exQueryBuilder("Values is not empty");
+        throw exQueryBuilder("Values is not empty");
 
     this->Data->Select = _selectQuery;
 

@@ -113,9 +113,9 @@ class gtwAWSS3 : public intfObjectStorageGateway
 public:
     static bool storeFile(
         const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
+        const QString &_fullFileName,
+        const QString &_path,
+        const QString &_fileName
     );
 };
 

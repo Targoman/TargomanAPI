@@ -37,7 +37,7 @@ using namespace Targoman::API::TicketingModule;
 //    /* namespace          */ Targoman::API::TicketingModule,
 //    /* type               */ stuTicketScope,
 //    /* toVariantLambda    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-//    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuTicketScope {
+//    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuTicketScope {
 //        if (_value.isValid() == false)
 //            return stuTicketScope();
 

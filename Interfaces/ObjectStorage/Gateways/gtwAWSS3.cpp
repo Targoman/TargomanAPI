@@ -36,9 +36,9 @@ namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwAWSS3::storeFile(
     const TAPI::JSON_t &_metaInfo,
-    const QString &_fileName,
-    const QString &_fileUUID,
-    const QString &_fullFileName
+    const QString &_fullFileName,
+    const QString &_path,
+    const QString &_fileName
 ) {
     QString Bucket = _metaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
     QString EndpointUrl = _metaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
@@ -51,13 +51,13 @@ bool gtwAWSS3::storeFile(
     S3::Model::PutObjectRequest Request;
 
     Request.SetBucket(Bucket.toStdString());
-    Request.SetKey(QString("%1_%2").arg(_fileUUID).arg(_fileName).toStdString());
+    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
 
     //----------------------------------------
-    std::shared_ptr<Aws::IOStream> InputData =
-            Aws::MakeShared<Aws::FStream>("SampleAllocationTag",
-                                          _fullFileName.toStdString().c_str(),
-                                          std::ios_base::in | std::ios_base::binary);
+    std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
+                QString("SampleAllocationTag_%1").arg(_path).toStdString().c_str(),
+                _fullFileName.toStdString().c_str(),
+                std::ios_base::in | std::ios_base::binary);
 
     Request.SetBody(InputData);
 
@@ -69,9 +69,20 @@ bool gtwAWSS3::storeFile(
 //    if (_region.isEmpty() == false)
 //        S3ClientConfig.region = _region.toStdString();
 
-    S3ClientConfig.endpointOverride = EndpointUrl.toStdString();
+    S3ClientConfig.httpRequestTimeoutMs = 1000;
+    S3ClientConfig.requestTimeoutMs = 1000;
+    S3ClientConfig.connectTimeoutMs = 1000;
 
-    S3::S3Client S3Client(AWSCredentials, S3ClientConfig);
+    S3ClientConfig.endpointOverride = EndpointUrl.toStdString();
+//    S3ClientConfig.enableHostPrefixInjection = false;
+//    S3ClientConfig.enableEndpointDiscovery = false;
+
+    S3::S3Client S3Client(
+                AWSCredentials,
+                S3ClientConfig,
+                Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never,
+                /* useVirtualAddressing */ false
+                );
 
     S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
 

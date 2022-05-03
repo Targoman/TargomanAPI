@@ -37,80 +37,61 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayS
 namespace Targoman::API::ObjectStorage::ORM {
 
 namespace Private {
+
 void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info) {
-    //Upload Queue
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uquID                  , _info, tblUploadQueue);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uqu_uflID              , _info, tblUploadQueue);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uqu_ugwID              , _info, tblUploadQueue);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uquStatus              , _info, tblUploadQueue);
-    //Upload File
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflID                  , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileName            , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileUUID            , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflSize                , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflFileType            , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflMimeType            , _info, tblUploadFiles);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflLocalFullFileName   , _info, tblUploadFiles);
-    ///TODO: bug at this line:
-//    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, uflStatus              , _info, tblUploadFiles);
-    //Upload Gateway
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwID                  , _info, tblUploadGateways);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwType                , _info, tblUploadGateways);
-//    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwBucket              , _info, tblUploadGateways);
-//    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwEndpointUrl         , _info, tblUploadGateways);
-//    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwSecretKey           , _info, tblUploadGateways);
-//    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwAccessKey           , _info, tblUploadGateways);
+    QJsonObject JsonInfo = QJsonObject::fromVariantMap(_info);
 
-
-    QVariant v = _info.value(tblUploadGateways::ugwMetaInfo);
-    TAPI::setFromVariant(this->ugwMetaInfo, _info.value(tblUploadGateways::ugwMetaInfo));
-
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwMetaInfo            , _info, tblUploadGateways);
-
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwCreatedFilesCount   , _info, tblUploadGateways);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwCreatedFilesSize    , _info, tblUploadGateways);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwLastActionTime      , _info, tblUploadGateways);
-    SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(this->, ugwStatus              , _info, tblUploadGateways);
+    this->UploadFiles.fromJson(JsonInfo);
+    this->UploadQueue.fromJson(JsonInfo);
+    this->UploadGateways.fromJson(JsonInfo);
 }
+
 } //namespace Private
 
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
 intfUploadFiles::intfUploadFiles(
-        const QString &_schema,
-        const QString &_name
-    ) :
+    const QString &_schema,
+    const QString &_name
+) :
     intfSQLBasedModule(
         _schema,
         _name,
         tblUploadFiles::Name,
-        {///< ColName                                       Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
-            { tblUploadFiles::uflID,                        ORM_PRIMARYKEY_64 },
-            { tblUploadFiles::uflFileName,                  S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflFileUUID,                  S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflSize,                      S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUploadFiles::uflFileType,                  S(QString),             QFV,                        QNull,      UPNone },
-            { tblUploadFiles::uflMimeType,                  S(QString),             QFV,                        QNull,      UPNone },
-            { tblUploadFiles::uflLocalFullFileName,         S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUploadFiles::uflStatus,                    ORM_STATUS_FIELD(Targoman::API::ObjectStorage::ORM::enuUploadFileStatus, Targoman::API::ObjectStorage::ORM::enuUploadFileStatus::New) },
-            { tblUploadFiles::uflCreationDateTime,          ORM_CREATED_ON },
-            { tblUploadFiles::uflCreatedBy_usrID,           ORM_CREATED_BY },
-            { tblUploadFiles::uflUpdatedBy_usrID,           ORM_UPDATED_BY },
+        {///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            { tblUploadFiles::uflID,                ORM_PRIMARYKEY_64 },
+            { tblUploadFiles::uflPath,              S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflOriginalFileName,  S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflCounter,           S(quint32),             QFV,                        QNull,      UPNone },
+            { tblUploadFiles::uflStoredFileName,    S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflSize,              S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploadFiles::uflFileType,          S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploadFiles::uflMimeType,          S(QString),             QFV,                        QNull,      UPNone },
+            { tblUploadFiles::uflLocalFullFileName, S(QString),             QFV,                        QRequired,  UPNone },
+            { tblUploadFiles::uflStatus,            ORM_STATUS_FIELD(Targoman::API::ObjectStorage::ORM::enuUploadFileStatus, Targoman::API::ObjectStorage::ORM::enuUploadFileStatus::New) },
+            { tblUploadFiles::uflCreationDateTime,  ORM_CREATED_ON },
+            { tblUploadFiles::uflCreatedBy_usrID,   ORM_CREATED_BY },
+            { tblUploadFiles::uflUpdatedBy_usrID,   ORM_UPDATED_BY },
         },
         {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(tblUploadFiles::uflCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadFiles::uflUpdatedBy_usrID),
         }
-    ) { ; }
+) { ; }
+
+QVariant intfUploadFiles::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+}
 
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
 intfUploadQueue::intfUploadQueue(
-        const QString &_schema,
-        const QString &_name
-    ) :
+    const QString &_schema,
+    const QString &_name
+) :
     intfSQLBasedModule(
         _schema,
         _name,
@@ -119,6 +100,9 @@ intfUploadQueue::intfUploadQueue(
             { tblUploadQueue::uquID,                ORM_PRIMARYKEY_64 },
             { tblUploadQueue::uqu_uflID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { tblUploadQueue::uqu_ugwID,            S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblUploadQueue::uquLockedAt,          S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
+            { tblUploadQueue::uquLastTryAt,         S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
+            { tblUploadQueue::uquStoredAt,          S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
             { tblUploadQueue::uquStatus,            ORM_STATUS_FIELD(Targoman::API::ObjectStorage::ORM::enuUploadQueueStatus, Targoman::API::ObjectStorage::ORM::enuUploadQueueStatus::New) },
             { tblUploadQueue::uquCreationDateTime,  ORM_CREATED_ON },
             { tblUploadQueue::uquCreatedBy_usrID,   ORM_CREATED_BY },
@@ -130,26 +114,28 @@ intfUploadQueue::intfUploadQueue(
             ORM_RELATION_OF_CREATOR(tblUploadQueue::uquCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadQueue::uquUpdatedBy_usrID),
         }
-    ) { ; }
+) { ; }
+
+QVariant intfUploadQueue::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+}
 
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
 intfUploadGateways::intfUploadGateways(
-        const QString &_schema,
-        const QString &_name
-    ) :
+    const QString &_schema,
+    const QString &_name
+) :
     intfSQLBasedModule(
         _schema,
         _name,
         tblUploadGateways::Name,
         {///< ColName                                   Type                        Validation                          Default     UpBy    Sort  Filter Self  Virt   PK
             { tblUploadGateways::ugwID,                 ORM_PRIMARYKEY_32 },
+            { tblUploadGateways::ugwName,               S(QString),                 QFV.maxLenght(50),                  QRequired,  UPAdmin },
             { tblUploadGateways::ugwType,               S(Targoman::API::ObjectStorage::ORM::enuUploadGatewayType::Type), QFV,         QRequired,  UPAdmin },
-//            { tblUploadGateways::ugwBucket,             S(QString),                 QFV.unicodeAlNum().maxLenght(128),  QRequired,  UPAdmin },
-//            { tblUploadGateways::ugwEndpointUrl,        S(QString),                 QFV.unicodeAlNum().maxLenght(512),  QRequired,  UPAdmin },
-//            { tblUploadGateways::ugwSecretKey,          S(QString),                 QFV.unicodeAlNum().maxLenght(128),  QRequired,  UPAdmin },
-//            { tblUploadGateways::ugwAccessKey,          S(QString),                 QFV.unicodeAlNum().maxLenght(128),  QRequired,  UPAdmin },
             { tblUploadGateways::ugwMetaInfo,           S(TAPI::JSON_t),            QFV,                                QNull,      UPAdmin },
             // conditions
             { tblUploadGateways::ugwAllowedFileTypes,   S(QString),                 QFV.unicodeAlNum().maxLenght(512),  QNull,      UPAdmin },
@@ -174,7 +160,7 @@ intfUploadGateways::intfUploadGateways(
             ORM_RELATION_OF_CREATOR(tblUploadGateways::ugwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(tblUploadGateways::ugwUpdatedBy_usrID),
         }
-    ) { ; }
+) { ; }
 
 QVariant intfUploadGateways::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));

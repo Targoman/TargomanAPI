@@ -23,6 +23,7 @@
 
 #include <QMap>
 #include <QMutex>
+#include <QTextStream>
 
 #include "RESTAPIRegistry.h"
 #include "APICache.hpp"
@@ -649,17 +650,25 @@ void RESTAPIRegistry::dumpAPIs()
 
     int index = 1;
     foreach (const QString Name, Keys) {
+        bool IsLastAPI = (Name == Keys.last());
+
         qDebug().noquote().nospace()
-                << "[" << Name << "]";
+                << "│" << endl
+                << (IsLastAPI ? "└" : "├") << "── "
+                << Name;
 
         QStringList Methods = APIs[Name].keys();
         Methods.sort(); //Qt::CaseSensitivity::CaseInsensitive);
         foreach (const QString Method, Methods) {
             stuAPIKey &API = APIs[Name][Method];
 
+            bool IsLastMethod = (Method == Methods.last());
+
             qDebug().noquote().nospace()
-                    << QString::number(index++).leftJustified(4) << ": "
-                    << Method.toUpper() << " " << Name;
+                    << (IsLastAPI ? " " : "│") << "   "
+                    << (IsLastMethod ? "└" : "├") << "── "
+                    << QString::number(index++) << ") "
+                    << Method.toUpper(); // << " " << Name;
 
             if (API.APIObject->ParamTypesName.isEmpty() == false) {
                 int maxLen = 0;
@@ -690,8 +699,12 @@ void RESTAPIRegistry::dumpAPIs()
 //                        dbg << "Invalid";
 //                    }
 
+                    bool IsLastParam = (ParamsIndex == API.APIObject->ParamTypesName.count()-1);
+
                     qDebug().noquote().nospace()
-                            << "         "
+                            << (IsLastAPI ? " " : "│") << "   "
+                            << (IsLastMethod ? " " : "│") << "   "
+                            << (IsLastParam ?  "└" : "├") << "── "
                             << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxLen)
                             << " "
                             << API.APIObject->ParamNames[ParamsIndex]
@@ -710,7 +723,6 @@ void RESTAPIRegistry::dumpAPIs()
             }
 
         }
-        qDebug() << "";
     }
 }
 

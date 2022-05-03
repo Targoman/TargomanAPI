@@ -77,10 +77,10 @@ QString renewExpiredJWT(
     /*OUT*/ bool &_isRenewed
 ) {
     clsJWT JWT(_JWTPayload);
-    QString SessionKey =  JWT.session();
-    QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
 
-    makeAAADAC(DAC);
+    QString SessionKey =  JWT.session().trimmed();
+    if (SessionKey.isEmpty())
+        throw exHTTPUnauthorized("Session key not provided in jwt");
 
     //check session
     QString Qry = R"(
@@ -94,6 +94,7 @@ QString renewExpiredJWT(
             ON tblUser.usrID = tblActiveSessions.ssn_usrID
          WHERE ssnKey=?
 )";
+    makeAAADAC(DAC);
     QJsonDocument Result = DAC.execQuery({}, Qry, { SessionKey }).toJson(true);
 
     if (Result.object().isEmpty())
@@ -138,6 +139,7 @@ QString renewExpiredJWT(
     }
 
     //-- else: renew -----
+    QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
     _isRenewed = true;
     quint32 Duration = JWT.expireAt() - JWT.issuedAt();
     QJsonObject UserInfo = DAC.callSP({},

@@ -112,12 +112,12 @@ OTHER_FILES += \
     Test/testCommon.hpp \
     migrations/.gitkeep \
     migrations/accounting/.gitkeep \
-    migrations/accounting/db/* \
-    migrations/accounting/local/* \
+    migrations/accounting/db/*.sql \
+    migrations/accounting/local/*.sh \
     migrations/accounting/local/.migrations \
     migrations/objectstorage/.gitkeep \
-    migrations/objectstorage/db/* \
-    migrations/objectstorage/local/* \
+    migrations/objectstorage/db/*.sql \
+    migrations/objectstorage/local/*.sh \
     migrations/objectstorage/local/.migrations
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \

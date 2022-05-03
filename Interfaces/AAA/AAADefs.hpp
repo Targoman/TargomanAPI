@@ -64,6 +64,7 @@ TARGOMAN_CREATE_CONSTEXPR(usrID);
 
 namespace tblUser {
     constexpr char Name[] = "tblUser";
+
     namespace Relation {
         constexpr char ExtraInfo[] = "extrainfo";
     }

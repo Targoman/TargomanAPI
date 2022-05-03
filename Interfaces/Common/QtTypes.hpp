@@ -63,9 +63,13 @@
 
 #define DEFINE_SETFROMVARIANT_METHOD_ON_COMPLEXITY_Complex(_baseType)  \
 namespace TAPI { \
-    inline void setFromVariant(_baseType& _storage, const QVariant& _val) { _storage = _val.value<_baseType>(); } \
-    inline void setFromVariant(NULLABLE_TYPE(_baseType)& _storage, const QVariant& _val) { \
-        if (_val.isValid() && _val.isNull() == false) _storage = _val.value<_baseType>(); \
+    inline void setFromVariant(_baseType& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
+        _storage = _val.value<_baseType>(); \
+    } \
+    inline void setFromVariant(NULLABLE_TYPE(_baseType)& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
+        _storage = NULLABLE_NULL_VALUE; \
+        if (_val.isValid() && _val.isNull() == false) \
+            _storage = _val.value<_baseType>(); \
     } \
 }
 
@@ -189,13 +193,19 @@ namespace Targoman::API::Common { \
     } \
 } \
 namespace TAPI { \
-    inline void setFromVariant(_numericType& _storage, const QVariant& _val) { \
-        bool Result;_storage = static_cast<_numericType>(_val._convertor(&Result)); \
-        if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: %2").arg(_val.toString()).arg(#_numericType)); \
+    inline void setFromVariant(_numericType& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
+        bool Result; \
+        _storage = static_cast<_numericType>(_val._convertor(&Result)); \
+        if (!Result) \
+            throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for %2:%3").arg(_val.toString()).arg(_paramName).arg(#_numericType)); \
     } \
-    inline void setFromVariant(NULLABLE_TYPE(_numericType)& _storage, const QVariant& _val) { \
-        bool Result = true; if (_val.isValid() && _val.isNull() == false) _storage = static_cast<_numericType>(_val._convertor(&Result)); \
-        if (!Result) throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for base type: NULLABLE<%1>").arg(_val.toString()).arg(#_numericType)); \
+    inline void setFromVariant(NULLABLE_TYPE(_numericType)& _storage, const QVariant& _val, Q_DECL_UNUSED const QString& _paramName = "") { \
+        _storage = NULLABLE_NULL_VALUE; \
+        bool Result = true; \
+        if (_val.isValid() && _val.isNull() == false) \
+            _storage = static_cast<_numericType>(_val._convertor(&Result)); \
+        if (!Result) \
+            throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for %2:NULLABLE<%3>").arg(_val.toString()).arg(_paramName).arg(#_numericType)); \
     } \
     inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val) { \
         qDebug() << "toJsonValue(?)" << NULLABLE_GET_OR_DEFAULT(_val, 99999999); \

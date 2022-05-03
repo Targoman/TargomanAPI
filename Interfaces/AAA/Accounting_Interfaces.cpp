@@ -42,7 +42,7 @@ TAPI_REGISTER_METATYPE(
 //        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
         return _value.toJson().toVariantMap();
     },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuVoucherItem {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
 //        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
 //            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
@@ -81,7 +81,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuPreVoucher,
     /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuPreVoucher {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
         if (_value.isValid() == false) {
             return stuPreVoucher();
         }
@@ -122,7 +122,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItemForTrustedAction,
     /* toVariantLambda    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuVoucherItemForTrustedAction {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
     //        qDebug() << "stuVoucherItemForTrustedAction(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
     //            qDebug() << "stuVoucherItemForTrustedAction(2.1) =================================" << _paramName << ":" << _value;

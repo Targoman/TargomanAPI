@@ -1,5 +1,6 @@
 #!/bin/bash
-#Migration File: m20220501_164741_Ticketing_mark_objectstorage_db_schema_creation.sh
+# Migration File: m20220501_164741_Ticketing_mark_objectstorage_db_schema_creation.sh
+# use $@ for arguments passed from migration runner
 
 if [ $# -ge 1 ]; then
   case $1 in

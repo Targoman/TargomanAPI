@@ -30,7 +30,7 @@
 
 namespace Targoman::API::AccountModule {
 
-//structures and enumes goes here
+//enumes goes here
 
 TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      New      = 'N',
@@ -41,6 +41,14 @@ TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      Rejected = 'J',
                      Removed  = 'R'
                      )
+
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
+
+namespace Targoman::API::AccountModule {
+
+//structures goes here
 
 struct stuOnlinePayment
 {
@@ -66,17 +74,18 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOnlinePayments {
-constexpr char Name[] = "tblOnlinePayments";
-TARGOMAN_CREATE_CONSTEXPR(onpID);
-TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
-TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
-TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
-TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
-TARGOMAN_CREATE_CONSTEXPR(onpAmount);
-TARGOMAN_CREATE_CONSTEXPR(onpResult);
-TARGOMAN_CREATE_CONSTEXPR(onpStatus);
-TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
+    constexpr char Name[] = "tblOnlinePayments";
+
+    TARGOMAN_CREATE_CONSTEXPR(onpID);
+    TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
+    TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
+    TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
+    TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
+    TARGOMAN_CREATE_CONSTEXPR(onpAmount);
+    TARGOMAN_CREATE_CONSTEXPR(onpResult);
+    TARGOMAN_CREATE_CONSTEXPR(onpStatus);
+    TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 }
 #pragma GCC diagnostic pop
 
@@ -96,6 +105,7 @@ private slots:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOfflinePaymentClaims {
     constexpr char Name[] = "tblOfflinePaymentClaims";
+
     TARGOMAN_CREATE_CONSTEXPR(ofpcID);
     TARGOMAN_CREATE_CONSTEXPR(ofpc_vchID);
     TARGOMAN_CREATE_CONSTEXPR(ofpcBank);
@@ -145,6 +155,7 @@ private slots:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOfflinePayments {
     constexpr char Name[] = "tblOfflinePayments";
+
     TARGOMAN_CREATE_CONSTEXPR(ofpID);
     TARGOMAN_CREATE_CONSTEXPR(ofp_vchID);
     TARGOMAN_CREATE_CONSTEXPR(ofpBank);
@@ -188,7 +199,5 @@ private slots:
 /*****************************************************************/
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
