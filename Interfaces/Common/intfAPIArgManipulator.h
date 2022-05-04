@@ -132,7 +132,7 @@ public:
 
 } //namespace Common
 
-extern void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator);
+//extern void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator);
 } //namespace Targoman::API
 
 #endif // TAPI_INTFAPIARGMANIPULATOR_H

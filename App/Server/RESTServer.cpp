@@ -180,6 +180,7 @@ QStringList RESTServer::registeredAPIs(bool _showParams, bool _showTypes, bool _
     return RESTAPIRegistry::registeredAPIs("", _showParams, _showTypes, _prettifyTypes);
 }
 
+/*
 void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator) {
 //    TargomanInfo(9, "registering User Defined Type: (" << _typeName << ")");
 
@@ -187,6 +188,7 @@ void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipu
 
     gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - TAPI_BASE_USER_DEFINED_TYPEID, _argManipulator);
 }
+*/
 
 bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _peerPort) {
     enuIPBlackListStatus::Type IPBlackListStatus = enuIPBlackListStatus::Unknown;
@@ -210,8 +212,8 @@ RESTServer::RESTServer() :
 } //namespace Server
 
 /***********************************************************************************************/
-void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator) {
-    Server::RESTServer::instance().registerUserDefinedType(_typeName, _argManipulator);
-}
+//void registerUserDefinedType(const char* _typeName, intfAPIArgManipulator* _argManipulator) {
+//    Server::RESTServer::instance().registerUserDefinedType(_typeName, _argManipulator);
+//}
 
 } //namespace Targoman::API

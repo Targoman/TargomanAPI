@@ -21,6 +21,9 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
+#include "GenericTypes.h"
+#include "tmplAPIArg.h"
+
 #include <QRegularExpression>
 #include <QUrl>
 #include <QJsonObject>
@@ -31,7 +34,6 @@
 #include "base.h"
 
 #include "intfAPIArgManipulator.h"
-#include "GenericTypes.h"
 #include "HTTPExceptions.hpp"
 
 #include "Interfaces/DBM/clsORMField.h"
@@ -41,8 +43,12 @@ using namespace TAPI;
 using namespace Targoman::API;
 using namespace Targoman::API::Common;
 
-QList<intfAPIArgManipulator*> Server::gOrderedMetaTypeInfo;
-QList<intfAPIArgManipulator*> Server::gUserDefinedTypesInfo;
+namespace Targoman::API::Server {
+
+QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
+} // namespace Targoman::API::Server
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,

@@ -178,6 +178,29 @@ protected:
     friend clsSelectQueryData;
 };
 
+class DBExpressionCase;
+
+class DBExpressionCaseWhen {
+public:
+    DBExpressionCaseWhen(DBExpressionCase *_parent);
+    DBExpressionCase& then(const QString &_then) const;
+
+protected:
+    DBExpressionCase *Parent;
+};
+
+class DBExpressionCase {
+public:
+    DBExpressionCase(const QString &_case = {});
+    const DBExpressionCaseWhen when(const QString &_when);
+    DBExpressionCase& else_(const QString &_else);
+    operator DBExpression() const;
+
+protected:
+    QString Buffer;
+    friend class DBExpressionCaseWhen;
+};
+
 /***************************************************************************************/
 class clsColSpecsData;
 

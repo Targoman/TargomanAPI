@@ -7,13 +7,14 @@
 #include <optional>
 using namespace std;
 
-#include "Interfaces/AAA/Accounting_Interfaces.h"
-using namespace Targoman::API::AAA;
+//#include "Interfaces/AAA/Accounting_Interfaces.h"
+//using namespace Targoman::API::AAA;
 
+#include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/DBM/QueryBuilders.h"
 using namespace Targoman::API::DBM;
 
-#include "Interfaces/API/intfSQLBasedModule.h"
+//#include "Interfaces/API/intfSQLBasedModule.h"
 
 using namespace Targoman;
 
@@ -1692,6 +1693,32 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 //        QString Demangled = Targoman::Common::demangle(Name.toStdString().c_str());
 //        qDebug() << Name << Demangled;
 //    }
+
+    void test_case_1() {
+        auto v = DBExpressionCase()
+                 .when("a")
+                 .then("b")
+                 .when("c")
+                 .then("d")
+                 .else_("e")
+                 .operator DBExpression()
+                 .toString();
+        qDebug() << v;
+        QVERIFY(v == "CASE WHEN a THEN b WHEN c THEN d ELSE e END");
+    }
+
+    void test_case_2() {
+        auto v = DBExpressionCase("ccc")
+                 .when("a")
+                 .then("b")
+                 .when("c")
+                 .then("d")
+                 .else_("e")
+                 .operator DBExpression()
+                 .toString();
+        qDebug() << v;
+        QVERIFY(v == "CASE ccc WHEN a THEN b WHEN c THEN d ELSE e END");
+    }
 
 };
 

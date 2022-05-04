@@ -70,8 +70,6 @@ struct ServerConfigs
     };
 };
 
-constexpr  quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 3;
-
 extern TAPI::stuStatistics gServerStats;
 
 } //namespace Targoman::API::Server

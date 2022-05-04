@@ -274,6 +274,40 @@ DBExpression DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _i
 }
 
 /***************************************************************************************/
+/* DBExpressionCase ********************************************************************/
+/***************************************************************************************/
+DBExpressionCaseWhen::DBExpressionCaseWhen(DBExpressionCase *_parent) :
+    Parent(_parent)
+{ ; }
+
+DBExpressionCase& DBExpressionCaseWhen::then(const QString &_then) const {
+    this->Parent->Buffer = this->Parent->Buffer + " THEN " + _then;
+    return *this->Parent;
+}
+
+/***************************************************************************************/
+DBExpressionCase::DBExpressionCase(const QString &_case) :
+    Buffer(_case)
+{ ; }
+
+const DBExpressionCaseWhen DBExpressionCase::when(const QString &_when) {
+    if (this->Buffer.isEmpty())
+        this->Buffer = "WHEN " + _when;
+    else
+        this->Buffer = this->Buffer + " WHEN " + _when;
+    return DBExpressionCaseWhen(this);
+}
+
+DBExpressionCase& DBExpressionCase::else_(const QString &_else) {
+    this->Buffer = this->Buffer + " ELSE " + _else;
+    return *this;
+}
+
+DBExpressionCase::operator DBExpression() const {
+    return DBExpression::VALUE(QString("CASE %1 END").arg(this->Buffer));
+}
+
+/***************************************************************************************/
 /* clsColSpecs *************************************************************************/
 /***************************************************************************************/
 class clsColSpecsData : public QSharedData

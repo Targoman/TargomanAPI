@@ -475,7 +475,19 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
 
         .innerJoin(SelectQuery(_uploadQueue)
                    .addCol(tblUploadQueue::uqu_uflID) //, "_q_uflID")
-                   .addCol(DBExpression::VALUE(QString("ANY_VALUE(%1)").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
+                   .addCol(DBExpressionCase()
+                           .when("a")
+                           .then("b")
+                           .when("c")
+                           .then("d")
+                           .else_("e")
+                           , uflFullFileUrl)
+
+
+
+
+
+//                           VALUE(QString("ANY_VALUE(%1)").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
                    .innerJoin(tblUploadGateways::Name)
                    .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored })
                    .groupBy(tblUploadQueue::uqu_uflID)
