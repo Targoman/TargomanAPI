@@ -356,6 +356,10 @@ inline QString toCammel(const QString& _name) {
 #define INTERNAL_V2DBL(v) v.toDouble()
 //#define INTERNAL_V2double(v) INTERNAL_V2DBL(v)
 
+#define INTERNAL_C2bool(v)      static_cast<bool>(v)
+#define INTERNAL_V2bool(v)      static_cast<bool>(v.toDouble())
+#define INTERNAL_N2bool(_value) INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(bool, _value)
+
 #define INTERNAL_V2U8(v) static_cast<quint8>(v.toDouble())
 #define INTERNAL_V2uint8(v) INTERNAL_V2U8(v)
 #define INTERNAL_V2U16(v) static_cast<quint16>(v.toDouble())

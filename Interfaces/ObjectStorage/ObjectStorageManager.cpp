@@ -48,63 +48,6 @@ using namespace qhttp;
 
 namespace Targoman::API::ObjectStorage {
 
-QString ObjectStorageManager::getFileUrl(
-    const quint64 _currentUserID,
-    Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
-    Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-    const quint64 _uploadedFileID
-) {
-    //if not stored yet, return local http server url that serves uflLocalFullFileName
-}
-
-void ObjectStorageManager::applyGetFileUrlInQuery(
-    SelectQuery &_query,
-    Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue
-//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-//        const QString &_foreignTableName,
-//        const QString &_foreignTableUploadedFileIDFieldName
-) {
-    Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
-//    Targoman::API::DBM::clsTable* TBL_uploadQueue = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadQueue);
-
-    /*
-     * https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html#:~:text=If%20the%20ONLY_FULL_GROUP_BY%20SQL%20mode,are%20functionally%20dependent%20on%20them.:
-     *  -> You can achieve the same effect without disabling ONLY_FULL_GROUP_BY by using ANY_VALUE() to refer to the nonaggregated column.
-     */
-    _query
-        .innerJoin(TBL_uploadFiles->name())
-        .addCols({
-                    tblUploadFiles::uflID,
-                    tblUploadFiles::uflPath,
-                    tblUploadFiles::uflOriginalFileName,
-                    tblUploadFiles::uflSize,
-                    tblUploadFiles::uflFileType,
-                    tblUploadFiles::uflMimeType,
-                    tblUploadFiles::uflLocalFullFileName,
-                    tblUploadFiles::uflStatus,
-                    tblUploadFiles::uflCreationDateTime,
-                    tblUploadFiles::uflCreatedBy_usrID,
-                    tblUploadFiles::uflUpdatedBy_usrID,
-                 })
-
-        .innerJoin(SelectQuery(_uploadQueue)
-                   .addCol(tblUploadQueue::uqu_uflID) //, "_q_uflID")
-                   .addCol(DBExpression::VALUE(QString("ANY_VALUE(%1)").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
-                   .innerJoin(tblUploadGateways::Name)
-                   .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored })
-                   .groupBy(tblUploadQueue::uqu_uflID)
-                   ,
-                   "tmpQueue",
-                   clsCondition("tmpQueue", tblUploadQueue::uqu_uflID,
-                                enuConditionOperator::Equal,
-                                TBL_uploadFiles->name(), tblUploadFiles::uflID)
-                   )
-        .addCol(QString("tmpQueue.%1").arg(uflFullFileUrl), uflFullFileUrl)
-    ;
-}
-
 QVariantMap ObjectStorageManager::saveFiles(
     const quint64 _currentUserID,
     intfUploadFiles &_uploadFiles,
@@ -173,6 +116,9 @@ quint64 ObjectStorageManager::saveFile(
 
         _path = StrOwnerID + "/" + _path;
     }
+    else
+        _path = StrOwnerID;
+
     FullTempPath = FullPathDir.absolutePath();
 
     //get mime type
@@ -223,8 +169,7 @@ quint64 ObjectStorageManager::saveFile(
         if (UploadedFileID > 0) {
             try {
                 _uploadFiles.DeleteByPks(_uploadFiles, _currentUserID, QString::number(UploadedFileID));
-
-            }  catch (...) { ; }
+            } catch (...) { ; }
         }
 
         throw;
@@ -233,7 +178,7 @@ quint64 ObjectStorageManager::saveFile(
     //trigger async upload to storage(s)
     try {
         if (QueueRowsCount > 0) {
-            TargomanDebug(5, "before queue ObjectStorageManager::processQueue(" << UploadedFileID << ")");
+            TargomanDebug(5, "before queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
@@ -244,7 +189,7 @@ quint64 ObjectStorageManager::saveFile(
                                         UploadedFileID,
                                         QueueRowsCount
                                     ));
-            TargomanDebug(5, "after queue ObjectStorageManager::processQueue(" << UploadedFileID << ")");
+            TargomanDebug(5, "after queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
 
 #ifdef QT_DEBUG
 //            bool rrr = ret.result();
@@ -267,45 +212,85 @@ quint64 ObjectStorageManager::saveFile(
 bool ObjectStorageManager::processQueue(
     const stuProcessQueueParams &_processQueueParams
 ) {
-    TargomanDebug(5, "ObjectStorageManager::processQueue(" << _processQueueParams.UploadedFileID << ")");
+    TargomanDebug(5, "ObjectStorageManager::processQueue(fileID: " << _processQueueParams.UploadedFileID << ")");
 
     _processQueueParams.UploadQueue.prepareFiltersList();
 
     SelectQuery Query = SelectQuery(_processQueueParams.UploadQueue)
         .addCols({
+                     //tblUploadQueue::*
                      tblUploadQueue::uquID,
                      tblUploadQueue::uqu_uflID,
                      tblUploadQueue::uqu_ugwID,
+                     tblUploadQueue::uquLockedAt,
+                     tblUploadQueue::uquLastTryAt,
+                     tblUploadQueue::uquStoredAt,
                      tblUploadQueue::uquStatus,
+                     tblUploadQueue::uquCreationDateTime,
+                     tblUploadQueue::uquCreatedBy_usrID,
+                     tblUploadQueue::uquUpdatedBy_usrID,
+                     //tblUploadFiles::*
                      tblUploadFiles::uflID,
-                     tblUploadFiles::uflOriginalFileName,
-                     tblUploadFiles::uflStoredFileName,
                      tblUploadFiles::uflPath,
+                     tblUploadFiles::uflOriginalFileName,
+                     tblUploadFiles::uflCounter,
+                     tblUploadFiles::uflStoredFileName,
                      tblUploadFiles::uflSize,
                      tblUploadFiles::uflFileType,
                      tblUploadFiles::uflMimeType,
                      tblUploadFiles::uflLocalFullFileName,
                      tblUploadFiles::uflStatus,
+                     tblUploadFiles::uflCreationDateTime,
                      tblUploadFiles::uflCreatedBy_usrID,
+                     tblUploadFiles::uflUpdatedBy_usrID,
+                     //tblUploadGateways::*
                      tblUploadGateways::ugwID,
+                     tblUploadGateways::ugwName,
                      tblUploadGateways::ugwType,
+                     tblUploadGateways::ugwBucket,
+                     tblUploadGateways::ugwEndpointUrl,
+                     tblUploadGateways::ugwEndpointIsVirtualHosted,
                      tblUploadGateways::ugwMetaInfo,
+                     tblUploadGateways::ugwAllowedFileTypes,
+                     tblUploadGateways::ugwAllowedMimeTypes,
+                     tblUploadGateways::ugwAllowedMinFileSize,
+                     tblUploadGateways::ugwAllowedMaxFileSize,
+                     tblUploadGateways::ugwMaxFilesCount,
+                     tblUploadGateways::ugwMaxFilesSize,
                      tblUploadGateways::ugwCreatedFilesCount,
                      tblUploadGateways::ugwCreatedFilesSize,
+                     tblUploadGateways::ugwDeletedFilesCount,
+                     tblUploadGateways::ugwDeletedFilesSize,
                      tblUploadGateways::ugwLastActionTime,
                      tblUploadGateways::ugwStatus,
+                     tblUploadGateways::ugwCreationDateTime,
+                     tblUploadGateways::ugwCreatedBy_usrID,
+                     tblUploadGateways::ugwUpdatedBy_usrID,
                  })
         .innerJoinWith(tblUploadQueue::Relation::File)
         .innerJoinWith(tblUploadQueue::Relation::Gateway)
+        .andWhere(clsCondition({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::New })
+                  .orCond(clsCondition({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Error })
+                          .andCond({ tblUploadQueue::uquLastTryAt, enuConditionOperator::Less,
+                                     DBExpression::DATE_SUB(DBExpression::NOW(), 10, enuDBExpressionIntervalUnit::MINUTE) })
+                          )
+                  )
+        .orderBy(tblUploadQueue::uquCreationDateTime)
     ;
 
     if (_processQueueParams.UploadedFileID > 0)
-        Query.andWhere({ tblUploadQueue::uqu_uflID, enuConditionOperator::Equal, _processQueueParams.UploadedFileID })
-             .andWhere({ tblUploadQueue::uquStatus, enuConditionOperator::In,
-                         "'" + QStringList({ QChar(enuUploadQueueStatus::New), QChar(enuUploadQueueStatus::Uploading) }).join("','") + "'" })
+        Query
+                .andWhere({ tblUploadQueue::uqu_uflID, enuConditionOperator::Equal, _processQueueParams.UploadedFileID })
+//                .andWhere({ tblUploadQueue::uquStatus, enuConditionOperator::In,
+//                            "'" + QStringList({ QChar(enuUploadQueueStatus::New), QChar(enuUploadQueueStatus::Error) }).join("','") + "'" })
         ;
     else
-        Query.andWhere({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::New });
+        Query
+                .andWhere(clsCondition({ tblUploadQueue::uquLockedAt, enuConditionOperator::Null })
+                          .orCond({ tblUploadQueue::uquLockedAt, enuConditionOperator::Less,
+                                    DBExpression::DATE_SUB(DBExpression::NOW(), 1, enuDBExpressionIntervalUnit::HOUR) })
+                         )
+        ;
 
     QVariantList QueueItems;
 
@@ -316,31 +301,33 @@ bool ObjectStorageManager::processQueue(
     }
 
     if (QueueItems.isEmpty()) {
-        if (_processQueueParams.UploadedFileID > 0)
-            UpdateQuery(_processQueueParams.UploadFiles)
-                    .setPksByPath(_processQueueParams.UploadedFileID)
-                    .set(tblUploadFiles::uflStatus, enuUploadFileStatus::New)
-                    .execute(_processQueueParams.CurrentUserID);
+//        if (_processQueueParams.UploadedFileID > 0)
+//            UpdateQuery(_processQueueParams.UploadFiles)
+//                    .setPksByPath(_processQueueParams.UploadedFileID)
+//                    .set(tblUploadFiles::uflStatus, enuUploadFileStatus::New)
+//                    .execute(_processQueueParams.CurrentUserID);
 
         return false;
     }
 
     QList<ORM::Private::stuProcessUploadQueueInfo> QueueInfos;
-
-    //update Queue Status to Uploading
     QStringList UploadingQueueIDs;
+
     foreach (QVariant Var, QueueItems) {
+
         ORM::Private::stuProcessUploadQueueInfo QueueInfo;
         QueueInfo.fromVariantMap(Var.toMap());
+
         QueueInfos.append(QueueInfo);
 
-        if (QueueInfo.UploadQueue.uquStatus == enuUploadQueueStatus::New)
+//        if (QueueInfo.UploadQueue.uquStatus == enuUploadQueueStatus::New)
             UploadingQueueIDs.append(QString::number(QueueInfo.UploadQueue.uquID));
     }
 
-    if (UploadingQueueIDs.length()) {
+    if (UploadingQueueIDs.length() && (_processQueueParams.UploadedFileID == 0)) {
         UpdateQuery(_processQueueParams.UploadQueue)
-                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Uploading)
+//                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Uploading)
+                .set(tblUploadQueue::uquLockedAt, DBExpression::NOW())
                 .where({ tblUploadQueue::uquID, enuConditionOperator::In, UploadingQueueIDs.join(",") })
                 .execute(_processQueueParams.CurrentUserID);
     }
@@ -356,14 +343,20 @@ bool ObjectStorageManager::processQueue(
     foreach (ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos) {
         bool Stored = false;
         try {
-            Stored = ObjectStorageManager::storeFile(
-                         QueueInfo.UploadGateways.ugwType,
-                         QueueInfo.UploadGateways.ugwMetaInfo,
-//                         QueueInfo.UploadFiles.uflCreatedBy_usrID,
-                         QueueInfo.UploadFiles.uflLocalFullFileName,
-                         QueueInfo.UploadFiles.uflPath,
-                         QueueInfo.UploadFiles.uflStoredFileName
-                         );
+            UpdateQuery(_processQueueParams.UploadQueue)
+                    .set(tblUploadQueue::uquLastTryAt, DBExpression::NOW())
+                    .where({ tblUploadQueue::uquID, enuConditionOperator::Equal, QueueInfo.UploadQueue.uquID })
+                    .execute(_processQueueParams.CurrentUserID);
+
+            Stored = ObjectStorageManager::storeFileToGateway(QueueInfo);
+
+            if (Stored)
+                UpdateQuery(_processQueueParams.UploadQueue)
+                        .set(tblUploadQueue::uquStoredAt, DBExpression::NOW())
+                        .set(tblUploadQueue::uquLockedAt, DBExpression::NIL())
+                        .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Stored)
+                        .where({ tblUploadQueue::uquID, enuConditionOperator::Equal, QueueInfo.UploadQueue.uquID })
+                        .execute(_processQueueParams.CurrentUserID);
         } catch (std::exception &exp) {
             TargomanDebug(5, "ERROR: storing file to remote storage: " << exp.what());
         }
@@ -398,16 +391,19 @@ bool ObjectStorageManager::processQueue(
     }
 
     //update queue
-    if (UploadedQueueIDs.length()) {
-        UpdateQuery(_processQueueParams.UploadQueue)
-                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Stored)
-                .where({ tblUploadQueue::uquID, enuConditionOperator::In, UploadedQueueIDs.join(',') })
-                .execute(_processQueueParams.CurrentUserID);
-                ;
-    }
+//    if (UploadedQueueIDs.length()) {
+//        UpdateQuery(_processQueueParams.UploadQueue)
+//                .set(tblUploadQueue::uquLockedAt, DBExpression::NIL())
+//                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Stored)
+//                .where({ tblUploadQueue::uquID, enuConditionOperator::In, UploadedQueueIDs.join(',') })
+//                .execute(_processQueueParams.CurrentUserID);
+//                ;
+//    }
+
     if (FailedQueueIDs.length()) {
         UpdateQuery(_processQueueParams.UploadQueue)
-                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::New)
+                .set(tblUploadQueue::uquLockedAt, DBExpression::NIL())
+                .set(tblUploadQueue::uquStatus, enuUploadQueueStatus::Error)
                 .where({ tblUploadQueue::uquID, enuConditionOperator::In, FailedQueueIDs.join(',') })
                 .execute(_processQueueParams.CurrentUserID);
                 ;
@@ -421,42 +417,86 @@ bool ObjectStorageManager::processQueue(
     return true;
 }
 
-bool ObjectStorageManager::storeFile(
-    const NULLABLE_TYPE(enuUploadGatewayType::Type) &_storageType,
-    const TAPI::JSON_t &_metaInfo,
-//    quint64 _ownerUserID,
-    const QString &_fullFileName,
-    const QString &_path,
-    const QString &_fileName
+bool ObjectStorageManager::storeFileToGateway(
+    const ORM::Private::stuProcessUploadQueueInfo &_queueInfo
 ) {
-    if (NULLABLE_IS_NULL(_storageType))
-        throw exTargomanBase("storageType IS NULL");
-
-//    QStringList FullPathParts;
-//    FullPathParts << QString("user_%1").arg(_ownerUserID);
-//    if (_path.isEmpty() == false)
-//        FullPathParts << _path;
-
-    switch (NULLABLE_VALUE(_storageType)) {
+    switch (NULLABLE_VALUE(_queueInfo.UploadGateways.ugwType)) {
         case enuUploadGatewayType::NFS:
             return Gateways::gtwNFS::storeFile(
-                        _metaInfo,
-                        _fullFileName,
-                        _path, //FullPathParts.join("/"),
-                        _fileName
+                        _queueInfo.UploadGateways,
+                        _queueInfo.UploadFiles.uflLocalFullFileName,
+                        _queueInfo.UploadFiles.uflPath,
+                        _queueInfo.UploadFiles.uflStoredFileName
                         );
 
         case enuUploadGatewayType::AWSS3:
             return Gateways::gtwAWSS3::storeFile(
-                        _metaInfo,
-                        _fullFileName,
-                        _path, //FullPathParts.join("/"),
-                        _fileName
+                        _queueInfo.UploadGateways,
+                        _queueInfo.UploadFiles.uflLocalFullFileName,
+                        _queueInfo.UploadFiles.uflPath,
+                        _queueInfo.UploadFiles.uflStoredFileName
                         );
 
     }
 
     return false;
+}
+
+void ObjectStorageManager::applyGetFileUrlInQuery(
+    SelectQuery &_query,
+    Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue
+//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+//        const QString &_foreignTableName,
+//        const QString &_foreignTableUploadedFileIDFieldName
+) {
+    Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
+//    Targoman::API::DBM::clsTable* TBL_uploadQueue = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadQueue);
+
+    /*
+     * https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html#:~:text=If%20the%20ONLY_FULL_GROUP_BY%20SQL%20mode,are%20functionally%20dependent%20on%20them.:
+     *  -> You can achieve the same effect without disabling ONLY_FULL_GROUP_BY by using ANY_VALUE() to refer to the nonaggregated column.
+     */
+    _query
+        .innerJoin(TBL_uploadFiles->name())
+        .addCols({
+                    tblUploadFiles::uflID,
+                    tblUploadFiles::uflPath,
+                    tblUploadFiles::uflOriginalFileName,
+                    tblUploadFiles::uflSize,
+                    tblUploadFiles::uflFileType,
+                    tblUploadFiles::uflMimeType,
+                    tblUploadFiles::uflLocalFullFileName,
+                    tblUploadFiles::uflStatus,
+                    tblUploadFiles::uflCreationDateTime,
+                    tblUploadFiles::uflCreatedBy_usrID,
+                    tblUploadFiles::uflUpdatedBy_usrID,
+                 })
+
+        .innerJoin(SelectQuery(_uploadQueue)
+                   .addCol(tblUploadQueue::uqu_uflID) //, "_q_uflID")
+                   .addCol(DBExpression::VALUE(QString("ANY_VALUE(%1)").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
+                   .innerJoin(tblUploadGateways::Name)
+                   .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored })
+                   .groupBy(tblUploadQueue::uqu_uflID)
+                   ,
+                   "tmpQueue",
+                   clsCondition("tmpQueue", tblUploadQueue::uqu_uflID,
+                                enuConditionOperator::Equal,
+                                TBL_uploadFiles->name(), tblUploadFiles::uflID)
+                   )
+        .addCol(QString("tmpQueue.%1").arg(uflFullFileUrl), uflFullFileUrl)
+    ;
+}
+
+QString ObjectStorageManager::getFileUrl(
+    const quint64 _currentUserID,
+    Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+    Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+    const quint64 _uploadedFileID
+) {
+    //if not stored yet, return local http server url that serves uflLocalFullFileName
 }
 
 } //namespace Targoman::API::ObjectStorage

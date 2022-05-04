@@ -35,22 +35,24 @@ using namespace Targoman::API::Common;
 namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwAWSS3::storeFile(
-    const TAPI::JSON_t &_metaInfo,
+//    const TAPI::JSON_t &_metaInfo,
+    const ORM::tblUploadGateways::DTO &_uploadGateway,
     const QString &_fullFileName,
     const QString &_path,
     const QString &_fileName
 ) {
-    QString Bucket = _metaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
-    QString EndpointUrl = _metaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
-    QString SecretKey = _metaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
-    QString AccessKey = _metaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
+//    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
+//    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
+
+    QString AccessKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
+    QString SecretKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
 
     ///TODO: use MultipartUploader for files larger than 400 MB
 
     //upload to s3
     S3::Model::PutObjectRequest Request;
 
-    Request.SetBucket(Bucket.toStdString());
+    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
     Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
 
     //----------------------------------------
@@ -73,7 +75,7 @@ bool gtwAWSS3::storeFile(
     S3ClientConfig.requestTimeoutMs = 1000;
     S3ClientConfig.connectTimeoutMs = 1000;
 
-    S3ClientConfig.endpointOverride = EndpointUrl.toStdString();
+    S3ClientConfig.endpointOverride = _uploadGateway.ugwEndpointUrl.toStdString();
 //    S3ClientConfig.enableHostPrefixInjection = false;
 //    S3ClientConfig.enableEndpointDiscovery = false;
 
@@ -81,7 +83,7 @@ bool gtwAWSS3::storeFile(
                 AWSCredentials,
                 S3ClientConfig,
                 Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never,
-                /* useVirtualAddressing */ false
+                /* useVirtualAddressing */ _uploadGateway.ugwEndpointIsVirtualHosted
                 );
 
     S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);

@@ -48,8 +48,9 @@ TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
 
 TARGOMAN_DEFINE_ENUM(enuUploadQueueStatus,
                      New        = 'N',
-                     Uploading  = 'U', //queue(s) are in uploading
+//                     Uploading  = 'U', //queue(s) are in uploading
                      Stored     = 'S', //queued before and upload to remote storage completed
+                     Error      = 'E',
                      Removed    = 'R'
                      )
 
@@ -109,6 +110,7 @@ namespace tblUploadFiles {
 
 namespace tblUploadQueue {
     constexpr char Name[] = "tblUploadQueue";
+
     namespace Relation {
         constexpr char File[] = "file";
         constexpr char Gateway[] = "gateway";
@@ -139,6 +141,9 @@ namespace tblUploadGateways {
     TARGOMAN_CREATE_CONSTEXPR(ugwID);
     TARGOMAN_CREATE_CONSTEXPR(ugwName);
     TARGOMAN_CREATE_CONSTEXPR(ugwType);
+    TARGOMAN_CREATE_CONSTEXPR(ugwBucket);
+    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointUrl);
+    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointIsVirtualHosted);
     TARGOMAN_CREATE_CONSTEXPR(ugwMetaInfo);
     // conditions
     TARGOMAN_CREATE_CONSTEXPR(ugwAllowedFileTypes);
@@ -162,6 +167,9 @@ namespace tblUploadGateways {
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint32(ugwID),
         SF_NULLABLE_Enum(enuUploadGatewayType, ugwType),
+        SF_QString(ugwBucket),
+        SF_QString(ugwEndpointUrl),
+        SF_bool(ugwEndpointIsVirtualHosted),
         SF_JSON_t(ugwMetaInfo),
         SF_quint64(ugwCreatedFilesCount),
         SF_quint64(ugwCreatedFilesSize),

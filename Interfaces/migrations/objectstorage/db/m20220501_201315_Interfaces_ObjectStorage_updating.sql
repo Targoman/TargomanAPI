@@ -56,6 +56,71 @@ ALTER TABLE `tblUploadQueue`
     ADD COLUMN `uquLastTryAt` TIMESTAMP NULL AFTER `uquLockedAt`,
     ADD COLUMN `uquStoredAt` TIMESTAMP NULL AFTER `uquLastTryAt`;
 
+
+
+
+
+UPDATE tblUploadGateways
+   SET ugwName = CONCAT('gateway ', ugwType)
+ WHERE ugwName IS NULL
+;
+
+ALTER TABLE `tblUploadGateways`
+    CHANGE COLUMN `ugwCreatedBy_usrID` `ugwCreatedBy_usrID` BIGINT(20) UNSIGNED NULL AFTER `ugwCreationDateTime`;
+
+ALTER TABLE `tblUploadGateways`
+    ADD COLUMN `ugwBucket` VARCHAR(256) NULL AFTER `ugwType`,
+    ADD COLUMN `ugwEndpointUrl` VARCHAR(512) NULL AFTER `ugwBucket`,
+    ADD COLUMN `ugwEndpointIsVirtualHosted` BIT NULL DEFAULT NULL AFTER `ugwEndpointUrl`;
+
+UPDATE tblUploadGateways
+   SET ugwBucket = REPLACE(JSON_EXTRACT(ugwMetaInfo, "$.Bucket"), '"', ''),
+       ugwEndpointUrl = REPLACE(JSON_EXTRACT(ugwMetaInfo, "$.EndpointUrl"), '"', ''),
+       ugwEndpointIsVirtualHosted = false
+ WHERE ugwType = '3'
+   AND (
+       ugwBucket IS NULL
+    OR ugwEndpointUrl IS NULL
+       )
+;
+
+UPDATE tblUploadGateways
+   SET ugwBucket = LOWER(REPLACE(ugwName, ' ', '-')),
+       ugwEndpointUrl = 'http://127.0.0.1',
+       ugwEndpointIsVirtualHosted = false
+ WHERE ugwType = 'N'
+   AND (
+       ugwBucket IS NULL
+    OR ugwEndpointUrl IS NULL
+       )
+;
+
+ALTER TABLE `tblUploadGateways`
+    CHANGE COLUMN `ugwName` `ugwName` VARCHAR(50) NOT NULL DEFAULT 'A' COLLATE 'utf8mb4_general_ci' AFTER `ugwID`,
+    CHANGE COLUMN `ugwBucket` `ugwBucket` VARCHAR(256) NOT NULL COLLATE 'utf8mb4_general_ci' AFTER `ugwType`,
+    CHANGE COLUMN `ugwEndpointUrl` `ugwEndpointUrl` VARCHAR(512) NOT NULL COLLATE 'utf8mb4_general_ci' AFTER `ugwBucket`,
+    CHANGE COLUMN `ugwEndpointIsVirtualHosted` `ugwEndpointIsVirtualHosted` BIT(1) NOT NULL DEFAULT false AFTER `ugwEndpointUrl`;
+
+UPDATE tblUploadGateways
+   SET ugwMetaInfo = JSON_REMOVE(COALESCE(ugwMetaInfo, '{}'), '$.Bucket', '$.EndpointUrl')
+ WHERE ugwType = '3'
+;
+
+ALTER TABLE `tblUploadQueue`
+    CHANGE COLUMN `uquStatus` `uquStatus` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'N:New, S:Stored, E:Error, R:Removed' COLLATE 'utf8mb4_general_ci' AFTER `uquStoredAt`;
+
+
+
+
+
+
+
+
+
+
+
+
+
 DROP FUNCTION IF EXISTS `fnApplyCounterToFileName`;
 DELIMITER ;;
 CREATE FUNCTION `fnApplyCounterToFileName`(
@@ -197,10 +262,12 @@ BEGIN
            uqu_uflID
          , uqu_ugwID
          , uquLockedAt
+         , uquCreatedBy_usrID
            )
     SELECT oUploadedFileID
          , tblUploadGateways.ugwID
          , IF(iLocked, NOW(), NULL)
+         , iCreatorUserID
       FROM tblUploadGateways
      WHERE tblUploadGateways.ugwStatus = 'A'
        AND (tblUploadGateways.ugwAllowedFileTypes IS NULL

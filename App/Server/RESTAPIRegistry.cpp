@@ -29,6 +29,7 @@
 #include "APICache.hpp"
 
 #include "Interfaces/DBM/clsORMField.h"
+#include "Interfaces/Helpers/RESTClientHelper.h"
 
 namespace Targoman::API {
 
@@ -647,6 +648,8 @@ void RESTAPIRegistry::dumpAPIs()
 
     QStringList Keys = APIs.keys();
     Keys.sort(); //Qt::CaseSensitivity::CaseInsensitive);
+
+    qDebug().noquote().nospace() << endl << Targoman::API::Helpers::ClientConfigs::RESTServerAddress.value();
 
     int index = 1;
     foreach (const QString Name, Keys) {

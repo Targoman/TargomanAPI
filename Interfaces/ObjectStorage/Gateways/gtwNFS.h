@@ -26,10 +26,9 @@
 
 #include "intfObjectStorageGateway.h"
 #include "libTargomanCommon/Macros.h"
-//using namespace Targoman::Common;
-
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 
 namespace Targoman::API::ObjectStorage::Gateways {
 
@@ -44,7 +43,8 @@ class gtwNFS : public intfObjectStorageGateway
 {
 public:
     static bool storeFile(
-        const TAPI::JSON_t &_metaInfo,
+//        const TAPI::JSON_t &_metaInfo,
+        const ORM::tblUploadGateways::DTO &_uploadGateway,
         const QString &_fullFileName,
         const QString &_path,
         const QString &_fileName

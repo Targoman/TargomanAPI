@@ -29,6 +29,7 @@
 #include "intfObjectStorageGateway.h"
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 
 #include "libTargomanCommon/Macros.h"
 #include "libTargomanCommon/CmdIO.h"
@@ -101,10 +102,10 @@ static __static_s3_initializer__ __static_s3_initializer__internal;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace AWSS3MetaInfoJsonKey {
-    TARGOMAN_CREATE_CONSTEXPR(Bucket);
-    TARGOMAN_CREATE_CONSTEXPR(EndpointUrl);
-    TARGOMAN_CREATE_CONSTEXPR(SecretKey);
+//    TARGOMAN_CREATE_CONSTEXPR(Bucket);
+//    TARGOMAN_CREATE_CONSTEXPR(EndpointUrl);
     TARGOMAN_CREATE_CONSTEXPR(AccessKey);
+    TARGOMAN_CREATE_CONSTEXPR(SecretKey);
 }
 #pragma GCC diagnostic pop
 
@@ -112,7 +113,8 @@ class gtwAWSS3 : public intfObjectStorageGateway
 {
 public:
     static bool storeFile(
-        const TAPI::JSON_t &_metaInfo,
+//        const TAPI::JSON_t &_metaInfo,
+        const ORM::tblUploadGateways::DTO &_uploadGateway,
         const QString &_fullFileName,
         const QString &_path,
         const QString &_fileName
