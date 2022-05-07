@@ -353,38 +353,38 @@ clsColSpecs::clsColSpecs(const clsColSpecs& _other) : Data(_other.Data) { ; }
 clsColSpecs::~clsColSpecs() { ; }
 
 clsColSpecs::clsColSpecs(
-        const QString& _name,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const QString& _name,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->Name = _name;
     this->Data->RenameAs = _renameAs;
 }
 
 clsColSpecs::clsColSpecs(
-        const DBExpression& _expression,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const DBExpression& _expression,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->RenameAs = _renameAs;
     this->Data->Expression = _expression;
 }
 
 clsColSpecs::clsColSpecs(
-        const enuAggregation::Type _aggregation_Simple,
-        const QString& _name,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const enuAggregation::Type _aggregation_Simple,
+    const QString& _name,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->Name = _name;
     this->Data->RenameAs = _renameAs;
     this->Data->SimpleAggregation = _aggregation_Simple;
 }
 
 clsColSpecs::clsColSpecs(
-        const enuConditionalAggregation::Type _ConditionalAggregation,
-        const clsCondition& _condition,
-        const QString& _renameAs,
-        const QVariant& _trueValue,
-        const QVariant& _falseValue
-    ) : Data(new clsColSpecsData) {
+    const enuConditionalAggregation::Type _ConditionalAggregation,
+    const clsCondition& _condition,
+    const QString& _renameAs,
+    const QVariant& _trueValue,
+    const QVariant& _falseValue
+) : Data(new clsColSpecsData) {
     this->Data->RenameAs = _renameAs;
     this->Data->ConditionalAggregation = _ConditionalAggregation;
     this->Data->Condition = _condition;
@@ -398,17 +398,17 @@ const QString clsColSpecs::renameAs() const
 }
 
 QString clsColSpecs::buildColNameString(
-        const QString &_tableName,
-        const QString &_tableAlias,
-        const QString &_otherTableAlias,
-        const QMap<QString, stuRelatedORMField> &_selectableColsMap,
-        const QMap<QString, stuRelatedORMField> &_filterableColsMap,
-        bool _allowUseColumnAlias,
-        QStringList &_renamedColumns,
-        bool _appendAs,
-        const stuRelation &_relation,
-        /*OUT*/ bool *_isStatusColumn
-    ) {
+    const QString &_tableName,
+    const QString &_tableAlias,
+    const QString &_otherTableAlias,
+    const QMap<QString, stuRelatedORMField> &_selectableColsMap,
+    const QMap<QString, stuRelatedORMField> &_filterableColsMap,
+    bool _allowUseColumnAlias,
+    QStringList &_renamedColumns,
+    bool _appendAs,
+    const stuRelation &_relation,
+    /*OUT*/ bool *_isStatusColumn
+) {
     auto applyRenameAs = [this, &_appendAs](QString _fieldString) {
         if ((_appendAs == false) || this->Data->RenameAs.isEmpty())
             return _fieldString;
@@ -582,22 +582,25 @@ struct stuConditionData
 //    };
 
     stuConditionData(
-            bool _isAggregator,
-            QString _col) :
+        bool _isAggregator,
+        QString _col
+    ) :
         IsAggregator(true),
         ColSpecs(_col, {}) {
         Q_UNUSED(_isAggregator);
     }
 
     stuConditionData(const clsCondition& _condition) :
-        Condition(_condition), IsAggregator(false)
+        Condition(_condition),
+        IsAggregator(false)
     { ; }
 
     stuConditionData(
-            QString _tableNameOrAlias,
-            const clsColSpecs& _colSpecs,
-            enuConditionOperator::Type _operator,
-            QVariant _value = {}) :
+        QString _tableNameOrAlias,
+        const clsColSpecs& _colSpecs,
+        enuConditionOperator::Type _operator,
+        QVariant _value = {}
+    ) :
         IsAggregator(false),
         TableNameOrAlias(_tableNameOrAlias),
         ColSpecs(_colSpecs),
@@ -606,11 +609,12 @@ struct stuConditionData
     { ; }
 
     stuConditionData(
-            QString _tableNameOrAlias,
-            const clsColSpecs& _colSpecs,
-            enuConditionOperator::Type _operator,
-            QString _otherTableNameOrAlias,
-            const clsColSpecs& _otherColSpecs) :
+        QString _tableNameOrAlias,
+        const clsColSpecs& _colSpecs,
+        enuConditionOperator::Type _operator,
+        QString _otherTableNameOrAlias,
+        const clsColSpecs& _otherColSpecs
+    ) :
         IsAggregator(false),
         TableNameOrAlias(_tableNameOrAlias),
         ColSpecs(_colSpecs),
@@ -1338,7 +1342,7 @@ public:
                     this->Owner->Data->Alias,
                     this->Owner->Data->Table.SelectableColsMap,
                     this->Owner->Data->Table.FilterableColsMap,
-                    false,
+                    true, //false,
                     this->Owner->Data->BaseQueryPreparedItems.RenamedCols
                 );
             }
@@ -1473,6 +1477,14 @@ template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::ri
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const clsTable& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable.name(), _alias);      }
 
 //-- nested -------------------------
 template <class itmplDerived>

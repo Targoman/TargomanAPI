@@ -103,6 +103,7 @@ intfUploadQueue::intfUploadQueue(
             { tblUploadQueue::uquLockedAt,          S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
             { tblUploadQueue::uquLastTryAt,         S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
             { tblUploadQueue::uquStoredAt,          S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
+            { tblUploadQueue::uquResult,            S(QString),             QFV,                        QNull,      UPAdmin },
             { tblUploadQueue::uquStatus,            ORM_STATUS_FIELD(Targoman::API::ObjectStorage::ORM::enuUploadQueueStatus, Targoman::API::ObjectStorage::ORM::enuUploadQueueStatus::New) },
             { tblUploadQueue::uquCreationDateTime,  ORM_CREATED_ON },
             { tblUploadQueue::uquCreatedBy_usrID,   ORM_CREATED_BY },

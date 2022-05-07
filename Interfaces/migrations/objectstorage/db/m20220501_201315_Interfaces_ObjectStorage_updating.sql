@@ -109,6 +109,8 @@ UPDATE tblUploadGateways
 ALTER TABLE `tblUploadQueue`
     CHANGE COLUMN `uquStatus` `uquStatus` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'N:New, S:Stored, E:Error, R:Removed' COLLATE 'utf8mb4_general_ci' AFTER `uquStoredAt`;
 
+ALTER TABLE `tblUploadQueue`
+    ADD COLUMN `uquResult` TEXT NULL AFTER `uquStoredAt`;
 
 
 

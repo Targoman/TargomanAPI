@@ -122,6 +122,7 @@ namespace tblUploadQueue {
     TARGOMAN_CREATE_CONSTEXPR(uquLockedAt);
     TARGOMAN_CREATE_CONSTEXPR(uquLastTryAt);
     TARGOMAN_CREATE_CONSTEXPR(uquStoredAt);
+    TARGOMAN_CREATE_CONSTEXPR(uquResult);
     TARGOMAN_CREATE_CONSTEXPR(uquStatus);
     TARGOMAN_CREATE_CONSTEXPR(uquCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(uquCreatedBy_usrID);

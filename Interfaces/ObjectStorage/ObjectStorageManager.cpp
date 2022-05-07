@@ -225,6 +225,7 @@ bool ObjectStorageManager::processQueue(
                      tblUploadQueue::uquLockedAt,
                      tblUploadQueue::uquLastTryAt,
                      tblUploadQueue::uquStoredAt,
+                     tblUploadQueue::uquResult,
                      tblUploadQueue::uquStatus,
                      tblUploadQueue::uquCreationDateTime,
                      tblUploadQueue::uquCreatedBy_usrID,
@@ -378,7 +379,7 @@ bool ObjectStorageManager::processQueue(
         }
     }
 
-    //update gateway ststictics
+    //update gateway statictics
     if (GatewayUploadedFileCount.count()) {
         foreach (quint64 GatewayID, GatewayUploadedFileCount.keys()) {
             UpdateQuery(_processQueueParams.UploadGateways)
@@ -445,12 +446,12 @@ bool ObjectStorageManager::storeFileToGateway(
 void ObjectStorageManager::applyGetFileUrlInQuery(
     SelectQuery &_query,
     Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue
-//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-//        const QString &_foreignTableName,
-//        const QString &_foreignTableUploadedFileIDFieldName
+    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+    Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+    const QString &_foreignTableName,
+    const QString &_foreignTableUploadedFileIDFieldName
 ) {
-    Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
+//    Targoman::API::DBM::clsTable* TBL_uploadFiles = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadFiles);
 //    Targoman::API::DBM::clsTable* TBL_uploadQueue = dynamic_cast<Targoman::API::DBM::clsTable*>(&_uploadQueue);
 
     /*
@@ -458,46 +459,71 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
      *  -> You can achieve the same effect without disabling ONLY_FULL_GROUP_BY by using ANY_VALUE() to refer to the nonaggregated column.
      */
     _query
-        .innerJoin(TBL_uploadFiles->name())
         .addCols({
-                    tblUploadFiles::uflID,
-                    tblUploadFiles::uflPath,
-                    tblUploadFiles::uflOriginalFileName,
-                    tblUploadFiles::uflSize,
-                    tblUploadFiles::uflFileType,
-                    tblUploadFiles::uflMimeType,
-                    tblUploadFiles::uflLocalFullFileName,
-                    tblUploadFiles::uflStatus,
-                    tblUploadFiles::uflCreationDateTime,
-                    tblUploadFiles::uflCreatedBy_usrID,
-                    tblUploadFiles::uflUpdatedBy_usrID,
+                     QString("f.") + tblUploadFiles::uflID,
+//                     QString("f.") + tblUploadFiles::uflPath,
+//                     QString("f.") + tblUploadFiles::uflOriginalFileName,
+                     QString("f.") + tblUploadFiles::uflSize,
+                     QString("f.") + tblUploadFiles::uflFileType,
+                     QString("f.") + tblUploadFiles::uflMimeType,
+//                     QString("f.") + tblUploadFiles::uflLocalFullFileName,
+//                     QString("f.") + tblUploadFiles::uflStatus,
+//                     QString("f.") + tblUploadFiles::uflCreationDateTime,
+//                     QString("f.") + tblUploadFiles::uflCreatedBy_usrID,
+//                     QString("f.") + tblUploadFiles::uflUpdatedBy_usrID,
                  })
+        .addCol(DBExpressionCase()
+                .when("g.ugwEndpointIsVirtualHosted")
+                .then(R"(
+                      CONCAT(
+                        IF(
+                          LEFT(g.ugwEndpointUrl, 5) = 'http:',
+                          LEFT(g.ugwEndpointUrl, 4),
+                          LEFT(g.ugwEndpointUrl, 5)),
+                        '://',
+                        g.ugwBucket,
+                        '.',
+                        IF(
+                          SUBSTRING(g.ugwEndpointUrl, 8, 1) = '/',
+                          SUBSTRING(g.ugwEndpointUrl, 9),
+                          SUBSTRING(g.ugwEndpointUrl, 8)),
+                        '/',
+                        f.uflPath,
+                        '/',
+                        f.uflStoredFileName)
+                      )")
+                .else_("CONCAT(g.ugwEndpointUrl, '/', g.ugwBucket, '/', f.uflPath, '/', f.uflStoredFileName)"),
+                uflFullFileUrl)
+
+        .innerJoin(/*TBL_uploadFiles->name()*/ _uploadFiles, "f",
+                   { "f", tblUploadFiles::uflID,
+                   enuConditionOperator::Equal,
+                   _foreignTableName, _foreignTableUploadedFileIDFieldName })
 
         .innerJoin(SelectQuery(_uploadQueue)
-                   .addCol(tblUploadQueue::uqu_uflID) //, "_q_uflID")
-                   .addCol(DBExpressionCase()
-                           .when("a")
-                           .then("b")
-                           .when("c")
-                           .then("d")
-                           .else_("e")
-                           , uflFullFileUrl)
-
-
-
-
-
-//                           VALUE(QString("ANY_VALUE(%1)").arg(tblUploadGateways::ugwType)), uflFullFileUrl)
-                   .innerJoin(tblUploadGateways::Name)
-                   .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored })
-                   .groupBy(tblUploadQueue::uqu_uflID)
-                   ,
-                   "tmpQueue",
-                   clsCondition("tmpQueue", tblUploadQueue::uqu_uflID,
+                   .addCol(DBExpression::VALUE(R"(
+                                               ROW_NUMBER()
+                                               OVER (
+                                                   PARTITION BY uqu_uflID
+                                                   ORDER BY RAND()
+                                               )
+                                               )"), "row_num")
+                   .addCols({
+                                tblUploadQueue::uqu_uflID,
+                                tblUploadQueue::uqu_ugwID
+                            })
+                   .where({ tblUploadQueue::uquStatus, enuConditionOperator::Equal, enuUploadQueueStatus::Stored }),
+                   "q",
+                   clsCondition("q", tblUploadQueue::uqu_uflID,
                                 enuConditionOperator::Equal,
-                                TBL_uploadFiles->name(), tblUploadFiles::uflID)
+                                "f", tblUploadFiles::uflID)
+                   .andCond({ "q.row_num", enuConditionOperator::Equal, 1 })
                    )
-        .addCol(QString("tmpQueue.%1").arg(uflFullFileUrl), uflFullFileUrl)
+
+        .innerJoin(_uploadGateways, "g",
+                   { "g", tblUploadGateways::ugwID,
+                   enuConditionOperator::Equal,
+                   "q", tblUploadQueue::uqu_ugwID })
     ;
 }
 
