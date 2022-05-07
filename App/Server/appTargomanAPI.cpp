@@ -28,6 +28,7 @@
 #include "libTargomanCommon/Configuration/ConfigManager.h"
 
 #include "Interfaces/API/intfPureModule.h"
+#include "Interfaces/Helpers/SecurityHelper.h"
 //#include "Interfaces/NLP/FormalityChecker.h"
 //#include "Interfaces/NLP/TextProcessor.hpp"
 
@@ -54,6 +55,9 @@ appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent) { ; }
 
 void appTargomanAPI::slotExecute() {
     try {
+        ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(Helpers::SecurityHelper::UUIDtoMD5()));
+        TargomanDebug(0, "Instance-ID: " << ServerCommonConfigs::InstanceID.value())
+
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
         auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {

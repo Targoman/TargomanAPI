@@ -32,6 +32,7 @@ struct ServerCommonConfigs
 {
     static inline QString makeConfig(const QString& _name) {return "/Server/" + _name;}
 
+    static Targoman::Common::Configuration::tmplConfigurable<QString> InstanceID;
     static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
     static Targoman::Common::Configuration::tmplConfigurable<QString> DBPrefix;
 };

@@ -28,6 +28,17 @@ using namespace Targoman::Common::Configuration;
 
 namespace Targoman::API::Server {
 
+tmplConfigurable<QString> ServerCommonConfigs::InstanceID(
+    ServerCommonConfigs::makeConfig("InstanceID"),
+    "Server Instance ID",
+    "",
+    ReturnTrueCrossValidator(),
+    "",
+    "UUID",
+    "instance-id",
+    enuConfigSource::Arg
+);
+
 tmplRangedConfigurable<quint16> ServerCommonConfigs::ListenPort(
     ServerCommonConfigs::makeConfig("ListenPort"),
     "Listen port for main REST server",

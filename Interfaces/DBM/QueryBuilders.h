@@ -383,6 +383,14 @@ public:
     itmplDerived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
 
+    itmplDerived& leftJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& leftJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& rightJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& crossJoin(const clsTable& _foreignTable, const QString& _alias = {});
+
     itmplDerived& join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on = {});
     itmplDerived& leftJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
     itmplDerived& rightJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);

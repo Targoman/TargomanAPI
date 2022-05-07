@@ -56,10 +56,6 @@ ALTER TABLE `tblUploadQueue`
     ADD COLUMN `uquLastTryAt` TIMESTAMP NULL AFTER `uquLockedAt`,
     ADD COLUMN `uquStoredAt` TIMESTAMP NULL AFTER `uquLastTryAt`;
 
-
-
-
-
 UPDATE tblUploadGateways
    SET ugwName = CONCAT('gateway ', ugwType)
  WHERE ugwName IS NULL
@@ -109,17 +105,11 @@ UPDATE tblUploadGateways
 ALTER TABLE `tblUploadQueue`
     CHANGE COLUMN `uquStatus` `uquStatus` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'N:New, S:Stored, E:Error, R:Removed' COLLATE 'utf8mb4_general_ci' AFTER `uquStoredAt`;
 
+ALTER TABLE `tblUploadQueue`
+    ADD COLUMN `uquResult` TEXT NULL AFTER `uquStoredAt`;
 
-
-
-
-
-
-
-
-
-
-
+ALTER TABLE `tblUploadQueue`
+    ADD COLUMN `uquLockedBy` VARCHAR(50) NULL DEFAULT NULL AFTER `uquLockedAt`;
 
 DROP FUNCTION IF EXISTS `fnApplyCounterToFileName`;
 DELIMITER ;;
@@ -185,7 +175,7 @@ CREATE PROCEDURE `spUploadedFile_Create`(
     IN `iFileType` VARCHAR(64),
     IN `iMimeType` VARCHAR(128),
     IN `iCreatorUserID` BIGINT UNSIGNED,
-    IN `iLocked` TINYINT,
+    IN `iLockedBy` VARCHAR(50),
     OUT `oStoredFileName` VARCHAR(256),
     OUT `oUploadedFileID` BIGINT UNSIGNED,
     OUT `oQueueRowsCount` INT UNSIGNED
@@ -214,6 +204,7 @@ BEGIN
                    "iMimeType",             iMimeType,
                    "iFullTempPath",         iFullTempPath,
                    "iCreatorUserID",        iCreatorUserID,
+                   "iLockedBy",             iLockedBy,
                    "UploadedFileCounter",   vUploadedFileCounter,
                    "StoredFileName",        oStoredFileName,
                    "FileID",                oUploadedFileID,
@@ -262,11 +253,13 @@ BEGIN
            uqu_uflID
          , uqu_ugwID
          , uquLockedAt
+         , uquLockedBy
          , uquCreatedBy_usrID
            )
     SELECT oUploadedFileID
          , tblUploadGateways.ugwID
-         , IF(iLocked, NOW(), NULL)
+         , IF(iLockedBy IS NULL OR iLockedBy='', NULL, NOW())
+         , IF(iLockedBy IS NULL OR iLockedBy='', NULL, iLockedBy)
          , iCreatorUserID
       FROM tblUploadGateways
      WHERE tblUploadGateways.ugwStatus = 'A'
@@ -311,6 +304,7 @@ BEGIN
                "iMimeType",             iMimeType,
                "iFullTempPath",         iFullTempPath,
                "iCreatorUserID",        iCreatorUserID,
+               "iLockedBy",             iLockedBy,
                "UploadedFileCounter",   vUploadedFileCounter,
                "StoredFileName",        oStoredFileName,
                "FileID",                oUploadedFileID,

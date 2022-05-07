@@ -47,23 +47,6 @@ bool gtwAWSS3::storeFile(
     QString AccessKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
     QString SecretKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
 
-    ///TODO: use MultipartUploader for files larger than 400 MB
-
-    //upload to s3
-    S3::Model::PutObjectRequest Request;
-
-    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
-    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
-
-    //----------------------------------------
-    std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
-                QString("SampleAllocationTag_%1").arg(_path).toStdString().c_str(),
-                _fullFileName.toStdString().c_str(),
-                std::ios_base::in | std::ios_base::binary);
-
-    Request.SetBody(InputData);
-
-    //----------------------------------------
     Aws::Auth::AWSCredentials AWSCredentials(AccessKey.toStdString(), SecretKey.toStdString());
 
     Aws::Client::ClientConfiguration S3ClientConfig;
@@ -86,6 +69,22 @@ bool gtwAWSS3::storeFile(
                 /* useVirtualAddressing */ _uploadGateway.ugwEndpointIsVirtualHosted
                 );
 
+    //----------------------------------------
+    ///TODO: use MultipartUploader for files larger than 400 MB
+
+    S3::Model::PutObjectRequest Request;
+
+    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
+    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
+
+    std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
+                QString("SampleAllocationTag_%1").arg(_path).toStdString().c_str(),
+                _fullFileName.toStdString().c_str(),
+                std::ios_base::in | std::ios_base::binary);
+
+    Request.SetBody(InputData);
+
+    //----------------------------------------
     S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
 
     if (Outcome.IsSuccess() == false)

@@ -39,27 +39,6 @@ using namespace Targoman::Common;
 using namespace Targoman::API::Server;
 
 int main(int _argc, char *_argv[]) {
-/*
-    static const QVariant       QNull     = QVariant(QVariant::Line);
-    static const QVariant       QInvalid  = QVariant(QVariant::Invalid);
-    static const QVariant       QRequired = QVariant(QVariant::RectF);
-    static const QVariant       QAuto     = QVariant(QVariant::PointF);
-
-#define compare(_type) \
-    qDebug()<<#_type<<" == QNull :" <<(_type == QNull); \
-    qDebug()<<#_type<<" == QInvalid :" <<(_type == QInvalid); \
-    qDebug()<<#_type<<" == QRequired :" <<(_type == QRequired); \
-    qDebug()<<#_type<<" == QAuto :" <<(_type == QAuto); \
-    qDebug()<<#_type<<".isValid():"<<_type.isValid(); \
-    qDebug()<<"===========================";
-
-    compare(QNull);
-    compare(QInvalid);
-    compare(QRequired);
-    compare(QAuto);
-
-    exit(0);*/
-
     try {
         QCoreApplication App(_argc, _argv);
 

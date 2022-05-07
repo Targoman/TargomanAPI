@@ -84,19 +84,19 @@ public:
     static void applyGetFileUrlInQuery(
         SelectQuery &_query,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue
-//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-//        const QString &_foreignTableName,
-//        const QString &_foreignTableUploadedFileIDFieldName
-        );
-
-    static QString getFileUrl(
-        const quint64 _currentUserID,
-        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const quint64 _uploadedFileID
-    );
+        const QString &_foreignTableName,
+        const QString &_foreignTableUploadedFileIDFieldName
+        );
+
+//    static QString getFileUrl(
+//        const quint64 _currentUserID,
+//        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+//        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+//        const quint64 _uploadedFileID
+//    );
 
 private:
     struct stuProcessQueueParams {
