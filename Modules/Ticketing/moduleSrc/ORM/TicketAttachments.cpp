@@ -55,7 +55,7 @@ TicketAttachments::TicketAttachments() :
                          { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::uqu_uflID },
                          ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
         }
-    ) { ; }
+) { ; }
 
 QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //    QString ExtraFilters;
@@ -109,12 +109,12 @@ QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         ObjectStorageManager::applyGetFileUrlInQuery(
                     _query,
                     UploadFiles::instance(),
-                    UploadQueue::instance()
+                    UploadQueue::instance(),
+                    UploadGateways::instance(),
+                    tblTicketAttachments::Name,
+                    tblTicketAttachments::tat_uplID
                     );
 
-//                    UploadGateways::instance(),
-//                    tblTicketAttachments::Name,
-//                    tblTicketAttachments::tat_uplID
     };
 
     return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);

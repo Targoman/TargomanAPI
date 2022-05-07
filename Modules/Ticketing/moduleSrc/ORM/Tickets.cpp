@@ -37,7 +37,7 @@ using namespace Targoman::API::TicketingModule;
 //    /* namespace          */ Targoman::API::TicketingModule,
 //    /* type               */ stuTicketScope,
 //    /* toVariantLambda    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-//    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> stuTicketScope {
+//    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuTicketScope {
 //        if (_value.isValid() == false)
 //            return stuTicketScope();
 
@@ -129,26 +129,29 @@ QVariant Tickets::apiGET(
 
     auto QueryLambda = [&_baseTicketID, _inReplyTicketID](SelectQuery &_query) {
         _query
-            .addCol(tblTickets::tktID)
-            .addCol(tblTickets::tktTarget_usrID)
-            .addCol(tblTickets::tkt_svcID)
-            .addCol(tblTickets::tkt_untID)
-            .addCol(tblTickets::tktBase_tktID)
-            .addCol(tblTickets::tktInReply_tktID)
-            .addCol(tblTickets::tktType)
-            .addCol(tblTickets::tktTitle)
-            .addCol(tblTickets::tktBody)
-            .addCol(tblTickets::tktStatus)
-            .addCol(tblTickets::tktCreationDateTime)
-            .addCol(tblTickets::tktCreatedBy_usrID)
-            .addCol(tblTickets::tktUpdatedBy_usrID)
-            .addCol(CURRENT_TIMESTAMP)
-
+            .addCols({
+                         tblTickets::tktID,
+                         tblTickets::tktTarget_usrID,
+                         tblTickets::tkt_svcID,
+                         tblTickets::tkt_untID,
+                         tblTickets::tktBase_tktID,
+                         tblTickets::tktInReply_tktID,
+                         tblTickets::tktType,
+                         tblTickets::tktTitle,
+                         tblTickets::tktBody,
+                         tblTickets::tktStatus,
+                         tblTickets::tktCreationDateTime,
+                         tblTickets::tktCreatedBy_usrID,
+                         tblTickets::tktUpdatedBy_usrID,
+                         CURRENT_TIMESTAMP,
+                     })
             .leftJoin(tblUnits::Name)
             .leftJoin(tblDepartments::Name, clsCondition(tblDepartments::Name, tblDepartments::depID, enuConditionOperator::Equal, tblUnits::Name, tblUnits::unt_depID))
-            .addCol(tblUnits::untName)
-            .addCol(tblDepartments::depID)
-            .addCol(tblDepartments::depName)
+            .addCols({
+                         tblUnits::untName,
+                         tblDepartments::depID,
+                         tblDepartments::depName,
+                     })
         ;
 
         if (_inReplyTicketID > 0)

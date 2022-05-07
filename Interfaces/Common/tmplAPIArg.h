@@ -24,6 +24,7 @@
 #ifndef TAPI_TMPLAPIARG_HPP
 #define TAPI_TMPLAPIARG_HPP
 
+//#include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 #include "Interfaces/Server/APICallBoom.h"
@@ -36,6 +37,17 @@ namespace Targoman::API {
 
 namespace Server {
 class intfCacheConnector;
+
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+extern QList<Targoman::API::Common::intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
+constexpr quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 3;
+
+inline void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator) {
+    Q_ASSERT_X(QMetaType::type(_typeName), QString("registerUserDefinedType typeName(%1)").arg(_typeName).toStdString().c_str(), "Seems that registering syntax is erroneous");
+    gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - TAPI_BASE_USER_DEFINED_TYPEID, _argManipulator);
+}
+
 }
 
 namespace Common {

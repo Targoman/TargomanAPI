@@ -31,18 +31,27 @@ using namespace Targoman::API::Common;
 namespace Targoman::API::ObjectStorage::Gateways {
 
 bool gtwNFS::storeFile(
-        const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
-    ) {
-    QString StoragePath = _metaInfo[NFSMetaInfoJsonKey::Path].toString();
+//    const TAPI::JSON_t &_metaInfo,
+    const ORM::tblUploadGateways::DTO &_uploadGateway,
+    const QString &_fullFileName,
+    const QString &_path,
+    const QString &_fileName
+) {
+    QString StoragePath = _uploadGateway.ugwMetaInfo[NFSMetaInfoJsonKey::Path].toString();
 
-    QDir FullPath(StoragePath);
-    if (FullPath.exists() == false)
-        throw exTargomanBase("NFS path not exists", ESTATUS_INTERNAL_SERVER_ERROR);
+    QDir FullPathDir(StoragePath);
+    if (FullPathDir.exists() == false) {
+        if (FullPathDir.mkpath(".") == false)
+            throw exTargomanBase("NFS path not exists", ESTATUS_INTERNAL_SERVER_ERROR);
+    }
 
-    QString FullFileName = QString("%1/%2_%3").arg(StoragePath).arg(_fileUUID).arg(_fileName);
+    if (FullPathDir.exists(_path) == false) {
+        if (FullPathDir.mkpath(_path) == false)
+            throw exTargomanBase("Could not create path under storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
+    }
+    FullPathDir.cd(_path);
+
+    QString FullFileName = QString("%1/%2/%3").arg(StoragePath).arg(_path).arg(_fileName);
 
     return QFile::copy(_fullFileName, FullFileName);
 }

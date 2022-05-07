@@ -109,7 +109,16 @@ SOURCES += \
 
 OTHER_FILES += \
     Test/testBase.hpp \
-    Test/testCommon.hpp
+    Test/testCommon.hpp \
+    migrations/.gitkeep \
+    migrations/accounting/.gitkeep \
+    migrations/accounting/db/*.sql \
+    migrations/accounting/local/*.sh \
+    migrations/accounting/local/.migrations \
+    migrations/objectstorage/.gitkeep \
+    migrations/objectstorage/db/*.sql \
+    migrations/objectstorage/local/*.sh \
+    migrations/objectstorage/local/.migrations
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
                $$BASE_PROJECT_PATH/3rdParty/E4MT/

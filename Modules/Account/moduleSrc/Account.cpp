@@ -626,8 +626,10 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
-                       .addCol(tblForgotPassRequest::fprCode)
-                       .addCol(tblForgotPassRequest::fprStatus)
+                       .addCols({
+                                    tblForgotPassRequest::fprCode,
+                                    tblForgotPassRequest::fprStatus,
+                                })
                        .innerJoinWith(tblForgotPassRequest::Relation::User)
                        .where({ Type == "E" ? tblUser::usrEmail : tblUser::usrMobile, enuConditionOperator::Equal, _emailOrMobile })
                        .andWhere({ tblForgotPassRequest::fprRequestedVia, enuConditionOperator::Equal, Type.at(0) })
@@ -721,10 +723,13 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
 
         QVariantList Services = SelectQuery(Service::instance())
-                .addCol(tblService::svcID)
-                .addCol(tblService::svcName)
-                .addCol(tblService::svcProcessVoucherItemEndPoint)
+                .addCols({
+                             tblService::svcID,
+                             tblService::svcName,
+                             tblService::svcProcessVoucherItemEndPoint,
+                         })
                 .all();
+
         if (Services.isEmpty())
             throw exHTTPInternalServerError("There is no services registered.");
 
@@ -817,9 +822,11 @@ void Account::tryCancelVoucher(
 
         if (PreVoucher.Items.length()) {
             QVariantList Services = SelectQuery(Service::instance())
-                    .addCol(tblService::svcID)
-                    .addCol(tblService::svcName)
-                    .addCol(tblService::svcCancelVoucherItemEndPoint)
+                    .addCols({
+                                 tblService::svcID,
+                                 tblService::svcName,
+                                 tblService::svcCancelVoucherItemEndPoint,
+                             })
                     .all();
 
             if (Services.isEmpty() == false) {
@@ -1103,24 +1110,26 @@ bool Account::apiPOSTrejectOfflinePayment(
     quint64 _offlinePaymentClaimID
 ) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
-        .addCol(tblOfflinePaymentClaims::ofpcID)
-        .addCol(tblOfflinePaymentClaims::ofpc_vchID)
-        .addCol(tblOfflinePaymentClaims::ofpcBank)
-        .addCol(tblOfflinePaymentClaims::ofpcReceiptCode)
-        .addCol(tblOfflinePaymentClaims::ofpcReceiptDate)
-        .addCol(tblOfflinePaymentClaims::ofpcAmount)
-        .addCol(tblOfflinePaymentClaims::ofpcNotes)
-        .addCol(tblOfflinePaymentClaims::ofpcStatus)
-        .addCol(tblOfflinePaymentClaims::ofpcCreationDateTime)
-        .addCol(tblOfflinePaymentClaims::ofpcCreatedBy_usrID)
-        .addCol(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID)
-        .addCol(tblVoucher::vchID)
-        .addCol(tblVoucher::vch_usrID)
-        .addCol(tblVoucher::vchDesc)
-        .addCol(tblVoucher::vchType)
-        .addCol(tblVoucher::vchTotalAmount)
-        .addCol(tblVoucher::vchStatus)
-        .addCol(tblVoucher::vchCreationDateTime)
+        .addCols({
+                     tblOfflinePaymentClaims::ofpcID,
+                     tblOfflinePaymentClaims::ofpc_vchID,
+                     tblOfflinePaymentClaims::ofpcBank,
+                     tblOfflinePaymentClaims::ofpcReceiptCode,
+                     tblOfflinePaymentClaims::ofpcReceiptDate,
+                     tblOfflinePaymentClaims::ofpcAmount,
+                     tblOfflinePaymentClaims::ofpcNotes,
+                     tblOfflinePaymentClaims::ofpcStatus,
+                     tblOfflinePaymentClaims::ofpcCreationDateTime,
+                     tblOfflinePaymentClaims::ofpcCreatedBy_usrID,
+                     tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,
+                     tblVoucher::vchID,
+                     tblVoucher::vch_usrID,
+                     tblVoucher::vchDesc,
+                     tblVoucher::vchType,
+                     tblVoucher::vchTotalAmount,
+                     tblVoucher::vchStatus,
+                     tblVoucher::vchCreationDateTime,
+                 })
         .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1164,24 +1173,26 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     quint64 _offlinePaymentClaimID
 ) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
-        .addCol(tblOfflinePaymentClaims::ofpcID)
-        .addCol(tblOfflinePaymentClaims::ofpc_vchID)
-        .addCol(tblOfflinePaymentClaims::ofpcBank)
-        .addCol(tblOfflinePaymentClaims::ofpcReceiptCode)
-        .addCol(tblOfflinePaymentClaims::ofpcReceiptDate)
-        .addCol(tblOfflinePaymentClaims::ofpcAmount)
-        .addCol(tblOfflinePaymentClaims::ofpcNotes)
-        .addCol(tblOfflinePaymentClaims::ofpcStatus)
-        .addCol(tblOfflinePaymentClaims::ofpcCreationDateTime)
-        .addCol(tblOfflinePaymentClaims::ofpcCreatedBy_usrID)
-        .addCol(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID)
-        .addCol(tblVoucher::vchID)
-        .addCol(tblVoucher::vch_usrID)
-        .addCol(tblVoucher::vchDesc)
-        .addCol(tblVoucher::vchType)
-        .addCol(tblVoucher::vchTotalAmount)
-        .addCol(tblVoucher::vchStatus)
-        .addCol(tblVoucher::vchCreationDateTime)
+        .addCols({
+                     tblOfflinePaymentClaims::ofpcID,
+                     tblOfflinePaymentClaims::ofpc_vchID,
+                     tblOfflinePaymentClaims::ofpcBank,
+                     tblOfflinePaymentClaims::ofpcReceiptCode,
+                     tblOfflinePaymentClaims::ofpcReceiptDate,
+                     tblOfflinePaymentClaims::ofpcAmount,
+                     tblOfflinePaymentClaims::ofpcNotes,
+                     tblOfflinePaymentClaims::ofpcStatus,
+                     tblOfflinePaymentClaims::ofpcCreationDateTime,
+                     tblOfflinePaymentClaims::ofpcCreatedBy_usrID,
+                     tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,
+                     tblVoucher::vchID,
+                     tblVoucher::vch_usrID,
+                     tblVoucher::vchDesc,
+                     tblVoucher::vchType,
+                     tblVoucher::vchTotalAmount,
+                     tblVoucher::vchStatus,
+                     tblVoucher::vchCreationDateTime,
+                 })
         .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1566,25 +1577,27 @@ QVariant Account::apiPOSTfixtureSetup(
                     { tblPaymentGateways::pgwAllowedDomainName, "dev.test" },
                 };
                 quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
-//                                           .addCol(tblPaymentGateways::pgwID)
-                                           .addCol(tblPaymentGateways::pgwName)
-                                           .addCol(tblPaymentGateways::pgwType)
-                                           .addCol(tblPaymentGateways::pgwDriver)
-                                           .addCol(tblPaymentGateways::pgwMetaInfo)
-                                           .addCol(tblPaymentGateways::pgwAllowedDomainName)
-//                                           .addCol(tblPaymentGateways::pgwTransactionFeeValue)
-//                                           .addCol(tblPaymentGateways::pgwTransactionFeeType)
-//                                           .addCol(tblPaymentGateways::pgwMinRequestAmount)
-//                                           .addCol(tblPaymentGateways::pgwMaxRequestAmount)
-//                                           .addCol(tblPaymentGateways::pgwMaxPerDayAmount)
-//                                           .addCol(tblPaymentGateways::pgwLastPaymentDateTime)
-//                                           .addCol(tblPaymentGateways::pgwSumTodayPaidAmount)
-//                                           .addCol(tblPaymentGateways::pgwSumRequestCount)
-//                                           .addCol(tblPaymentGateways::pgwSumRequestAmount)
-//                                           .addCol(tblPaymentGateways::pgwSumFailedCount)
-//                                           .addCol(tblPaymentGateways::pgwSumOkCount)
-//                                           .addCol(tblPaymentGateways::pgwSumPaidAmount)
-//                                           .addCol(tblPaymentGateways::pgwStatus)
+                                           .addCols({
+//                                                        tblPaymentGateways::pgwID,
+                                                        tblPaymentGateways::pgwName,
+                                                        tblPaymentGateways::pgwType,
+                                                        tblPaymentGateways::pgwDriver,
+                                                        tblPaymentGateways::pgwMetaInfo,
+                                                        tblPaymentGateways::pgwAllowedDomainName,
+//                                                        tblPaymentGateways::pgwTransactionFeeValue,
+//                                                        tblPaymentGateways::pgwTransactionFeeType,
+//                                                        tblPaymentGateways::pgwMinRequestAmount,
+//                                                        tblPaymentGateways::pgwMaxRequestAmount,
+//                                                        tblPaymentGateways::pgwMaxPerDayAmount,
+//                                                        tblPaymentGateways::pgwLastPaymentDateTime,
+//                                                        tblPaymentGateways::pgwSumTodayPaidAmount,
+//                                                        tblPaymentGateways::pgwSumRequestCount,
+//                                                        tblPaymentGateways::pgwSumRequestAmount,
+//                                                        tblPaymentGateways::pgwSumFailedCount,
+//                                                        tblPaymentGateways::pgwSumOkCount,
+//                                                        tblPaymentGateways::pgwSumPaidAmount,
+//                                                        tblPaymentGateways::pgwStatus,
+                                                    })
                                            .values(PaymentGatewayValues)
                                            .execute(1);
 

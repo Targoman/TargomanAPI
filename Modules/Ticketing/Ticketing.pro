@@ -12,6 +12,6 @@ addSubdirs(moduleSrc, Dependencies)
 addSubdirs(functionalTest, Dependencies)
 
 OTHER_FILES += \
-    migrations/db/* \
-    migrations/local/* \
+    migrations/db/*.sql \
+    migrations/local/*.sh \
     migrations/local/.migrations

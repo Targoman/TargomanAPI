@@ -274,6 +274,40 @@ DBExpression DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _i
 }
 
 /***************************************************************************************/
+/* DBExpressionCase ********************************************************************/
+/***************************************************************************************/
+DBExpressionCaseWhen::DBExpressionCaseWhen(DBExpressionCase *_parent) :
+    Parent(_parent)
+{ ; }
+
+DBExpressionCase& DBExpressionCaseWhen::then(const QString &_then) const {
+    this->Parent->Buffer = this->Parent->Buffer + " THEN " + _then;
+    return *this->Parent;
+}
+
+/***************************************************************************************/
+DBExpressionCase::DBExpressionCase(const QString &_case) :
+    Buffer(_case)
+{ ; }
+
+const DBExpressionCaseWhen DBExpressionCase::when(const QString &_when) {
+    if (this->Buffer.isEmpty())
+        this->Buffer = "WHEN " + _when;
+    else
+        this->Buffer = this->Buffer + " WHEN " + _when;
+    return DBExpressionCaseWhen(this);
+}
+
+DBExpressionCase& DBExpressionCase::else_(const QString &_else) {
+    this->Buffer = this->Buffer + " ELSE " + _else;
+    return *this;
+}
+
+DBExpressionCase::operator DBExpression() const {
+    return DBExpression::VALUE(QString("CASE %1 END").arg(this->Buffer));
+}
+
+/***************************************************************************************/
 /* clsColSpecs *************************************************************************/
 /***************************************************************************************/
 class clsColSpecsData : public QSharedData
@@ -319,38 +353,38 @@ clsColSpecs::clsColSpecs(const clsColSpecs& _other) : Data(_other.Data) { ; }
 clsColSpecs::~clsColSpecs() { ; }
 
 clsColSpecs::clsColSpecs(
-        const QString& _name,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const QString& _name,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->Name = _name;
     this->Data->RenameAs = _renameAs;
 }
 
 clsColSpecs::clsColSpecs(
-        const DBExpression& _expression,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const DBExpression& _expression,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->RenameAs = _renameAs;
     this->Data->Expression = _expression;
 }
 
 clsColSpecs::clsColSpecs(
-        const enuAggregation::Type _aggregation_Simple,
-        const QString& _name,
-        const QString& _renameAs
-    ) : Data(new clsColSpecsData) {
+    const enuAggregation::Type _aggregation_Simple,
+    const QString& _name,
+    const QString& _renameAs
+) : Data(new clsColSpecsData) {
     this->Data->Name = _name;
     this->Data->RenameAs = _renameAs;
     this->Data->SimpleAggregation = _aggregation_Simple;
 }
 
 clsColSpecs::clsColSpecs(
-        const enuConditionalAggregation::Type _ConditionalAggregation,
-        const clsCondition& _condition,
-        const QString& _renameAs,
-        const QVariant& _trueValue,
-        const QVariant& _falseValue
-    ) : Data(new clsColSpecsData) {
+    const enuConditionalAggregation::Type _ConditionalAggregation,
+    const clsCondition& _condition,
+    const QString& _renameAs,
+    const QVariant& _trueValue,
+    const QVariant& _falseValue
+) : Data(new clsColSpecsData) {
     this->Data->RenameAs = _renameAs;
     this->Data->ConditionalAggregation = _ConditionalAggregation;
     this->Data->Condition = _condition;
@@ -364,17 +398,17 @@ const QString clsColSpecs::renameAs() const
 }
 
 QString clsColSpecs::buildColNameString(
-        const QString &_tableName,
-        const QString &_tableAlias,
-        const QString &_otherTableAlias,
-        const QMap<QString, stuRelatedORMField> &_selectableColsMap,
-        const QMap<QString, stuRelatedORMField> &_filterableColsMap,
-        bool _allowUseColumnAlias,
-        QStringList &_renamedColumns,
-        bool _appendAs,
-        const stuRelation &_relation,
-        /*OUT*/ bool *_isStatusColumn
-    ) {
+    const QString &_tableName,
+    const QString &_tableAlias,
+    const QString &_otherTableAlias,
+    const QMap<QString, stuRelatedORMField> &_selectableColsMap,
+    const QMap<QString, stuRelatedORMField> &_filterableColsMap,
+    bool _allowUseColumnAlias,
+    QStringList &_renamedColumns,
+    bool _appendAs,
+    const stuRelation &_relation,
+    /*OUT*/ bool *_isStatusColumn
+) {
     auto applyRenameAs = [this, &_appendAs](QString _fieldString) {
         if ((_appendAs == false) || this->Data->RenameAs.isEmpty())
             return _fieldString;
@@ -548,22 +582,25 @@ struct stuConditionData
 //    };
 
     stuConditionData(
-            bool _isAggregator,
-            QString _col) :
+        bool _isAggregator,
+        QString _col
+    ) :
         IsAggregator(true),
         ColSpecs(_col, {}) {
         Q_UNUSED(_isAggregator);
     }
 
     stuConditionData(const clsCondition& _condition) :
-        Condition(_condition), IsAggregator(false)
+        Condition(_condition),
+        IsAggregator(false)
     { ; }
 
     stuConditionData(
-            QString _tableNameOrAlias,
-            const clsColSpecs& _colSpecs,
-            enuConditionOperator::Type _operator,
-            QVariant _value = {}) :
+        QString _tableNameOrAlias,
+        const clsColSpecs& _colSpecs,
+        enuConditionOperator::Type _operator,
+        QVariant _value = {}
+    ) :
         IsAggregator(false),
         TableNameOrAlias(_tableNameOrAlias),
         ColSpecs(_colSpecs),
@@ -572,11 +609,12 @@ struct stuConditionData
     { ; }
 
     stuConditionData(
-            QString _tableNameOrAlias,
-            const clsColSpecs& _colSpecs,
-            enuConditionOperator::Type _operator,
-            QString _otherTableNameOrAlias,
-            const clsColSpecs& _otherColSpecs) :
+        QString _tableNameOrAlias,
+        const clsColSpecs& _colSpecs,
+        enuConditionOperator::Type _operator,
+        QString _otherTableNameOrAlias,
+        const clsColSpecs& _otherColSpecs
+    ) :
         IsAggregator(false),
         TableNameOrAlias(_tableNameOrAlias),
         ColSpecs(_colSpecs),
@@ -1304,7 +1342,7 @@ public:
                     this->Owner->Data->Alias,
                     this->Owner->Data->Table.SelectableColsMap,
                     this->Owner->Data->Table.FilterableColsMap,
-                    false,
+                    true, //false,
                     this->Owner->Data->BaseQueryPreparedItems.RenamedCols
                 );
             }
@@ -1439,6 +1477,14 @@ template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::ri
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
 template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable.name(), {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable.name(), _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const clsTable& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable.name(), _alias);      }
 
 //-- nested -------------------------
 template <class itmplDerived>
@@ -2975,10 +3021,10 @@ CreateQuery& CreateQuery::options_ignore() {
 \***********************/
 CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
 //    if (this->Data->Values.length())
-//        throw new exQueryBuilder("Columns must be defined before values");
+//        throw exQueryBuilder("Columns must be defined before values");
 
 //    if (this->Data->Select != nullptr)
-//        throw new exQueryBuilder("Columns must be defined before select query");
+//        throw exQueryBuilder("Columns must be defined before select query");
 
     foreach (auto Col, _cols)
         this->addCol(Col);
@@ -2987,10 +3033,10 @@ CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
 
 CreateQuery& CreateQuery::addCol(const QString& _col) {
 //    if (this->Data->Values.length())
-//        throw new exQueryBuilder("Columns must be defined before values");
+//        throw exQueryBuilder("Columns must be defined before values");
 
 //    if (this->Data->Select != nullptr)
-//        throw new exQueryBuilder("Columns must be defined before select query");
+//        throw exQueryBuilder("Columns must be defined before select query");
 
     this->Data->Cols.append(_col);
     return *this;
@@ -3001,10 +3047,10 @@ CreateQuery& CreateQuery::addCol(const QString& _col) {
 CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
 
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before values");
+        throw exQueryBuilder("Columns must be defined before values");
 
     if (this->Data->Select.isValid())
-        throw new exQueryBuilder("Select query is not empty");
+        throw exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_oneRecordValues);
 //    qDebug() << "----------------1:" << _oneRecordValues;
@@ -3014,10 +3060,10 @@ CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
 }
 CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues) {
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before values");
+        throw exQueryBuilder("Columns must be defined before values");
 
     if (this->Data->Select.isValid())
-        throw new exQueryBuilder("Select query is not empty");
+        throw exQueryBuilder("Select query is not empty");
 
     this->Data->Values.append(_multipleRecordValues);
 
@@ -3028,10 +3074,10 @@ CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues
 \***********************/
 CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery) {
     if (this->Data->Cols.isEmpty())
-        throw new exQueryBuilder("Columns must be defined before select query");
+        throw exQueryBuilder("Columns must be defined before select query");
 
     if (this->Data->Values.length())
-        throw new exQueryBuilder("Values is not empty");
+        throw exQueryBuilder("Values is not empty");
 
     this->Data->Select = _selectQuery;
 

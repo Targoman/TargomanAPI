@@ -101,13 +101,15 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
-//        .addCol(tblPaymentGateways::pgwID)
-//        .addCol(tblPaymentGateways::pgwName)
-        .addCol(tblPaymentGateways::pgwType)
-//        .addCol(tblPaymentGateways::pgwDriver)
-//        .addCol(tblPaymentGateways::pgwMetaInfo)
-//        .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
-//        .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
+                      .addCols({
+//                                   tblPaymentGateways::pgwID,
+//                                   tblPaymentGateways::pgwName,
+                                   tblPaymentGateways::pgwType,
+//                                   tblPaymentGateways::pgwDriver,
+//                                   tblPaymentGateways::pgwMetaInfo,
+//                                   "tmptbl_inner.inner_pgwSumTodayPaidAmount",
+//                                   "tmptbl_inner.inner_pgwTransactionFeeAmount",
+                               })
         .leftJoin(SelectQuery(PaymentGateways::instance())
             .addCol(tblPaymentGateways::pgwID)
             .addCol(enuConditionalAggregation::IF,
@@ -178,13 +180,15 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
-        .addCol(tblPaymentGateways::pgwID)
-        .addCol(tblPaymentGateways::pgwName)
-        .addCol(tblPaymentGateways::pgwType)
-        .addCol(tblPaymentGateways::pgwDriver)
-        .addCol(tblPaymentGateways::pgwMetaInfo)
-        .addCol("tmptbl_inner.inner_pgwSumTodayPaidAmount")
-        .addCol("tmptbl_inner.inner_pgwTransactionFeeAmount")
+        .addCols({
+                     tblPaymentGateways::pgwID,
+                     tblPaymentGateways::pgwName,
+                     tblPaymentGateways::pgwType,
+                     tblPaymentGateways::pgwDriver,
+                     tblPaymentGateways::pgwMetaInfo,
+                     "tmptbl_inner.inner_pgwSumTodayPaidAmount",
+                     "tmptbl_inner.inner_pgwTransactionFeeAmount",
+                 })
         .leftJoin(SelectQuery(PaymentGateways::instance())
             .addCol(tblPaymentGateways::pgwID)
             .addCol(enuConditionalAggregation::IF,
@@ -375,21 +379,22 @@ quint64 PaymentLogic::approveOnlinePayment(
         throw exPayment("paymentMD5 is empty");
 
     QVariantMap OnlinePaymentInfo = SelectQuery(OnlinePayments::instance())
-            .addCol(tblOnlinePayments::onpID)
-            .addCol(tblOnlinePayments::onpMD5)
-            .addCol(tblOnlinePayments::onp_vchID)
-            .addCol(tblOnlinePayments::onp_pgwID)
-            .addCol(tblOnlinePayments::onpPGTrnID)
-            .addCol(tblOnlinePayments::onpAmount)
-            .addCol(tblOnlinePayments::onpResult)
-            .addCol(tblOnlinePayments::onpStatus)
-            //----------------
-            .addCol(tblPaymentGateways::pgwID)
-            .addCol(tblPaymentGateways::pgwName)
-            .addCol(tblPaymentGateways::pgwType)
-            .addCol(tblPaymentGateways::pgwDriver)
-            .addCol(tblPaymentGateways::pgwMetaInfo)
-            //----------------
+            .addCols({
+                         tblOnlinePayments::onpID,
+                         tblOnlinePayments::onpMD5,
+                         tblOnlinePayments::onp_vchID,
+                         tblOnlinePayments::onp_pgwID,
+                         tblOnlinePayments::onpPGTrnID,
+                         tblOnlinePayments::onpAmount,
+                         tblOnlinePayments::onpResult,
+                         tblOnlinePayments::onpStatus,
+                         //----------------
+                         tblPaymentGateways::pgwID,
+                         tblPaymentGateways::pgwName,
+                         tblPaymentGateways::pgwType,
+                         tblPaymentGateways::pgwDriver,
+                         tblPaymentGateways::pgwMetaInfo,
+                     })
             .innerJoinWith("paymentGateway")
             .where({ tblOnlinePayments::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
             .one();

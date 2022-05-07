@@ -47,6 +47,12 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Percent = '%',
                      Currency  = '$',
                      );
+} //namespace Targoman::API::AAA
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+
+namespace Targoman::API::AAA {
 
 //inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
@@ -384,8 +390,5 @@ TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucher)             // -> TAPI_REG
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::OrderAdditives_t)       // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItemForTrustedAction)   // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 #endif // TARGOMAN_API_AAA_ACCOUNTING_DEFS_H

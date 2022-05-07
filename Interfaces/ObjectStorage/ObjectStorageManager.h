@@ -56,29 +56,13 @@ TARGOMAN_CREATE_CONSTEXPR(uflFullFileUrl);
 class ObjectStorageManager
 {
 public:
-    static QString getFileUrl(
-        const quint64 _currentUserID,
-        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
-        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const quint64 _uploadedFileID
-    );
-
-    static void applyGetFileUrlInQuery(
-        SelectQuery &_query,
-        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue
-//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-//        const QString &_foreignTableName,
-//        const QString &_foreignTableUploadedFileIDFieldName
-        );
-
     static QVariantMap saveFiles(
         const quint64 _currentUserID,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const TAPI::Files_t &_files
+        const TAPI::Files_t &_files,
+        const QString &_path = {}
     );
 
     static quint64 saveFile(
@@ -86,7 +70,8 @@ public:
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-        const TAPI::stuFileInfo &_file
+        const TAPI::stuFileInfo &_file,
+        QString _path = {}
     );
 
 //    static Targoman::API::Helpers::stuSaveFileResult saveFile(
@@ -95,6 +80,23 @@ public:
 //            QString &_fileName,
 //            const QString &_base64Content
 //            );
+
+    static void applyGetFileUrlInQuery(
+        SelectQuery &_query,
+        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+        const QString &_foreignTableName,
+        const QString &_foreignTableUploadedFileIDFieldName
+        );
+
+//    static QString getFileUrl(
+//        const quint64 _currentUserID,
+//        Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+//        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+//        Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+//        const quint64 _uploadedFileID
+//    );
 
 private:
     struct stuProcessQueueParams {
@@ -106,13 +108,13 @@ private:
         quint16 MaxItemsCount = 100;
 
         stuProcessQueueParams(
-                quint64 _currentUserID,
-                Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-                Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
-                Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
-                quint64 _uploadedFileID = 0,
-                quint16 _maxItemsCount = 100
-            ) :
+            quint64 _currentUserID,
+            Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
+            Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
+            Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+            quint64 _uploadedFileID = 0,
+            quint16 _maxItemsCount = 100
+        ) :
             CurrentUserID(_currentUserID),
             UploadFiles(_uploadFiles),
             UploadQueue(_uploadQueue),
@@ -124,13 +126,7 @@ private:
 
     static bool processQueue(const stuProcessQueueParams &_processQueueParams);
 
-    static bool storeFile(
-        const enuUploadGatewayType::Type &_storageType,
-        const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
-    );
+    static bool storeFileToGateway(const ORM::Private::stuProcessUploadQueueInfo &_queueInfo);
 };
 
 } //namespace Targoman::API::ObjectStorage

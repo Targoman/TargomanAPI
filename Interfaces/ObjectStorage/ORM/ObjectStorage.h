@@ -28,6 +28,8 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 using namespace Targoman::Common;
 
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
+
 //#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
 //using namespace Targoman::API::Helpers;
 
@@ -46,8 +48,9 @@ TARGOMAN_DEFINE_ENUM(enuUploadFileStatus,
 
 TARGOMAN_DEFINE_ENUM(enuUploadQueueStatus,
                      New        = 'N',
-                     Uploading  = 'U', //queue(s) are in uploading
+//                     Uploading  = 'U', //queue(s) are in uploading
                      Stored     = 'S', //queued before and upload to remote storage completed
+                     Error      = 'E',
                      Removed    = 'R'
                      )
 
@@ -61,15 +64,26 @@ TARGOMAN_DEFINE_ENUM(enuUploadGatewayStatus,
                      Disabled   = 'D',
                      Removed    = 'R'
                      )
+} //namespace Targoman::API::ObjectStorage::ORM
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadFileStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadQueueStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayStatus);
+
+namespace Targoman::API::ObjectStorage::ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblUploadFiles {
     constexpr char Name[] = "tblUploadFiles";
+
     TARGOMAN_CREATE_CONSTEXPR(uflID);
-    TARGOMAN_CREATE_CONSTEXPR(uflFileName);
-    TARGOMAN_CREATE_CONSTEXPR(uflFileUUID);
+    TARGOMAN_CREATE_CONSTEXPR(uflPath);
+    TARGOMAN_CREATE_CONSTEXPR(uflOriginalFileName);
+    TARGOMAN_CREATE_CONSTEXPR(uflCounter);
+    TARGOMAN_CREATE_CONSTEXPR(uflStoredFileName);
     TARGOMAN_CREATE_CONSTEXPR(uflSize);
     TARGOMAN_CREATE_CONSTEXPR(uflFileType);
     TARGOMAN_CREATE_CONSTEXPR(uflMimeType);
@@ -78,31 +92,60 @@ namespace tblUploadFiles {
     TARGOMAN_CREATE_CONSTEXPR(uflCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(uflCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(uflUpdatedBy_usrID);
+    //TARGOMAN_CREATE_CONSTEXPR(uflUniqueMD5);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(uflID),
+        SF_QString(uflPath),
+        SF_QString(uflOriginalFileName),
+        SF_quint32(uflCounter),
+        SF_QString(uflStoredFileName),
+        SF_quint64(uflSize),
+        SF_QString(uflFileType),
+        SF_QString(uflMimeType),
+        SF_QString(uflLocalFullFileName),
+        SF_quint64(uflCreatedBy_usrID)
+    );
 }
 
 namespace tblUploadQueue {
     constexpr char Name[] = "tblUploadQueue";
+
     namespace Relation {
         constexpr char File[] = "file";
         constexpr char Gateway[] = "gateway";
     }
+
     TARGOMAN_CREATE_CONSTEXPR(uquID);
     TARGOMAN_CREATE_CONSTEXPR(uqu_uflID);
     TARGOMAN_CREATE_CONSTEXPR(uqu_ugwID);
+    TARGOMAN_CREATE_CONSTEXPR(uquLockedAt);
+    TARGOMAN_CREATE_CONSTEXPR(uquLockedBy);
+    TARGOMAN_CREATE_CONSTEXPR(uquLastTryAt);
+    TARGOMAN_CREATE_CONSTEXPR(uquStoredAt);
+    TARGOMAN_CREATE_CONSTEXPR(uquResult);
     TARGOMAN_CREATE_CONSTEXPR(uquStatus);
     TARGOMAN_CREATE_CONSTEXPR(uquCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(uquCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(uquUpdatedBy_usrID);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(uquID),
+        SF_quint64(uqu_uflID),
+        SF_quint32(uqu_ugwID),
+        SF_Enum(enuUploadQueueStatus, uquStatus, enuUploadQueueStatus::New)
+    );
 }
 
 namespace tblUploadGateways {
     constexpr char Name[] = "tblUploadGateways";
+
     TARGOMAN_CREATE_CONSTEXPR(ugwID);
+    TARGOMAN_CREATE_CONSTEXPR(ugwName);
     TARGOMAN_CREATE_CONSTEXPR(ugwType);
-//    TARGOMAN_CREATE_CONSTEXPR(ugwBucket);
-//    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointUrl);
-//    TARGOMAN_CREATE_CONSTEXPR(ugwSecretKey);
-//    TARGOMAN_CREATE_CONSTEXPR(ugwAccessKey);
+    TARGOMAN_CREATE_CONSTEXPR(ugwBucket);
+    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointUrl);
+    TARGOMAN_CREATE_CONSTEXPR(ugwEndpointIsVirtualHosted);
     TARGOMAN_CREATE_CONSTEXPR(ugwMetaInfo);
     // conditions
     TARGOMAN_CREATE_CONSTEXPR(ugwAllowedFileTypes);
@@ -122,44 +165,35 @@ namespace tblUploadGateways {
     TARGOMAN_CREATE_CONSTEXPR(ugwCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(ugwCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ugwUpdatedBy_usrID);
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint32(ugwID),
+        SF_NULLABLE_Enum(enuUploadGatewayType, ugwType),
+        SF_QString(ugwBucket),
+        SF_QString(ugwEndpointUrl),
+        SF_bool(ugwEndpointIsVirtualHosted),
+        SF_JSON_t(ugwMetaInfo),
+        SF_quint64(ugwCreatedFilesCount),
+        SF_quint64(ugwCreatedFilesSize),
+//        SF_NULLABLE_TYPE(TAPI::DateTime_t) ugwLastActionTime), //used for loadbalance
+        SF_DateTime_t(ugwLastActionTime), //used for loadbalance
+        SF_Enum(enuUploadGatewayStatus, ugwStatus, enuUploadGatewayStatus::Active)
+    );
 }
 
 #pragma GCC diagnostic pop
 
 namespace Private {
+
 struct stuProcessUploadQueueInfo
 {
-    //Upload Queue
-    quint64 uquID;
-    quint64 uqu_uflID;
-    quint32 uqu_ugwID;
-    enuUploadQueueStatus::Type uquStatus;
+    tblUploadFiles::DTO UploadFiles;
+    tblUploadQueue::DTO UploadQueue;
+    tblUploadGateways::DTO UploadGateways;
 
-    //Upload File
-    quint64 uflID;
-    QString uflFileName;
-    QString uflFileUUID;
-    quint64 uflSize;
-    QString uflFileType;
-    QString uflMimeType;
-    QString uflLocalFullFileName;
-//    enuUploadFileStatus::Type uflStatus;
-
-    //Upload Gateway
-    quint32 ugwID;
-    enuUploadGatewayType::Type ugwType;
-//    QString ugwBucket;
-//    QString ugwEndpointUrl;
-//    QString ugwSecretKey;
-//    QString ugwAccessKey;
-    TAPI::JSON_t ugwMetaInfo;
-    quint64 ugwCreatedFilesCount;
-    quint64 ugwCreatedFilesSize;
-    NULLABLE_TYPE(TAPI::DateTime_t) ugwLastActionTime; //used for loadbalance
-    enuUploadGatewayStatus::Type ugwStatus;
-
-    void fromVariantMap(const QVariantMap& _info);
+    void fromVariantMap(const QVariantMap &_info);
 };
+
 } //namespace Private
 
 class intfUploadFiles : public intfSQLBasedModule
@@ -168,9 +202,9 @@ class intfUploadFiles : public intfSQLBasedModule
 
 public:
     intfUploadFiles(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
 
     struct stuObjectStorageConfigs
     {
@@ -179,6 +213,7 @@ public:
         stuObjectStorageConfigs(const stuObjectStorageConfigs &_other) :
             TempLocalStoragePath(_other.TempLocalStoragePath)
         { ; }
+
         stuObjectStorageConfigs(const QString &_localStoragePath) :
             TempLocalStoragePath(_localStoragePath)
         { ; }
@@ -186,7 +221,8 @@ public:
 
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;
 
-protected slots:
+private slots:
+    QVariant ORMGET("Get uploaded files")
 };
 
 class intfUploadQueue : public intfSQLBasedModule
@@ -195,9 +231,12 @@ class intfUploadQueue : public intfSQLBasedModule
 
 public:
     intfUploadQueue(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
+
+private slots:
+    QVariant ORMGET("Get upload queue")
 };
 
 class intfUploadGateways : public intfSQLBasedModule
@@ -206,23 +245,18 @@ class intfUploadGateways : public intfSQLBasedModule
 
 public:
     intfUploadGateways(
-            const QString &_schema,
-            const QString &_name
-        );
+        const QString &_schema,
+        const QString &_name
+    );
 
 private slots:
     QVariant ORMGET("Get object storage gateway information")
     quint32 ORMCREATE("Create a new object storage gateway by priviledged user")
     bool ORMUPDATE("Update object storage gateway info by priviledged user")
-    bool ORMDELETE("Delete a object storage gateway")
+    bool ORMDELETE("Delete an object storage gateway")
 };
 
 } //namespace Targoman::API::ObjectStorage::ORM
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadFileStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadQueueStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayType);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::ObjectStorage::ORM, enuUploadGatewayStatus);
 
 /****************************************************/
 //put this macro before module class definition (.h)
@@ -243,7 +277,7 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
     virtual intfUploadFiles::stuObjectStorageConfigs getObjectStorageConfigs() const { \
         return intfUploadFiles::stuObjectStorageConfigs( \
             _module::ObjectStorage::TempLocalStoragePath.value() \
@@ -260,7 +294,7 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
 }; \
 class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
 { \
@@ -272,15 +306,15 @@ public: \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
-    {} \
+    { ; } \
 };
 
 //put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
 #define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
-    QScopedPointer<UploadFiles>     _UploadFiles;       \
-    QScopedPointer<UploadQueue>     _UploadQueue;       \
-    QScopedPointer<UploadGateways>  _UploadGateways;    \
+    QScopedPointer<UploadFiles>     _UploadFiles;    \
+    QScopedPointer<UploadQueue>     _UploadQueue;    \
+    QScopedPointer<UploadGateways>  _UploadGateways; \
 public: \
     struct ObjectStorage { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/ObjectStorage/%2").arg(TARGOMAN_M2STR(_module), _name); } \

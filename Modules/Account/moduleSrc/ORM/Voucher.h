@@ -30,7 +30,7 @@
 
 namespace Targoman::API::AccountModule {
 
-//structures and enumes goes here
+//enumes goes here
 
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
@@ -42,12 +42,22 @@ TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      TransferTo     = 'T',
                      )
 
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuVoucherType);
+
+namespace Targoman::API::AccountModule {
+
+//structures goes here
+
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
 namespace tblVoucher {
     constexpr char Name[] = "tblVoucher";
+
     TARGOMAN_CREATE_CONSTEXPR(vchID);
     TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
@@ -80,7 +90,5 @@ private slots:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuVoucherType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_VOUCHER_H

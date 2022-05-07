@@ -26,17 +26,16 @@
 
 #include "intfObjectStorageGateway.h"
 #include "libTargomanCommon/Macros.h"
-//using namespace Targoman::Common;
-
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 
 namespace Targoman::API::ObjectStorage::Gateways {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace NFSMetaInfoJsonKey {
-TARGOMAN_CREATE_CONSTEXPR(Path);
+    TARGOMAN_CREATE_CONSTEXPR(Path);
 }
 #pragma GCC diagnostic pop
 
@@ -44,10 +43,11 @@ class gtwNFS : public intfObjectStorageGateway
 {
 public:
     static bool storeFile(
-        const TAPI::JSON_t &_metaInfo,
-        const QString &_fileName,
-        const QString &_fileUUID,
-        const QString &_fullFileName
+//        const TAPI::JSON_t &_metaInfo,
+        const ORM::tblUploadGateways::DTO &_uploadGateway,
+        const QString &_fullFileName,
+        const QString &_path,
+        const QString &_fileName
     );
 };
 

@@ -458,8 +458,10 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
             }))
 
             .leftJoin(SelectQuery(*this->AccountUserAssets)
-                      .addCol(tblAccountUserAssetsBase::uas_cpnID)
-                      .addCol(tblAccountUserAssetsBase::uas_vchID)
+                      .addCols({
+                                   tblAccountUserAssetsBase::uas_cpnID,
+                                   tblAccountUserAssetsBase::uas_vchID,
+                               })
                       .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::uasID, "_discountUsedCount")
                       .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
                       .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
@@ -687,14 +689,16 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     //PreVoucherItem.Sign
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
-        .addCol(tblAccountUserAssetsBase::uas_usrID)
-        .addCol(tblAccountUserAssetsBase::uas_slbID)
-        .addCol(tblAccountUserAssetsBase::uasQty)
-//        .addCol(tblAccountUserAssetsBase::uas_vchID)
-        .addCol(tblAccountUserAssetsBase::uasVoucherItemUUID)
-//        .addCol(tblAccountUserAssetsBase::uasPrefered)
-//        .addCol(tblAccountUserAssetsBase::uasOrderDateTime)
-//        .addCol(tblAccountUserAssetsBase::uasStatus)
+        .addCols({
+                     tblAccountUserAssetsBase::uas_usrID,
+                     tblAccountUserAssetsBase::uas_slbID,
+                     tblAccountUserAssetsBase::uasQty,
+//                     tblAccountUserAssetsBase::uas_vchID,
+                     tblAccountUserAssetsBase::uasVoucherItemUUID,
+//                     tblAccountUserAssetsBase::uasPrefered,
+//                     tblAccountUserAssetsBase::uasOrderDateTime,
+//                     tblAccountUserAssetsBase::uasStatus,
+                 })
     ;
 
     QVariantMap values;
@@ -710,9 +714,10 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     };
 
     if (Discount3.ID > 0) {
-        qry
-            .addCol(tblAccountUserAssetsBase::uas_cpnID)
-            .addCol(tblAccountUserAssetsBase::uasDiscountAmount)
+        qry.addCols({
+                        tblAccountUserAssetsBase::uas_cpnID,
+                        tblAccountUserAssetsBase::uasDiscountAmount,
+                    })
         ;
 
         values.insert(tblAccountUserAssetsBase::uas_cpnID, Discount3.ID);
@@ -845,9 +850,11 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
 
             //check uasStatus
             QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
-                                        .addCol(tblAccountUserAssetsBase::uasID)
-                                        .addCol(tblAccountUserAssetsBase::uas_slbID)
-                                        .addCol(tblAccountUserAssetsBase::uasStatus)
+                                        .addCols({
+                                                    tblAccountUserAssetsBase::uasID,
+                                                    tblAccountUserAssetsBase::uas_slbID,
+                                                    tblAccountUserAssetsBase::uasStatus,
+                                                 })
                                         .where({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
                                         .one();
             TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
@@ -877,8 +884,10 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasket
             UpdateQuery(*this->AccountUserAssets)
                     .set(tblAccountUserAssetsBase::
                         tblAccountUserAssetsBase::uasID)
-                                        .addCol(tblAccountUserAssetsBase::uas_slbID)
-                                        .addCol(tblAccountUserAssetsBase::uasStatus)
+                                        .addCols({
+                                                    tblAccountUserAssetsBase::uas_slbID,
+                                                    tblAccountUserAssetsBase::uasStatus,
+                                                 })
                                         .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
                                         .one();
 
@@ -1012,9 +1021,11 @@ bool intfAccountingBasedModule::cancelVoucherItem(
         return false;
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
-                                .addCol(tblAccountUserAssetsBase::uasID)
-                                .addCol(tblAccountUserAssetsBase::uas_slbID)
-                                .addCol(tblAccountUserAssetsBase::uasStatus)
+                                .addCols({
+                                             tblAccountUserAssetsBase::uasID,
+                                             tblAccountUserAssetsBase::uas_slbID,
+                                             tblAccountUserAssetsBase::uasStatus,
+                                         })
                                 .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                                 .one();
 

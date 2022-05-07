@@ -21,6 +21,9 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
+#include "GenericTypes.h"
+#include "tmplAPIArg.h"
+
 #include <QRegularExpression>
 #include <QUrl>
 #include <QJsonObject>
@@ -31,7 +34,6 @@
 #include "base.h"
 
 #include "intfAPIArgManipulator.h"
-#include "GenericTypes.h"
 #include "HTTPExceptions.hpp"
 
 #include "Interfaces/DBM/clsORMField.h"
@@ -41,8 +43,12 @@ using namespace TAPI;
 using namespace Targoman::API;
 using namespace Targoman::API::Common;
 
-QList<intfAPIArgManipulator*> Server::gOrderedMetaTypeInfo;
-QList<intfAPIArgManipulator*> Server::gUserDefinedTypesInfo;
+namespace Targoman::API::Server {
+
+QList<intfAPIArgManipulator*> gOrderedMetaTypeInfo;
+QList<intfAPIArgManipulator*> gUserDefinedTypesInfo;
+
+} // namespace Targoman::API::Server
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
@@ -109,7 +115,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ TAPI,
     /* type               */ JWT_t,
     /* toVariantLambda    */ nullptr,
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> JWT_t {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> JWT_t {
         QJsonObject Obj;
         if (_value.canConvert<QVariantMap>())
             Obj = Obj.fromVariantMap(_value.value<QVariantMap>());
@@ -323,7 +329,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ TAPI,
     /* type               */ Date_t,
     /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Date_t {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Date_t {
         if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
         return _value.toDate();
@@ -335,7 +341,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ TAPI,
     /* type               */ Time_t,
     /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> Time_t {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Time_t {
         if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
         return _value.toTime();
@@ -347,7 +353,7 @@ TAPI_REGISTER_METATYPE(
     /* namespace          */ TAPI,
     /* type               */ DateTime_t,
     /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _paramName) -> DateTime_t {
+    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> DateTime_t {
         if (_value.canConvert<QDate>() == false) {
             print_stacktrace();
             throw exHTTPBadRequest(_paramName + " is not a valid DateTime: <" + _value.toString() + ">");
