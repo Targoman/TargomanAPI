@@ -140,7 +140,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
 ) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     if (_file.Size > 0)
