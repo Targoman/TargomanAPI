@@ -44,6 +44,7 @@ intfAlerts::intfAlerts() :
             { tblAlerts::alrReplacements,           S(TAPI::DBText_t),                          QFV,                        QRequired,  UPAdmin },
             { tblAlerts::alrCreateDate,             ORM_CREATED_ON },
             { tblAlerts::alrLockedAt,               S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
+            { tblAlerts::alrLockedBy,               S(QString),                                 QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrLastTryAt,              S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrSentDate,               S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
             { tblAlerts::alrStatus,                 ORM_STATUS_FIELD(Targoman::API::ORM::enuAlertStatus,                    Targoman::API::ORM::enuAlertStatus::New) },
