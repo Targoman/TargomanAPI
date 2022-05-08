@@ -55,23 +55,35 @@ public:
 
 private slots:
     void initTestCase() {
-        cleanupAll();
-        initUnitTestData(false);
+        initUnitTestData(false, true);
     }
 
     void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
-//        cleanupUnitTestData();
-
-//        cleanupAll();
+        cleanupUnitTestData();
     }
 
 private:
     /***************************************************************************************/
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
-    void cleanupAll() {
+/*
+DELETE FROM dev_AAA.tblWalletBalances;
+DELETE FROM dev_AAA.tblWalletsTransactions;
+DELETE FROM dev_AAA.tblUserWallets;
+DELETE FROM dev_AAA.tblOnlinePayments;
+
+DELETE FROM dev_AAA.tblOfflinePayments;
+DELETE FROM dev_AAA.tblOfflinePaymentClaims;
+DELETE FROM dev_AAA.tblVoucher;
+DELETE FROM dev_AAA.tblApprovalRequest;
+DELETE FROM dev_AAA.tblActiveSessions;
+DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
+DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
+DELETE FROM dev_Common.tblAlerts;
+*/
+    void cleanupUnitTestData() {
         QVariantMap Result;
 
         clsDAC DAC;
@@ -91,7 +103,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblWalletBalances CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -106,7 +120,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblWalletsTransactions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblWalletsTransactions CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -119,14 +135,16 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUserWallets", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblUserWallets CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
-                DELETE op
-                  FROM tblOnlinePayments op
+                DELETE onp
+                  FROM tblOnlinePayments onp
             INNER JOIN tblVoucher vch
-                    ON vch.vchID = op.onp_vchID
+                    ON vch.vchID = onp.onp_vchID
             INNER JOIN tblUser u
                     ON u.usrID = vch.vch_usrID
                  WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
@@ -134,14 +152,16 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOnlinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblOnlinePayments CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
-                DELETE fp
-                  FROM tblOfflinePayments fp
+                DELETE ofp
+                  FROM tblOfflinePayments ofp
             INNER JOIN tblVoucher vch
-                    ON vch.vchID = fp.ofp_vchID
+                    ON vch.vchID = ofp.ofp_vchID
             INNER JOIN tblUser u
                     ON u.usrID = vch.vch_usrID
                  WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
@@ -149,7 +169,26 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblOfflinePayments", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblOfflinePayments CLEANUP EXCEPTION ***" << _exp.what();
+        }
+
+        try {
+            QString QueryString = R"(
+                DELETE ofpc
+                  FROM tblOfflinePaymentClaims ofpc
+            INNER JOIN tblVoucher vch
+                    ON vch.vchID = ofpc.ofpc_vchID
+            INNER JOIN tblUser u
+                    ON u.usrID = vch.vch_usrID
+                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+                    OR u.usrMobile LIKE '+98999888%'
+            ;)";
+            clsDACResult DACResult = DAC.execQuery("", QueryString);
+            Result.insert("tblOfflinePaymentClaims", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblOfflinePaymentClaims CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -162,7 +201,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblVoucher", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblVoucher CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -175,7 +216,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblApprovalRequest", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblApprovalRequest CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -188,7 +231,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblActiveSessions", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblActiveSessions CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -199,7 +244,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblUser", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblUser CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         try {
             QString QueryString = R"(
@@ -209,7 +256,9 @@ private:
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
             Result.insert("tblRoles", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (...) { ; }
+        } catch (std::exception &_exp) {
+            qDebug() << "*** tblRoles CLEANUP EXCEPTION ***" << _exp.what();
+        }
 
         qDebug() << Result;
     }
@@ -529,8 +578,8 @@ private slots:
 
     void CreateForgotPasswordLink() {
         QVERIFY(callUserAPI(RESTClientHelper::POST,
-                        "Account/createForgotPasswordLink",{}, {
-                            {"emailOrMobile", UT_UserEmail},
+                        "Account/createForgotPasswordLink", {}, {
+                            { "emailOrMobile", UT_UserEmail },
                         }).toBool());
     }
 
@@ -1093,7 +1142,10 @@ private slots:
             QVERIFY(this->WithdrawalID > 0);
 
         } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
+            if (QString(exp.what()) == "User not found")
+                QVERIFY(true);
+            else
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
     void requestWithdrawalFor_admin_invalid_iban() {
@@ -1114,11 +1166,29 @@ private slots:
             QVERIFY(this->WithdrawalID > 0);
 
         } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
+            if (QString(exp.what()) == "IBAN not defined")
+                QVERIFY(true);
+            else
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
     //    "Account/UserWallets/acceptWithdrawal"
 
 };
+
+/*
+DELETE FROM dev_AAA.tblWalletsTransactions;
+DELETE FROM dev_AAA.tblWalletBalances;
+DELETE FROM dev_AAA.tblUserWallets;
+DELETE FROM dev_AAA.tblOnlinePayments;
+DELETE FROM dev_AAA.tblOfflinePayments;
+DELETE FROM dev_AAA.tblOfflinePaymentClaims;
+DELETE FROM dev_AAA.tblVoucher;
+DELETE FROM dev_AAA.tblApprovalRequest;
+DELETE FROM dev_AAA.tblActiveSessions;
+DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
+DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
+DELETE FROM dev_Common.tblAlerts;
+*/
 
 #endif // TEST_ACCOUNT_HPP
