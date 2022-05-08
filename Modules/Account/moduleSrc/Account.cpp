@@ -168,7 +168,7 @@ Account::Account() :
         if (InputFile.open(QIODevice::ReadOnly)) {
             QTextStream Stream(&InputFile);
             while (!Stream.atEnd())
-                InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), ""));
+                InvalidPasswords.insert(Stream.readLine().replace(QRegularExpression("#.*"), "").trimmed());
             InputFile.close();
         }
     }
@@ -685,8 +685,11 @@ bool Account::apichangePass(
 ) {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
+    clsJWT JWT(_APICALLBOOM.getJWT());
+
     this->callSP("spPassword_Change", {
-                     { "iUserID", _APICALLBOOM.getUserID() },
+                     { "iUserID", JWT.usrID() },
+                     { "iSessionGUID", JWT.session() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
                      { "iNewPass", _newPass },
