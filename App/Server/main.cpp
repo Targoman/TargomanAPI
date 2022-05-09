@@ -50,6 +50,8 @@ int main(int _argc, char *_argv[]) {
                     );
 #pragma GCC diagnostic pop
 
+//        TARGOMAN_IO_SETTINGS.ShowColored = true;
+
         QTimer::singleShot(10, new appTargomanAPI, SLOT(slotExecute()));
         return App.exec();
     } catch (exTargomanBase& ex) {

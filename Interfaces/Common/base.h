@@ -30,7 +30,7 @@
 //#include <QString>
 //#include <QTextStream>
 //#include "libTargomanCommon/CmdIO.h"
-//#include "libTargomanCommon/Logger.h"
+#include "libTargomanCommon/TLogger.h"
 //using namespace Targoman::Common;
 
 #define TAPI_DISABLE_COPY(Class) \

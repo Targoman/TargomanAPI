@@ -588,18 +588,17 @@ void clsRequestHandler::addHeaderValues(
     const QVariantMap &_responseHeaders
 ) {
     if (_responseHeaders.isEmpty() == false) {
-        TargomanLogInfo(7, "Response Custom Header Values:");
+        tInfoLog(7) << "Response Custom Header Values:";
 
         for (QVariantMap::const_iterator it = _responseHeaders.constBegin();
              it != _responseHeaders.constEnd();
              ++it
         ) {
-            TargomanLogInfo(7,
-                            "    "
-                            << it.key().toLatin1()
-                            << " : "
-                            << it->toString()
-                            );
+            tInfoLog(7) << "    "
+                        << it.key().toLatin1()
+                        << " : "
+                        << it->toString()
+                        ;
 
             this->Response->addHeaderValue(
                         it.key().toLatin1(),

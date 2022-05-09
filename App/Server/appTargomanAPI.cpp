@@ -147,6 +147,8 @@ void appTargomanAPI::slotExecute() {
 
         RESTAPIRegistry::dumpAPIs();
 
+        tDebug(5) << ">>>>> Server ready <<<<<";
+
     } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());
         QCoreApplication::exit(-1);
