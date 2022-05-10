@@ -50,6 +50,9 @@ static WebSocketServer gWSServer;
 #endif
 static clsUpdateAndPruneThread *gStatUpdateThread;
 
+RESTServer::RESTServer() :
+    IsStarted(false) { ; }
+
 void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     if (this->IsStarted)
         throw exTargomanInitialization("RESTServer can be run single instance only");
@@ -202,12 +205,9 @@ bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _p
 
     gServerStats.Connections.inc();
 
-    tInfoLog(7) << "New connection accepted from:" << _peerAddress.toString() << ":" << _peerPort;
+    TargomanLogInfo(7, "New connection accepted from:" << _peerAddress.toString() << ":" << _peerPort);
     return true;
 }
-
-RESTServer::RESTServer() :
-    IsStarted(false) { ; }
 
 } //namespace Server
 
