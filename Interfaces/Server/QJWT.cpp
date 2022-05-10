@@ -200,12 +200,12 @@ void QJWT::verifyJWT(
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     //-- check client ip -----
-    if (_jWTPayload.contains("prv")) {
-        QJsonObject PrivateObject = _jWTPayload["prv"].toObject();
+//    if (_jWTPayload.contains("prv")) {
+//        QJsonObject PrivateObject = _jWTPayload["prv"].toObject();
 
-        if (PrivateObject.contains("cip") && (PrivateObject["cip"].toString() != _remoteIP))
-            throw exHTTPForbidden("Invalid client IP");
-    }
+//        if (PrivateObject.contains("cip") && (PrivateObject["cip"].toString() != _remoteIP))
+//            throw exHTTPForbidden("Invalid client IP");
+//    }
 
     uint currentDateTime = QDateTime::currentDateTime().toTime_t();
 
