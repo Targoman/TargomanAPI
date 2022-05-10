@@ -63,7 +63,7 @@ void appTargomanAPI::slotExecute() {
         auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {
             _module->setInstancePointer();
 
-            TargomanDebug(0, "Loading module <" << _module->moduleFullName() << ">");
+            TargomanDebug(0) << "Loading module <" << _module->moduleFullName() << ">";
 
             foreach (auto ModuleMethod, _module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
@@ -146,6 +146,8 @@ void appTargomanAPI::slotExecute() {
         OpenAPIGenerator::retrieveJson();
 
         RESTAPIRegistry::dumpAPIs();
+
+        TargomanDebug(5) << ">>>>> Server ready <<<<<";
 
     } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());

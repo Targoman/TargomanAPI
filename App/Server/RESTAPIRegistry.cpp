@@ -649,14 +649,15 @@ void RESTAPIRegistry::dumpAPIs()
     QStringList Keys = APIs.keys();
     Keys.sort(); //Qt::CaseSensitivity::CaseInsensitive);
 
-    qDebug().noquote().nospace() << endl << Targoman::API::Helpers::ClientConfigs::RESTServerAddress.value();
+    TargomanDebug(5).noLabel().noquote().nospace() << endl << Targoman::API::Helpers::ClientConfigs::RESTServerAddress.value();
 
     int index = 1;
     foreach (const QString Name, Keys) {
         bool IsLastAPI = (Name == Keys.last());
 
-        qDebug().noquote().nospace()
-                << "│" << endl
+        TargomanDebug(5).noLabel().noquote().nospace()
+                << "│";
+        TargomanDebug(5).noLabel().noquote().nospace()
                 << (IsLastAPI ? "└" : "├") << "── "
                 << Name;
 
@@ -667,7 +668,7 @@ void RESTAPIRegistry::dumpAPIs()
 
             bool IsLastMethod = (Method == Methods.last());
 
-            qDebug().noquote().nospace()
+            TargomanDebug(5).noLabel().noquote().nospace()
                     << (IsLastAPI ? " " : "│") << "   "
                     << (IsLastMethod ? "└" : "├") << "── "
                     << QString::number(index++) << ") "
@@ -704,7 +705,7 @@ void RESTAPIRegistry::dumpAPIs()
 
                     bool IsLastParam = (ParamsIndex == API.APIObject->ParamTypesName.count()-1);
 
-                    qDebug().noquote().nospace()
+                    TargomanDebug(5).noLabel().noquote().nospace()
                             << (IsLastAPI ? " " : "│") << "   "
                             << (IsLastMethod ? " " : "│") << "   "
                             << (IsLastParam ?  "└" : "├") << "── "

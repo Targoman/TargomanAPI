@@ -594,12 +594,11 @@ void clsRequestHandler::addHeaderValues(
              it != _responseHeaders.constEnd();
              ++it
         ) {
-            TargomanLogInfo(7,
-                            "    "
-                            << it.key().toLatin1()
-                            << " : "
-                            << it->toString()
-                            );
+            TargomanLogInfo(7, "    "
+                               << it.key().toLatin1()
+                               << " : "
+                               << it->toString()
+                               );
 
             this->Response->addHeaderValue(
                         it.key().toLatin1(),
