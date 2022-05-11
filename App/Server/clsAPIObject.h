@@ -43,14 +43,16 @@ namespace Targoman::API::Server {
 
 class QMetaMethodExtended : public QMetaMethod {
 public:
-    QMetaMethodExtended(QMetaMethod _metaMethod, QVariantList _defaultValues, QString _doc) :
+    QMetaMethodExtended(QMetaMethod _metaMethod, QVariantList _defaultValues, QString _doc, bool _hidden) :
         QMetaMethod(_metaMethod),
         Doc(_doc),
-        DefaultValues(_defaultValues)
+        DefaultValues(_defaultValues),
+        Hidden(_hidden)
     { ; }
 
     QString Doc;
     QVariantList DefaultValues;
+    bool Hidden;
 };
 
 class clsAPIObject : public intfAPIObject, public QObject
@@ -71,6 +73,10 @@ public:
 
     inline bool requiresJWT() const {
         return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
+    }
+
+    inline bool isHidden() const {
+        return this->BaseMethod.Hidden;
     }
 
 //    inline bool requiresCookies() const {

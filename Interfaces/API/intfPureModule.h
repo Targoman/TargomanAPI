@@ -50,8 +50,8 @@ using namespace Targoman::API::Server;
 \**********************************************************************/
 //used by Api call methods
 //TAPI::JWT_t _JWT,
-#define GET_METHOD_ARGS_HEADER_APICALL \
-    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(_apiCallBoomType) \
+    _apiCallBoomType &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath = {}, \
     quint64 _pageIndex = 0, \
     quint16 _pageSize = 20, \
@@ -61,9 +61,12 @@ using namespace Targoman::API::Server;
     TAPI::GroupBy_t _groupBy = {}, \
     bool _reportCount = true
 
+#define GET_METHOD_ARGS_HEADER_APICALL              INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(APICALLBOOM_TYPE_JWT_DECL)
+#define ANONYMOUSE_GET_METHOD_ARGS_HEADER_APICALL   INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
+
 //TAPI::JWT_t _JWT,
-#define GET_METHOD_ARGS_IMPL_APICALL \
-    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(_apiCallBoomType) \
+    _apiCallBoomType &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath, \
     quint64 _pageIndex, \
     quint16 _pageSize, \
@@ -73,11 +76,24 @@ using namespace Targoman::API::Server;
     TAPI::GroupBy_t _groupBy, \
     bool _reportCount
 
+#define GET_METHOD_ARGS_IMPL_APICALL            INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_DECL)
+#define ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
+
 //#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _pageIndex, _pageSize, _cols, _filters, _orderBy, _groupBy, _reportCount
+
+#define ORM_EX_CONFIG(_method, ...)     QVariantMap confOf##_method() { return __VA_ARGS__; }
+
+#define ANONYMOUSE_ORMGET(_doc)         apiGET(ANONYMOUSE_GET_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfGET()                 { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfGET()                  { return _doc; }
+
+#define ANONYMOUSE_ORMGET_HIDDEN(_doc)  ANONYMOUSE_ORMGET(_doc); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
 #define ORMGET(_doc)                    apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET()                 { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET()                  { return _doc; }
+
+#define ORMGET_HIDDEN(_doc)             ORMGET(_doc); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
 #define ORMGETPureVirtual(_doc)         apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
     virtual QString signOfGET()         { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
@@ -267,87 +283,74 @@ namespace Targoman::API::API {
 #endif
 
 //-- REST BASE MACROS
-#define REST(_method, _name, _sig, _doc) \
+#define EXRESTCONFIGKEY_HIDDEN "hidden"
+#define EXRESTCONFIG_HIDDEN { EXRESTCONFIGKEY_HIDDEN, true }
+#define EXRESTCONFIGKEY_ALIAS "alias"
+#define EXRESTCONFIG_ALIAS(_alias) { EXRESTCONFIGKEY_ALIAS, _alias }
+
+#define EXREST(_method, _name, _sig, _doc, ...) \
     api##_method##_name _sig; \
     QString signOf##_method##_name() { return #_sig; } \
-    QString docOf##_method##_name() { return #_doc; }
+    QString docOf##_method##_name() { return #_doc; } \
+    QVariantMap confOf##_method##_name() { return __VA_ARGS__; }
+#define REST(_method, _name, _sig, _doc) \
+    EXREST(_method, _name, _sig, _doc, {})
 #define IMPL_REST(_method, _module, _name, _params) \
     _module::api##_method##_name _params
 
-#define ASYNC_REST(_method, _name, _sig, _doc) \
+#define ASYNC_EXREST(_method, _name, _sig, _doc, ...) \
     asyncApi##_method##_name _sig; \
     QString signOf##_method##_name() { return #_sig; } \
-    QString docOf##_method##_name() { return #_doc; }
+    QString docOf##_method##_name() { return #_doc; } \
+    QVariantMap confOf##_method##_name() { return __VA_ARGS__; }
+#define ASYNC_REST(_method, _name, _sig, _doc) \
+    ASYNC_EXREST(_method, _name, _sig, _doc, {})
 #define IMPL_ASYNC_REST(_method, _module, _name, _params) \
     _module::asyncApi##_method##_name _params
 
-#define REST_ALIAS(_method, _name, _alias, _sig, _doc) \
-    api##_method##_name _sig; \
-    QString aliasOf##_method##_name() { return #_method _alias; } \
-    QString signOf##_method##_name() { return #_sig; } \
-    QString docOf##_method##_name() { return #_doc; }
-
-#define ASYNC_REST_ALIAS(_method, _name, _alias, _sig, _doc) \
-    asyncApi##_method##_name _sig; \
-    QString aliasOf##_method##_name() { return #_method _alias; } \
-    QString signOf##_method##_name() { return #_sig; } \
-    QString docOf##_method##_name() { return #_doc; }
-
 //-- REST MACROS
-#define            REST_GET_OR_POST(_name, _sig, _doc)                              REST(, _name, _sig, _doc)
-#define      ASYNC_REST_GET_OR_POST(_name, _sig, _doc)                        ASYNC_REST(, _name, _sig, _doc)
-#define       IMPL_REST_GET_OR_POST(_module, _name, _params)                   IMPL_REST(, _module, _name, _params)
-#define IMPL_ASYNC_REST_GET_OR_POST(_module, _name, _params)             IMPL_ASYNC_REST(, _module, _name, _params)
-
-//#define            REST_GET_OR_POST_EX(_name, _ex, _sig, _doc)                   REST_EX(, _name, _ex, _sig, _doc)
-//#define      ASYNC_REST_GET_OR_POST_EX(_name, _ex, _sig, _doc)             ASYNC_REST_EX(, _name, _ex, _sig, _doc)
-//#define       IMPL_REST_GET_OR_POST_EX(_module, _name, _ex, _params)        IMPL_REST_EX(, _module, _name, _ex, _params)
-//#define IMPL_ASYNC_REST_GET_OR_POST_EX(_module, _name, _ex, _params)  IMPL_ASYNC_REST_EX(, _module, _name, _ex, _params)
+#define           EXREST_GET_OR_POST(_name, _sig, _doc, ...)              EXREST(, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_GET_OR_POST(_name, _sig, _doc, ...)        ASYNC_EXREST(, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_GET_OR_POST(_name, _sig, _doc)                     REST(, _name, _sig, _doc)
+#define       ASYNC_REST_GET_OR_POST(_name, _sig, _doc)               ASYNC_REST(, _name, _sig, _doc)
+#define        IMPL_REST_GET_OR_POST(_module, _name, _params)          IMPL_REST(, _module, _name, _params)
+#define  IMPL_ASYNC_REST_GET_OR_POST(_module, _name, _params)    IMPL_ASYNC_REST(, _module, _name, _params)
 
 //TODO: create IMPL_REST_... for other cases
-#define REST_GET(_name, _sig, _doc)                 REST(GET, _name, _sig, _doc)
-#define ASYNC_GET(_name, _sig, _doc)                ASYNC_REST(GET, _name, _sig, _doc)
+#define           EXREST_GET(_name, _sig, _doc, ...)                      EXREST(GET, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_GET(_name, _sig, _doc, ...)                ASYNC_EXREST(GET, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_GET(_name, _sig, _doc)                             REST(GET, _name, _sig, _doc)
+#define       ASYNC_REST_GET(_name, _sig, _doc)                       ASYNC_REST(GET, _name, _sig, _doc)
 
-#define REST_PUT(_name, _sig, _doc)                 REST(PUT, _name, _sig, _doc)
-#define ASYNC_PUT(_name, _sig, _doc)                ASYNC_REST(PUT, _name, _sig, _doc)
+#define           EXREST_PUT(_name, _sig, _doc, ...)                      EXREST(PUT, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_PUT(_name, _sig, _doc, ...)                ASYNC_EXREST(PUT, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_PUT(_name, _sig, _doc)                             REST(PUT, _name, _sig, _doc)
+#define       ASYNC_REST_PUT(_name, _sig, _doc)                       ASYNC_REST(PUT, _name, _sig, _doc)
 
-#define REST_POST(_name, _sig, _doc)                REST(POST, _name, _sig, _doc)
-#define ASYNC_POST(_name, _sig, _doc)               ASYNC_REST(POST, _name, _sig, _doc)
+#define           EXREST_POST(_name, _sig, _doc, ...)                     EXREST(POST, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_POST(_name, _sig, _doc, ...)               ASYNC_EXREST(POST, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_POST(_name, _sig, _doc)                            REST(POST, _name, _sig, _doc)
+#define       ASYNC_REST_POST(_name, _sig, _doc)                      ASYNC_REST(POST, _name, _sig, _doc)
 
-#define REST_CREATE(_name, _sig, _doc)              REST(CREATE, _name, _sig, _doc)
-#define ASYNC_CREATE(_name, _sig, _doc)             ASYNC_REST(CREATE, _name, _sig, _doc)
+#define           EXREST_CREATE(_name, _sig, _doc, ...)                   EXREST(CREATE, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_CREATE(_name, _sig, _doc, ...)             ASYNC_EXREST(CREATE, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_CREATE(_name, _sig, _doc)                          REST(CREATE, _name, _sig, _doc)
+#define       ASYNC_REST_CREATE(_name, _sig, _doc)                    ASYNC_REST(CREATE, _name, _sig, _doc)
 
-#define REST_UPDATE(_name, _sig, _doc)              REST(UPDATE, _name, _sig, _doc)
-#define ASYNC_UPDATE(_name, _sig, _doc)             ASYNC_REST(UPDATE, _name, _sig, _doc)
-#define REST_PATCH(_name, _sig, _doc)               REST_UPDATE(_name, _sig, _doc)
-#define ASYNC_PATCH(_name, _sig, _doc)              ASYNC_REST_UPDATE(_name, _sig, _doc)
+#define           EXREST_UPDATE(_name, _sig, _doc, ...)                   EXREST(UPDATE, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_UPDATE(_name, _sig, _doc, ...)             ASYNC_EXREST(UPDATE, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_UPDATE(_name, _sig, _doc)                          REST(UPDATE, _name, _sig, _doc)
+#define       ASYNC_REST_UPDATE(_name, _sig, _doc)                    ASYNC_REST(UPDATE, _name, _sig, _doc)
+//--
+#define           EXREST_PATCH(_name, _sig, _doc, ...)                    EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_PATCH(_name, _sig, _doc, ...)              ASYNC_EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
+#define             REST_PATCH(_name, _sig, _doc)                           REST_UPDATE(_name, _sig, _doc)
+#define       ASYNC_REST_PATCH(_name, _sig, _doc)                     ASYNC_REST_UPDATE(_name, _sig, _doc)
 
-#define REST_DELETE(_name, _sig, _doc)              REST(DELETE, _name, _sig, _doc)
-#define ASYNC_DELETE(_name, _sig, _doc)             ASYNC_REST(DELETE, _name, _sig, _doc)
-
-// REST ALIAS MACROS (DO NOT NEED IMPL_REST_..._ALIAS: USE IMPL_REST_... WITHOUT _ALIAS)
-#define REST_GET_OR_POST_ALIAS(_name, _alias, _sig, _doc)       REST_ALIAS(, _name, _alias, _sig, _doc)
-#define ASYNC_REST_GET_OR_POST_ALIAS(_name, _alias, _sig, _doc) ASYNC_REST_ALIAS(, _name, _alias, _sig, _doc)
-
-#define REST_GET_ALIAS(_name, _alias, _sig, _doc)               REST_ALIAS(GET, _name, _alias, _sig, _doc)
-#define ASYNC_GET_ALIAS(_name, _alias, _sig, _doc)              ASYNC_REST_ALIAS(GET, _name, _alias, _sig, _doc)
-
-#define REST_PUT_ALIAS(_name, _alias, _sig, _doc)               REST_ALIAS(PUT, _name, _alias, _sig, _doc)
-#define ASYNC_PUT_ALIAS(_name, _alias, _sig, _doc)              ASYNC_REST_ALIAS(PUT, _name, _alias, _sig, _doc)
-
-#define REST_POST_ALIAS(_name, _alias, _sig, _doc)              REST_ALIAS(POST, _name, _alias, _sig, _doc)
-#define ASYNC_POST_ALIAS(_name, _alias, _sig, _doc)             ASYNC_REST_ALIAS(POST, _name, _alias, _sig, _doc)
-
-#define REST_CREATE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(CREATE, _name, _alias, _sig, _doc)
-#define ASYNC_CREATE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(CREATE, _name, _alias, _sig, _doc)
-
-#define REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(UPDATE, _name, _alias, _sig, _doc)
-#define ASYNC_UPDATE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(UPDATE, _name, _alias, _sig, _doc)
-#define REST_PATCH_ALIAS(_name, _alias, _sig, _doc)             REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)
-#define ASYNC_PATCH_ALIAS(_name, _alias, _sig, _doc)            ASYNC_REST_UPDATE_ALIAS(_name, _alias, _sig, _doc)
-
-#define REST_DELETE_ALIAS(_name, _alias, _sig, _doc)            REST_ALIAS(DELETE, _name, _alias, _sig, _doc)
-#define ASYNC_DELETE_ALIAS(_name, _alias, _sig, _doc)           ASYNC_REST_ALIAS(DELETE, _name, _alias, _sig, _doc)
+#define           EXREST_DELETE(_name, _sig, _doc, ...)                   EXREST(DELETE, _name, _sig, _doc, __VA_ARGS__)
+#define     ASYNC_EXREST_DELETE(_name, _sig, _doc, ...)             ASYNC_EXREST(DELETE, _name, _sig, _doc, __VA_ARGS__)
+#define             REST_DELETE(_name, _sig, _doc)                          REST(DELETE, _name, _sig, _doc)
+#define       ASYNC_REST_DELETE(_name, _sig, _doc)                    ASYNC_REST(DELETE, _name, _sig, _doc)
 
 //
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"

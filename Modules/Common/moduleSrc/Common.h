@@ -24,14 +24,14 @@
 #ifndef TARGOMAN_API_MODULES_COMMON_COMMON_H
 #define TARGOMAN_API_MODULES_COMMON_COMMON_H
 
+#include "Interfaces/ORM/intfMigrations.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
-//#include "Interfaces/AAA/AAA.hpp"
-//#include "Interfaces/AAA/Accounting_Defs.hpp"
-//#include "Interfaces/ORM/intfAlerts.h"
-//using namespace Targoman::API::ORM;
+#include "ORM/Defs.hpp"
 
 namespace Targoman::API::CommonModule {
+
+TARGOMAN_MIGRATIONS_PREPARENT;
 
 class Common : public intfSQLBasedModule
 {
@@ -40,9 +40,12 @@ class Common : public intfSQLBasedModule
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Common);
     TARGOMAN_DEFINE_API_MODULE(Common);
+    TARGOMAN_API_DEFINE_MIGRATIONS(Common, CommonSchema);
 
 protected slots:
 };
+
+TARGOMAN_MIGRATIONS_POSTPARENT(Common, CommonSchema);
 
 } //namespace Targoman::API::CommonModule
 

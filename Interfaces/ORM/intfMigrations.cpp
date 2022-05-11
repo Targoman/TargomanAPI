@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "intfActionLogs.h"
+#include "intfMigrations.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
@@ -30,29 +30,24 @@ using namespace Targoman::API::AAA;
 
 namespace Targoman::API::ORM {
 
-intfActionLogs::intfActionLogs(
+intfMigrations::intfMigrations(
     const QString& _schema,
     const QString& _name
 ) :
     intfSQLBasedModule(
         _schema,
         _name,
-        tblActionLogs::Name,
-        {///< ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-            { tblActionLogs::atlID,                 ORM_PRIMARYKEY_64},
-            { tblActionLogs::atlBy_usrID,           S(quint64),         QFV.integer().minValue(1),      {},      UPNone },
-            { tblActionLogs::atlInsertionDateTime,  S(TAPI::DateTime_t),QFV,                            {},      UPNone },
-            { tblActionLogs::atlType,               S(QString),         QFV.asciiAlNum().maxLenght(50), {},      UPNone },
-            { tblActionLogs::atlDescription,        S(QString),         QFV.allwaysInvalid(),           {},      UPNone, false, false },
-        },
-        {
-            { tblActionLogs::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
+        tblMigrations::Name,
+        {///< ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
+            { tblMigrations::migName,       S(QString),         QFV,        QNull,   UPNone },
+            { tblMigrations::migAppliedAt,  S(TAPI::DateTime_t),QFV,        QNull,   UPNone },
+            { tblMigrations::migStatus,     S(QString),         QFV,        QNull,   UPNone },
         }
     ) { ; }
 
-QVariant intfActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->ModuleName + ":ActionLogs:CRUD~0100" });
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant intfMigrations::apiGET(ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL) {
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->ModuleName + ":Migrations:CRUD~0100" });
+//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }

@@ -139,6 +139,7 @@ TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
 Account::Account() :
     intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
 {
+    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Account, AAASchema)
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());

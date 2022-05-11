@@ -25,6 +25,7 @@
 #define TARGOMAN_API_MODULES_ADVERT_ADVERT_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
@@ -63,6 +64,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
 struct stuAdvertBill {
 };
 
+TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 
@@ -73,6 +75,7 @@ class Advert : public intfAccountingBasedModule
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
     TARGOMAN_DEFINE_API_MODULE(Advert);
+    TARGOMAN_API_DEFINE_MIGRATIONS(Advert, AdvertSchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Advert, AdvertSchema);
     TARGOMAN_API_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
 
@@ -167,6 +170,7 @@ protected slots:
 #endif
 };
 
+TARGOMAN_MIGRATIONS_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Advert, AdvertSchema);
 
