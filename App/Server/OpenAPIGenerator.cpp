@@ -110,6 +110,8 @@ QJsonObject OpenAPIGenerator::retrieveJson(
         QStringList PKInPathStorage;
 
         clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
+        if (APIObject->isHidden())
+            continue;
 
         /******************************************************************/
         auto mapTypeToValidOpenAPIType = [](

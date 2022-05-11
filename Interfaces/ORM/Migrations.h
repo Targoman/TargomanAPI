@@ -17,28 +17,59 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S.Mehran M.Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
-#define TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
+#ifndef TARGOMAN_API_MIGRATIONS_H
+#define TARGOMAN_API_MIGRATIONS_H
 
 #include "Interfaces/API/intfSQLBasedModule.h"
-#include "Interfaces/ORM/intfActionLogs.h"
 
+namespace Targoman::API::ORM {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+namespace tblMigrations {
+    constexpr char Name[] = "tblMigrations";
+
+    TARGOMAN_CREATE_CONSTEXPR(migName);
+    TARGOMAN_CREATE_CONSTEXPR(migAppliedAt);
+    TARGOMAN_CREATE_CONSTEXPR(migStatus);
+}
+
+#pragma GCC diagnostic pop
+
+class intfMigrations : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfMigrations(
+        const QString &_schema,
+        const QString &_name
+    );
+
+private slots:
+    QVariant ORMGET("Get migrations")
+};
+
+} //namespace Targoman::API::ORM
+
+/****************************************************/
 //put this macro before module class definition (.h)
-#define TARGOMAN_ACTIONLOG_PREPARENT class ActionLogs;
+#define TARGOMAN_MIGRATIONS_PREPARENT class Migrations;
 
 //put this macro after module class definition (.h)
-#define TARGOMAN_ACTIONLOG_POSTPARENT(_module, _schema) \
-class ActionLogs : public Targoman::API::ORM::intfActionLogs \
+#define TARGOMAN_MIGRATIONS_POSTPARENT(_module, _schema) \
+class Migrations : public Targoman::API::ORM::intfMigrations \
 { \
     Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, ActionLogs) \
+    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, Migrations) \
 public: \
-    ActionLogs() : \
-        intfActionLogs( \
+    Migrations() : \
+        intfMigrations( \
             Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
             _schema \
         ) \
@@ -46,26 +77,14 @@ public: \
 };
 
 //put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_ACTIONLOG(_module, _schema) \
+#define TARGOMAN_API_DEFINE_MIGRATIONS(_module, _schema) \
 protected: \
-    QScopedPointer<ActionLogs> _ActionLogs;
+    QScopedPointer<Migrations>  _Migrations;
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_ACTIONLOG(_module, _schema) \
-    this->_ActionLogs.reset(&ActionLogs::instance()); \
-    this->addSubModule(this->_ActionLogs.data());
+#define TARGOMAN_API_IMPLEMENT_MIGRATIONS(_module, _schema) \
+    this->_Migrations   .reset(&Migrations   ::instance()); \
+    this->addSubModule(this->_Migrations.data());
 
-namespace Targoman::API::API {
-
-class intfSQLBasedWithActionLogsModule : public intfSQLBasedModule
-{
-public:
-    intfSQLBasedWithActionLogsModule(
-        const QString& _module,
-        const QString& _schema
-    );
-};
-
-} // namespace Targoman::API::API
-
-#endif // TARGOMAN_API_API_INTFSQLBASEDWITHACTIONLOGSMODULE_H
+/****************************************************/
+#endif // TARGOMAN_API_MIGRATIONS_H

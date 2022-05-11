@@ -38,58 +38,76 @@ class StaticModule : public intfPureModule
     TARGOMAN_DEFINE_API_MODULE(StaticModule);
 
 private slots:
-    TAPI::RawData_t REST_GET_OR_POST_ALIAS(
+    TAPI::RawData_t EXREST_GET_OR_POST(
         openAPI_json,
-        "openAPI.json",
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_ALIAS("openAPI.json"),
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 
-    QVariant REST_GET_OR_POST_ALIAS(
+    QVariant EXREST_GET_OR_POST(
         openAPI_yaml,
-        "openAPI.yaml",
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_ALIAS("openAPI.yaml"),
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 
     //TAPI::ResponseRedirect_t
     //TAPI::FileData_t
-    QVariant REST_GET_OR_POST(
+    QVariant EXREST_GET_OR_POST(
         swaggerui,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 
-    QVariant REST_GET_OR_POST_ALIAS(
+    QVariant EXREST_GET_OR_POST(
         stats_json,
-        "stats.json",
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             bool _full = false
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_ALIAS("stats.json"),
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 
-    QVariant REST_GET_OR_POST(
+    QVariant EXREST_GET_OR_POST(
         version,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 
-    QVariant REST_GET_OR_POST(
+    QVariant EXREST_GET_OR_POST(
         ping,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
         ),
-        ""
+        "",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
     );
 };
 

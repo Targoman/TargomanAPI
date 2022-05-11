@@ -176,18 +176,11 @@ void RESTAPIRegistry::registerRESTAPI(
         QString MethodName = _method.name().constData();
         MethodName = MethodName.mid(MethodName.indexOf("api", 0, Qt::CaseInsensitive) + 3);
 
+        QVariantMap MethodConf;
         QString MethodAlias = MethodName, MethodSignature, MethodDoc;
-        bool FoundAlias = false, FoundSignature = false, FoundDoc = false;
+        bool FoundSignature = false, FoundDoc = false;
 
         for (int i=0; i<_module->metaObject()->methodCount(); ++i) {
-            if (_module->metaObject()->method(i).name() == "aliasOf" + MethodName) {
-                _module->metaObject()->method(i).invoke(_module,
-                                                        Qt::DirectConnection,
-                                                        Q_RETURN_ARG(QString, MethodAlias)
-                                                        );
-                FoundAlias = true;
-            }
-
             if (_module->metaObject()->method(i).name() == "signOf" + MethodName) {
                 _module->metaObject()->method(i).invoke(_module,
                                                         Qt::DirectConnection,
@@ -205,7 +198,19 @@ void RESTAPIRegistry::registerRESTAPI(
                 FoundDoc = true;
 //                break;
             }
+
+            if (_module->metaObject()->method(i).name() == "confOf" + MethodName) {
+                _module->metaObject()->method(i).invoke(_module,
+                                                        Qt::DirectConnection,
+                                                        Q_RETURN_ARG(QVariantMap, MethodConf)
+                                                        );
+            }
         }
+
+        if (MethodConf.contains(EXRESTCONFIGKEY_ALIAS))
+            MethodAlias = MethodConf[EXRESTCONFIGKEY_ALIAS].toString();
+
+        bool HiddenMethod = MethodConf.contains(EXRESTCONFIGKEY_HIDDEN);
 
         if (!FoundSignature)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
@@ -302,7 +307,7 @@ void RESTAPIRegistry::registerRESTAPI(
                 DefaultValues.append(QVariant());
         }
 
-        QMetaMethodExtended Method(_method, DefaultValues, MethodDoc);
+        QMetaMethodExtended Method(_method, DefaultValues, MethodDoc, HiddenMethod);
 
         auto makeMethodName = [MethodAlias](int _start = 1) -> QString {
             if (MethodAlias.size() >= _start)
@@ -312,7 +317,7 @@ void RESTAPIRegistry::registerRESTAPI(
 
         if (MethodName.startsWith("GET")) {
             if (ContainsFileInput)
-                throw exRESTRegistry("file input can not be used with GET method: "+ MethodName);
+                throw exRESTRegistry("file input can not be used with GET method: " + MethodName);
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "GET", makeMethodName(sizeof("GET")));
         } else if (MethodName.startsWith("POST"))
             RESTAPIRegistry::addRegistryEntry(RESTAPIRegistry::Registry, _module, Method, "POST", makeMethodName(sizeof("POST")));
@@ -642,6 +647,9 @@ void RESTAPIRegistry::dumpAPIs()
         QString Name = Key.split(" ").last();
         QString Method = Key.split(" ").first().toLower();
         clsAPIObject* APIObject = RESTAPIRegistry::Registry.value(Key);
+
+        if (APIObject->isHidden())
+            Method = "[HIDDEN] " + Method;
 
         APIs[Name].insert(Method, stuAPIKey(Method, APIObject));
     }
