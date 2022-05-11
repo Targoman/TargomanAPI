@@ -24,6 +24,7 @@
 #define TARGOMAN_API_MODULES_NGT_NGTV1_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/intfMigrations.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -38,6 +39,7 @@ struct stuNGTPriceInfo{
 
 namespace Targoman::API {
 
+TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 
 class NGTv1 : public intfSQLBasedWithActionLogsModule
@@ -47,12 +49,14 @@ class NGTv1 : public intfSQLBasedWithActionLogsModule
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
     TARGOMAN_DEFINE_API_MODULE(NGTv1)
+    TARGOMAN_API_DEFINE_MIGRATIONS(NGTv1, NGTv1Schema);
     TARGOMAN_API_DEFINE_ACTIONLOG(NGTv1, NGTv1Schema);
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
 };
 
+TARGOMAN_MIGRATIONS_POSTPARENT(NGTv1, NGTv1Schema);
 TARGOMAN_ACTIONLOG_POSTPARENT(NGTv1, NGTv1Schema);
 
 } //namespace Targoman::API

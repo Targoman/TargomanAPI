@@ -50,8 +50,8 @@ using namespace Targoman::API::Server;
 \**********************************************************************/
 //used by Api call methods
 //TAPI::JWT_t _JWT,
-#define GET_METHOD_ARGS_HEADER_APICALL \
-    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(_apiCallBoomType) \
+    _apiCallBoomType &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath = {}, \
     quint64 _pageIndex = 0, \
     quint16 _pageSize = 20, \
@@ -61,9 +61,12 @@ using namespace Targoman::API::Server;
     TAPI::GroupBy_t _groupBy = {}, \
     bool _reportCount = true
 
+#define GET_METHOD_ARGS_HEADER_APICALL              INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(APICALLBOOM_TYPE_JWT_DECL)
+#define ANONYMOUSE_GET_METHOD_ARGS_HEADER_APICALL   INTERNAL_GET_METHOD_ARGS_HEADER_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
+
 //TAPI::JWT_t _JWT,
-#define GET_METHOD_ARGS_IMPL_APICALL \
-    APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(_apiCallBoomType) \
+    _apiCallBoomType &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath, \
     quint64 _pageIndex, \
     quint16 _pageSize, \
@@ -73,11 +76,24 @@ using namespace Targoman::API::Server;
     TAPI::GroupBy_t _groupBy, \
     bool _reportCount
 
+#define GET_METHOD_ARGS_IMPL_APICALL            INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_DECL)
+#define ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
+
 //#define GET_METHOD_CALL_ARGS_APICALL     _JWT, _pksByPath, _pageIndex, _pageSize, _cols, _filters, _orderBy, _groupBy, _reportCount
+
+#define ORM_EX_CONFIG(_method, ...)     QVariantMap confOf##_method() { return __VA_ARGS__; }
+
+#define ANONYMOUSE_ORMGET(_doc)         apiGET(ANONYMOUSE_GET_METHOD_ARGS_HEADER_APICALL); \
+    QString signOfGET()                 { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
+    QString docOfGET()                  { return _doc; }
+
+#define ANONYMOUSE_ORMGET_HIDDEN(_doc)  ANONYMOUSE_ORMGET(_doc); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
 #define ORMGET(_doc)                    apiGET(GET_METHOD_ARGS_HEADER_APICALL); \
     QString signOfGET()                 { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET()                  { return _doc; }
+
+#define ORMGET_HIDDEN(_doc)             ORMGET(_doc); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
 #define ORMGETPureVirtual(_doc)         apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
     virtual QString signOfGET()         { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \

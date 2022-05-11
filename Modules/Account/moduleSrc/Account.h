@@ -25,6 +25,7 @@
 #define TARGOMAN_API_MODULES_ACCOUNT_AAA_H
 
 #include "Interfaces/ORM/intfActionLogs.h"
+#include "Interfaces/ORM/intfMigrations.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -40,6 +41,7 @@ namespace Targoman::API::AccountModule {
 //    TAPI::EncodedJWT_t Session;
 //};
 
+TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 
 class Account : public intfSQLBasedWithActionLogsModule
@@ -49,6 +51,7 @@ class Account : public intfSQLBasedWithActionLogsModule
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(Account);
     TARGOMAN_DEFINE_API_MODULE(Account);
+    TARGOMAN_API_DEFINE_MIGRATIONS(Account, AAASchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
 
 public:
@@ -439,6 +442,7 @@ private slots:
 
 };
 
+TARGOMAN_MIGRATIONS_POSTPARENT(Account, AAASchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 
 } //namespace Targoman::API::AccountModule

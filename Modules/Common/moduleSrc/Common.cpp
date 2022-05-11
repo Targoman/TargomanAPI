@@ -22,17 +22,6 @@
  */
 
 #include "Common.h"
-//#include "libQFieldValidator/QFieldValidator.h"
-//#include "Interfaces/AAA/PrivHelpers.h"
-//#include "Interfaces/Common/GenericEnums.hpp"
-//#include "Interfaces/Common/HTTPExceptions.hpp"
-//#include "Interfaces/Helpers/SecurityHelper.h"
-//using namespace Targoman::API::Helpers;
-
-//#include "Interfaces/Helpers/RESTClientHelper.h"
-//using namespace Targoman::API::Helpers;
-
-#include "ORM/Defs.hpp"
 #include "ORM/Alerts.h"
 
 namespace Targoman::API::CommonModule {
@@ -47,7 +36,9 @@ Common::Common() :
         CommonDomain,
         CommonSchema,
         ""
-    ) {
+) {
+    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
+
     this->addSubModule(&Alerts::instance());
 }
 
