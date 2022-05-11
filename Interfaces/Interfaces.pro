@@ -42,7 +42,7 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
-    ORM/Migrations.h \
+    ORM/intfMigrations.h \
     Server/APICallBoom.h \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
@@ -77,7 +77,7 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
-    ORM/Migrations.cpp \
+    ORM/intfMigrations.cpp \
     Server/APICallBoom.cpp \
     Server/ServerCommon.cpp \
     Server/clsSimpleCrypt.cpp \
