@@ -57,7 +57,7 @@ TicketAttachments::TicketAttachments() :
         }
 ) { ; }
 
-QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(TicketAttachments) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
@@ -117,7 +117,7 @@ QVariant TicketAttachments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
 }
 
 } //namespace Targoman::API::TicketingModule::ORM

@@ -61,7 +61,7 @@ private slots:
     void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
-        cleanupUnitTestData();
+//        cleanupUnitTestData();
     }
 
 private:
@@ -870,34 +870,6 @@ private slots:
         }
     }
 
-//    "Account/UserWallets/transfer",
-
-//    void UserWallets_transfer() {
-//        QT_TRY {
-//            QVariant Result = callUserAPI(
-//                RESTClientHelper::POST,
-//                "Account/UserWallets/transfer",
-//                {},
-//                {
-//QString _destEmailOrMobile,
-//quint32 _amount,
-//TAPI::MD5_t _pass,
-//QString _salt,
-//quint64 _fromWalID = 0
-
-//                    { "walID", this->NewUserWalletID },
-//                }
-//            );
-
-//            QVERIFY(Result.toBool());
-
-//        } catch (exTargomanBase &e) {
-//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
-//        } catch (std::exception &e) {
-//            QFAIL (e.what());
-//        }
-//    }
-
     void requestIncrease_DEVTEST_empty_domain() {
         QVERIFY_EXCEPTION_THROWN(callUserAPI(
             RESTClientHelper::PUT,
@@ -907,7 +879,7 @@ private slots:
                 { "amount", 1234 },
                 { "gatewayType", "_DeveloperTest" },
                 { "domain", "" },
-                { "walletID", 0 },
+                { "walID", 0 },
                 { "paymentVerifyCallback", "http://www.a.com" }
             }
         ),
@@ -927,7 +899,7 @@ private slots:
                     { "amount", 1234 },
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
-//                    { "walletID", 0 },
+//                    { "walID", 0 },
                     { "paymentVerifyCallback", "http://www.a.com" }
                 }
             );
@@ -1083,6 +1055,30 @@ private slots:
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
+        }
+    }
+
+    void UserWallets_transfer() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets/transfer",
+                {},
+                {
+                    { "destEmailOrMobile", UT_AdminUserEmail },
+                    { "amount", 1 },
+                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                    { "salt", "1234" },
+//                    { "fromWalID", 9876 },
+                }
+            );
+
+            QVERIFY(Result.toBool());
+
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
         }
     }
 

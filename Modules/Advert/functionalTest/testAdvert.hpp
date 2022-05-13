@@ -533,7 +533,7 @@ private slots:
                     { "preVoucher",             {} },
                     { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "dev.test" },
-//                    { "walletID",               9988 },
+//                    { "walID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
                 }
             );
@@ -576,7 +576,7 @@ private slots:
                     { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
                     { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "dev.test" },
-//                    { "walletID",               9988 },
+//                    { "walID",               9988 },
                     { "paymentVerifyCallback",  "http://www.a.com" },
                 }
             );

@@ -195,6 +195,7 @@ void RESTAPIRegistry::registerRESTAPI(
                                                         Qt::DirectConnection,
                                                         Q_RETURN_ARG(QString, MethodDoc)
                                                         );
+                MethodDoc = MethodDoc.trimmed();
                 FoundDoc = true;
 //                break;
             }

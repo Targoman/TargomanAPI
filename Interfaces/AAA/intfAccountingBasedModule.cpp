@@ -307,7 +307,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
+Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t _saleableCode,
     Targoman::API::AAA::OrderAdditives_t _orderAdditives,
@@ -316,7 +316,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     QString _referrer,
     TAPI::JSON_t _extraReferrerParams,
     Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-) {
+)) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
@@ -378,7 +378,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
         )
         .one();
 
-    qDebug() << "-- intfAccountingBasedModule::apiPOSTaddToBasket() : SaleableInfo" << SaleableInfo;
+    qDebug() << "-- IMPL_REST_POST(intfAccountingBasedModule, addToBasket, ()) : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
     AssetItem.fromVariantMap(SaleableInfo);
@@ -752,12 +752,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTaddToBasket(
     return _lastPreVoucher;
 }
 
-Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasketItem(
+Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //    quint64 _orderID, //it is uasID
     TAPI::MD5_t _itemUUID,
     Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-) {
+)) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
@@ -818,12 +818,12 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTremoveBasket
 }
 
 /*
-Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::apiPOSTupdateBasketItem(
+Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
         APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         TAPI::MD5_t _itemUUID,
         quint16 _new_qty, ///TODO: float
         Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-    ) {
+    )) {
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
@@ -965,7 +965,7 @@ bool intfAccountingBasedModule::activateUserAsset(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    return /*Targoman::API::Query::*/this->Update(
+    return this->Update(
         *this->AccountUserAssets,
         _userID,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
@@ -983,7 +983,7 @@ bool intfAccountingBasedModule::removeFromUserAssets(
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
-    return /*Targoman::API::Query::*/this->DeleteByPks(
+    return this->DeleteByPks(
         *this->AccountUserAssets,
         _userID,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
@@ -1091,19 +1091,19 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
         throw exHTTPBadRequest("Invalid voucher item sign");
 }
 
-bool intfAccountingBasedModule::apiPOSTprocessVoucherItem(
+bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
-) {
+)) {
     checkVoucherItemForTrustedActionSanity(_data);
 
     return this->processVoucherItem(_data.UserID, _data.VoucherItem, _data.VoucherID);
 }
 
-bool intfAccountingBasedModule::apiPOSTcancelVoucherItem(
+bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
-) {
+)) {
     checkVoucherItemForTrustedActionSanity(_data);
 
     return this->cancelVoucherItem(_data.UserID, _data.VoucherItem);

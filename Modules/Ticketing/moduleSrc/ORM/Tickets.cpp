@@ -96,21 +96,21 @@ Tickets::Tickets() :
     ) { ; }
 
 QVariant Tickets::apiGET(
-//        GET_METHOD_ARGS_IMPL_APICALL,
-        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-        TAPI::PKsByPath_t _pksByPath,
-        quint64 _pageIndex,
-        quint16 _pageSize,
-//            TAPI::Cols_t _cols,
-//            TAPI::Filter_t _filters,
-        TAPI::OrderBy_t _orderBy,
-//            TAPI::GroupBy_t _groupBy,
-        bool _reportCount,
-        //-------------------------------------
-//        const stuTicketScope &_ticketScope
-        quint64 _baseTicketID,
-        quint64 _inReplyTicketID
-    ) {
+//    GET_METHOD_ARGS_IMPL_APICALL,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    TAPI::PKsByPath_t _pksByPath,
+    quint64 _pageIndex,
+    quint16 _pageSize,
+//        TAPI::Cols_t _cols,
+//        TAPI::Filter_t _filters,
+    TAPI::OrderBy_t _orderBy,
+//        TAPI::GroupBy_t _groupBy,
+    bool _reportCount,
+    //-------------------------------------
+//    const stuTicketScope &_ticketScope
+    quint64 _baseTicketID,
+    quint64 _inReplyTicketID
+) {
     TAPI::Cols_t _cols;
     TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
@@ -178,7 +178,7 @@ QVariant Tickets::apiGET(
         ;
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
 }
 
 /******************************************************************************/

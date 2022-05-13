@@ -284,15 +284,17 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-//    QVariantList REST_GET_OR_POST(
-//        gatewayTypesForFinalizeBasket,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            Targoman::API::AAA::stuPreVoucher _preVoucher,
-//            QString _domain
-//        ),
-//        "get list of payment gateway types valid for voucher and domain"
-//    )
+    Targoman::API::AAA::stuVoucher REST_POST(
+        payBasketByWallet,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            quint64 _voucherID,
+            quint64 _amount,
+            quint64 _walID = 0
+        ),
+        "Create a wallet transaction for pay for voucher."
+        "amount must be <= remainig of voucher topay"
+    )
 
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
@@ -301,7 +303,7 @@ private slots:
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
-            qint64 _walletID = -1,
+            qint64 _walID = -1,
             QString _paymentVerifyCallback = {}
         ),
         "create a voucher based on preVoucher. "
@@ -314,7 +316,6 @@ private slots:
         approveOnlinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,
             TAPI::JSON_t _pgResponse
@@ -331,9 +332,12 @@ private slots:
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
+            quint64 _walID = 0,
             const QString& _note = {}
         ),
-        "claim offline payment by user"
+        R"(
+            Claim offline payment by user.
+        )"
     )
 
     bool REST_POST(
@@ -354,7 +358,7 @@ private slots:
         "approve Voucher by offline payment"
     )
 
-    Targoman::API::AAA::stuVoucher REST_POST(
+    Targoman::API::AAA::stuVoucher EXREST_POST(
         approveOfflinePayment_withBankInfo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
@@ -363,9 +367,13 @@ private slots:
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
+            quint64 _walID = 0,
             const QString& _note = {}
         ),
-        "approve Voucher by offline payment"
+        "approve Voucher by offline payment",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
     )
 
     ///TODO: create API for cancelBasketItem

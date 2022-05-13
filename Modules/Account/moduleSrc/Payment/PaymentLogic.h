@@ -69,10 +69,11 @@ public:
         const QString& _invDesc,
         quint32 _toPay,
         const QString _paymentVerifyCallback,
-        /*OUT*/ TAPI::MD5_t& _outPaymentMD5
+        /*OUT*/ TAPI::MD5_t& _outPaymentMD5,
+        quint64 _walID = 0
     );
 
-    static quint64 approveOnlinePayment(
+    static std::tuple<quint64, quint64, quint64> approveOnlinePayment(
         const QString& _paymentMD5,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain

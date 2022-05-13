@@ -33,21 +33,21 @@ TARGOMAN_IMPL_API_MODULE(URLProcessor)
 URLProcessor::URLProcessor() :
     intfPureModule("URLProcessor") { ; }
 
-QString URLProcessor::apiGETcanonicalize(
+QString IMPL_REST_GET(URLProcessor, canonicalize, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _removeWWW
-) {
+)) {
     char Normalized[MAX_URL_SIZE+1];
     URLCanonicalizer::doJob (_url.toLatin1().constData(), Normalized, _removeWWW);
     return Normalized;
 }
 
-QString URLProcessor::apiGETconvertHexCodes(
+QString IMPL_REST_GET(URLProcessor, convertHexCodes, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _convertAll
-) {
+)) {
     char Normalized[MAX_URL_SIZE+1];
     strncpy(Normalized, _url.toLatin1().constData(), MAX_URL_SIZE);
     return URLCanonicalizer::convertHexCodes(Normalized, _convertAll);

@@ -55,20 +55,20 @@ ActiveSessions::ActiveSessions() :
         }
     ) { ; }
 
-QVariant ActiveSessions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(ActiveSessions) {
 //  QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 
 //  return query.one();
 
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMDELETE(ActiveSessions) {
   TAPI::ORMFields_t ExtraFilters;
 
   if (_pksByPath.trimmed() == clsJWT(_APICALLBOOM.getJWT()).session())
@@ -78,7 +78,7 @@ bool ActiveSessions::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
       ExtraFilters.insert(tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID());
 //  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-  return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

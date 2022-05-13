@@ -41,7 +41,7 @@ Voucher::Voucher() :
             { tblVoucher::vchID,               ORM_PRIMARYKEY_64 },
             { tblVoucher::vch_usrID,           S(quint64),              QFV.integer().minValue(1),  QRequired, UPNone },
             { tblVoucher::vchDesc,             S(TAPI::JSON_t),         QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
-            { tblVoucher::vchType,             S(Targoman::API::AccountModule::enuVoucherType::Type), QFV,                  Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
+            { tblVoucher::vchType,             S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AccountModule::enuVoucherType::Expense*/, UPNone },
             { tblVoucher::vchTotalAmount,      S(quint64),              QFV,                        0,         UPNone },
             { tblVoucher::vchStatus,           ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
             { tblVoucher::vchCreationDateTime, ORM_CREATED_ON },
@@ -51,14 +51,14 @@ Voucher::Voucher() :
         }
     ) { ; }
 
-QVariant Voucher::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(Voucher) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
 }
 
-bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMDELETE(Voucher) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
@@ -68,7 +68,7 @@ bool Voucher::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
 //        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
     }
 
-    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

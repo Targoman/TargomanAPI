@@ -52,7 +52,7 @@ WalletTransactions::WalletTransactions() :
         }
     ) { ; }
 
-QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(WalletTransactions) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
@@ -60,7 +60,7 @@ QVariant WalletTransactions::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         _query.innerJoin(tblUserWallets::Name);
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
 }
 
 WalletBalances::WalletBalances() :

@@ -135,10 +135,10 @@ void Advert::applyAssetAdditives(
 };
 
 /***************************************************************************************************/
-//bool Advert::apiPOSTprocessVoucher(
+//bool IMPL_REST_POST(Advert, processVoucher, (
 //        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
-//    )
+//    ))
 //{
 //    clsJWT JWT(_JWT);
 //    quint64 currentUserID = JWT.usrID();
@@ -149,10 +149,10 @@ void Advert::applyAssetAdditives(
 //    return true;
 //}
 
-//bool Advert::apiPOSTcancelVoucher(
+//bool IMPL_REST_POST(Advert, cancelVoucher, (
 //        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
-//    )
+//    ))
 //{
 //    clsJWT JWT(_JWT);
 //    quint64 currentUserID = JWT.usrID();
@@ -163,37 +163,37 @@ void Advert::applyAssetAdditives(
 //    return true;
 //}
 
-Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewBanner(
+Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newBanner, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order
-) {
+)) {
 }
 
-Targoman::API::AdvertModule::stuAdvert Advert::apiGETnewText(
+Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
     const QString _keywords
-) {
+)) {
 }
 
-QString Advert::apiGETretrieveURL(
+QString IMPL_REST_GET(Advert, retrieveURL, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _id,
     TAPI::IPv4_t _clientIP,
     QString _agent
-) {
+)) {
 }
 
 /****************************************************************\
 |** fixture *****************************************************|
 \****************************************************************/
 #ifdef QT_DEBUG
-QVariant Advert::apiPOSTfixtureSetup(
+QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     if (_random == "1")
@@ -392,7 +392,7 @@ QVariant Advert::apiPOSTfixtureSetup(
             { "preVoucher",             LastPreVoucher.toJson().toVariantMap() },
             { "gatewayType",            "_DeveloperTest" },
             { "domain",                 "dev.test" },
-//            { "walletID",               9988 },
+//            { "walID",               9988 },
             { "paymentVerifyCallback",  "http://www.a.com" },
         }
     );
@@ -424,16 +424,16 @@ QVariant Advert::apiPOSTfixtureSetup(
     return Result;
 }
 
-//bool Advert::apiPOSTfixtureSetupVoucher(
+//bool IMPL_REST_POST(Advert, fixtureSetupVoucher, (
 //        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
-//    )
+//    ))
 //{
 //}
 
-QVariant Advert::apiPOSTfixtureCleanup(
+QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     //online payment

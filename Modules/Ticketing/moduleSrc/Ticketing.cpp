@@ -135,7 +135,7 @@ quint64 Ticketing::insertTicket(
     return TicketID;
 }
 
-QVariantMap Ticketing::apiPUTnewMessage(
+QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
@@ -143,7 +143,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
     quint64 _targetUserID,
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
-) {
+)) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
@@ -167,7 +167,7 @@ QVariantMap Ticketing::apiPUTnewMessage(
                        });
 }
 
-QVariantMap Ticketing::apiPUTnewFeedback(
+QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
@@ -175,7 +175,7 @@ QVariantMap Ticketing::apiPUTnewFeedback(
     quint32 _serviceID,
     quint64 _inReplyTicketID,
     const TAPI::stuFileInfo &_file
-) {
+)) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
@@ -209,10 +209,10 @@ QVariantMap Ticketing::apiPUTnewFeedback(
 |** fixture *****************************************************|
 \****************************************************************/
 #ifdef QT_DEBUG
-QVariant Ticketing::apiPOSTfixtureSetup(
+QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     if (_random == "1")
@@ -340,10 +340,10 @@ QVariant Ticketing::apiPOSTfixtureSetup(
     return Result;
 }
 
-QVariant Ticketing::apiPOSTfixtureCleanup(
+QVariant IMPL_REST_POST(Ticketing, fixtureCleanup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     try {

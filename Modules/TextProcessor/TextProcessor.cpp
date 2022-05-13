@@ -45,21 +45,21 @@ bool TextProcessor::init() {
     return true;
 }
 
-QString TextProcessor::apinormalize(
+QString IMPL_REST_GET_OR_POST(TextProcessor, normalize, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
-) {
+)) {
     return NLP::TextProcessor::instance().normalizeText(_text, _useSpellCorrector ? _lang : TAPI::ISO639_2_t());
 }
 
-QString TextProcessor::apitext2IXML(
+QString IMPL_REST_GET_OR_POST(TextProcessor, text2IXML, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
-) {
+)) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -77,25 +77,25 @@ QString TextProcessor::apitext2IXML(
                 );
 }
 
-QString TextProcessor::apiixml2Text(
+QString IMPL_REST_GET_OR_POST(TextProcessor, ixml2Text, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _ixml,
     bool _detokenize,
     bool _hinidiDigits,
     bool _arabicPunctuations,
     bool _breakSentences
-) {
+)) {
     return NLP::TextProcessor::instance().ixml2Text(_ixml, _detokenize, _hinidiDigits, _arabicPunctuations, _breakSentences);
 }
 
-QString TextProcessor::apitokenize(
+QString IMPL_REST_GET_OR_POST(TextProcessor, tokenize, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector,
     bool _hindiNumerals,
     bool _arabicPunctuations
-) {
+)) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(

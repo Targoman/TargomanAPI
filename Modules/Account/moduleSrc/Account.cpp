@@ -173,57 +173,6 @@ Account::Account() :
             InputFile.close();
         }
     }
-
-/*
-    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(
-    {
-        { "vchID", 99000 },
-        { "vchDesc", QVariantMap({
-            { "sign", "WCB0bSmSpsFGTL0vjOTw0LeScog/82EU3t5H6TGy/lU=" },
-            { "items", QVariantMap({
-                {"qty", 0 },
-                { "orderID", 0 },
-                { "service", "INC_WALLET" },
-                { "subTotal", 0 },
-                { "disAmount", 0 },
-                { "unitPrice", 0 },
-                { "vATAmount", 0 },
-                { "vATPercent", 0 },
-            })},
-            { "round", 0 },
-            { "toPay", 5678 },
-            { "userID", 1223 },
-            { "summary", "Increase wallet"}
-        })},
-        { "vchCreationDateTime", "2022-03-04T12:34:56" },
-    });
-
-    tblVoucher::DTO Voucher;
-    Voucher.fromJson(PaymentInfo);
-
-    qDebug() << "---------------------" << endl << Voucher.toJson();
-
-//    QJsonValue jv = QVariant(Voucher.vchCreationDateTime).toJsonValue();
-//    jv = QVariant(Voucher.vchCreationDateTime.toString()).toJsonValue();
-
-    Voucher.vchCreationDateTime = (PaymentInfo.contains("vchCreationDateTime")
-              ? [](auto v) -> TAPI::DateTime_t {
-        return [](QJsonValue v) {
-            TAPI::DateTime_t t;
-            TAPI::setFromVariant(t, v.toVariant(), "vchCreationDateTime");
-//            QVariant vv = v.toVariant();
-//            t = vv.toDateTime();
-            return t;
-        }(v); }
-            (PaymentInfo.value("vchCreationDateTime"))
-              : TAPI::DateTime_t()
-    );
-    TAPI::DateTime_t doc = Voucher.vchCreationDateTime;
-//    QString ss = doc.toJson();
-
-    throw exTargomanBase("AAAAAAA");
-*/
-
 }
 
 //TAPI::EncodedJWT_t Account::createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services)
@@ -270,15 +219,15 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-QString Account::apinormalizePhoneNumber(
+QString IMPL_REST_GET_OR_POST(Account, normalizePhoneNumber, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _phone,
     QString _country
-) {
+)) {
     return PhoneHelper::NormalizePhoneNumber(_phone, _country);
 }
 
-QVariantMap Account::apiPUTsignup(
+QVariantMap IMPL_REST_PUT(Account, signup, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
@@ -289,7 +238,7 @@ QVariantMap Account::apiPUTsignup(
     bool _enableSMSAlerts,
     TAPI::JSON_t _specialPrivs,
     qint8 _maxSessions
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -329,7 +278,7 @@ QVariantMap Account::apiPUTsignup(
     };
 }
 
-TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
+TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email,
     TAPI::MD5_t _uuid,
@@ -338,7 +287,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     _email = _email.toLower().trimmed();
@@ -372,7 +321,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveEmail(
 //                                                     });
 }
 
-TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
+TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     quint32 _code,
@@ -381,7 +330,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
@@ -415,7 +364,7 @@ TAPI::EncodedJWT_t Account::apiPOSTapproveMobile(
 //                                                     });
 }
 
-TAPI::EncodedJWT_t Account::apilogin(
+TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
@@ -424,7 +373,7 @@ TAPI::EncodedJWT_t Account::apilogin(
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
 //    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
@@ -450,14 +399,14 @@ TAPI::EncodedJWT_t Account::apilogin(
 //                             });
 }
 
-bool Account::apiloginByMobileOnly(
+bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     bool _signupIfNotExists,
     QString _signupRole,
     bool _signupEnableEmailAlerts,
     bool _signupEnableSMSAlerts
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QFV/*.asciiAlNum()*/.maxLenght(50).validate(_signupRole);
@@ -484,10 +433,10 @@ bool Account::apiloginByMobileOnly(
     return true;
 }
 
-bool Account::apiresendApprovalCode(
+bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -516,14 +465,14 @@ bool Account::apiresendApprovalCode(
 ///TODO: cache to ban users for every service
 ///TODO: update cache for each module
 ///TODO: JWT lifetime dynamic based on current hour
-TAPI::EncodedJWT_t Account::apiloginByOAuth(
+TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::enuOAuthType::Type _type,
     QString _oAuthToken,
     TAPI::CommaSeparatedStringList_t _services,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Login;
@@ -569,7 +518,7 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //                             });
 }
 
-//Targoman::API::AccountModule::stuMultiJWT Account::apirefreshJWT(
+//Targoman::API::AccountModule::stuMultiJWT IMPL_REST_GET_OR_POST(Account, refreshJWT(
 //        TAPI::JWT_t _loginJWT,
 //        QString _services
 //    )
@@ -590,9 +539,9 @@ TAPI::EncodedJWT_t Account::apiloginByOAuth(
 //                             });
 //}
 
-bool Account::apilogout(
+bool IMPL_REST_GET_OR_POST(Account, logout, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
-) {
+)) {
     clsJWT JWT(_APICALLBOOM.getJWT());
 
     this->callSP("spLogout", {
@@ -603,10 +552,10 @@ bool Account::apilogout(
     return true;
 }
 
-QString Account::apicreateForgotPasswordLink(
+QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -620,10 +569,10 @@ QString Account::apicreateForgotPasswordLink(
 }
 
 #ifdef QT_DEBUG
-QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
+QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
-) {
+)) {
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
@@ -658,12 +607,12 @@ QString Account::apiPOSTfixtureGetLastForgotPasswordUUIDAndMakeAsSent(
 }
 #endif
 
-bool Account::apichangePassByUUID(
+bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     QString _uuid,
     TAPI::MD5_t _newPass
-) {
+)) {
     Authorization::validateIPAddress(_APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -678,12 +627,12 @@ bool Account::apichangePassByUUID(
     return true;
 }
 
-bool Account::apichangePass(
+bool IMPL_REST_GET_OR_POST(Account, changePass, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::MD5_t _oldPass,
     QString _oldPassSalt,
     TAPI::MD5_t _newPass
-) {
+)) {
     QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
 
     clsJWT JWT(_APICALLBOOM.getJWT());
@@ -775,7 +724,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         }
 
         //2: change voucher status to Targoman::API::AAA::enuVoucherStatus::Finished
-        /*Targoman::API::Query::*/Voucher::instance().Update(
+        Voucher::instance().Update(
                                      Voucher::instance(),
                                      SYSTEM_USER_ID,
                                      {},
@@ -882,7 +831,7 @@ void Account::tryCancelVoucher(
         { "iSetAsError", _setAsError ? 1 : 0 },
     });
 
-//    /*Targoman::API::Query::*/this->Update(Voucher::instance(),
+//    this->Update(Voucher::instance(),
 //                                 SYSTEM_USER_ID,
 //                                 {},
 //                                 TAPI::ORMFields_t({
@@ -893,38 +842,39 @@ void Account::tryCancelVoucher(
 //                                 });
 }
 
-//QVariantList Account::apigatewayTypesForFinalizeBasket(
-//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-//    Targoman::API::AAA::stuPreVoucher _preVoucher,
-//    QString _domain
-//) {
-//    checkPreVoucherSanity(_preVoucher);
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payBasketByWallet, (
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    quint64 _voucherID,
+    quint64 _amount,
+    quint64 _walID
+)) {
+    clsDACResult Result = this->callSP("spBasket_PayByWallet", {
+                                           { "iUserID", _APICALLBOOM.getUserID() },
+                                           { "iVoucherID", _voucherID },
+                                           { "iAmount", _amount },
+                                           { "iWalletID", _walID },
+                                       });
 
-//    if (_preVoucher.Items.isEmpty())
-//        throw exHTTPBadRequest("seems that pre-Voucher is empty");
+    quint64 VoucherBalance = Result.spDirectOutputs().value("oVoucherBalance").toUInt();
+    if (VoucherBalance == 0)
+        return Account::processVoucher(_APICALLBOOM.getUserID(), _voucherID);
 
-//    if (_preVoucher.ToPay <= 0)
-//        throw exHTTPBadRequest("topay is zero");
-
-//    return PaymentLogic::findAvailableGatewayTypes(
-//                _preVoucher.ToPay,
-//                _domain
-//                );
-//}
+    return {};
+}
 
 ///TODO: select gateway (null|single|multiple) from service
 ///TODO: check for common gateway voucher
 /**
  * call Account/PaymentGateways/availableGatewayTypes for list of gateway types
  */
-Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
     Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
-    qint64 _walletID,
+    qint64 _walID,
     QString _paymentVerifyCallback
-) {
+)) {
     ///scenario:
     ///1: create voucher
     ///2: compute wallet remaining
@@ -956,24 +906,22 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
     ///TODO: reserve saleables before returning voucher
     ///TODO: implement overall coupon at the end of checkout steps
 
-    Voucher.ID = /*Targoman::API::Query::*/this->Create(
-                     Voucher::instance(),
-                     _APICALLBOOM,
-                     TAPI::ORMFields_t({
-                                           { tblVoucher::vch_usrID, CurrentUserID },
-                                           { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
-                                           { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
-                                           { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
-                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
-                                       })
-                     );
+    Voucher.ID = this->Create(Voucher::instance(),
+                              _APICALLBOOM,
+                              TAPI::ORMFields_t({
+                                                    { tblVoucher::vch_usrID, CurrentUserID },
+                                                    { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
+                                                    { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
+                                                    { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
+                                                    { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                                }));
 
     try {
         //2: compute wallet remaining
         qint64 RemainingAfterWallet = static_cast<qint64>(_preVoucher.ToPay);
-        if ((_walletID >= 0) && (RemainingAfterWallet > 0)) {
+        if ((_walID >= 0) && (RemainingAfterWallet > 0)) {
             clsDACResult Result = this->callSP("spWalletTransaction_Create", {
-                                                   { "iWalletID", _walletID },
+                                                   { "iWalletID", _walID },
                                                    { "iVoucherID", Voucher.ID },
                                                });
             RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
@@ -997,7 +945,8 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
                                       _preVoucher.Summary,
                                       RemainingAfterWallet,
                                       _paymentVerifyCallback,
-                                      PaymentMD5
+                                      PaymentMD5,
+                                      _walID < 0 ? 0 : abs(_walID)
                                       );
             Voucher.PaymentMD5 = PaymentMD5;
         }
@@ -1005,7 +954,7 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
         qDebug() << "**********************************" << exp.what();
 
         Account::tryCancelVoucher(CurrentUserID, Voucher.ID, true);
-//        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
+//        this->Update(Voucher::instance(),
 //                                     SYSTEM_USER_ID,
 //                                     {},
 //                                     TAPI::ORMFields_t({
@@ -1021,37 +970,50 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTfinalizeBasket(
 }
 
 /**
- * @brief Account::apiPOSTapproveOnlinePayment: called back from callback
+ * @brief apiPOSTapproveOnlinePayment: called back from callback
  * @param _gateway
  * @param _domain
  * @param _pgResponse: ... voucherID ...
  * @return
  */
-Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-//    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     const QString _paymentMD5,
     const QString _domain,
     TAPI::JSON_t _pgResponse
-) {
-    quint64 VoucherID = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
+)) {
+    //VoucherID comes from finalizeBasket(Expense, New) or requestIncrease(Credit, New)
+
+    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
 
     try {
-        this->callSP("spWalletTransactionOnPayment_Create", {
-                         { "iVoucherID", VoucherID },
-                         { "iPaymentType", QChar(enuPaymentType::Online) }
-                     });
+        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+                                               { "iPaymentID", PaymentID },
+                                               { "iPaymentType", QChar(enuPaymentType::Online) },
+                                               { "iVoucherID", VoucherID },
+                                               { "iTargetWalletID", TargetWalletID },
+                                           });
+
+        qint64 RemainingAfterWallet = Result.spDirectOutputs().value("oRemainingAfterWallet").toInt();
+
+        if (RemainingAfterWallet > 0)
+            return Targoman::API::AAA::stuVoucher();
+
         return Account::processVoucher(_APICALLBOOM.getUserID(), VoucherID);
+
     } catch (...) {
-        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
-                                     SYSTEM_USER_ID,
-                                     {},
-                                     TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                                     }),
-                                     {
-                                        { tblVoucher::vchID, VoucherID }
-                                     });
+        ///@TODO: VERY IMPORTANT: reject gateway verify if 'C' type of tblWalletsTransactions not created in sp yet
+
+
+        this->Update(Voucher::instance(),
+                     SYSTEM_USER_ID,
+                     {},
+                     TAPI::ORMFields_t({
+                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                                       }),
+                     {
+                         { tblVoucher::vchID, VoucherID }
+                     });
         throw;
     }
 }
@@ -1063,15 +1025,16 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOnlinePayment(
  *     operator
  *     owner
  */
-quint64 Account::apiPOSTclaimOfflinePayment(
+quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,
     const QString& _receiptCode,
     TAPI::Date_t _receiptDate,
     quint32 _amount,
+    quint64 _walID,
     const QString& _note
-) {
+)) {
     QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
 //        .addCol(tblVoucher::vchTotalAmount)
         .where({ tblVoucher::vchID, enuConditionOperator::Equal, _vchID })
@@ -1092,16 +1055,20 @@ quint64 Account::apiPOSTclaimOfflinePayment(
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
+    QVariantMap CreateParams = {
+        { "ofpc_vchID", _vchID },
+        { "ofpcBank", _bank },
+        { "ofpcReceiptCode", _receiptCode },
+        { "ofpcReceiptDate", _receiptDate },
+        { "ofpcAmount", _amount },
+        { "ofpcNotes", _note.trimmed().size() ? _note.trimmed() : QVariant() }
+    };
+    if (_walID > 0)
+        CreateParams.insert("ofpcTarget_walID", _walID);
+
     return this->Create(OfflinePaymentClaims::instance(),
                         _APICALLBOOM,
-                        TAPI::ORMFields_t({
-                                              { "ofpc_vchID", _vchID },
-                                              { "ofpcBank", _bank },
-                                              { "ofpcReceiptCode", _receiptCode },
-                                              { "ofpcReceiptDate", _receiptDate },
-                                              { "ofpcAmount", _amount },
-                                              { "ofpcNotes", _note.trimmed().size() ? _note.trimmed() : QVariant() }
-                                          }));
+                        TAPI::ORMFields_t(CreateParams));
 }
 
 /**
@@ -1109,31 +1076,13 @@ quint64 Account::apiPOSTclaimOfflinePayment(
  *     operator
  *     owner
  */
-bool Account::apiPOSTrejectOfflinePayment(
+bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
-) {
+)) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
-        .addCols({
-                     tblOfflinePaymentClaims::ofpcID,
-                     tblOfflinePaymentClaims::ofpc_vchID,
-                     tblOfflinePaymentClaims::ofpcBank,
-                     tblOfflinePaymentClaims::ofpcReceiptCode,
-                     tblOfflinePaymentClaims::ofpcReceiptDate,
-                     tblOfflinePaymentClaims::ofpcAmount,
-                     tblOfflinePaymentClaims::ofpcNotes,
-                     tblOfflinePaymentClaims::ofpcStatus,
-                     tblOfflinePaymentClaims::ofpcCreationDateTime,
-                     tblOfflinePaymentClaims::ofpcCreatedBy_usrID,
-                     tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,
-                     tblVoucher::vchID,
-                     tblVoucher::vch_usrID,
-                     tblVoucher::vchDesc,
-                     tblVoucher::vchType,
-                     tblVoucher::vchTotalAmount,
-                     tblVoucher::vchStatus,
-                     tblVoucher::vchCreationDateTime,
-                 })
+        .addCols(tblOfflinePaymentClaims::ColumnNames())
+        .addCols(tblVoucher::ColumnNames())
         .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1172,31 +1121,13 @@ bool Account::apiPOSTrejectOfflinePayment(
  *     operator
  *     owner
  */
-Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
-) {
+)) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
-        .addCols({
-                     tblOfflinePaymentClaims::ofpcID,
-                     tblOfflinePaymentClaims::ofpc_vchID,
-                     tblOfflinePaymentClaims::ofpcBank,
-                     tblOfflinePaymentClaims::ofpcReceiptCode,
-                     tblOfflinePaymentClaims::ofpcReceiptDate,
-                     tblOfflinePaymentClaims::ofpcAmount,
-                     tblOfflinePaymentClaims::ofpcNotes,
-                     tblOfflinePaymentClaims::ofpcStatus,
-                     tblOfflinePaymentClaims::ofpcCreationDateTime,
-                     tblOfflinePaymentClaims::ofpcCreatedBy_usrID,
-                     tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,
-                     tblVoucher::vchID,
-                     tblVoucher::vch_usrID,
-                     tblVoucher::vchDesc,
-                     tblVoucher::vchType,
-                     tblVoucher::vchTotalAmount,
-                     tblVoucher::vchStatus,
-                     tblVoucher::vchCreationDateTime,
-                 })
+        .addCols(tblOfflinePaymentClaims::ColumnNames())
+        .addCols(tblVoucher::ColumnNames())
         .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1225,17 +1156,22 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    this->Create(OfflinePayments::instance(),
+    QVariantMap CreateParams = {
+        { tblOfflinePayments::ofp_vchID, OfflinePaymentClaim.ofpc_vchID },
+        { tblOfflinePayments::ofpBank, OfflinePaymentClaim.ofpcBank },
+        { tblOfflinePayments::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
+        { tblOfflinePayments::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
+        { tblOfflinePayments::ofpAmount, OfflinePaymentClaim.ofpcAmount },
+        { tblOfflinePayments::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
+        { tblOfflinePayments::ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
+    };
+
+    if (NULLABLE_HAS_VALUE(OfflinePaymentClaim.ofpcTarget_walID))
+            CreateParams.insert(tblOfflinePayments::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaim.ofpcTarget_walID));
+
+    quint64 PaymentID = this->Create(OfflinePayments::instance(),
                  _APICALLBOOM,
-                 TAPI::ORMFields_t({
-                     { tblOfflinePayments::ofp_vchID, OfflinePaymentClaim.ofpc_vchID },
-                     { tblOfflinePayments::ofpBank, OfflinePaymentClaim.ofpcBank },
-                     { tblOfflinePayments::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
-                     { tblOfflinePayments::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
-                     { tblOfflinePayments::ofpAmount, OfflinePaymentClaim.ofpcAmount },
-                     { tblOfflinePayments::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
-                     { tblOfflinePayments::ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
-                 }));
+                 TAPI::ORMFields_t(CreateParams));
 
     this->Update(OfflinePaymentClaims::instance(),
                  _APICALLBOOM,
@@ -1248,11 +1184,20 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
                  });
 
     try {
-        this->callSP("spWalletTransactionOnPayment_Create", {
-                         { "iVoucherID", OfflinePaymentClaim.ofpc_vchID },
-                         { "iPaymentType", QChar(enuPaymentType::Offline) }
-                     });
+        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+                                               { "iPaymentID", PaymentID },
+                                               { "iPaymentType", QChar(enuPaymentType::Offline) },
+                                               { "iVoucherID", OfflinePaymentClaim.ofpc_vchID },
+                                               { "iTargetWalletID", NULLABLE_GET_OR_DEFAULT(OfflinePaymentClaim.ofpcTarget_walID, 0) },
+                                           });
+
+        qint64 RemainingAfterWallet = Result.spDirectOutputs().value("oRemainingAfterWallet").toInt();
+
+        if (RemainingAfterWallet > 0)
+            return Targoman::API::AAA::stuVoucher();
+
         return Account::processVoucher(_APICALLBOOM.getUserID(), OfflinePaymentClaim.ofpc_vchID);
+
     }  catch (...) {
         this->Update(Voucher::instance(),
                     SYSTEM_USER_ID,
@@ -1267,15 +1212,16 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment(
     }
 }
 
-Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment_withBankInfo(
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_withBankInfo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,
     const QString& _receiptCode,
     TAPI::Date_t _receiptDate,
     quint32 _amount,
+    quint64 _walID,
     const QString& _note
-) {
+)) {
     qint64 ApprovalLimit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:approveOffline:maxAmount").toLongLong();
     if (ApprovalLimit == 0)
         throw exAuthorization("Not enough access for offline approval");
@@ -1294,25 +1240,38 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment_withBankInf
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    /*Targoman::API::Query::*/this->Create(
-                                 OfflinePayments::instance(),
-                                 _APICALLBOOM,
-                                 TAPI::ORMFields_t({
-                                    { "ofp_vchID",_vchID },
-                                    { "ofpBank",_bank },
-                                    { "ofpReceiptCode",_receiptCode },
-                                    { "ofpReceiptDate",_receiptDate },
-                                    { "ofpAmount",_amount },
-                                    { "ofpNote",_note.trimmed().size() ? _note.trimmed() : QVariant() }
-                                 }));
+    QVariantMap CreateParams = {
+        { "ofp_vchID", _vchID },
+        { "ofpBank", _bank },
+        { "ofpReceiptCode", _receiptCode },
+        { "ofpReceiptDate", _receiptDate },
+        { "ofpAmount", _amount },
+        { "ofpNote", _note.trimmed().size() ? _note.trimmed() : QVariant() }
+    };
+    if (_walID > 0)
+        CreateParams.insert("ofpTarget_walID", _walID);
+
+    quint64 PaymentID = this->Create(OfflinePayments::instance(),
+        _APICALLBOOM,
+        TAPI::ORMFields_t(CreateParams));
+
     try {
-        this->callSP("spWalletTransactionOnPayment_Create", {
-                         { "iVoucherID", _vchID },
-                         { "iPaymentType", QChar(enuPaymentType::Offline) }
-                     });
+        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+                                               { "iPaymentID", PaymentID },
+                                               { "iPaymentType", QChar(enuPaymentType::Offline) },
+                                               { "iVoucherID", _vchID },
+                                               { "iTargetWalletID", _walID },
+                                           });
+
+        qint64 RemainingAfterWallet = Result.spDirectOutputs().value("oRemainingAfterWallet").toInt();
+
+        if (RemainingAfterWallet > 0)
+            return Targoman::API::AAA::stuVoucher();
+
         return Account::processVoucher(_APICALLBOOM.getUserID(), _vchID);
+
     }  catch (...) {
-        /*Targoman::API::Query::*/this->Update(Voucher::instance(),
+        this->Update(Voucher::instance(),
                     SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
@@ -1325,12 +1284,12 @@ Targoman::API::AAA::stuVoucher Account::apiPOSTapproveOfflinePayment_withBankInf
     }
 }
 
-bool Account::apiPOSTaddPrizeTo(
+bool IMPL_REST_POST(Account, addPrizeTo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     TAPI::JSON_t _desc
-) {
+)) {
     qint64 Limit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:addPrizeTo:maxAmount").toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add prize");
@@ -1350,12 +1309,12 @@ bool Account::apiPOSTaddPrizeTo(
     return true;
 }
 
-bool Account::apiPOSTaddIncomeTo(
+bool IMPL_REST_POST(Account, addIncomeTo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     TAPI::JSON_t _desc
-) {
+)) {
     qint64 Limit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:addIncomeTo:maxAmount").toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add income");
@@ -1375,20 +1334,20 @@ bool Account::apiPOSTaddIncomeTo(
     return true;
 }
 
-bool Account::apiPOSTcheckVoucherTTL(
+bool IMPL_REST_POST(Account, checkVoucherTTL, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
-) {
+)) {
 }
 
 /****************************************************************\
 |** fixture *****************************************************|
 \****************************************************************/
 #ifdef QT_DEBUG
-QVariant Account::apiPOSTfixtureSetup(
+QVariant IMPL_REST_POST(Account, fixtureSetup, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     if (_random == "1")
@@ -1621,10 +1580,10 @@ QVariant Account::apiPOSTfixtureSetup(
     return Result;
 }
 
-QVariant Account::apiPOSTfixtureCleanup(
+QVariant IMPL_REST_POST(Account, fixtureCleanup, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
-) {
+)) {
     QVariantMap Result;
 
     clsDAC DAC;
@@ -1825,10 +1784,10 @@ QVariant Account::apiPOSTfixtureCleanup(
 }
 
 ///TODO: not tested
-bool Account::apiPOSTfixtureApproveEmail(
+bool IMPL_REST_POST(Account, fixtureApproveEmail, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email
-) {
+)) {
     clsDAC DAC;
 
     QJsonObject Result = DAC.execQuery("",
@@ -1865,10 +1824,10 @@ bool Account::apiPOSTfixtureApproveEmail(
 }
 
 ///TODO: not tested
-bool Account::apiPOSTfixtureApproveMobile(
+bool IMPL_REST_POST(Account, fixtureApproveMobile, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile
-) {
+)) {
     clsDAC DAC;
 
     QJsonObject Result = DAC.execQuery("",

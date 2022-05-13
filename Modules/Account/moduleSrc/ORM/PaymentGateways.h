@@ -97,34 +97,35 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblPaymentGateways {
-constexpr char Name[] = "tblPaymentGateways";
-TARGOMAN_CREATE_CONSTEXPR(pgwID);
-TARGOMAN_CREATE_CONSTEXPR(pgwName);
-TARGOMAN_CREATE_CONSTEXPR(pgwType);
-TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
-TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
-TARGOMAN_CREATE_CONSTEXPR(pgwAllowedDomainName);
-//------------------
-TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
-TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);
-//------------------
-TARGOMAN_CREATE_CONSTEXPR(pgwMinRequestAmount);
-TARGOMAN_CREATE_CONSTEXPR(pgwMaxRequestAmount);
-TARGOMAN_CREATE_CONSTEXPR(pgwMaxPerDayAmount);
-//load balance:
-TARGOMAN_CREATE_CONSTEXPR(pgwLastPaymentDateTime);
-TARGOMAN_CREATE_CONSTEXPR(pgwSumTodayPaidAmount);
-//using:
-TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestCount);
-TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestAmount);
-TARGOMAN_CREATE_CONSTEXPR(pgwSumFailedCount);
-TARGOMAN_CREATE_CONSTEXPR(pgwSumOkCount);
-TARGOMAN_CREATE_CONSTEXPR(pgwSumPaidAmount);
-//
-TARGOMAN_CREATE_CONSTEXPR(pgwStatus);
-TARGOMAN_CREATE_CONSTEXPR(pgwCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
+    constexpr char Name[] = "tblPaymentGateways";
+
+    TARGOMAN_CREATE_CONSTEXPR(pgwID);
+    TARGOMAN_CREATE_CONSTEXPR(pgwName);
+    TARGOMAN_CREATE_CONSTEXPR(pgwType);
+    TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
+    TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
+    TARGOMAN_CREATE_CONSTEXPR(pgwAllowedDomainName);
+    //------------------
+    TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
+    TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);
+    //------------------
+    TARGOMAN_CREATE_CONSTEXPR(pgwMinRequestAmount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwMaxRequestAmount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwMaxPerDayAmount);
+    //load balance:
+    TARGOMAN_CREATE_CONSTEXPR(pgwLastPaymentDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumTodayPaidAmount);
+    //using:
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestCount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumRequestAmount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumFailedCount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumOkCount);
+    TARGOMAN_CREATE_CONSTEXPR(pgwSumPaidAmount);
+    //
+    TARGOMAN_CREATE_CONSTEXPR(pgwStatus);
+    TARGOMAN_CREATE_CONSTEXPR(pgwCreatedBy_usrID);
+    TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
+    TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
 }
 
 #pragma GCC diagnostic pop

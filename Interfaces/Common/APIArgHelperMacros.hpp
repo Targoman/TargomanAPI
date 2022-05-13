@@ -290,6 +290,20 @@
 #define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
 
+//template <typename _type>
+//inline QVariant toVariant(const NULLABLE_TYPE(_type) &v) {
+//    if (NULLABLE_IS_NULL(v))
+//        return QVariant();
+
+//    QVariant::fromValue(v);
+
+//    return QVariant(NULLABLE_VALUE(v));
+//}
+//template <typename _type>
+//inline QVariant operator QVariant(const NULLABLE_TYPE(_type) &v) {
+//    return toVariant(v);
+//}
+
 /************************************************************/
 #define N2J(_value)    [](auto v) { return toJsonValue(v); } (_value)
 #define N2S8(_value)   INTERNAL_N2int8(_value)

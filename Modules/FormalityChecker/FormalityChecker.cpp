@@ -40,11 +40,11 @@ bool FormalityChecker::init() {
     return true;
 }
 
-QString FormalityChecker::apicheck(
+QString IMPL_REST_GET_OR_POST(FormalityChecker, check, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _text,
     const TAPI::ISO639_2_t& _lang
-) {
+)) {
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 

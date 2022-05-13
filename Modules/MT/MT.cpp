@@ -31,15 +31,17 @@ namespace Modules {
 using namespace  Translation::Classes;
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT);
 
-QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
-                             const QString& _token,
-                             QString _text,
-                             QString _dir,
-                             const QString& _engine,
-                             bool _detailed,
-                             bool _detok,
-                             bool _dic,
-                             bool _dicFull) {
+QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
+    const TAPI::RemoteIP_t& _REMOTE_IP,
+    const QString& _token,
+    QString _text,
+    QString _dir,
+    const QString& _engine,
+    bool _detailed,
+    bool _detok,
+    bool _dic,
+    bool _dicFull
+)) {
     QTime Timer, OverallTime;
 
     int PreprocessTime = 0;
@@ -160,7 +162,11 @@ QVariantMap MT::apiTranslate(const TAPI::RemoteIP_t& _REMOTE_IP,
     }
 }
 
-QVariantMap MT::apiTest(const TAPI::RemoteIP_t& _REMOTE_IP, const QString& _token, const QString& _arg) {
+QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
+    const TAPI::RemoteIP_t& _REMOTE_IP,
+    const QString& _token,
+    const QString& _arg
+)) {
     return {
         {"inputArg", _arg},
         {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}

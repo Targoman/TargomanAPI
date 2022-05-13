@@ -242,8 +242,8 @@ protected:
 
     friend testQueryBuilders;
 
-//    friend bool /*Targoman::API::Query::*/this->Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-//    friend bool /*Targoman::API::Query::*/this->DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+//    friend bool this->Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
+//    friend bool this->DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
 } //namespace DBM
