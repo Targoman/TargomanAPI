@@ -55,7 +55,7 @@ class testAdvert : public clsBaseTest
 public:
     testAdvert(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
-    QString LastRandomNumber;
+    QString LastRandomNumber = "998877998877";
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
 
@@ -71,14 +71,9 @@ public:
     Targoman::API::AAA::stuVoucher Voucher;
     Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
 
-    void cleanupUnitTestData() {
-        clsDAC DAC;
-        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
-    }
-
 private slots:
     void initTestCase() {
-        initUnitTestData(false);
+        initUnitTestData(false, true);
     }
 
     void cleanupTestCase() {
@@ -87,8 +82,121 @@ private slots:
         cleanupUnitTestData();
     }
 
+private:
     /***************************************************************************************/
+    /* cleanup *****************************************************************************/
     /***************************************************************************************/
+    void cleanupUnitTestData() {
+//        clsDAC DAC;
+//        DAC.execQuery("", QString("UPDATE %1AAA.tblUser SET usrStatus='R' WHERE usrEmail IN(?,?)").arg(this->DBPrefix), { UT_UserEmail, UT_AdminUserEmail });
+
+        //    Targoman::API::AAA::stuVoucher approveOnlinePaymentVoucher;
+        //    void deleteOnlinePayment()
+        //    {
+        //        QT_TRY {
+        //            int ItemsCount = lastPreVoucher.Items.length();
+
+        //            QVariant Result = callAdminAPI(
+        //                DELETE,
+        //                QString("Account/OnlinePayment"
+        //            );
+
+        //            lastPreVoucher.fromJson(Result.toJsonObject());
+
+        //            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+
+        //        } QT_CATCH (const std::exception &exp) {
+        //            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        //        }
+        //    }
+
+        //    Targoman::API::AAA::stuVoucher voucher;
+        //    Targoman::API::AAA::stuPreVoucher lastPreVoucher;
+
+        if (this->CouponID > 0) {
+            try {
+                QVariant Result = callAdminAPI(
+                    RESTClientHelper::DELETE,
+                    QString("Advert/AccountCoupons/%1").arg(this->CouponID.toString())
+                );
+
+            } catch (std::exception &_exp) {
+                TargomanDebug(5) << _exp.what();
+            }
+        }
+
+        //    void deletePaymentGateway_devtest()
+        //    {
+        //        if (paymentGatewayID > 0)
+        //        {
+        //            QT_TRY {
+        //                QVariant Result = callAdminAPI(
+        //                    DELETE,
+        //                    QString("Advert/PaymentGateways/%1").arg(paymentGatewayID.toString())
+        //                );
+
+        //                QVERIFY(Result == true);
+
+        //            } QT_CATCH (const std::exception &exp) {
+        //                QTest::qFail(exp.what(), __FILE__, __LINE__);
+        //            }
+        //        }
+        //    }
+
+        if (this->BannerSaleableID > 0) {
+            try {
+                QVariant Result = callAdminAPI(
+                    RESTClientHelper::DELETE,
+                    QString("Advert/AccountSaleables/%1").arg(this->BannerSaleableID.toString())
+                );
+
+            } catch (std::exception &_exp) {
+                TargomanDebug(5) << _exp.what();
+            }
+        }
+
+        if (this->BannerProductID > 0) {
+            try {
+                QVariant Result = callAdminAPI(
+                    RESTClientHelper::DELETE,
+                    QString("Advert/AccountProducts/%1").arg(this->BannerProductID.toString())
+                );
+
+            } catch (std::exception &_exp) {
+                TargomanDebug(5) << _exp.what();
+            }
+        }
+
+        if (this->LocationID > 0) {
+            try {
+                QVariant Result = callAdminAPI(
+                    RESTClientHelper::DELETE,
+                    QString("Advert/Locations/%1").arg(this->LocationID.toString())
+                );
+
+            } catch (std::exception &_exp) {
+                TargomanDebug(5) << _exp.what();
+            }
+        }
+
+        try {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/fixtureCleanup",
+                {},
+                {
+                    { "random", this->LastRandomNumber },
+                });
+
+        } catch (std::exception &_exp) {
+            TargomanDebug(5) << _exp.what();
+        }
+
+    }
+
+private slots:
+    /***************************************************************************************/
+    /* tests *******************************************************************************/
     /***************************************************************************************/
     void setupAccountFixture() {
         QT_TRY {
@@ -97,12 +205,12 @@ private slots:
                 "Account/fixtureSetup",
                 {},
                 {
-                    { "random", 1 },
+                    { "random", this->LastRandomNumber },
                 });
 
             QVERIFY(Result.isValid());
 
-            this->LastRandomNumber = Result.toMap().value("Random").toString();
+//            this->LastRandomNumber = Result.toMap().value("Random").toString();
 
             this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
             gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
@@ -615,131 +723,6 @@ private slots:
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
-        }
-    }
-
-private slots:
-    /***************************************************************************************/
-    /* cleanup *****************************************************************************/
-    /***************************************************************************************/
-//    Targoman::API::AAA::stuVoucher approveOnlinePaymentVoucher;
-//    void deleteOnlinePayment()
-//    {
-//        QT_TRY {
-//            int ItemsCount = lastPreVoucher.Items.length();
-
-//            QVariant Result = callAdminAPI(
-//                DELETE,
-//                QString("Account/OnlinePayment"
-//            );
-
-//            lastPreVoucher.fromJson(Result.toJsonObject());
-
-//            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
-
-//        } QT_CATCH (const std::exception &exp) {
-//            QTest::qFail(exp.what(), __FILE__, __LINE__);
-//        }
-//    }
-
-//    Targoman::API::AAA::stuVoucher voucher;
-//    Targoman::API::AAA::stuPreVoucher lastPreVoucher;
-
-    void deleteDiscount() {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::DELETE,
-                QString("Advert/AccountCoupons/%1").arg(this->CouponID.toString())
-            );
-
-            QVERIFY(Result.toBool());
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-
-//    void deletePaymentGateway_devtest()
-//    {
-//        if (paymentGatewayID > 0)
-//        {
-//            QT_TRY {
-//                QVariant Result = callAdminAPI(
-//                    DELETE,
-//                    QString("Advert/PaymentGateways/%1").arg(paymentGatewayID.toString())
-//                );
-
-//                QVERIFY(Result == true);
-
-//            } QT_CATCH (const std::exception &exp) {
-//                QTest::qFail(exp.what(), __FILE__, __LINE__);
-//            }
-//        }
-//    }
-
-    void deleteSaleable_banner() {
-        if (this->BannerSaleableID > 0) {
-            QT_TRY {
-                QVariant Result = callAdminAPI(
-                    RESTClientHelper::DELETE,
-                    QString("Advert/AccountSaleables/%1").arg(this->BannerSaleableID.toString())
-                );
-
-                QVERIFY(Result.toBool());
-
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
-        }
-    }
-
-    void deleteProduct_banner() {
-        if (this->BannerProductID > 0) {
-            QT_TRY {
-                QVariant Result = callAdminAPI(
-                    RESTClientHelper::DELETE,
-                    QString("Advert/AccountProducts/%1").arg(this->BannerProductID.toString())
-                );
-
-                QVERIFY(Result.toBool());
-
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
-        }
-    }
-
-    void deleteLocation() {
-        if (this->LocationID > 0) {
-            QT_TRY {
-                QVariant Result = callAdminAPI(
-                    RESTClientHelper::DELETE,
-                    QString("Advert/Locations/%1").arg(this->LocationID.toString())
-                );
-
-                QVERIFY(Result.toBool());
-
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
-        }
-    }
-
-    /***************************************************************************************/
-    void cleanupAccountFixture() {
-        QT_TRY {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::POST,
-                "Account/fixtureCleanup",
-                {},
-                {
-                    { "random", this->LastRandomNumber },
-                });
-
-            QVERIFY(Result.isValid());
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 

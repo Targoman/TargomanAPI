@@ -1063,6 +1063,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
         { "ofpcAmount", _amount },
         { "ofpcNotes", _note.trimmed().size() ? _note.trimmed() : QVariant() }
     };
+
     if (_walID > 0)
         CreateParams.insert("ofpcTarget_walID", _walID);
 

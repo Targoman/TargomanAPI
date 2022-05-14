@@ -150,7 +150,6 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
     return true;
 }
 
-
 QVariantList IMPL_REST_GET_OR_POST(UserWallets, availableGatewayTypesForRequestIncrease, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
