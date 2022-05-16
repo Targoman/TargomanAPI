@@ -13,6 +13,11 @@ ALTER TABLE `tblOfflinePaymentClaims`
 ALTER TABLE `tblOnlinePayments`
     CHANGE COLUMN `onpStatus` `onpStatus` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'N:New, P:Pending, Y:Payed, A:Succeded, E:Error, J:Rejected, R:Removed' COLLATE 'utf8mb4_general_ci' AFTER `onpResult`;
 
+ALTER TABLE `tblOnlinePayments`
+    CHANGE COLUMN `onpPGTrnID` `onpTrackNumber` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci' AFTER `onp_pgwID`,
+    DROP INDEX `onpBankTrnID`,
+    ADD INDEX `onpTrackNumber` (`onpTrackNumber`) USING BTREE;
+
 DROP PROCEDURE IF EXISTS `spWallet_Transfer`;
 DELIMITER ;;
 CREATE PROCEDURE `spWallet_Transfer`(
@@ -209,7 +214,7 @@ BEGIN
                    SET MESSAGE_TEXT = '401:Not enough credit in wallet to transfer';
             END IF;
 
-            SELECT COALESCE(SUM(tblWalletsTransactions.wltAmount), 0)
+            SELECT COALESCE(SUM(ABS(tblWalletsTransactions.wltAmount)), 0)
               INTO vTodayTransfers
               FROM tblWalletsTransactions
              WHERE tblWalletsTransactions.wlt_walID = ioWalletID
@@ -490,7 +495,7 @@ BEGIN
 
     SET oRemainingAfterWallet = vTotalAmount;
 
-    SELECT vTotalAmount - SUM(tblWalletsTransactions.wltAmount)
+    SELECT vTotalAmount - SUM(ABS(tblWalletsTransactions.wltAmount))
       INTO oRemainingAfterWallet
       FROM tblWalletsTransactions
      WHERE tblWalletsTransactions.wlt_vchID = iVoucherID
@@ -551,38 +556,14 @@ BEGIN
 END;;
 DELIMITER ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-DROP PROCEDURE IF EXISTS `spBasket_PayByWallet`;
+DROP PROCEDURE IF EXISTS `spVoucher_GetRemaining`;
 DELIMITER ;;
-CREATE PROCEDURE `spBasket_PayByWallet`(
-    IN `iUserID` BIGINT UNSIGNED,
+CREATE PROCEDURE `spVoucher_GetRemaining`(
     IN `iVoucherID` BIGINT UNSIGNED,
-    IN `iAmount` INT UNSIGNED,
-    IN `iWalletID` BIGINT UNSIGNED,
-    OUT `oVoucherBalance` INT UNSIGNED
+    OUT `oRemainingAmount` BIGINT UNSIGNED
 )
 BEGIN
-    DECLARE vUserID BIGINT UNSIGNED;
-    DECLARE vValid TINYINT;
-    DECLARE vTargetUserID BIGINT UNSIGNED;
-    DECLARE vTargetWalletID BIGINT UNSIGNED;
-    DECLARE vFromNameFamily VARCHAR(100);
-    DECLARE vToNameFamily VARCHAR(100);
+    DECLARE vTotalAmount BIGINT UNSIGNED;
     DECLARE vErr VARCHAR(500);
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -590,35 +571,39 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 vErr = MESSAGE_TEXT;
 
         INSERT INTO tblActionLogs
-           SET tblActionLogs.atlBy_usrID = iFromUserID,
-               tblActionLogs.atlType = 'spBasket_PayByWallet.Error',
+           SET -- tblActionLogs.atlBy_usrID = iFromUserID,
+               tblActionLogs.atlType = 'spVoucher_GetRemaining.Error',
                tblActionLogs.atlDescription = JSON_OBJECT(
                    "err", vErr,
-                   "iUserID", iUserID,
                    "iVoucherID", iVoucherID,
-                   "iAmount", iAmount,
-                   "iWalletID", iWalletID,
-                   "oVoucherBalance", oVoucherBalance
+                   "vTotalAmount", vTotalAmount,
+                   "oRemainingAmount", oRemainingAmount
                )
         ;
 
-        ROLLBACK;
+--        ROLLBACK;
         RESIGNAL;
     END;
 
-    --compute voucher balance
+    SELECT vchTotalAmount
+      INTO vTotalAmount
+      FROM tblVoucher
+     WHERE vchID = iVoucherID
+    ;
 
-SELECT *
-FROM tblVoucher
-LEFT JOIN (
-SELECT wlt_vchID,
-SUM(wltAmount) AS _sum
-   FROM tblWalletsTransactions
-   GROUP BY wlt_vchID
-) wt
-ON wt.wlt_vchID = tblVoucher.vchID
-WHERE vchStatus = 'F'
+    IF ISNULL(vTotalAmount) THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '500:Voucher not found';
+    END IF
 
+    SELECT vTotalAmount - SUM(ABS(tblWalletsTransactions.wltAmount))
+      INTO oRemainingAmount
+      FROM tblWalletsTransactions
+     WHERE tblWalletsTransactions.wlt_vchID = iVoucherID
+       AND tblWalletsTransactions.wlt_vchType = 'E' -- Expense
+       AND tblWalletsTransactions.wltStatus = 'A'
+  GROUP BY tblWalletsTransactions.wlt_vchID
+    ;
 
 END;;
 DELIMITER ;

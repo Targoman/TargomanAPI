@@ -55,33 +55,33 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 
 } //namespace Payment
 
-struct stuPaymentResponse {
-    int     ErrorCode;
-    QString ErrorString;
-    QString Result;
-    QString TrackID;
-    QString OrderMD5;
-    QString PaymentLink;
+//struct stuPaymentResponse {
+//    int     ErrorCode;
+//    QString ErrorString;
+//    QString Result;
+//    QString TrackID;
+//    QString OrderMD5;
+//    QString PaymentLink;
 
-    stuPaymentResponse() :
-        ///TODO: why -1????
-//        ErrorCode(-1)
-        ErrorCode(0)
-    { ; }
+//    stuPaymentResponse() :
+//        ///TODO: why -1????
+////        ErrorCode(-1)
+//        ErrorCode(0)
+//    { ; }
 
-    stuPaymentResponse(const QString& _trackID, const QString& _paymentLink) :
-        ErrorCode(0),
-        TrackID(_trackID),
-        PaymentLink(_paymentLink)
-    { ; }
+//    stuPaymentResponse(const QString& _trackID, const QString& _paymentLink) :
+//        ErrorCode(0),
+//        TrackID(_trackID),
+//        PaymentLink(_paymentLink)
+//    { ; }
 
-    stuPaymentResponse(const QString _orderMD5, const QString& _result, int _errorCode, const QString& _errStr) :
-        ErrorCode(_errorCode),
-        ErrorString(_errStr),
-        Result(_result),
-        OrderMD5(_orderMD5)
-    { ; }
-};
+//    stuPaymentResponse(const QString _orderMD5, const QString& _result, int _errorCode, const QString& _errStr) :
+//        ErrorCode(_errorCode),
+//        ErrorString(_errStr),
+//        Result(_result),
+//        OrderMD5(_orderMD5)
+//    { ; }
+//};
 
 namespace Payment {
 
@@ -103,14 +103,14 @@ public: \
     instanceGetterPtr(_gatewayClassName); \
 protected: \
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
-    virtual Targoman::API::AccountModule::stuPaymentResponse request( \
+    virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
             const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
             TAPI::MD5_t _orderMD5, \
             qint64 _amount, \
             const QString& _callback, \
             const QString& _desc \
             ); \
-    virtual Targoman::API::AccountModule::stuPaymentResponse verify( \
+    virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle( \
             const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
             const TAPI::JSON_t& _pgResponse, \
             const QString& _domain \
@@ -139,14 +139,14 @@ class intfPaymentGateway
 protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
 //    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
-    virtual stuPaymentResponse request(
+    virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest(
             const stuPaymentGateway& _paymentGateway,
             TAPI::MD5_t _orderMD5,
             qint64 _amount,
             const QString& _callback,
             const QString& _desc
             ) = 0;
-    virtual stuPaymentResponse verify(
+    virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle(
             const stuPaymentGateway& _paymentGateway,
             const TAPI::JSON_t& _pgResponse,
             const QString& _domain

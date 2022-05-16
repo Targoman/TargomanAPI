@@ -54,7 +54,7 @@ OnlinePayments::OnlinePayments() :
             { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired,  UPAdmin },
             { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
             { tblOnlinePayments::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
-            { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),   QNull,      UPAdmin },
+            { tblOnlinePayments::onpTrackNumber,        S(QString),             QFV.allwaysValid().maxLenght(50),   QNull,      UPAdmin },
             { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
             { tblOnlinePayments::onpTarget_walID,       S(quint64),             QFV,                                QNull,      UPNone },
             { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,      UPAdmin, false, false },

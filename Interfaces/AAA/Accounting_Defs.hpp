@@ -37,16 +37,19 @@
 namespace Targoman::API::AAA {
 
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
-                     New      = 'N',
-                     Canceled = 'C',
-                     Error    = 'E',
-                     Finished = 'F',
-                     Removed  = 'R',
+                     New            = 'N',
+                     Canceled       = 'C',
+                     Error          = 'E',
+                     Finished       = 'F',
+//                     WaitForProcess = 'W',
+                     Removed        = 'R',
                      );
+
 TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Percent = '%',
                      Currency  = '$',
                      );
+
 } //namespace Targoman::API::AAA
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp

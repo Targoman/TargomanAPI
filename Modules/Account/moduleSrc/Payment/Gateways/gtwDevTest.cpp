@@ -27,13 +27,14 @@ namespace Targoman::API::AccountModule::Payment::Gateways {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 
-stuPaymentResponse gtwDevTest::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    ) {
+// [Response, TrackID, PaymentLink]
+std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
+    const stuPaymentGateway& _paymentGateway,
+    TAPI::MD5_t _orderMD5,
+    qint64 _amount,
+    const QString& _callback,
+    const QString& _desc
+) {
     Q_UNUSED(_orderMD5);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
@@ -47,28 +48,27 @@ stuPaymentResponse gtwDevTest::request(
 //    raiseError = true;
 
     if (raiseError)
-        return stuPaymentResponse(
-            _orderMD5,
-            {},
-            -1,
-            "raiseError is TRUE"
-        );
+        throw exPayment("raiseError is TRUE");
 
     QString TrackID = "devtest_track_id";
-    return stuPaymentResponse(
+
+    return {
+        "",
         TrackID,
         QString(gtwDevTest::URL_GTW_PAY).replace("{{track_id}}", TrackID)
-    );
+    };
+
 #else
     throw exPayment("THIS PAYMENT GATEWAY ONLY WORKS ON DEVELEOPMENT PHASE.");
 #endif // QT_DEBUG
 }
 
-stuPaymentResponse gtwDevTest::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    ) {
+// [Response, refNumber]
+std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
+    const stuPaymentGateway& _paymentGateway,
+    const TAPI::JSON_t& _pgResponse,
+    const QString& _domain
+) {
     Q_UNUSED(_pgResponse);
     Q_UNUSED(_domain);
 
@@ -79,18 +79,17 @@ stuPaymentResponse gtwDevTest::verify(
 
 //    raiseError = true;
 
-    QString OrderMD5 = _pgResponse.object().value("orderId").toString();
+//    QString OrderMD5 = _pgResponse.object().value("orderId").toString();
 //    QString TrackID = _pgResponse.object().value("trackId").toString();
 
     if (raiseError)
-        return stuPaymentResponse(
-            OrderMD5,
-            {},
-            -1,
-            "raiseError is TRUE"
-        );
+        throw exPayment("raiseError is TRUE");
 
-    return {};
+    return {
+        "",
+        "devtest_ref_number"
+    };
+
 #else
     throw exPayment("THIS PAYMENT GATEWAY ONLY WORKS ON DEVELEOPMENT PHASE.");
 #endif // QT_DEBUG

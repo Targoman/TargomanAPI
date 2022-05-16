@@ -59,19 +59,6 @@ public:
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
-public:
-    static Targoman::API::AAA::stuVoucher processVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
-        quint64 _userID,
-        quint64 _voucherID
-    );
-    static void tryCancelVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
-        quint64 _userID,
-        quint64 _voucherID,
-        bool _setAsError = false
-    );
-
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
     TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
@@ -284,14 +271,27 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
+public:
+private:
+    Targoman::API::AAA::stuVoucher processVoucher(
+//        intfAPICallBoom &APICALLBOOM_PARAM,
+        quint64 _userID,
+        quint64 _voucherID
+    );
+    void tryCancelVoucher(
+//        intfAPICallBoom &APICALLBOOM_PARAM,
+        quint64 _userID,
+        quint64 _voucherID,
+        bool _setAsError = false
+    );
 private:
     Targoman::API::AAA::stuVoucher payAndProcessBasket(
         APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         QString _domain,
         quint64 _voucherID,
         Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
-        quint64 _amount,
-        qint64 _walID = -1,
+        qint64 _amount = -1, //-1: rest of voucher's remained amount
+        qint64 _walID = -1, //-1: no wallet
         QString _paymentVerifyCallback = {}
     );
 
@@ -307,8 +307,8 @@ private slots:
             qint64 _walID = -1, //-1: no wallet
             QString _paymentVerifyCallback = {}
         ),
-        "Create a wallet transaction for pay for voucher."
-        "amount must be <= remainig of voucher topay"
+        "Pay for voucher by wallet transaction and/or offline/online payment."
+        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining"
     )
 
     Targoman::API::AAA::stuVoucher REST_POST(
@@ -350,9 +350,7 @@ private slots:
             quint64 _walID = 0,
             const QString& _note = {}
         ),
-        R"(
-            Claim offline payment by user.
-        )"
+        "Claim offline payment by user"
     )
 
     bool REST_POST(

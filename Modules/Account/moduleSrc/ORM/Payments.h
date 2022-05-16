@@ -64,7 +64,7 @@ namespace tblOnlinePayments {
     TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
     TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
     TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
-    TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
+    TARGOMAN_CREATE_CONSTEXPR(onpTrackNumber);
     TARGOMAN_CREATE_CONSTEXPR(onpAmount);
     TARGOMAN_CREATE_CONSTEXPR(onpTarget_walID);
     TARGOMAN_CREATE_CONSTEXPR(onpResult);
@@ -78,7 +78,7 @@ namespace tblOnlinePayments {
             onpMD5,
             onp_vchID,
             onp_pgwID,
-            onpPGTrnID,
+            onpTrackNumber,
             onpAmount,
             onpTarget_walID,
             onpResult,
@@ -93,7 +93,7 @@ namespace tblOnlinePayments {
         SF_MD5_t(onpMD5),
         SF_quint64(onp_vchID),
         SF_quint32(onp_pgwID),
-        SF_QString(onpPGTrnID),
+        SF_QString(onpTrackNumber),
         SF_quint32(onpAmount),
         SF_NULLABLE_quint64(onpTarget_walID),
         SF_QString(onpResult),

@@ -657,20 +657,40 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
     quint64 _voucherID
 ) {
     try {
-        QVariant VoucherDesc = SelectQuery(Voucher::instance())
-                               .addCol(tblVoucher::vchDesc)
-                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
-                               .one()
-                               .value(tblVoucher::vchDesc);
+        tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
+                                      .addCols(tblVoucher::ColumnNames())
+                                      .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                                      .one<tblVoucher::DTO>();
+
+        if (VoucherInfo.vchStatus != enuVoucherStatus::New)
+            throw exHTTPInternalServerError("only NEW vouchers are allowed to process");
 
         Targoman::API::AAA::stuPreVoucher PreVoucher;
+        PreVoucher.fromJson(VoucherInfo.vchDesc.object());
 
-        if (VoucherDesc.canConvert<QJsonObject>())
-            PreVoucher.fromJson(VoucherDesc.toJsonObject());
-        else if (VoucherDesc.canConvert<QVariantMap>())
-            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
-        else
-            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json.").arg(_voucherID));
+        this->Update(Voucher::instance(),
+                     SYSTEM_USER_ID,
+                     {},
+                     TAPI::ORMFields_t({
+                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::WaitForProcess }
+                                       }),
+                     {
+                         { tblVoucher::vchID, _voucherID }
+                     });
+
+
+
+
+
+
+
+
+//        if (VoucherInfo.vchDesc.canConvert<QJsonObject>())
+//            PreVoucher.fromJson(VoucherInfo.vchDesc.toJsonObject());
+//        else if (VoucherDesc.canConvert<QVariantMap>())
+//            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
+//        else
+//            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json.").arg(_voucherID));
 
         if (PreVoucher.Items.isEmpty())
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
@@ -847,7 +867,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
     QString _domain,
     quint64 _voucherID,
     enuPaymentGatewayType::Type _gatewayType,
-    quint64 _amount,
+    qint64 _amount,
     qint64 _walID,
     QString _paymentVerifyCallback
 ) {
@@ -857,6 +877,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
     } else if (_gatewayType != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
+
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 
@@ -866,6 +887,16 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
                                   .addCols(tblVoucher::ColumnNames())
                                   .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
                                   .one<tblVoucher::DTO>();
+
+    if (VoucherInfo.vchType != enuVoucherType::Expense)
+        throw exHTTPBadRequest("Only Expense vouchers allowed");
+
+    if (_amount < 0) {
+        clsDACResult Result = this->callSP("spVoucher_GetRemaining", {
+                                               { "iVoucherID", _voucherID },
+                                           });
+        _amount = Result.spDirectOutputs().value("oRemainingAmount").toUInt();
+    }
 
     //compute wallet remaining
     qint64 RemainingAfterWallet = static_cast<qint64>(_amount);
@@ -958,11 +989,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     if (_gatewayType != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
+
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 
     if (_preVoucher.Items.isEmpty())
-        throw exHTTPBadRequest("seems that pre-Voucher is empty");
+        throw exHTTPBadRequest("Pre-Voucher is empty");
 
     checkPreVoucherSanity(_preVoucher);
 
@@ -1077,7 +1109,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
     auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
 
-    try {
+//    try {
         clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
                                                { "iPaymentID", PaymentID },
                                                { "iPaymentType", QChar(enuPaymentType::Online) },
@@ -1092,21 +1124,21 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
         return Account::processVoucher(_APICALLBOOM.getUserID(), VoucherID);
 
-    } catch (...) {
-        ///@TODO: VERY IMPORTANT: reject gateway verify if 'C' type of tblWalletsTransactions not created in sp yet
+//    } catch (...) {
+//        ///@TODO: VERY IMPORTANT: reject gateway verify if 'C' type of tblWalletsTransactions not created in sp yet
 
 
-        this->Update(Voucher::instance(),
-                     SYSTEM_USER_ID,
-                     {},
-                     TAPI::ORMFields_t({
-                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                                       }),
-                     {
-                         { tblVoucher::vchID, VoucherID }
-                     });
-        throw;
-    }
+//        this->Update(Voucher::instance(),
+//                     SYSTEM_USER_ID,
+//                     {},
+//                     TAPI::ORMFields_t({
+//                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                                       }),
+//                     {
+//                         { tblVoucher::vchID, VoucherID }
+//                     });
+//        throw;
+//    }
 }
 
 ///TODO: implement auto verify daemon OJO on failed payments in the daemon
@@ -1291,15 +1323,36 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         return Account::processVoucher(_APICALLBOOM.getUserID(), OfflinePaymentClaim.ofpc_vchID);
 
     }  catch (...) {
-        this->Update(Voucher::instance(),
-                    SYSTEM_USER_ID,
-                    {},
-                    TAPI::ORMFields_t({
-                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                    }),
-                    {
-                        { tblVoucher::vchID, OfflinePaymentClaim.ofpc_vchID }
-                    });
+        this->Update(OfflinePaymentClaims::instance(),
+                     _APICALLBOOM,
+                     {},
+                     TAPI::ORMFields_t({
+                         { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Error }
+                     }),
+                     {
+                         { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                     });
+
+        this->Update(OfflinePayments::instance(),
+                     _APICALLBOOM,
+                     {},
+                     TAPI::ORMFields_t({
+                         { tblOfflinePayments::ofpStatus, enuPaymentStatus::Error }
+                     }),
+                     {
+                         { tblOfflinePayments::ofpID, PaymentID }
+                     });
+
+
+        //        this->Update(Voucher::instance(),
+//                    SYSTEM_USER_ID,
+//                    {},
+//                    TAPI::ORMFields_t({
+//                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                    }),
+//                    {
+//                        { tblVoucher::vchID, OfflinePaymentClaim.ofpc_vchID }
+//                    });
         throw;
     }
 }
@@ -1363,15 +1416,25 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
         return Account::processVoucher(_APICALLBOOM.getUserID(), _vchID);
 
     }  catch (...) {
-        this->Update(Voucher::instance(),
-                    SYSTEM_USER_ID,
-                    {},
-                    TAPI::ORMFields_t({
-                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                    }),
-                    {
-                        { tblVoucher::vchID, _vchID }
-                    });
+        this->Update(OfflinePayments::instance(),
+                     _APICALLBOOM,
+                     {},
+                     TAPI::ORMFields_t({
+                         { tblOfflinePayments::ofpStatus, enuPaymentStatus::Error }
+                     }),
+                     {
+                         { tblOfflinePayments::ofpID, PaymentID }
+                     });
+
+//        this->Update(Voucher::instance(),
+//                    SYSTEM_USER_ID,
+//                    {},
+//                    TAPI::ORMFields_t({
+//                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                    }),
+//                    {
+//                        { tblVoucher::vchID, _vchID }
+//                    });
         throw;
     }
 }
