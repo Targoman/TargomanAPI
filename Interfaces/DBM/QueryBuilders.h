@@ -506,9 +506,25 @@ public:
     SelectQuery& setCacheTime(quint16 _cacheTime);
     void clearCache(QVariantMap _args = {});
 
-//    template <typename T> inline T one(QVariantMap _args = {});
     QVariantMap one(QVariantMap _args = {});
+    template <typename T> inline T one(QVariantMap _args = {}) {
+        QVariantMap info = this->one(_args);
+        T t;
+        t.fromJson(QJsonObject::fromVariantMap(info));
+        return t;
+    }
     QVariantMap tryOne(QVariantMap _args = {});
+    template <typename T> inline T tryOne(QVariantMap _args = {}) noexcept {
+        QT_TRY {
+            QVariantMap info = this->one(_args);
+            T t;
+            t.fromJson(QJsonObject::fromVariantMap(info));
+            return t;
+        }
+        QT_CATCH (const exHTTPNotFound &e) {
+            return {};
+        }
+    }
     QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
     TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});

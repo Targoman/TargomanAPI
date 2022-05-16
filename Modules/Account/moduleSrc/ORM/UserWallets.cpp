@@ -150,24 +150,24 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
     return true;
 }
 
-QVariantList IMPL_REST_GET_OR_POST(UserWallets, availableGatewayTypesForRequestIncrease, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint32 _amount,
-    QString _domain
-)) {
-    if (_amount == 0)
-        throw exHTTPBadRequest("amount is zero");
+//QVariantList IMPL_REST_GET_OR_POST(UserWallets, availableGatewayTypesForRequestIncrease, (
+//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    quint32 _amount,
+//    QString _domain
+//)) {
+//    if (_amount == 0)
+//        throw exHTTPBadRequest("amount is zero");
 
-    QVariantList Result = Payment::PaymentLogic::findAvailableGatewayTypes(
-                _amount,
-                _domain
-                );
+//    QVariantList Result = Payment::PaymentLogic::findAvailableGatewayTypes(
+//                _amount,
+//                _domain
+//                );
 
-    if (Result.contains(Targoman::API::AccountModule::enuPaymentGatewayType::COD))
-        Result.removeAt(Result.indexOf(Targoman::API::AccountModule::enuPaymentGatewayType::COD));
+//    if (Result.contains(Targoman::API::AccountModule::enuPaymentGatewayType::COD))
+//        Result.removeAt(Result.indexOf(Targoman::API::AccountModule::enuPaymentGatewayType::COD));
 
-    return Result;
-}
+//    return Result;
+//}
 
 Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,

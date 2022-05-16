@@ -30,12 +30,12 @@ namespace Targoman::API::AccountModule::Payment::Gateways {
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
 stuPaymentResponse gtwZibal::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    ) {
+    const stuPaymentGateway& _paymentGateway,
+    TAPI::MD5_t _orderMD5,
+    qint64 _amount,
+    const QString& _callback,
+    const QString& _desc
+) {
     TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
@@ -61,9 +61,9 @@ stuPaymentResponse gtwZibal::request(
         QJsonObject Response = Json.object();
 
         if (Response.contains("result") == false
-                || Response.value("result").toInt() != 100
-                || Response.value("trackId").toString().isEmpty()
-            )
+            || Response.value("result").toInt() != 100
+            || Response.value("trackId").toString().isEmpty()
+        )
             return stuPaymentResponse(
                 _orderMD5,
                 Json.toJson(),
@@ -83,20 +83,21 @@ stuPaymentResponse gtwZibal::request(
 }
 
 stuPaymentResponse gtwZibal::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    ) {
+    const stuPaymentGateway& _paymentGateway,
+    const TAPI::JSON_t& _pgResponse,
+    const QString& _domain
+) {
     TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
+
     try {
         QString OrderMD5 = _pgResponse.object().value("orderId").toString();
         QString TrackID = _pgResponse.object().value("trackId").toString();
 
         if (OrderMD5.isEmpty() || TrackID.isEmpty())
-            throw exHTTPBadRequest("Invalid response not containing essential keys");
+            throw exHTTPBadRequest("Invalid response. not containing essential keys");
 
         QFV.md5().validate(OrderMD5, "orderID");
         QFV.asciiAlNum(false).maxLenght(32).validate(TrackID, "trackId");
@@ -122,9 +123,9 @@ stuPaymentResponse gtwZibal::verify(
         QJsonObject Response = Json.object();
 
         if (Response.contains("result") == false
-               || ((Response.value("result").toInt() != 100)
-                   && (Response.value("result").toInt() != 201))
-            )
+           || ((Response.value("result").toInt() != 100)
+               && (Response.value("result").toInt() != 201))
+        )
             return stuPaymentResponse(
                 OrderMD5,
                 Json.toJson(),

@@ -2687,15 +2687,6 @@ quint64 SelectQuery::count(QVariantMap _args) {
 }
 */
 
-//template <typename T>
-//T SelectQuery::one(QVariantMap _args)
-//{
-//    QVariantMap info = this->one(_args);
-//    T t;
-//    t.setFromvariant(info);
-//    return t;
-//}
-
 QVariantMap SelectQuery::one(QVariantMap _args) {
     QString QueryString = this->buildQueryString(_args, true, false, true);
 
@@ -2725,6 +2716,15 @@ QVariantMap SelectQuery::one(QVariantMap _args) {
     return Result.toVariant().toMap();
 }
 
+//template <typename T>
+//T SelectQuery::one(QVariantMap _args)
+//{
+//    QVariantMap info = this->one(_args);
+//    T t;
+//    t.fromJson(QJsonObject::fromVariantMap(info));
+//    return t;
+//}
+
 QVariantMap SelectQuery::tryOne(QVariantMap _args) {
     QT_TRY {
         return this->one(_args);
@@ -2733,6 +2733,19 @@ QVariantMap SelectQuery::tryOne(QVariantMap _args) {
         return QVariantMap();
     }
 }
+//template <typename T>
+//T SelectQuery::tryOne(QVariantMap _args) noexcept
+//{
+//    QT_TRY {
+//        QVariantMap info = this->one(_args);
+//        T t;
+//        t.fromJson(QJsonObject::fromVariantMap(info));
+//        return t;
+//    }
+//    QT_CATCH (const exHTTPNotFound &e) {
+//        return {};
+//    }
+//}
 
 QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from) {
     this->Data->Offset = _from;

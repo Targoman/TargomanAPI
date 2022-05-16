@@ -32,6 +32,7 @@ namespace Targoman::API::AccountModule {
 //structures and enumes goes here
 
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
+                     NONE                       = '0',
                      _DeveloperTest             = '-',
                      COD                        = 'D', //offline payment
                      IranBank                   = 'I',
@@ -126,6 +127,38 @@ namespace tblPaymentGateways {
     TARGOMAN_CREATE_CONSTEXPR(pgwCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
+
+    inline QStringList ColumnNames() {
+        return {
+            pgwID,
+            pgwName,
+            pgwType,
+            pgwDriver,
+            pgwMetaInfo,
+            pgwAllowedDomainName,
+            //------------------
+            pgwTransactionFeeValue,
+            pgwTransactionFeeType,
+            //------------------
+            pgwMinRequestAmount,
+            pgwMaxRequestAmount,
+            pgwMaxPerDayAmount,
+            //load balance:
+            pgwLastPaymentDateTime,
+            pgwSumTodayPaidAmount,
+            //using:
+            pgwSumRequestCount,
+            pgwSumRequestAmount,
+            pgwSumFailedCount,
+            pgwSumOkCount,
+            pgwSumPaidAmount,
+            //------------------
+            pgwStatus,
+            pgwCreatedBy_usrID,
+            pgwCreationDateTime,
+            pgwUpdatedBy_usrID,
+        };
+    }
 }
 
 #pragma GCC diagnostic pop

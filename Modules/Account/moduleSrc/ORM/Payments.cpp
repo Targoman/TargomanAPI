@@ -58,7 +58,7 @@ OnlinePayments::OnlinePayments() :
             { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
             { tblOnlinePayments::onpTarget_walID,       S(quint64),             QFV,                                QNull,      UPNone },
             { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,      UPAdmin, false, false },
-            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
+            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
             { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
             { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
         },

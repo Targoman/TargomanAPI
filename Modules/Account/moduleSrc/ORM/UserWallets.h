@@ -96,15 +96,15 @@ private slots:
         "Transfer money to other user's default wallet. Default wallet will be used if not specified"
     )
 
-    QVariantList REST_GET_OR_POST(
-        availableGatewayTypesForRequestIncrease,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint32 _amount,
-            QString _domain
-        ),
-        "get list of payment gateway types valid for request increase base on amount and domain"
-    )
+//    QVariantList REST_GET_OR_POST(
+//        availableGatewayTypesForRequestIncrease,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            quint32 _amount,
+//            QString _domain
+//        ),
+//        "get list of payment gateway types valid for request increase base on amount and domain"
+//    )
 
     Targoman::API::AAA::stuVoucher REST_CREATE(
         requestIncrease,

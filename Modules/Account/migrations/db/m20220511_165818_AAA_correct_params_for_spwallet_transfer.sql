@@ -10,6 +10,9 @@ ALTER TABLE `tblOfflinePayments`
 ALTER TABLE `tblOfflinePaymentClaims`
     ADD COLUMN `ofpcTarget_walID` BIGINT UNSIGNED NULL AFTER `ofpcAmount`;
 
+ALTER TABLE `tblOnlinePayments`
+    CHANGE COLUMN `onpStatus` `onpStatus` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'N:New, P:Pending, Y:Payed, A:Succeded, E:Error, J:Rejected, R:Removed' COLLATE 'utf8mb4_general_ci' AFTER `onpResult`;
+
 DROP PROCEDURE IF EXISTS `spWallet_Transfer`;
 DELIMITER ;;
 CREATE PROCEDURE `spWallet_Transfer`(

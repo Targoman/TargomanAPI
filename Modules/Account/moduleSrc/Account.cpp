@@ -842,24 +842,98 @@ void Account::tryCancelVoucher(
 //                                 });
 }
 
-Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payBasketByWallet, (
+Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _domain,
     quint64 _voucherID,
+    enuPaymentGatewayType::Type _gatewayType,
     quint64 _amount,
-    quint64 _walID
+    qint64 _walID,
+    QString _paymentVerifyCallback
+) {
+    if (_gatewayType == enuPaymentGatewayType::NONE) {
+        if (_walID == -1)
+            throw exHTTPBadRequest("One of Wallet or Gateway Type must be provided");
+    } else if (_gatewayType != enuPaymentGatewayType::COD) {
+        if (_paymentVerifyCallback.isEmpty())
+            throw exHTTPBadRequest("callback for non COD is mandatory");
+        QFV.url().validate(_paymentVerifyCallback, "callBack");
+    }
+
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
+    tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
+                                  .addCols(tblVoucher::ColumnNames())
+                                  .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                                  .one<tblVoucher::DTO>();
+
+    //compute wallet remaining
+    qint64 RemainingAfterWallet = static_cast<qint64>(_amount);
+    if ((_walID >= 0) && (RemainingAfterWallet > 0)) {
+        clsDACResult Result = this->callSP("spWalletTransaction_Create", {
+                                               { "iWalletID", _walID },
+                                               { "iVoucherID", _voucherID },
+                                           });
+        RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
+        if (RemainingAfterWallet < 0)
+            throw exHTTPInternalServerError("Remaining after wallet transaction is negative.");
+    }
+
+    //process voucher
+    if (RemainingAfterWallet == 0)
+        return Account::processVoucher(CurrentUserID, _voucherID);
+
+    Targoman::API::AAA::stuVoucher Voucher;
+    Voucher.ID = VoucherInfo.vchID;
+    Voucher.Info.fromJson(VoucherInfo.vchDesc.object());
+
+    //create online/offline payment
+    switch (_gatewayType) {
+        case enuPaymentGatewayType::NONE:
+            //Do nothing
+            break;
+
+        case enuPaymentGatewayType::COD:
+            //Do nothing as it will be created after information upload.
+            break;
+
+        default:
+            TAPI::MD5_t PaymentMD5;
+            Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
+                                      _gatewayType,
+                                      _domain,
+                                      _voucherID,
+                                      VoucherInfo.vchDesc.toJson(), //_preVoucher.Summary,
+                                      RemainingAfterWallet,
+                                      _paymentVerifyCallback,
+                                      PaymentMD5,
+                                      _walID < 0 ? 0 : abs(_walID)
+                                      );
+            Voucher.PaymentMD5 = PaymentMD5;
+            break;
+    }
+
+    return Voucher;
+}
+
+Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payBasket, (
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _domain,
+    quint64 _voucherID,
+    enuPaymentGatewayType::Type _gatewayType,
+    qint64 _amount,
+    qint64 _walID,
+    QString _paymentVerifyCallback
 )) {
-    clsDACResult Result = this->callSP("spBasket_PayByWallet", {
-                                           { "iUserID", _APICALLBOOM.getUserID() },
-                                           { "iVoucherID", _voucherID },
-                                           { "iAmount", _amount },
-                                           { "iWalletID", _walID },
-                                       });
-
-    quint64 VoucherBalance = Result.spDirectOutputs().value("oVoucherBalance").toUInt();
-    if (VoucherBalance == 0)
-        return Account::processVoucher(_APICALLBOOM.getUserID(), _voucherID);
-
-    return {};
+    return this->payAndProcessBasket(
+        APICALLBOOM_PARAM,
+        _domain,
+        _voucherID,
+        _gatewayType,
+        _amount,
+        _walID,
+        _paymentVerifyCallback
+    );
 }
 
 ///TODO: select gateway (null|single|multiple) from service
@@ -870,7 +944,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payBasketByWallet, (
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
-    Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+    enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
     qint64 _walID,
     QString _paymentVerifyCallback
@@ -881,7 +955,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     ///2.1: process voucher
     ///2.2: create online/offline payment
 
-    if (_gatewayType != Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
+    if (_gatewayType != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
             throw exHTTPBadRequest("callback for non COD is mandatory");
         QFV.url().validate(_paymentVerifyCallback, "callBack");
@@ -893,28 +967,44 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     checkPreVoucherSanity(_preVoucher);
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
     if (_preVoucher.UserID != CurrentUserID)
         throw exHTTPBadRequest("invalid pre-Voucher owner");
 
     //1: create voucher
-    Targoman::API::AAA::stuVoucher Voucher;
+//    Targoman::API::AAA::stuVoucher Voucher;
 
-    Voucher.Info = _preVoucher;
+//    Voucher.Info = _preVoucher;
 
     ///TODO: remove sign from prevoucher before converting to JSON
     ///TODO: recalculate prevoucher to check either price change/package expiry/coupon limits/ etc.
     ///TODO: reserve saleables before returning voucher
     ///TODO: implement overall coupon at the end of checkout steps
 
-    Voucher.ID = this->Create(Voucher::instance(),
+    quint64 VoucherID = this->Create(Voucher::instance(),
                               _APICALLBOOM,
                               TAPI::ORMFields_t({
                                                     { tblVoucher::vch_usrID, CurrentUserID },
                                                     { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
                                                     { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
-                                                    { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Expense },
+                                                    { tblVoucher::vchType, enuVoucherType::Expense },
                                                     { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                 }));
+
+    Targoman::API::AAA::stuVoucher Voucher = payAndProcessBasket(
+        APICALLBOOM_PARAM,
+        _domain,
+        VoucherID,
+        _gatewayType,
+        _preVoucher.ToPay,
+        _walID,
+        _paymentVerifyCallback
+    );
+
+    return Voucher;
+
+
+/*
 
     try {
         //2: compute wallet remaining
@@ -934,7 +1024,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             return Account::processVoucher(CurrentUserID, Voucher.ID);
 
         //2.2: create online/offline payment
-        if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
+        if (_gatewayType == enuPaymentGatewayType::COD) {
             //Do nothing as it will be created after information upload.
         } else {
             TAPI::MD5_t PaymentMD5;
@@ -967,6 +1057,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     }
 
     return Voucher;
+*/
 }
 
 /**
@@ -1101,14 +1192,14 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
             throw exAuthorization("Voucher is not yours");
     }
 
-    if (OfflinePaymentClaim.ofpcStatus != Targoman::API::AccountModule::enuPaymentStatus::New)
+    if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
 
     this->Update(OfflinePaymentClaims::instance(),
                  _APICALLBOOM,
                  {},
                  TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::Rejected }
+                     { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Rejected }
                  }),
                  {
                      { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
@@ -1146,7 +1237,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
             throw exAuthorization("Voucher is not yours");
     }
 
-    if (OfflinePaymentClaim.ofpcStatus != Targoman::API::AccountModule::enuPaymentStatus::New)
+    if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
 
 //    if (ApprovalLimit > 0) {
@@ -1164,7 +1255,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         { tblOfflinePayments::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
         { tblOfflinePayments::ofpAmount, OfflinePaymentClaim.ofpcAmount },
         { tblOfflinePayments::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
-        { tblOfflinePayments::ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
+        { tblOfflinePayments::ofpStatus, enuPaymentStatus::Payed },
     };
 
     if (NULLABLE_HAS_VALUE(OfflinePaymentClaim.ofpcTarget_walID))
@@ -1178,7 +1269,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                  _APICALLBOOM,
                  {},
                  TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::Succeded }
+                     { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Succeded }
                  }),
                  {
                      { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
@@ -1303,7 +1394,7 @@ bool IMPL_REST_POST(Account, addPrizeTo, (
     this->callSP("sp_CREATE_increaseWallet", {
                      {"iWalletID", 0},
                      {"iToUsrID", _targetUsrID},
-                     {"iType", QString(static_cast<char>(Targoman::API::AccountModule::enuVoucherType::Prize))},
+                     {"iType", QString(static_cast<char>(enuVoucherType::Prize))},
                      {"iAmount", _amount},
                      {"iDesc", _desc.toJson()},
                  });
@@ -1328,7 +1419,7 @@ bool IMPL_REST_POST(Account, addIncomeTo, (
     this->callSP("sp_CREATE_increaseWallet", {
                      {"iWalletID", 0},
                      {"iToUsrID", _targetUsrID},
-                     {"iType", QString(static_cast<char>(Targoman::API::AccountModule::enuVoucherType::Income))},
+                     {"iType", QString(static_cast<char>(enuVoucherType::Income))},
                      {"iAmount", _amount},
                      {"iDesc", _desc.toJson()},
                  });

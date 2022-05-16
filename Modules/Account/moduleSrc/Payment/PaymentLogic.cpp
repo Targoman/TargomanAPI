@@ -273,27 +273,16 @@ QString PaymentLogic::createOnlinePaymentLink(
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);
 
     //3: create payment
-    TAPI::MD5_t onpMD5;
-    quint8 Retries = 0;
-    while (true) {
-        try {
-            onpMD5 = OnlinePayments::instance()
-                     .callSP("spOnlinePayment_Create", {
-                                 { "iVoucherID", _vchID },
-                                 { "iGatewayID", PaymentGateway.pgwID },
-                                 { "iAmount", _toPay },
-                                 { "iTargetWalID", _walID },
-                             })
-                     .spDirectOutputs()
-                     .value("oMD5")
-                     .toString()
-            ;
-            break;
-        } catch (...) {
-            if (++Retries > 3)
-                throw;
-        }
-    }
+    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP("spOnlinePayment_Create", {
+                                                               { "iVoucherID", _vchID },
+                                                               { "iGatewayID", PaymentGateway.pgwID },
+                                                               { "iAmount", _toPay },
+                                                               { "iTargetWalID", _walID },
+                                                           })
+                         .spDirectOutputs()
+                         .value("oMD5")
+                         .toString()
+                         ;
 
     try {
         _outPaymentMD5 = onpMD5;
@@ -321,6 +310,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                         {
                            { tblOnlinePayments::onpMD5, onpMD5 }
                         });
+
             throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
         }
 
@@ -345,11 +335,11 @@ QString PaymentLogic::createOnlinePaymentLink(
                                  { "iAmount", _toPay },
                              })
             ;
-        } catch (...)
-        { ; }
+        } catch (...) { ; }
 
         //5: return result for client redirecting
         return PaymentResponse.PaymentLink;
+
     } catch (exPayment&) {
         throw;
     } catch (exHTTPBadRequest&) {
@@ -382,28 +372,16 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
         throw exPayment("paymentMD5 is empty");
 
     QVariantMap OnlinePaymentInfo = SelectQuery(OnlinePayments::instance())
-            .addCols({
-                         tblOnlinePayments::onpID,
-                         tblOnlinePayments::onpMD5,
-                         tblOnlinePayments::onp_vchID,
-                         tblOnlinePayments::onp_pgwID,
-                         tblOnlinePayments::onpPGTrnID,
-                         tblOnlinePayments::onpAmount,
-                         tblOnlinePayments::onpTarget_walID,
-                         tblOnlinePayments::onpResult,
-                         tblOnlinePayments::onpStatus,
-                         //----------------
-                         tblPaymentGateways::pgwID,
-                         tblPaymentGateways::pgwName,
-                         tblPaymentGateways::pgwType,
-                         tblPaymentGateways::pgwDriver,
-                         tblPaymentGateways::pgwMetaInfo,
-                     })
+            .addCols(tblOnlinePayments::ColumnNames())
+            .addCols(tblPaymentGateways::ColumnNames())
             .innerJoinWith("paymentGateway")
             .where({ tblOnlinePayments::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
             .one();
     stuOnlinePayment OnlinePayment;
     OnlinePayment.fromVariantMap(OnlinePaymentInfo);
+
+    if (OnlinePayment.OnlinePayment.onpStatus != Targoman::API::AccountModule::enuPaymentStatus::Pending)
+        throw exPayment("Only Pending online payments allowed");
 
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
 

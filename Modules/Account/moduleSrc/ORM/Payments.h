@@ -72,6 +72,22 @@ namespace tblOnlinePayments {
     TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 
+    inline QStringList ColumnNames() {
+        return {
+            onpID,
+            onpMD5,
+            onp_vchID,
+            onp_pgwID,
+            onpPGTrnID,
+            onpAmount,
+            onpTarget_walID,
+            onpResult,
+            onpStatus,
+            onpCreationDateTime,
+            onpLastUpdateDateTime,
+        };
+    }
+
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(onpID),
         SF_MD5_t(onpMD5),
@@ -186,6 +202,23 @@ namespace tblOfflinePayments {
     TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+
+    inline QStringList ColumnNames() {
+        return {
+            ofpID,
+            ofp_vchID,
+            ofpBank,
+            ofpReceiptCode,
+            ofpReceiptDate,
+            ofpAmount,
+            ofpTarget_walID,
+            ofpNotes,
+            ofpStatus,
+            ofpCreationDateTime,
+            ofpCreatedBy_usrID,
+            ofpUpdatedBy_usrID,
+        };
+    }
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(ofpID),

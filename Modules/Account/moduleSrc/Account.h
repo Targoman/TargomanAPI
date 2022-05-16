@@ -284,13 +284,28 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
+private:
+    Targoman::API::AAA::stuVoucher payAndProcessBasket(
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+        QString _domain,
+        quint64 _voucherID,
+        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+        quint64 _amount,
+        qint64 _walID = -1,
+        QString _paymentVerifyCallback = {}
+    );
+
+private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
-        payBasketByWallet,
+        payBasket,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            QString _domain,
             quint64 _voucherID,
-            quint64 _amount,
-            quint64 _walID = 0
+            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType = Targoman::API::AccountModule::enuPaymentGatewayType::NONE,
+            qint64 _amount = -1, //-1: rest of voucher's remained amount
+            qint64 _walID = -1, //-1: no wallet
+            QString _paymentVerifyCallback = {}
         ),
         "Create a wallet transaction for pay for voucher."
         "amount must be <= remainig of voucher topay"
