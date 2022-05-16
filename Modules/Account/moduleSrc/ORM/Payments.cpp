@@ -86,15 +86,15 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
     intfSQLBasedModule(
         AAASchema,
         tblOfflinePaymentClaims::Name,
-        {///< ColName                                           Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+        {///< ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { tblOfflinePaymentClaims::ofpcID,                  ORM_PRIMARYKEY_64},
-            { tblOfflinePaymentClaims::ofpc_vchID,              S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcBank,                S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),             QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcTarget_walID,        S(quint64),             QFV,                                QNull,      UPNone },
-            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
+            { tblOfflinePaymentClaims::ofpc_vchID,              S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner},
+            { tblOfflinePaymentClaims::ofpcBank,                S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),                 QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcTarget_walID,        S(quint64),                 QFV,                                QNull,      UPNone },
+            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
             { tblOfflinePaymentClaims::ofpcStatus,              ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
             { tblOfflinePaymentClaims::ofpcCreationDateTime,    ORM_CREATED_ON},
             { tblOfflinePaymentClaims::ofpcCreatedBy_usrID,     ORM_CREATED_BY},

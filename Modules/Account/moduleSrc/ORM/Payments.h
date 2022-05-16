@@ -153,7 +153,7 @@ namespace tblOfflinePaymentClaims {
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(ofpcID),
-        SF_quint64(ofpc_vchID),
+        SF_NULLABLE_quint64(ofpc_vchID),
         SF_QString(ofpcBank),
         SF_QString(ofpcReceiptCode),
         SF_QString(ofpcReceiptDate),

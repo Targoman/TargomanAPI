@@ -378,7 +378,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         )
         .one();
 
-    qDebug() << "-- IMPL_REST_POST(intfAccountingBasedModule, addToBasket, ()) : SaleableInfo" << SaleableInfo;
+    qDebug() << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
     AssetItem.fromVariantMap(SaleableInfo);
@@ -744,7 +744,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     if (FinalPrice < 0)
         throw exHTTPInternalServerError("Final amount computed negative!");
 
-    _lastPreVoucher.Round = static_cast<quint16>((FinalPrice / 100.));
+    _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
     _lastPreVoucher.Sign.clear();
     _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());

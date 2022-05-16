@@ -271,25 +271,25 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-public:
 private:
     Targoman::API::AAA::stuVoucher processVoucher(
 //        intfAPICallBoom &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID
     );
+
     void tryCancelVoucher(
 //        intfAPICallBoom &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
     );
-private:
+
     Targoman::API::AAA::stuVoucher payAndProcessBasket(
         APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
         QString _domain,
         quint64 _voucherID,
-        Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
         qint64 _amount = -1, //-1: rest of voucher's remained amount
         qint64 _walID = -1, //-1: no wallet
         QString _paymentVerifyCallback = {}
@@ -302,7 +302,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             QString _domain,
             quint64 _voucherID,
-            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType = Targoman::API::AccountModule::enuPaymentGatewayType::NONE,
+            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
             qint64 _amount = -1, //-1: rest of voucher's remained amount
             qint64 _walID = -1, //-1: no wallet
             QString _paymentVerifyCallback = {}
@@ -342,15 +342,16 @@ private slots:
         claimOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _vchID,
             const QString& _bank,
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
+            NULLABLE_TYPE(quint64) _vchID = NULLABLE_NULL_VALUE,
             quint64 _walID = 0,
             const QString& _note = {}
         ),
-        "Claim offline payment by user"
+        "Claim offline payment by user."
+        "Set vchID to null just for charging wallet, otherwise after increasing the wallet, the voucher will be paid"
     )
 
     bool REST_POST(
@@ -371,23 +372,23 @@ private slots:
         "approve Voucher by offline payment"
     )
 
-    Targoman::API::AAA::stuVoucher EXREST_POST(
-        approveOfflinePayment_withBankInfo,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _vchID,
-            const QString& _bank,
-            const QString& _receiptCode,
-            TAPI::Date_t _receiptDate,
-            quint32 _amount,
-            quint64 _walID = 0,
-            const QString& _note = {}
-        ),
-        "approve Voucher by offline payment",
-        {
-            EXRESTCONFIG_HIDDEN,
-        }
-    )
+//    Targoman::API::AAA::stuVoucher EXREST_POST(
+//        approveOfflinePayment_withBankInfo,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            quint64 _vchID,
+//            const QString& _bank,
+//            const QString& _receiptCode,
+//            TAPI::Date_t _receiptDate,
+//            quint32 _amount,
+//            quint64 _walID = 0,
+//            const QString& _note = {}
+//        ),
+//        "approve Voucher by offline payment",
+//        {
+//            EXRESTCONFIG_HIDDEN,
+//        }
+//    )
 
     ///TODO: create API for cancelBasketItem
     ///TODO: create API for returnBasketItem

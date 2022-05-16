@@ -32,7 +32,6 @@ namespace Targoman::API::AccountModule {
 //structures and enumes goes here
 
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
-                     NONE                       = '0',
                      _DeveloperTest             = '-',
                      COD                        = 'D', //offline payment
                      IranBank                   = 'I',

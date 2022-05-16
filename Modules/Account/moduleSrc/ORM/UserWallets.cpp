@@ -178,7 +178,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     quint64 _walID
 )) {
     if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
-        throw exHTTPBadRequest("Call claimOfflinePayment for offline increase");
+        throw exHTTPBadRequest("Use claimOfflinePayment for offline increase");
 
     Targoman::API::AAA::stuVoucher Voucher;
 

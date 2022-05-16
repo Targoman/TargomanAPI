@@ -21,6 +21,9 @@ ALTER TABLE `tblOnlinePayments`
 ALTER TABLE `tblVoucher`
     ADD COLUMN `vchProcessResult` JSON NULL AFTER `vchTotalAmount`;
 
+ALTER TABLE `tblOfflinePaymentClaims`
+    CHANGE COLUMN `ofpc_vchID` `ofpc_vchID` BIGINT(20) UNSIGNED NULL AFTER `ofpcID`;
+
 DROP PROCEDURE IF EXISTS `spWallet_Transfer`;
 DELIMITER ;;
 CREATE PROCEDURE `spWallet_Transfer`(
