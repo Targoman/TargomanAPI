@@ -18,6 +18,9 @@ ALTER TABLE `tblOnlinePayments`
     DROP INDEX `onpBankTrnID`,
     ADD INDEX `onpTrackNumber` (`onpTrackNumber`) USING BTREE;
 
+ALTER TABLE `tblVoucher`
+    ADD COLUMN `vchProcessResult` JSON NULL AFTER `vchTotalAmount`;
+
 DROP PROCEDURE IF EXISTS `spWallet_Transfer`;
 DELIMITER ;;
 CREATE PROCEDURE `spWallet_Transfer`(

@@ -656,7 +656,14 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
     quint64 _userID,
     quint64 _voucherID
 ) {
-    try {
+//    try {
+        clsDACResult Result = this->callSP("spVoucher_GetRemaining", {
+                                               { "iVoucherID", _voucherID },
+                                           });
+        quint64 RemainingAmount = Result.spDirectOutputs().value("oRemainingAmount").toUInt();
+        if (RemainingAmount != 0)
+            throw exHTTPInternalServerError("This voucher has not been paid in full");
+
         tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
                                       .addCols(tblVoucher::ColumnNames())
                                       .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
@@ -667,30 +674,22 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         Targoman::API::AAA::stuPreVoucher PreVoucher;
         PreVoucher.fromJson(VoucherInfo.vchDesc.object());
-
-        this->Update(Voucher::instance(),
-                     SYSTEM_USER_ID,
-                     {},
-                     TAPI::ORMFields_t({
-                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::WaitForProcess }
-                                       }),
-                     {
-                         { tblVoucher::vchID, _voucherID }
-                     });
-
-
-
-
-
-
-
-
 //        if (VoucherInfo.vchDesc.canConvert<QJsonObject>())
 //            PreVoucher.fromJson(VoucherInfo.vchDesc.toJsonObject());
 //        else if (VoucherDesc.canConvert<QVariantMap>())
 //            PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
 //        else
 //            throw exHTTPInternalServerError(QString("Voucher with ID: %1 not found or invalid json.").arg(_voucherID));
+
+//        this->Update(Voucher::instance(),
+//                     SYSTEM_USER_ID,
+//                     {},
+//                     TAPI::ORMFields_t({
+//                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::WaitForProcess }
+//                                       }),
+//                     {
+//                         { tblVoucher::vchID, _voucherID }
+//                     });
 
         if (PreVoucher.Items.isEmpty())
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
@@ -706,42 +705,65 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         if (Services.isEmpty())
             throw exHTTPInternalServerError("There is no services registered.");
 
+        QVariantMap vchProcessResult = VoucherInfo.vchProcessResult.object().toVariantMap();
+        quint8 ErrorCount = 0;
+
         //1: process voucher items
         foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items) {
-            //lookup services
-            foreach (QVariant Service, Services) {
-                QVariantMap ServiceInfo = Service.toMap();
 
-                if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
-                    NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                    TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
-
-                    //bypass process by end point?
-                    if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
-                        stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                        VoucherItemForTrustedAction.UserID = _userID;
-                        VoucherItemForTrustedAction.VoucherID = _voucherID;
-                        VoucherItemForTrustedAction.VoucherItem = VoucherItem;
-                        VoucherItemForTrustedAction.Sign.clear();
-                        VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
-
-                        QVariant Result = RESTClientHelper::callAPI(
-                            RESTClientHelper::POST,
-                            NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
-                            {},
-                            {
-                                { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
-                            }
-                        );
-
-                        if ((Result.isValid() == false) || (Result.toBool() == false))
-                            throw exHTTPInternalServerError("error in process voucher");
-                    }
-
-                    break;
+            if (vchProcessResult.contains(VoucherItem.UUID)) {
+                QVariantMap ItemResult = vchProcessResult[VoucherItem.UUID].toMap();
+                if (ItemResult.contains("status") && (ItemResult["status"] == enuVoucherItemProcessStatus::Finished)) {
+                    continue;
                 }
-            } //foreach (QVariant Service, Services)
-        }
+            }
+
+            //lookup services
+            try {
+                foreach (QVariant Service, Services) {
+                    QVariantMap ServiceInfo = Service.toMap();
+
+                    if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
+                        NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
+                        TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
+
+                        //bypass process by end point?
+                        if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
+                            stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
+                            VoucherItemForTrustedAction.UserID = _userID;
+                            VoucherItemForTrustedAction.VoucherID = _voucherID;
+                            VoucherItemForTrustedAction.VoucherItem = VoucherItem;
+                            VoucherItemForTrustedAction.Sign.clear();
+                            VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
+
+                            QVariant Result = RESTClientHelper::callAPI(
+                                RESTClientHelper::POST,
+                                NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
+                                {},
+                                {
+                                    { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
+                                }
+                            );
+
+                            if ((Result.isValid() == false) || (Result.toBool() == false))
+                                throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
+
+                            vchProcessResult[VoucherItem.UUID] = QVariantMap({
+                                                                                 { "status", enuVoucherItemProcessStatus::Finished },
+                                                                             });
+                        }
+
+                        break;
+                    }
+                } //foreach (QVariant Service, Services)
+            } catch (std::exception &_exp) {
+                ++ErrorCount;
+                vchProcessResult[VoucherItem.UUID] = QVariantMap({
+                                                                     { "status", enuVoucherItemProcessStatus::Error },
+                                                                     { "error", _exp.what() },
+                                                                 });
+            }
+        } // foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
 
         //2: change voucher status to Targoman::API::AAA::enuVoucherStatus::Finished
         Voucher::instance().Update(
@@ -749,7 +771,11 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                      SYSTEM_USER_ID,
                                      {},
                                      TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Finished }
+                                        { tblVoucher::vchStatus, (ErrorCount == 0
+                                          ? Targoman::API::AAA::enuVoucherStatus::Finished
+                                          : Targoman::API::AAA::enuVoucherStatus::Error
+                                        )},
+                                        { tblVoucher::vchProcessResult, vchProcessResult }
                                      }),
                                      {
                                         { tblVoucher::vchID, _voucherID }
@@ -763,13 +789,13 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     QString(),
                     Targoman::API::AAA::enuVoucherStatus::Finished
                     );
-    } catch (...) {
-        Account::tryCancelVoucher(
-//                    _APICALLBOOM,
-                    _userID,
-                    _voucherID);
-        throw;
-    }
+//    } catch (...) {
+//        Account::tryCancelVoucher(
+////                    _APICALLBOOM,
+//                    _userID,
+//                    _voucherID);
+//        throw;
+//    }
 }
 
 void Account::tryCancelVoucher(

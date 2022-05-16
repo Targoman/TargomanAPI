@@ -63,6 +63,7 @@ namespace tblVoucher {
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
     TARGOMAN_CREATE_CONSTEXPR(vchType);
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
+    TARGOMAN_CREATE_CONSTEXPR(vchProcessResult);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
     TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
 
@@ -73,6 +74,7 @@ namespace tblVoucher {
             vchDesc,
             vchType,
             vchTotalAmount,
+            vchProcessResult,
             vchStatus,
             vchCreationDateTime,
         };
@@ -84,6 +86,7 @@ namespace tblVoucher {
         SF_JSON_t(vchDesc),
         SF_NULLABLE_Enum(Targoman::API::AccountModule::enuVoucherType, vchType),
         SF_quint64(vchTotalAmount),
+        SF_JSON_t(vchProcessResult),
         SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
         SF_DateTime_t(vchCreationDateTime)
     );

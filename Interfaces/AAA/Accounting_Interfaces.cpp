@@ -172,6 +172,7 @@ TAPI_REGISTER_METATYPE(
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 
 namespace Targoman::API::AAA {
 

@@ -50,10 +50,18 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      Currency  = '$',
                      );
 
+TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
+                     Canceled   = 'C',
+                     Error      = 'E',
+                     Finished   = 'F',
+                     Removed    = 'R',
+                     );
+
 } //namespace Targoman::API::AAA
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 namespace Targoman::API::AAA {
 
@@ -250,6 +258,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
     SF_QString(PaymentMD5),
     SF_Enum(enuVoucherStatus, Status, enuVoucherStatus::New)
 );
+
+//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemProcess,
+//    SF_MD5_t(UUID),
+//    SF_NULLABLE_Enum(enuVoucherItemProcessStatus, Status)
+//);
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}
 
