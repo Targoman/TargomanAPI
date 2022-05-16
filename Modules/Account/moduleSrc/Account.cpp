@@ -749,7 +749,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                 throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
 
                             vchProcessResult[VoucherItem.UUID] = QVariantMap({
-                                                                                 { "status", enuVoucherItemProcessStatus::Finished },
+                                                                                 { "status", QChar(enuVoucherItemProcessStatus::Finished) },
                                                                              });
                         }
 
@@ -759,7 +759,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             } catch (std::exception &_exp) {
                 ++ErrorCount;
                 vchProcessResult[VoucherItem.UUID] = QVariantMap({
-                                                                     { "status", enuVoucherItemProcessStatus::Error },
+                                                                     { "status", QChar(enuVoucherItemProcessStatus::Error) },
                                                                      { "error", _exp.what() },
                                                                  });
             }

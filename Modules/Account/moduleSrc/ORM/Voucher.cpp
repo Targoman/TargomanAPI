@@ -37,13 +37,13 @@ Voucher::Voucher() :
     intfSQLBasedModule(
         AAASchema,
         tblVoucher::Name,
-        {///< ColName                           Type                     Validation                  Default    UpBy    Sort   Filter Self  Virt   PK
+        {///< ColName                           Type                    Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
             { tblVoucher::vchID,                ORM_PRIMARYKEY_64 },
-            { tblVoucher::vch_usrID,            S(quint64),              QFV.integer().minValue(1),  QRequired, UPNone },
-            { tblVoucher::vchDesc,              S(TAPI::JSON_t),         QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
+            { tblVoucher::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { tblVoucher::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPNone, false, false },
             { tblVoucher::vchType,              S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AccountModule::enuVoucherType::Expense*/, UPNone },
-            { tblVoucher::vchTotalAmount,       S(quint64),              QFV,                        0,         UPNone },
-            { tblVoucher::vchProcessResult,     S(TAPI::JSON_t),         QFV/*.maxLenght(500)*/,     QRequired, UPNone, false, false },
+            { tblVoucher::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
+            { tblVoucher::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin, false, false },
             { tblVoucher::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
             { tblVoucher::vchCreationDateTime,  ORM_CREATED_ON },
         },
