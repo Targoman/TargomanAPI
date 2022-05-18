@@ -899,10 +899,10 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 ) {
     if (NULLABLE_IS_NULL(_gatewayType)) {
         if (_walID == -1)
-            throw exHTTPBadRequest("One of Wallet or Gateway Type must be provided");
+            throw exHTTPBadRequest("At least one of gatewayType or walID must be provided");
     } else if (NULLABLE_VALUE(_gatewayType) != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
-            throw exHTTPBadRequest("callback for non COD is mandatory");
+            throw exHTTPBadRequest("callback for non COD gatewayType is mandatory");
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
@@ -913,6 +913,9 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
                                   .addCols(tblVoucher::ColumnNames())
                                   .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
                                   .one<tblVoucher::DTO>();
+
+    if (VoucherInfo.vchStatus != enuVoucherStatus::New)
+        throw exHTTPBadRequest("Only New vouchers allowed");
 
     if (VoucherInfo.vchType != enuVoucherType::Expense)
         throw exHTTPBadRequest("Only Expense vouchers allowed");
@@ -1219,19 +1222,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
 )) {
-    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaim = SelectQuery(OfflinePaymentClaims::instance())
         .addCols(tblOfflinePaymentClaims::ColumnNames())
 //        .addCols(tblVoucher::ColumnNames())
 //        .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
-        .one()
-    );
-
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaim;
-    OfflinePaymentClaim.fromJson(PaymentInfo);
-
-//    tblVoucher::DTO Voucher;
-//    Voucher.fromJson(PaymentInfo);
+        .one<tblOfflinePaymentClaims::DTO>();
 
     //check operator or owner
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:approveOfflinePayment" }) == false) {

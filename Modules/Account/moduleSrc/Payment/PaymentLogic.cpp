@@ -158,7 +158,8 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
         .groupBy(tblPaymentGateways::pgwType)
     ;
 
-//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
+//    QList<ORM::tblPaymentGateways::DTO> Rows = qry.all<ORM::tblPaymentGateways::DTO>();
+
     QVariantList Rows = qry.all();
     return Rows;
 //    QList<enuPaymentGatewayType::Type> Types;
@@ -170,7 +171,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 //    return Types;
 }
 
-const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
+const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     quint32 _amount,
     enuPaymentGatewayType::Type _gatewayType,
     const QString& _domain
@@ -180,12 +181,8 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
+        .addCols(tblPaymentGateways::ColumnNames())
         .addCols({
-                     tblPaymentGateways::pgwID,
-                     tblPaymentGateways::pgwName,
-                     tblPaymentGateways::pgwType,
-                     tblPaymentGateways::pgwDriver,
-                     tblPaymentGateways::pgwMetaInfo,
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
                  })
@@ -236,12 +233,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         .orderBy("RAND()")
     ;
 
-//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
-    QVariantMap PaymentGatewayInfo = qry.one();
-    stuPaymentGateway PaymentGateway;
-    PaymentGateway.fromVariantMap(PaymentGatewayInfo);
-
-    return PaymentGateway;
+    return qry.one<ORM::tblPaymentGateways::DTO>();
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
@@ -267,7 +259,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     QFV.url().validate(_paymentVerifyCallback, "callBack");
 
     //1: find best payment gateway
-    stuPaymentGateway PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
+    ORM::tblPaymentGateways::DTO PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
 
     //2: get payment gateway driver
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);

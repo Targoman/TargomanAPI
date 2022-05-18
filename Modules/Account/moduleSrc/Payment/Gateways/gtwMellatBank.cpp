@@ -29,7 +29,7 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwMellatBank)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwMellatBank::prepareAndRequest(
-    const stuPaymentGateway& _paymentGateway,
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _orderMD5,
     qint64 _amount,
     const QString& _callback,
@@ -50,7 +50,7 @@ std::tuple<QString, QString, QString> gtwMellatBank::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwMellatBank::verifyAndSettle(
-    const stuPaymentGateway& _paymentGateway,
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
 ) {

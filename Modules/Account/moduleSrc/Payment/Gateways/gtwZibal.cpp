@@ -29,14 +29,14 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
-    const stuPaymentGateway& _paymentGateway,
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _orderMD5,
     qint64 _amount,
     const QString& _callback,
     const QString& _desc
 ) {
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
-    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
 
@@ -86,12 +86,12 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwZibal::verifyAndSettle(
-    const stuPaymentGateway& _paymentGateway,
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
 ) {
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
-    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
 

@@ -29,21 +29,21 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
-    const stuPaymentGateway& _paymentGateway,
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _orderMD5,
     qint64 _amount,
-    const QString& _callback,
-    const QString& _desc
+    const QString &_callback,
+    const QString &_desc
 ) {
     Q_UNUSED(_orderMD5);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
     Q_UNUSED(_desc);
 
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = MetaInfo["raiseError"].toBool();
+    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 
@@ -65,17 +65,17 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
-    const stuPaymentGateway& _paymentGateway,
-    const TAPI::JSON_t& _pgResponse,
-    const QString& _domain
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const TAPI::JSON_t &_pgResponse,
+    const QString &_domain
 ) {
     Q_UNUSED(_pgResponse);
     Q_UNUSED(_domain);
 
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = MetaInfo["raiseError"].toBool();
+    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 

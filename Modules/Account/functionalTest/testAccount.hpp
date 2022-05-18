@@ -799,6 +799,9 @@ private slots:
                         ).toBool());
     }
 
+    /*****************************************************************\
+    |* Voucher & Payments ********************************************|
+    \*****************************************************************/
     void checkPaymentGateways() {
         QVariant Result = callAdminAPI(RESTClientHelper::GET,
                                   "Account/PaymentGateways"
@@ -914,7 +917,7 @@ private slots:
             QFAIL (e.what());
         }
     }
-    void requestIncrease_DEVTEST_with_domain_approveOnlinePayment() {
+    void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
         if (this->Voucher.PaymentMD5.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callUserAPI(

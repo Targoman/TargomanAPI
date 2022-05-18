@@ -36,8 +36,7 @@ void stuOnlinePayment::fromVariantMap(
     QJsonObject JsonInfo = QJsonObject::fromVariantMap(_info);
 
     this->OnlinePayment.fromJson(JsonInfo);
-
-    this->PaymentGateway.fromVariantMap(_info);
+    this->PaymentGateway.fromJson(JsonInfo);
 }
 
 namespace ORM {

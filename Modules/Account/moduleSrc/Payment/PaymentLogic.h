@@ -56,7 +56,7 @@ public:
         const QString& _domain
     );
 
-    static const stuPaymentGateway findBestPaymentGateway(
+    static const ORM::tblPaymentGateways::DTO findBestPaymentGateway(
         quint32 _amount,
         enuPaymentGatewayType::Type _gatewayType,
         const QString& _domain

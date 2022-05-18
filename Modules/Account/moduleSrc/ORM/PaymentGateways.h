@@ -59,37 +59,17 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
                      Currency = '$',
                      );
 
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPaymentGateway,
-//    SF_quint32(pgwID),
-//    SF_QString(pgwName),
-//    SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
-//    SF_Enum(TAPI::enuPaymentGatewayDriver, pgwDriver, TAPI::enuPaymentGatewayDriver::IranMellatBank),
-//    SF_JSON_t(pgwMetaInfo)
-//    SF_NULLABLE_quint32(pgwTransactionFeeValue),
-//    SF_Enum(TAPI::enuPaymentGatewayTransactionFeeType::Type(pgwTransactionFeeType),
-//    SF_quint32(pgwMinRequestAmount),
-//    SF_NULLABLE_quint32)(pgwMaxRequestAmount),
-//    SF_NULLABLE_quint32)(pgwMaxPerDayAmount),
-//    SF_Generic(DateTime_t)(pgwLastPaymentDateTime),
-//    SF_quint64(pgwSumTodayPaidAmount),
-//    SF_quint32(pgwSumRequestCount),
-//    SF_quint64(pgwSumRequestAmount),
-//    SF_quint32(pgwSumFailedCount),
-//    SF_quint32(pgwSumOkCount),
-//    SF_quint64(pgwSumPaidAmount),
-//    SF_Enum(TAPI::enuPaymentGatewayStatus::Type, pgwStatus),
-//);
+} // namespace Targoman::API::AccountModule
 
-struct stuPaymentGateway
-{
-    quint32 pgwID;
-    QString pgwName;
-    Targoman::API::AccountModule::enuPaymentGatewayType::Type pgwType;
-    QString pgwDriver;
-    NULLABLE_TYPE(TAPI::JSON_t) pgwMetaInfo;
+//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
 
-    void fromVariantMap(const QVariantMap& _info);
-};
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
+//TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::enuPaymentGatewayType::List);
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
+
+namespace Targoman::API::AccountModule {
 
 namespace ORM {
 
@@ -158,6 +138,37 @@ namespace tblPaymentGateways {
             pgwUpdatedBy_usrID,
         };
     }
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint32(pgwID),
+        SF_QString(pgwName),
+        SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
+        SF_QString(pgwDriver),
+        SF_JSON_t(pgwMetaInfo),
+        SF_QString(pgwAllowedDomainName),
+
+        SF_NULLABLE_quint32(pgwTransactionFeeValue),
+        SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType, pgwTransactionFeeType, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Currency),
+
+        SF_quint32(pgwMinRequestAmount),
+        SF_NULLABLE_quint32(pgwMaxRequestAmount),
+        SF_NULLABLE_quint32(pgwMaxPerDayAmount),
+
+        SF_DateTime_t(pgwLastPaymentDateTime),
+        SF_quint64(pgwSumTodayPaidAmount),
+
+        SF_quint32(pgwSumRequestCount),
+        SF_quint64(pgwSumRequestAmount),
+        SF_quint32(pgwSumFailedCount),
+        SF_quint32(pgwSumOkCount),
+        SF_quint64(pgwSumPaidAmount),
+
+        SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayStatus, pgwStatus, Targoman::API::AccountModule::enuPaymentGatewayStatus::Active),
+        SF_QString(pgwCreationDateTime),
+        SF_quint64(pgwCreatedBy_usrID),
+        SF_quint64(pgwUpdatedBy_usrID)
+    );
+
 }
 
 #pragma GCC diagnostic pop
@@ -186,13 +197,5 @@ private slots:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-//TAPI_DECLARE_METATYPE_ENUM(TAPI::enuPaymentGateway);
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
-//TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::enuPaymentGatewayType::List);
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTGATEWAYS_H

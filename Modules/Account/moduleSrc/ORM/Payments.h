@@ -255,7 +255,7 @@ private slots:
 struct stuOnlinePayment
 {
     ORM::tblOnlinePayments::DTO OnlinePayment;
-    stuPaymentGateway PaymentGateway;
+    ORM::tblPaymentGateways::DTO PaymentGateway;
 
     void fromVariantMap(const QVariantMap& _info);
 };

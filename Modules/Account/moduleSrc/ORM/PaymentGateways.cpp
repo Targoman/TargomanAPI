@@ -36,27 +36,6 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTrans
 
 namespace Targoman::API::AccountModule {
 
-void stuPaymentGateway::fromVariantMap(const QVariantMap& _info) {
-    SET_FIELD_FROM_VARIANT_MAP(this->pgwID,                  _info, ORM::tblPaymentGateways, pgwID);
-    SET_FIELD_FROM_VARIANT_MAP(this->pgwName,                _info, ORM::tblPaymentGateways, pgwName);
-    SET_FIELD_FROM_VARIANT_MAP(this->pgwType,                _info, ORM::tblPaymentGateways, pgwType);
-    SET_FIELD_FROM_VARIANT_MAP(this->pgwDriver,              _info, ORM::tblPaymentGateways, pgwDriver);
-    SET_FIELD_FROM_VARIANT_MAP(this->pgwMetaInfo,            _info, ORM::tblPaymentGateways, pgwMetaInfo);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeValue, _info, ORM::tblPaymentGateways, pgwTransactionFeeValue);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwTransactionFeeType,  _info, ORM::tblPaymentGateways, pgwTransactionFeeType);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMinRequestAmount,    _info, ORM::tblPaymentGateways, pgwMinRequestAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxRequestAmount,    _info, ORM::tblPaymentGateways, pgwMaxRequestAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwMaxPerDayAmount,     _info, ORM::tblPaymentGateways, pgwMaxPerDayAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwLastPaymentDateTime, _info, ORM::tblPaymentGateways, pgwLastPaymentDateTime);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumTodayPaidAmount,  _info, ORM::tblPaymentGateways, pgwSumTodayPaidAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestCount,     _info, ORM::tblPaymentGateways, pgwSumRequestCount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumRequestAmount,    _info, ORM::tblPaymentGateways, pgwSumRequestAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumFailedCount,      _info, ORM::tblPaymentGateways, pgwSumFailedCount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumOkCount,          _info, ORM::tblPaymentGateways, pgwSumOkCount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwSumPaidAmount,       _info, ORM::tblPaymentGateways, pgwSumPaidAmount);
-//        SET_FIELD_FROM_VARIANT_MAP(this->pgwStatus,              _info, ORM::tblPaymentGateways, pgwStatus);
-}
-
 namespace ORM {
 
 PaymentGateways::PaymentGateways() :

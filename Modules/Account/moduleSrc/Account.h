@@ -307,8 +307,10 @@ private slots:
             qint64 _walID = -1, //-1: no wallet
             QString _paymentVerifyCallback = {}
         ),
-        "Pay for voucher by wallet transaction and/or offline/online payment."
-        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining"
+        "Pay for voucher by wallet and/or offline/online payment."
+        "gatewayType=null for pay only by wallet."
+        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining."
+        "At least one of gatewayType or walID must be provided."
     )
 
     Targoman::API::AAA::stuVoucher REST_POST(

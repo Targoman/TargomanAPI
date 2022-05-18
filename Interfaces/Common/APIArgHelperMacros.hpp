@@ -173,8 +173,12 @@
     /* def               */ _def, \
     /* validator         */ v, \
     /* type 2 QJsonValue */ _type::toStr(v), \
-    /* QJsonValue 2 type */ [](QJsonValue v) -> _type::Type { _type::Type t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
-//static_cast<_type::Type>(v.toString().toLatin1().constData()[0])
+    /* QJsonValue 2 type */ [](QJsonValue v) -> _type::Type { \
+        _type::Type t; \
+        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+        return t; \
+    }(v)
+
 #define SF_NULLABLE_Enum(_type, _name) \
     /* type              */ NULLABLE_TYPE(_type::Type), \
     /* name              */ _name, \
@@ -197,7 +201,11 @@
     /* def               */ TAPI::JSON_t(), \
     /* validator         */ v.isEmpty() == false, \
     /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
-    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { TAPI::JSON_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
+    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { \
+        TAPI::JSON_t t; \
+        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+        return t; \
+    }(v)
 
 #define SF_DateTime_t(_name) \
     /* type              */ TAPI::DateTime_t, \
@@ -205,7 +213,11 @@
     /* def               */ TAPI::DateTime_t(), \
     /* validator         */ v.isValid(), \
     /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
-    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { TAPI::DateTime_t t; TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); return t; }(v)
+    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { \
+        TAPI::DateTime_t t; \
+        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+        return t; \
+    }(v)
 
 //                                                  _type,                  _name, _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
 #define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)

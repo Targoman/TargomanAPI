@@ -104,16 +104,16 @@ public: \
 protected: \
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
-            const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
+            const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
             TAPI::MD5_t _orderMD5, \
             qint64 _amount, \
-            const QString& _callback, \
-            const QString& _desc \
+            const QString &_callback, \
+            const QString &_desc \
             ); \
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle( \
-            const Targoman::API::AccountModule::stuPaymentGateway& _paymentGateway, \
-            const TAPI::JSON_t& _pgResponse, \
-            const QString& _domain \
+            const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
+            const TAPI::JSON_t &_pgResponse, \
+            const QString &_domain \
             ); \
     friend Targoman::API::AccountModule::Payment::PaymentLogic; \
 private: \
@@ -140,16 +140,16 @@ protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
 //    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest(
-            const stuPaymentGateway& _paymentGateway,
+            const ORM::tblPaymentGateways::DTO &_paymentGateway,
             TAPI::MD5_t _orderMD5,
             qint64 _amount,
-            const QString& _callback,
-            const QString& _desc
+            const QString &_callback,
+            const QString &_desc
             ) = 0;
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle(
-            const stuPaymentGateway& _paymentGateway,
-            const TAPI::JSON_t& _pgResponse,
-            const QString& _domain
+            const ORM::tblPaymentGateways::DTO &_paymentGateway,
+            const TAPI::JSON_t &_pgResponse,
+            const QString &_domain
             ) = 0;
     virtual QString errorString(int _errCode) { return QString("unknown error %1").arg(_errCode); }
 
