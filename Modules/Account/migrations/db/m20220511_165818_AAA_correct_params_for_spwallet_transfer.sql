@@ -566,14 +566,6 @@ BEGIN
 END;;
 DELIMITER ;
 
-
-
-
-
-
-
-
-
 DROP PROCEDURE IF EXISTS `spWalletTransaction_Create`;
 DELIMITER ;;
 CREATE PROCEDURE `spWalletTransaction_Create`(
