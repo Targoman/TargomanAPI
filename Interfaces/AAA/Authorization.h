@@ -34,7 +34,7 @@ namespace Targoman::API::AAA::Authorization {
     extern bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
     extern void checkPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
     extern QJsonObject privObjectFromInfo(const QJsonObject& _info);
-    extern QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem);
+    extern QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem, const QVariant &_defIfNotFoundAndAllIsDefined = {});
 
 } // namespace Targoman::API::AAA::Authorization
 

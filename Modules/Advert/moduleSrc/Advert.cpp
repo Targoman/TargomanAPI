@@ -125,7 +125,7 @@ bool Advert::isEmpty(const UsageLimits_t& _limits) const
 }
 
 void Advert::applyAssetAdditives(
-    intfAPICallBoom &APICALLBOOM_PARAM,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     INOUT stuAssetItem& _assetItem,
     const OrderAdditives_t& _orderAdditives
 ) {

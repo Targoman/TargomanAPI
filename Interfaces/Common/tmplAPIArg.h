@@ -94,7 +94,7 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            intfAPICallBoom* _APICALLBOOM,
+            INTFAPICALLBOOM_DECL *_APICALLBOOM,
             const QVariantList& _arguments
 //            /*OUT*/ QVariantMap &_responseHeaders
         ) final

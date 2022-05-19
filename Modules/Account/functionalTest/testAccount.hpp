@@ -61,7 +61,7 @@ private slots:
     void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
-//        cleanupUnitTestData();
+        cleanupUnitTestData();
     }
 
 private:
@@ -69,7 +69,7 @@ private:
     /* cleanup *****************************************************************************/
     /***************************************************************************************/
 /*
-DELETE FROM dev_AAA.tblWalletBalances;
+DELETE FROM dev_AAA.tblWalletsBalanceHistory;
 DELETE FROM dev_AAA.tblWalletsTransactions;
 DELETE FROM dev_AAA.tblUserWallets;
 DELETE FROM dev_AAA.tblOnlinePayments;
@@ -91,7 +91,7 @@ DELETE FROM dev_Common.tblAlerts;
         try {
             QString QueryString = R"(
                 DELETE wb
-                  FROM tblWalletBalances wb
+                  FROM tblWalletsBalanceHistory wb
             INNER JOIN tblWalletsTransactions wt
                     ON wt.wltID = wb.wbl_wltID
             INNER JOIN tblUserWallets uw
@@ -102,9 +102,9 @@ DELETE FROM dev_Common.tblAlerts;
                     OR u.usrMobile LIKE '+98999888%'
             ;)";
             clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblWalletBalances", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+            Result.insert("tblWalletsBalanceHistory", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
         } catch (std::exception &_exp) {
-            qDebug() << "*** tblWalletBalances CLEANUP EXCEPTION ***" << _exp.what();
+            qDebug() << "*** tblWalletsBalanceHistory CLEANUP EXCEPTION ***" << _exp.what();
         }
 
         try {
@@ -177,10 +177,8 @@ DELETE FROM dev_Common.tblAlerts;
             QString QueryString = R"(
                 DELETE ofpc
                   FROM tblOfflinePaymentClaims ofpc
-            INNER JOIN tblVoucher vch
-                    ON vch.vchID = ofpc.ofpc_vchID
             INNER JOIN tblUser u
-                    ON u.usrID = vch.vch_usrID
+                    ON u.usrID = ofpc.ofpcCreatedBy_usrID
                  WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
                     OR u.usrMobile LIKE '+98999888%'
             ;)";
@@ -260,7 +258,8 @@ DELETE FROM dev_Common.tblAlerts;
             qDebug() << "*** tblRoles CLEANUP EXCEPTION ***" << _exp.what();
         }
 
-        qDebug() << Result;
+        QJsonDocument Doc = QJsonDocument::fromVariant(Result);
+        qDebug().noquote() << Doc.toJson();
     }
 
 private slots:
@@ -879,7 +878,7 @@ private slots:
             "Account/UserWallets/requestIncrease",
             {},
             {
-                { "amount", 1234 },
+                { "amount", 10'000 },
                 { "gatewayType", "_DeveloperTest" },
                 { "domain", "" },
                 { "walID", 0 },
@@ -899,7 +898,7 @@ private slots:
                 "Account/UserWallets/requestIncrease",
                 {},
                 {
-                    { "amount", 1234 },
+                    { "amount", 11'000 },
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
 //                    { "walID", 0 },
@@ -939,63 +938,63 @@ private slots:
 
                 QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
 
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            } QT_CATCH (const std::exception &e) {
+                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
             }
+
+            this->Voucher.ID = 0;
+            this->Voucher.PaymentMD5 = "";
         }
     }
 
-    void requestIncrease_COD_with_domain() {
+    void requestIncrease_COD_with_domain_ERROR() {
         try {
-            this->Voucher.ID = 0;
-            this->Voucher.PaymentMD5 = "";
-
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
                 "Account/UserWallets/requestIncrease",
                 {},
                 {
-                    { "amount", 5678 },
+                    { "amount", 12'000 },
                     { "gatewayType", "COD" },
                     { "domain", "dev.Test" },
+                    { "paymentVerifyCallback", "aa" },
                 }
             );
 
-            this->Voucher.fromJson(Result.toJsonObject());
+//            this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.ID > 0);
+//            QVERIFY(this->Voucher.ID > 0);
 
         } catch (exTargomanBase &e) {
-            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+            TargomanDebug(5) << QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str();
+            QVERIFY(true);
         } catch (std::exception &e) {
             QFAIL (e.what());
         }
     }
-    void requestIncrease_COD_with_domain_claimOfflinePayment_1() {
-        if (this->Voucher.ID > 0) {
-            QT_TRY {
-                this->OfflinePaymentClaimID = callUserAPI(
-                    RESTClientHelper::POST,
-                    "Account/claimOfflinePayment",
-                    {},
-                    {
-                        { "vchID",          this->Voucher.ID },
-                        { "bank",           "bank mellat" },
-                        { "receiptCode",    "809" },
-                        { "receiptDate",    "2022/03/04" },
-                        { "amount",         150000 },
-                        { "note",           "this is note for offline payment" },
-                    }
-                );
+    void claimOfflinePayment_NO_VOUCHER_1() {
+        QT_TRY {
+            this->OfflinePaymentClaimID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/claimOfflinePayment",
+                {},
+                {
+//                    { "voucherID",          12345 }, //this->Voucher.ID },
+                    { "bank",           "bank mellat" },
+                    { "receiptCode",    "809" },
+                    { "receiptDate",    "2022/03/04" },
+                    { "amount",         13'000 },
+                    { "note",           "this is note for offline payment" },
+                }
+            );
 
-                QVERIFY(this->OfflinePaymentClaimID > 0);
+            QVERIFY(this->OfflinePaymentClaimID > 0);
 
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-    void requestIncrease_COD_with_domain_rejectOfflinePayment() {
+    void rejectClaimOfflinePayment_1() {
         if (this->OfflinePaymentClaimID > 0) {
             QT_TRY {
                 QVariant Result = callUserAPI(
@@ -1012,34 +1011,33 @@ private slots:
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
+
             this->OfflinePaymentClaimID = 0;
         }
     }
-    void requestIncrease_COD_with_domain_claimOfflinePayment_2() {
-        if (this->Voucher.ID > 0) {
-            QT_TRY {
-                this->OfflinePaymentClaimID = callUserAPI(
-                    RESTClientHelper::POST,
-                    "Account/claimOfflinePayment",
-                    {},
-                    {
-                        { "vchID",          this->Voucher.ID },
-                        { "bank",           "bank mellat 2" },
-                        { "receiptCode",    "8090" },
-                        { "receiptDate",    "2022/03/04" },
-                        { "amount",         250000 },
-                        { "note",           "this is note for offline payment 2" },
-                    }
-                );
+    void claimOfflinePayment_NO_VOUCHER_2() {
+        QT_TRY {
+            this->OfflinePaymentClaimID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/claimOfflinePayment",
+                {},
+                {
+//                    { "voucherID",          this->Voucher.ID },
+                    { "bank",           "bank mellat 2" },
+                    { "receiptCode",    "8090" },
+                    { "receiptDate",    "2022/03/04" },
+                    { "amount",         14'000 },
+                    { "note",           "this is note for offline payment 2" },
+                }
+            );
 
-                QVERIFY(this->OfflinePaymentClaimID > 0);
+            QVERIFY(this->OfflinePaymentClaimID > 0);
 
-            } QT_CATCH (const std::exception &exp) {
-                QTest::qFail(exp.what(), __FILE__, __LINE__);
-            }
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-    void requestIncrease_COD_with_domain_approveOfflinePayment() {
+    void claimOfflinePayment_NO_VOUCHER_2_approveOfflinePayment() {
         if (this->OfflinePaymentClaimID > 0) {
             QT_TRY {
                 QVariant Result = callUserAPI(
@@ -1069,7 +1067,7 @@ private slots:
                 {},
                 {
                     { "destEmailOrMobile", UT_AdminUserEmail },
-                    { "amount", 1 },
+                    { "amount", 5'000 },
                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                     { "salt", "1234" },
 //                    { "fromWalID", 9876 },
@@ -1092,7 +1090,7 @@ private slots:
                 "Account/UserWallets/requestWithdrawal",
                 {},
                 {
-                    { "amount", 12500 },
+                    { "amount", 4'000 },
                     { "walID", 0 },
                     { "desc", "this is description" },
                 }
@@ -1122,17 +1120,16 @@ private slots:
         }
     }
 
-    //    "Account/UserWallets/requestWithdrawalFor"
     void requestWithdrawalFor_unknownuser() {
         this->WithdrawalID = {};
 
         QT_TRY {
-            this->WithdrawalID = callUserAPI(
+            this->WithdrawalID = callAdminAPI(
                 RESTClientHelper::POST,
                 "Account/UserWallets/requestWithdrawalFor",
                 {},
                 {
-                    { "amount", 12500 },
+                    { "amount", 3'000 },
                     { "targetUsrID", 5000 },
                     { "desc", "this is description" },
                 }
@@ -1151,12 +1148,12 @@ private slots:
         this->WithdrawalID = {};
 
         QT_TRY {
-            this->WithdrawalID = callUserAPI(
+            this->WithdrawalID = callAdminAPI(
                 RESTClientHelper::POST,
                 "Account/UserWallets/requestWithdrawalFor",
                 {},
                 {
-                    { "amount", 12500 },
+                    { "amount", 2'000 },
                     { "targetUsrID", gAdminUserID },
                     { "desc", "this is description" },
                 }
@@ -1171,23 +1168,47 @@ private slots:
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-    //    "Account/UserWallets/acceptWithdrawal"
+
+    void addPrizeTo() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/addPrizeTo",
+                {},
+                {
+                    { "amount", 30'000 },
+                    { "targetUsrID", gUserID },
+                    { "desc", "this is description" },
+                }
+            );
+
+            QVERIFY(Result > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void addIncomeTo() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/addIncomeTo",
+                {},
+                {
+                    { "amount", 40'000 },
+                    { "targetUsrID", gUserID },
+                    { "desc", "this is description" },
+                }
+            );
+
+            QVERIFY(Result > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 
 };
-
-/*
-DELETE FROM dev_AAA.tblWalletsTransactions;
-DELETE FROM dev_AAA.tblWalletBalances;
-DELETE FROM dev_AAA.tblUserWallets;
-DELETE FROM dev_AAA.tblOnlinePayments;
-DELETE FROM dev_AAA.tblOfflinePayments;
-DELETE FROM dev_AAA.tblOfflinePaymentClaims;
-DELETE FROM dev_AAA.tblVoucher;
-DELETE FROM dev_AAA.tblApprovalRequest;
-DELETE FROM dev_AAA.tblActiveSessions;
-DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
-DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
-DELETE FROM dev_Common.tblAlerts;
-*/
 
 #endif // TEST_ACCOUNT_HPP

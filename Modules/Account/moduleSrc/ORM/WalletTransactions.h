@@ -40,10 +40,10 @@ namespace Targoman::API::AccountModule {
 
 TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      New      = 'N',
-                     Pending  = 'P',
-                     Payed    = 'Y',
+//                     Pending  = 'P',
+//                     Payed    = 'Y',
                      Succeded = 'A',
-                     Error    = 'E',
+//                     Error    = 'E',
                      Removed  = 'R'
                      )
 
@@ -62,8 +62,8 @@ namespace tblWalletsTransactions {
     TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
 }
 
-namespace tblWalletBalances {
-    constexpr char Name[] = "tblWalletBalances";
+namespace tblWalletsBalanceHistory {
+    constexpr char Name[] = "tblWalletsBalanceHistory";
     TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
     TARGOMAN_CREATE_CONSTEXPR(wblBalance);
     TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
@@ -83,10 +83,10 @@ private slots:
     QVariant ORMGET("Get WalletTransactions information.")
 };
 
-class WalletBalances : public intfSQLBasedModule
+class WalletsBalanceHistory : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletBalances)
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletsBalanceHistory)
 
 private:
 };

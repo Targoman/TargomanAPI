@@ -63,7 +63,7 @@ public:
     );
 
     static QVariant callAPI(
-        intfAPICallBoom &APICALLBOOM_PARAM,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs = {},

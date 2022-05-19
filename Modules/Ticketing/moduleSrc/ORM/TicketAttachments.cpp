@@ -117,7 +117,7 @@ QVariant IMPL_ORMGET(TicketAttachments) {
 
     };
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, ExtraFilters, 0, QueryLambda);
 }
 
 } //namespace Targoman::API::TicketingModule::ORM

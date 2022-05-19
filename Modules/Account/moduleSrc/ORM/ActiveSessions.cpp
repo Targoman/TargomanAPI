@@ -61,7 +61,7 @@ QVariant IMPL_ORMGET(ActiveSessions) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
 
 //  return query.one();
 
@@ -78,7 +78,7 @@ bool IMPL_ORMDELETE(ActiveSessions) {
       ExtraFilters.insert(tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID());
 //  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters, true);
+  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

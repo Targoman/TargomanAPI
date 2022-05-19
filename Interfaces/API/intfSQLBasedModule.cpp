@@ -208,7 +208,7 @@ QVariant intfSQLBasedModule::Select(
         if (_reportCount)
             return this->SelectAllWithCount(
                         _table,
-                        GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                        GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
                         _extraFilters,
                         _cacheTime,
                         _lambda_TouchQuery
@@ -218,7 +218,7 @@ QVariant intfSQLBasedModule::Select(
 
         return this->SelectAll(
                     _table,
-                    GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                    GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
                     _extraFilters,
                     _cacheTime,
                     _lambda_TouchQuery
@@ -227,11 +227,26 @@ QVariant intfSQLBasedModule::Select(
 
     return this->SelectOne(
                 _table,
-                GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW,
+                GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
                 _extraFilters,
                 _cacheTime,
                 _lambda_TouchQuery
                 );
+}
+
+QVariant intfSQLBasedModule::Select(
+    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const clsCondition& _extraFilters,
+    quint16 _cacheTime,
+    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+) {
+    return this->Select(
+                *this,
+                GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
+                _extraFilters,
+                _cacheTime,
+                _lambda_TouchQuery
+            );
 }
 
 quint64 intfSQLBasedModule::Create(
@@ -248,6 +263,34 @@ quint64 intfSQLBasedModule::Create(
     query.values(_createInfo);
 
     return query.execute(_userID);
+}
+
+quint64 intfSQLBasedModule::Create(
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL
+) {
+    return this->Create(
+                *this,
+                CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER
+                );
+}
+
+quint64 intfSQLBasedModule::Create(
+    clsTable& _table,
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM
+) {
+    return this->Create(
+        _table,
+        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER
+    );
+}
+
+quint64 intfSQLBasedModule::Create(
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM
+) {
+    return this->Create(
+        *this,
+        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER
+    );
 }
 
 bool intfSQLBasedModule::Update(
@@ -284,6 +327,40 @@ bool intfSQLBasedModule::Update(
     }
 
     return query.execute(_userID) > 0;
+}
+
+bool intfSQLBasedModule::Update(
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const QVariantMap& _extraFilters
+) {
+    return this->Update(
+                *this,
+                UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER,
+                _extraFilters
+                );
+}
+
+bool intfSQLBasedModule::Update(
+    clsTable& _table,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    const QVariantMap& _extraFilters
+) {
+    return this->Update(
+        _table,
+        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        _extraFilters
+    );
+}
+
+bool intfSQLBasedModule::Update(
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    const QVariantMap& _extraFilters
+) {
+    return this->Update(
+        *this,
+        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        _extraFilters
+    );
 }
 
 bool intfSQLBasedModule::DeleteByPks(
@@ -325,43 +402,44 @@ bool intfSQLBasedModule::DeleteByPks(
     return query.execute(_userID, {}, _realDelete) > 0;
 }
 
-
-
-
-quint64 intfSQLBasedModule::Create(
-    clsTable& _table,
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1
+bool intfSQLBasedModule::DeleteByPks(
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    const QVariantMap& _extraFilters,
+    bool _realDelete
 ) {
-    return this->Create(
-        _table,
-        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL
-    );
-}
-
-bool intfSQLBasedModule::Update(
-    clsTable& _table,
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1,
-    const QVariantMap& _extraFilters
-) {
-    return this->Update(
-        _table,
-        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL,
-        _extraFilters
-    );
+    return this->DeleteByPks(
+        *this,
+        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_USER,
+        _extraFilters,
+        _realDelete
+        );
 }
 
 bool intfSQLBasedModule::DeleteByPks(
     clsTable& _table,
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_1,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
     return this->DeleteByPks(
         _table,
-        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL,
+        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
         _extraFilters,
         _realDelete
     );
+}
+
+bool intfSQLBasedModule::DeleteByPks(
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    const QVariantMap& _extraFilters,
+    bool _realDelete
+) {
+    return this->DeleteByPks(
+        *this,
+        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        _extraFilters,
+        _realDelete
+        );
 }
 
 } // namespace Targoman::API::API

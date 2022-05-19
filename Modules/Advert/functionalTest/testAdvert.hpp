@@ -68,8 +68,11 @@ public:
     QString CouponCode;
     QVariant CouponID;
     Targoman::API::AAA::stuPreVoucher LastPreVoucher;
+    Targoman::API::AAA::stuVoucher BasketVoucher;
     Targoman::API::AAA::stuVoucher Voucher;
     Targoman::API::AAA::stuVoucher ApproveOnlinePaymentVoucher;
+    QVariant OfflinePaymentClaimID;
+    Targoman::API::AAA::stuVoucher ApproveOfflinePaymentVoucher;
 
 private slots:
     void initTestCase() {
@@ -401,7 +404,9 @@ private slots:
             }
         }
     }
-//*/
+*/
+
+    // basket 1:
     void addToBasket_invalid_saleable_code() {
         QT_TRY {
 //            QVERIFY_EXCEPTION_THROWN
@@ -689,9 +694,9 @@ private slots:
                 }
             );
 
-            this->Voucher.fromJson(Result.toJsonObject());
+            this->BasketVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.ID > 0);
+            QVERIFY(this->BasketVoucher.ID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -699,9 +704,65 @@ private slots:
     }
 
     void approveOnlinePayment() {
-        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+        if (this->BasketVoucher.PaymentMD5.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callAdminAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentMD5",     this->BasketVoucher.PaymentMD5 },
+                        { "domain",         "this.is.domain" },
+                        { "pgResponse",     QVariantMap({
+                              { "resp_1", 1 },
+                              { "resp_2", 2 },
+                              { "resp_3", 3 },
+                          }) },
+                    }
+                );
+
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    // basket 2:
+    void requestIncrease_DEVTEST_with_domain() {
+        try {
+            this->Voucher = {};
+
+            QVariant Result = callUserAPI(
+                RESTClientHelper::PUT,
+                "Account/UserWallets/requestIncrease",
+                {},
+                {
+                    { "amount", 10'000 },
+                    { "gatewayType", "_DeveloperTest" },
+                    { "domain", "dev.Test" },
+//                    { "walID", 0 },
+                    { "paymentVerifyCallback", "http://www.a.com" }
+                }
+            );
+
+            this->Voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->Voucher.PaymentMD5.isEmpty() == false);
+
+        } catch (exTargomanBase &e) {
+            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+        } catch (std::exception &e) {
+            QFAIL (e.what());
+        }
+    }
+    void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
+        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
                     RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
@@ -719,6 +780,193 @@ private slots:
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
                 QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &e) {
+                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
+            }
+
+            this->Voucher = {};
+        }
+    }
+
+    void addToBasket2_valid_coupon_code_1() {
+        this->LastPreVoucher = {};
+
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    10 },
+//                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+    void addToBasket2_valid_coupon_code_2() {
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    5 },
+//                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void finalizeBasket2() {
+        this->BasketVoucher = {};
+
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            "COD" },
+                    { "domain",                 "dev.test" },
+                    { "walID",                  0 },
+                    { "paymentVerifyCallback",  "http://www.a.com" },
+                }
+            );
+
+            this->BasketVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->BasketVoucher.ID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void payForBasket2() {
+        this->Voucher = {};
+
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/payForBasket",
+                {},
+                {
+                    { "domain",                 "dev.test" },
+                    { "voucherID",              this->BasketVoucher.ID },
+                    { "gatewayType",            "_DeveloperTest" },
+                    { "amount",                 100'000 },
+//                    { "walID",                  0 },
+                    { "paymentVerifyCallback",  "http://www.a.com" },
+                }
+            );
+
+            this->Voucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->Voucher.ID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void payForBasket2_approveOnlinePayment() {
+        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentMD5",     this->Voucher.PaymentMD5 },
+                        { "domain",         "this.is.domain" },
+                        { "pgResponse",     QVariantMap({
+                              { "resp_1", 1 },
+                              { "resp_2", 2 },
+                              { "resp_3", 3 },
+                          }) },
+                    }
+                );
+
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+//                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+
+            } QT_CATCH (const std::exception &e) {
+                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
+            }
+
+            this->Voucher = {};
+        }
+    }
+
+    void claimOfflinePayment2() {
+        QT_TRY {
+            this->OfflinePaymentClaimID = callUserAPI(
+                RESTClientHelper::POST,
+                "Account/claimOfflinePayment",
+                {},
+                {
+                    { "voucherID",      this->BasketVoucher.ID },
+                    { "bank",           "bank mellat 2" },
+                    { "receiptCode",    "8090" },
+                    { "receiptDate",    "2022/03/04" },
+                    { "amount",         200'000 },
+                    { "note",           "this is note for offline payment 2" },
+                }
+            );
+
+            QVERIFY(this->OfflinePaymentClaimID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void claimOfflinePayment2_approveOfflinePayment() {
+        if (this->OfflinePaymentClaimID > 0) {
+            QT_TRY {
+                QVariant Result = callUserAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOfflinePayment",
+                    {},
+                    {
+                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                    }
+                );
+
+                this->ApproveOfflinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);

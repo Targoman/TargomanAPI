@@ -161,7 +161,11 @@ inline QVariant readNumber(const QString& _str, bool *ok) {
 
 #define TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(_numericType, _convertor) \
 namespace Targoman::API::Common { \
-    template <> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral, false, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) { \
+    template <> inline QGenericArgument tmplAPIArg<_numericType, COMPLEXITY_Integral, false, true>::makeGenericArgument( \
+        const QVariant& _val, \
+        const QByteArray& _paramName, \
+        void** _argStorage \
+    ) { \
         bool Result; \
         *_argStorage = new _numericType; \
         _numericType ConvertedVal; \
@@ -175,10 +179,14 @@ namespace Targoman::API::Common { \
             throw exHTTPBadRequest("Invalid value specified for parameter: " + _paramName); \
         return QGenericArgument(this->RealTypeName, *_argStorage); \
     } \
-    template <> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPLEXITY_Integral, true>::makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) { \
+    template <> inline QGenericArgument tmplAPIArg<NULLABLE_TYPE(_numericType), COMPLEXITY_Integral, true>::makeGenericArgument( \
+        const QVariant& _val, \
+        const QByteArray& _paramName, \
+        void** _argStorage \
+    ) { \
         bool Result = true; \
         *_argStorage = new NULLABLE_TYPE(_numericType); \
-        if (_val.isValid() && _val.isNull() == false) { \
+        if (_val.isValid() && (_val != NULLABLE_NULL_VALUE_AS_STRING)) { \
             _numericType ConvertedVal; \
             if (_val.userType() == QMetaType::QString) { \
                 QString StrVal = _val.toString(); \

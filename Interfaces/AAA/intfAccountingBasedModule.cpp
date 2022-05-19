@@ -117,7 +117,7 @@ stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
 }
 
 void intfAccountingBasedModule::checkUsageIsAllowed(
-    intfAPICallBoom &APICALLBOOM_PARAM,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage
 ) {
     QJsonObject Privs = _APICALLBOOM.getJWTPrivsObject();

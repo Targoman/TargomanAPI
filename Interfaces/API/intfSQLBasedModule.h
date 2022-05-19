@@ -56,7 +56,7 @@ public:
 private:
     QVariantMap SelectOne(
             clsTable& _table,
-            GET_METHOD_ARGS_HEADER_INTERNAL_CALL,
+            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
@@ -79,7 +79,13 @@ private:
 public:
     QVariant Select(
             clsTable& _table,
-            GET_METHOD_ARGS_HEADER_INTERNAL_CALL,
+            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            const clsCondition& _extraFilters = {},
+            quint16 _cacheTime = 0,
+            std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
+        );
+    QVariant Select(
+            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
@@ -87,37 +93,57 @@ public:
 
     quint64 Create(
             clsTable& _table,
-            CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL
+            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL
+        );
+    quint64 Create(
+            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL
+        );
+    quint64 Create(
+            clsTable& _table,
+            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM
+        );
+    quint64 Create(
+            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM
         );
 
     bool Update(
             clsTable& _table,
-            UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL,
+            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            const QVariantMap& _extraFilters = {}
+        );
+    bool Update(
+            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            const QVariantMap& _extraFilters = {}
+        );
+    bool Update(
+            clsTable& _table,
+            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            const QVariantMap& _extraFilters = {}
+        );
+    bool Update(
+            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
             const QVariantMap& _extraFilters = {}
         );
 
     bool DeleteByPks(
             clsTable& _table,
-            DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL,
+            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
-
-    //overloads by _APICALLBOOM
-    quint64 Create(
-            clsTable& _table,
-            CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1
+    bool DeleteByPks(
+            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            const QVariantMap& _extraFilters = {},
+            bool _realDelete = false
         );
-
-    bool Update(
-            clsTable& _table,
-            UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1,
-            const QVariantMap& _extraFilters = {}
-        );
-
     bool DeleteByPks(
             clsTable& _table,
-            DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL_1,
+            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            const QVariantMap& _extraFilters = {},
+            bool _realDelete = false
+        );
+    bool DeleteByPks(
+            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );

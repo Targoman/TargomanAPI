@@ -117,7 +117,7 @@ public:
     }
 
     QVariant invoke(
-        intfAPICallBoom* _APICALLBOOM,
+        INTFAPICALLBOOM_DECL *_APICALLBOOM,
         bool _isUpdateMethod,
         const QStringList& _args,
 //        /*OUT*/ QVariantMap &_responseHeaders,
@@ -130,7 +130,7 @@ public:
     ) const;
 
     void invokeMethod(
-        intfAPICallBoom* _APICALLBOOM,
+        INTFAPICALLBOOM_DECL *_APICALLBOOM,
         const QVariantList& _arguments,
         QGenericReturnArgument _returnArg
 //        /*OUT*/ QVariantMap &_responseHeaders

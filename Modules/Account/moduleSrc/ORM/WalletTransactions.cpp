@@ -48,7 +48,7 @@ WalletTransactions::WalletTransactions() :
         {///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
             { tblWalletsTransactions::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::walID },
             { tblWalletsTransactions::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::vchID },
-            { tblWalletsTransactions::wltID,        R(AAASchema, tblWalletBalances::Name),  tblWalletBalances::wbl_wltID },
+            { tblWalletsTransactions::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::wbl_wltID },
         }
     ) { ; }
 
@@ -60,23 +60,23 @@ QVariant IMPL_ORMGET(WalletTransactions) {
         _query.innerJoin(tblUserWallets::Name);
     };
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
 }
 
-WalletBalances::WalletBalances() :
+WalletsBalanceHistory::WalletsBalanceHistory() :
     intfSQLBasedModule(
         AAASchema,
-        tblWalletBalances::Name,
+        tblWalletsBalanceHistory::Name,
         {///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
-            { tblWalletBalances::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
-            { tblWalletBalances::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletBalances::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletBalances::wblSumCredit,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletBalances::wblSumIncome,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletBalances::wblSumExpense, S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletsBalanceHistory::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
+            { tblWalletsBalanceHistory::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletsBalanceHistory::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletsBalanceHistory::wblSumCredit,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletsBalanceHistory::wblSumIncome,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            { tblWalletsBalanceHistory::wblSumExpense, S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
         },
         {///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
-            { tblWalletBalances::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::wltID },
+            { tblWalletsBalanceHistory::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::wltID },
         }
     ) { ; }
 

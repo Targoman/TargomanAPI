@@ -273,13 +273,13 @@ private slots:
     \*****************************************************************/
 private:
     Targoman::API::AAA::stuVoucher processVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID
     );
 
     void tryCancelVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
@@ -297,7 +297,7 @@ private:
 
 private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
-        payBasket,
+        payForBasket,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             QString _domain,
@@ -348,7 +348,7 @@ private slots:
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
-            NULLABLE_TYPE(quint64) _vchID = NULLABLE_NULL_VALUE,
+            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
             quint64 _walID = 0,
             const QString& _note = {}
         ),
@@ -395,28 +395,26 @@ private slots:
     ///TODO: create API for cancelBasketItem
     ///TODO: create API for returnBasketItem
 
-    bool REST_POST(
+    quint64 REST_POST(
         addPrizeTo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            TAPI::JSON_t _desc
+            const QString &_desc
         ),
-        "add prize to a user by priviledged user. "
-        "Description object must contain at least an string field named 'desc'"
+        "Add prize to a user by priviledged user"
     )
 
-    bool REST_POST(
+    quint64 REST_POST(
         addIncomeTo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            TAPI::JSON_t _desc
+            const QString &_desc
         ),
-        "add income to a user by priviledged user. "
-        "Description object must contain at least an string field named 'desc'"
+        "Add income to a user by priviledged user"
     )
 
     bool REST_POST(
