@@ -93,6 +93,9 @@ using namespace Targoman::API::Server;
     QString signOfGET()                 { return TARGOMAN_M2STR((GET_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfGET()                  { return _doc; }
 
+#define IMPL_ORMGET(_module)            _module::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ANONYMOUSE_ORMGET(_module) _module::apiGET(ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL)
+
 #define ORMGET_HIDDEN(_doc)             ORMGET(_doc); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
 #define ORMGETPureVirtual(_doc)         apiGET(GET_METHOD_ARGS_HEADER_APICALL)=0; \
@@ -109,8 +112,8 @@ using namespace Targoman::API::Server;
 
 //used by ApiQuery
 //quint64 _userID,
-#define GET_METHOD_ARGS_HEADER_INTERNAL_CALL \
-    intfAPICallBoom &APICALLBOOM_PARAM, \
+#define GET_METHOD_ARGS_HEAD_INTERNAL_CALL \
+    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath = {}, \
     quint64 _pageIndex = 0, \
     quint16 _pageSize = 20, \
@@ -122,7 +125,7 @@ using namespace Targoman::API::Server;
 
 //quint64 _userID,
 #define GET_METHOD_ARGS_IMPL_INTERNAL_CALL \
-    intfAPICallBoom &APICALLBOOM_PARAM, \
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, \
     TAPI::PKsByPath_t _pksByPath, \
     quint64 _pageIndex, \
     quint16 _pageSize, \
@@ -133,7 +136,7 @@ using namespace Targoman::API::Server;
     bool _reportCount
 
 //clsJWT(_JWT).usrID(),
-#define GET_METHOD_CALL_ARGS_INTERNAL_CALL \
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM \
     _APICALLBOOM, \
     _pksByPath, \
     _pageIndex, \
@@ -145,7 +148,7 @@ using namespace Targoman::API::Server;
     _reportCount
 
 //_userID,
-#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_RAW \
+#define GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW \
     _APICALLBOOM, \
     _pksByPath, \
     _pageIndex, \
@@ -166,14 +169,18 @@ using namespace Targoman::API::Server;
 #define ORMCREATE(_doc)                     apiCREATE(CREATE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfCREATE() { return TARGOMAN_M2STR((CREATE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfCREATE() { return _doc; }
-//used by ApiQuery
-#define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _createInfo
 
-#define CREATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_createInfo
+#define IMPL_ORMCREATE(_module) _module::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
+
+//used by ApiQuery
+#define CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL               quint64 _userID, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL               quint64 _userID, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER          _userID, _createInfo
+#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER     _APICALLBOOM.getUserID(), _createInfo
+
+#define CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM          _APICALLBOOM, _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
@@ -185,14 +192,18 @@ using namespace Targoman::API::Server;
 #define ORMUPDATE(_doc)                   apiUPDATE(UPDATE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfUPDATE() { return _doc; }
-//used by ApiQuery
-#define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
-#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
 
-#define UPDATE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
-#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_pksByPath, _updateInfo
+#define IMPL_ORMUPDATE(_module) _module::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
+
+//used by ApiQuery
+#define UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL               quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL               quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER          _userID, _pksByPath, _updateInfo
+#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER     _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
+
+#define UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM          _APICALLBOOM, _pksByPath, _updateInfo
 /**********************************************************************\
 |** DELETE ************************************************************|
 \**********************************************************************/
@@ -203,14 +214,18 @@ using namespace Targoman::API::Server;
 #define ORMDELETE(_doc)                   apiDELETE(DELETE_METHOD_ARGS_HEADER_APICALL); \
     QString signOfDELETE() { return TARGOMAN_M2STR((DELETE_METHOD_ARGS_HEADER_APICALL)); } \
     QString docOfDELETE() { return _doc; }
-//used by ApiQuery
-#define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL   quint64 _userID, TAPI::PKsByPath_t _pksByPath
-#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL   _APICALLBOOM.getUserID(), _pksByPath
 
-#define DELETE_METHOD_ARGS_HEADER_INTERNAL_CALL_1 intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_1   intfAPICallBoom &APICALLBOOM_PARAM, /*quint64 _userID, */TAPI::PKsByPath_t _pksByPath
-#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_1   _APICALLBOOM, /*clsJWT(_JWT).usrID(), */_pksByPath
+#define IMPL_ORMDELETE(_module) _module::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
+
+//used by ApiQuery
+#define DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL               quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL               quint64 _userID, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_USER          _userID, _pksByPath
+#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER     _APICALLBOOM.getUserID(), _pksByPath
+
+#define DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM          INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM          _APICALLBOOM, _pksByPath
 
 namespace TAPI {
 TAPI_ADD_TYPE_STRING(Cols_t);
@@ -321,36 +336,50 @@ namespace Targoman::API::API {
 #define     ASYNC_EXREST_GET(_name, _sig, _doc, ...)                ASYNC_EXREST(GET, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_GET(_name, _sig, _doc)                             REST(GET, _name, _sig, _doc)
 #define       ASYNC_REST_GET(_name, _sig, _doc)                       ASYNC_REST(GET, _name, _sig, _doc)
+#define        IMPL_REST_GET(_module, _name, _params)                  IMPL_REST(GET, _module, _name, _params)
+#define  IMPL_ASYNC_REST_GET(_module, _name, _params)            IMPL_ASYNC_REST(GET, _module, _name, _params)
 
 #define           EXREST_PUT(_name, _sig, _doc, ...)                      EXREST(PUT, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_PUT(_name, _sig, _doc, ...)                ASYNC_EXREST(PUT, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_PUT(_name, _sig, _doc)                             REST(PUT, _name, _sig, _doc)
 #define       ASYNC_REST_PUT(_name, _sig, _doc)                       ASYNC_REST(PUT, _name, _sig, _doc)
+#define        IMPL_REST_PUT(_module, _name, _params)                  IMPL_REST(PUT, _module, _name, _params)
+#define  IMPL_ASYNC_REST_PUT(_module, _name, _params)            IMPL_ASYNC_REST(PUT, _module, _name, _params)
 
 #define           EXREST_POST(_name, _sig, _doc, ...)                     EXREST(POST, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_POST(_name, _sig, _doc, ...)               ASYNC_EXREST(POST, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_POST(_name, _sig, _doc)                            REST(POST, _name, _sig, _doc)
 #define       ASYNC_REST_POST(_name, _sig, _doc)                      ASYNC_REST(POST, _name, _sig, _doc)
+#define        IMPL_REST_POST(_module, _name, _params)                 IMPL_REST(POST, _module, _name, _params)
+#define  IMPL_ASYNC_REST_POST(_module, _name, _params)           IMPL_ASYNC_REST(POST, _module, _name, _params)
 
 #define           EXREST_CREATE(_name, _sig, _doc, ...)                   EXREST(CREATE, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_CREATE(_name, _sig, _doc, ...)             ASYNC_EXREST(CREATE, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_CREATE(_name, _sig, _doc)                          REST(CREATE, _name, _sig, _doc)
 #define       ASYNC_REST_CREATE(_name, _sig, _doc)                    ASYNC_REST(CREATE, _name, _sig, _doc)
+#define        IMPL_REST_CREATE(_module, _name, _params)               IMPL_REST(CREATE, _module, _name, _params)
+#define  IMPL_ASYNC_REST_CREATE(_module, _name, _params)         IMPL_ASYNC_REST(CREATE, _module, _name, _params)
 
 #define           EXREST_UPDATE(_name, _sig, _doc, ...)                   EXREST(UPDATE, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_UPDATE(_name, _sig, _doc, ...)             ASYNC_EXREST(UPDATE, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_UPDATE(_name, _sig, _doc)                          REST(UPDATE, _name, _sig, _doc)
 #define       ASYNC_REST_UPDATE(_name, _sig, _doc)                    ASYNC_REST(UPDATE, _name, _sig, _doc)
+#define        IMPL_REST_UPDATE(_module, _name, _params)               IMPL_REST(UPDATE, _module, _name, _params)
+#define  IMPL_ASYNC_REST_UPDATE(_module, _name, _params)         IMPL_ASYNC_REST(UPDATE, _module, _name, _params)
 //--
-#define           EXREST_PATCH(_name, _sig, _doc, ...)                    EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
-#define     ASYNC_EXREST_PATCH(_name, _sig, _doc, ...)              ASYNC_EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
-#define             REST_PATCH(_name, _sig, _doc)                           REST_UPDATE(_name, _sig, _doc)
-#define       ASYNC_REST_PATCH(_name, _sig, _doc)                     ASYNC_REST_UPDATE(_name, _sig, _doc)
+//#define           EXREST_PATCH(_name, _sig, _doc, ...)             EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
+//#define     ASYNC_EXREST_PATCH(_name, _sig, _doc, ...)       ASYNC_EXREST_UPDATE(_name, _sig, _doc, __VA_ARGS__)
+//#define             REST_PATCH(_name, _sig, _doc)                    REST_UPDATE(_name, _sig, _doc)
+//#define       ASYNC_REST_PATCH(_name, _sig, _doc)              ASYNC_REST_UPDATE(_name, _sig, _doc)
+//#define        IMPL_REST_PATCH(_module, _name, _params)                IMPL_REST(PATCH, _module, _name, _params)
+//#define  IMPL_ASYNC_REST_PATCH(_module, _name, _params)          IMPL_ASYNC_REST(PATCH, _module, _name, _params)
 
 #define           EXREST_DELETE(_name, _sig, _doc, ...)                   EXREST(DELETE, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_DELETE(_name, _sig, _doc, ...)             ASYNC_EXREST(DELETE, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_DELETE(_name, _sig, _doc)                          REST(DELETE, _name, _sig, _doc)
 #define       ASYNC_REST_DELETE(_name, _sig, _doc)                    ASYNC_REST(DELETE, _name, _sig, _doc)
+#define        IMPL_REST_DELETE(_module, _name, _params)               IMPL_REST(DELETE, _module, _name, _params)
+#define  IMPL_ASYNC_REST_DELETE(_module, _name, _params)         IMPL_ASYNC_REST(DELETE, _module, _name, _params)
 
 //
 #define INTFPUREMODULE_IID "TARGOMAN.API.API.INTFPUREMODULE/1.0.0"

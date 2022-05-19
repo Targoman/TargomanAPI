@@ -27,41 +27,47 @@ namespace Targoman::API::AccountModule::Payment::Gateways {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwMellatBank)
 
-stuPaymentResponse gtwMellatBank::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    ) {
+// [Response, TrackID, PaymentLink]
+std::tuple<QString, QString, QString> gtwMellatBank::prepareAndRequest(
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    TAPI::MD5_t _orderMD5,
+    qint64 _amount,
+    const QString& _callback,
+    const QString& _desc
+) {
     Q_UNUSED(_paymentGateway);
     Q_UNUSED(_orderMD5);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
     Q_UNUSED(_desc);
 
-    return stuPaymentResponse(
+    return {
+        "",
         "devtest_track_id",
         "http://devtest.gateway/pay"
-    );
+    };
 }
 
-stuPaymentResponse gtwMellatBank::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    ) {
+// [Response, refNumber]
+std::tuple<QString, QString> gtwMellatBank::verifyAndSettle(
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const TAPI::JSON_t& _pgResponse,
+    const QString& _domain
+) {
     Q_UNUSED(_paymentGateway);
     Q_UNUSED(_pgResponse);
     Q_UNUSED(_domain);
 
-    return {};
+    return {
+        "",
+        "devtest_ref_number"
+    };
 }
 
 QString gtwMellatBank::errorString(int _errCode) {
     Q_UNUSED(_errCode);
 
-    return "UNKNOWN";
+    return "Uknown";
 }
 
 } //namespace Targoman::API::AccountModule::Payment::Gateways

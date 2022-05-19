@@ -66,32 +66,32 @@ APITokens::APITokens() :
         }
     ) { ; }
 
-QVariant APITokens::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(APITokens) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
 }
 
-quint64 APITokens::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint64 IMPL_ORMCREATE(APITokens) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
-bool APITokens::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMUPDATE(APITokens) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
-bool APITokens::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMDELETE(APITokens) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER, ExtraFilters);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

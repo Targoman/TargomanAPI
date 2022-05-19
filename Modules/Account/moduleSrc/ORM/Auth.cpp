@@ -31,9 +31,9 @@ Auth::Auth() :
     )
 { ; }
 
-bool Auth::apivalidateJWT(
+bool IMPL_REST_GET_OR_POST(Auth, validateJWT, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
-) {
+)) {
     return true;
 }
 

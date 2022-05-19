@@ -59,19 +59,6 @@ public:
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
-public:
-    static Targoman::API::AAA::stuVoucher processVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
-        quint64 _userID,
-        quint64 _voucherID
-    );
-    static void tryCancelVoucher(
-//        intfAPICallBoom &APICALLBOOM_PARAM,
-        quint64 _userID,
-        quint64 _voucherID,
-        bool _setAsError = false
-    );
-
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
     TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
@@ -284,15 +271,47 @@ private slots:
     /*****************************************************************\
     |* Voucher & Payments ********************************************|
     \*****************************************************************/
-//    QVariantList REST_GET_OR_POST(
-//        gatewayTypesForFinalizeBasket,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            Targoman::API::AAA::stuPreVoucher _preVoucher,
-//            QString _domain
-//        ),
-//        "get list of payment gateway types valid for voucher and domain"
-//    )
+private:
+    Targoman::API::AAA::stuVoucher processVoucher(
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _userID,
+        quint64 _voucherID
+    );
+
+    void tryCancelVoucher(
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _userID,
+        quint64 _voucherID,
+        bool _setAsError = false
+    );
+
+    Targoman::API::AAA::stuVoucher payAndProcessBasket(
+        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+        QString _domain,
+        quint64 _voucherID,
+        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
+        qint64 _amount = -1, //-1: rest of voucher's remained amount
+        qint64 _walID = -1, //-1: no wallet
+        QString _paymentVerifyCallback = {}
+    );
+
+private slots:
+    Targoman::API::AAA::stuVoucher REST_POST(
+        payForBasket,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            QString _domain,
+            quint64 _voucherID,
+            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
+            qint64 _amount = -1, //-1: rest of voucher's remained amount
+            qint64 _walID = -1, //-1: no wallet
+            QString _paymentVerifyCallback = {}
+        ),
+        "Pay for voucher by wallet and/or offline/online payment."
+        "gatewayType=null for pay only by wallet."
+        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining."
+        "At least one of gatewayType or walID must be provided."
+    )
 
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
@@ -301,7 +320,7 @@ private slots:
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
-            qint64 _walletID = -1,
+            qint64 _walID = -1,
             QString _paymentVerifyCallback = {}
         ),
         "create a voucher based on preVoucher. "
@@ -314,7 +333,6 @@ private slots:
         approveOnlinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             const QString _paymentMD5,
             const QString _domain,
             TAPI::JSON_t _pgResponse
@@ -326,14 +344,16 @@ private slots:
         claimOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _vchID,
             const QString& _bank,
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
+            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
+            quint64 _walID = 0,
             const QString& _note = {}
         ),
-        "claim offline payment by user"
+        "Claim offline payment by user."
+        "Set vchID to null just for charging wallet, otherwise after increasing the wallet, the voucher will be paid"
     )
 
     bool REST_POST(
@@ -354,45 +374,47 @@ private slots:
         "approve Voucher by offline payment"
     )
 
-    Targoman::API::AAA::stuVoucher REST_POST(
-        approveOfflinePayment_withBankInfo,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _vchID,
-            const QString& _bank,
-            const QString& _receiptCode,
-            TAPI::Date_t _receiptDate,
-            quint32 _amount,
-            const QString& _note = {}
-        ),
-        "approve Voucher by offline payment"
-    )
+//    Targoman::API::AAA::stuVoucher EXREST_POST(
+//        approveOfflinePayment_withBankInfo,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            quint64 _vchID,
+//            const QString& _bank,
+//            const QString& _receiptCode,
+//            TAPI::Date_t _receiptDate,
+//            quint32 _amount,
+//            quint64 _walID = 0,
+//            const QString& _note = {}
+//        ),
+//        "approve Voucher by offline payment",
+//        {
+//            EXRESTCONFIG_HIDDEN,
+//        }
+//    )
 
     ///TODO: create API for cancelBasketItem
     ///TODO: create API for returnBasketItem
 
-    bool REST_POST(
+    quint64 REST_POST(
         addPrizeTo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            TAPI::JSON_t _desc
+            const QString &_desc
         ),
-        "add prize to a user by priviledged user. "
-        "Description object must contain at least an string field named 'desc'"
+        "Add prize to a user by priviledged user"
     )
 
-    bool REST_POST(
+    quint64 REST_POST(
         addIncomeTo,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            TAPI::JSON_t _desc
+            const QString &_desc
         ),
-        "add income to a user by priviledged user. "
-        "Description object must contain at least an string field named 'desc'"
+        "Add income to a user by priviledged user"
     )
 
     bool REST_POST(

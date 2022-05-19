@@ -85,7 +85,7 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
     virtual void applyAssetAdditives(
-        intfAPICallBoom &APICALLBOOM_PARAM,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
     );

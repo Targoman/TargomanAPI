@@ -51,9 +51,9 @@ TARGOMAN_CREATE_CONSTEXPR(walDefault);
 TARGOMAN_CREATE_CONSTEXPR(walMinBalance);
 TARGOMAN_CREATE_CONSTEXPR(walNotTransferableAmount);
 TARGOMAN_CREATE_CONSTEXPR(walMaxTransferPerDay);
-TARGOMAN_CREATE_CONSTEXPR(walLastBalance);
+TARGOMAN_CREATE_CONSTEXPR(walBalance);
 TARGOMAN_CREATE_CONSTEXPR(walSumIncome);
-TARGOMAN_CREATE_CONSTEXPR(walSumExpenses);
+TARGOMAN_CREATE_CONSTEXPR(walSumExpense);
 TARGOMAN_CREATE_CONSTEXPR(walSumCredit);
 TARGOMAN_CREATE_CONSTEXPR(walSumDebit);
 TARGOMAN_CREATE_CONSTEXPR(walCreatedBy_usrID);
@@ -96,6 +96,16 @@ private slots:
         "Transfer money to other user's default wallet. Default wallet will be used if not specified"
     )
 
+//    QVariantList REST_GET_OR_POST(
+//        availableGatewayTypesForRequestIncrease,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            quint32 _amount,
+//            QString _domain
+//        ),
+//        "get list of payment gateway types valid for request increase base on amount and domain"
+//    )
+
     Targoman::API::AAA::stuVoucher REST_CREATE(
         requestIncrease,
         (
@@ -103,8 +113,8 @@ private slots:
             quint32 _amount,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
-            quint64 _walletID = 0,
-            QString _paymentVerifyCallback = {}
+            QString _paymentVerifyCallback,
+            quint64 _walID = 0
         ),
         "Increase wallet balance by online payment"
         "Set callbackURL = OFFLINE for offline payment, url for online payment"
@@ -118,7 +128,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _amount,
             quint64 _walID = 0,
-            const QString _desc = {}
+            const QString &_desc = {}
         ),
         "Create a new withdrawal request by user."
     )
@@ -129,7 +139,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _amount,
             quint64 _targetUsrID,
-            const QString _desc = {}
+            const QString &_desc = {}
         ),
         "Create a new withdrawal request for another user by priviledged user. "
         "Description object must contain at least an string field named 'desc'"
@@ -143,6 +153,7 @@ private slots:
         ),
         "Make a withdrawal as accepted and finished"
     )
+
 };
 
 } //namespace ORM

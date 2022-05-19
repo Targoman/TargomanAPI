@@ -28,10 +28,10 @@
 
 namespace Targoman::API::AccountModule::ORM {
 
-QVariant IPStats::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(IPStats) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
 
 //    return query.one();
 

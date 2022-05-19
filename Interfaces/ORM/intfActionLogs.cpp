@@ -50,11 +50,11 @@ intfActionLogs::intfActionLogs(
         }
     ) { ; }
 
-QVariant intfActionLogs::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(intfActionLogs) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->ModuleName + ":ActionLogs:CRUD~0100" });
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
 }
 
 } //namespace Targoman::API::ORM

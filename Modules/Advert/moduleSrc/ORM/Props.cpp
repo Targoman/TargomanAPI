@@ -31,7 +31,7 @@ namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
 
-QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(Props) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
 
@@ -39,34 +39,34 @@ QVariant Props::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         _query.innerJoin(tblBin::Name);
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
 }
 
-quint64 Props::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint64 IMPL_ORMCREATE(Props) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         _createInfo.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _createInfo);
 
-    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
-bool Props::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMUPDATE(Props) {
     QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())))
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER, ExtraFilters);
 }
 
-bool Props::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMDELETE(Props) {
     QVariantMap ExtraFilters;
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER, ExtraFilters);
 }
 
 Props::Props() :

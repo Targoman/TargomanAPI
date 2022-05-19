@@ -63,15 +63,30 @@ namespace tblVoucher {
     TARGOMAN_CREATE_CONSTEXPR(vchDesc);
     TARGOMAN_CREATE_CONSTEXPR(vchType);
     TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
+    TARGOMAN_CREATE_CONSTEXPR(vchProcessResult);
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
     TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+
+    inline QStringList ColumnNames() {
+        return {
+            vchID,
+            vch_usrID,
+            vchDesc,
+            vchType,
+            vchTotalAmount,
+            vchProcessResult,
+            vchStatus,
+            vchCreationDateTime,
+        };
+    }
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(vchID),
         SF_quint64(vch_usrID),
         SF_JSON_t(vchDesc),
-        SF_Enum(Targoman::API::AccountModule::enuVoucherType, vchType, Targoman::API::AccountModule::enuVoucherType::Expense),
+        SF_NULLABLE_Enum(Targoman::API::AccountModule::enuVoucherType, vchType),
         SF_quint64(vchTotalAmount),
+        SF_JSON_t(vchProcessResult),
         SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
         SF_DateTime_t(vchCreationDateTime)
     );

@@ -97,7 +97,7 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
 }
 
 QVariant clsAPIObject::invoke(
-    intfAPICallBoom* _APICALLBOOM,
+    INTFAPICALLBOOM_IMPL *_APICALLBOOM,
     bool _isUpdateMethod,
     const QStringList& _args,
 //    /*OUT*/ QVariantMap &_responseHeaders,
@@ -302,7 +302,7 @@ QVariant clsAPIObject::invoke(
 }
 
 void clsAPIObject::invokeMethod(
-    intfAPICallBoom* _APICALLBOOM,
+    INTFAPICALLBOOM_IMPL *_APICALLBOOM,
     const QVariantList& _arguments,
     QGenericReturnArgument _returnArg
 //    /*OUT*/ QVariantMap &_responseHeaders
@@ -319,6 +319,12 @@ void clsAPIObject::invokeMethod(
         InvokableMethod = this->LessArgumentMethods.at(this->ParamNames.size() - _arguments.size() - 1);
 
     QVector<void*> ArgStorage(_arguments.size(), {});
+
+#ifdef QT_DEBUG
+    if (this->BaseMethod.name() == "apiPOSTclaimOfflinePayment") {
+        int ii; ii = 0;
+    }
+#endif
 
     auto useArgAt = [=, &_arguments, &ArgStorage](int _i) -> QGenericArgument {
         Targoman::API::Common::intfAPIArgManipulator* ArgMan = (this->ParamTypesID.at(_i) < TAPI_BASE_USER_DEFINED_TYPEID

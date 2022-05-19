@@ -23,21 +23,20 @@
 
 #include "gtwZibal.h"
 
-//using namespace Targoman::API::AccountModule::Classes;
-
 namespace Targoman::API::AccountModule::Payment::Gateways {
 
 TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
-stuPaymentResponse gtwZibal::request(
-        const stuPaymentGateway& _paymentGateway,
-        TAPI::MD5_t _orderMD5,
-        qint64 _amount,
-        const QString& _callback,
-        const QString& _desc
-    ) {
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
-    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
+// [Response, TrackID, PaymentLink]
+std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    TAPI::MD5_t _orderMD5,
+    qint64 _amount,
+    const QString& _callback,
+    const QString& _desc
+) {
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
 
@@ -60,21 +59,24 @@ stuPaymentResponse gtwZibal::request(
 
         QJsonObject Response = Json.object();
 
-        if (Response.contains("result") == false
-                || Response.value("result").toInt() != 100
-                || Response.value("trackId").toString().isEmpty()
-            )
-            return stuPaymentResponse(
-                _orderMD5,
-                Json.toJson(),
-                Response.value("result").toInt(),
-                errorString(Response.value("result").toInt())
-            );
+        if (Response.contains("result") == false)
+            throw exPayment("The response has no result field");
 
-        return stuPaymentResponse(
+        int Result = Response.value("result").toInt();
+
+        if (Result != 100)
+            throw exPayment(QString("Error Code:%1, Message:%2")
+                            .arg(Result)
+                            .arg(this->errorString(Result)));
+
+        if (Response.value("trackId").toString().isEmpty())
+            throw exPayment("The trackID is empty");
+
+        return {
+            Json.toJson(),
             Response.value("trackId").toString(),
             QString(URL_GTW_PAY).replace("{{track_id}}", Response.value("trackId").toString())
-        );
+        };
 
     } catch (std::exception &e) {
         PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
@@ -82,21 +84,35 @@ stuPaymentResponse gtwZibal::request(
     }
 }
 
-stuPaymentResponse gtwZibal::verify(
-        const stuPaymentGateway& _paymentGateway,
-        const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
-    ) {
-    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
-    QString MerchantID = MetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
+// [Response, refNumber]
+std::tuple<QString, QString> gtwZibal::verifyAndSettle(
+    const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const TAPI::JSON_t& _pgResponse,
+    const QString& _domain
+) {
+//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
+    QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
     PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
+
     try {
-        QString OrderMD5 = _pgResponse.object().value("orderId").toString();
-        QString TrackID = _pgResponse.object().value("trackId").toString();
+        if (_pgResponse.isObject() == false)
+            throw exPayment("Invalid response from gateway.");
+        QJsonObject PGResponse = _pgResponse.object();
+        QString Success = PGResponse.value("success").toString();
+        QString Status = PGResponse.value("status").toString();
+
+        if (Success != "1")
+            throw exPayment(QString("Payment failed. Status Code:%1, Message:%2")
+                            .arg(Status)
+                            .arg(this->statusString(Status.toInt()))
+                            );
+
+        QString TrackID = PGResponse.value("trackId").toString();
+        QString OrderMD5 = PGResponse.value("orderId").toString();
 
         if (OrderMD5.isEmpty() || TrackID.isEmpty())
-            throw exHTTPBadRequest("Invalid response not containing essential keys");
+            throw exHTTPBadRequest("Invalid response. not containing essential keys");
 
         QFV.md5().validate(OrderMD5, "orderID");
         QFV.asciiAlNum(false).maxLenght(32).validate(TrackID, "trackId");
@@ -109,30 +125,28 @@ stuPaymentResponse gtwZibal::verify(
                                                            }))
                                  );
 
-        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, {Json});
+        PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { Json });
 
         if (Json.isObject() == false)
-            return stuPaymentResponse(
-                OrderMD5,
-                Json.toJson(),
-                -1,
-                "JsonObject expected as Zibal response"
-            );
+            throw exPayment("JsonObject expected as Zibal response.");
 
         QJsonObject Response = Json.object();
 
-        if (Response.contains("result") == false
-               || ((Response.value("result").toInt() != 100)
-                   && (Response.value("result").toInt() != 201))
-            )
-            return stuPaymentResponse(
-                OrderMD5,
-                Json.toJson(),
-                Response.value("result").toInt(),
-                errorString(Response.value("result").toInt())
-            );
+        if (Response.contains("result") == false)
+            throw exPayment("The response has no result field");
 
-        return {};
+        int Result = Response.value("result").toInt();
+
+        if ((Result != 100) && (Result != 201))
+            throw exPayment(QString("Error Code:%1, Message:%2")
+                            .arg(Result)
+                            .arg(this->errorString(Result)));
+
+        return {
+            Json.toJson(),
+            Response.value("refNumber").toString()
+        };
+
     } catch (std::exception &e) {
         PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { e.what() });
         throw;
@@ -142,13 +156,39 @@ stuPaymentResponse gtwZibal::verify(
 QString gtwZibal::errorString(int _errCode) {
     switch (_errCode) {
         case 100 : return "Ok";
-        case 102 : return "Invalid API Key";
-        case 103 : return "Erroneous API Key";
-        case 104 : return "Erroneous API Key";
-        case 201 : return "Ok";
-        case 105 : return "Invalid Amount";
-        case 106 : return "Invalid CallBack";
-        default  : return "UNKNOWN";
+        case 102 : return "Merchant not found";
+        case 103 : return "The merchant is inactive";
+        case 104 : return "Invalid merchant";
+        case 105 : return "Invalid amount";
+        case 106 : return "Invalid callback";
+        case 113 : return "The transaction amount is out of range";
+
+        case 201 : return "Approved before";
+        case 202 : return "The order was unpaid or failed";
+        case 203 : return "Invalid track id";
+
+        default  : return "Unknown";
+    }
+}
+
+QString gtwZibal::statusString(int _statusCode) {
+    switch (_statusCode) {
+        case -1 : return "Wait for payment"; //"در انتظار پردخت";
+        case -2 : return "Internal error"; //"خطای داخلی";
+        case  1 : return "Payed - Approved"; //"پرداخت شده - تاییدشده";
+        case  2 : return "Payed - Not approved"; //"پرداخت شده - تاییدنشده";
+        case  3 : return "Cancelled by user"; //"لغوشده توسط کاربر";
+        case  4 : return "Invalid card number"; //"‌شماره کارت نامعتبر می‌باشد.";
+        case  5 : return "Account balance is not enough"; //"‌موجودی حساب کافی نمی‌باشد.";
+        case  6 : return "Invalid password"; //"رمز واردشده اشتباه می‌باشد.";
+        case  7 : return "The number of requests is too much"; //"‌تعداد درخواست‌ها بیش از حد مجاز می‌باشد.";
+        case  8 : return "The number of online payments per day is more than allowed"; //"‌تعداد پرداخت اینترنتی روزانه بیش از حد مجاز می‌باشد.";
+        case  9 : return "Daily internet payment is more than allowed"; //"مبلغ پرداخت اینترنتی روزانه بیش از حد مجاز می‌باشد.";
+        case 10 : return "Invalid card issuer"; //"‌صادرکننده‌ی کارت نامعتبر می‌باشد.";
+        case 11 : return "Switch error"; //"‌خطای سوییچ";
+        case 12 : return "The card is not available"; //"کارت قابل دسترسی نمی‌باشد.";
+
+        default : return "Unknown";
     }
 }
 

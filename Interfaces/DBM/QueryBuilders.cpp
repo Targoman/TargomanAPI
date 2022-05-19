@@ -2687,15 +2687,6 @@ quint64 SelectQuery::count(QVariantMap _args) {
 }
 */
 
-//template <typename T>
-//T SelectQuery::one(QVariantMap _args)
-//{
-//    QVariantMap info = this->one(_args);
-//    T t;
-//    t.setFromvariant(info);
-//    return t;
-//}
-
 QVariantMap SelectQuery::one(QVariantMap _args) {
     QString QueryString = this->buildQueryString(_args, true, false, true);
 
@@ -2725,6 +2716,15 @@ QVariantMap SelectQuery::one(QVariantMap _args) {
     return Result.toVariant().toMap();
 }
 
+//template <typename T>
+//T SelectQuery::one(QVariantMap _args)
+//{
+//    QVariantMap info = this->one(_args);
+//    T t;
+//    t.fromJson(QJsonObject::fromVariantMap(info));
+//    return t;
+//}
+
 QVariantMap SelectQuery::tryOne(QVariantMap _args) {
     QT_TRY {
         return this->one(_args);
@@ -2733,6 +2733,19 @@ QVariantMap SelectQuery::tryOne(QVariantMap _args) {
         return QVariantMap();
     }
 }
+//template <typename T>
+//T SelectQuery::tryOne(QVariantMap _args) noexcept
+//{
+//    QT_TRY {
+//        QVariantMap info = this->one(_args);
+//        T t;
+//        t.fromJson(QJsonObject::fromVariantMap(info));
+//        return t;
+//    }
+//    QT_CATCH (const exHTTPNotFound &e) {
+//        return {};
+//    }
+//}
 
 QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from) {
     this->Data->Offset = _from;
@@ -3370,6 +3383,25 @@ public:
 
         QString equalSign = (SQLPrettyLen ? " = " : "=");
 
+        auto CanSetValueAsNull = [](const clsORMField &_col, const QVariant &_val) -> bool {
+            if (_col.defaultValue() != QNull)
+                return false;
+
+            if (_val.userType() == QMetaType::QString)
+                return _val.toString().trimmed().isEmpty();
+
+            if (_val.userType() == QMetaType::QStringList)
+                return _val.toStringList().isEmpty();
+
+            if (_val.userType() == QMetaType::QVariantMap)
+                return _val.toMap().isEmpty();
+
+            if (_val.userType() == QMetaType::QVariantList)
+                return _val.toList().isEmpty();
+
+            return false;
+        };
+
         foreach (auto Col, this->SetMaps) {
             QString key = Col.first;
             QVariant val = Col.second;
@@ -3400,20 +3432,25 @@ public:
                 if (val.userType() != QMetaTypeId<DBExpression>::qt_metatype_id())
                     relatedORMField.Col.validate(val);
 
-                if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
-                    QString v = makeValueAsSQL(val, _useBinding == false, &relatedORMField.Col);
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
-                } else {
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
-                    this->UpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(val));
+                if (CanSetValueAsNull(relatedORMField.Col, val))
+                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2NULL").arg(colName).arg(equalSign));
+                else {
+                    if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
+                        QString v = makeValueAsSQL(val, _useBinding == false, &relatedORMField.Col);
+                        this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
+                    } else {
+                        this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
+                        this->UpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(val));
+                    }
                 }
             }
         }
 
         foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
             if ((baseCol.Relation == InvalidRelation)
-                    && (providedCols.contains(baseCol.Col.name()) == false)
-                    && (baseCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__ )) {
+                && (providedCols.contains(baseCol.Col.name()) == false)
+                && (baseCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__ )
+            ) {
                 auto colName = makeColName(this->Table.Name, this->Alias, baseCol.Col, false);
 
                 if (_useBinding == false)

@@ -158,7 +158,8 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
         .groupBy(tblPaymentGateways::pgwType)
     ;
 
-//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
+//    QList<ORM::tblPaymentGateways::DTO> Rows = qry.all<ORM::tblPaymentGateways::DTO>();
+
     QVariantList Rows = qry.all();
     return Rows;
 //    QList<enuPaymentGatewayType::Type> Types;
@@ -170,7 +171,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 //    return Types;
 }
 
-const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
+const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     quint32 _amount,
     enuPaymentGatewayType::Type _gatewayType,
     const QString& _domain
@@ -180,12 +181,8 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
+        .addCols(tblPaymentGateways::ColumnNames())
         .addCols({
-                     tblPaymentGateways::pgwID,
-                     tblPaymentGateways::pgwName,
-                     tblPaymentGateways::pgwType,
-                     tblPaymentGateways::pgwDriver,
-                     tblPaymentGateways::pgwMetaInfo,
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
                  })
@@ -236,12 +233,7 @@ const stuPaymentGateway PaymentLogic::findBestPaymentGateway(
         .orderBy("RAND()")
     ;
 
-//    stuPaymentGateway PaymentGateway = qry.one<stuPaymentGateway>();
-    QVariantMap PaymentGatewayInfo = qry.one();
-    stuPaymentGateway PaymentGateway;
-    PaymentGateway.fromVariantMap(PaymentGatewayInfo);
-
-    return PaymentGateway;
+    return qry.one<ORM::tblPaymentGateways::DTO>();
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
@@ -251,7 +243,8 @@ QString PaymentLogic::createOnlinePaymentLink(
     const QString& _invDesc,
     quint32 _toPay,
     const QString _paymentVerifyCallback,
-    /*OUT*/ TAPI::MD5_t& _outPaymentMD5
+    /*OUT*/ TAPI::MD5_t& _outPaymentMD5,
+    quint64 _walID
 ) {
     ///scenario:
     ///1: find best payment gateway
@@ -266,32 +259,22 @@ QString PaymentLogic::createOnlinePaymentLink(
     QFV.url().validate(_paymentVerifyCallback, "callBack");
 
     //1: find best payment gateway
-    stuPaymentGateway PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
+    ORM::tblPaymentGateways::DTO PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
 
     //2: get payment gateway driver
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);
 
     //3: create payment
-    TAPI::MD5_t onpMD5;
-    quint8 Retries = 0;
-    while (true) {
-        try {
-            onpMD5 = OnlinePayments::instance()
-                     .callSP("spOnlinePayment_Create", {
-                                 { "iVoucherID", _vchID },
-                                 { "iGatewayID", PaymentGateway.pgwID },
-                                 { "iAmount", _toPay },
-                             })
-                     .spDirectOutputs()
-                     .value("oMD5")
-                     .toString()
-            ;
-            break;
-        } catch (...) {
-            if (++Retries > 3)
-                throw;
-        }
-    }
+    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP("spOnlinePayment_Create", {
+                                                               { "iVoucherID", _vchID },
+                                                               { "iGatewayID", PaymentGateway.pgwID },
+                                                               { "iAmount", _toPay },
+                                                               { "iTargetWalID", _walID },
+                                                           })
+                         .spDirectOutputs()
+                         .value("oMD5")
+                         .toString()
+                         ;
 
     try {
         _outPaymentMD5 = onpMD5;
@@ -299,41 +282,25 @@ QString PaymentLogic::createOnlinePaymentLink(
         QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentMD5", onpMD5);
 
         //4: call driver::request
-        stuPaymentResponse PaymentResponse = PaymentGatewayDriver->request(
-                                                 PaymentGateway,
-                                                 onpMD5,
-                                                 _toPay,
-                                                 Callback,
-                                                 _invDesc
-                                                 );
+        auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(PaymentGateway,
+                                                                                        onpMD5,
+                                                                                        _toPay,
+                                                                                        Callback,
+                                                                                        _invDesc
+                                                                                        );
 
-        if (PaymentResponse.ErrorCode) {
-            /*Targoman::API::Query::*/OnlinePayments::instance().Update(
-                        OnlinePayments::instance(),
-                        SYSTEM_USER_ID,
-                        {},
-                        TAPI::ORMFields_t({
-                           { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
-                           { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
-                        }),
-                        {
-                           { tblOnlinePayments::onpMD5, onpMD5 }
-                        });
-            throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
-        }
-
-        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
-                    OnlinePayments::instance(),
-                    SYSTEM_USER_ID,
-                    {},
-                    TAPI::ORMFields_t({
-                       { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
-                       { tblOnlinePayments::onpResult, PaymentResponse.Result },
-                       { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending },
-                    }),
-                    {
-                       { tblOnlinePayments::onpMD5, onpMD5 }
-                    });
+        OnlinePayments::instance().Update(
+                OnlinePayments::instance(),
+                SYSTEM_USER_ID,
+                {},
+                TAPI::ORMFields_t({
+                   { tblOnlinePayments::onpTrackNumber, TrackID },
+                   { tblOnlinePayments::onpResult, Response },
+                   { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending },
+                }),
+                {
+                   { tblOnlinePayments::onpMD5, onpMD5 }
+                });
 
         //increase pgwSumRequestCount and pgwSumRequestAmount
         try {
@@ -343,34 +310,30 @@ QString PaymentLogic::createOnlinePaymentLink(
                                  { "iAmount", _toPay },
                              })
             ;
-        } catch (...)
-        { ; }
+        } catch (...) { ; }
 
         //5: return result for client redirecting
-        return PaymentResponse.PaymentLink;
-    } catch (exPayment&) {
-        throw;
-    } catch (exHTTPBadRequest&) {
-        throw;
-    } catch (std::exception &e) {
-        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
+        return PaymentLink;
+
+    } catch (std::exception &_exp) {
+        OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
-                        { tblOnlinePayments::onpResult, e.what() },
-                        { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
+                       { tblOnlinePayments::onpResult, _exp.what() },
+                       { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                     }),
                     {
-                        { tblOnlinePayments::onpMD5, onpMD5 }
+                       { tblOnlinePayments::onpMD5, onpMD5 }
                     });
-        throw;
-    }
 
+        throw exPayment(QString("Unable to create payment request: ") + _exp.what());
+    }
 }
 
-///TODO: settle after verify
-quint64 PaymentLogic::approveOnlinePayment(
+// [PaymentID, VoucherID, TargetWalletID]
+std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     const QString& _paymentMD5,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
@@ -379,45 +342,63 @@ quint64 PaymentLogic::approveOnlinePayment(
         throw exPayment("paymentMD5 is empty");
 
     QVariantMap OnlinePaymentInfo = SelectQuery(OnlinePayments::instance())
-            .addCols({
-                         tblOnlinePayments::onpID,
-                         tblOnlinePayments::onpMD5,
-                         tblOnlinePayments::onp_vchID,
-                         tblOnlinePayments::onp_pgwID,
-                         tblOnlinePayments::onpPGTrnID,
-                         tblOnlinePayments::onpAmount,
-                         tblOnlinePayments::onpResult,
-                         tblOnlinePayments::onpStatus,
-                         //----------------
-                         tblPaymentGateways::pgwID,
-                         tblPaymentGateways::pgwName,
-                         tblPaymentGateways::pgwType,
-                         tblPaymentGateways::pgwDriver,
-                         tblPaymentGateways::pgwMetaInfo,
-                     })
+            .addCols(tblOnlinePayments::ColumnNames())
+            .addCols(tblPaymentGateways::ColumnNames())
             .innerJoinWith("paymentGateway")
             .where({ tblOnlinePayments::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
             .one();
+
     stuOnlinePayment OnlinePayment;
     OnlinePayment.fromVariantMap(OnlinePaymentInfo);
 
+    if (OnlinePayment.OnlinePayment.onpStatus != Targoman::API::AccountModule::enuPaymentStatus::Pending)
+        throw exPayment("Only Pending online payments allowed");
+
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
 
-    stuPaymentResponse PaymentResponse = PaymentGatewayDriver->verify(
-                                             OnlinePayment.PaymentGateway,
-                                             _pgResponse,
-                                             _domain
-                                             );
+    try {
+        auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(OnlinePayment.PaymentGateway,
+                                                                           _pgResponse,
+                                                                           _domain
+                                                                           );
 
-    //PaymentResponse.OrderMD5 =?= _paymentMD5
+        //PaymentResponse.OrderMD5 =?= _paymentMD5
 
-    if (PaymentResponse.ErrorCode) {
-        /*Targoman::API::Query::*/OnlinePayments::instance().Update(
+        OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
                     SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
-                        { tblOnlinePayments::onpResult, PaymentResponse.Result.isEmpty() ? QString(PaymentResponse.ErrorCode) : PaymentResponse.Result },
+    //                    { tblOnlinePayments::onpTrackNumber, PaymentResponse.TrackID },
+                        { tblOnlinePayments::onpResult, Response },
+                        { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
+                    }),
+                    {
+                        { tblOnlinePayments::onpMD5, _paymentMD5 }
+                    });
+
+        try {
+            PaymentGateways::instance()
+                     .callSP("spPaymentGateway_UpdateOkCounters", {
+                                 { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
+                                 { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
+                             })
+            ;
+        } catch (...) { ; }
+
+        return {
+            OnlinePayment.OnlinePayment.onpID,
+            OnlinePayment.OnlinePayment.onp_vchID,
+            NULLABLE_GET_OR_DEFAULT(OnlinePayment.OnlinePayment.onpTarget_walID, 0)
+        };
+
+    } catch (std::exception &_exp) {
+        OnlinePayments::instance().Update(
+                    OnlinePayments::instance(),
+                    SYSTEM_USER_ID,
+                    {},
+                    TAPI::ORMFields_t({
+                        { tblOnlinePayments::onpResult, _exp.what() },
                         { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                     }),
                     {
@@ -427,52 +408,13 @@ quint64 PaymentLogic::approveOnlinePayment(
         //increase pgwSumFailedCount
         PaymentGateways::instance()
                  .callSP("spPaymentGateway_UpdateFailedCounters", {
-                             { "iPgwID", OnlinePayment.onp_pgwID },
-                             { "iAmount", OnlinePayment.onpAmount },
+                             { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
+                             { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
                          })
         ;
 
-        throw exPayment("Unable to create payment request: " + PaymentResponse.ErrorString);
+        throw exPayment(QString("Unable to verify payment: ") + _exp.what());
     }
-
-    /*Targoman::API::Query::*/OnlinePayments::instance().Update(
-                OnlinePayments::instance(),
-                SYSTEM_USER_ID,
-                {},
-                TAPI::ORMFields_t({
-//                    { tblOnlinePayments::onpPGTrnID, PaymentResponse.TrackID },
-                    { tblOnlinePayments::onpResult, PaymentResponse.Result },
-                    { tblOnlinePayments::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
-                }),
-                {
-                    { tblOnlinePayments::onpMD5, _paymentMD5 }
-                });
-
-    //update pgwLastPaymentDateTime and pgwSumTodayPaidAmount
-    //increase pgwSumOkCount and pgwSumPaidAmount
-    try {
-        PaymentGateways::instance()
-                 .callSP("spPaymentGateway_UpdateOkCounters", {
-                             { "iPgwID", OnlinePayment.onp_pgwID },
-                             { "iAmount", OnlinePayment.onpAmount },
-                         })
-        ;
-    } catch (...)
-    { ; }
-
-    /*Targoman::API::Query::*/ORM::PaymentGateways::instance().Update(
-                ORM::PaymentGateways::instance(),
-                SYSTEM_USER_ID,
-                {},
-                TAPI::ORMFields_t({
-                   { tblPaymentGateways::pgwSumOkCount, DBExpression::VALUE(QString("%1 + 1").arg(tblPaymentGateways::pgwSumOkCount))},
-                   { tblPaymentGateways::pgwSumPaidAmount, DBExpression::VALUE(QString("%1 + %2").arg(tblPaymentGateways::pgwSumPaidAmount).arg(OnlinePayment.onpAmount))},
-                }),
-                {
-                   { tblPaymentGateways::pgwID, OnlinePayment.onp_pgwID }
-                });
-
-    return OnlinePayment.onp_vchID;
 }
 
 } //namespace Targoman::API::AccountModule::Payment

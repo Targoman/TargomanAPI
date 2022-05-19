@@ -30,17 +30,13 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
 namespace Targoman::API::AccountModule {
 
-void stuOnlinePayment::fromVariantMap(const QVariantMap& _info) {
-    SET_FIELD_FROM_VARIANT_MAP(this->onpID,      _info, ORM::tblOnlinePayments, onpID);
-    SET_FIELD_FROM_VARIANT_MAP(this->onpMD5,     _info, ORM::tblOnlinePayments, onpMD5);
-    SET_FIELD_FROM_VARIANT_MAP(this->onp_vchID,  _info, ORM::tblOnlinePayments, onp_vchID);
-    SET_FIELD_FROM_VARIANT_MAP(this->onp_pgwID,  _info, ORM::tblOnlinePayments, onp_pgwID);
-    SET_FIELD_FROM_VARIANT_MAP(this->onpPGTrnID, _info, ORM::tblOnlinePayments, onpPGTrnID);
-    SET_FIELD_FROM_VARIANT_MAP(this->onpAmount,  _info, ORM::tblOnlinePayments, onpAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->onpResult,  _info, ORM::tblOnlinePayments, onpResult);
-    SET_FIELD_FROM_VARIANT_MAP(this->onpStatus,  _info, ORM::tblOnlinePayments, onpStatus);
+void stuOnlinePayment::fromVariantMap(
+    const QVariantMap& _info
+) {
+    QJsonObject JsonInfo = QJsonObject::fromVariantMap(_info);
 
-    this->PaymentGateway.fromVariantMap(_info);
+    this->OnlinePayment.fromJson(JsonInfo);
+    this->PaymentGateway.fromJson(JsonInfo);
 }
 
 namespace ORM {
@@ -52,15 +48,16 @@ OnlinePayments::OnlinePayments() :
     intfSQLBasedModule(
         AAASchema,
         tblOnlinePayments::Name,
-        {///< ColName                                   Type                    Validation                           Default    UpBy   Sort  Filter Self  Virt   PK
+        {///< ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { tblOnlinePayments::onpID,                 ORM_PRIMARYKEY_64 },
-            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                 QRequired, UPAdmin },
-            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPAdmin },
-            { tblOnlinePayments::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),           QRequired, UPAdmin },
-            { tblOnlinePayments::onpPGTrnID,            S(QString),             QFV.allwaysValid().maxLenght(50),    QNull,     UPAdmin },
-            { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),           QRequired, UPAdmin },
-            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                 QNull,     UPAdmin, false, false },
-            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
+            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired,  UPAdmin },
+            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
+            { tblOnlinePayments::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
+            { tblOnlinePayments::onpTrackNumber,        S(QString),             QFV.allwaysValid().maxLenght(50),   QNull,      UPAdmin },
+            { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
+            { tblOnlinePayments::onpTarget_walID,       S(quint64),             QFV,                                QNull,      UPNone },
+            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,      UPAdmin, false, false },
+            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
             { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
             { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
         },
@@ -70,7 +67,7 @@ OnlinePayments::OnlinePayments() :
         }
     ) { ; }
 
-QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
@@ -78,7 +75,7 @@ QVariant OnlinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
 }
 
 /*****************************************************************\
@@ -88,14 +85,15 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
     intfSQLBasedModule(
         AAASchema,
         tblOfflinePaymentClaims::Name,
-        {///< ColName                                           Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+        {///< ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { tblOfflinePaymentClaims::ofpcID,                  ORM_PRIMARYKEY_64},
-            { tblOfflinePaymentClaims::ofpc_vchID,              S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcBank,                S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),             QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
+            { tblOfflinePaymentClaims::ofpc_vchID,              S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner},
+            { tblOfflinePaymentClaims::ofpcBank,                S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),                 QFV,                                QRequired,  UPOwner},
+            { tblOfflinePaymentClaims::ofpcTarget_walID,        S(quint64),                 QFV,                                QNull,      UPNone },
+            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
             { tblOfflinePaymentClaims::ofpcStatus,              ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
             { tblOfflinePaymentClaims::ofpcCreationDateTime,    ORM_CREATED_ON},
             { tblOfflinePaymentClaims::ofpcCreatedBy_usrID,     ORM_CREATED_BY},
@@ -108,7 +106,7 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
         }
     ) { ; }
 
-QVariant OfflinePaymentClaims::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(OfflinePaymentClaims) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
@@ -116,24 +114,24 @@ QVariant OfflinePaymentClaims::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
 }
 
-//quint32 OfflinePaymentClaims::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
+//quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-//    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 //}
 
-//bool OfflinePaymentClaims::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+//bool IMPL_ORMUPDATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-//    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 //}
 
-//bool OfflinePaymentClaims::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+//bool IMPL_ORMDELETE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-//    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+//    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 //}
 
 /*****************************************************************\
@@ -150,6 +148,7 @@ OfflinePayments::OfflinePayments() :
             { tblOfflinePayments::ofpReceiptCode,       S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
             { tblOfflinePayments::ofpReceiptDate,       S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
             { tblOfflinePayments::ofpAmount,            S(quint32),             QFV,                                QRequired,  UPOwner},
+            { tblOfflinePayments::ofpTarget_walID,      S(quint64),             QFV,                                QNull,      UPNone },
             { tblOfflinePayments::ofpNotes,             S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
             { tblOfflinePayments::ofpStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
             { tblOfflinePayments::ofpCreationDateTime,  ORM_CREATED_ON},
@@ -163,7 +162,7 @@ OfflinePayments::OfflinePayments() :
         }
     ) { ; }
 
-QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(OfflinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
@@ -171,12 +170,12 @@ QVariant OfflinePayments::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return /*Targoman::API::Query::*/this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
 }
 
-bool OfflinePayments::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMUPDATE(OfflinePayments) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
 /*****************************************************************/

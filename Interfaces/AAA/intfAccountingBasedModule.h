@@ -59,7 +59,7 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-    void checkUsageIsAllowed(intfAPICallBoom &APICALLBOOM_PARAM, const ServiceUsage_t& _requestedUsage);
+    void checkUsageIsAllowed(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ServiceUsage_t& _requestedUsage);
 
     virtual bool increaseDiscountUsage(
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
@@ -186,7 +186,7 @@ protected:
         Q_UNUSED(_assetItem)
     };
     virtual void applyAssetAdditives(
-        Q_DECL_UNUSED intfAPICallBoom &APICALLBOOM_PARAM,
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         INOUT stuAssetItem& _assetItem,
         const OrderAdditives_t& _orderAdditives
     ) {
@@ -194,7 +194,7 @@ protected:
         Q_UNUSED(_orderAdditives)
     };
     virtual void applyReferrer(
-        Q_DECL_UNUSED intfAPICallBoom &APICALLBOOM_PARAM,
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         INOUT stuAssetItem& AssetItem,
         QString _referrer,
         TAPI::JSON_t _extraReferrerParams

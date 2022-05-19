@@ -50,6 +50,7 @@ private:
     constexpr static char METAINFO_KEY_MERCHANT_ID[] = "merchantid";
 
     virtual QString errorString(int _errCode);
+    QString statusString(int _statusCode);
 };
 
 } //namespace Targoman::API::AccountModule::Payment::Gateways

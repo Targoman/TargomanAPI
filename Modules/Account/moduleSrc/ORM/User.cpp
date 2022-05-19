@@ -97,7 +97,7 @@ User::User() :
     ;
 }
 
-QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
+QVariant IMPL_ORMGET(User) {
     if (_APICALLBOOM.getUserID() != _pksByPath.toULongLong())
         Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:CRUD~0100" });
 
@@ -134,9 +134,9 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
 //            tblUserExtraInfo::ueiUpdatedBy_usrID,
         }).join(",");
 
-    return /*Targoman::API::Query::*/this->Select(
+    return this->Select(
                 *this,
-                GET_METHOD_CALL_ARGS_INTERNAL_CALL,
+                GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM,
                 {},
                 0,
                 [](SelectQuery &_query) {
@@ -148,27 +148,27 @@ QVariant User::apiGET(GET_METHOD_ARGS_IMPL_APICALL) {
     //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 User::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL) {
+quint64 IMPL_ORMCREATE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return /*Targoman::API::Query::*/this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
 /*
  * this method only can call by admin user
  */
-bool User::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMUPDATE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return /*Targoman::API::Query::*/this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
-bool User::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL) {
+bool IMPL_ORMDELETE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return /*Targoman::API::Query::*/this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL);
+    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
 }
 
 SelectQuery User::getPhotoQuery(quint64 _usrID) {
@@ -181,10 +181,10 @@ SelectQuery User::getPhotoQuery(quint64 _usrID) {
     ;
 }
 
-TAPI::Base64Image_t User::apiGETphoto(
+TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     if (CurrentUserID != _usrID)
@@ -199,10 +199,10 @@ TAPI::Base64Image_t User::apiGETphoto(
     return TAPI::Base64Image_t(Photo);
 }
 
-bool User::apiUPDATEphoto(
+bool IMPL_REST_UPDATE(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QString qry = QString()
@@ -232,9 +232,9 @@ bool User::apiUPDATEphoto(
     return OK;
 }
 
-bool User::apiPOSTdeletePhoto(
+bool IMPL_REST_POST(User, deletePhoto, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QString qry = QString()
@@ -260,12 +260,12 @@ bool User::apiPOSTdeletePhoto(
     return OK;
 }
 
-bool User::apiUPDATEemail(
+bool IMPL_REST_UPDATE(User, email, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _psw,
     QString         _salt
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     _email = _email.toLower().trimmed();
@@ -292,12 +292,12 @@ bool User::apiUPDATEemail(
     return true;
 }
 
-bool User::apiUPDATEmobile(
+bool IMPL_REST_UPDATE(User, mobile, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _psw,
     QString         _salt
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
@@ -324,7 +324,7 @@ bool User::apiUPDATEmobile(
     return true;
 }
 
-bool User::apiUPDATEpersonalInfo(
+bool IMPL_REST_UPDATE(User, personalInfo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString             _name,
     QString             _family,
@@ -332,7 +332,7 @@ bool User::apiUPDATEpersonalInfo(
     NULLABLE_TYPE(TAPI::enuGender::Type) _gender,
     NULLABLE_TYPE(bool) _enableEmailAlerts,
     NULLABLE_TYPE(bool) _enableSMSAlerts
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ToUpdate;
@@ -354,11 +354,11 @@ bool User::apiUPDATEpersonalInfo(
     return true;
 }
 
-bool User::apiUPDATEfinancialInfo(
+bool IMPL_REST_UPDATE(User, financialInfo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QStringList ToUpdate;
@@ -398,7 +398,7 @@ bool User::apiUPDATEfinancialInfo(
     return true;
 }
 
-bool User::apiUPDATEextraInfo(
+bool IMPL_REST_UPDATE(User, extraInfo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
@@ -406,7 +406,7 @@ bool User::apiUPDATEextraInfo(
     QString         _fieldOfStudy,
 //        QString         _language,
     QString         _theme
-) {
+)) {
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     QVariantMap ToUpdateJson;
@@ -547,7 +547,7 @@ UserExtraInfo::UserExtraInfo() :
     )
 { ; }
 
-//bool UserExtraInfo::apiUPDATEsheba(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba)
+//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -561,7 +561,7 @@ UserExtraInfo::UserExtraInfo() :
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool UserExtraInfo::apiUPDATEetherAddress(APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress)
+//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name

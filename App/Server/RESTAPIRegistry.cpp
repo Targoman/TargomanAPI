@@ -195,6 +195,7 @@ void RESTAPIRegistry::registerRESTAPI(
                                                         Qt::DirectConnection,
                                                         Q_RETURN_ARG(QString, MethodDoc)
                                                         );
+                MethodDoc = MethodDoc.trimmed();
                 FoundDoc = true;
 //                break;
             }
@@ -659,14 +660,16 @@ void RESTAPIRegistry::dumpAPIs()
 
     TargomanDebug(5).noLabel().noquote().nospace() << endl << Targoman::API::Helpers::ClientConfigs::RESTServerAddress.value();
 
-    int index = 1;
+    int APIsIndex = 1;
+    int MethodsIndex = 1;
     foreach (const QString Name, Keys) {
         bool IsLastAPI = (Name == Keys.last());
 
         TargomanDebug(5).noLabel().noquote().nospace()
                 << "│";
         TargomanDebug(5).noLabel().noquote().nospace()
-                << (IsLastAPI ? "└" : "├") << "── "
+                << (IsLastAPI ? "└" : "├") << "──"
+                << "[" << QString::number(APIsIndex++) << "] "
                 << Name;
 
         QStringList Methods = APIs[Name].keys();
@@ -678,8 +681,8 @@ void RESTAPIRegistry::dumpAPIs()
 
             TargomanDebug(5).noLabel().noquote().nospace()
                     << (IsLastAPI ? " " : "│") << "   "
-                    << (IsLastMethod ? "└" : "├") << "── "
-                    << QString::number(index++) << ") "
+                    << (IsLastMethod ? "└" : "├") << "──"
+                    << "(" << QString::number(MethodsIndex++) << ") "
                     << Method.toUpper(); // << " " << Name;
 
             if (API.APIObject->ParamTypesName.isEmpty() == false) {
@@ -716,7 +719,8 @@ void RESTAPIRegistry::dumpAPIs()
                     TargomanDebug(5).noLabel().noquote().nospace()
                             << (IsLastAPI ? " " : "│") << "   "
                             << (IsLastMethod ? " " : "│") << "   "
-                            << (IsLastParam ?  "└" : "├") << "── "
+                            << (IsLastParam ?  "└" : "├") << "──"
+                            << " " << QString::number(ParamsIndex + 1) << ": "
                             << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxLen)
                             << " "
                             << API.APIObject->ParamNames[ParamsIndex]

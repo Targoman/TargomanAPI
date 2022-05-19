@@ -115,19 +115,24 @@ QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const 
 
     foreach (auto AccessItem, _requiredAccess)
         if (AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
-            throw exAuthorization("Not enough priviledges on <"+AccessItem+">");
+            throw exAuthorization("Not enough priviledges on <" + AccessItem + ">");
+
     return _privs;
 }
 
 void PrivHelpers::validateToken(const QString& _token) {
+
     static QRegularExpression rxTokenValidator = QRegularExpression("^[a-zA-Z0-9\\-_ ]{8,32}$");
+
     if (_token.isEmpty())
         throw exNoTokenProvided("No token provided");
+
     if (rxTokenValidator.match(_token).hasMatch() == false)
         throw exInvalidToken("Invalid token provided");
 }
 
-QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector) {
+QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _selector, const QVariant &_defIfNotFoundAndAllIsDefined) {
+
     if (_privs.isEmpty() || _selector.isEmpty())
         return QVariant();
 
@@ -135,8 +140,12 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
     QJsonObject CurrCheckingPriv = _privs;
 
     foreach (auto Part, AccessItemParts) {
-        if (CurrCheckingPriv.contains(Part) == false)
+        if (CurrCheckingPriv.contains(Part) == false) {
+            if (CurrCheckingPriv.contains("ALL"))
+                return _defIfNotFoundAndAllIsDefined;
+
             return QVariant();
+        }
 
         CurrCheckingPriv = CurrCheckingPriv.value(Part).toObject();
     }
@@ -145,6 +154,7 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
 }
 
 stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
+
     if (_userObj.contains(DBM_SPRESULT_ROWS))
         _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
@@ -154,13 +164,17 @@ stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QSt
                     _userObj[AAACommonItems::privs].toArray(),
                     static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble()),
                     _services);
+
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
+
         return { ActiveAccount.TTL, _userObj };
+
     } else
         return { -1, _userObj };
 }
 
 QByteArray PrivHelpers::getURL(const QString& _url) {
+
     QtCUrl CUrl;
     CUrl.setTextCodec("UTF-8");
 

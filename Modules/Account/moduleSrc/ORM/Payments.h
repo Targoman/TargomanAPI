@@ -50,22 +50,6 @@ namespace Targoman::API::AccountModule {
 
 //structures goes here
 
-struct stuOnlinePayment
-{
-    quint64 onpID;
-    TAPI::MD5_t onpMD5;
-    quint64 onp_vchID;
-    quint32 onp_pgwID;
-    QString onpPGTrnID;
-    quint64 onpAmount;
-    QString onpResult;
-    Targoman::API::AccountModule::enuPaymentStatus::Type onpStatus;
-
-    stuPaymentGateway PaymentGateway;
-
-    void fromVariantMap(const QVariantMap& _info);
-};
-
 namespace ORM {
 
 /*****************************************************************\
@@ -80,12 +64,43 @@ namespace tblOnlinePayments {
     TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
     TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
     TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
-    TARGOMAN_CREATE_CONSTEXPR(onpPGTrnID);
+    TARGOMAN_CREATE_CONSTEXPR(onpTrackNumber);
     TARGOMAN_CREATE_CONSTEXPR(onpAmount);
+    TARGOMAN_CREATE_CONSTEXPR(onpTarget_walID);
     TARGOMAN_CREATE_CONSTEXPR(onpResult);
     TARGOMAN_CREATE_CONSTEXPR(onpStatus);
     TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
+
+    inline QStringList ColumnNames() {
+        return {
+            onpID,
+            onpMD5,
+            onp_vchID,
+            onp_pgwID,
+            onpTrackNumber,
+            onpAmount,
+            onpTarget_walID,
+            onpResult,
+            onpStatus,
+            onpCreationDateTime,
+            onpLastUpdateDateTime,
+        };
+    }
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_quint64(onpID),
+        SF_MD5_t(onpMD5),
+        SF_quint64(onp_vchID),
+        SF_quint32(onp_pgwID),
+        SF_QString(onpTrackNumber),
+        SF_quint32(onpAmount),
+        SF_NULLABLE_quint64(onpTarget_walID),
+        SF_QString(onpResult),
+        SF_Enum(Targoman::API::AccountModule::enuPaymentStatus, onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending),
+        SF_QString(onpCreationDateTime),
+        SF_QString(onpLastUpdateDateTime)
+    );
 }
 #pragma GCC diagnostic pop
 
@@ -112,19 +127,38 @@ namespace tblOfflinePaymentClaims {
     TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptCode);
     TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptDate);
     TARGOMAN_CREATE_CONSTEXPR(ofpcAmount);
+    TARGOMAN_CREATE_CONSTEXPR(ofpcTarget_walID);
     TARGOMAN_CREATE_CONSTEXPR(ofpcNotes);
     TARGOMAN_CREATE_CONSTEXPR(ofpcStatus);
     TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
 
+    inline QStringList ColumnNames() {
+        return {
+            ofpcID,
+            ofpc_vchID,
+            ofpcBank,
+            ofpcReceiptCode,
+            ofpcReceiptDate,
+            ofpcAmount,
+            ofpcTarget_walID,
+            ofpcNotes,
+            ofpcStatus,
+            ofpcCreationDateTime,
+            ofpcCreatedBy_usrID,
+            ofpcUpdatedBy_usrID,
+        };
+    }
+
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(ofpcID),
-        SF_quint64(ofpc_vchID),
+        SF_NULLABLE_quint64(ofpc_vchID),
         SF_QString(ofpcBank),
         SF_QString(ofpcReceiptCode),
         SF_QString(ofpcReceiptDate),
         SF_quint32(ofpcAmount),
+        SF_NULLABLE_quint64(ofpcTarget_walID),
         SF_QString(ofpcNotes),
         SF_Enum(Targoman::API::AccountModule::enuPaymentStatus, ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus::New),
         SF_QString(ofpcCreationDateTime),
@@ -162,11 +196,29 @@ namespace tblOfflinePayments {
     TARGOMAN_CREATE_CONSTEXPR(ofpReceiptCode);
     TARGOMAN_CREATE_CONSTEXPR(ofpReceiptDate);
     TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
+    TARGOMAN_CREATE_CONSTEXPR(ofpTarget_walID);
     TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
     TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
     TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
+
+    inline QStringList ColumnNames() {
+        return {
+            ofpID,
+            ofp_vchID,
+            ofpBank,
+            ofpReceiptCode,
+            ofpReceiptDate,
+            ofpAmount,
+            ofpTarget_walID,
+            ofpNotes,
+            ofpStatus,
+            ofpCreationDateTime,
+            ofpCreatedBy_usrID,
+            ofpUpdatedBy_usrID,
+        };
+    }
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
         SF_quint64(ofpID),
@@ -175,6 +227,7 @@ namespace tblOfflinePayments {
         SF_QString(ofpReceiptCode),
         SF_QString(ofpReceiptDate),
         SF_quint32(ofpAmount),
+        SF_NULLABLE_quint64(ofpTarget_walID),
         SF_QString(ofpNotes),
         SF_Enum(Targoman::API::AccountModule::enuPaymentStatus, ofpStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending),
         SF_QString(ofpCreationDateTime),
@@ -198,6 +251,15 @@ private slots:
 
 /*****************************************************************/
 } //namespace ORM
+
+struct stuOnlinePayment
+{
+    ORM::tblOnlinePayments::DTO OnlinePayment;
+    ORM::tblPaymentGateways::DTO PaymentGateway;
+
+    void fromVariantMap(const QVariantMap& _info);
+};
+
 } //namespace Targoman::API::AccountModule
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_PAYMENTORDERS_H
