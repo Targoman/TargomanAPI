@@ -292,7 +292,7 @@ CREATE PROCEDURE `spOnlinePayment_Create`(
     OUT `oMD5` VARCHAR(50)
 )
 BEGIN
-    SET oMD5 = dev_Common.fnCreateRandomMD5();
+    SET oMD5 = {{dbprefix}}Common.fnCreateRandomMD5();
 
     INSERT INTO tblOnlinePayments
        SET onpMD5 = oMD5
@@ -930,7 +930,7 @@ INNER JOIN tblWalletsBalanceHistory
      LIMIT 1
     ;
 
-    CALL dev_Common.spLogDebug('spBalanceInfo_Prepare',
+    CALL {{dbprefix}}Common.spLogDebug('spBalanceInfo_Prepare',
         JSON_OBJECT(
             'oLastTransactionDate', oLastTransactionDate,
             'iWalID', iWalID,
@@ -1012,7 +1012,7 @@ Proc: BEGIN
     SET vLastSumCredit = IFNULL(vLastSumCredit, 0);
     SET vLastSumDebit = IFNULL(vLastSumDebit, 0);
 
-    CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_insert:before action',
+    CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_insert:before action',
         JSON_OBJECT(
             'wlt_walID', NEW.wlt_walID,
             'wltID', NEW.wltID,
@@ -1050,7 +1050,7 @@ Proc: BEGIN
         ;
 
         SET @uvAffectedRows = ROW_COUNT();
-        CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_insert:after action(1:INSERT)',
+        CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_insert:after action(1:INSERT)',
             JSON_OBJECT(
                 '@uvAffectedRows', @uvAffectedRows,
                 'wlt_walID', NEW.wlt_walID,
@@ -1124,7 +1124,7 @@ Proc: BEGIN
         SET vLastSumCredit = @uvLastSumCredit;
         SET vLastSumDebit = @uvLastSumDebit;
 
-        CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_insert:after action(2:INSERT)',
+        CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_insert:after action(2:INSERT)',
             JSON_OBJECT(
                 '@uvAffectedRows', @uvAffectedRows,
                 'wlt_walID', NEW.wlt_walID,
@@ -1189,7 +1189,7 @@ Proc: BEGIN
     SET vLastSumCredit = IFNULL(vLastSumCredit, 0);
     SET vLastSumDebit = IFNULL(vLastSumDebit, 0);
 
-    CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_update:before action',
+    CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_update:before action',
         JSON_OBJECT(
             'wlt_walID', NEW.wlt_walID,
             'wltID', NEW.wltID,
@@ -1235,7 +1235,7 @@ Proc: BEGIN
         ;
 
         SET @uvAffectedRows = ROW_COUNT();
-        CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action(1:UPDATE)',
+        CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action(1:UPDATE)',
             JSON_OBJECT(
                 '@uvAffectedRows', @uvAffectedRows,
                 'wlt_walID', NEW.wlt_walID,
@@ -1265,7 +1265,7 @@ Proc: BEGIN
         ;
 
         SET @uvAffectedRows = ROW_COUNT();
-        CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action (2:DELETE)',
+        CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action (2:DELETE)',
             JSON_OBJECT(
                 '@uvAffectedRows', @uvAffectedRows,
                 'wlt_walID', NEW.wlt_walID,
@@ -1328,7 +1328,7 @@ Proc: BEGIN
         SET vLastSumCredit = @uvLastSumCredit;
         SET vLastSumDebit = @uvLastSumDebit;
 
-        CALL dev_Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action (2:INSERT)',
+        CALL {{dbprefix}}Common.spLogDebug('trg_tblWalletsTransactions_after_update:after action (2:INSERT)',
             JSON_OBJECT(
                 '@uvAffectedRows', @uvAffectedRows,
                 'wlt_walID', NEW.wlt_walID,
