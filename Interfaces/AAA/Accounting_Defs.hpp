@@ -156,51 +156,75 @@ typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
 
 typedef QMap<QString, QString> OrderAdditives_t;
 
-struct stuAssetItem {
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
     //product
-    quint32                         prdID;
-    TAPI::ProductCode_t             prdCode;
-    QString                         prdName;
-    TAPI::Date_t                    prdValidFromDate;
-    TAPI::Date_t                    prdValidToDate;
-    NULLABLE_TYPE(quint8)           prdValidFromHour;
-    NULLABLE_TYPE(quint8)           prdValidToHour;
-    TAPI::PrivObject_t              prdPrivs;
-    NULLABLE_TYPE(double)           prdVAT;
-    quint32                         prdInStockQty;
-    NULLABLE_TYPE(quint32)          prdOrderedQty;
-    NULLABLE_TYPE(quint32)          prdReturnedQty;
-    TAPI::enuGenericStatus::Type    prdStatus;
+    SF_quint32          (prdID),
+    SF_QString          (prdCode), //TAPI::ProductCode_t
+    SF_QString          (prdName),
+    SF_DateTime_t       (prdValidFromDate),
+    SF_DateTime_t       (prdValidToDate),
+    SF_NULLABLE_quint8  (prdValidFromHour),
+    SF_NULLABLE_quint8  (prdValidToHour),
+    SF_JSON_t           (prdPrivs), //TAPI::PrivObject_t
+    SF_NULLABLE_qreal   (prdVAT),
+    SF_quint32          (prdInStockQty),
+    SF_NULLABLE_quint32 (prdOrderedQty),
+    SF_NULLABLE_quint32 (prdReturnedQty),
+    SF_Enum             (TAPI::enuGenericStatus, prdStatus, TAPI::enuGenericStatus::Active),
 
     //saleable
-    quint32                         slbID;
-    TAPI::SaleableCode_t            slbCode;
-    QString                         slbName;
-    TAPI::JSON_t                    slbPrivs;
-    qreal                           slbBasePrice;
-    TAPI::SaleableAdditive_t        slbAdditives;
-//    quint32                         slbProductCount;
-    NULLABLE_TYPE(quint32)          slbMaxSaleCountPerUser;
-    quint32                         slbInStockQty;
-    NULLABLE_TYPE(quint32)          slbOrderedQty;
-    NULLABLE_TYPE(quint32)          slbReturnedQty;
-    QString                         slbVoucherTemplate;
-    TAPI::enuGenericStatus::Type    slbStatus;
+    SF_quint32          (slbID),
+    SF_QString          (slbCode), //TAPI::SaleableCode_t
+    SF_QString          (slbName),
+    SF_JSON_t           (slbPrivs),
+    SF_qreal            (slbBasePrice),
+    SF_JSON_t           (slbAdditives), //TAPI::SaleableAdditive_t
+//    SF_quint32          (slbProductCount),
+    SF_NULLABLE_quint32 (slbMaxSaleCountPerUser),
+    SF_quint32          (slbInStockQty),
+    SF_NULLABLE_quint32 (slbOrderedQty),
+    SF_NULLABLE_quint32 (slbReturnedQty),
+    SF_QString          (slbVoucherTemplate),
+    SF_Enum             (TAPI::enuGenericStatus, slbStatus, TAPI::enuGenericStatus::Active),
 
-    qreal                           SubTotal;
-    NULLABLE_TYPE(stuDiscount3)     Discount;
-    qreal                           TotalPrice;
+    SF_qreal            (SubTotal),
+    SF_Var_Struct       (stuDiscount3, Discount, [](Q_DECL_UNUSED auto v) { return true; }(v)), //NULLABLE_TYPE
+    SF_qreal            (TotalPrice),
 
+    /*
     struct {
 //        QJsonObject   Additives;
         UsageLimits_t Limits;
 //        QJsonObject   Privs;
-    } Digested;
+    } Digested;*/
 
-    QJsonObject toJson(bool _full);
-    stuAssetItem& fromJson(const QJsonObject& _obj);
-    void fromVariantMap(const QVariantMap& _info);
-};
+    SF_Generic(
+        /* type              */ UsageLimits_t,
+        /* name              */ Digested_Limits,
+        /* def               */ UsageLimits_t(),
+        /* validator         */ v.size(),
+        /* type 2 QJsonValue */ [](auto v) {
+                                    QJsonObject A;
+                                    for (auto it = v.begin();
+                                        it != v.end();
+                                        it++
+                                    ) {
+                                        A.insert(it.key(), it->toJson());
+                                    }
+                                    return A;
+                                }(v),
+        /* QJsonValue 2 type */ [](auto v) {
+                                    UsageLimits_t L;
+                                    foreach (auto I, v)
+                                        L.insert(I.key(), stuUsage().fromJson(I.toObject()));
+                                    return L;
+                                }(v)
+    )
+
+//    QJsonObject toJson(bool _full);
+//    stuAssetItem& fromJson(const QJsonObject& _obj);
+//    void fromVariantMap(const QVariantMap& _info);
+);
 
 typedef QMap<QString, stuAssetItem> ActiveCredits_t;
 
@@ -218,6 +242,7 @@ struct stuServiceCreditsInfo {
                           QDateTime                   _dbCurrentDateTime);
 };
 
+/*
 struct stuActiveCredit {
     stuAssetItem  Credit;
     bool          IsFromParent;
@@ -228,9 +253,39 @@ struct stuActiveCredit {
                     bool _isFromParent = false,
                     const UsageLimits_t& _myLimitsOnParent = {},
                     qint64 _ttl = 0);
-    QJsonObject toJson(bool _full);
-    stuActiveCredit& fromJson(const QJsonObject _obj);
+
+//    QJsonObject toJson(bool _full);
+//    stuActiveCredit& fromJson(const QJsonObject _obj);
 };
+*/
+
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuActiveCredit,
+    SF_Var_Struct(stuAssetItem, Credit, v.prdID),
+    SF_bool(IsFromParent),
+    SF_Generic(
+        /* type              */ UsageLimits_t,
+        /* name              */ MyLimitsOnParent,
+        /* def               */ UsageLimits_t(),
+        /* validator         */ v.size(),
+        /* type 2 QJsonValue */ [](auto v) {
+                                    QJsonObject A;
+                                    for (auto it = v.begin();
+                                        it != v.end();
+                                        it++
+                                    ) {
+                                        A.insert(it.key(), it->toJson());
+                                    }
+                                    return A;
+                                }(v),
+        /* QJsonValue 2 type */ [](auto v) {
+                                    UsageLimits_t L;
+                                    foreach (auto I, v)
+                                        L.insert(I.key(), stuUsage().fromJson(I.toObject()));
+                                    return L;
+                                }(v)
+    ),
+    SF_qint64(TTL)
+);
 
 typedef QList<stuVoucherItem> InvItems_t;
 
