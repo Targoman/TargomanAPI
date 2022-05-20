@@ -10,9 +10,6 @@
 [submodule "3rdParty/URLCanonicalizer"]
 	path = 3rdParty/URLCanonicalizer
 	url = https://github.com/Targoman/URLCanonicalizer.git
-[submodule "3rdParty/E4MT"]
-	path = 3rdParty/E4MT
-	url = https://github.com/Targoman/E4MT.git
 [submodule "3rdParty/QtCurl"]
 	path = 3rdParty/QtCurl
 	url = https://github.com/Targoman/qtcurl.git
