@@ -123,7 +123,8 @@ OTHER_FILES += \
     migrations/objectstorage/local/.migrations
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/App/ \
-               $$BASE_PROJECT_PATH/3rdParty/E4MT/
+
+#               $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)
