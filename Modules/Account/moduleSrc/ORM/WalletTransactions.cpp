@@ -46,7 +46,7 @@ WalletTransactions::WalletTransactions() :
             { tblWalletsTransactions::wltDateTime,  ORM_CREATED_ON },
         },
         {///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
-            { tblWalletsTransactions::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::walID },
+            { tblWalletsTransactions::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::Fields::walID },
             { tblWalletsTransactions::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::vchID },
             { tblWalletsTransactions::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::wbl_wltID },
         }
@@ -54,13 +54,13 @@ WalletTransactions::WalletTransactions() :
 
 QVariant IMPL_ORMGET(WalletTransactions) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblUserWallets::Name);
     };
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 WalletsBalanceHistory::WalletsBalanceHistory() :

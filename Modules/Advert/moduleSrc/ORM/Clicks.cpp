@@ -40,7 +40,7 @@ QVariant IMPL_ORMGET(Clicks) {
         _query.innerJoin(tblBin::Name);
     };
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, 0, QueryLambda);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 Clicks::Clicks() :

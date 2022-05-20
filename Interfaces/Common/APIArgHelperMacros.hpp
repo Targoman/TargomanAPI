@@ -235,6 +235,16 @@
 #define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint32(v), __VA_ARGS__)
 #define SF_quint64(_name, ...)          INTERNAL_SF(quint64,                _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint64(v), __VA_ARGS__)
 #define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint64(v), __VA_ARGS__)
+
+#define SF_qint8(_name, ...)            INTERNAL_SF(qint8,                  _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int8(v),   __VA_ARGS__)
+#define SF_NULLABLE_qint8(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qint8),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int8(v),   __VA_ARGS__)
+#define SF_qint16(_name, ...)           INTERNAL_SF(qint16,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int16(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint16(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint16),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int16(v),  __VA_ARGS__)
+#define SF_qint32(_name, ...)           INTERNAL_SF(qint32,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int32(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint32(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint32),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int32(v),  __VA_ARGS__)
+#define SF_qint64(_name, ...)           INTERNAL_SF(qint64,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int64(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint64(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint64),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int64(v),  __VA_ARGS__)
+
 #define SF_qreal(_name, ...)            INTERNAL_SF(qreal,                  _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2DBL(v),    __VA_ARGS__)
 #define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qreal),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2DBL(v),    __VA_ARGS__)
 

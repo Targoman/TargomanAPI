@@ -35,7 +35,7 @@ namespace Targoman::API::AdvertModule::ORM {
 QVariant IMPL_ORMGET(ActiveAds) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //    return query.one();
 
@@ -45,7 +45,7 @@ QVariant IMPL_ORMGET(ActiveAds) {
 bool IMPL_ORMDELETE(ActiveAds) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 ActiveAds::ActiveAds() :

@@ -79,7 +79,7 @@ PaymentGateways::PaymentGateways() :
 
 QVariant IMPL_ORMGET(PaymentGateways) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint32 IMPL_ORMCREATE(PaymentGateways) {
@@ -88,17 +88,17 @@ quint32 IMPL_ORMCREATE(PaymentGateways) {
     if (_createInfo.contains(tblPaymentGateways::pgwAllowedDomainName))
         _createInfo[tblPaymentGateways::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::pgwAllowedDomainName].toString());
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(PaymentGateways) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(PaymentGateways) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (

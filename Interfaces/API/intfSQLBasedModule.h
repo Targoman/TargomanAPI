@@ -56,21 +56,21 @@ public:
 private:
     QVariantMap SelectOne(
             clsTable& _table,
-            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            GET_METHOD_ARGS_DECL_INTERNAL_USER,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     QVariantList SelectAll(
             clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+            GET_METHOD_ARGS_IMPL_INTERNAL_USER,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     TAPI::stuTable SelectAllWithCount(
             clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+            GET_METHOD_ARGS_IMPL_INTERNAL_USER,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
@@ -79,13 +79,13 @@ private:
 public:
     QVariant Select(
             clsTable& _table,
-            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            GET_METHOD_ARGS_DECL_INTERNAL_USER,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     QVariant Select(
-            GET_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            GET_METHOD_ARGS_DECL_INTERNAL_USER,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
@@ -93,57 +93,57 @@ public:
 
     quint64 Create(
             clsTable& _table,
-            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL
+            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
         );
     quint64 Create(
-            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL
+            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
         );
     quint64 Create(
             clsTable& _table,
-            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM
+            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
         );
     quint64 Create(
-            CREATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM
+            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
         );
 
     bool Update(
             clsTable& _table,
-            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
             const QVariantMap& _extraFilters = {}
         );
     bool Update(
-            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
             const QVariantMap& _extraFilters = {}
         );
     bool Update(
             clsTable& _table,
-            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {}
         );
     bool Update(
-            UPDATE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {}
         );
 
     bool DeleteByPks(
             clsTable& _table,
-            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
     bool DeleteByPks(
-            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL,
+            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
     bool DeleteByPks(
             clsTable& _table,
-            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
     bool DeleteByPks(
-            DELETE_METHOD_ARGS_HEAD_INTERNAL_CALL_BOOM,
+            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {},
             bool _realDelete = false
         );
