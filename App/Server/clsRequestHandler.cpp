@@ -386,6 +386,7 @@ QString clsRequestHandler::host() const
 
     return Host;
 }
+
 quint16 clsRequestHandler::port() const
 {
     const qhttp::THeaderHash headers = this->Request->headers();
@@ -401,75 +402,8 @@ quint16 clsRequestHandler::port() const
 
     return Host.mid(idx+1).toUInt();
 }
-/*
-bool clsRequestHandler::callStaticAPI(QString _api) {
-    if (_api == "/openAPI.json") {
-        gServerStats.Success.inc();
-        this->sendResponseBase(
-                    qhttp::ESTATUS_OK,
-                    OpenAPIGenerator::retrieveJson(this->host(), this->port()));
-        return true;
-    }
 
-    if (_api == "/openAPI.yaml")
-        throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
-
-    _api.replace(QRegularExpression("//+"), "/");
-
-    if (_api.toLower().startsWith("/swaggerui")) {
-        if (ServerConfigs::SwaggerUI.value().isEmpty()) {
-            this->sendError(qhttp::ESTATUS_NOT_FOUND, "Swagger is not configured");
-            return true;
-        }
-
-        QString File = _api.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
-        if (File.isEmpty()) {
-            this->redirect(_api + "/");
-            return true;
-        }
-
-        if (File == "/")
-            File = "index.html";
-
-        this->sendFile(ServerConfigs::SwaggerUI.value(), File);
-        return true;
-    }
-
-    QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
-
-    if (_api == "/stats.json") {
-        gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, gServerStats.toJson(Queries.contains("full=true")));
-        return true;
-    }
-
-    if (_api == "/version") {
-        gServerStats.Success.inc();
-        QJsonObject Version;
-        Version.insert("version", TARGOMAN_M2STR(PROJ_VERSION));
-#ifdef GIT_VERSION
-        Version.insert("git-version", TARGOMAN_M2STR(GIT_VERSION));
-#endif
-        this->sendResponseBase(qhttp::ESTATUS_OK, Version);
-        return true;
-    }
-
-    if (_api == "/ping") {
-        gServerStats.Success.inc();
-        this->sendResponseBase(qhttp::ESTATUS_OK, QJsonObject({
-                                                                  { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
-                                                              }));
-        return true;
-    }
-
-    return false;
-}
-*/
 void clsRequestHandler::findAndCallAPI(QString _api) {
-//    if (this->callStaticAPI(_api))
-//        return;
-
-    //-----------------------------------------------------
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
 
     QString ExtraAPIPath;
