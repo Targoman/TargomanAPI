@@ -501,8 +501,9 @@ public:
     SelectQuery& addUnionAll(SelectQuery& _query);
     SelectQuery& addUnionDistinct(SelectQuery& _query);
 
-    SelectQuery& offset(quint64 _offset); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-    SelectQuery& limit(quint16 _limit); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    SelectQuery& pageIndex(quint16 _pageIndex); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    SelectQuery& pageSize(quint16 _pageSize); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+
     SelectQuery& setCacheTime(quint16 _cacheTime);
     void clearCache(QVariantMap _args = {});
 
@@ -525,8 +526,8 @@ public:
             return {};
         }
     }
-    QVariantList all(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
-    TAPI::stuTable allWithCount(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);
+    QVariantList all(QVariantMap _args = {}); //, quint16 _maxCount = 20, quint64 _from = 0);
+    TAPI::stuTable allWithCount(QVariantMap _args = {}); //, quint16 _maxCount = 20, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});
 
 //    QVariant execute(QVariantMap _args = {}, quint16 _maxCount = 20, quint64 _from = 0);

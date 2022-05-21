@@ -2291,13 +2291,14 @@ public:
 //    }
 
 public:
-    QList<clsColSpecs>   RequiredCols;
-    QList<stuOrderBy>    OrderByCols;
-    QList<stuUnion>      UnionParts;
+    QList<clsColSpecs>  RequiredCols;
+    QList<stuOrderBy>   OrderByCols;
+    QList<stuUnion>     UnionParts;
 
-    quint64              Offset = 0;
-    quint16              Limit = 0;
-    quint16              CahceTime = 0;
+    quint16             PageIndex = 0;
+    quint16             PageSize = 20;
+
+    quint16             CahceTime = 0;
 
     stuSelectQueryPreparedItems SelectQueryPreparedItems;
 };
@@ -2437,14 +2438,14 @@ SelectQuery& SelectQuery::addUnionDistinct(SelectQuery& _query) {
 |* Other               *|
 \***********************/
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-SelectQuery& SelectQuery::offset(quint64 _offset) {
-    this->Data->Offset = _offset;
+SelectQuery& SelectQuery::pageIndex(quint16 _pageIndex) {
+    this->Data->PageIndex = _pageIndex;
     return *this;
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-SelectQuery& SelectQuery::limit(quint16 _limit) {
-    this->Data->Limit = _limit;
+SelectQuery& SelectQuery::pageSize(quint16 _pageSize) {
+    this->Data->PageSize = _pageSize;
     return *this;
 }
 
@@ -2507,14 +2508,14 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     this->JoinTraitData->prepare();
 
     //push
-    quint64 offset = this->Data->Offset;
-    quint16 limit = this->Data->Limit;
+    quint16 PageIndex = this->Data->PageIndex;
+    quint16 PageSize = this->Data->PageSize;
 
     if (_reportCount) {
-        this->Data->Offset = 0;
-        this->Data->Limit = 0;
+        this->Data->PageIndex = 0;
+        this->Data->PageSize = 0;
     } else if (_selectOne)
-        this->Data->Limit = 1;
+        this->Data->PageSize = 1;
 
     QStringList QueryParts;
 
@@ -2601,15 +2602,15 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     //-----------
     if (_reportCount == false) {
         if (this->WhereTraitData->PksByPath.isEmpty()) {
-            if ((this->Data->Offset > 0) || (this->Data->Limit > 0)) {
+            if ((this->Data->PageIndex > 0) || (this->Data->PageSize > 0)) {
                 QString sLimit;
-                if (this->Data->Offset > 0) {
-                    if (this->Data->Limit > 0)
-                        sLimit = QString("%1,%2").arg(this->Data->Offset).arg(this->Data->Limit);
-                    else
-                        sLimit = QString("%1").arg(this->Data->Offset);
-                } else //limit > 0
-                    sLimit = QString("0,%1").arg(this->Data->Limit);
+//                if (this->Data->PageIndex > 0) {
+//                    if (this->Data->PageSize > 0)
+                        sLimit = QString("%1,%2").arg(this->Data->PageIndex * this->Data->PageSize).arg(this->Data->PageSize);
+//                    else
+//                        sLimit = QString("%1").arg(this->Data->PageIndex);
+//                } else //limit > 0
+//                    sLimit = QString("0,%1").arg(this->Data->PageSize);
 
                 if (SQLPrettyLen) {
                     QueryParts.append(QString("LIMIT").rightJustified(SQLPrettyLen)
@@ -2669,8 +2670,8 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
 
     //-----------
     //pull
-    this->Data->Offset = offset;
-    this->Data->Limit = limit;
+    this->Data->PageIndex = PageIndex;
+    this->Data->PageSize = PageSize;
 
     return QueryString;
 }
@@ -2747,10 +2748,7 @@ QVariantMap SelectQuery::tryOne(QVariantMap _args) {
 //    }
 //}
 
-QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _from) {
-    this->Data->Offset = _from;
-    this->Data->Limit = _maxCount;
-
+QVariantList SelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
     QString QueryString = this->buildQueryString(_args, false, false, true);
 
 #ifdef QT_DEBUG
@@ -2776,10 +2774,7 @@ QVariantList SelectQuery::all(QVariantMap _args, quint16 _maxCount, quint64 _fro
     return Result.toVariant().toList();
 }
 
-TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, quint64 _from) {
-    this->Data->Offset = _from;
-    this->Data->Limit = _maxCount;
-
+TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
     QString QueryString = this->buildQueryString(_args, false, false, true);
     QString CountingQueryString = this->buildQueryString(_args, false, true, true);
 
@@ -2809,6 +2804,7 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
     }
 
     TAPI::stuTable Result;
+
     Result.TotalRows = ResultTotalRows
                        .toVariant()
                        .toMap()["cnt"]
@@ -2817,7 +2813,8 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args, quint16 _maxCount, q
                   .toVariant()
                   .toList();
 
-//    qDebug() << "--- SelectQuery::allWithCount()" << __FILE__ << __LINE__ << "Rows: " << Result.Rows << "Rows Count: " << Result.TotalRows;
+    Result.PageCount = ceil((double)Result.TotalRows / this->Data->PageSize);
+    Result.HasMore = (Result.PageCount > (this->Data->PageIndex + 1));
 
     return Result;
 }

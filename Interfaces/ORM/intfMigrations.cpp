@@ -41,6 +41,7 @@ intfMigrations::intfMigrations(
         {///< ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
             { tblMigrations::migName,       S(QString),         QFV,        QNull,   UPNone },
             { tblMigrations::migAppliedAt,  S(TAPI::DateTime_t),QFV,        QNull,   UPNone },
+            { tblMigrations::migRunType,    S(QString),         QFV,        QNull,   UPNone },
             { tblMigrations::migStatus,     S(QString),         QFV,        QNull,   UPNone },
         }
     ) { ; }
@@ -48,6 +49,8 @@ intfMigrations::intfMigrations(
 QVariant IMPL_ANONYMOUSE_ORMGET(intfMigrations) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->ModuleName + ":Migrations:CRUD~0100" });
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+
+    _orderBy = QStringLiteral("migName, migAppliedAt");
 
     return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
