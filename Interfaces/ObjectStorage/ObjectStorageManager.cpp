@@ -301,7 +301,9 @@ bool ObjectStorageManager::processQueue(
     QVariantList QueueItems;
 
     try {
-        QueueItems = Query.all({}, _processQueueParams.MaxItemsCount);
+        QueueItems = Query.pageSize(_processQueueParams.MaxItemsCount)
+                          .all();
+
     } catch (std::exception &exp) {
         TargomanDebug(5, "ERROR: fetching upload queue items:" << exp.what());
     }

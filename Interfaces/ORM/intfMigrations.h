@@ -36,6 +36,7 @@ namespace tblMigrations {
 
     TARGOMAN_CREATE_CONSTEXPR(migName);
     TARGOMAN_CREATE_CONSTEXPR(migAppliedAt);
+    TARGOMAN_CREATE_CONSTEXPR(migRunType);
     TARGOMAN_CREATE_CONSTEXPR(migStatus);
 }
 

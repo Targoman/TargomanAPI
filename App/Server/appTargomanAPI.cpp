@@ -55,8 +55,9 @@ appTargomanAPI::appTargomanAPI(QObject *parent) : QObject(parent) { ; }
 
 void appTargomanAPI::slotExecute() {
     try {
-        ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(Helpers::SecurityHelper::UUIDtoMD5()));
-        TargomanDebug(0, "Instance-ID: " << ServerCommonConfigs::InstanceID.value())
+//        ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(Helpers::SecurityHelper::UUIDtoMD5()));
+        ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(QSysInfo::machineHostName()));
+        TargomanDebug(0) << "Instance-ID: " << ServerCommonConfigs::InstanceID.value();
 
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
@@ -147,7 +148,7 @@ void appTargomanAPI::slotExecute() {
 
         RESTAPIRegistry::dumpAPIs();
 
-        TargomanDebug(5) << ">>>>>" << "Server ready." << "(version:" << TARGOMAN_M2STR(PROJ_VERSION) << ")" << "<<<<<";
+        TargomanDebug(5).nospace() .noquote() << ">>>>>" << " [" << ServerCommonConfigs::InstanceID.value() << "] Server ready." << " (version: " << TARGOMAN_M2STR(PROJ_VERSION) << ")" << " <<<<<";
 
     } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());

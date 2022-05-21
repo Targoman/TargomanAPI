@@ -92,8 +92,8 @@ QVariantMap intfSQLBasedModule::SelectOne(
         .groupBy(_groupBy)
         .addFilters(_filters)
         .andWhere(_extraFilters)
-        .offset(_pageIndex * _pageSize)
-        .limit(_pageSize)
+        .pageIndex(_pageIndex)
+        .pageSize(_pageSize)
         .setCacheTime(_cacheTime)
     ;
 
@@ -128,8 +128,8 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     SelectQuery Query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
-        .offset(_pageIndex * _pageSize)
-        .limit(_pageSize)
+        .pageIndex(_pageIndex)
+        .pageSize(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
@@ -169,8 +169,8 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     SelectQuery Query = SelectQuery(_table)
         .setPksByPath(_pksByPath)
-        .offset(_pageIndex * _pageSize)
-        .limit(_pageSize)
+        .pageIndex(_pageIndex)
+        .pageSize(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)

@@ -786,8 +786,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
-                .offset(20)
-                .limit(100)
+                .pageIndex(20)
+                .pageSize(100)
             ;
 
             QString qry = query.buildQueryString({}, true, false, true);
@@ -812,7 +812,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    )
           ORDER BY colA1
                  , colB1 DESC
-             LIMIT 20,1
+             LIMIT 2000,100
 )");
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -844,8 +844,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
-                .offset(20)
-                .limit(100)
+                .pageIndex(20)
+                .pageSize(100)
             ;
 
             QString qry = query.buildQueryString({}, false, true, true);
@@ -904,8 +904,8 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                         .orCond({ "alias_colB1", enuConditionOperator::Equal, 106 })
                     )
                 )
-                .offset(20)
-                .limit(100)
+                .pageIndex(20)
+                .pageSize(100)
                 .addUnionAll(
                     SelectQuery(t2)
                     .addCol("colA2")
@@ -934,7 +934,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                    )
           ORDER BY colA1
                  , colB1 DESC
-             LIMIT 20,1
+             LIMIT 2000,100
          UNION ALL
             SELECT t2.colA2
               FROM test.t2
