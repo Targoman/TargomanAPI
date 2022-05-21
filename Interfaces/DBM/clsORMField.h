@@ -183,6 +183,16 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME          "StatusFieldName"
 #define ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME   "InvalidatedAtFieldName"
 
+// used for TAPI_DEFINE_VARIANT_ENABLED_STRUCT
+#define SF_ORM_PRIMARYKEY_32(_name)           SF_quint32(_name)
+#define SF_ORM_PRIMARYKEY_64(_name)           SF_quint64(_name)
+#define SF_ORM_CREATED_ON(_name)              SF_DateTime_t(_name)
+#define SF_ORM_CREATED_BY(_name)              SF_quint64(_name)
+#define SF_ORM_CREATED_BY_NULLABLE(_name)     SF_NULLABLE_quint64(_name)
+#define SF_ORM_UPDATED_ON(_name)              SF_DateTime_t(_name)
+#define SF_ORM_UPDATED_BY(_name)              SF_NULLABLE_quint64(_name)
+#define SF_ORM_STATUS_FIELD(_name, T, Def)    SF_Enum(T, _name, Def)
+
 } //namespace DBM
 } //namespace Targoman::API
 

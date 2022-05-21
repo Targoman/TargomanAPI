@@ -74,7 +74,7 @@ intfSQLBasedModule::intfSQLBasedModule(
 
 QVariantMap intfSQLBasedModule::SelectOne(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -117,7 +117,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 QVariantList intfSQLBasedModule::SelectAll(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -158,7 +158,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -199,7 +199,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
 QVariant intfSQLBasedModule::Select(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -208,7 +208,7 @@ QVariant intfSQLBasedModule::Select(
         if (_reportCount)
             return this->SelectAllWithCount(
                         _table,
-                        GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
+                        GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                         _extraFilters,
                         _cacheTime,
                         _lambda_TouchQuery
@@ -218,7 +218,7 @@ QVariant intfSQLBasedModule::Select(
 
         return this->SelectAll(
                     _table,
-                    GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
+                    GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                     _extraFilters,
                     _cacheTime,
                     _lambda_TouchQuery
@@ -227,7 +227,7 @@ QVariant intfSQLBasedModule::Select(
 
     return this->SelectOne(
                 _table,
-                GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
+                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
                 _lambda_TouchQuery
@@ -235,14 +235,14 @@ QVariant intfSQLBasedModule::Select(
 }
 
 QVariant intfSQLBasedModule::Select(
-    GET_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
 ) {
     return this->Select(
                 *this,
-                GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM_RAW,
+                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
                 _lambda_TouchQuery
@@ -251,7 +251,7 @@ QVariant intfSQLBasedModule::Select(
 
 quint64 intfSQLBasedModule::Create(
     clsTable& _table,
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
 ) {
     _table.prepareFiltersList();
 
@@ -266,36 +266,36 @@ quint64 intfSQLBasedModule::Create(
 }
 
 quint64 intfSQLBasedModule::Create(
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
 ) {
     return this->Create(
                 *this,
-                CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER
+                CREATE_METHOD_ARGS_CALL_INTERNAL_USER
                 );
 }
 
 quint64 intfSQLBasedModule::Create(
     clsTable& _table,
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
     return this->Create(
         _table,
-        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER
+        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER
     );
 }
 
 quint64 intfSQLBasedModule::Create(
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
     return this->Create(
         *this,
-        CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER
+        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER
     );
 }
 
 bool intfSQLBasedModule::Update(
     clsTable& _table,
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
     const QVariantMap& _extraFilters
 ) {
     _table.prepareFiltersList();
@@ -330,42 +330,42 @@ bool intfSQLBasedModule::Update(
 }
 
 bool intfSQLBasedModule::Update(
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
     const QVariantMap& _extraFilters
 ) {
     return this->Update(
                 *this,
-                UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_USER,
+                UPDATE_METHOD_ARGS_CALL_INTERNAL_USER,
                 _extraFilters
                 );
 }
 
 bool intfSQLBasedModule::Update(
     clsTable& _table,
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
     return this->Update(
         _table,
-        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
         _extraFilters
     );
 }
 
 bool intfSQLBasedModule::Update(
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
     return this->Update(
         *this,
-        UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
         _extraFilters
     );
 }
 
 bool intfSQLBasedModule::DeleteByPks(
     clsTable& _table,
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
@@ -403,13 +403,13 @@ bool intfSQLBasedModule::DeleteByPks(
 }
 
 bool intfSQLBasedModule::DeleteByPks(
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
     return this->DeleteByPks(
         *this,
-        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_USER,
+        DELETE_METHOD_ARGS_CALL_INTERNAL_USER,
         _extraFilters,
         _realDelete
         );
@@ -417,26 +417,26 @@ bool intfSQLBasedModule::DeleteByPks(
 
 bool intfSQLBasedModule::DeleteByPks(
     clsTable& _table,
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
     return this->DeleteByPks(
         _table,
-        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
         _extraFilters,
         _realDelete
     );
 }
 
 bool intfSQLBasedModule::DeleteByPks(
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL_BOOM,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
     return this->DeleteByPks(
         *this,
-        DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER,
+        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
         _extraFilters,
         _realDelete
         );

@@ -37,30 +37,97 @@ TARGOMAN_DEFINE_ENUM(enuUserWalletStatus,
                      Deactive = 'P',
                      Removed  = 'R'
                      )
+} //namespace Targoman::API::AccountModule
 
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
+
+namespace Targoman::API::AccountModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblUserWallets{
-constexpr char Name[] = "tblUserWallets";
-TARGOMAN_CREATE_CONSTEXPR(walID);
-TARGOMAN_CREATE_CONSTEXPR(wal_usrID);
-TARGOMAN_CREATE_CONSTEXPR(walName);
-TARGOMAN_CREATE_CONSTEXPR(walDefault);
-TARGOMAN_CREATE_CONSTEXPR(walMinBalance);
-TARGOMAN_CREATE_CONSTEXPR(walNotTransferableAmount);
-TARGOMAN_CREATE_CONSTEXPR(walMaxTransferPerDay);
-TARGOMAN_CREATE_CONSTEXPR(walBalance);
-TARGOMAN_CREATE_CONSTEXPR(walSumIncome);
-TARGOMAN_CREATE_CONSTEXPR(walSumExpense);
-TARGOMAN_CREATE_CONSTEXPR(walSumCredit);
-TARGOMAN_CREATE_CONSTEXPR(walSumDebit);
-TARGOMAN_CREATE_CONSTEXPR(walCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(walCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(walUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(walStatus);
-}
+namespace tblUserWallets {
+
+    constexpr char Name[] = "tblUserWallets";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(walID);
+        TARGOMAN_CREATE_CONSTEXPR(wal_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(walName);
+        TARGOMAN_CREATE_CONSTEXPR(walDefault);
+        TARGOMAN_CREATE_CONSTEXPR(walMinBalance);
+        TARGOMAN_CREATE_CONSTEXPR(walNotTransferableAmount);
+        TARGOMAN_CREATE_CONSTEXPR(walMaxTransferPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(walBalance);
+        TARGOMAN_CREATE_CONSTEXPR(walSumIncome);
+        TARGOMAN_CREATE_CONSTEXPR(walSumExpense);
+        TARGOMAN_CREATE_CONSTEXPR(walSumCredit);
+        TARGOMAN_CREATE_CONSTEXPR(walSumDebit);
+        TARGOMAN_CREATE_CONSTEXPR(walCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(walCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(walUpdatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(walStatus);
+    } //namespace Fields
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                           Type                        Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
+            { Fields::walID,                    ORM_PRIMARYKEY_64 },
+            { Fields::wal_usrID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
+            { Fields::walName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner },
+            { Fields::walDefault,               S(bool),                    QFV,                                false,      UPOwner },
+            { Fields::walMinBalance,            S(qint64),                  QFV,                                0,          UPAdmin, false, false },
+            { Fields::walNotTransferableAmount, S(qint64),                  QFV,                                0,          UPAdmin, false, false },
+            { Fields::walMaxTransferPerDay,     S(qint64),                  QFV,                                10000000,   UPAdmin, false, false },
+            { Fields::walBalance,               S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumIncome,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumExpense,            S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumCredit,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumDebit,              S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::walCreationDateTime,      ORM_CREATED_ON },
+            { Fields::walCreatedBy_usrID,       ORM_CREATED_BY },
+            { Fields::walUpdatedBy_usrID,       ORM_UPDATED_BY },
+        };
+
+        const QList<stuRelation> Relations = {
+            //Col                   Reference Table                 ForeignCol     Rename   LeftJoin
+            { Fields::wal_usrID,    R(AAASchema, tblUser::Name),    tblUser::usrID },
+            ORM_RELATION_OF_CREATOR(Fields::walCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(Fields::walUpdatedBy_usrID),
+        };
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                Fields::wal_usrID,
+                Fields::walName,
+                ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64(walID),
+        SF_quint64          (wal_usrID),
+        SF_QString          (walName),
+        SF_bool             (walDefault),
+        SF_qint64           (walMinBalance),
+        SF_qint64           (walNotTransferableAmount),
+        SF_qint64           (walMaxTransferPerDay),
+        SF_qint64           (walBalance),
+        SF_qint64           (walSumIncome),
+        SF_qint64           (walSumExpense),
+        SF_qint64           (walSumCredit),
+        SF_qint64           (walSumDebit),
+        SF_ORM_STATUS_FIELD (walStatus, Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active),
+        SF_ORM_CREATED_ON   (walCreationDateTime),
+        SF_ORM_CREATED_BY   (walCreatedBy_usrID),
+        SF_ORM_UPDATED_BY   (walUpdatedBy_usrID)
+    );
+
+} //namespace tblUserWallets
 #pragma GCC diagnostic pop
 
 class UserWallets : public intfSQLBasedModule
@@ -158,7 +225,5 @@ private slots:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H

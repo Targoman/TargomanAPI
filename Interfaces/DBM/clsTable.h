@@ -40,8 +40,8 @@ class clsTable;
 }
 
 //namespace Query {
-//extern bool Update(Targoman::API::DBM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-//extern bool DeleteByPks(Targoman::API::DBM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+//extern bool Update(Targoman::API::DBM::clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER, const QVariantMap& _extraFilters);
+//extern bool DeleteByPks(Targoman::API::DBM::clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_USER, const QVariantMap& _extraFilters, bool _realDelete);
 //}
 
 namespace DBM {
@@ -242,8 +242,8 @@ protected:
 
     friend testQueryBuilders;
 
-//    friend bool this->Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters);
-//    friend bool this->DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_CALL, const QVariantMap& _extraFilters, bool _realDelete);
+//    friend bool this->Update(clsTable& _table, UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER, const QVariantMap& _extraFilters);
+//    friend bool this->DeleteByPks(clsTable& _table, DELETE_METHOD_ARGS_IMPL_INTERNAL_USER, const QVariantMap& _extraFilters, bool _realDelete);
 };
 
 } //namespace DBM

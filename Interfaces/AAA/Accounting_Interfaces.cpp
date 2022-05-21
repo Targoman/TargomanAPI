@@ -187,10 +187,10 @@ namespace Targoman::API::AAA {
 //constexpr char PKG_LIMITS[] = "LM";
 //constexpr char PKG_PROPS[] = "PP";
 
-constexpr char ASA_PACKAGE[] = "PK";
-constexpr char ASA_ISFROMPARENT[] = "IP";
-constexpr char ASA_TTL[] = "TT";
-constexpr char ASA_LIMITSONPARENT[] = "LP";
+//constexpr char ASA_PACKAGE[] = "PK";
+//constexpr char ASA_ISFROMPARENT[] = "IP";
+//constexpr char ASA_TTL[] = "TT";
+//constexpr char ASA_LIMITSONPARENT[] = "LP";
 
 /******************************************************************/
 intfAccountProducts::intfAccountProducts(
@@ -249,25 +249,25 @@ QVariant IMPL_ORMGET(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, {}, CACHE_TIME);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(intfAccountProducts) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 /******************************************************************/
@@ -344,25 +344,25 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
             );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM, ExtraFilters, CACHE_TIME);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(intfAccountSaleables) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 /******************************************************************/
@@ -420,7 +420,7 @@ QVariant IMPL_ORMGET(intfAccountUserAssets) {
   if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID() }}, _filters);
 
-  return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
@@ -484,7 +484,7 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -539,7 +539,7 @@ intfAccountCoupons::intfAccountCoupons(
 QVariant IMPL_ORMGET(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //  return query.one();
 
@@ -549,19 +549,19 @@ QVariant IMPL_ORMGET(intfAccountCoupons) {
 quint32 IMPL_ORMCREATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 /******************************************************************/
@@ -581,7 +581,7 @@ intfAccountPrizes::intfAccountPrizes(
 QVariant IMPL_ORMGET(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //  return query.one();
 
@@ -591,19 +591,19 @@ QVariant IMPL_ORMGET(intfAccountPrizes) {
 quint32 IMPL_ORMCREATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 //} //namespace Targoman::API::AAA {
@@ -613,38 +613,38 @@ bool IMPL_ORMDELETE(intfAccountPrizes) {
 
 //using namespace Targoman::API::AAA;
 
-stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
-  Credit(_credit),
-  IsFromParent(_isFromParent),
-  MyLimitsOnParent(_myLimitsOnParent),
-  TTL(_ttl) { ; }
+//stuActiveCredit::stuActiveCredit(const stuAssetItem& _credit, bool _isFromParent, const UsageLimits_t& _myLimitsOnParent, qint64 _ttl) :
+//  Credit(_credit),
+//  IsFromParent(_isFromParent),
+//  MyLimitsOnParent(_myLimitsOnParent),
+//  TTL(_ttl) { ; }
 
-QJsonObject stuActiveCredit::toJson(bool _full) {
-  QJsonObject Account = {
-    { ASA_PACKAGE, this->Credit.toJson(_full) },
-    { ASA_TTL, static_cast<double>(this->TTL) },
-  };
-  if (this->IsFromParent)
-    Account.insert(ASA_ISFROMPARENT, true);
-  for (auto LimitIter = this->MyLimitsOnParent.begin();
-      LimitIter != this->MyLimitsOnParent.end();
-      LimitIter++)
-    Account.insert(LimitIter.key(), LimitIter->toJson());
-  return Account;
-}
+//QJsonObject stuActiveCredit::toJson(bool _full) {
+//  QJsonObject Account = {
+//    { ASA_PACKAGE, this->Credit.toJson(_full) },
+//    { ASA_TTL, static_cast<double>(this->TTL) },
+//  };
+//  if (this->IsFromParent)
+//    Account.insert(ASA_ISFROMPARENT, true);
+//  for (auto LimitIter = this->MyLimitsOnParent.begin();
+//      LimitIter != this->MyLimitsOnParent.end();
+//      LimitIter++)
+//    Account.insert(LimitIter.key(), LimitIter->toJson());
+//  return Account;
+//}
 
-stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj) {
-  this->Credit = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
-  this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
-  this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
-  QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
-  for (auto LimitIter = Limits.begin();
-      LimitIter != Limits.end();
-      LimitIter++)
-    this->MyLimitsOnParent.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
+//stuActiveCredit& stuActiveCredit::fromJson(const QJsonObject _obj) {
+//  this->Credit = stuAssetItem().fromJson(_obj.value(ASA_PACKAGE).toObject());
+//  this->IsFromParent  = _obj.value(ASA_ISFROMPARENT).toBool();
+//  this->TTL = static_cast<qint64>(_obj.value(ASA_TTL).toDouble());
+//  QJsonObject Limits = _obj.value(ASA_LIMITSONPARENT).toObject();
+//  for (auto LimitIter = Limits.begin();
+//      LimitIter != Limits.end();
+//      LimitIter++)
+//    this->MyLimitsOnParent.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
 
-  return *this;
-}
+//  return *this;
+//}
 
 /******************************************************************/
 stuServiceCreditsInfo::stuServiceCreditsInfo(
@@ -659,9 +659,9 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     MyLimitsOnParent(_myLimitsOnParent),
     DBCurrentDateTime(_dbCurrentDateTime) { ; }
 
-QJsonObject stuAssetItem::toJson(bool _full) {
-    ///TODO: very important: Complete this
-  QJsonObject Info;
+//QJsonObject stuAssetItem::toJson(bool _full) {
+//    ///TODO: very important: Complete this
+//  QJsonObject Info;
 /*
   if (this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
   if (this->PackageCode > -1)    Info[PKG_CODE] = this->PackageCode;
@@ -680,30 +680,31 @@ QJsonObject stuAssetItem::toJson(bool _full) {
       Limits.insert(LimitIter.key(), LimitIter->toJson());
     Info[PKG_LIMITS] = Limits;
   }*/
-  return Info;
-}
+//  return Info;
+//}
 
-stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj) {
-    ///TODO: very important: Complete this
-    /*
-  this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
-  this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
-  this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
-  this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
-  this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
-  this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
-  this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
-  this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
-  this->Properties = _obj.value(PKG_PROPS).toObject();
-  QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
-  for (auto LimitIter = Limits.begin();
-      LimitIter != Limits.end();
-      LimitIter++)
-    this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
-    */
-  return *this;
-}
+//stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj) {
+//    ///TODO: very important: Complete this
+//  return *this;
+/*
+this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);
+this->PackageCode = _obj.contains(PKG_CODE) ? _obj.value(PKG_CODE).toString() : QString();
+this->RemainingDays = static_cast<qint32>(_obj.contains(PKG_REMAININGDAYS) ? _obj.value(PKG_REMAININGDAYS).toInt() : -1);
+this->RemainingHours = static_cast<qint8>(_obj.contains(PKG_REMAININGHOURS) ? _obj.value(PKG_REMAININGHOURS).toInt() : -1);
+this->StartDate = _obj.contains(PKG_STARTDATE) ? QDate::fromString(_obj.value(PKG_STARTDATE).toString()) : QDate();
+this->EndDate = _obj.contains(PKG_ENDDATE) ? QDate::fromString(_obj.value(PKG_ENDDATE).toString()) : QDate();
+this->StartTime = _obj.contains(PKG_STARTTIME) ? QTime::fromString(_obj.value(PKG_STARTTIME).toString()) : QTime();
+this->EndTime = _obj.contains(PKG_ENDTIME) ? QTime::fromString(_obj.value(PKG_ENDTIME).toString()) : QTime();
+this->Properties = _obj.value(PKG_PROPS).toObject();
+QJsonObject Limits = _obj.value(PKG_LIMITS).toObject();
+for (auto LimitIter = Limits.begin();
+   LimitIter != Limits.end();
+   LimitIter++)
+ this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
+ */
+ //}
 
+/*
 void stuAssetItem::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->prdID,                  _info, tblAccountProductsBase,  prdID);
     SET_FIELD_FROM_VARIANT_MAP(this->prdCode,                _info, tblAccountProductsBase,  prdCode);
@@ -733,6 +734,7 @@ void stuAssetItem::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->slbVoucherTemplate,     _info, tblAccountSaleablesBase, slbVoucherTemplate);
     SET_FIELD_FROM_VARIANT_MAP(this->slbStatus,              _info, tblAccountSaleablesBase, slbStatus);
 }
+*/
 
 void stuFullDiscount::fromVariantMap(const QVariantMap& _info) {
     SET_FIELD_FROM_VARIANT_MAP(this->cpnID,                         _info, tblAccountCouponsBase, cpnID);

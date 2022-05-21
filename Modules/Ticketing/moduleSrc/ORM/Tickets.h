@@ -80,7 +80,7 @@ private slots:
     QVariant REST_GET(
         ,
         (
-//            GET_METHOD_ARGS_HEADER_APICALL,
+//            GET_METHOD_ARGS_DECL_APICALL,
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath = {},
             quint64 _pageIndex = 0,

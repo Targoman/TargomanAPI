@@ -36,72 +36,44 @@ UserWallets::UserWallets() :
     intfSQLBasedModule(
         AAASchema,
         tblUserWallets::Name,
-        {///<ColName                                    Type                        Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
-            { tblUserWallets::walID,                    ORM_PRIMARYKEY_64 },
-            { tblUserWallets::wal_usrID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
-            { tblUserWallets::walName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner },
-            { tblUserWallets::walDefault,               S(bool),                    QFV,                                false,      UPOwner },
-            { tblUserWallets::walMinBalance,            S(qint64),                  QFV,                                0,          UPAdmin, false, false },
-            { tblUserWallets::walNotTransferableAmount, S(qint64),                  QFV,                                0,          UPAdmin, false, false },
-            { tblUserWallets::walMaxTransferPerDay,     S(qint64),                  QFV,                                10000000,   UPAdmin, false, false },
-            { tblUserWallets::walBalance,           S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walSumIncome,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walSumExpense,           S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walSumCredit,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walSumDebit,              S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { tblUserWallets::walStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active) },
-            {  ORM_INVALIDATED_AT_FIELD },
-            { tblUserWallets::walCreationDateTime,      ORM_CREATED_ON },
-            { tblUserWallets::walCreatedBy_usrID,       ORM_CREATED_BY },
-            { tblUserWallets::walUpdatedBy_usrID,       ORM_UPDATED_BY },
-        },
-        {///< Col                        Reference Table             ForeignCol     Rename   LeftJoin
-            { tblUserWallets::wal_usrID, R(AAASchema,tblUser::Name), tblUser::usrID },
-            ORM_RELATION_OF_CREATOR(tblUserWallets::walCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblUserWallets::walUpdatedBy_usrID),
-        },
-        {
-            { {
-                tblUserWallets::wal_usrID,
-                tblUserWallets::walName,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
-    ) { ; }
+        tblUserWallets::Private::ORMFields,
+        tblUserWallets::Private::Relations,
+        tblUserWallets::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(UserWallets) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({ { tblUserWallets::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
+        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
 
-    return this->Select(*this, GET_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM);
+    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint64 IMPL_ORMCREATE(UserWallets) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
-        _createInfo.insert(tblUserWallets::walDefault, 0);
+        _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
-//        this->setSelfFilters({ { tblUserWallets::wal_usrID, _APICALLBOOM.getUserID() } }, _createInfo);
-        _createInfo.insert(tblUserWallets::wal_usrID, _APICALLBOOM.getUserID());
+//        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _createInfo);
+        _createInfo.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->Create(*this, CREATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMUPDATE(UserWallets) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
 bool IMPL_ORMDELETE(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
-        ExtraFilters.insert(tblUserWallets::walDefault, 0);
-        ExtraFilters.insert(tblUserWallets::wal_usrID, _APICALLBOOM.getUserID());
+        ExtraFilters.insert(tblUserWallets::Fields::walDefault, 0);
+        ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->DeleteByPks(*this, DELETE_METHOD_CALL_ARGS_INTERNAL_CALL_BOOM2USER, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
 }
 
 /**
