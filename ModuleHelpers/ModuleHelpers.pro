@@ -8,4 +8,4 @@
 ################################################################################
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
-#addSubdirs(NLP, Dependencies)
+addSubdirs(NLP, Dependencies)

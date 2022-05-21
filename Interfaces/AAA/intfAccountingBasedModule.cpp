@@ -150,28 +150,28 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
         for (auto UsageIter = _requestedUsage.begin();
             UsageIter != _requestedUsage.end();
             UsageIter++) {
-            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+            if (ActiveCredit.Digested_Limits.contains(UsageIter.key()) == false)
                 continue;
 
             if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
                 checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
 
-            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+            checkCredit(UsageIter, ActiveCredit.Digested_Limits.value(UsageIter.key()), "Parent");
         }
 
         return;
     }
 
-    if (this->isUnlimited(ActiveCredit.Digested.Limits))
+    if (this->isUnlimited(ActiveCredit.Digested_Limits))
         return;
 
     for (auto UsageIter = _requestedUsage.begin();
         UsageIter != _requestedUsage.end();
         UsageIter++) {
-        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
+        if (ActiveCredit.Digested_Limits.contains(UsageIter.key()) == false)
             continue;
 
-        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+        checkCredit(UsageIter, ActiveCredit.Digested_Limits.value(UsageIter.key()), "Self");
     }
 }
 
@@ -207,7 +207,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
                || (NULLABLE_HAS_VALUE(_assetItem.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
                || (NULLABLE_HAS_VALUE(_assetItem.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
-               || this->isEmpty(_assetItem.Digested.Limits)
+               || this->isEmpty(_assetItem.Digested_Limits)
             )
             return false;
 
@@ -215,11 +215,11 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
             for (auto UsageIter = _requestedUsage.begin();
                 UsageIter != _requestedUsage.end();
                 UsageIter++) {
-                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
+                if (_assetItem.Digested_Limits.contains(UsageIter.key()) == false)
                     continue;
 
-                if (this->isUnlimited(_assetItem.Digested.Limits) == false) {
-                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+                if (this->isUnlimited(_assetItem.Digested_Limits) == false) {
+                    stuUsage Remaining = _assetItem.Digested_Limits.value(UsageIter.key());
                     if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
                            || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
                            || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
@@ -241,8 +241,8 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
     auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
         if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
-        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
-        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
+        if (this->isUnlimited(a.Digested_Limits) && this->isUnlimited(b.Digested_Limits) == false) return -1;
+        if (this->isUnlimited(a.Digested_Limits) == false && this->isUnlimited(b.Digested_Limits)) return 1;
         if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_IS_NULL(b.prdValidToHour)) return -1;
         if (NULLABLE_IS_NULL(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) return 1;
         if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) {
@@ -327,47 +327,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         throw exHTTPBadRequest("invalid pre-Voucher owner");
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
-        .addCols(QStringList({
-            tblAccountSaleablesBase::slbID,
-            tblAccountSaleablesBase::slbCode,
-            //tblAccountSaleablesBase::slb_prdID,
-            tblAccountSaleablesBase::slbName,
-            //tblAccountSaleablesBase::slbDesc,
-            //tblAccountSaleablesBase::slbType,
-            tblAccountSaleablesBase::slbAvailableFromDate,
-            tblAccountSaleablesBase::slbAvailableToDate,
-            //tblAccountSaleablesBase::slbPrivs,
-            tblAccountSaleablesBase::slbBasePrice,
-            tblAccountSaleablesBase::slbAdditives,
-//            tblAccountSaleablesBase::slbProductCount,
-            tblAccountSaleablesBase::slbMaxSaleCountPerUser,
-            tblAccountSaleablesBase::slbInStockQty,
-            tblAccountSaleablesBase::slbOrderedQty,
-            tblAccountSaleablesBase::slbReturnedQty,
-            tblAccountSaleablesBase::slbVoucherTemplate,
-            tblAccountSaleablesBase::slbStatus,
-            //tblAccountSaleablesBase::slbCreatedBy_usrID,
-            //tblAccountSaleablesBase::slbCreationDateTime,
-            //tblAccountSaleablesBase::slbUpdatedBy_usrID,
-
-            tblAccountProductsBase::prdID,
-            tblAccountProductsBase::prdCode,
-            tblAccountProductsBase::prdName,
-            //tblAccountProductsBase::prdDesc,
-            tblAccountProductsBase::prdValidFromDate,
-            tblAccountProductsBase::prdValidToDate,
-            tblAccountProductsBase::prdValidFromHour,
-            tblAccountProductsBase::prdValidToHour,
-            //tblAccountProductsBase::prdPrivs,
-            tblAccountProductsBase::prdVAT,
-            tblAccountProductsBase::prdInStockQty,
-            tblAccountProductsBase::prdOrderedQty,
-            tblAccountProductsBase::prdReturnedQty,
-            tblAccountProductsBase::prdStatus,
-            //tblAccountProductsBase::prdCreatedBy_usrID,
-            //tblAccountProductsBase::prdCreationDateTime,
-            //tblAccountProductsBase::prdUpdatedBy_usrID,
-        }))
+        .addCols(tblAccountSaleablesBase::ColumnNames())
+        .addCols(tblAccountProductsBase::ColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .leftJoinWith("product")
         .where({ tblAccountSaleablesBase::slbCode, enuConditionOperator::Equal, _saleableCode })
@@ -381,7 +342,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     qDebug() << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
-    AssetItem.fromVariantMap(SaleableInfo);
+    AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
 
     //-- check available count --------------------------------
     qreal AvailableProductQty = AssetItem.prdInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedQty, 0));
@@ -411,7 +372,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
             }
         );
     }
-    AssetItem.Digested.Limits = SaleableUsageLimits;
+    AssetItem.Digested_Limits = SaleableUsageLimits;
 
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;

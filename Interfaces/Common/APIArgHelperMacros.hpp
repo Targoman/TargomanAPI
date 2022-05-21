@@ -136,12 +136,17 @@
 /************************************************************/
 #define TAPI_VALIDATION_REQUIRED_TYPE_IMPL(_complexity, _namespace, _type, _validationRule, _toVariant, ...) \
     TAPI_REGISTER_METATYPE( \
-        _complexity, _namespace, _type, \
-        [](const _namespace::_type& _value) -> QVariant {return _toVariant;}, \
+        _complexity, \
+        _namespace, \
+        _type, \
+        [](const _namespace::_type& _value) -> QVariant { return _toVariant; }, \
         [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_type { \
             static QFieldValidator Validator = QFieldValidator()._validationRule; \
-            if (Validator.isValid(_value, _paramName) == false) throw exHTTPBadRequest(Validator.errorMessage()); \
-            _namespace::_type Value; Value=_value.toString();  return  Value; \
+            if (Validator.isValid(_value, _paramName) == false) \
+                throw exHTTPBadRequest(Validator.errorMessage()); \
+            _namespace::_type Value; \
+            Value = _value.toString(); \
+            return Value; \
         }, __VA_ARGS__ \
     )
 
@@ -174,10 +179,10 @@
     /* validator         */ v, \
     /* type 2 QJsonValue */ _type::toStr(v), \
     /* QJsonValue 2 type */ [](QJsonValue v) -> _type::Type { \
-        _type::Type t; \
-        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
-        return t; \
-    }(v)
+                                _type::Type t; \
+                                TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+                                return t; \
+                            }(v)
 
 #define SF_NULLABLE_Enum(_type, _name) \
     /* type              */ NULLABLE_TYPE(_type::Type), \
@@ -185,15 +190,15 @@
     /* def               */ NULLABLE_NULL_VALUE, \
     /* validator         */ v==v, \
     /* type 2 QJsonValue */ [](NULLABLE_TYPE(_type::Type) v) -> QJsonValue { \
-        if (NULLABLE_IS_NULL(v)) \
-            return QJsonValue(); \
-        return QVariant(NULLABLE_GET(v).toString()).toJsonValue(); \
-    }(v), \
+                                if (NULLABLE_IS_NULL(v)) \
+                                    return QJsonValue(); \
+                                return QVariant(NULLABLE_GET(v).toString()).toJsonValue(); \
+                            }(v), \
     /* QJsonValue 2 type */ [](QJsonValue v) -> NULLABLE_TYPE(_type::Type) { \
-        NULLABLE_TYPE(_type::Type) t; \
-        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
-        return t; \
-    }(v)
+                                NULLABLE_TYPE(_type::Type) t; \
+                                TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+                                return t; \
+                            }(v)
 
 #define SF_JSON_t(_name) \
     /* type              */ TAPI::JSON_t, \
@@ -202,10 +207,10 @@
     /* validator         */ v.isEmpty() == false, \
     /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
     /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::JSON_t { \
-        TAPI::JSON_t t; \
-        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
-        return t; \
-    }(v)
+                                TAPI::JSON_t t; \
+                                TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+                                return t; \
+                            }(v)
 
 #define SF_DateTime_t(_name) \
     /* type              */ TAPI::DateTime_t, \
@@ -214,10 +219,22 @@
     /* validator         */ v.isValid(), \
     /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
     /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::DateTime_t { \
-        TAPI::DateTime_t t; \
-        TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
-        return t; \
-    }(v)
+                                TAPI::DateTime_t t; \
+                                TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+                                return t; \
+                            }(v)
+
+#define SF_Date_t(_name) \
+    /* type              */ TAPI::Date_t, \
+    /* name              */ _name, \
+    /* def               */ TAPI::Date_t(), \
+    /* validator         */ v.isValid(), \
+    /* type 2 QJsonValue */ [](TAPI::Date_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> TAPI::Date_t { \
+                                TAPI::Date_t t; \
+                                TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
+                                return t; \
+                            }(v)
 
 //                                                  _type,                  _name, _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
 #define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)

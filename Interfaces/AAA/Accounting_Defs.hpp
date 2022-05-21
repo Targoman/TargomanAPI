@@ -141,6 +141,30 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
 
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
+#define SF_UsageLimits_t(_name) SF_Generic( \
+    /* type              */ UsageLimits_t, \
+    /* name              */ Digested_Limits, \
+    /* def               */ UsageLimits_t(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue { \
+                                QJsonObject A; \
+                                for (auto it = v.begin(); \
+                                    it != v.end(); \
+                                    it++ \
+                                ) { \
+                                    A.insert(it.key(), it->toJson()); \
+                                } \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t { \
+                                UsageLimits_t L; \
+                                QJsonObject O = v.toObject(); \
+                                foreach (const QString &Key, O.keys()) \
+                                    L.insert(Key, stuUsage().fromJson(O.value(Key).toObject())); \
+                                return L; \
+                            }(v) \
+    )
+
 struct stuUsageColDefinition {
     QString PerDay;
     QString PerWeek;
@@ -161,8 +185,8 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
     SF_quint32          (prdID),
     SF_QString          (prdCode), //TAPI::ProductCode_t
     SF_QString          (prdName),
-    SF_DateTime_t       (prdValidFromDate),
-    SF_DateTime_t       (prdValidToDate),
+    SF_Date_t           (prdValidFromDate),
+    SF_Date_t           (prdValidToDate),
     SF_NULLABLE_quint8  (prdValidFromHour),
     SF_NULLABLE_quint8  (prdValidToHour),
     SF_JSON_t           (prdPrivs), //TAPI::PrivObject_t
@@ -198,12 +222,13 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
 //        QJsonObject   Privs;
     } Digested;*/
 
+//        SF_UsageLimits_t(Digested_Limits)
     SF_Generic(
         /* type              */ UsageLimits_t,
         /* name              */ Digested_Limits,
         /* def               */ UsageLimits_t(),
         /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](auto v) {
+        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
                                     QJsonObject A;
                                     for (auto it = v.begin();
                                         it != v.end();
@@ -213,10 +238,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
                                     }
                                     return A;
                                 }(v),
-        /* QJsonValue 2 type */ [](auto v) {
+        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
                                     UsageLimits_t L;
-                                    foreach (auto I, v)
-                                        L.insert(I.key(), stuUsage().fromJson(I.toObject()));
+                                    QJsonObject O = v.toObject();
+                                    foreach (const QString &Key, O.keys())
+                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
                                     return L;
                                 }(v)
     )
@@ -262,12 +288,13 @@ struct stuActiveCredit {
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuActiveCredit,
     SF_Var_Struct(stuAssetItem, Credit, v.prdID),
     SF_bool(IsFromParent),
+//    SF_UsageLimits_t(MyLimitsOnParent),
     SF_Generic(
         /* type              */ UsageLimits_t,
         /* name              */ MyLimitsOnParent,
         /* def               */ UsageLimits_t(),
         /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](auto v) {
+        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
                                     QJsonObject A;
                                     for (auto it = v.begin();
                                         it != v.end();
@@ -277,10 +304,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuActiveCredit,
                                     }
                                     return A;
                                 }(v),
-        /* QJsonValue 2 type */ [](auto v) {
+        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
                                     UsageLimits_t L;
-                                    foreach (auto I, v)
-                                        L.insert(I.key(), stuUsage().fromJson(I.toObject()));
+                                    QJsonObject O = v.toObject();
+                                    foreach (const QString &Key, O.keys())
+                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
                                     return L;
                                 }(v)
     ),
@@ -331,6 +359,7 @@ extern void checkPreVoucherSanity(stuPreVoucher _preVoucher);
 
 namespace tblAccountProductsBase {
     constexpr char Name[] = "tblAccountProducts";
+
     TARGOMAN_CREATE_CONSTEXPR(prdID);
     TARGOMAN_CREATE_CONSTEXPR(prdCode);
     TARGOMAN_CREATE_CONSTEXPR(prdName);
@@ -352,10 +381,35 @@ namespace tblAccountProductsBase {
     TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
+
+    inline QStringList ColumnNames() {
+        return {
+            prdID,
+            prdCode,
+            prdName,
+            prdDesc,
+            prdValidFromDate,
+            prdValidToDate,
+            prdValidFromHour,
+            prdValidToHour,
+            prdPrivs,
+            prdVAT,
+            prdInStockQty,
+            prdOrderedQty,
+            prdReturnedQty,
+            // prdRemainingCount = prdInStockQty - (prdOrderedQty - prdReturnedQty)
+            prdStatus,
+            prdCreatedBy_usrID,
+            prdCreationDateTime,
+            prdUpdatedBy_usrID,
+        };
+    }
+
 }
 
 namespace tblAccountSaleablesBase {
     constexpr char Name[] = "tblAccountSaleables";
+
     TARGOMAN_CREATE_CONSTEXPR(slbID);
     TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
     TARGOMAN_CREATE_CONSTEXPR(slbCode);
@@ -381,10 +435,39 @@ namespace tblAccountSaleablesBase {
     TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
+
+    inline QStringList ColumnNames() {
+        return {
+            slbID,
+            slb_prdID,
+            slbCode,
+            slbName,
+            slbDesc,
+            slbType,
+            slbAvailableFromDate,
+            slbAvailableToDate,
+            slbPrivs,
+            slbBasePrice,
+            slbAdditives,
+//            slbProductCount, //what is this?
+            slbMaxSaleCountPerUser,
+            slbInStockQty,
+            slbOrderedQty,
+            slbReturnedQty,
+//            slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
+            slbVoucherTemplate,
+            slbStatus,
+            slbCreatedBy_usrID,
+            slbCreationDateTime,
+            slbUpdatedBy_usrID,
+        };
+    }
+
 }
 
 namespace tblAccountUserAssetsBase {
     constexpr char Name[] = "tblAccountUserAssets";
+
     TARGOMAN_CREATE_CONSTEXPR(uasID);
     TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
     TARGOMAN_CREATE_CONSTEXPR(uas_slbID);
@@ -437,6 +520,7 @@ namespace tblAccountCouponsBase {
 
 namespace tblAccountReferalsBase {
     constexpr char Name[] = "tblAccountReferals";
+
     TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
     TARGOMAN_CREATE_CONSTEXPR(refValidFromDateTime);
     TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
