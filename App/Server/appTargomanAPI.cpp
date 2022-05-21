@@ -147,7 +147,7 @@ void appTargomanAPI::slotExecute() {
 
         RESTAPIRegistry::dumpAPIs();
 
-        TargomanDebug(5) << ">>>>> Server ready <<<<<";
+        TargomanDebug(5) << ">>>>>" << "Server ready." << "(version:" << TARGOMAN_M2STR(PROJ_VERSION) << ")" << "<<<<<";
 
     } catch (Targoman::Common::exTargomanBase& e) {
         TargomanLogError(e.what());

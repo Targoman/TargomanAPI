@@ -7,7 +7,12 @@
 #   terms of BSD License 2.0.
 ################################################################################
 ProjectName="TargomanAPI"
-VERSION=0.2
+
+defined(GIT_VERSION, var) {
+    VERSION = $$GIT_VERSION
+} else {
+    VERSION = 0.2
+}
 
 #!defined(GIT_VERSION) {
 #    DEFINES += GIT_VERSION=$$system(git describe --always)
