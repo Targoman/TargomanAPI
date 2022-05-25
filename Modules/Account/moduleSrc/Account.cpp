@@ -41,6 +41,7 @@
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 #include "ORM/Auth.h"
+#include "ORM/CurrencyExchangeRate.h"
 #include "Payment/PaymentLogic.h"
 #include "Payment/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
@@ -163,6 +164,7 @@ Account::Account() :
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletsBalanceHistory::instance());
     this->addSubModule(&Auth::instance());
+    this->addSubModule(&CurrencyExchangeRate::instance());
 
     if (Account::InvalidPasswordsFile.value().size()) {
         QFile InputFile(Account::InvalidPasswordsFile.value());
