@@ -125,3 +125,11 @@ INSERT INTO tblCurrency
      , `curSymbol` = 'IRT'
      , `curRate` = 0.1
 ;
+
+ALTER TABLE `tblCurrency`
+    ADD INDEX `curStatus__InvalidatedAt` (`curStatus`, `_InvalidatedAt`)
+/*!*/;
+
+ALTER TABLE `tblCurrency`
+    ADD INDEX `curIsDefault` (`curIsDefault`)
+/*!*/;
