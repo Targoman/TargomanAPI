@@ -74,7 +74,7 @@ intfSQLBasedModule::intfSQLBasedModule(
 
 QVariantMap intfSQLBasedModule::SelectOne(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -117,7 +117,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 QVariantList intfSQLBasedModule::SelectAll(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -158,7 +158,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -199,11 +199,13 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
 QVariant intfSQLBasedModule::Select(
     clsTable& _table,
-    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
 ) {
+    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
@@ -235,7 +237,7 @@ QVariant intfSQLBasedModule::Select(
 }
 
 QVariant intfSQLBasedModule::Select(
-    GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
@@ -249,10 +251,37 @@ QVariant intfSQLBasedModule::Select(
             );
 }
 
+//quint64 intfSQLBasedModule::Create(
+//    clsTable& _table,
+//    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
+//) {
+//    _table.prepareFiltersList();
+
+//    CreateQuery query = CreateQuery(_table);
+
+//    for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
+//        query.addCol(arg.key());
+
+//    query.values(_createInfo);
+
+//    return query.execute(_userID);
+//}
+
+//quint64 intfSQLBasedModule::Create(
+//    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
+//) {
+//    return this->Create(
+//                *this,
+//                CREATE_METHOD_ARGS_CALL_INTERNAL_USER
+//                );
+//}
+
 quint64 intfSQLBasedModule::Create(
     clsTable& _table,
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
+    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
+    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+
     _table.prepareFiltersList();
 
     CreateQuery query = CreateQuery(_table);
@@ -262,26 +291,7 @@ quint64 intfSQLBasedModule::Create(
 
     query.values(_createInfo);
 
-    return query.execute(_userID);
-}
-
-quint64 intfSQLBasedModule::Create(
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
-) {
-    return this->Create(
-                *this,
-                CREATE_METHOD_ARGS_CALL_INTERNAL_USER
-                );
-}
-
-quint64 intfSQLBasedModule::Create(
-    clsTable& _table,
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
-) {
-    return this->Create(
-        _table,
-        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER
-    );
+    return query.execute(_APICALLBOOM.getUserID());
 }
 
 quint64 intfSQLBasedModule::Create(
@@ -289,15 +299,64 @@ quint64 intfSQLBasedModule::Create(
 ) {
     return this->Create(
         *this,
-        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER
+        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM
     );
 }
 
+//bool intfSQLBasedModule::Update(
+//    clsTable& _table,
+//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
+//    const QVariantMap& _extraFilters
+//) {
+//    _table.prepareFiltersList();
+
+//    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
+//        throw exHTTPBadRequest("No key provided to update");
+
+//    if (_updateInfo.isEmpty())
+//        throw exHTTPBadRequest("No change provided to update");
+
+//    UpdateQuery query = UpdateQuery(_table)
+//        .setPksByPath(_pksByPath)
+////        .addFilters(_extraFilters)
+//    ;
+
+//    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
+//        if (FilterIter->isValid() == false)
+//            continue;
+//        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+//        if (relatedORMField.Col.isFilterable() == false)
+//            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+//        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
+//    }
+
+//    for (QVariantMap::const_iterator arg = _updateInfo.constBegin(); arg != _updateInfo.constEnd(); ++arg) {
+//        if (arg->isValid()) {
+//            query.set(arg.key(), arg.value());
+//        }
+//    }
+
+//    return query.execute(_userID) > 0;
+//}
+
+//bool intfSQLBasedModule::Update(
+//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
+//    const QVariantMap& _extraFilters
+//) {
+//    return this->Update(
+//                *this,
+//                UPDATE_METHOD_ARGS_CALL_INTERNAL_USER,
+//                _extraFilters
+//                );
+//}
+
 bool intfSQLBasedModule::Update(
     clsTable& _table,
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
+    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -326,30 +385,7 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(_userID) > 0;
-}
-
-bool intfSQLBasedModule::Update(
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
-    const QVariantMap& _extraFilters
-) {
-    return this->Update(
-                *this,
-                UPDATE_METHOD_ARGS_CALL_INTERNAL_USER,
-                _extraFilters
-                );
-}
-
-bool intfSQLBasedModule::Update(
-    clsTable& _table,
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-    const QVariantMap& _extraFilters
-) {
-    return this->Update(
-        _table,
-        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
-        _extraFilters
-    );
+    return query.execute(_APICALLBOOM.getUserID()) > 0;
 }
 
 bool intfSQLBasedModule::Update(
@@ -358,17 +394,71 @@ bool intfSQLBasedModule::Update(
 ) {
     return this->Update(
         *this,
-        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
+        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM,
         _extraFilters
     );
 }
 
+//bool intfSQLBasedModule::DeleteByPks(
+//    clsTable& _table,
+//    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
+//    const QVariantMap& _extraFilters,
+//    bool _realDelete
+//) {
+//    _table.prepareFiltersList();
+
+//    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
+//        throw exHTTPBadRequest("No key provided to delete");
+
+////    QString statusColumn = _table.getStatusColumnName();
+////    if (statusColumn.isEmpty() == false) {
+////        if (Update(_table, _userID, _pksByPath, TAPI::ORMFields_t({
+////                { statusColumn, "Removed" }
+////            }), _extraFilters) == 0)
+////            return false;
+////    }
+
+////    if (_realDelete == false)
+////        return true;
+
+//    DeleteQuery query = DeleteQuery(_table)
+//        .setPksByPath(_pksByPath)
+////        .addFilters(_extraFilters)
+//    ;
+
+//    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
+//        if (FilterIter->isValid() == false)
+//            continue;
+//        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+//        if (relatedORMField.Col.isFilterable() == false)
+//            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
+//        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
+//    }
+
+//    return query.execute(_userID, {}, _realDelete) > 0;
+//}
+
+//bool intfSQLBasedModule::DeleteByPks(
+//    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
+//    const QVariantMap& _extraFilters,
+//    bool _realDelete
+//) {
+//    return this->DeleteByPks(
+//        *this,
+//        DELETE_METHOD_ARGS_CALL_INTERNAL_USER,
+//        _extraFilters,
+//        _realDelete
+//        );
+//}
+
 bool intfSQLBasedModule::DeleteByPks(
     clsTable& _table,
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
+    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+
     _table.prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
@@ -399,34 +489,7 @@ bool intfSQLBasedModule::DeleteByPks(
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_userID, {}, _realDelete) > 0;
-}
-
-bool intfSQLBasedModule::DeleteByPks(
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
-    const QVariantMap& _extraFilters,
-    bool _realDelete
-) {
-    return this->DeleteByPks(
-        *this,
-        DELETE_METHOD_ARGS_CALL_INTERNAL_USER,
-        _extraFilters,
-        _realDelete
-        );
-}
-
-bool intfSQLBasedModule::DeleteByPks(
-    clsTable& _table,
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-    const QVariantMap& _extraFilters,
-    bool _realDelete
-) {
-    return this->DeleteByPks(
-        _table,
-        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
-        _extraFilters,
-        _realDelete
-    );
+    return query.execute(_APICALLBOOM.getUserID(), {}, _realDelete) > 0;
 }
 
 bool intfSQLBasedModule::DeleteByPks(
@@ -436,7 +499,7 @@ bool intfSQLBasedModule::DeleteByPks(
 ) {
     return this->DeleteByPks(
         *this,
-        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER,
+        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM,
         _extraFilters,
         _realDelete
         );

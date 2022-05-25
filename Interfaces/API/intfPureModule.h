@@ -99,22 +99,11 @@ using namespace Targoman::API::Server;
                                                     QString docOfGET##_name() { return _doc; }
 
 //used by intfSQLBasedModule
-#define GET_METHOD_ARGS_DECL_INTERNAL_USER          INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLBOOM_DECL)
-#define GET_METHOD_ARGS_IMPL_INTERNAL_USER          INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLBOOM_IMPL)
+#define GET_METHOD_ARGS_DECL_INTERNAL_BOOM          INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLBOOM_DECL)
+#define GET_METHOD_ARGS_IMPL_INTERNAL_BOOM          INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLBOOM_IMPL)
 
 #define GET_METHOD_ARGS_CALL_INTERNAL_BOOM \
     _APICALLBOOM, \
-    _pksByPath, \
-    _pageIndex, \
-    _pageSize, \
-    _cols, \
-    _filters, \
-    _orderBy, \
-    _groupBy, \
-    _reportCount
-
-#define GET_METHOD_ARGS_CALL_INTERNAL_BOOM2USER \
-    _APICALLBOOM.getUserID(), \
     _pksByPath, \
     _pageIndex, \
     _pageSize, \
@@ -138,15 +127,15 @@ using namespace Targoman::API::Server;
 #define IMPL_ORMCREATE(_module)                     _module::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by intfSQLBasedModule
-#define CREATE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _createInfo
+//#define CREATE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::ORMFields_t _createInfo = {}
+//#define CREATE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::ORMFields_t _createInfo
+//#define CREATE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _createInfo
 
 #define CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
 #define CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
 #define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _createInfo
 
-#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _createInfo
+//#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
@@ -162,15 +151,15 @@ using namespace Targoman::API::Server;
 #define IMPL_ORMUPDATE(_module)                     _module::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by intfSQLBasedModule
-#define UPDATE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
-#define UPDATE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _pksByPath, _updateInfo
+//#define UPDATE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
+//#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+//#define UPDATE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _pksByPath, _updateInfo
 
 #define UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
 #define UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 #define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _pksByPath, _updateInfo
 
-#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
+//#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
 
 /**********************************************************************\
 |** DELETE ************************************************************|
@@ -186,15 +175,15 @@ using namespace Targoman::API::Server;
 #define IMPL_ORMDELETE(_module)                     _module::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 
 //used by intfSQLBasedModule
-#define DELETE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath
-#define DELETE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _pksByPath
+//#define DELETE_METHOD_ARGS_DECL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath = {}
+//#define DELETE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath
+//#define DELETE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _pksByPath
 
 #define DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
 #define DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
 #define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _pksByPath
 
-#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath
+//#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath
 
 /**********************************************************************/
 namespace TAPI {

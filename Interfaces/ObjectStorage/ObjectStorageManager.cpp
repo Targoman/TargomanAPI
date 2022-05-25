@@ -50,7 +50,8 @@ using namespace qhttp;
 namespace Targoman::API::ObjectStorage {
 
 QVariantMap ObjectStorageManager::saveFiles(
-    const quint64 _currentUserID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const quint64 _currentUserID,
     intfUploadFiles &_uploadFiles,
     intfUploadQueue &_uploadQueue,
     intfUploadGateways &_uploadGateways,
@@ -61,7 +62,7 @@ QVariantMap ObjectStorageManager::saveFiles(
     foreach (auto _file, _files) {
         try {
             quint64 ID = saveFile(
-                             _currentUserID,
+                             APICALLBOOM_PARAM,
                              _uploadFiles,
                              _uploadQueue,
                              _uploadGateways,
@@ -77,7 +78,8 @@ QVariantMap ObjectStorageManager::saveFiles(
 }
 
 quint64 ObjectStorageManager::saveFile(
-    const quint64 _currentUserID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const quint64 _currentUserID,
     intfUploadFiles &_uploadFiles,
     intfUploadQueue &_uploadQueue,
     intfUploadGateways &_uploadGateways,
@@ -101,7 +103,7 @@ quint64 ObjectStorageManager::saveFile(
             throw exTargomanBase("Could not create storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
     }
     //--
-    QString StrOwnerID = QString("user_%1").arg(_currentUserID);
+    QString StrOwnerID = QString("user_%1").arg(APICALLBOOM_PARAM.getUserID());
     if (FullPathDir.exists(StrOwnerID) == false) {
         if (FullPathDir.mkpath(StrOwnerID) == false)
             throw exTargomanBase("Could not create path under storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
@@ -141,17 +143,18 @@ quint64 ObjectStorageManager::saveFile(
     QString FullFileName;
 
     try {
-        QVariantMap SpOutVars = _uploadFiles.callSP("spUploadedFile_Create", {
-            { "iPath",              _path },
-            { "iOriginalFileName",  _file.Name },
-            { "iFullTempPath",      FullTempPath },
-            { "iFileSize",          _file.Size },
-            { "iFileType",          FileType },
-            { "iMimeType",          MimeType },
-            { "iCreatorUserID",     _currentUserID },
-            { "iLockedBy",          ServerCommonConfigs::InstanceID.value() },
-        })
-        .spDirectOutputs();
+        QVariantMap SpOutVars = _uploadFiles.callSP(APICALLBOOM_PARAM,
+                                                    "spUploadedFile_Create", {
+                                                        { "iPath",              _path },
+                                                        { "iOriginalFileName",  _file.Name },
+                                                        { "iFullTempPath",      FullTempPath },
+                                                        { "iFileSize",          _file.Size },
+                                                        { "iFileType",          FileType },
+                                                        { "iMimeType",          MimeType },
+                                                        { "iCreatorUserID",     APICALLBOOM_PARAM.getUserID() },
+                                                        { "iLockedBy",          ServerCommonConfigs::InstanceID.value() },
+                                                    })
+                                                    .spDirectOutputs();
 
         UploadedFileID = SpOutVars.value("oUploadedFileID").toULongLong();
         QueueRowsCount = SpOutVars.value("oQueueRowsCount").toUInt();
@@ -169,7 +172,7 @@ quint64 ObjectStorageManager::saveFile(
 
         if (UploadedFileID > 0) {
             try {
-                _uploadFiles.DeleteByPks(_uploadFiles, _currentUserID, QString::number(UploadedFileID));
+                _uploadFiles.DeleteByPks(_uploadFiles, APICALLBOOM_PARAM, QString::number(UploadedFileID));
             } catch (...) { ; }
         }
 
@@ -183,7 +186,7 @@ quint64 ObjectStorageManager::saveFile(
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
-                                        _currentUserID,
+                                        APICALLBOOM_PARAM.getUserID(),
                                         _uploadFiles,
                                         _uploadQueue,
                                         _uploadGateways,
@@ -204,7 +207,7 @@ quint64 ObjectStorageManager::saveFile(
             .set(tblUploadQueue::uquLockedBy, DBExpression::NIL())
             .where({ tblUploadQueue::uqu_uflID, enuConditionOperator::Equal, UploadedFileID })
             .andWhere({ tblUploadQueue::uquLockedAt, enuConditionOperator::NotNull })
-            .execute(_currentUserID)
+            .execute(APICALLBOOM_PARAM.getUserID())
         ;
     }
 

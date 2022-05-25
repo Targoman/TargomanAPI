@@ -56,21 +56,21 @@ public:
 private:
     QVariantMap SelectOne(
             clsTable& _table,
-            GET_METHOD_ARGS_DECL_INTERNAL_USER,
+            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     QVariantList SelectAll(
             clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+            GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     TAPI::stuTable SelectAllWithCount(
             clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_USER,
+            GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
@@ -79,25 +79,25 @@ private:
 public:
     QVariant Select(
             clsTable& _table,
-            GET_METHOD_ARGS_DECL_INTERNAL_USER,
+            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
     QVariant Select(
-            GET_METHOD_ARGS_DECL_INTERNAL_USER,
+            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _lambda_TouchQuery = nullptr
         );
 
-    quint64 Create(
-            clsTable& _table,
-            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
-        );
-    quint64 Create(
-            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
-        );
+//    quint64 Create(
+//            clsTable& _table,
+//            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
+//        );
+//    quint64 Create(
+//            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
+//        );
     quint64 Create(
             clsTable& _table,
             CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
@@ -106,15 +106,15 @@ public:
             CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
         );
 
-    bool Update(
-            clsTable& _table,
-            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
-            const QVariantMap& _extraFilters = {}
-        );
-    bool Update(
-            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
-            const QVariantMap& _extraFilters = {}
-        );
+//    bool Update(
+//            clsTable& _table,
+//            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            const QVariantMap& _extraFilters = {}
+//        );
+//    bool Update(
+//            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            const QVariantMap& _extraFilters = {}
+//        );
     bool Update(
             clsTable& _table,
             UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
@@ -125,17 +125,17 @@ public:
             const QVariantMap& _extraFilters = {}
         );
 
-    bool DeleteByPks(
-            clsTable& _table,
-            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
-            const QVariantMap& _extraFilters = {},
-            bool _realDelete = false
-        );
-    bool DeleteByPks(
-            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
-            const QVariantMap& _extraFilters = {},
-            bool _realDelete = false
-        );
+//    bool DeleteByPks(
+//            clsTable& _table,
+//            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            const QVariantMap& _extraFilters = {},
+//            bool _realDelete = false
+//        );
+//    bool DeleteByPks(
+//            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            const QVariantMap& _extraFilters = {},
+//            bool _realDelete = false
+//        );
     bool DeleteByPks(
             clsTable& _table,
             DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,

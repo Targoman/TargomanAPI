@@ -69,7 +69,7 @@ bool IMPL_ORMDELETE(Voucher) {
 //        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
     }
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

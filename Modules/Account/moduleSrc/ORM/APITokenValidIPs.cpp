@@ -43,7 +43,7 @@ QVariant IMPL_ORMGET(APITokenValidIPs) {
 quint64 IMPL_ORMCREATE(APITokenValidIPs) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(APITokenValidIPs) {
@@ -53,7 +53,7 @@ bool IMPL_ORMUPDATE(APITokenValidIPs) {
 
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 bool IMPL_ORMDELETE(APITokenValidIPs) {
@@ -63,7 +63,7 @@ bool IMPL_ORMDELETE(APITokenValidIPs) {
         ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters, true);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

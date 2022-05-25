@@ -108,10 +108,10 @@ public:
     clsRequestHandler(qhttp::server::QHttpRequest* _req,
                       qhttp::server::QHttpResponse* _res,
                       QObject *_parent = nullptr);
-    void process(const QString& _api);
 
-//private:
-//    bool callStaticAPI(QString _api);
+    void process(const QString& _api);
+    void addToTimings(const QString &_label, quint64 _nanoSecs);
+    void sendTimingsToResponse();
 
 public:
     void findAndCallAPI(QString _api);
@@ -159,6 +159,9 @@ private:
     QMimeDatabase                                       MIMEDB;
     QScopedPointer<QFile>                               FileHandler;
     QElapsedTimer                                       ElapsedTimer;
+
+    //QString _label, quint64 _nanoSecs
+    QMap<QString, quint64> ServerTimings;
 
     friend class clsMultipartFormDataRequestHandler;
 };

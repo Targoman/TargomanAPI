@@ -67,7 +67,8 @@ Ticketing::Ticketing() :
 }
 
 quint64 Ticketing::insertTicket(
-    quint64 _createdBy,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    quint64 _createdBy,
     quint64 _targetUserID,
     quint32 _serviceID,
     quint64 _inReplyTicketID,
@@ -97,7 +98,7 @@ quint64 Ticketing::insertTicket(
 
     quint64 TicketID = this->Create(
                            Tickets::instance(),
-                           _createdBy,
+                           APICALLBOOM_PARAM,
                            CreateFields
                            );
 
@@ -111,7 +112,7 @@ quint64 Ticketing::insertTicket(
             if (_file.Size > 0) {
                 try {
                     quint64 UploadedFileID = ObjectStorageManager::saveFile(
-                                                 _createdBy,
+                                                 APICALLBOOM_PARAM,
                                                  UploadFiles::instance(),
                                                  UploadQueue::instance(),
                                                  UploadGateways::instance(),
@@ -129,7 +130,7 @@ quint64 Ticketing::insertTicket(
             }
         }
 
-        QueryCreateAttachments.execute(_createdBy);
+        QueryCreateAttachments.execute(APICALLBOOM_PARAM.getUserID());
     }
 
     return TicketID;
@@ -151,7 +152,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
         Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _APICALLBOOM.getUserID(),
+                     _APICALLBOOM,
                      _targetUserID,
                      _serviceID,
                      0,
@@ -190,7 +191,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
         Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _APICALLBOOM.getUserID(),
+                     _APICALLBOOM,
                      0,
                      _serviceID,
                      _inReplyTicketID,
@@ -352,7 +353,11 @@ QVariant IMPL_REST_POST(Ticketing, fixtureCleanup, (
               FROM tblTickets t
              WHERE t.tkt_svcID=?
         ;)";
-        clsDACResult DACResult = this->execQuery(QueryString, { _random.toInt() });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     _random.toInt()
+                                                 });
+
         Result.insert("tblTickets", QVariantMap({
                                                    { "random", _random },
                                                    { "numRowsAffected", DACResult.numRowsAffected() },

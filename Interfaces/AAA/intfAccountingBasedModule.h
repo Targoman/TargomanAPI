@@ -59,25 +59,30 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-    void checkUsageIsAllowed(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ServiceUsage_t& _requestedUsage);
+    void checkUsageIsAllowed(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const ServiceUsage_t& _requestedUsage);
 
     virtual bool increaseDiscountUsage(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
     virtual bool decreaseDiscountUsage(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
     virtual bool activateUserAsset(
-        quint64 _userID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     );
     virtual bool removeFromUserAssets(
-        quint64 _userID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
 
     virtual bool preProcessVoucherItem(
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     ) {
@@ -86,11 +91,13 @@ protected:
         return true;
     };
     virtual bool processVoucherItem(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     );
     virtual bool postProcessVoucherItem(
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     ) {
@@ -100,17 +107,20 @@ protected:
     };
 
     virtual bool preCancelVoucherItem(
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
         Q_UNUSED(_voucherItem);
         return true;
     };
     virtual bool cancelVoucherItem(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr
     );
     virtual bool postCancelVoucherItem(
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
         Q_UNUSED(_voucherItem);

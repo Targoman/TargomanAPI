@@ -139,36 +139,53 @@ public:
 //                     QVariantMap _extraFilters={},
 //                     bool _realDelete = false);
 
-    DBManager::clsDACResult callSP(const QString& _spName,
-                                   const QVariantMap& _spArgs = QVariantMap(),
-                                   const QString& _purpose = {},
-                                   quint64* _executionTime = nullptr);
+    DBManager::clsDACResult callSP(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const QString& _spName,
+        const QVariantMap& _spArgs = QVariantMap(),
+        const QString& _purpose = {},
+        quint64* _executionTime = nullptr
+    );
 
-    DBManager::clsDACResult callSPCacheable(quint32 _maxCacheTime,
-                                            const QString& _spName,
-                                            const QVariantMap& _spArgs = QVariantMap(),
-                                            const QString& _purpose = {},
-                                            quint64* _executionTime = nullptr);
+    DBManager::clsDACResult callSPCacheable(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint32 _maxCacheTime,
+        const QString& _spName,
+        const QVariantMap& _spArgs = QVariantMap(),
+        const QString& _purpose = {},
+        quint64* _executionTime = nullptr
+    );
 
-    DBManager::clsDACResult execQuery(const QString &_queryStr,
-                                      const QVariantList &_params = QVariantList(),
-                                      const QString& _purpose = "",
-                                      quint64* _executionTime = nullptr);
-    DBManager::clsDACResult execQuery(const QString &_queryStr,
-                                      const QVariantMap &_params,
-                                      const QString& _purpose = "",
-                                      quint64* _executionTime = nullptr);
-    DBManager::clsDACResult execQueryCacheable(quint32 _maxCacheTime,
-                                               const QString &_queryStr,
-                                               const QVariantList &_params = QVariantList(),
-                                               const QString& _purpose = "",
-                                               quint64* _executionTime = nullptr);
-    DBManager::clsDACResult execQueryCacheable(quint32 _maxCacheTime,
-                                               const QString &_queryStr,
-                                               const QVariantMap &_params,
-                                               const QString& _purpose = "",
-                                               quint64* _executionTime = nullptr);
-
+    DBManager::clsDACResult execQuery(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const QString &_queryStr,
+        const QVariantList &_params = QVariantList(),
+        const QString& _purpose = "",
+        quint64* _executionTime = nullptr
+    );
+    DBManager::clsDACResult execQuery(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const QString &_queryStr,
+        const QVariantMap &_params,
+        const QString& _purpose = "",
+        quint64* _executionTime = nullptr
+    );
+    DBManager::clsDACResult execQueryCacheable(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint32 _maxCacheTime,
+        const QString &_queryStr,
+        const QVariantList &_params = QVariantList(),
+        const QString& _purpose = "",
+        quint64* _executionTime = nullptr
+    );
+    DBManager::clsDACResult execQueryCacheable(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint32 _maxCacheTime,
+        const QString &_queryStr,
+        const QVariantMap &_params,
+        const QString& _purpose = "",
+        quint64* _executionTime = nullptr
+    );
 
     //TAPI::Filter_t -> QString
     void setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters);

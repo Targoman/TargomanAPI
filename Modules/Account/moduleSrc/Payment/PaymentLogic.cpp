@@ -95,6 +95,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
 //}
 
 QVariantList PaymentLogic::findAvailableGatewayTypes(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     const QString& _domain
 ) {
@@ -172,6 +173,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 }
 
 const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     enuPaymentGatewayType::Type _gatewayType,
     const QString& _domain
@@ -237,6 +239,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     enuPaymentGatewayType::Type _gatewayType,
     const QString& _domain,
     quint64 _vchID,
@@ -259,13 +262,18 @@ QString PaymentLogic::createOnlinePaymentLink(
     QFV.url().validate(_paymentVerifyCallback, "callBack");
 
     //1: find best payment gateway
-    ORM::tblPaymentGateways::DTO PaymentGateway = PaymentLogic::findBestPaymentGateway(_toPay, _gatewayType, _domain);
+    ORM::tblPaymentGateways::DTO PaymentGateway = PaymentLogic::findBestPaymentGateway(
+                                                      APICALLBOOM_PARAM,
+                                                      _toPay,
+                                                      _gatewayType,
+                                                      _domain);
 
     //2: get payment gateway driver
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);
 
     //3: create payment
-    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP("spOnlinePayment_Create", {
+    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP(APICALLBOOM_PARAM,
+                                                           "spOnlinePayment_Create", {
                                                                { "iVoucherID", _vchID },
                                                                { "iGatewayID", PaymentGateway.pgwID },
                                                                { "iAmount", _toPay },
@@ -291,7 +299,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         OnlinePayments::instance().Update(
                 OnlinePayments::instance(),
-                SYSTEM_USER_ID,
+                APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                 {},
                 TAPI::ORMFields_t({
                    { tblOnlinePayments::onpTrackNumber, TrackID },
@@ -304,11 +312,11 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         //increase pgwSumRequestCount and pgwSumRequestAmount
         try {
-            PaymentGateways::instance()
-                     .callSP("spPaymentGateway_UpdateRequestCounters", {
-                                 { "iPgwID", PaymentGateway.pgwID },
-                                 { "iAmount", _toPay },
-                             })
+            PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+                                               "spPaymentGateway_UpdateRequestCounters", {
+                                                   { "iPgwID", PaymentGateway.pgwID },
+                                                   { "iAmount", _toPay },
+                                               })
             ;
         } catch (...) { ; }
 
@@ -318,7 +326,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     } catch (std::exception &_exp) {
         OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
-                    SYSTEM_USER_ID,
+                    APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                        { tblOnlinePayments::onpResult, _exp.what() },
@@ -334,6 +342,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
 // [PaymentID, VoucherID, TargetWalletID]
 std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString& _paymentMD5,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
@@ -366,7 +375,7 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
 
         OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
-                    SYSTEM_USER_ID,
+                    APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
     //                    { tblOnlinePayments::onpTrackNumber, PaymentResponse.TrackID },
@@ -378,11 +387,11 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
                     });
 
         try {
-            PaymentGateways::instance()
-                     .callSP("spPaymentGateway_UpdateOkCounters", {
-                                 { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
-                                 { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
-                             })
+            PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+                                               "spPaymentGateway_UpdateOkCounters", {
+                                                   { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
+                                                   { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
+                                               })
             ;
         } catch (...) { ; }
 
@@ -395,7 +404,7 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     } catch (std::exception &_exp) {
         OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
-                    SYSTEM_USER_ID,
+                    APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::onpResult, _exp.what() },
@@ -406,11 +415,11 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
                     });
 
         //increase pgwSumFailedCount
-        PaymentGateways::instance()
-                 .callSP("spPaymentGateway_UpdateFailedCounters", {
-                             { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
-                             { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
-                         })
+        PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+                                           "spPaymentGateway_UpdateFailedCounters", {
+                                               { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
+                                               { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
+                                           })
         ;
 
         throw exPayment(QString("Unable to verify payment: ") + _exp.what());

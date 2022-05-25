@@ -51,7 +51,8 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
 
 private:
     quint64 insertTicket(
-            quint64 _createdBy,
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            quint64 _createdBy,
             quint64 _targetUserID,
             quint32 _serviceID,
             quint64 _inReplyTicketID,

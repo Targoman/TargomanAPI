@@ -183,6 +183,7 @@ Account::Account() :
 //}
 
 TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString _login,
     const stuActiveAccount& _activeAccount,
     const QString& _services
@@ -209,11 +210,12 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
     );
 
     //-- save to active session -----
-    this->callSP("spSession_UpdateJWT", {
-        { "iSSID", _activeAccount.Privs["ssnKey"].toString() },
-        { "iJWT", JWT },
-        { "iIssuance", Payload["iat"].toInt() },
-    });
+    this->callSP(APICALLBOOM_PARAM,
+                 "spSession_UpdateJWT", {
+                     { "iSSID", _activeAccount.Privs["ssnKey"].toString() },
+                     { "iJWT", JWT },
+                     { "iIssuance", Payload["iat"].toInt() },
+                 });
 
     return JWT;
 }
@@ -256,23 +258,24 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     if (InvalidPasswords.contains(_pass))
         throw exHTTPBadRequest("Invalid simple password");
 
-    quint64 UserID = this->callSP("spSignup", {
-            { "iBy", Type },
-            { "iLogin", _emailOrMobile },
-            { "iPass", _pass },
-            { "iRole", _role },
-            { "iIP", _APICALLBOOM.getIP() },
-            { "iName", _name.isEmpty()? QVariant() : _name },
-            { "iFamily", _family.isEmpty()? QVariant() : _family },
-            { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
-            { "iMaxSessions", _maxSessions },
-            { "iCreatorUserID", QVariant() },
-            { "iEnableEmailAlerts", _enableEmailAlerts ? 1 : 0 },
-            { "iEnableSMSAlerts", _enableSMSAlerts ? 1 : 0 },
-        })
-        .spDirectOutputs()
-        .value("oUserID")
-        .toDouble();
+    quint64 UserID = this->callSP(APICALLBOOM_PARAM,
+                                  "spSignup", {
+                                      { "iBy", Type },
+                                      { "iLogin", _emailOrMobile },
+                                      { "iPass", _pass },
+                                      { "iRole", _role },
+                                      { "iIP", _APICALLBOOM.getIP() },
+                                      { "iName", _name.isEmpty()? QVariant() : _name },
+                                      { "iFamily", _family.isEmpty()? QVariant() : _family },
+                                      { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+                                      { "iMaxSessions", _maxSessions },
+                                      { "iCreatorUserID", QVariant() },
+                                      { "iEnableEmailAlerts", _enableEmailAlerts ? 1 : 0 },
+                                      { "iEnableSMSAlerts", _enableSMSAlerts ? 1 : 0 },
+                                  })
+                                  .spDirectOutputs()
+                                  .value("oUserID")
+                                  .toDouble();
 
     return {
         { "type", Type == 'E' ? "email" : "mobile" },
@@ -294,19 +297,20 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
 
     _email = _email.toLower().trimmed();
 
-    QJsonObject UserInfo = this->callSP("spApproval_Accept", {
-            { "iBy", "E" },
-            { "iKey", _email },
-            { "iCode", _uuid },
-            { "iLogin", _autoLogin ? 1 : 0 },
-            { "iLoginIP", _APICALLBOOM.getIP() },
-            { "iLoginInfo", _sessionInfo.object() },
-            { "iLoginRemember", _rememberMe ? 1 : 0 },
-            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-            { "iTTL", ApprovalRequest::EmailApprovalCodeTTL.value() },
-        })
-        .toJson(true)
-        .object();
+    QJsonObject UserInfo = this->callSP(APICALLBOOM_PARAM,
+                                        "spApproval_Accept", {
+                                            { "iBy", "E" },
+                                            { "iKey", _email },
+                                            { "iCode", _uuid },
+                                            { "iLogin", _autoLogin ? 1 : 0 },
+                                            { "iLoginIP", _APICALLBOOM.getIP() },
+                                            { "iLoginInfo", _sessionInfo.object() },
+                                            { "iLoginRemember", _rememberMe ? 1 : 0 },
+                                            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
+                                            { "iTTL", ApprovalRequest::EmailApprovalCodeTTL.value() },
+                                        })
+                                        .toJson(true)
+                                        .object();
 
     if (_autoLogin == false)
         return TAPI::EncodedJWT_t();
@@ -317,7 +321,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return this->createJWTAndSaveToActiveSession(_email, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _email, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
@@ -337,19 +341,20 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    QJsonObject UserInfo = this->callSP("spApproval_Accept", {
-            { "iBy", "M" },
-            { "iKey", _mobile },
-            { "iCode", _code },
-            { "iLogin", _autoLogin ? 1 : 0 },
-            { "iLoginIP", _APICALLBOOM.getIP() },
-            { "iLoginInfo", _sessionInfo.object() },
-            { "iLoginRemember", _rememberMe ? 1 : 0 },
-            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-            { "iTTL", ApprovalRequest::MobileApprovalCodeTTL.value() },
-        })
-        .toJson(true)
-        .object();
+    QJsonObject UserInfo = this->callSP(APICALLBOOM_PARAM,
+                                        "spApproval_Accept", {
+                                            { "iBy", "M" },
+                                            { "iKey", _mobile },
+                                            { "iCode", _code },
+                                            { "iLogin", _autoLogin ? 1 : 0 },
+                                            { "iLoginIP", _APICALLBOOM.getIP() },
+                                            { "iLoginInfo", _sessionInfo.object() },
+                                            { "iLoginRemember", _rememberMe ? 1 : 0 },
+                                            { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
+                                            { "iTTL", ApprovalRequest::MobileApprovalCodeTTL.value() },
+                                        })
+                                        .toJson(true)
+                                        .object();
 
     if (_autoLogin == false)
         return TAPI::EncodedJWT_t();
@@ -360,7 +365,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
                          _services.split(",", QString::SkipEmptyParts)
                          );
 
-    return this->createJWTAndSaveToActiveSession(_mobile, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _mobile, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
@@ -395,7 +400,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
                                                        _fingerprint
                                                        );
 
-    return this->createJWTAndSaveToActiveSession(_emailOrMobile, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _emailOrMobile, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -424,7 +429,8 @@ bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
-    this->callSP("spMobileVerifyCode_Request", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spMobileVerifyCode_Request", {
                      { "iMobile", _mobile },
                      { "iSignupIfNotExists", _signupIfNotExists ? 1 : 0 },
                      { "iSignupRole", _signupRole },
@@ -443,14 +449,16 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-//    this->callSP("spApprovalRequestAgain", {
+//    this->callSP(APICALLBOOM_PARAM,
+//    "spApprovalRequestAgain", {
 //                     { "iBy", Type },
 //                     { "iKey", _emailOrMobile },
 //                     { "iIP", _APICALLBOOM.getIP() },
 //                     { "iRecreateIfExpired", true },
 //                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
 //                 });
-    this->callSP("spApproval_Request", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spApproval_Request", {
                      { "iBy", Type },
                      { "iKey", _emailOrMobile },
                      { "iUserID", {} },
@@ -514,7 +522,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
                          _fingerprint
                          );
 
-    return this->createJWTAndSaveToActiveSession(OAuthInfo.Email, LoginInfo, _services);
+    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, OAuthInfo.Email, LoginInfo, _services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -537,7 +545,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
 //    auto NewPrivs = Authentication::updatePrivs(_APICALLBOOM.getIP(), LoginJWT.session(), Services);
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, LoginJWT.login(), LoginJWT.session(), Services),
-//                                 this->createJWTAndSaveToActiveSession(LoginJWT.login(), NewPrivs, Services)
+//                                 this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, LoginJWT.login(), NewPrivs, Services)
 //                             });
 //}
 
@@ -546,7 +554,8 @@ bool IMPL_REST_GET_OR_POST(Account, logout, (
 )) {
     clsJWT JWT(_APICALLBOOM.getJWT());
 
-    this->callSP("spLogout", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spLogout", {
                      { "iByUserID", JWT.usrID() },
                      { "iSessionGUID", JWT.session() },
                  });
@@ -562,7 +571,8 @@ QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("spForgotPass_Request", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spForgotPass_Request", {
                      { "iLogin", _emailOrMobile },
                      { "iBy", Type },
                  });
@@ -619,7 +629,8 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    this->callSP("spPassword_ChangeByCode", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spPassword_ChangeByCode", {
                      { "iBy", Type },
                      { "iLogin", _emailOrMobile },
                      { "iCode", _uuid },
@@ -639,7 +650,8 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 
     clsJWT JWT(_APICALLBOOM.getJWT());
 
-    this->callSP("spPassword_Change", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spPassword_Change", {
                      { "iUserID", JWT.usrID() },
                      { "iSessionGUID", JWT.session() },
                      { "iOldPass", _oldPass },
@@ -654,12 +666,13 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 Targoman::API::AAA::stuVoucher Account::processVoucher(
-//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    quint64 _userID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    quint64 _userID,
     quint64 _voucherID
 ) {
 //    try {
-        clsDACResult Result = this->callSP("spVoucher_GetRemaining", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spVoucher_GetRemaining", {
                                                { "iVoucherID", _voucherID },
                                            });
         quint64 RemainingAmount = Result.spDirectOutputs().value("oRemainingAmount").toUInt();
@@ -732,7 +745,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                         //bypass process by end point?
                         if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
                             stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                            VoucherItemForTrustedAction.UserID = _userID;
+                            VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getUserID();
                             VoucherItemForTrustedAction.VoucherID = _voucherID;
                             VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                             VoucherItemForTrustedAction.Sign.clear();
@@ -768,7 +781,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         } // foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
 
         //2: change voucher status to Targoman::API::AAA::enuVoucherStatus::Finished
-        Voucher::instance().Update(SYSTEM_USER_ID,
+        Voucher::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                                    {},
                                    TAPI::ORMFields_t({
                                       { tblVoucher::vchStatus, (ErrorCount == 0
@@ -799,8 +812,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 }
 
 void Account::tryCancelVoucher(
-//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    quint64 _userID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    quint64 _userID,
     quint64 _voucherID,
     bool _setAsError
 ) {
@@ -842,7 +855,7 @@ void Account::tryCancelVoucher(
                             if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint)) {
                                 try {
                                     stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                                    VoucherItemForTrustedAction.UserID = _userID;
+                                    VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getUserID();
                                     VoucherItemForTrustedAction.VoucherID = _voucherID;
                                     VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                                     VoucherItemForTrustedAction.Sign.clear();
@@ -871,11 +884,12 @@ void Account::tryCancelVoucher(
 
     ///TODO: complete spVoucher_Cancel: create cancel voucher and credit to wallet
 
-    clsDACResult Result = Voucher::instance().callSP("spVoucher_Cancel", {
-        { "iUserID", SYSTEM_USER_ID },
-        { "iVoucherID", _voucherID },
-        { "iSetAsError", _setAsError ? 1 : 0 },
-    });
+    clsDACResult Result = Voucher::instance().callSP(APICALLBOOM_PARAM,
+                                                     "spVoucher_Cancel", {
+                                                         { "iUserID", SYSTEM_USER_ID },
+                                                         { "iVoucherID", _voucherID },
+                                                         { "iSetAsError", _setAsError ? 1 : 0 },
+                                                     });
 
 //    this->Update(Voucher::instance(),
 //                                 SYSTEM_USER_ID,
@@ -907,7 +921,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+//    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
                                   .addCols(tblVoucher::ColumnNames())
@@ -921,27 +935,32 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
         throw exHTTPBadRequest("Only Expense vouchers allowed");
 
     if (_amount < 0) {
-        clsDACResult Result = this->callSP("spVoucher_GetRemaining", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spVoucher_GetRemaining", {
                                                { "iVoucherID", _voucherID },
                                            });
+
         _amount = Result.spDirectOutputs().value("oRemainingAmount").toUInt();
     }
 
     //compute wallet remaining
     qint64 RemainingAfterWallet = static_cast<qint64>(_amount);
     if ((_walID >= 0) && (RemainingAfterWallet > 0)) {
-        clsDACResult Result = this->callSP("spWalletTransaction_Create", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spWalletTransaction_Create", {
                                                { "iWalletID", _walID },
                                                { "iVoucherID", _voucherID },
                                            });
+
         RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
+
         if (RemainingAfterWallet < 0)
             throw exHTTPInternalServerError("Remaining after wallet transaction is negative.");
     }
 
     //process voucher
     if (RemainingAfterWallet == 0)
-        return Account::processVoucher(CurrentUserID, _voucherID);
+        return Account::processVoucher(APICALLBOOM_PARAM, _voucherID);
 
     Targoman::API::AAA::stuVoucher Voucher;
     Voucher.ID = VoucherInfo.vchID;
@@ -956,6 +975,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
         default:
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
+                                      APICALLBOOM_PARAM,
                                       NULLABLE_VALUE(_gatewayType),
                                       _domain,
                                       _voucherID,
@@ -1076,10 +1096,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 )) {
     //VoucherID comes from finalizeBasket(Expense, New) or requestIncrease(Credit, New)
 
-    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(_paymentMD5, _pgResponse, _domain);
+    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(APICALLBOOM_PARAM,
+                                                                                     _paymentMD5,
+                                                                                     _pgResponse,
+                                                                                     _domain);
 
 //    try {
-        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spWalletTransactionOnPayment_Create", {
                                                { "iPaymentID", PaymentID },
                                                { "iPaymentType", QChar(enuPaymentType::Online) },
                                                { "iVoucherID", VoucherID },
@@ -1091,7 +1115,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
         if (RemainingAfterWallet > 0)
             return Targoman::API::AAA::stuVoucher();
 
-        return Account::processVoucher(_APICALLBOOM.getUserID(), VoucherID);
+        return Account::processVoucher(_APICALLBOOM, VoucherID);
 
 //    } catch (...) {
 //        ///@TODO: VERY IMPORTANT: reject gateway verify if 'C' type of tblWalletsTransactions not created in sp yet
@@ -1301,7 +1325,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                  });
 
     try {
-        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spWalletTransactionOnPayment_Create", {
                                                { "iPaymentID", PaymentID },
                                                { "iPaymentType", QChar(enuPaymentType::Offline) },
                                                { "iVoucherID", VoucherID },
@@ -1313,7 +1338,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         if (RemainingAfterWallet > 0)
             return Targoman::API::AAA::stuVoucher();
 
-        return Account::processVoucher(_APICALLBOOM.getUserID(), VoucherID);
+        return Account::processVoucher(_APICALLBOOM, VoucherID);
 
     }  catch (...) {
         this->Update(OfflinePaymentClaims::instance(),
@@ -1395,7 +1420,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
         TAPI::ORMFields_t(CreateParams));
 
     try {
-        clsDACResult Result = this->callSP("spWalletTransactionOnPayment_Create", {
+        clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                           "spWalletTransactionOnPayment_Create", {
                                                { "iPaymentID", PaymentID },
                                                { "iPaymentType", QChar(enuPaymentType::Offline) },
                                                { "iVoucherID", _vchID },
@@ -1453,7 +1479,8 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
 
 //    QFV.hasKey("desc").validate(_desc, "desc");
 
-    return this->callSP("spWallet_Increase", {
+    return this->callSP(APICALLBOOM_PARAM,
+                        "spWallet_Increase", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
                             { "iByUserID", APICALLBOOM_PARAM.getUserID() },
@@ -1482,7 +1509,8 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
 
 //    QFV.hasKey("desc").validate(_desc, "desc");
 
-    return this->callSP("spWallet_Increase", {
+    return this->callSP(APICALLBOOM_PARAM,
+                        "spWallet_Increase", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
                             { "iByUserID", APICALLBOOM_PARAM.getUserID() },
@@ -1746,7 +1774,7 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
 )) {
     QVariantMap Result;
 
-    clsDAC DAC;
+//    clsDAC DAC;
 
     QString UserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "user@dev.test");
     QString AdminUserEmail = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "admin@dev.test");
@@ -1766,10 +1794,12 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
+
         Result.insert("tblWalletsBalanceHistory", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
@@ -1786,10 +1816,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblWalletsTransactions", QVariantMap({
                                                                 { "numRowsAffected", DACResult.numRowsAffected() },
                                                             }));
@@ -1804,10 +1835,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblUserWallets", QVariantMap({
                                                         { "numRowsAffected", DACResult.numRowsAffected() },
                                                     }));
@@ -1824,10 +1856,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblOnlinePayments", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
@@ -1844,10 +1877,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblOfflinePayments", QVariantMap({
                                                             { "numRowsAffected", DACResult.numRowsAffected() },
                                                         }));
@@ -1862,10 +1896,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblVoucher", QVariantMap({
                                                     { "numRowsAffected", DACResult.numRowsAffected() },
                                                 }));
@@ -1880,10 +1915,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblApprovalRequest", QVariantMap({
                                                             { "numRowsAffected", DACResult.numRowsAffected() },
                                                         }));
@@ -1898,10 +1934,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblActiveSessions", QVariantMap({
                                                            { "numRowsAffected", DACResult.numRowsAffected() },
                                                        }));
@@ -1914,10 +1951,11 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
              WHERE u.usrEmail=?
                 OR u.usrEmail=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   UserEmail,
-                                                   AdminUserEmail
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     UserEmail,
+                                                     AdminUserEmail
+                                                 });
         Result.insert("tblUser", QVariantMap({
                                                  { "items", QStringList({ UserEmail, AdminUserEmail }).join(",") },
                                                  { "numRowsAffected", DACResult.numRowsAffected() },
@@ -1931,9 +1969,10 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
               FROM tblRoles r
              WHERE r.rolName=?
         ;)";
-        clsDACResult DACResult = DAC.execQuery("", QueryString, {
-                                                   RoleName
-                                               });
+        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+                                                 QueryString, {
+                                                     RoleName
+                                                 });
         Result.insert("tblRoles", QVariantMap({
                                                   { "items", RoleName },
                                                   { "numRowsAffected", DACResult.numRowsAffected() },
