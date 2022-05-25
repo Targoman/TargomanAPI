@@ -97,7 +97,7 @@ QVariant IMPL_ORMGET(ApprovalRequest) {
 bool IMPL_ORMDELETE(ApprovalRequest) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, {}, true);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
 }
 

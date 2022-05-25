@@ -255,19 +255,19 @@ QVariant IMPL_ORMGET(intfAccountProducts) {
 quint32 IMPL_ORMCREATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountProducts) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -350,19 +350,19 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
 quint32 IMPL_ORMCREATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountSaleables) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -432,9 +432,10 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
   if (!Ok || !UserPackageID )
     throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-  this->callSP("spUserAsset_SetAsPrefered", {
-                 {"iUserID", _APICALLBOOM.getUserID()},
-                 {"iUASID",  UserPackageID},
+  this->callSP(APICALLBOOM_PARAM,
+               "spUserAsset_SetAsPrefered", {
+                   { "iUserID", _APICALLBOOM.getUserID() },
+                   { "iUASID",  UserPackageID },
                });
   return false;
 }
@@ -549,19 +550,19 @@ QVariant IMPL_ORMGET(intfAccountCoupons) {
 quint32 IMPL_ORMCREATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -591,19 +592,19 @@ QVariant IMPL_ORMGET(intfAccountPrizes) {
 quint32 IMPL_ORMCREATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 //} //namespace Targoman::API::AAA {

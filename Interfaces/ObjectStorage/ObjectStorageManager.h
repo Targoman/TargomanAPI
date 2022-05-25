@@ -57,7 +57,8 @@ class ObjectStorageManager
 {
 public:
     static QVariantMap saveFiles(
-        const quint64 _currentUserID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        const quint64 _currentUserID,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
@@ -66,7 +67,8 @@ public:
     );
 
     static quint64 saveFile(
-        const quint64 _currentUserID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        const quint64 _currentUserID,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,

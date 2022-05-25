@@ -55,7 +55,7 @@ clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QO
 }
 
 void clsRequestHandler::process(const QString& _api) {
-    this->Request->onData([this](QByteArray _data ) {
+    this->Request->onData([this](QByteArray _data) {
         try {
             TargomanLogInfo(7, "posted data: " << _data);
 
@@ -264,6 +264,37 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
+void clsRequestHandler::addToTimings(const QString &_label, quint64 _nanoSecs) {
+    if (this->ServerTimings.contains(_label))
+        this->ServerTimings[_label] += _nanoSecs;
+    else
+        this->ServerTimings[_label] = _nanoSecs;
+}
+
+void clsRequestHandler::sendTimingsToResponse() {
+    this->addToTimings("total", this->ElapsedTimer.nsecsElapsed());
+
+//    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
+//    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
+
+    QStringList Output;
+
+    for (QMap<QString, quint64>::const_iterator it = this->ServerTimings.constBegin();
+         it != this->ServerTimings.constEnd();
+         it ++
+    ) {
+        Output.append(QString("%1;dur=%2").arg(it.key()).arg(ceil(it.value() / 1000.0) / 1000));
+    }
+
+    this->Response->addHeaderValue("Server-Timing", Output.join(", "));
+
+    TargomanLogInfo(7, "    "
+                       << "Server-Timing"
+                       << " : "
+                       << Output.join(", ")
+                       );
+}
+
 clsRequestHandler::stuResult clsRequestHandler::run(
     clsAPIObject* _apiObject,
     QStringList& _queries,
@@ -272,11 +303,15 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 ) {
 //    QVariantMap ResponseHeaders;
 
+    auto FNTiming = [=](const QString &_label, quint64 _nanoSecs) {
+        this->addToTimings(_label, _nanoSecs);
+    };
+
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
     if (_apiObject->requiresJWT())
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL());
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(FNTiming));
     else
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL());
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(FNTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -511,8 +546,7 @@ void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
     this->Response->setStatusCode(qhttp::ESTATUS_OK);
 
 #ifdef QT_DEBUG
-    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
+    this->sendTimingsToResponse();
 #endif
 
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
@@ -575,18 +609,19 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->addHeaderValue("Access-Control-Allow-Origin", QStringLiteral("*"));
         this->Response->addHeaderValue("Connection", QStringLiteral("keep-alive"));
 
-        auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
-            if (_responseHeaders.contains("Access-Control-Expose-Headers"))
-                _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
-            else
-                _responseHeaders["Access-Control-Expose-Headers"] = _header;
-        };
+//        auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
+//            if (_responseHeaders.contains("Access-Control-Expose-Headers"))
+//                _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
+//            else
+//                _responseHeaders["Access-Control-Expose-Headers"] = _header;
+//        };
 
 #ifdef QT_DEBUG
-        funcAddToHeaderArray("x-debug-time-elapsed");
+        this->sendTimingsToResponse();
+//        funcAddToHeaderArray("x-debug-time-elapsed");
 
-        if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-            _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
+//        if (_responseHeaders.contains("x-debug-time-elapsed") == false)
+//            _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
         this->addHeaderValues(_responseHeaders);
@@ -631,8 +666,7 @@ void clsRequestHandler::sendCORSOptions() {
     this->Response->setStatusCode(qhttp::ESTATUS_NO_CONTENT);
 
 #ifdef QT_DEBUG
-    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
-    this->Response->addHeaderValue("x-debug-time-elapsed", QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms");
+    this->sendTimingsToResponse();
 #endif
 
     this->Response->end();
@@ -686,18 +720,19 @@ void clsRequestHandler::sendResponseBase(
     this->Response->addHeaderValue("Access-Control-Allow-Origin", QStringLiteral("*"));
     this->Response->addHeaderValue("Connection", QStringLiteral("keep-alive"));
 
-    auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
-        if (_responseHeaders.contains("Access-Control-Expose-Headers"))
-            _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
-        else
-            _responseHeaders["Access-Control-Expose-Headers"] = _header;
-    };
+//    auto funcAddToHeaderArray = [&_responseHeaders](const QString &_header) {
+//        if (_responseHeaders.contains("Access-Control-Expose-Headers"))
+//            _responseHeaders["Access-Control-Expose-Headers"] = _responseHeaders["Access-Control-Expose-Headers"].toString() + "," + _header;
+//        else
+//            _responseHeaders["Access-Control-Expose-Headers"] = _header;
+//    };
 
 #ifdef QT_DEBUG
-    funcAddToHeaderArray("x-debug-time-elapsed");
+    this->sendTimingsToResponse();
+//    funcAddToHeaderArray("x-debug-time-elapsed");
 
-    if (_responseHeaders.contains("x-debug-time-elapsed") == false)
-        _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
+//    if (_responseHeaders.contains("x-debug-time-elapsed") == false)
+//        _responseHeaders["x-debug-time-elapsed"] = QString::number(ceil(this->ElapsedTimer.nsecsElapsed() / 1000.0) / 1000) + " ms";
 #endif
 
     this->addHeaderValues(_responseHeaders);

@@ -56,13 +56,13 @@ quint64 IMPL_ORMCREATE(UserWallets) {
         _createInfo.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(UserWallets) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(UserWallets) {
@@ -73,7 +73,7 @@ bool IMPL_ORMDELETE(UserWallets) {
         ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 /**
@@ -87,8 +87,8 @@ bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
 )) {
     bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    this->callSP("spWallet_SetAsDefault",
-                 {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spWallet_SetAsDefault", {
                      { "iUserID", (IsPrivileged ? 0 : _APICALLBOOM.getUserID()) },
                      { "iWalID", _walID },
                  });
@@ -109,8 +109,8 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 //    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destEmailOrMobile, "destEmailOrMobile");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP("spWallet_Transfer",
-                 {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spWallet_Transfer", {
                      { "iFromUserID", _APICALLBOOM.getUserID() },
                      { "iPass", _pass },
                      { "iSalt", _salt },
@@ -177,6 +177,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
         } else {
             TAPI::MD5_t PaymentMD5;
             Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
+                                      APICALLBOOM_PARAM,
                                       _gatewayType,
                                       _domain,
                                       Voucher.ID,
@@ -190,14 +191,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
         }
     } catch (...) {
         this->Update(Voucher::instance(),
-                                     SYSTEM_USER_ID,
-                                     {},
-                                     TAPI::ORMFields_t({
-                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-                                     }),
-                                     {
-                                        { tblVoucher::vchID, Voucher.ID }
-                                     });
+                     APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+                     {},
+                     TAPI::ORMFields_t({
+                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                     }),
+                     {
+                        { tblVoucher::vchID, Voucher.ID }
+                     });
         throw;
     }
 
@@ -210,7 +211,8 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
     quint64 _walID,
     const QString &_desc
 )) {
-    return this->callSP("spWithdrawal_Request", {
+    return this->callSP(APICALLBOOM_PARAM,
+                        "spWithdrawal_Request", {
                             { "iWalletID", _walID },
                             { "iForUsrID", _APICALLBOOM.getUserID() },
                             { "iByUserID", _APICALLBOOM.getUserID() },
@@ -231,7 +233,8 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
 )) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:requestWithdrawal" });
 
-    return this->callSP("spWithdrawal_Request", {
+    return this->callSP(APICALLBOOM_PARAM,
+                        "spWithdrawal_Request", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
                             { "iByUserID", _APICALLBOOM.getUserID() },
@@ -250,7 +253,8 @@ bool IMPL_REST_POST(UserWallets, acceptWithdrawal, (
 )) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:acceptWithdrawal" });
 
-    this->callSP("spWithdrawal_Accept", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spWithdrawal_Accept", {
                      { "iVoucherID", _voucherID },
                      { "iOperator_usrID", _APICALLBOOM.getUserID() },
                  });

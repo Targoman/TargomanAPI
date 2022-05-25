@@ -76,13 +76,13 @@ QVariant IMPL_ORMGET(APITokens) {
 quint64 IMPL_ORMCREATE(APITokens) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(APITokens) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(APITokens) {
@@ -91,7 +91,7 @@ bool IMPL_ORMDELETE(APITokens) {
         ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

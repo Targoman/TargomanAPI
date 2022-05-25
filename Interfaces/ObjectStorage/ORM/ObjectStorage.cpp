@@ -178,17 +178,17 @@ quint32 IMPL_ORMCREATE(intfUploadGateways) {
 //    if (_createInfo.contains(tblintfUploadGateways::ugwAllowedDomainName))
 //        _createInfo[tblintfUploadGateways::ugwAllowedDomainName] = URLHelper::domain(_createInfo[tblUploadGateways::ugwAllowedDomainName].toString());
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfUploadGateways) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfUploadGateways) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 } //namespace Targoman::API::ObjectStorage::ORM

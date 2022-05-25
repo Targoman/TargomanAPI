@@ -62,7 +62,7 @@ QVariant IMPL_ORMGET(ForgotPassRequest) {
 bool IMPL_ORMDELETE(ForgotPassRequest) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, {}, true);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

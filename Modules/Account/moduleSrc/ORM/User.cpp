@@ -153,7 +153,7 @@ quint64 IMPL_ORMCREATE(User) {
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /*
@@ -162,13 +162,13 @@ quint64 IMPL_ORMCREATE(User) {
 bool IMPL_ORMUPDATE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 SelectQuery User::getPhotoQuery(quint64 _usrID) {
@@ -215,14 +215,13 @@ bool IMPL_REST_UPDATE(User, photo, (
           + "   , ueiUpdatedBy_usrID=?"
           ;
 
-    clsDACResult Result = UserExtraInfo::instance().execQuery(
-                              qry,
-                              {
-                                  _image,
-                                  CurrentUserID,
-                                  _image,
-                                  CurrentUserID,
-                              });
+    clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+                                                              qry, {
+                                                                  _image,
+                                                                  CurrentUserID,
+                                                                  _image,
+                                                                  CurrentUserID,
+                                                              });
 
     bool OK = Result.numRowsAffected() > 0;
 
@@ -245,12 +244,11 @@ bool IMPL_REST_POST(User, deletePhoto, (
           + " WHERE uei_usrID=?"
           ;
 
-    clsDACResult Result = UserExtraInfo::instance().execQuery(
-                              qry,
-                              {
-                                  CurrentUserID,
-                                  CurrentUserID,
-                              });
+    clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+                                                              qry, {
+                                                                  CurrentUserID,
+                                                                  CurrentUserID,
+                                                              });
 
     bool OK = Result.numRowsAffected() > 0;
 
@@ -281,7 +279,8 @@ bool IMPL_REST_UPDATE(User, email, (
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP("spApproval_Request", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spApproval_Request", {
                      { "iBy", "E" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _email },
@@ -313,7 +312,8 @@ bool IMPL_REST_UPDATE(User, mobile, (
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP("spApproval_Request", {
+    this->callSP(APICALLBOOM_PARAM,
+                 "spApproval_Request", {
                      { "iBy", "M" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _mobile },
@@ -388,11 +388,10 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
 
         Params.append(CurrentUserID);
 
-        clsDACResult Result = UserExtraInfo::instance().execQuery(
-                                  qry,
-                                  Params
-                                  + Params
-                              );
+        clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+                                                                  qry,
+                                                                  Params + Params
+                                                                  );
     }
 
     return true;
@@ -513,10 +512,10 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 
         qDebug() << "******************************" << qry;
 
-        clsDACResult Result = UserExtraInfo::instance().execQuery(
-                                  qry,
-                                  Params + Params
-                                  );
+        clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+                                                                  qry,
+                                                                  Params + Params
+                                                                  );
     }
 
     //------------------------

@@ -47,7 +47,7 @@ quint64 IMPL_ORMCREATE(Props) {
         _createInfo.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _createInfo);
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
+    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(Props) {
@@ -57,7 +57,7 @@ bool IMPL_ORMUPDATE(Props) {
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 bool IMPL_ORMDELETE(Props) {
@@ -66,7 +66,7 @@ bool IMPL_ORMDELETE(Props) {
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters);
+    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 Props::Props() :

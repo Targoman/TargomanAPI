@@ -625,11 +625,12 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     } //if discount
 
     //-- reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP("spSaleable_Reserve", {
-        { "iSaleableID", AssetItem.slbID },
-        { "iUserID", CurrentUserID },
-        { "iQty", _qty },
-    });
+    this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+                                   "spSaleable_Reserve", {
+                                       { "iSaleableID", AssetItem.slbID },
+                                       { "iUserID", CurrentUserID },
+                                       { "iQty", _qty },
+                                   });
 
     //-- new pre voucher item --------------------------------
     ///TODO: add ttl for order item
@@ -739,7 +740,9 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, remo
             Found = true;
 
             //delete voucher item
-            if (this->cancelVoucherItem(_APICALLBOOM.getUserID(), PreVoucherItem,
+            if (this->cancelVoucherItem(_APICALLBOOM,
+                                        _APICALLBOOM.getUserID(),
+                                        PreVoucherItem,
                                         [](const QVariantMap &_userAssetInfo) -> bool {
                                             TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
                                             return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
@@ -896,39 +899,45 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, upda
 |** procerss and cancel voucher item ******************************|
 \******************************************************************/
 bool intfAccountingBasedModule::increaseDiscountUsage(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     if (_voucherItem.DisAmount > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_IncreaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
+        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+                                                           "spCoupon_IncreaseStats", {
+                                                               { "iDiscountID", _voucherItem.Discount.ID },
+                                                               { "iTotalUsedCount", 1 },
+                                                               { "iTotalUsedAmount", _voucherItem.DisAmount },
+                                                           });
     }
+
     return true;
 }
 
 bool intfAccountingBasedModule::decreaseDiscountUsage(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     if (_voucherItem.DisAmount > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP("spCoupon_DecreaseStats", {
-            { "iDiscountID", _voucherItem.Discount.ID },
-            { "iTotalUsedCount", 1 },
-            { "iTotalUsedAmount", _voucherItem.DisAmount },
-        });
+        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+                                                           "spCoupon_DecreaseStats", {
+                                                               { "iDiscountID", _voucherItem.Discount.ID },
+                                                               { "iTotalUsedCount", 1 },
+                                                               { "iTotalUsedAmount", _voucherItem.DisAmount },
+                                                           });
     }
+
     return true;
 }
 
 bool intfAccountingBasedModule::activateUserAsset(
-    quint64 _userID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
     return this->Update(
         *this->AccountUserAssets,
-        _userID,
+        APICALLBOOM_PARAM,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         TAPI::ORMFields_t({
             { tblAccountUserAssetsBase::uas_vchID, _voucherID },
@@ -941,12 +950,12 @@ bool intfAccountingBasedModule::activateUserAsset(
 }
 
 bool intfAccountingBasedModule::removeFromUserAssets(
-    quint64 _userID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     return this->DeleteByPks(
         *this->AccountUserAssets,
-        _userID,
+        APICALLBOOM_PARAM,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         {
             { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
@@ -956,29 +965,31 @@ bool intfAccountingBasedModule::removeFromUserAssets(
 }
 
 bool intfAccountingBasedModule::processVoucherItem(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    if (!this->preProcessVoucherItem(_voucherItem, _voucherID))
+    if (!this->preProcessVoucherItem(APICALLBOOM_PARAM, _voucherItem, _voucherID))
         return false;
 
-    if (this->activateUserAsset(_userID, _voucherItem, _voucherID) == false)
+    if (this->activateUserAsset(APICALLBOOM_PARAM, _voucherItem, _voucherID) == false)
         return false;
 
-    this->increaseDiscountUsage(_voucherItem);
+    this->increaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
 
-    this->postProcessVoucherItem(_voucherItem, _voucherID);
+    this->postProcessVoucherItem(APICALLBOOM_PARAM, _voucherItem, _voucherID);
 
     return true;
 }
 
 bool intfAccountingBasedModule::cancelVoucherItem(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
 ) {
-    if (!this->preCancelVoucherItem(_voucherItem))
+    if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _voucherItem))
         return false;
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
@@ -996,16 +1007,17 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
 
     if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
-        this->decreaseDiscountUsage(_voucherItem);
+        this->decreaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
 
     quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
 
     //-- un-reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP("spSaleable_unReserve", {
-        { "iSaleableID", SaleableID },
-        { "iUserID", _userID },
-        { "iQty", _voucherItem.Qty },
-    });
+    this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+                                   "spSaleable_unReserve", {
+                                       { "iSaleableID", SaleableID },
+                                       { "iUserID", APICALLBOOM_PARAM.getUserID() },
+                                       { "iQty", _voucherItem.Qty },
+                                   });
 
     //-- un-reserve saleable ------------------------------------
 //    UpdateQuery(*this->AccountSaleables)
@@ -1025,9 +1037,9 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 //        .execute(_userID);
 
     //-----------------------------------------------------------
-    this->removeFromUserAssets(_userID, _voucherItem);
+    this->removeFromUserAssets(APICALLBOOM_PARAM, _voucherItem);
 
-    this->postCancelVoucherItem(_voucherItem);
+    this->postCancelVoucherItem(APICALLBOOM_PARAM, _voucherItem);
 
     return true;
 }
@@ -1058,7 +1070,7 @@ bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
 )) {
     checkVoucherItemForTrustedActionSanity(_data);
 
-    return this->processVoucherItem(_data.UserID, _data.VoucherItem, _data.VoucherID);
+    return this->processVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem, _data.VoucherID);
 }
 
 bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
@@ -1067,7 +1079,7 @@ bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
 )) {
     checkVoucherItemForTrustedActionSanity(_data);
 
-    return this->cancelVoucherItem(_data.UserID, _data.VoucherItem);
+    return this->cancelVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem);
 }
 
 } //namespace Targoman::API::AAA

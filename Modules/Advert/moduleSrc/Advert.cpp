@@ -446,7 +446,8 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountCoupons c
              WHERE c.cpnCode=?
         ;)";
-        clsDACResult DACResult = this->AccountCoupons->execQuery(QueryString, {
+        clsDACResult DACResult = this->AccountCoupons->execQuery(APICALLBOOM_PARAM,
+                                                                 QueryString, {
                                                                      CouponCode
                                                                  });
         Result.insert("tblCoupon", QVariantMap({
@@ -462,7 +463,8 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountSaleables s
              WHERE s.slbCode=?
         ;)";
-        clsDACResult DACResult = this->AccountSaleables->execQuery(QueryString, {
+        clsDACResult DACResult = this->AccountSaleables->execQuery(APICALLBOOM_PARAM,
+                                                                   QueryString, {
                                                                        SaleableCode
                                                                    });
         Result.insert("tblSaleable", QVariantMap({
@@ -478,7 +480,8 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountProducts p
              WHERE p.prdCode=?
         ;)";
-        clsDACResult DACResult = this->AccountProducts->execQuery(QueryString, {
+        clsDACResult DACResult = this->AccountProducts->execQuery(APICALLBOOM_PARAM,
+                                                                  QueryString, {
                                                                       ProductCode
                                                                   });
         Result.insert("tblProduct", QVariantMap({
@@ -494,7 +497,8 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblLocations l
              WHERE l.locURL=?
         ;)";
-        clsDACResult DACResult = Locations::instance().execQuery(QueryString, {
+        clsDACResult DACResult = Locations::instance().execQuery(APICALLBOOM_PARAM,
+                                                                 QueryString, {
                                                                      LocationUrl
                                                                  });
         Result.insert("tblLocation", QVariantMap({

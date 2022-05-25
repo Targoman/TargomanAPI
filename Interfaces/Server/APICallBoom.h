@@ -26,18 +26,32 @@
 
 #include "QString"
 #include "QSharedDataPointer"
+#include "QElapsedTimer"
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/Macros.h"
 
 #define APICALLBOOM_TYPE_BASE_STR           "APICallBoom<"
+
+//just for use in api methods (.h)
 #define APICALLBOOM_TYPE_NO_JWT_DECL        APICallBoom<false>
 #define APICALLBOOM_TYPE_NO_JWT_DECL_STR    TARGOMAN_M2STR(APICALLBOOM_TYPE_NO_JWT_DECL)
+
+//just for use in api methods (.cpp)
 #define APICALLBOOM_TYPE_NO_JWT_IMPL        Q_DECL_UNUSED APICALLBOOM_TYPE_NO_JWT_DECL
+
+//just for use in api methods (.h)
 #define APICALLBOOM_TYPE_JWT_DECL           APICallBoom<true>
 #define APICALLBOOM_TYPE_JWT_DECL_STR       TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_DECL)
+
+//just for use in api methods (.cpp)
 #define APICALLBOOM_TYPE_JWT_IMPL           Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_DECL
+
+#define INTFAPICALLBOOM                     intfAPICallBoom
+//just for use in NON-api methods (.h)
 #define INTFAPICALLBOOM_DECL                intfAPICallBoom
+//just for use in NON-api methods (.cpp)
 #define INTFAPICALLBOOM_IMPL                Q_DECL_UNUSED intfAPICallBoom
+
 #define APICALLBOOM_PARAM                   _APICALLBOOM
 #define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
 
@@ -48,8 +62,8 @@ class APICallBoomData;
 class intfAPICallBoom
 {
 public:
-    intfAPICallBoom();
-    intfAPICallBoom(const intfAPICallBoom& _other);
+    intfAPICallBoom(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming);
+    intfAPICallBoom(const intfAPICallBoom &_other);
     virtual ~intfAPICallBoom();
 
 public:
@@ -79,6 +93,35 @@ public:
     void addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue=false);
     void addResponseHeaderNameToExpose(const QString &_header);
 
+    //-----------------------
+//    enum class TimerTypes {
+//        api,
+//        db,
+//    };
+
+    class ScopedTimer {
+    public:
+        ScopedTimer(intfAPICallBoom *_parent, const QString &_label) :
+            Parent(_parent),
+            Label(_label)
+        {
+            this->ElapsedTimer.start();
+        }
+        ~ScopedTimer() {
+            this->Parent->addToTimings(this->Label, this->ElapsedTimer.nsecsElapsed());
+        }
+
+    protected:
+        intfAPICallBoom* Parent;
+        QString Label;
+        QElapsedTimer ElapsedTimer;
+    };
+
+    ScopedTimer createScopeTiming(const QString &_label) {
+        return ScopedTimer(this, _label);
+    }
+    void addToTimings(const QString &_label, quint64 _nanoSecs);
+
 protected:
     QExplicitlySharedDataPointer<APICallBoomData> Data;
 };
@@ -87,6 +130,10 @@ template <bool _needJWT>
 class APICallBoom : public intfAPICallBoom
 {
 public:
+    APICallBoom(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming) :
+        intfAPICallBoom(_fnTiming)
+    { ; }
+
     virtual bool needJWT() { return _needJWT; }
 };
 

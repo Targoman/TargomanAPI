@@ -78,7 +78,7 @@ bool IMPL_ORMDELETE(ActiveSessions) {
       ExtraFilters.insert(tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID());
 //  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER, ExtraFilters, true);
+  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

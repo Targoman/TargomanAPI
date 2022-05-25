@@ -61,7 +61,12 @@ public:
 
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
-    TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(const QString _login, const stuActiveAccount& _activeAccount, const QString& _services = {});
+    TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const QString _login,
+        const stuActiveAccount& _activeAccount,
+        const QString& _services = {}
+    );
 
 private slots:
     /*****************************************************************\
@@ -273,14 +278,14 @@ private slots:
     \*****************************************************************/
 private:
     Targoman::API::AAA::stuVoucher processVoucher(
-//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        quint64 _userID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        quint64 _userID,
         quint64 _voucherID
     );
 
     void tryCancelVoucher(
-//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        quint64 _userID,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
     );
