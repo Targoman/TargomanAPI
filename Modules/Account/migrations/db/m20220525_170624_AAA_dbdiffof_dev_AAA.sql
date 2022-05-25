@@ -113,17 +113,9 @@ ALTER TABLE `tblCurrency`
     CHANGE COLUMN `curRate` `curRate` FLOAT UNSIGNED NOT NULL AFTER `curSymbol`
 /*!*/;
 
-INSERT INTO tblCurrency
-   SET `curName` = 'ریال ایران'
-     , `curSymbol` = 'IRR'
-     , `curRate` = 1.0
-     , `curIsDefault` = 1
-;
-
-INSERT INTO tblCurrency
-   SET `curName` = 'تومان ایران'
-     , `curSymbol` = 'IRT'
-     , `curRate` = 0.1
+INSERT INTO tblCurrency(`curID`, `curName`, `curSymbol`, `curRate`, `curIsDefault`) VALUES
+    (1, 'ریال ایران', 'IRR', 1.0, 1),
+    (2, 'تومان ایران', 'IRT', 0.1, 0)
 ;
 
 ALTER TABLE `tblCurrency`
@@ -132,4 +124,21 @@ ALTER TABLE `tblCurrency`
 
 ALTER TABLE `tblCurrency`
     ADD INDEX `curIsDefault` (`curIsDefault`)
+/*!*/;
+
+ALTER TABLE `tblPaymentGateways`
+    ADD COLUMN `pgw_curID` INT UNSIGNED NULL DEFAULT NULL AFTER `pgwMetaInfo`
+/*!*/;
+
+ALTER TABLE `tblPaymentGateways`
+    ADD CONSTRAINT `FK_tblPaymentGateways_tblCurrency` FOREIGN KEY (`pgw_curID`) REFERENCES `tblCurrency` (`curID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+/*!*/;
+
+UPDATE `tblPaymentGateways`
+    SET `pgw_curID` = 1
+    WHERE `pgw_curID` IS NULL
+;
+
+ALTER TABLE `tblPaymentGateways`
+    CHANGE COLUMN `pgw_curID` `pgw_curID` INT(10) UNSIGNED NOT NULL AFTER `pgwMetaInfo`;
 /*!*/;

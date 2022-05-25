@@ -1695,6 +1695,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                           { "password", "123" },
                       })
                     },
+                    { tblPaymentGateways::pgw_curID,   1 },
                     { tblPaymentGateways::pgwAllowedDomainName, "dev.test" },
                 };
                 quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
@@ -1704,6 +1705,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                                                         tblPaymentGateways::pgwType,
                                                         tblPaymentGateways::pgwDriver,
                                                         tblPaymentGateways::pgwMetaInfo,
+                                                        tblPaymentGateways::pgw_curID,
                                                         tblPaymentGateways::pgwAllowedDomainName,
 //                                                        tblPaymentGateways::pgwTransactionFeeValue,
 //                                                        tblPaymentGateways::pgwTransactionFeeType,

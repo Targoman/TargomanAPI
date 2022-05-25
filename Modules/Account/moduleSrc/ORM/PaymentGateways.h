@@ -84,6 +84,7 @@ namespace tblPaymentGateways {
     TARGOMAN_CREATE_CONSTEXPR(pgwType);
     TARGOMAN_CREATE_CONSTEXPR(pgwDriver);
     TARGOMAN_CREATE_CONSTEXPR(pgwMetaInfo);     //meta info keys are defined and using by driver
+    TARGOMAN_CREATE_CONSTEXPR(pgw_curID);
     TARGOMAN_CREATE_CONSTEXPR(pgwAllowedDomainName);
     //------------------
     TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
@@ -114,6 +115,7 @@ namespace tblPaymentGateways {
             pgwType,
             pgwDriver,
             pgwMetaInfo,
+            pgw_curID,
             pgwAllowedDomainName,
             //------------------
             pgwTransactionFeeValue,
@@ -145,6 +147,7 @@ namespace tblPaymentGateways {
         SF_Enum(Targoman::API::AccountModule::enuPaymentGatewayType, pgwType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
         SF_QString(pgwDriver),
         SF_JSON_t(pgwMetaInfo),
+        SF_quint32(pgw_curID),
         SF_QString(pgwAllowedDomainName),
 
         SF_NULLABLE_quint32(pgwTransactionFeeValue),
