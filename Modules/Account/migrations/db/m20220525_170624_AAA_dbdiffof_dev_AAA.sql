@@ -34,7 +34,7 @@ ALTER TABLE `tblCurrency`
 
 ALTER TABLE `tblCurrency`
     ADD CONSTRAINT `FK_tblCurrency_tblUser` FOREIGN KEY (`curCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    ADD CONSTRAINT `FK_tblCurrency_tblUser_2` FOREIGN KEY (`vUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+    ADD CONSTRAINT `FK_tblCurrency_tblUser_2` FOREIGN KEY (`curUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 /*!*/;
 
 ALTER TABLE `tblCurrency`
