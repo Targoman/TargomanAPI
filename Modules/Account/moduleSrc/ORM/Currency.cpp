@@ -21,39 +21,39 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "CurrencyExchangeRate.h"
+#include "Currency.h"
 //#include "User.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuCurrencyExchangeRateStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuCurrencyStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
-CurrencyExchangeRate::CurrencyExchangeRate() :
+Currency::Currency() :
     intfSQLBasedModule(
         AAASchema,
-        tblCurrencyExchangeRate::Name,
-        tblCurrencyExchangeRate::Private::ORMFields,
-        tblCurrencyExchangeRate::Private::Relations,
-        tblCurrencyExchangeRate::Private::Indexes
+        tblCurrency::Name,
+        tblCurrency::Private::ORMFields,
+        tblCurrency::Private::Relations,
+        tblCurrency::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(CurrencyExchangeRate) {
+QVariant IMPL_ANONYMOUSE_ORMGET(Currency) {
     return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
-quint64 IMPL_ORMCREATE(CurrencyExchangeRate) {
+quint64 IMPL_ORMCREATE(Currency) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
-bool IMPL_ORMUPDATE(CurrencyExchangeRate) {
+bool IMPL_ORMUPDATE(Currency) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
 }
 
-bool IMPL_ORMDELETE(CurrencyExchangeRate) {
+bool IMPL_ORMDELETE(Currency) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER);
@@ -64,16 +64,16 @@ bool IMPL_ORMDELETE(CurrencyExchangeRate) {
  *     operator
  *     owner
  */
-bool IMPL_REST_UPDATE(CurrencyExchangeRate, setAsDefault, (
+bool IMPL_REST_UPDATE(Currency, setAsDefault, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint32 _exrID
+    quint32 _curID
 )) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canChangeDefault" });
 
-    this->callSP("spCurrencyExchangeRate_SetAsDefault",
+    this->callSP("spCurrency_SetAsDefault",
                  {
                      { "iUserID", _APICALLBOOM.getUserID() },
-                     { "iExrID", _exrID },
+                     { "iCurID", _curID },
                  });
 
     return true;

@@ -10,59 +10,59 @@ USE `{{dbprefix}}{{Schema}}`;
 | binlog.000078 --start-position=24048                       |
 \************************************************************/
 
-CREATE TABLE `tblCurrencyExchangeRate` (
-	`exrID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`exrName` VARCHAR(128) NOT NULL,
-	`exrSymbol` VARCHAR(32) NOT NULL,
-	`exrRate` FLOAT UNSIGNED NULL,
-	`exrStatus` CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Deactive, R:Removed',
+CREATE TABLE `tblCurrency` (
+    `curID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `curName` VARCHAR(128) NOT NULL,
+    `curSymbol` VARCHAR(32) NOT NULL,
+    `curRate` FLOAT UNSIGNED NULL,
+    `curStatus` CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A:Active, D:Deactive, R:Removed',
 	`_InvalidatedAt` INT NULL,
-	`exrCreationDateTime` DATETIME NULL,
-	`exrCreatedBy_usrID` BIGINT UNSIGNED NULL DEFAULT NULL,
-	`exrUpdatedBy_usrID` BIGINT UNSIGNED NULL DEFAULT NULL,
-	PRIMARY KEY (`exrID`)
+    `curCreationDateTime` DATETIME NULL,
+    `curCreatedBy_usrID` BIGINT UNSIGNED NULL DEFAULT NULL,
+    `curUpdatedBy_usrID` BIGINT UNSIGNED NULL DEFAULT NULL,
+    PRIMARY KEY (`curID`)
 )
 COLLATE='utf8mb4_general_ci'
 /*!*/;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	CHANGE COLUMN `_InvalidatedAt` `_InvalidatedAt` INT(10) UNSIGNED NULL DEFAULT 0 AFTER `exrStatus`,
-	CHANGE COLUMN `exrCreationDateTime` `exrCreationDateTime` DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER `_InvalidatedAt`
+ALTER TABLE `tblCurrency`
+    CHANGE COLUMN `_InvalidatedAt` `_InvalidatedAt` INT(10) UNSIGNED NULL DEFAULT 0 AFTER `curStatus`,
+    CHANGE COLUMN `curCreationDateTime` `curCreationDateTime` DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER `_InvalidatedAt`
 /*!*/;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	CHANGE COLUMN `exrCreatedBy_usrID` `exrCreatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL AFTER `exrCreationDateTime`,
-	CHANGE COLUMN `exrUpdatedBy_usrID` `exrUpdatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL AFTER `exrCreatedBy_usrID`
+ALTER TABLE `tblCurrency`
+    CHANGE COLUMN `curCreatedBy_usrID` `curCreatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL AFTER `curCreationDateTime`,
+    CHANGE COLUMN `curUpdatedBy_usrID` `curUpdatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL AFTER `curCreatedBy_usrID`
 /*!*/;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	ADD CONSTRAINT `FK_tblCurrencyExchangeRate_tblUser` FOREIGN KEY (`exrCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION,
-	ADD CONSTRAINT `FK_tblCurrencyExchangeRate_tblUser_2` FOREIGN KEY (`exrUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+ALTER TABLE `tblCurrency`
+    ADD CONSTRAINT `FK_tblCurrency_tblUser` FOREIGN KEY (`curCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    ADD CONSTRAINT `FK_tblCurrency_tblUser_2` FOREIGN KEY (`vUpdatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 /*!*/;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	ADD COLUMN `exrIsDefault` BIT NOT NULL AFTER `exrRate`
+ALTER TABLE `tblCurrency`
+    ADD COLUMN `curIsDefault` BIT NOT NULL AFTER `curRate`
 /*!*/;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	CHANGE COLUMN `exrRate` `exrRate` FLOAT UNSIGNED NULL DEFAULT NULL AFTER `exrSymbol`,
-	CHANGE COLUMN `exrIsDefault` `exrIsDefault` BIT(1) NOT NULL DEFAULT 0 AFTER `exrRate`,
-	CHANGE COLUMN `exrCreatedBy_usrID` `exrCreatedBy_usrID` BIGINT(20) UNSIGNED NULL AFTER `exrCreationDateTime`,
-	CHANGE COLUMN `exrUpdatedBy_usrID` `exrUpdatedBy_usrID` BIGINT(20) UNSIGNED NULL AFTER `exrCreatedBy_usrID`
+ALTER TABLE `tblCurrency`
+    CHANGE COLUMN `curRate` `curRate` FLOAT UNSIGNED NULL DEFAULT NULL AFTER `curSymbol`,
+    CHANGE COLUMN `curIsDefault` `curIsDefault` BIT(1) NOT NULL DEFAULT 0 AFTER `curRate`,
+    CHANGE COLUMN `curCreatedBy_usrID` `curCreatedBy_usrID` BIGINT(20) UNSIGNED NULL AFTER `curCreationDateTime`,
+    CHANGE COLUMN `curUpdatedBy_usrID` `curUpdatedBy_usrID` BIGINT(20) UNSIGNED NULL AFTER `curCreatedBy_usrID`
 /*!*/;
 
-DROP PROCEDURE IF EXISTS `spCurrencyExchangeRate_SetAsDefault`
+DROP PROCEDURE IF EXISTS `spCurrency_SetAsDefault`
 /*!*/;
 
 DELIMITER ;;
 
-CREATE PROCEDURE `spCurrencyExchangeRate_SetAsDefault`(
+CREATE PROCEDURE `spCurrency_SetAsDefault`(
 	IN `iUserID` BIGINT UNSIGNED,
-	IN `iExrID` INT UNSIGNED
+    IN `iCurID` INT UNSIGNED
 )
 BEGIN
     DECLARE vErr VARCHAR(500);
-    DECLARE vExrIsDefault INT;
+    DECLARE vCurIsDefault INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -70,11 +70,11 @@ BEGIN
 
         INSERT INTO tblActionLogs
            SET tblActionLogs.atlBy_usrID = iUserID,
-               tblActionLogs.atlType = 'spCurrencyExchangeRate_SetAsDefault.Error',
+               tblActionLogs.atlType = 'spCurrency_SetAsDefault.Error',
                tblActionLogs.atlDescription = JSON_OBJECT(
                    "err", vErr,
                    "iUserID", iUserID,
-                   "iExrID", iExrID
+                   "iCurID", iCurID
                )
         ;
 
@@ -82,26 +82,26 @@ BEGIN
         RESIGNAL;
     END;
 
-    SELECT tblCurrencyExchangeRate.exrIsDefault
-      INTO vExrIsDefault
-      FROM tblCurrencyExchangeRate
-     WHERE tblCurrencyExchangeRate.exrID = iExrID
+    SELECT tblCurrency.curIsDefault
+      INTO vCurIsDefault
+      FROM tblCurrency
+     WHERE tblCurrency.curID = iCurID
     ;
 
-    IF ISNULL(vExrIsDefault) THEN
+    IF ISNULL(vCurIsDefault) THEN
         SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:CurrencyExchangeRate not found';
+           SET MESSAGE_TEXT = '401:Currency not found';
     END IF;
 
-    IF (vExrIsDefault = 1) THEN
+    IF (vCurIsDefault = 1) THEN
         SIGNAL SQLSTATE '45000'
-           SET MESSAGE_TEXT = '401:CurrencyExchangeRate already is default';
+           SET MESSAGE_TEXT = '401:Currency already is default';
     END IF;
 
-    UPDATE tblCurrencyExchangeRate
-       SET tblCurrencyExchangeRate.exrIsDefault = 1
-         , tblCurrencyExchangeRate.exrUpdatedBy_usrID = iUserID
-     WHERE tblCurrencyExchangeRate.exrID = iExrID
+    UPDATE tblCurrency
+       SET tblCurrency.curIsDefault = 1
+         , tblCurrency.curUpdatedBy_usrID = iUserID
+     WHERE tblCurrency.curID = iCurID
     ;
 
 END
@@ -109,6 +109,19 @@ END
 
 DELIMITER ;
 
-ALTER TABLE `tblCurrencyExchangeRate`
-	CHANGE COLUMN `exrRate` `exrRate` FLOAT UNSIGNED NOT NULL AFTER `exrSymbol`
+ALTER TABLE `tblCurrency`
+    CHANGE COLUMN `curRate` `curRate` FLOAT UNSIGNED NOT NULL AFTER `curSymbol`
 /*!*/;
+
+INSERT INTO tblCurrency
+   SET `curName` = 'ریال ایران'
+     , `curSymbol` = 'IRR'
+     , `curRate` = 1.0
+     , `curIsDefault` = 1
+;
+
+INSERT INTO tblCurrency
+   SET `curName` = 'تومان ایران'
+     , `curSymbol` = 'IRT'
+     , `curRate` = 0.1
+;
