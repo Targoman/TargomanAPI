@@ -48,6 +48,7 @@ PaymentGateways::PaymentGateways() :
             { tblPaymentGateways::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
+            { tblPaymentGateways::pgw_curID,                S(quint32),                                         QFV,                                QRequired,  UPAdmin },
             { tblPaymentGateways::pgwAllowedDomainName,     S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             //------------------
             { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },

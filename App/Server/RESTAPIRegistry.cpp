@@ -683,7 +683,9 @@ void RESTAPIRegistry::dumpAPIs()
                     << (IsLastAPI ? " " : "│") << "   "
                     << (IsLastMethod ? "└" : "├") << "──"
                     << "(" << QString::number(MethodsIndex++) << ") "
-                    << Method.toUpper(); // << " " << Name;
+                    << Method.toUpper() // << " " << Name
+                    << (API.APIObject->requiresJWT() ? " (JWT)" : "")
+                    ;
 
             if (API.APIObject->ParamTypesName.isEmpty() == false) {
                 int maxLen = 0;
@@ -726,6 +728,8 @@ void RESTAPIRegistry::dumpAPIs()
                             << API.APIObject->ParamNames[ParamsIndex]
                             << " = "
                             << DefVal
+                            << " [" << (DefVal.isNull() ? "Null" : "Not Null") << "]"
+                            << " [" << (DefVal.isValid() ? "Valid" : "Invalid") << "]"
                             << (ParamsIndex < API.APIObject->ParamTypesName.count()-1 ? "," : "")
                     ;
                 }

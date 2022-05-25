@@ -823,6 +823,7 @@ private slots:
                              { "password", "123" },
                          })
                        },
+                       { "pgw_curID",   1 },
                        { "pgwAllowedDomainName", "dev.test" },
                     });
 //                qDebug() << Result;

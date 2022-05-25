@@ -41,6 +41,7 @@
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 #include "ORM/Auth.h"
+#include "ORM/Currency.h"
 #include "Payment/PaymentLogic.h"
 #include "Payment/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
@@ -163,6 +164,7 @@ Account::Account() :
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletsBalanceHistory::instance());
     this->addSubModule(&Auth::instance());
+    this->addSubModule(&Currency::instance());
 
     if (Account::InvalidPasswordsFile.value().size()) {
         QFile InputFile(Account::InvalidPasswordsFile.value());
@@ -1693,6 +1695,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                           { "password", "123" },
                       })
                     },
+                    { tblPaymentGateways::pgw_curID,   1 },
                     { tblPaymentGateways::pgwAllowedDomainName, "dev.test" },
                 };
                 quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
@@ -1702,6 +1705,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                                                         tblPaymentGateways::pgwType,
                                                         tblPaymentGateways::pgwDriver,
                                                         tblPaymentGateways::pgwMetaInfo,
+                                                        tblPaymentGateways::pgw_curID,
                                                         tblPaymentGateways::pgwAllowedDomainName,
 //                                                        tblPaymentGateways::pgwTransactionFeeValue,
 //                                                        tblPaymentGateways::pgwTransactionFeeType,

@@ -16,6 +16,7 @@ HEADERS += \
     ORM/ApprovalRequest.h \
     ORM/Auth.h \
     ORM/BlockingRules.h \
+    ORM/Currency.h \
     ORM/ForgotPassRequest.h \
     ORM/IPBin.h \
     ORM/IPStats.h \
@@ -43,6 +44,7 @@ SOURCES += \
     ORM/ApprovalRequest.cpp \
     ORM/Auth.cpp \
     ORM/BlockingRules.cpp \
+    ORM/Currency.cpp \
     ORM/ForgotPassRequest.cpp \
     ORM/IPBin.cpp \
     ORM/IPStats.cpp \
