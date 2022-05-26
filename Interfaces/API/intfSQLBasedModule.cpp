@@ -205,6 +205,7 @@ QVariant intfSQLBasedModule::Select(
     std::function<void(SelectQuery &_query)> _lambda_TouchQuery
 ) {
     auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto dbTiming2 = _APICALLBOOM.createScopeTiming("dbr"); // r of crud
 
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
@@ -281,6 +282,7 @@ quint64 intfSQLBasedModule::Create(
     CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
     auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto dbTiming2 = _APICALLBOOM.createScopeTiming("dbc"); // c of crud
 
     _table.prepareFiltersList();
 
@@ -356,6 +358,7 @@ bool intfSQLBasedModule::Update(
     const QVariantMap& _extraFilters
 ) {
     auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto dbTiming2 = _APICALLBOOM.createScopeTiming("dbu"); // u of crud
 
     _table.prepareFiltersList();
 
@@ -458,6 +461,7 @@ bool intfSQLBasedModule::DeleteByPks(
     bool _realDelete
 ) {
     auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto dbTiming2 = _APICALLBOOM.createScopeTiming("dbd"); // d of crud
 
     _table.prepareFiltersList();
 

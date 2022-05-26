@@ -96,11 +96,10 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::tkt_untID, _unitID);
 
-    quint64 TicketID = this->Create(
-                           Tickets::instance(),
-                           APICALLBOOM_PARAM,
-                           CreateFields
-                           );
+    quint64 TicketID = this->Create(Tickets::instance(),
+                                    APICALLBOOM_PARAM,
+                                    CreateFields
+                                    );
 
     if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())

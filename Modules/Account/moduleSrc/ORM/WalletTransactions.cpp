@@ -60,7 +60,7 @@ QVariant IMPL_ORMGET(WalletTransactions) {
         _query.innerJoin(tblUserWallets::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 WalletsBalanceHistory::WalletsBalanceHistory() :

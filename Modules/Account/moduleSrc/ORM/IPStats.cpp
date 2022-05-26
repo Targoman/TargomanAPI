@@ -31,7 +31,7 @@ namespace Targoman::API::AccountModule::ORM {
 QVariant IMPL_ORMGET(IPStats) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //    return query.one();
 

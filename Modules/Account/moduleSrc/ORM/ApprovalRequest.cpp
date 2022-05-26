@@ -87,7 +87,7 @@ ApprovalRequest::ApprovalRequest() :
 QVariant IMPL_ORMGET(ApprovalRequest) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //    return query.one();
 
@@ -97,7 +97,7 @@ QVariant IMPL_ORMGET(ApprovalRequest) {
 bool IMPL_ORMDELETE(ApprovalRequest) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
 }
 

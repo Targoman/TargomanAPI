@@ -935,18 +935,17 @@ bool intfAccountingBasedModule::activateUserAsset(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    return this->Update(
-        *this->AccountUserAssets,
-        APICALLBOOM_PARAM,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
-        TAPI::ORMFields_t({
-            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
-            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
-        }),
-        {
-            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
-        });
+    return this->Update(*this->AccountUserAssets,
+                        APICALLBOOM_PARAM,
+                        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+                        TAPI::ORMFields_t({
+                            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
+                            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
+                        }),
+                        {
+                            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
+                            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+                        });
 }
 
 bool intfAccountingBasedModule::removeFromUserAssets(

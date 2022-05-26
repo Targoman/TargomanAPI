@@ -75,7 +75,7 @@ QVariant IMPL_ORMGET(OnlinePayments) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 /*****************************************************************\
@@ -114,24 +114,24 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-//    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 //bool IMPL_ORMUPDATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-//    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 //bool IMPL_ORMDELETE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-//    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 /*****************************************************************\
@@ -170,12 +170,12 @@ QVariant IMPL_ORMGET(OfflinePayments) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /*****************************************************************/

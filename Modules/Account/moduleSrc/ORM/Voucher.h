@@ -67,16 +67,18 @@ namespace tblVoucher {
     TARGOMAN_CREATE_CONSTEXPR(vchStatus);
     TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            vchID,
-            vch_usrID,
-            vchDesc,
-            vchType,
-            vchTotalAmount,
-            vchProcessResult,
-            vchStatus,
-            vchCreationDateTime,
+            _tableAlias + vchID,
+            _tableAlias + vch_usrID,
+            _tableAlias + vchDesc,
+            _tableAlias + vchType,
+            _tableAlias + vchTotalAmount,
+            _tableAlias + vchProcessResult,
+            _tableAlias + vchStatus,
+            _tableAlias + vchCreationDateTime,
         };
     }
 

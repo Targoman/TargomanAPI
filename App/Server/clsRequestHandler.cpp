@@ -267,11 +267,14 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
 void clsRequestHandler::addToTimings(const QString &_label, quint64 _nanoSecs) {
     if (this->ServerTimings.contains(_label))
         this->ServerTimings[_label] += _nanoSecs;
+//    else if (_label == "total")
+//        this->ServerTimings.insert(this->ServerTimings.constBegin(), _label, _nanoSecs);
     else
-        this->ServerTimings[_label] = _nanoSecs;
+        this->ServerTimings.insert(_label, _nanoSecs);
 }
 
 void clsRequestHandler::sendTimingsToResponse() {
+#ifdef QT_DEBUG
     this->addToTimings("total", this->ElapsedTimer.nsecsElapsed());
 
 //    this->Response->addHeaderValue("Access-Control-Expose-Headers", QStringLiteral("x-debug-time-elapsed"));
@@ -281,18 +284,18 @@ void clsRequestHandler::sendTimingsToResponse() {
 
     for (QMap<QString, quint64>::const_iterator it = this->ServerTimings.constBegin();
          it != this->ServerTimings.constEnd();
-         it ++
+         it++
     ) {
         Output.append(QString("%1;dur=%2").arg(it.key()).arg(ceil(it.value() / 1000.0) / 1000));
     }
 
     this->Response->addHeaderValue("Server-Timing", Output.join(", "));
 
-    TargomanLogInfo(7, "    "
-                       << "Server-Timing"
-                       << " : "
-                       << Output.join(", ")
-                       );
+    TargomanLogInfo(7, "Server-Timing"
+                    << " : "
+                    << Output.join(", ")
+                    );
+#endif
 }
 
 clsRequestHandler::stuResult clsRequestHandler::run(
@@ -326,6 +329,8 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         TAPI::JWT_t JWT;
 
         if (_apiObject->requiresJWT()) {
+            auto dbTiming = APICALLBOOM->createScopeTiming("jwt");
+
             QString Auth = Headers.value("authorization");
             if (Auth.startsWith("Bearer ")) {
                 QString BearerToken = Auth.mid(sizeof("Bearer"));

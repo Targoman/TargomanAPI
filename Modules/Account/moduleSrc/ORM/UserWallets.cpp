@@ -45,7 +45,7 @@ QVariant IMPL_ORMGET(UserWallets) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint64 IMPL_ORMCREATE(UserWallets) {
@@ -56,13 +56,13 @@ quint64 IMPL_ORMCREATE(UserWallets) {
         _createInfo.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(UserWallets) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(UserWallets) {
@@ -73,7 +73,7 @@ bool IMPL_ORMDELETE(UserWallets) {
         ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 /**

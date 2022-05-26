@@ -134,14 +134,12 @@ QVariant IMPL_ORMGET(User) {
 //            tblUserExtraInfo::ueiUpdatedBy_usrID,
         }).join(",");
 
-    return this->Select(
-                *this,
-                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
-                {},
-                0,
-                [](SelectQuery &_query) {
-                    _query.leftJoinWith(tblUser::Relation::ExtraInfo);
-    });
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+                        {},
+                        0,
+                        [](SelectQuery &_query) {
+                            _query.leftJoinWith(tblUser::Relation::ExtraInfo);
+                        });
 
 //    return query.one();
 
@@ -153,7 +151,7 @@ quint64 IMPL_ORMCREATE(User) {
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /*
@@ -162,13 +160,13 @@ quint64 IMPL_ORMCREATE(User) {
 bool IMPL_ORMUPDATE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(User) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 SelectQuery User::getPhotoQuery(quint64 _usrID) {
@@ -345,8 +343,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::usrEnableSMSAlerts, *_enableSMSAlerts ? 1 : 0);
 
     if (ToUpdate.size())
-        this->Update(*this,
-                     _APICALLBOOM,
+        this->Update(_APICALLBOOM,
                      QString("%1").arg(CurrentUserID),
                      ToUpdate
                      );

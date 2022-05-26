@@ -249,25 +249,25 @@ QVariant IMPL_ORMGET(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountProducts) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -344,25 +344,25 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
             );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountSaleables) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountSaleables) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -420,7 +420,7 @@ QVariant IMPL_ORMGET(intfAccountUserAssets) {
   if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
     this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID() }}, _filters);
 
-  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
@@ -485,7 +485,7 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
     if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -540,7 +540,7 @@ intfAccountCoupons::intfAccountCoupons(
 QVariant IMPL_ORMGET(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //  return query.one();
 
@@ -550,19 +550,19 @@ QVariant IMPL_ORMGET(intfAccountCoupons) {
 quint32 IMPL_ORMCREATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountCoupons) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
@@ -582,7 +582,7 @@ intfAccountPrizes::intfAccountPrizes(
 QVariant IMPL_ORMGET(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-  return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
 //  return query.one();
 
@@ -592,19 +592,19 @@ QVariant IMPL_ORMGET(intfAccountPrizes) {
 quint32 IMPL_ORMCREATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(intfAccountPrizes) {
     Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-  return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+  return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 //} //namespace Targoman::API::AAA {

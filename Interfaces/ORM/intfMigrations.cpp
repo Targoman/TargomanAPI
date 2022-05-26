@@ -52,7 +52,7 @@ QVariant IMPL_ANONYMOUSE_ORMGET(intfMigrations) {
 
     _orderBy = QStringLiteral("migName, migAppliedAt");
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 } //namespace Targoman::API::ORM

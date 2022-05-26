@@ -61,17 +61,19 @@ namespace tblCurrency {
         TARGOMAN_CREATE_CONSTEXPR(curUpdatedBy_usrID);
     } //namespace Fields
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            Fields::curID,
-            Fields::curName,
-            Fields::curSymbol,
-            Fields::curRate,
-            Fields::curIsDefault,
-            Fields::curStatus,
-            Fields::curCreatedBy_usrID,
-            Fields::curCreationDateTime,
-            Fields::curUpdatedBy_usrID,
+            _tableAlias + Fields::curID,
+            _tableAlias + Fields::curName,
+            _tableAlias + Fields::curSymbol,
+            _tableAlias + Fields::curRate,
+            _tableAlias + Fields::curIsDefault,
+            _tableAlias + Fields::curStatus,
+            _tableAlias + Fields::curCreatedBy_usrID,
+            _tableAlias + Fields::curCreationDateTime,
+            _tableAlias + Fields::curUpdatedBy_usrID,
         };
     }
 
