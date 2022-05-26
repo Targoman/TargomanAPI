@@ -32,7 +32,7 @@ namespace Targoman::API::AdvertModule::ORM {
 //using namespace ORM;
 
 QVariant IMPL_ORMGET(Props) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
@@ -43,7 +43,7 @@ QVariant IMPL_ORMGET(Props) {
 }
 
 quint64 IMPL_ORMCREATE(Props) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         _createInfo.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _createInfo);
 
@@ -53,7 +53,7 @@ quint64 IMPL_ORMCREATE(Props) {
 bool IMPL_ORMUPDATE(Props) {
     QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())))
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
@@ -62,7 +62,7 @@ bool IMPL_ORMUPDATE(Props) {
 
 bool IMPL_ORMDELETE(Props) {
     QVariantMap ExtraFilters;
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 

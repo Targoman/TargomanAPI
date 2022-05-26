@@ -58,7 +58,7 @@ ActiveSessions::ActiveSessions() :
 QVariant IMPL_ORMGET(ActiveSessions) {
 //  QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
@@ -74,7 +74,7 @@ bool IMPL_ORMDELETE(ActiveSessions) {
   if (_pksByPath.trimmed() == clsJWT(_APICALLBOOM.getJWT()).session())
     throw exHTTPForbidden("Deleting current session is not allowed");
 
-  if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+  if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
       ExtraFilters.insert(tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID());
 //  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 

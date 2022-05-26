@@ -34,7 +34,7 @@ class clsRequestHandler;
 class APICallBoomData : public QSharedData
 {
 public:
-    APICallBoomData(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming) :
+    APICallBoomData(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
         QSharedData(),
         FNTiming(_fnTiming)
     { ; }
@@ -55,7 +55,7 @@ public:
 
 public:
 //    clsRequestHandler *RequestHandler;
-    std::function<void(const QString &_label, quint64 _nanoSecs)> FNTiming;
+    std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> FNTiming;
 
     QString RequestAPIPath;
     QVariantMap RequestHeaders;
@@ -65,7 +65,7 @@ public:
     QVariantMap ResponseHeaders;
 };
 
-intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming) : Data(new APICallBoomData(_fnTiming)) { ; }
+intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) : Data(new APICallBoomData(_fnTiming)) { ; }
 intfAPICallBoom::intfAPICallBoom(const intfAPICallBoom& _other) : Data(_other.Data) { ; }
 intfAPICallBoom::~intfAPICallBoom() { ; }
 
@@ -156,8 +156,8 @@ void intfAPICallBoom::addResponseHeaderNameToExpose(const QString &_header) {
     this->addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
 
-void intfAPICallBoom::addToTimings(const QString &_label, quint64 _nanoSecs) {
-    this->Data->FNTiming(_label, _nanoSecs);
+void intfAPICallBoom::addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+    this->Data->FNTiming(_name, _desc, _nanoSecs);
 }
 
 template class APICALLBOOM_TYPE_NO_JWT_DECL;

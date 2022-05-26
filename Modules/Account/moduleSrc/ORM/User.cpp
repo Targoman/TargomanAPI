@@ -99,7 +99,7 @@ User::User() :
 
 QVariant IMPL_ORMGET(User) {
     if (_APICALLBOOM.getUserID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:CRUD~0100" });
+        Authorization::checkPriv(_APICALLBOOM, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -147,7 +147,7 @@ QVariant IMPL_ORMGET(User) {
 }
 
 quint64 IMPL_ORMCREATE(User) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -158,13 +158,13 @@ quint64 IMPL_ORMCREATE(User) {
  * this method only can call by admin user
  */
 bool IMPL_ORMUPDATE(User) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(User) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -186,7 +186,7 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     if (CurrentUserID != _usrID)
-        Authorization::checkPriv(_APICALLBOOM.getJWT(), { "Account:User:photo:CRUD~0100" });
+        Authorization::checkPriv(_APICALLBOOM, { "Account:User:photo:CRUD~0100" });
 
     auto Photo = getPhotoQuery(_usrID)
             .setCacheTime(30)

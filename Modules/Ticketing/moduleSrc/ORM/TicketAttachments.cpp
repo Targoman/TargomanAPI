@@ -59,7 +59,7 @@ TicketAttachments::TicketAttachments() :
 
 QVariant IMPL_ORMGET(TicketAttachments) {
 //    QString ExtraFilters;
-//    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
 //                       .arg(tblTicketAttachments::tktTarget_usrID).arg(_APICALLBOOM.getUserID())
 //                       .arg(tblTicketAttachments::tktCreatedBy_usrID).arg(_APICALLBOOM.getUserID())
@@ -69,7 +69,7 @@ QVariant IMPL_ORMGET(TicketAttachments) {
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
             .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })

@@ -85,7 +85,7 @@ ApprovalRequest::ApprovalRequest() :
     ) { ; }
 
 QVariant IMPL_ORMGET(ApprovalRequest) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
@@ -95,7 +95,7 @@ QVariant IMPL_ORMGET(ApprovalRequest) {
 }
 
 bool IMPL_ORMDELETE(ApprovalRequest) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
@@ -105,7 +105,7 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     enuApprovalType::Type Type;
 

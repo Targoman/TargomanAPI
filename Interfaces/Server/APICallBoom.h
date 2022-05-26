@@ -62,7 +62,7 @@ class APICallBoomData;
 class intfAPICallBoom
 {
 public:
-    intfAPICallBoom(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming);
+    intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming);
     intfAPICallBoom(const intfAPICallBoom &_other);
     virtual ~intfAPICallBoom();
 
@@ -101,26 +101,43 @@ public:
 
     class ScopedTimer {
     public:
-        ScopedTimer(intfAPICallBoom *_parent, const QString &_label) :
+        ScopedTimer(intfAPICallBoom *_parent, const QString &_name, const QString &_desc) :
             Parent(_parent),
-            Label(_label)
+            Name(_name),
+            Desc(_desc)
         {
             this->ElapsedTimer.start();
         }
         ~ScopedTimer() {
-            this->Parent->addToTimings(this->Label, this->ElapsedTimer.nsecsElapsed());
+            if (this->Finished == false)
+                this->Parent->addToTimings(this->Name, this->Desc, this->ElapsedTimer.nsecsElapsed());
+        }
+        void finish() {
+            this->Parent->addToTimings(this->Name, this->Desc, this->ElapsedTimer.nsecsElapsed());
+            this->Finished = true;
+        }
+        void mark(const QString &_mark, bool _resetTiming = false) {
+            this->Parent->addToTimings(this->Name, _mark, this->ElapsedTimer.nsecsElapsed());
+            if (_resetTiming)
+                this->ElapsedTimer.restart();
+        }
+        void mark(const quint64 _mark, bool _resetTiming = false) {
+            this->mark(QString::number(_mark), _resetTiming);
         }
 
     protected:
         intfAPICallBoom* Parent;
-        QString Label;
+        QString Name;
+        QString Desc;
         QElapsedTimer ElapsedTimer;
+        bool Finished;
     };
 
-    ScopedTimer createScopeTiming(const QString &_label) {
-        return ScopedTimer(this, _label);
+    ScopedTimer createScopeTiming(const QString &_name, const QString &_desc = "") {
+        return ScopedTimer(this, _name, _desc);
     }
-    void addToTimings(const QString &_label, quint64 _nanoSecs);
+protected:
+    void addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs);
 
 protected:
     QExplicitlySharedDataPointer<APICallBoomData> Data;
@@ -130,7 +147,7 @@ template <bool _needJWT>
 class APICallBoom : public intfAPICallBoom
 {
 public:
-    APICallBoom(std::function<void(const QString &_label, quint64 _nanoSecs)> _fnTiming) :
+    APICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
         intfAPICallBoom(_fnTiming)
     { ; }
 

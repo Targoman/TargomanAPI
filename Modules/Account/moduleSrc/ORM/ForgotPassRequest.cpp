@@ -50,7 +50,7 @@ ForgotPassRequest::ForgotPassRequest() :
     ) { ; }
 
 QVariant IMPL_ORMGET(ForgotPassRequest) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
@@ -60,7 +60,7 @@ QVariant IMPL_ORMGET(ForgotPassRequest) {
 }
 
 bool IMPL_ORMDELETE(ForgotPassRequest) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, true);
 }

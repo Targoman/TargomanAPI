@@ -144,7 +144,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
 )) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
+//    Authorization::checkPriv(_APICALLBOOM, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     if (_file.Size > 0)
@@ -176,7 +176,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     quint64 _inReplyTicketID,
     const TAPI::stuFileInfo &_file
 )) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), {});
+    Authorization::checkPriv(_APICALLBOOM, {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
         throw exHTTPBadRequest("Reply tickets must have reply type");

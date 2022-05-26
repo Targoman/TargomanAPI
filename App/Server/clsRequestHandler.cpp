@@ -264,13 +264,26 @@ const qhttp::TStatusCode StatusCodeOnMethod[] = {
     qhttp::ESTATUS_EXPECTATION_FAILED, ///< EHTTP_UNLINK         = 32,
 };
 
-void clsRequestHandler::addToTimings(const QString &_label, quint64 _nanoSecs) {
-    if (this->ServerTimings.contains(_label))
-        this->ServerTimings[_label] += _nanoSecs;
-//    else if (_label == "total")
-//        this->ServerTimings.insert(this->ServerTimings.constBegin(), _label, _nanoSecs);
+void clsRequestHandler::addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+    //add overal
+    if (this->ServerTimings.contains(_name))
+        this->ServerTimings[_name] += _nanoSecs;
     else
-        this->ServerTimings.insert(_label, _nanoSecs);
+        this->ServerTimings.insert(_name, _nanoSecs);
+
+    //add for desc
+    if (_desc.isEmpty() == false) {
+        QString Label = _name + ";desc=\"" + _desc + "\"";
+
+        if (this->ServerTimings.contains(Label))
+            this->ServerTimings[Label] += _nanoSecs;
+        else
+            this->ServerTimings.insert(Label, _nanoSecs);
+    }
+}
+
+void clsRequestHandler::addToTimings(const QString &_name, quint64 _nanoSecs) {
+    this->addToTimings(_name, "", _nanoSecs);
 }
 
 void clsRequestHandler::sendTimingsToResponse() {
@@ -306,8 +319,8 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 ) {
 //    QVariantMap ResponseHeaders;
 
-    auto FNTiming = [=](const QString &_label, quint64 _nanoSecs) {
-        this->addToTimings(_label, _nanoSecs);
+    auto FNTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+        this->addToTimings(_name, _desc, _nanoSecs);
     };
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
@@ -329,7 +342,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         TAPI::JWT_t JWT;
 
         if (_apiObject->requiresJWT()) {
-            auto dbTiming = APICALLBOOM->createScopeTiming("jwt");
+            auto ServerTiming = APICALLBOOM->createScopeTiming("jwt");
 
             QString Auth = Headers.value("authorization");
             if (Auth.startsWith("Bearer ")) {
@@ -343,6 +356,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 JWT
                                 );
                 } catch (exJWTExpired &exp) {
+                    auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
                     bool IsRenewed = false;
                     QString NewToken = Authentication::renewExpiredJWT(
                                 JWT,
