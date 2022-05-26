@@ -30,40 +30,40 @@
 namespace Targoman::API::AccountModule::ORM {
 
 QVariant IMPL_ORMGET(APITokenValidIPs) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblAPITokens::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 quint64 IMPL_ORMCREATE(APITokenValidIPs) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
         ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 bool IMPL_ORMDELETE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
 //    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
 

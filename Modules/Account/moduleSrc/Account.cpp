@@ -188,6 +188,8 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
     const stuActiveAccount& _activeAccount,
     const QString& _services
 ) {
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("jwt", "create");
+
     QJsonObject Payload = {
         { JWTItems::usrLogin,       _login },
         { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
@@ -208,6 +210,8 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
         _activeAccount.TTL,
         _activeAccount.Privs["ssnKey"].toString()
     );
+
+    ServerTiming.finish();
 
     //-- save to active session -----
     this->callSP(APICALLBOOM_PARAM,
@@ -243,7 +247,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     TAPI::JSON_t _specialPrivs,
     qint8 _maxSessions
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -293,7 +297,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     _email = _email.toLower().trimmed();
 
@@ -337,7 +341,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -381,11 +385,8 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
-//    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_emailOrMobile, "login");
-//    if (QFV.mobile().isValid(_emailOrMobile))
-//        _emailOrMobile = PhoneHelper::NormalizePhoneNumber(_emailOrMobile);
     PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
@@ -414,7 +415,7 @@ bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
     bool _signupEnableEmailAlerts,
     bool _signupEnableSMSAlerts
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QFV/*.asciiAlNum()*/.maxLenght(50).validate(_signupRole);
 
@@ -445,7 +446,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -483,7 +484,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QString Login;
 
@@ -533,7 +534,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
 //        QString _services
 //    )
 //{
-//    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+//    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
 //    QJsonObject Obj;
 
@@ -567,7 +568,7 @@ QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -625,7 +626,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
     QString _uuid,
     TAPI::MD5_t _newPass
 )) {
-    Authorization::validateIPAddress(_APICALLBOOM.getIP());
+    Authorization::validateIPAddress(_APICALLBOOM, _APICALLBOOM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
@@ -1161,7 +1162,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
         Voucher.fromJson(VoucherInfo);
 
         //check operator or owner
-        if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:claimOfflinePayment" }) == false) {
+        if (Authorization::hasPriv(_APICALLBOOM, { "AAA:claimOfflinePayment" }) == false) {
             if (Voucher.vch_usrID != _APICALLBOOM.getUserID())
                 throw exAuthorization("Voucher is not yours");
         }
@@ -1218,7 +1219,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
 //    Voucher.fromJson(PaymentInfo);
 
     //check operator or owner
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:rejectOfflinePayment" }) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM, { "AAA:rejectOfflinePayment" }) == false) {
         if (OfflinePaymentClaim.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
             throw exAuthorization("This `voucher` is not yours");
     }
@@ -1256,7 +1257,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         .one<tblOfflinePaymentClaims::DTO>();
 
     //check operator or owner
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), { "AAA:approveOfflinePayment" }) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM, { "AAA:approveOfflinePayment" }) == false) {
         if (OfflinePaymentClaim.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
             throw exAuthorization("This `offline payment claim` is not yours");
     }
@@ -1388,7 +1389,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
     quint64 _walID,
     const QString& _note
 )) {
-    qint64 ApprovalLimit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:approveOffline:maxAmount").toLongLong();
+    qint64 ApprovalLimit = Authorization::getPrivValue(_APICALLBOOM, "AAA:approveOffline:maxAmount").toLongLong();
     if (ApprovalLimit == 0)
         throw exAuthorization("Not enough access for offline approval");
 
@@ -1472,7 +1473,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
     quint64 _amount,
     const QString &_desc
 )) {
-    qint64 Limit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:addPrizeTo:maxAmount", -1).toLongLong();
+    qint64 Limit = Authorization::getPrivValue(_APICALLBOOM, "AAA:addPrizeTo:maxAmount", -1).toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add prize");
 
@@ -1502,7 +1503,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
     quint64 _amount,
     const QString &_desc
 )) {
-    qint64 Limit = Authorization::getPrivValue(_APICALLBOOM.getJWT(), "AAA:addIncomeTo:maxAmount", -1).toLongLong();
+    qint64 Limit = Authorization::getPrivValue(_APICALLBOOM, "AAA:addIncomeTo:maxAmount", -1).toLongLong();
     if (Limit == 0)
         throw exAuthorization("Not enough access to add income");
 

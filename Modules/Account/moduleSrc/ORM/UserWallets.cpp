@@ -42,38 +42,38 @@ UserWallets::UserWallets() :
 ) { ; }
 
 QVariant IMPL_ORMGET(UserWallets) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint64 IMPL_ORMCREATE(UserWallets) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
 //        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _createInfo);
         _createInfo.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(UserWallets) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblUserWallets::Fields::walDefault, 0);
         ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
     }
 
-    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
 
 /**
@@ -85,7 +85,7 @@ bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _walID
 )) {
-    bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWallet_SetAsDefault", {
@@ -231,7 +231,7 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
     quint64 _targetUsrID,
     const QString &_desc
 )) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:requestWithdrawal" });
+    Authorization::checkPriv(_APICALLBOOM, { "AAA:requestWithdrawal" });
 
     return this->callSP(APICALLBOOM_PARAM,
                         "spWithdrawal_Request", {
@@ -251,7 +251,7 @@ bool IMPL_REST_POST(UserWallets, acceptWithdrawal, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), { "AAA:acceptWithdrawal" });
+    Authorization::checkPriv(_APICALLBOOM, { "AAA:acceptWithdrawal" });
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWithdrawal_Accept", {

@@ -279,7 +279,7 @@ clsDACResult clsTable::callSP(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSP({}, _spName, _spArgs, _purpose, _executionTime);
@@ -293,7 +293,7 @@ clsDACResult clsTable::callSPCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSPCacheable(_maxCacheTime, {}, _spName, _spArgs, _purpose, _executionTime);
@@ -306,7 +306,7 @@ clsDACResult clsTable::execQuery(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
@@ -319,7 +319,7 @@ clsDACResult clsTable::execQuery(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
@@ -333,7 +333,7 @@ clsDACResult clsTable::execQueryCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
@@ -347,7 +347,7 @@ clsDACResult clsTable::execQueryCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto dbTiming = _APICALLBOOM.createScopeTiming("db");
+    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);

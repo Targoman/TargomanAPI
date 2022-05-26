@@ -47,12 +47,12 @@ intfMigrations::intfMigrations(
     ) { ; }
 
 QVariant IMPL_ANONYMOUSE_ORMGET(intfMigrations) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->ModuleName + ":Migrations:CRUD~0100" });
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName()));
+//    Authorization::checkPriv(_APICALLBOOM, { this->ModuleName + ":Migrations:CRUD~0100" });
+//    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     _orderBy = QStringLiteral("migName, migAppliedAt");
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 } //namespace Targoman::API::ORM

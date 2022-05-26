@@ -382,26 +382,28 @@ namespace tblAccountProductsBase {
     TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            prdID,
-            prdCode,
-            prdName,
-            prdDesc,
-            prdValidFromDate,
-            prdValidToDate,
-            prdValidFromHour,
-            prdValidToHour,
-            prdPrivs,
-            prdVAT,
-            prdInStockQty,
-            prdOrderedQty,
-            prdReturnedQty,
+            _tableAlias + prdID,
+            _tableAlias + prdCode,
+            _tableAlias + prdName,
+            _tableAlias + prdDesc,
+            _tableAlias + prdValidFromDate,
+            _tableAlias + prdValidToDate,
+            _tableAlias + prdValidFromHour,
+            _tableAlias + prdValidToHour,
+            _tableAlias + prdPrivs,
+            _tableAlias + prdVAT,
+            _tableAlias + prdInStockQty,
+            _tableAlias + prdOrderedQty,
+            _tableAlias + prdReturnedQty,
             // prdRemainingCount = prdInStockQty - (prdOrderedQty - prdReturnedQty)
-            prdStatus,
-            prdCreatedBy_usrID,
-            prdCreationDateTime,
-            prdUpdatedBy_usrID,
+            _tableAlias + prdStatus,
+            _tableAlias + prdCreatedBy_usrID,
+            _tableAlias + prdCreationDateTime,
+            _tableAlias + prdUpdatedBy_usrID,
         };
     }
 
@@ -436,30 +438,32 @@ namespace tblAccountSaleablesBase {
     TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            slbID,
-            slb_prdID,
-            slbCode,
-            slbName,
-            slbDesc,
-            slbType,
-            slbAvailableFromDate,
-            slbAvailableToDate,
-            slbPrivs,
-            slbBasePrice,
-            slbAdditives,
-//            slbProductCount, //what is this?
-            slbMaxSaleCountPerUser,
-            slbInStockQty,
-            slbOrderedQty,
-            slbReturnedQty,
-//            slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
-            slbVoucherTemplate,
-            slbStatus,
-            slbCreatedBy_usrID,
-            slbCreationDateTime,
-            slbUpdatedBy_usrID,
+            _tableAlias + slbID,
+            _tableAlias + slb_prdID,
+            _tableAlias + slbCode,
+            _tableAlias + slbName,
+            _tableAlias + slbDesc,
+            _tableAlias + slbType,
+            _tableAlias + slbAvailableFromDate,
+            _tableAlias + slbAvailableToDate,
+            _tableAlias + slbPrivs,
+            _tableAlias + slbBasePrice,
+            _tableAlias + slbAdditives,
+//            _tableAlias + slbProductCount, //what is this?
+            _tableAlias + slbMaxSaleCountPerUser,
+            _tableAlias + slbInStockQty,
+            _tableAlias + slbOrderedQty,
+            _tableAlias + slbReturnedQty,
+//            _tableAlias + slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
+            _tableAlias + slbVoucherTemplate,
+            _tableAlias + slbStatus,
+            _tableAlias + slbCreatedBy_usrID,
+            _tableAlias + slbCreationDateTime,
+            _tableAlias + slbUpdatedBy_usrID,
         };
     }
 

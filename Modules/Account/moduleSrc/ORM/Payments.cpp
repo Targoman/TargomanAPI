@@ -68,14 +68,14 @@ OnlinePayments::OnlinePayments() :
     ) { ; }
 
 QVariant IMPL_ORMGET(OnlinePayments) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 /*****************************************************************\
@@ -107,31 +107,31 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
     ) { ; }
 
 QVariant IMPL_ORMGET(OfflinePaymentClaims) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PUT, this->moduleBaseName()));
+//    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-//    return this->Create(*this, CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 //bool IMPL_ORMUPDATE(OfflinePaymentClaims) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-//    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+//    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 //bool IMPL_ORMDELETE(OfflinePaymentClaims) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+//    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-//    return this->DeleteByPks(*this, DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
 /*****************************************************************\
@@ -163,19 +163,19 @@ OfflinePayments::OfflinePayments() :
     ) { ; }
 
 QVariant IMPL_ORMGET(OfflinePayments) {
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(*this, UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /*****************************************************************/

@@ -28,29 +28,44 @@
 
 namespace Targoman::API::AAA::Authorization {
 
-void validateIPAddress(const QString& _ip) {
+void validateIPAddress(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const QString& _ip
+) {
     makeAAADAC(DAC);
     DAC.callSP({}, "spIP_ValidateAccess", {
                    {"iIP", inet_addr(_ip.toLatin1().constData())},
                });
 }
 
-QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs) {
+QJsonObject retrieveTokenInfo(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const QString& _token,
+    const QString& _ip,
+    const QStringList& _requiredPrivs
+) {
     PrivHelpers::validateToken(_token);
 
     makeAAADAC(DAC);
-    QJsonObject TokenInfo =  DAC.callSPCacheable(3600,{},
+    QJsonObject TokenInfo =  DAC.callSPCacheable(3600, {},
                                                  "spToken_RetrieveInfo", {
                                                      {"iToken", _token},
                                                      {"iIP", _ip},
                                                  }).toJson(true).object();
+
     return PrivHelpers::processUserObject(TokenInfo, _requiredPrivs).Privs;
 }
 
-bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf) {
+bool hasPriv(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const TAPI::JWT_t& _jwt,
+    const QStringList& _requiredAccess,
+    bool _isSelf
+) {
     if (_requiredAccess.isEmpty())
         return true;
-    QJsonObject Privs = privObjectFromInfo(_jwt);
+
+    QJsonObject Privs = privObjectFromInfo(APICALLBOOM_PARAM.getJWT());
 
     if ( Privs.isEmpty())
         return false;
@@ -58,16 +73,27 @@ bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _
     foreach (auto AccessItem, _requiredAccess)
         if (PrivHelpers::hasPrivBase(Privs, AccessItem, _isSelf) == false)
             return false;
+
     return true;
 }
 
-void checkPriv(const TAPI::JWT_t &_jwt, const QStringList &_requiredAccess, bool _isSelf) {
-    if (!hasPriv(_jwt, _requiredAccess, _isSelf))
+void checkPriv(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const TAPI::JWT_t &_jwt,
+    const QStringList &_requiredAccess,
+    bool _isSelf
+) {
+    if (!hasPriv(APICALLBOOM_PARAM, _requiredAccess, _isSelf))
         throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
 }
 
-QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem, const QVariant &_defIfNotFoundAndAllIsDefined) {
-    QJsonObject Privs = privObjectFromInfo(_jwt);
+QVariant getPrivValue(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const TAPI::JWT_t &_jwt,
+    QString _accessItem,
+    const QVariant &_defIfNotFoundAndAllIsDefined
+) {
+    QJsonObject Privs = privObjectFromInfo(APICALLBOOM_PARAM.getJWT());
 
     if (Privs.isEmpty())
         return QVariant();

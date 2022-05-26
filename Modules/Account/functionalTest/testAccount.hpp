@@ -61,7 +61,7 @@ private slots:
     void cleanupTestCase() {
         gEncodedAdminJWT = "";
         gEncodedJWT = "";
-        cleanupUnitTestData();
+//        cleanupUnitTestData();
     }
 
 private:

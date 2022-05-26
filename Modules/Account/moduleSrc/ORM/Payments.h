@@ -72,19 +72,21 @@ namespace tblOnlinePayments {
     TARGOMAN_CREATE_CONSTEXPR(onpCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            onpID,
-            onpMD5,
-            onp_vchID,
-            onp_pgwID,
-            onpTrackNumber,
-            onpAmount,
-            onpTarget_walID,
-            onpResult,
-            onpStatus,
-            onpCreationDateTime,
-            onpLastUpdateDateTime,
+            _tableAlias + onpID,
+            _tableAlias + onpMD5,
+            _tableAlias + onp_vchID,
+            _tableAlias + onp_pgwID,
+            _tableAlias + onpTrackNumber,
+            _tableAlias + onpAmount,
+            _tableAlias + onpTarget_walID,
+            _tableAlias + onpResult,
+            _tableAlias + onpStatus,
+            _tableAlias + onpCreationDateTime,
+            _tableAlias + onpLastUpdateDateTime,
         };
     }
 
@@ -134,20 +136,22 @@ namespace tblOfflinePaymentClaims {
     TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            ofpcID,
-            ofpc_vchID,
-            ofpcBank,
-            ofpcReceiptCode,
-            ofpcReceiptDate,
-            ofpcAmount,
-            ofpcTarget_walID,
-            ofpcNotes,
-            ofpcStatus,
-            ofpcCreationDateTime,
-            ofpcCreatedBy_usrID,
-            ofpcUpdatedBy_usrID,
+            _tableAlias + ofpcID,
+            _tableAlias + ofpc_vchID,
+            _tableAlias + ofpcBank,
+            _tableAlias + ofpcReceiptCode,
+            _tableAlias + ofpcReceiptDate,
+            _tableAlias + ofpcAmount,
+            _tableAlias + ofpcTarget_walID,
+            _tableAlias + ofpcNotes,
+            _tableAlias + ofpcStatus,
+            _tableAlias + ofpcCreationDateTime,
+            _tableAlias + ofpcCreatedBy_usrID,
+            _tableAlias + ofpcUpdatedBy_usrID,
         };
     }
 
@@ -203,20 +207,22 @@ namespace tblOfflinePayments {
     TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
     TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            ofpID,
-            ofp_vchID,
-            ofpBank,
-            ofpReceiptCode,
-            ofpReceiptDate,
-            ofpAmount,
-            ofpTarget_walID,
-            ofpNotes,
-            ofpStatus,
-            ofpCreationDateTime,
-            ofpCreatedBy_usrID,
-            ofpUpdatedBy_usrID,
+            _tableAlias + ofpID,
+            _tableAlias + ofp_vchID,
+            _tableAlias + ofpBank,
+            _tableAlias + ofpReceiptCode,
+            _tableAlias + ofpReceiptDate,
+            _tableAlias + ofpAmount,
+            _tableAlias + ofpTarget_walID,
+            _tableAlias + ofpNotes,
+            _tableAlias + ofpStatus,
+            _tableAlias + ofpCreationDateTime,
+            _tableAlias + ofpCreatedBy_usrID,
+            _tableAlias + ofpUpdatedBy_usrID,
         };
     }
 

@@ -96,11 +96,10 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::tkt_untID, _unitID);
 
-    quint64 TicketID = this->Create(
-                           Tickets::instance(),
-                           APICALLBOOM_PARAM,
-                           CreateFields
-                           );
+    quint64 TicketID = this->Create(Tickets::instance(),
+                                    APICALLBOOM_PARAM,
+                                    CreateFields
+                                    );
 
     if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
@@ -145,7 +144,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
 )) {
-//    Authorization::checkPriv(_APICALLBOOM.getJWT(), { this->moduleBaseName() + ":canPUTNewMessage" });
+//    Authorization::checkPriv(_APICALLBOOM, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     if (_file.Size > 0)
@@ -177,7 +176,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     quint64 _inReplyTicketID,
     const TAPI::stuFileInfo &_file
 )) {
-    Authorization::checkPriv(_APICALLBOOM.getJWT(), {});
+    Authorization::checkPriv(_APICALLBOOM, {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
         throw exHTTPBadRequest("Reply tickets must have reply type");

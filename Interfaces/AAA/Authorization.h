@@ -28,13 +28,35 @@
 #include "Interfaces/Common/GenericTypes.h"
 
 namespace Targoman::API::AAA::Authorization {
+    extern void validateIPAddress(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            const QString& _ip);
 
-    extern void validateIPAddress(const QString& _ip);
-    extern QJsonObject retrieveTokenInfo(const QString& _token, const QString& _ip, const QStringList& _requiredPrivs = {});
-    extern bool hasPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
-    extern void checkPriv(const TAPI::JWT_t& _jwt, const QStringList& _requiredAccess, bool _isSelf = false);
+    extern QJsonObject retrieveTokenInfo(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            const QString& _token,
+            const QString& _ip,
+            const QStringList& _requiredPrivs = {});
+
+    extern bool hasPriv(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            const TAPI::JWT_t& _jwt,
+            const QStringList& _requiredAccess,
+            bool _isSelf = false);
+
+    extern void checkPriv(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            const TAPI::JWT_t& _jwt,
+            const QStringList& _requiredAccess,
+            bool _isSelf = false);
+
+    extern QVariant getPrivValue(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            const TAPI::JWT_t &_jwt,
+            QString _accessItem,
+            const QVariant &_defIfNotFoundAndAllIsDefined = {});
+
     extern QJsonObject privObjectFromInfo(const QJsonObject& _info);
-    extern QVariant getPrivValue(const TAPI::JWT_t &_jwt, QString _accessItem, const QVariant &_defIfNotFoundAndAllIsDefined = {});
 
 } // namespace Targoman::API::AAA::Authorization
 

@@ -118,7 +118,7 @@ QVariant Tickets::apiGET(
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
     clsCondition ExtraFilters = {};
 
-    if (Authorization::hasPriv(_APICALLBOOM.getJWT(), this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
             .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })
@@ -178,7 +178,7 @@ QVariant Tickets::apiGET(
         ;
     };
 
-    return this->Select(*this, GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, QueryLambda);
 }
 
 /******************************************************************************/

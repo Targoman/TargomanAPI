@@ -108,36 +108,38 @@ namespace tblPaymentGateways {
     TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
     TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
 
-    inline QStringList ColumnNames() {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
         return {
-            pgwID,
-            pgwName,
-            pgwType,
-            pgwDriver,
-            pgwMetaInfo,
-            pgw_curID,
-            pgwAllowedDomainName,
+            _tableAlias + pgwID,
+            _tableAlias + pgwName,
+            _tableAlias + pgwType,
+            _tableAlias + pgwDriver,
+            _tableAlias + pgwMetaInfo,
+            _tableAlias + pgw_curID,
+            _tableAlias + pgwAllowedDomainName,
             //------------------
-            pgwTransactionFeeValue,
-            pgwTransactionFeeType,
+            _tableAlias + pgwTransactionFeeValue,
+            _tableAlias + pgwTransactionFeeType,
             //------------------
-            pgwMinRequestAmount,
-            pgwMaxRequestAmount,
-            pgwMaxPerDayAmount,
+            _tableAlias + pgwMinRequestAmount,
+            _tableAlias + pgwMaxRequestAmount,
+            _tableAlias + pgwMaxPerDayAmount,
             //load balance:
-            pgwLastPaymentDateTime,
-            pgwSumTodayPaidAmount,
+            _tableAlias + pgwLastPaymentDateTime,
+            _tableAlias + pgwSumTodayPaidAmount,
             //using:
-            pgwSumRequestCount,
-            pgwSumRequestAmount,
-            pgwSumFailedCount,
-            pgwSumOkCount,
-            pgwSumPaidAmount,
+            _tableAlias + pgwSumRequestCount,
+            _tableAlias + pgwSumRequestAmount,
+            _tableAlias + pgwSumFailedCount,
+            _tableAlias + pgwSumOkCount,
+            _tableAlias + pgwSumPaidAmount,
             //------------------
-            pgwStatus,
-            pgwCreatedBy_usrID,
-            pgwCreationDateTime,
-            pgwUpdatedBy_usrID,
+            _tableAlias + pgwStatus,
+            _tableAlias + pgwCreatedBy_usrID,
+            _tableAlias + pgwCreationDateTime,
+            _tableAlias + pgwUpdatedBy_usrID,
         };
     }
 

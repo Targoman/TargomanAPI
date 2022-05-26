@@ -110,7 +110,8 @@ public:
                       QObject *_parent = nullptr);
 
     void process(const QString& _api);
-    void addToTimings(const QString &_label, quint64 _nanoSecs);
+    void addToTimings(const QString &_name, quint64 _nanoSecs);
+    void addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs);
     void sendTimingsToResponse();
 
 public:
