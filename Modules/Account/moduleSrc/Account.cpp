@@ -1178,8 +1178,10 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
         { "ofpcReceiptCode", _receiptCode },
         { "ofpcReceiptDate", _receiptDate },
         { "ofpcAmount", _amount },
-        { "ofpcNotes", _note.trimmed().size() ? _note.trimmed() : QVariant() }
     };
+
+    if ((_note.isNull() == false) && (_note.trimmed().length() > 0))
+        CreateParams.insert("ofpcNotes", _note.trimmed());
 
     if (NULLABLE_HAS_VALUE(voucherID))
         CreateParams.insert("ofpc_vchID", NULLABLE_VALUE(voucherID));

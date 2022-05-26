@@ -111,8 +111,8 @@ ALTER TABLE `tblCurrency`
 /*!*/;
 
 INSERT INTO tblCurrency(`curID`, `curName`, `curSymbol`, `curRate`, `curIsDefault`) VALUES
-    (1, 'ریال ایران', 'IRR', 1.0, 1),
-    (2, 'تومان ایران', 'IRT', 0.1, 0)
+    (1, 'ریال', 'IRR', 1.0, 1),
+    (2, 'تومان', 'IRT', 0.1, 0)
 ;
 
 ALTER TABLE `tblCurrency`

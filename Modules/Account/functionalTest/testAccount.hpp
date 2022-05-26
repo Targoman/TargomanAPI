@@ -973,7 +973,7 @@ private slots:
             QFAIL (e.what());
         }
     }
-    void claimOfflinePayment_NO_VOUCHER_1() {
+    void claimOfflinePayment_NO_VOUCHER_NO_NOTE_1() {
         QT_TRY {
             this->OfflinePaymentClaimID = callUserAPI(
                 RESTClientHelper::POST,
@@ -985,7 +985,7 @@ private slots:
                     { "receiptCode",    "809" },
                     { "receiptDate",    "2022/03/04" },
                     { "amount",         13'000 },
-                    { "note",           "this is note for offline payment" },
+//                    { "note",           "this is note for offline payment" },
                 }
             );
 
