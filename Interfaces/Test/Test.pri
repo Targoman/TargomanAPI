@@ -30,6 +30,10 @@ SOURCES += \
     $$BASE_PROJECT_PATH/Interfaces/Server/APICallBoom.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Common/base.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Common/GenericTypes.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Common/intfAPIArgManipulator.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/DBM/clsORMField.cpp \
 
 DEFINES += UNITTEST_DB_HOST="127.0.0.1"
 DEFINES += UNITTEST_DB_PORT=3306

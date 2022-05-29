@@ -23,9 +23,6 @@
 
 #include "APITokens.h"
 #include "User.h"
-#include "Service.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
@@ -34,41 +31,15 @@ namespace Targoman::API::AccountModule::ORM {
 APITokens::APITokens() :
     intfSQLBasedModule(
         AAASchema,
-        "tblAPITokens",
-        {///< ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAPITokens::aptID,               ORM_PRIMARYKEY_64 },
-            { tblAPITokens::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false },
-            { tblAPITokens::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone },
-            { tblAPITokens::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin },
-            { tblAPITokens::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en",      UPAdmin },
-            { tblAPITokens::aptValidateIP,       S(bool),               QFV,                            false,     UPAdmin },
-            { tblAPITokens::aptExtraPriviledges, S(TAPI::PrivObject_t), QFV,                            QNull,     UPAdmin, false, false },
-            { tblAPITokens::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull,     UPAdmin },
-            { tblAPITokens::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QInvalid,  UPNone },
-            { tblAPITokens::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone },
-            { tblAPITokens::aptStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAPITokens::aptCreatedBy_usrID,  ORM_CREATED_BY },
-            { tblAPITokens::aptCreationDateTime, ORM_CREATED_ON },
-            { tblAPITokens::aptUpdatedBy_usrID,  ORM_UPDATED_BY },
-        },
-        {///< Col                                Reference Table                 ForeignCol         Rename    LeftJoin
-            { tblAPITokens::apt_svcID,           R(AAASchema, tblService::Name), tblService::svcID, {},       true},
-            { tblAPITokens::apt_usrID,           R(AAASchema, tblUser::Name),    tblUser::usrID,    "Owner_", true},
-            ORM_RELATION_OF_CREATOR(tblAPITokens::aptCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblAPITokens::aptUpdatedBy_usrID),
-        },
-        {
-            { {
-                tblAPITokens::aptToken,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
+        tblAPITokens::Name,
+        tblAPITokens::Private::ORMFields,
+        tblAPITokens::Private::Relations,
+        tblAPITokens::Private::Indexes
     ) { ; }
 
 QVariant IMPL_ORMGET(APITokens) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -88,8 +59,8 @@ bool IMPL_ORMUPDATE(APITokens) {
 bool IMPL_ORMDELETE(APITokens) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }

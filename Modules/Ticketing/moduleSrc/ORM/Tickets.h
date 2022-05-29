@@ -26,6 +26,10 @@
 
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Defs.hpp"
+#include "Units.h"
+#include "Departments.h"
 
 namespace Targoman::API::TicketingModule {
 
@@ -41,32 +45,158 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
 //    QString, inReplyTicketID, QString(), v.size(), v, v.toString()
 //);
 
+} //namespace Targoman::API::TicketingModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
+//TAPI_DECLARE_METATYPE(Targoman::API::TicketingModule::stuTicketScope)
+
+namespace Targoman::API::TicketingModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblTickets {
-    constexpr char Name[] = "tblTickets";
-    TARGOMAN_CREATE_CONSTEXPR(tktID);
-    TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
-    TARGOMAN_CREATE_CONSTEXPR(tkt_untID);
-    TARGOMAN_CREATE_CONSTEXPR(tktBase_tktID);
-    TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
-    TARGOMAN_CREATE_CONSTEXPR(tktType);
-    TARGOMAN_CREATE_CONSTEXPR(tktTitle);
-    TARGOMAN_CREATE_CONSTEXPR(tktBody);
-    TARGOMAN_CREATE_CONSTEXPR(tktStatus);
-    TARGOMAN_CREATE_CONSTEXPR(tktCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(tktCreatedBy_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
-}
 
 namespace tblTicketRead {
     constexpr char Name[] = "tblTicketRead";
-    TARGOMAN_CREATE_CONSTEXPR(tkr_tktID);
-    TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(tkr_tktID);
+        TARGOMAN_CREATE_CONSTEXPR(tkrBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(tkrDateTime);
+    }
+}
+
+namespace tblTickets {
+    constexpr char Name[] = "tblTickets";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(tktID);
+        TARGOMAN_CREATE_CONSTEXPR(tktTarget_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(tkt_svcID);
+        TARGOMAN_CREATE_CONSTEXPR(tkt_untID);
+        TARGOMAN_CREATE_CONSTEXPR(tktBase_tktID);
+        TARGOMAN_CREATE_CONSTEXPR(tktInReply_tktID);
+        TARGOMAN_CREATE_CONSTEXPR(tktType);
+        TARGOMAN_CREATE_CONSTEXPR(tktTitle);
+        TARGOMAN_CREATE_CONSTEXPR(tktBody);
+        TARGOMAN_CREATE_CONSTEXPR(tktStatus);
+        TARGOMAN_CREATE_CONSTEXPR(tktCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(tktCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::tktID,
+            _tableAlias + Fields::tktTarget_usrID,
+            _tableAlias + Fields::tkt_svcID,
+            _tableAlias + Fields::tkt_untID,
+            _tableAlias + Fields::tktBase_tktID,
+            _tableAlias + Fields::tktInReply_tktID,
+            _tableAlias + Fields::tktType,
+            _tableAlias + Fields::tktTitle,
+            _tableAlias + Fields::tktBody,
+            _tableAlias + Fields::tktStatus,
+            _tableAlias + Fields::tktCreationDateTime,
+            _tableAlias + Fields::tktCreatedBy_usrID,
+            _tableAlias + Fields::tktUpdatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+                { Fields::tktID,                ORM_PRIMARYKEY_64 },
+                { Fields::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+                { Fields::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
+                { Fields::tkt_untID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
+                { Fields::tktBase_tktID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+                { Fields::tktInReply_tktID,     S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+                { Fields::tktType,              S(Targoman::API::TicketingModule::enuTicketType::Type), QFV, Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
+                { Fields::tktTitle,             S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone, false, false },
+                { Fields::tktBody,              S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone, false, false },
+                { Fields::tktStatus,            ORM_STATUS_FIELD(Targoman::API::TicketingModule::enuTicketStatus, Targoman::API::TicketingModule::enuTicketStatus::New) },
+                { Fields::tktCreationDateTime,  ORM_CREATED_ON },
+                { Fields::tktCreatedBy_usrID,   ORM_CREATED_BY },
+                { Fields::tktUpdatedBy_usrID,   ORM_UPDATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
+                { Fields::tktInReply_tktID, R(TicketingSchema, tblTickets::Name),       Fields::tktID,          "InReply_" , true },
+                { Fields::tktTarget_usrID,  R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_"  , true },
+                { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_", true },
+                { Fields::tkt_untID,        R(TicketingSchema, tblUnits::Name),         tblUnits::Fields::untID },
+                ORM_RELATION_OF_CREATOR(Fields::tktCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(Fields::tktUpdatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (tktID),
+        SF_NULLABLE_quint64         (tktTarget_usrID),
+        SF_NULLABLE_quint32         (tkt_svcID),
+        SF_NULLABLE_quint32         (tkt_untID),
+        SF_NULLABLE_quint64         (tktBase_tktID),
+        SF_NULLABLE_quint64         (tktInReply_tktID),
+        SF_Enum                     (tktType, Targoman::API::TicketingModule::enuTicketType, Targoman::API::TicketingModule::enuTicketType::Message),
+        SF_QString                  (tktTitle),
+        SF_QString                  (tktBody),
+        SF_ORM_STATUS_FIELD         (tktStatus, Targoman::API::TicketingModule::enuTicketStatus, Targoman::API::TicketingModule::enuTicketStatus::New),
+        SF_ORM_CREATED_ON           (tktCreationDateTime),
+        SF_ORM_CREATED_BY           (tktCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (tktUpdatedBy_usrID)
+    );
+}
+
+namespace tblTicketRead {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::tkr_tktID,
+            _tableAlias + Fields::tkrBy_usrID,
+            _tableAlias + Fields::tkrDateTime,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///<ColName                       Type                   Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+                { Fields::tkr_tktID,      ORM_PRIMARYKEY_64},
+                { Fields::tkrBy_usrID,    S(quint64),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
+                { Fields::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
+            };
+
+        const QList<stuRelation> Relations = {
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (tkr_tktID),
+        SF_quint64                  (tkrBy_usrID),
+        SF_DateTime_t               (tkrDateTime)
+    );
 }
 #pragma GCC diagnostic pop
 
@@ -108,8 +238,5 @@ class TicketRead : public intfSQLBasedModule
 
 } //namespace ORM
 } //namespace Targoman::API::TicketingModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
-//TAPI_DECLARE_METATYPE(Targoman::API::TicketingModule::stuTicketScope)
 
 #endif // TARGOMAN_API_MODULES_TICKETING_ORM_TICKETS_H

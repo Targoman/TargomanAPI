@@ -23,59 +23,41 @@
 
 #include "TicketAttachments.h"
 #include "Interfaces/AAA/AAA.hpp"
-#include "Defs.hpp"
-#include "Tickets.h"
 //#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
-#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
-using namespace Targoman::API::ObjectStorage;
 #include "Ticketing.h"
 
 using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
 
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
 TicketAttachments::TicketAttachments() :
     intfSQLBasedModule(
         TicketingSchema,
         tblTicketAttachments::Name,
-        {///< ColName                                       Type                    Validation                 Default      UpBy   Sort  Filter Self  Virt   PK
-            { tblTicketAttachments::tatID,                  ORM_PRIMARYKEY_64 },
-            { tblTicketAttachments::tat_tktID,              S(quint64),             QFV.integer().minValue(1), QRequired,   UPNone },
-            { tblTicketAttachments::tat_uplID,              S(quint64),             QFV.integer().minValue(1), QRequired,   UPNone },
-            { tblTicketAttachments::tatCreationDateTime,    ORM_CREATED_ON },
-            { tblTicketAttachments::tatCreatedBy_usrID,     ORM_CREATED_BY },
-        },
-        {///< Alias        Col                               Reference Table                            ForeignCol          Rename     LeftJoin
-            { "tickets", { tblTicketAttachments::tat_tktID,  R(TicketingSchema, tblTickets::Name),      tblTickets::tktID } },
-                         { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadFiles::Name),  tblUploadFiles::uflID },
-                         //this index is preventing querybuilder invalid column for filter error:
-                         { tblTicketAttachments::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::uqu_uflID },
-                         ORM_RELATION_OF_CREATOR(tblTicketAttachments::tatCreatedBy_usrID),
-        }
+        tblTicketAttachments::Private::ORMFields,
+        tblTicketAttachments::Private::Relations,
+        tblTicketAttachments::Private::Indexes
 ) { ; }
 
 QVariant IMPL_ORMGET(TicketAttachments) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-//                       .arg(tblTicketAttachments::tktTarget_usrID).arg(_APICALLBOOM.getUserID())
-//                       .arg(tblTicketAttachments::tktCreatedBy_usrID).arg(_APICALLBOOM.getUserID())
-//                       .arg(tblTicketAttachments::tktTarget_usrID)
-//                       .arg(tblTicketAttachments::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
+//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID).arg(_APICALLBOOM.getUserID())
+//                       .arg(tblTicketAttachments::Fields::tktCreatedBy_usrID).arg(_APICALLBOOM.getUserID())
+//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID)
+//                       .arg(tblTicketAttachments::Fields::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblTickets::tktTarget_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
-            .orCond({ tblTickets::tktCreatedBy_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
+            .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
+            .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, _APICALLBOOM.getUserID() })
             .orCond(
-                clsCondition({ tblTickets::tktTarget_usrID, enuConditionOperator::Null })
-                .andCond({ tblTickets::tktType,
+                clsCondition({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Null })
+                .andCond({ tblTickets::Fields::tktType,
                            enuConditionOperator::Equal,
                            Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
             );
@@ -83,26 +65,26 @@ QVariant IMPL_ORMGET(TicketAttachments) {
     auto QueryLambda = [](SelectQuery &_query) {
         _query
             .addCols({
-                         tblTicketAttachments::tatID,
-                         tblTicketAttachments::tat_tktID,
-                         tblTicketAttachments::tat_uplID,
-                         tblTicketAttachments::tatCreationDateTime,
-                         tblTicketAttachments::tatCreatedBy_usrID,
+                         tblTicketAttachments::Fields::tatID,
+                         tblTicketAttachments::Fields::tat_tktID,
+                         tblTicketAttachments::Fields::tat_uplID,
+                         tblTicketAttachments::Fields::tatCreationDateTime,
+                         tblTicketAttachments::Fields::tatCreatedBy_usrID,
                      })
             .innerJoinWith("tickets")
             .addCols({
-                         tblTickets::tktID,
-                         tblTickets::tktTarget_usrID,
-                         tblTickets::tkt_svcID,
-                         tblTickets::tktBase_tktID,
-                         tblTickets::tktInReply_tktID,
-                         tblTickets::tktType,
-                         tblTickets::tktTitle,
-                         tblTickets::tktBody,
-                         tblTickets::tktStatus,
-                         tblTickets::tktCreationDateTime,
-                         tblTickets::tktCreatedBy_usrID,
-                         tblTickets::tktUpdatedBy_usrID,
+                         tblTickets::Fields::tktID,
+                         tblTickets::Fields::tktTarget_usrID,
+                         tblTickets::Fields::tkt_svcID,
+                         tblTickets::Fields::tktBase_tktID,
+                         tblTickets::Fields::tktInReply_tktID,
+                         tblTickets::Fields::tktType,
+                         tblTickets::Fields::tktTitle,
+                         tblTickets::Fields::tktBody,
+                         tblTickets::Fields::tktStatus,
+                         tblTickets::Fields::tktCreationDateTime,
+                         tblTickets::Fields::tktCreatedBy_usrID,
+                         tblTickets::Fields::tktUpdatedBy_usrID,
                      })
         ;
 
@@ -112,7 +94,7 @@ QVariant IMPL_ORMGET(TicketAttachments) {
                     UploadQueue::instance(),
                     UploadGateways::instance(),
                     tblTicketAttachments::Name,
-                    tblTicketAttachments::tat_uplID
+                    tblTicketAttachments::Fields::tat_uplID
                     );
 
     };

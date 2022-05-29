@@ -163,12 +163,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.ID = this->Create(Voucher::instance(),
                               _APICALLBOOM,
                               TAPI::ORMFields_t({
-                                                    { tblVoucher::vch_usrID, _APICALLBOOM.getUserID() },
-//                                                    { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                    { tblVoucher::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                    { tblVoucher::vchTotalAmount, Voucher.Info.ToPay },
-                                                    { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
-                                                    { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                                    { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+//                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                                    { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                                    { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
+                                                    { tblVoucher::Fields::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
+                                                    { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                 }));
 
     try {
@@ -194,10 +194,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
                      APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                      {},
                      TAPI::ORMFields_t({
-                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
                      }),
                      {
-                        { tblVoucher::vchID, Voucher.ID }
+                        { tblVoucher::Fields::vchID, Voucher.ID }
                      });
         throw;
     }

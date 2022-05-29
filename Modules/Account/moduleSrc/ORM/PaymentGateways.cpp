@@ -42,41 +42,10 @@ PaymentGateways::PaymentGateways() :
     intfSQLBasedModule(
         AAASchema,
         tblPaymentGateways::Name,
-        {///< ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
-            { tblPaymentGateways::pgwID,                    ORM_PRIMARYKEY_32 },
-            { tblPaymentGateways::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgw_curID,                S(quint32),                                         QFV,                                QRequired,  UPAdmin },
-            { tblPaymentGateways::pgwAllowedDomainName,     S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
-            //------------------
-            { tblPaymentGateways::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwTransactionFeeType,    S(Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Type), QFV, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
-            //------------------
-            { tblPaymentGateways::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    1,          UPAdmin },
-            { tblPaymentGateways::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwMaxPerDayAmount,       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
-            //------------------
-            { tblPaymentGateways::pgwLastPaymentDateTime,   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
-            { tblPaymentGateways::pgwSumTodayPaidAmount,    S(quint64),                                         QFV,                                0,          UPAdmin },
-            //------------------
-            { tblPaymentGateways::pgwSumRequestCount,       S(quint32),                                         QFV,                                0,          UPAdmin },
-            { tblPaymentGateways::pgwSumRequestAmount,      S(quint64),                                         QFV,                                0,          UPAdmin },
-            { tblPaymentGateways::pgwSumFailedCount,        S(quint32),                                         QFV,                                0,          UPAdmin },
-            { tblPaymentGateways::pgwSumOkCount,            S(quint32),                                         QFV,                                0,          UPAdmin },
-            { tblPaymentGateways::pgwSumPaidAmount,         S(quint64),                                         QFV,                                0,          UPAdmin },
-            //------------------
-            { tblPaymentGateways::pgwStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayStatus, Targoman::API::AccountModule::enuPaymentGatewayStatus::Active) },
-            { tblPaymentGateways::pgwCreationDateTime,      ORM_CREATED_ON },
-            { tblPaymentGateways::pgwCreatedBy_usrID,       ORM_CREATED_BY },
-            { tblPaymentGateways::pgwUpdatedBy_usrID,       ORM_UPDATED_BY },
-        },
-        {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
-            ORM_RELATION_OF_CREATOR(tblPaymentGateways::pgwCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblPaymentGateways::pgwUpdatedBy_usrID),
-        }
-    ) { ; }
+        tblPaymentGateways::Private::ORMFields,
+        tblPaymentGateways::Private::Relations,
+        tblPaymentGateways::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(PaymentGateways) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -86,8 +55,8 @@ QVariant IMPL_ORMGET(PaymentGateways) {
 quint32 IMPL_ORMCREATE(PaymentGateways) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    if (_createInfo.contains(tblPaymentGateways::pgwAllowedDomainName))
-        _createInfo[tblPaymentGateways::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::pgwAllowedDomainName].toString());
+    if (_createInfo.contains(tblPaymentGateways::Fields::pgwAllowedDomainName))
+        _createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName].toString());
 
     return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }

@@ -23,7 +23,6 @@
 
 #include "intfActionLogs.h"
 #include "Interfaces/AAA/Authorization.h"
-#include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
 
 using namespace Targoman::API::AAA;
@@ -34,21 +33,14 @@ intfActionLogs::intfActionLogs(
     const QString& _schema,
     const QString& _name
 ) :
-    intfSQLBasedModule(
-        _schema,
-        _name,
-        tblActionLogs::Name,
-        {///< ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
-            { tblActionLogs::atlID,                 ORM_PRIMARYKEY_64},
-            { tblActionLogs::atlBy_usrID,           S(quint64),         QFV.integer().minValue(1),      {},      UPNone },
-            { tblActionLogs::atlInsertionDateTime,  S(TAPI::DateTime_t),QFV,                            {},      UPNone },
-            { tblActionLogs::atlType,               S(QString),         QFV.asciiAlNum().maxLenght(50), {},      UPNone },
-            { tblActionLogs::atlDescription,        S(QString),         QFV.allwaysInvalid(),           {},      UPNone, false, false },
-        },
-        {
-            { tblActionLogs::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
-        }
-    ) { ; }
+intfSQLBasedModule(
+    _schema,
+    _name,
+    tblActionLogs::Name,
+    tblActionLogs::Private::ORMFields,
+    tblActionLogs::Private::Relations,
+    tblActionLogs::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfActionLogs) {
 //    Authorization::checkPriv(_APICALLBOOM, { this->ModuleName + ":ActionLogs:CRUD~0100" });

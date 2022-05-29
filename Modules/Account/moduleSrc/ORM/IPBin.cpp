@@ -24,8 +24,6 @@
 #include "IPBin.h"
 #include "User.h"
 
-//#include "Interfaces/ORM/APIQueryBuilders.h"
-
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuIPBinStatus);
 
 namespace Targoman::API::AccountModule::ORM {
@@ -34,27 +32,10 @@ IPBin::IPBin() :
     intfSQLBasedModule(
         AAASchema,
         tblIPBin::Name,
-        {///< ColName                        Type                 Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblIPBin::ipbIP,               ORM_PRIMARYKEY_32 },
-            { tblIPBin::ipbReadable,         S(TAPI::IPv4_t),     QFV,                       QInvalid,  UPNone },
-            { tblIPBin::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
-            { tblIPBin::ipbAccessCount,      S(quint64),          QFV.integer().minValue(0), 0,         UPNone },
-            { tblIPBin::ipbLastAccess,       S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
-            { tblIPBin::ipbBlockedBy_usrID,  S(quint64),          QFV.integer().minValue(1), QNull,     UPNone },
-            { tblIPBin::ipbBlockingTime,     S(TAPI::DateTime_t), QFV,                       QNull,     UPNone },
-            { tblIPBin::ipbStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuIPBinStatus, Targoman::API::AccountModule::enuIPBinStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-        },
-        {///< Col                            Reference Table             ForeignCol      Rename      LeftJoin
-            { tblIPBin::ipbBlockedBy_usrID,  R(AAASchema,tblUser::Name), tblUser::usrID, "Blocker_", true },
-        },
-        {
-            { {
-                tblIPBin::ipbIP,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
-    ) { ; }
+        tblIPBin::Private::ORMFields,
+        tblIPBin::Private::Relations,
+        tblIPBin::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(IPBin) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

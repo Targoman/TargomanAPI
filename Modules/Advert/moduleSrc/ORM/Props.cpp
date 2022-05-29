@@ -22,18 +22,21 @@
  */
 
 #include "Props.h"
-#include "Defs.hpp"
-#include "Locations.h"
-#include "Bin.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
-//using namespace ORM;
+Props::Props() :
+    intfSQLBasedModule(
+        AdvertSchema,
+        tblProps::Name,
+        tblProps::Private::ORMFields,
+        tblProps::Private::Relations,
+        tblProps::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Props) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -44,8 +47,8 @@ QVariant IMPL_ORMGET(Props) {
 
 quint64 IMPL_ORMCREATE(Props) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        _createInfo.insert(tblBin::binID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _createInfo);
+        _createInfo.insert(tblBin::Fields::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, _createInfo);
 
     return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -54,8 +57,8 @@ bool IMPL_ORMUPDATE(Props) {
     QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
-        ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblBin::Fields::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
@@ -63,31 +66,10 @@ bool IMPL_ORMUPDATE(Props) {
 bool IMPL_ORMDELETE(Props) {
     QVariantMap ExtraFilters;
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblBin::binID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblBin::Fields::binID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
-
-Props::Props() :
-    intfSQLBasedModule(AdvertSchema,
-              tblProps::Name,
-              { ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
-                {tblProps::prp_binID,           ORM_PRIMARYKEY_32},
-                {tblProps::prp_locID,           ORM_PRIMARYKEY_32},
-                {tblProps::prpOrder,            S(Targoman::API::AdvertModule::enuAdvertOrder::Type), QFV,                       Targoman::API::AdvertModule::enuAdvertOrder::Normal,  UPOwner},
-                {tblProps::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QRequired,  UPOwner},
-                {tblProps::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},
-                {tblProps::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},
-                {tblProps::prpCreatedBy_usrID,  ORM_CREATED_BY},
-                {tblProps::prpCreationDateTime, ORM_CREATED_ON},
-                {tblProps::prpUpdatedBy_usrID,  ORM_UPDATED_BY},
-              },
-              { ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
-                {tblProps::prp_binID,           R(AdvertSchema,tblBin::Name),       tblBin::binID },
-                {tblProps::prp_locID,           R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-                ORM_RELATION_OF_CREATOR(tblProps::prpCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblProps::prpUpdatedBy_usrID),
-              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

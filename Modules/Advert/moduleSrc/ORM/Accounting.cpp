@@ -22,10 +22,6 @@
  */
 
 #include "Accounting.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "Defs.hpp"
-#include "Locations.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
@@ -37,51 +33,45 @@ using namespace Targoman::API::AAA;
 namespace Targoman::API::AdvertModule::ORM {
 
 /******************************************************/
-AccountProducts::AccountProducts()
-    : intfAccountProducts(AdvertSchema,
-        {///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
-            { tblAccountProducts::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
-            { tblAccountProducts::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
-            { tblAccountProducts::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-            { tblAccountProducts::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-            { tblAccountProducts::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-            { tblAccountProducts::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-            { tblAccountProducts::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-        },
-        {///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
-            { tblAccountProducts::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::locID },
-        }
-    ) { ; }
+AccountProducts::AccountProducts() :
+    intfAccountProducts(
+        AdvertSchema,
+        tblAccountProducts::Private::ORMFields,
+        tblAccountProducts::Private::Relations,
+        tblAccountProducts::Private::Indexes
+) { ; }
 
 /******************************************************/
-AccountSaleables::AccountSaleables()
-    : intfAccountSaleables(AdvertSchema,
-        {///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-            { tblAccountSaleables::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountSaleables::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountSaleables::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountSaleables::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-            { tblAccountSaleables::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-        }
-    ) { ; }
+AccountSaleables::AccountSaleables() :
+    intfAccountSaleables(
+        AdvertSchema,
+        tblAccountSaleables::Private::ORMFields,
+        tblAccountSaleables::Private::Relations,
+        tblAccountSaleables::Private::Indexes
+) { ; }
 
 /******************************************************/
-AccountUserAssets::AccountUserAssets()
-    : intfAccountUserAssets(AdvertSchema,
+AccountUserAssets::AccountUserAssets() :
+    intfAccountUserAssets(
+        AdvertSchema,
         {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("uas")
-        }) { ; }
+        }
+) { ; }
 
 /******************************************************/
-AccountAssetUsage::AccountAssetUsage()
-    : intfAccountAssetUsage(AdvertSchema,
+AccountAssetUsage::AccountAssetUsage() :
+    intfAccountAssetUsage(
+        AdvertSchema,
         {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("usg")
         }
-    ) { ; }
+) { ; }
 
 /******************************************************/
-AccountCoupons::AccountCoupons()
-    : intfAccountCoupons(AdvertSchema) { ; }
+AccountCoupons::AccountCoupons() :
+    intfAccountCoupons(
+        AdvertSchema
+) { ; }
 
 } // namespace Targoman::API::AdvertModule::ORM

@@ -25,6 +25,10 @@
 #define TARGOMAN_API_MODULES_TICKETING_ORM_TICKETATTACHMENTS_H
 
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Defs.hpp"
+#include "Tickets.h"
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+using namespace Targoman::API::ObjectStorage;
 
 namespace Targoman::API::TicketingModule {
 
@@ -36,11 +40,63 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblTicketAttachments {
     constexpr char Name[] = "tblTicketAttachments";
-    TARGOMAN_CREATE_CONSTEXPR(tatID);
-    TARGOMAN_CREATE_CONSTEXPR(tat_tktID);
-    TARGOMAN_CREATE_CONSTEXPR(tat_uplID);
-    TARGOMAN_CREATE_CONSTEXPR(tatCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(tatCreatedBy_usrID);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(tatID);
+        TARGOMAN_CREATE_CONSTEXPR(tat_tktID);
+        TARGOMAN_CREATE_CONSTEXPR(tat_uplID);
+        TARGOMAN_CREATE_CONSTEXPR(tatCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(tatCreatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::tatID,
+            _tableAlias + Fields::tat_tktID,
+            _tableAlias + Fields::tat_uplID,
+            _tableAlias + Fields::tatCreationDateTime,
+            _tableAlias + Fields::tatCreatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+        constexpr char Tickets[] = "tickets";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                       Type                    Validation                 Default      UpBy   Sort  Filter Self  Virt   PK
+                { Fields::tatID,                  ORM_PRIMARYKEY_64 },
+                { Fields::tat_tktID,              S(quint64),             QFV.integer().minValue(1), QRequired,   UPNone },
+                { Fields::tat_uplID,              S(quint64),             QFV.integer().minValue(1), QRequired,   UPNone },
+                { Fields::tatCreationDateTime,    ORM_CREATED_ON },
+                { Fields::tatCreatedBy_usrID,     ORM_CREATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Alias        Col                               Reference Table                            ForeignCol          Rename     LeftJoin
+                { Relation::Tickets, { Fields::tat_tktID,  R(TicketingSchema, tblTickets::Name),      tblTickets::Fields::tktID } },
+                { Fields::tat_uplID,  R(TicketingSchema, tblUploadFiles::Name),  tblUploadFiles::Fields::uflID },
+                //this index is preventing querybuilder invalid column for filter error:
+                { Fields::tat_uplID,  R(TicketingSchema, tblUploadQueue::Name),  tblUploadQueue::Fields::uqu_uflID },
+                ORM_RELATION_OF_CREATOR(Fields::tatCreatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (tatID),
+        SF_quint64                  (tat_tktID),
+        SF_quint64                  (tat_uplID),
+        SF_ORM_CREATED_ON           (tatCreationDateTime),
+        SF_ORM_CREATED_BY           (tatCreatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

@@ -36,17 +36,81 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblBlockingRules {
-constexpr char Name[] = "tblBlockingRules";
-TARGOMAN_CREATE_CONSTEXPR(blrID);
-TARGOMAN_CREATE_CONSTEXPR(blr_ipbIP);
-TARGOMAN_CREATE_CONSTEXPR(blr_ipIPReadable);
-TARGOMAN_CREATE_CONSTEXPR(blrStartingTime);
-TARGOMAN_CREATE_CONSTEXPR(blrEndingTime);
-TARGOMAN_CREATE_CONSTEXPR(blrCause);
-TARGOMAN_CREATE_CONSTEXPR(blrCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(blrCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(blrUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(blrStatus);
+    constexpr char Name[] = "tblBlockingRules";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(blrID);
+        TARGOMAN_CREATE_CONSTEXPR(blr_ipbIP);
+        TARGOMAN_CREATE_CONSTEXPR(blr_ipIPReadable);
+        TARGOMAN_CREATE_CONSTEXPR(blrStartingTime);
+        TARGOMAN_CREATE_CONSTEXPR(blrEndingTime);
+        TARGOMAN_CREATE_CONSTEXPR(blrCause);
+        TARGOMAN_CREATE_CONSTEXPR(blrCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(blrCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(blrUpdatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(blrStatus);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::blrID,
+            _tableAlias + Fields::blr_ipbIP,
+            _tableAlias + Fields::blr_ipIPReadable,
+            _tableAlias + Fields::blrStartingTime,
+            _tableAlias + Fields::blrEndingTime,
+            _tableAlias + Fields::blrCause,
+            _tableAlias + Fields::blrCreatedBy_usrID,
+            _tableAlias + Fields::blrCreationDateTime,
+            _tableAlias + Fields::blrUpdatedBy_usrID,
+            _tableAlias + Fields::blrStatus,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                Type                 Validation                       Default   UpBy     Sort   Filter Self  Virt   PK
+            { Fields::blrID,               ORM_PRIMARYKEY_64} ,
+            { Fields::blr_ipbIP,           S(quint32),          QFV.integer().minValue(1),       QNull,    UPAdmin },
+            { Fields::blr_ipIPReadable,    S(TAPI::IPv4_t),     QFV,                             QInvalid, UPNone,  false, false },
+            { Fields::blrStartingTime,     S(TAPI::DateTime_t), QFV,                             QNull,    UPNone,  true },
+            { Fields::blrEndingTime,       S(TAPI::DateTime_t), QFV,                             QNull,    UPAdmin },
+            { Fields::blrCause,            S(QString),          QFV,                             QNull,    UPAdmin, false, false },
+            { Fields::blrStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { Fields::blrCreatedBy_usrID,  ORM_CREATED_BY },
+            { Fields::blrCreationDateTime, ORM_CREATED_ON },
+            { Fields::blrUpdatedBy_usrID,  ORM_UPDATED_BY },
+        };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                                    Reference Table              ForeignCol          Rename     LeftJoin
+            ORM_RELATION_OF_CREATOR(Fields::blrCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(Fields::blrUpdatedBy_usrID),
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (blrID),
+        SF_quint32                  (blr_ipbIP),
+        SF_QString                  (blr_ipIPReadable),
+        SF_DateTime_t               (blrStartingTime),
+        SF_DateTime_t               (blrEndingTime),
+        SF_QString                  (blrCause),
+        SF_ORM_STATUS_FIELD         (blrStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
+        SF_ORM_CREATED_BY           (blrCreatedBy_usrID),
+        SF_ORM_CREATED_ON           (blrCreationDateTime),
+        SF_ORM_UPDATED_BY           (blrUpdatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

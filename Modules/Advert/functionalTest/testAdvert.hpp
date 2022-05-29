@@ -282,8 +282,8 @@ private slots:
                 "Advert/Locations",
                 {},
                 {
-                    { tblLocations::locURL,        url },
-                    { tblLocations::locPlaceCode,  "ABC" },
+                    { tblLocations::Fields::locURL,        url },
+                    { tblLocations::Fields::locPlaceCode,  "ABC" },
                 }
             );
 
@@ -303,11 +303,11 @@ private slots:
                 "Advert/AccountProducts",
                 {},
                 {
-                    { tblAccountProductsBase::prdCode,          this->BannerProductCode },
-                    { tblAccountProductsBase::prdName,          "test product 123" },
-                    { tblAccountProductsBase::prdInStockQty,    1'000 },
-                    { tblAccountProducts::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::prd_locID,            this->LocationID },
+                    { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
+                    { tblAccountProductsBase::Fields::prdName,          "test product 123" },
+                    { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
+                    { tblAccountProducts::Fields::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::Fields::prd_locID,            this->LocationID },
                 }
             );
 
@@ -327,15 +327,15 @@ private slots:
                 "Advert/AccountSaleables",
                 {},
                 {
-                    { tblAccountSaleablesBase::slbCode,             this->BannerSaleableCode },
-                    { tblAccountSaleablesBase::slbName,             "test Saleable 456 name" },
-                    { tblAccountSaleablesBase::slbDesc,             "test Saleable 456 desc" },
-                    { tblAccountSaleablesBase::slb_prdID,           this->BannerProductID },
-                    { tblAccountSaleablesBase::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
-                    { tblAccountSaleablesBase::slbBasePrice,        12'000 },
-//                    { tblAccountSaleablesBase::slbProductCount,     900 },
-                    { tblAccountSaleablesBase::slbInStockQty,       150 },
-                    { tblAccountSaleablesBase::slbVoucherTemplate,  "test Saleable 456 vt" },
+                    { tblAccountSaleablesBase::Fields::slbCode,             this->BannerSaleableCode },
+                    { tblAccountSaleablesBase::Fields::slbName,             "test Saleable 456 name" },
+                    { tblAccountSaleablesBase::Fields::slbDesc,             "test Saleable 456 desc" },
+                    { tblAccountSaleablesBase::Fields::slb_prdID,           this->BannerProductID },
+                    { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+                    { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
+//                    { tblAccountSaleablesBase::Fields::slbProductCount,     900 },
+                    { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
+                    { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test Saleable 456 vt" },
                 }
             );
 
@@ -495,17 +495,17 @@ private slots:
                 "Advert/AccountCoupons",
                 {},
                 {
-                    { tblAccountCouponsBase::cpnCode,                       this->CouponCode },
-                    { tblAccountCouponsBase::cpnPrimaryCount,               500 },
-                    { tblAccountCouponsBase::cpnTotalMaxAmount,             15'000'000 },
-                    { tblAccountCouponsBase::cpnPerUserMaxCount,            2 },
-                    { tblAccountCouponsBase::cpnPerUserMaxAmount,           1'000'000 },
-                    { tblAccountCouponsBase::cpnValidFrom,                  "2020/1/1 1:2:3" },
-//                    { tblAccountCouponsBase::cpnExpiryTime,               S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
-                    { tblAccountCouponsBase::cpnAmount,                     10 },
-                    { tblAccountCouponsBase::cpnAmountType,                 Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
-                    { tblAccountCouponsBase::cpnMaxAmount,                  250'000 },
-                    { tblAccountCouponsBase::cpnSaleableBasedMultiplier,
+                    { tblAccountCouponsBase::Fields::cpnCode,                       this->CouponCode },
+                    { tblAccountCouponsBase::Fields::cpnPrimaryCount,               500 },
+                    { tblAccountCouponsBase::Fields::cpnTotalMaxAmount,             15'000'000 },
+                    { tblAccountCouponsBase::Fields::cpnPerUserMaxCount,            2 },
+                    { tblAccountCouponsBase::Fields::cpnPerUserMaxAmount,           1'000'000 },
+                    { tblAccountCouponsBase::Fields::cpnValidFrom,                  "2020/1/1 1:2:3" },
+//                    { tblAccountCouponsBase::Fields::cpnExpiryTime,               S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin},
+                    { tblAccountCouponsBase::Fields::cpnAmount,                     10 },
+                    { tblAccountCouponsBase::Fields::cpnAmountType,                 Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
+                    { tblAccountCouponsBase::Fields::cpnMaxAmount,                  250'000 },
+                    { tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
 //                        QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>({
 //                            { this->BannerSaleableCode, 1.5, 0 },
 //                            { this->BannerSaleableCode, 1.8, 5 },

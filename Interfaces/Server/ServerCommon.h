@@ -28,6 +28,11 @@
 
 namespace Targoman::API::Server {
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase);
+#pragma clang diagnostic pop
+
 struct ServerCommonConfigs
 {
     static inline QString makeConfig(const QString& _name) {return "/Server/" + _name;}

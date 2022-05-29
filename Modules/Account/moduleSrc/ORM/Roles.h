@@ -37,24 +37,94 @@ TARGOMAN_DEFINE_ENUM(enuRoleStatus,
                      Removed  = 'R'
                      )
 
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuRoleStatus);
+
+namespace Targoman::API::AccountModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-
 namespace tblRoles {
-constexpr char Name[] = "tblRoles";
-TARGOMAN_CREATE_CONSTEXPR(rolID);
-TARGOMAN_CREATE_CONSTEXPR(rolName);
-TARGOMAN_CREATE_CONSTEXPR(rolParent_rolID);
-TARGOMAN_CREATE_CONSTEXPR(rolPrivileges);
-TARGOMAN_CREATE_CONSTEXPR(rolSignupAllowedIPs);
-TARGOMAN_CREATE_CONSTEXPR(rolStatus);
-TARGOMAN_CREATE_CONSTEXPR(rolCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(rolCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
-}
+    constexpr char Name[] = "tblRoles";
 
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(rolID);
+        TARGOMAN_CREATE_CONSTEXPR(rolName);
+        TARGOMAN_CREATE_CONSTEXPR(rolParent_rolID);
+        TARGOMAN_CREATE_CONSTEXPR(rolPrivileges);
+        TARGOMAN_CREATE_CONSTEXPR(rolSignupAllowedIPs);
+        TARGOMAN_CREATE_CONSTEXPR(rolStatus);
+        TARGOMAN_CREATE_CONSTEXPR(rolCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(rolCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::rolID,
+            _tableAlias + Fields::rolName,
+            _tableAlias + Fields::rolParent_rolID,
+            _tableAlias + Fields::rolPrivileges,
+            _tableAlias + Fields::rolSignupAllowedIPs,
+            _tableAlias + Fields::rolStatus,
+            _tableAlias + Fields::rolCreatedBy_usrID,
+            _tableAlias + Fields::rolCreationDateTime,
+            _tableAlias + Fields::rolUpdatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///<ColName                          Type                   Validation                        Default    UpBy   Sort  Filter Self  Virt   PK
+                { Fields::rolID,                ORM_PRIMARYKEY_32 },
+                { Fields::rolName,              S(QString),            QFV/*.unicodeAlNum()*/.maxLenght(50), QRequired, UPAdmin },
+                { Fields::rolParent_rolID,      S(quint32),            QFV.integer().minValue(1),        QNull,     UPAdmin },
+                { Fields::rolPrivileges,        S(TAPI::PrivObject_t), QFV,                              QRequired, UPAdmin, false, false },
+                { Fields::rolSignupAllowedIPs,  S(QString),            QFV,                              QNull,     UPAdmin, false, false }, //OJO This must be validated after splitting by comma
+                { Fields::rolStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuRoleStatus, Targoman::API::AccountModule::enuRoleStatus::Active) },
+                { ORM_INVALIDATED_AT_FIELD },
+                { Fields::rolCreationDateTime,  ORM_CREATED_ON },
+                { Fields::rolCreatedBy_usrID,   ORM_CREATED_BY_NULLABLE },
+                { Fields::rolUpdatedBy_usrID,   ORM_UPDATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+                { Fields::rolParent_rolID, R(AAASchema,tblRoles::Name), Fields::rolID, "Parent_", true },
+                ORM_RELATION_OF_CREATOR(Fields::rolCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(Fields::rolUpdatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                Fields::rolName,
+                ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (rolID),
+        SF_QString                  (rolName),
+        SF_quint32                  (rolParent_rolID),
+        SF_JSON_t                   (rolPrivileges),
+        SF_QString                  (rolSignupAllowedIPs),
+        SF_ORM_STATUS_FIELD         (rolStatus, Targoman::API::AccountModule::enuRoleStatus, Targoman::API::AccountModule::enuRoleStatus::Active),
+        SF_ORM_CREATED_ON           (rolCreationDateTime),
+        SF_ORM_CREATED_BY_NULLABLE  (rolCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (rolUpdatedBy_usrID)
+    );
+}
 #pragma GCC diagnostic pop
 
 class Roles : public intfSQLBasedModule
@@ -71,7 +141,5 @@ private slots:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuRoleStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_ROLES_H

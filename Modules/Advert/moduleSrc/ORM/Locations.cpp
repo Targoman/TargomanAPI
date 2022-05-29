@@ -32,34 +32,10 @@ Locations::Locations() :
     intfSQLBasedModule(
         AdvertSchema,
         tblLocations::Name,
-        {///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblLocations::locID,               ORM_PRIMARYKEY_32 },
-            { tblLocations::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
-            { tblLocations::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
-            { tblLocations::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblLocations::locCreationDateTime, ORM_CREATED_ON },
-            { tblLocations::locCreatedBy_usrID,  ORM_CREATED_BY },
-            { tblLocations::locUpdatedBy_usrID,  ORM_UPDATED_BY },
-        },
-        {///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
-            ORM_RELATION_OF_CREATOR(tblLocations::locCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblLocations::locUpdatedBy_usrID),
-        },
-        {
-            { {
-                tblLocations::locURL,
-                tblLocations::locPlaceCode,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { tblLocations::locURL },
-            { tblLocations::locPlaceCode },
-            { tblLocations::locStatus },
-            { tblLocations::locCreatedBy_usrID },
-            { tblLocations::locCreationDateTime },
-            { tblLocations::locUpdatedBy_usrID },
-        }
-    ) { ; }
+        tblLocations::Private::ORMFields,
+        tblLocations::Private::Relations,
+        tblLocations::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Locations) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

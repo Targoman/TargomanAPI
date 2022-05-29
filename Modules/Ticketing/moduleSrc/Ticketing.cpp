@@ -79,22 +79,22 @@ quint64 Ticketing::insertTicket(
     quint32 _unitID
 ) {
     TAPI::ORMFields_t CreateFields({
-       { tblTickets::tktType, _ticketType },
-       { tblTickets::tktTitle, _title },
-       { tblTickets::tktBody, _body },
+       { tblTickets::Fields::tktType, _ticketType },
+       { tblTickets::Fields::tktTitle, _title },
+       { tblTickets::Fields::tktBody, _body },
     });
 
     if (_targetUserID > 0)
-        CreateFields.insert(tblTickets::tktTarget_usrID, _targetUserID);
+        CreateFields.insert(tblTickets::Fields::tktTarget_usrID, _targetUserID);
 
     if (_serviceID > 0)
-        CreateFields.insert(tblTickets::tkt_svcID, _serviceID);
+        CreateFields.insert(tblTickets::Fields::tkt_svcID, _serviceID);
 
     if (_inReplyTicketID > 0)
-        CreateFields.insert(tblTickets::tktInReply_tktID, _inReplyTicketID);
+        CreateFields.insert(tblTickets::Fields::tktInReply_tktID, _inReplyTicketID);
 
     if (_unitID > 0)
-        CreateFields.insert(tblTickets::tkt_untID, _unitID);
+        CreateFields.insert(tblTickets::Fields::tkt_untID, _unitID);
 
     quint64 TicketID = this->Create(Tickets::instance(),
                                     APICALLBOOM_PARAM,
@@ -103,8 +103,8 @@ quint64 Ticketing::insertTicket(
 
     if (_files.isEmpty() == false) {
         CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
-                                             .addCol(tblTicketAttachments::tat_tktID)
-                                             .addCol(tblTicketAttachments::tat_uplID)
+                                             .addCol(tblTicketAttachments::Fields::tat_tktID)
+                                             .addCol(tblTicketAttachments::Fields::tat_uplID)
                                              ;
 
         foreach (auto _file, _files) {
@@ -120,8 +120,8 @@ quint64 Ticketing::insertTicket(
                                                  );
                     if (UploadedFileID > 0)
                         QueryCreateAttachments.values(QVariantMap({
-                                                                      { tblTicketAttachments::tat_tktID, TicketID },
-                                                                      { tblTicketAttachments::tat_uplID, UploadedFileID },
+                                                                      { tblTicketAttachments::Fields::tat_tktID, TicketID },
+                                                                      { tblTicketAttachments::Fields::tat_uplID, UploadedFileID },
                                                                   }));
                 } catch (std::exception &exp) {
                     TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
@@ -240,14 +240,14 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
     if (UploadGatewaysRows.contains(QChar(enuUploadGatewayType::NFS)) == false) {
         auto res = CreateQuery(UploadGateways::instance())
                 .addCols({
-                             tblUploadGateways::ugwName,
-                             tblUploadGateways::ugwType,
-                             tblUploadGateways::ugwMetaInfo,
+                             tblUploadGateways::Fields::ugwName,
+                             tblUploadGateways::Fields::ugwType,
+                             tblUploadGateways::Fields::ugwMetaInfo,
                 })
                 .values({
-                            { tblUploadGateways::ugwName, "fixture NFS 1" },
-                            { tblUploadGateways::ugwType, enuUploadGatewayType::NFS },
-                            { tblUploadGateways::ugwMetaInfo, QVariantMap({
+                            { tblUploadGateways::Fields::ugwName, "fixture NFS 1" },
+                            { tblUploadGateways::Fields::ugwType, enuUploadGatewayType::NFS },
+                            { tblUploadGateways::Fields::ugwMetaInfo, QVariantMap({
                                 { Gateways::NFSMetaInfoJsonKey::Path, ".../ticketing" },
                             })},
                         })
@@ -259,14 +259,14 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
     if (UploadGatewaysRows.contains(QChar(enuUploadGatewayType::AWSS3)) == false) {
         auto res = CreateQuery(UploadGateways::instance())
                 .addCols({
-                             tblUploadGateways::ugwName,
-                             tblUploadGateways::ugwType,
-                             tblUploadGateways::ugwMetaInfo,
+                             tblUploadGateways::Fields::ugwName,
+                             tblUploadGateways::Fields::ugwType,
+                             tblUploadGateways::Fields::ugwMetaInfo,
                 })
                 .values({
-                            { tblUploadGateways::ugwName, "fixture S3 1" },
-                            { tblUploadGateways::ugwType, enuUploadGatewayType::AWSS3 },
-                            { tblUploadGateways::ugwMetaInfo, QVariantMap({
+                            { tblUploadGateways::Fields::ugwName, "fixture S3 1" },
+                            { tblUploadGateways::Fields::ugwType, enuUploadGatewayType::AWSS3 },
+                            { tblUploadGateways::Fields::ugwMetaInfo, QVariantMap({
                                   { Gateways::AWSS3MetaInfoJsonKey::Bucket, "dev.tapi-ticketing" },
                                   { Gateways::AWSS3MetaInfoJsonKey::EndpointUrl, "https://TEST-S3.DOM" },
                                   { Gateways::AWSS3MetaInfoJsonKey::SecretKey, "0" },

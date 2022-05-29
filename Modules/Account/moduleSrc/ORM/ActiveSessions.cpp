@@ -34,32 +34,16 @@ ActiveSessions::ActiveSessions() :
     intfSQLBasedModule(
         AAASchema,
         tblActiveSessions::Name,
-        {///< ColName                                   Type                    Validation                  Default     UpBy    Sort    Filter  Self    Virt    PK      Select
-            { tblActiveSessions::ssnKey,                S(TAPI::MD5_t),         QFV,                        ORM_PRIMARY_KEY },
-            { tblActiveSessions::ssn_usrID,             S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblActiveSessions::ssnIP,                 S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone, false,  false,  false,  false,  false,  false },
-            { tblActiveSessions::ssnIPReadable,         S(QString),             QFV.allwaysInvalid(),       QInvalid,   UPNone, false,  false,  false,  false,  false,  false },
-            { tblActiveSessions::ssnInfo,               S(TAPI::JSON_t),        QFV,                        QNull,      UPNone, false,  false,  false,  false,  false,  false },
-            { tblActiveSessions::ssnFingerPrint,        S(TAPI::MD5_t),         QFV.allwaysInvalid(),       QNull,      UPNone, false,  false,  false,  false,  false,  false },
-            { tblActiveSessions::ssnLastActivity,       S(TAPI::DateTime_t),    QFV,                        QNull,      UPNone },
-            { tblActiveSessions::ssnLastRenew,          S(quint64),             QFV,                        QNull,      UPNone },
-            { tblActiveSessions::ssnRemember,           S(bool),                QFV,                        false,      UPNone },
-            { tblActiveSessions::ssnJWT,                S(QString),             QFV,                        QNull,      UPAdmin,false,  false,  false,  false,  false,  false },
-            { tblActiveSessions::ssnStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuSessionStatus, Targoman::API::AccountModule::enuSessionStatus::Active) },
-            { tblActiveSessions::ssnCreationDateTime,   ORM_CREATED_ON },
-            { tblActiveSessions::ssnUpdatedBy_usrID,    ORM_UPDATED_BY },
-        },
-        {///< Col                                       Reference Table              ForeignCol      Rename      LeftJoin
-            { tblActiveSessions::ssn_usrID,             R(AAASchema, tblUser::Name), tblUser::usrID, "Owner_" },
-            { tblActiveSessions::ssnUpdatedBy_usrID,    R(AAASchema, tblUser::Name), tblUser::usrID, "Updater_", true }
-        }
+        tblActiveSessions::Private::ORMFields,
+        tblActiveSessions::Private::Relations,
+        tblActiveSessions::Private::Indexes
     ) { ; }
 
 QVariant IMPL_ORMGET(ActiveSessions) {
 //  QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 
@@ -75,8 +59,8 @@ bool IMPL_ORMDELETE(ActiveSessions) {
     throw exHTTPForbidden("Deleting current session is not allowed");
 
   if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-      ExtraFilters.insert(tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID());
-//  this->setSelfFilters({{tblActiveSessions::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+      ExtraFilters.insert(tblActiveSessions::Fields::ssn_usrID, _APICALLBOOM.getUserID());
+//  this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

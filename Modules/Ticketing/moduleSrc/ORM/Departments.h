@@ -25,6 +25,8 @@
 #define TARGOMAN_API_MODULES_TICKETING_ORM_DEPARTMENTS_H
 
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Defs.hpp"
 
 namespace Targoman::API::TicketingModule {
 
@@ -36,10 +38,55 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblDepartments {
     constexpr char Name[] = "tblDepartments";
-    TARGOMAN_CREATE_CONSTEXPR(depID);
-    TARGOMAN_CREATE_CONSTEXPR(depName);
-    TARGOMAN_CREATE_CONSTEXPR(depCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(depCreatedBy_usrID);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(depID);
+        TARGOMAN_CREATE_CONSTEXPR(depName);
+        TARGOMAN_CREATE_CONSTEXPR(depCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(depCreatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::depID,
+            _tableAlias + Fields::depName,
+            _tableAlias + Fields::depCreationDateTime,
+            _tableAlias + Fields::depCreatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                               Type                    Validation      Default     UpBy   Sort  Filter Self  Virt   PK
+                { Fields::depID,                ORM_PRIMARYKEY_32 },
+                { Fields::depName,              S(QString),             QFV,            QRequired,  UPNone },
+                { Fields::depCreationDateTime,  ORM_CREATED_ON },
+                { Fields::depCreatedBy_usrID,   ORM_CREATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                                   Reference Table         ForeignCol      Rename      LeftJoin
+                ORM_RELATION_OF_CREATOR(Fields::depCreatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (depID),
+        SF_QString                  (depName),
+        SF_ORM_CREATED_ON           (depCreationDateTime),
+        SF_ORM_CREATED_BY           (depCreatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

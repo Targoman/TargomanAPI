@@ -158,15 +158,75 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblUserExtraInfo {
     constexpr char Name[] = "tblUserExtraInfo";
-    TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
-    //TARGOMAN_CREATE_CONSTEXPR(ueiGender);
-    TARGOMAN_CREATE_CONSTEXPR(ueiBirthDate);
-    TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
-    TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
-    TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
-    TARGOMAN_CREATE_CONSTEXPR(ueiEther);
-    TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
-    TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(uei_usrID);
+        //TARGOMAN_CREATE_CONSTEXPR(ueiGender);
+        TARGOMAN_CREATE_CONSTEXPR(ueiBirthDate);
+        TARGOMAN_CREATE_CONSTEXPR(ueiPhoto);
+        TARGOMAN_CREATE_CONSTEXPR(ueiOAuthAccounts);
+        TARGOMAN_CREATE_CONSTEXPR(ueiIBAN);
+        TARGOMAN_CREATE_CONSTEXPR(ueiEther);
+        TARGOMAN_CREATE_CONSTEXPR(ueiExtraInfo);
+        TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::uei_usrID,
+//            _tableAlias + Fields::ueiGender,
+            _tableAlias + Fields::ueiBirthDate,
+            _tableAlias + Fields::ueiPhoto,
+            _tableAlias + Fields::ueiOAuthAccounts,
+            _tableAlias + Fields::ueiIBAN,
+            _tableAlias + Fields::ueiEther,
+            _tableAlias + Fields::ueiExtraInfo,
+            _tableAlias + Fields::ueiUpdatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                               Type                                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::uei_usrID,          ORM_PRIMARYKEY_64 },
+//            { Fields::ueiGender,          S(NULLABLE_TYPE(TAPI::enuGender::Type)),    QFV,            TAPI::enuGender::NotExpressed,  UPOwner,false,false },
+            { Fields::ueiBirthDate,       S(NULLABLE_TYPE(TAPI::Date_t)),                 QFV,            QNull,  UPOwner },
+            { Fields::ueiPhoto,           S(NULLABLE_TYPE(TAPI::Base64Image_t)),          QFV,            QNull,  UPOwner, false, false },
+            { Fields::ueiOAuthAccounts,   S(NULLABLE_TYPE(TAPI::JSON_t)),                 QFV,            QNull,  UPNone },
+            { Fields::ueiIBAN,            S(NULLABLE_TYPE(TAPI::Sheba_t)),                QFV.iban("IR"), QNull,  UPOwner, false, false },
+            { Fields::ueiEther,           S(NULLABLE_TYPE(TAPI::Ether_t)),                QFV,            QNull,  UPOwner, false, false },
+            { Fields::ueiExtraInfo,       S(NULLABLE_TYPE(TAPI::JSON_t)),                 QFV,            QNull,  UPOwner, false, false },
+            { Fields::ueiUpdatedBy_usrID, ORM_UPDATED_BY },
+        };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                                   Reference Table                 ForeignCol      Rename  LeftJoin
+            ORM_RELATION_OF_UPDATER(Fields::ueiUpdatedBy_usrID),
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (uei_usrID),
+//        SF_NULLABLE_Enum            (ueiGender, TAPI::enuGender),
+        SF_Date_t                   (ueiBirthDate),
+        SF_QString                  (ueiPhoto),
+        SF_JSON_t                   (ueiOAuthAccounts),
+        SF_QString                  (ueiIBAN),
+        SF_QString                  (ueiEther),
+        SF_JSON_t                   (ueiExtraInfo),
+        SF_ORM_UPDATED_BY           (ueiUpdatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

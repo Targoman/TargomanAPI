@@ -155,26 +155,26 @@
     INTERNAL_TAPI_REGISTER_TARGOMAN_ENUM(_namespace, _enum)
 
 /************************************************************/
-#define SF_Generic(_type, _name, _def, _validator, _typeToQJsonValue, _qJsonValueToType) \
-    _type, \
+#define SF_Generic(_name, _type, _def, _validator, _typeToQJsonValue, _qJsonValueToType) \
     _name, \
+    _type, \
     _def, \
     _validator, \
     _typeToQJsonValue, \
     _qJsonValueToType
 
-#define SF_Struct(_type, _name, ...) INTERNAL_SF_STRUCT(_type, _name, __VA_ARGS__)
-#define SF_Var_Struct(_type, _name, _validator) \
-    /* type              */ _type, \
+#define SF_Struct(_name, _type, ...) INTERNAL_SF_STRUCT(_name, _type, __VA_ARGS__)
+#define SF_Var_Struct(_name, _type, _validator) \
     /* name              */ _name, \
+    /* type              */ _type, \
     /* def               */ _type(), \
     /* validator         */ _validator, \
     /* type 2 QJsonValue */ v.toJson(), \
     /* QJsonValue 2 type */ _type().fromJson(v.toObject())
 
-#define SF_Enum(_type, _name, _def) \
-    /* type              */ _type::Type, \
+#define SF_Enum(_name, _type, _def) \
     /* name              */ _name, \
+    /* type              */ _type::Type, \
     /* def               */ _def, \
     /* validator         */ v, \
     /* type 2 QJsonValue */ _type::toStr(v), \
@@ -184,9 +184,9 @@
                                 return t; \
                             }(v)
 
-#define SF_NULLABLE_Enum(_type, _name) \
-    /* type              */ NULLABLE_TYPE(_type::Type), \
+#define SF_NULLABLE_Enum(_name, _type) \
     /* name              */ _name, \
+    /* type              */ NULLABLE_TYPE(_type::Type), \
     /* def               */ NULLABLE_NULL_VALUE, \
     /* validator         */ v==v, \
     /* type 2 QJsonValue */ [](NULLABLE_TYPE(_type::Type) v) -> QJsonValue { \
@@ -201,8 +201,8 @@
                             }(v)
 
 #define SF_JSON_t(_name) \
-    /* type              */ TAPI::JSON_t, \
     /* name              */ _name, \
+    /* type              */ TAPI::JSON_t, \
     /* def               */ TAPI::JSON_t(), \
     /* validator         */ v.isEmpty() == false, \
     /* type 2 QJsonValue */ [](TAPI::JSON_t v) -> QJsonValue { return QVariant(v).toJsonValue(); }(v), \
@@ -213,8 +213,8 @@
                             }(v)
 
 #define SF_DateTime_t(_name) \
-    /* type              */ TAPI::DateTime_t, \
     /* name              */ _name, \
+    /* type              */ TAPI::DateTime_t, \
     /* def               */ TAPI::DateTime_t(), \
     /* validator         */ v.isValid(), \
     /* type 2 QJsonValue */ [](TAPI::DateTime_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
@@ -225,8 +225,8 @@
                             }(v)
 
 #define SF_Date_t(_name) \
-    /* type              */ TAPI::Date_t, \
     /* name              */ _name, \
+    /* type              */ TAPI::Date_t, \
     /* def               */ TAPI::Date_t(), \
     /* validator         */ v.isValid(), \
     /* type 2 QJsonValue */ [](TAPI::Date_t v) -> QJsonValue { return QVariant(v.toString()).toJsonValue(); }(v), \
@@ -236,34 +236,34 @@
                                 return t; \
                             }(v)
 
-//                                                  _type,                  _name, _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
-#define SF_String(_name, _type, ...)    INTERNAL_SF(_type,                  _name, STRING,            v,                 v.toString(),         __VA_ARGS__)
-#define SF_QString(_name, ...)          SF_String(_name,    QString,      __VA_ARGS__)
-#define SF_MD5_t(_name, ...)            SF_String(_name,    TAPI::MD5_t,  __VA_ARGS__)
+//                                                  _name,  _type,                  _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
+#define SF_String(_name, _type, ...)    INTERNAL_SF(_name,  _type,                  STRING,            v,                 v.toString(),         __VA_ARGS__)
+#define SF_QString(_name, ...)          SF_String  (_name,  QString,                __VA_ARGS__)
+#define SF_MD5_t(_name, ...)            SF_String  (_name,  TAPI::MD5_t,            __VA_ARGS__)
 
-#define SF_bool(_name, ...)             INTERNAL_SF(bool,                   _name, INTEGRAL,          INTERNAL_C2bool(v),   INTERNAL_V2bool(v),  __VA_ARGS__)
-#define SF_NULLABLE_bool(_name, ...)    INTERNAL_SF(NULLABLE_TYPE(bool),    _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2bool(v),  __VA_ARGS__)
+#define SF_bool(_name, ...)             INTERNAL_SF(_name,  bool,                   INTEGRAL,          INTERNAL_C2bool(v),   INTERNAL_V2bool(v),  __VA_ARGS__)
+#define SF_NULLABLE_bool(_name, ...)    INTERNAL_SF(_name,  NULLABLE_TYPE(bool),    NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2bool(v),  __VA_ARGS__)
 
-#define SF_quint8(_name, ...)           INTERNAL_SF(quint8,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint8(v),  __VA_ARGS__)
-#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(quint8),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint8(v),  __VA_ARGS__)
-#define SF_quint16(_name, ...)          INTERNAL_SF(quint16,                _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint16(v), __VA_ARGS__)
-#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint16), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint16(v), __VA_ARGS__)
-#define SF_quint32(_name, ...)          INTERNAL_SF(quint32,                _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint32(v), __VA_ARGS__)
-#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint32), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint32(v), __VA_ARGS__)
-#define SF_quint64(_name, ...)          INTERNAL_SF(quint64,                _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint64(v), __VA_ARGS__)
-#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(NULLABLE_TYPE(quint64), _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint64(v), __VA_ARGS__)
+#define SF_quint8(_name, ...)           INTERNAL_SF(_name,  quint8,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint8(v),  __VA_ARGS__)
+#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(quint8),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint8(v),  __VA_ARGS__)
+#define SF_quint16(_name, ...)          INTERNAL_SF(_name,  quint16,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint16(v), __VA_ARGS__)
+#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint16), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint16(v), __VA_ARGS__)
+#define SF_quint32(_name, ...)          INTERNAL_SF(_name,  quint32,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint32(v), __VA_ARGS__)
+#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint32), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint32(v), __VA_ARGS__)
+#define SF_quint64(_name, ...)          INTERNAL_SF(_name,  quint64,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint64(v), __VA_ARGS__)
+#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint64), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint64(v), __VA_ARGS__)
 
-#define SF_qint8(_name, ...)            INTERNAL_SF(qint8,                  _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int8(v),   __VA_ARGS__)
-#define SF_NULLABLE_qint8(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qint8),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int8(v),   __VA_ARGS__)
-#define SF_qint16(_name, ...)           INTERNAL_SF(qint16,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int16(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint16(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint16),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int16(v),  __VA_ARGS__)
-#define SF_qint32(_name, ...)           INTERNAL_SF(qint32,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int32(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint32(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint32),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int32(v),  __VA_ARGS__)
-#define SF_qint64(_name, ...)           INTERNAL_SF(qint64,                 _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int64(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint64(_name, ...)  INTERNAL_SF(NULLABLE_TYPE(qint64),  _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int64(v),  __VA_ARGS__)
+#define SF_qint8(_name, ...)            INTERNAL_SF(_name,  qint8,                  INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int8(v),   __VA_ARGS__)
+#define SF_NULLABLE_qint8(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qint8),   NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int8(v),   __VA_ARGS__)
+#define SF_qint16(_name, ...)           INTERNAL_SF(_name,  qint16,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int16(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint16(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint16),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int16(v),  __VA_ARGS__)
+#define SF_qint32(_name, ...)           INTERNAL_SF(_name,  qint32,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int32(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint32(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint32),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int32(v),  __VA_ARGS__)
+#define SF_qint64(_name, ...)           INTERNAL_SF(_name,  qint64,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int64(v),  __VA_ARGS__)
+#define SF_NULLABLE_qint64(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint64),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int64(v),  __VA_ARGS__)
 
-#define SF_qreal(_name, ...)            INTERNAL_SF(qreal,                  _name, INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2DBL(v),    __VA_ARGS__)
-#define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(NULLABLE_TYPE(qreal),   _name, NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2DBL(v),    __VA_ARGS__)
+#define SF_qreal(_name, ...)            INTERNAL_SF(_name,  qreal,                  INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2DBL(v),    __VA_ARGS__)
+#define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qreal),   NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2DBL(v),    __VA_ARGS__)
 
 /************************************************************/
 #define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) \
@@ -283,6 +283,7 @@
         } \
     };
 
+/*
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
     QT_TRY { \
         TAPI::setFromVariant(_varName, _infoRec.value(_table::_tableFieldName), #_tableFieldName); \
@@ -293,6 +294,7 @@
 
 #define SET_FIELD_FROM_VARIANT_MAP_SAME_NAME(_storage, _varName, _infoRec, _table) \
     SET_FIELD_FROM_VARIANT_MAP(_storage _varName, _infoRec, _table, _varName)
+*/
 
 #define C2DBL(v) INTERNAL_C2DBL(v)
 #define C2U64(v) INTERNAL_C2DBL(v)

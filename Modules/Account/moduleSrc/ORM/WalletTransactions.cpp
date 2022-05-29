@@ -22,35 +22,23 @@
  */
 
 #include "WalletTransactions.h"
-#include "UserWallets.h"
-#include "Voucher.h"
 #include "Payment/PaymentLogic.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
+/*****************************************************************\
+|* WalletTransactions ********************************************|
+\*****************************************************************/
 WalletTransactions::WalletTransactions() :
     intfSQLBasedModule(
         AAASchema,
         tblWalletsTransactions::Name,
-        {///< ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
-            { tblWalletsTransactions::wltID,        ORM_PRIMARYKEY_64 },
-            { tblWalletsTransactions::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
-            { tblWalletsTransactions::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
-            { tblWalletsTransactions::wlt_vchType,  S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
-            { tblWalletsTransactions::wltAmount,    S(qint64),                      QFV,                        QInvalid,   UPNone, false, false },
-            { tblWalletsTransactions::wltStatus,    ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
-            { tblWalletsTransactions::wltDateTime,  ORM_CREATED_ON },
-        },
-        {///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
-            { tblWalletsTransactions::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::Fields::walID },
-            { tblWalletsTransactions::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::vchID },
-            { tblWalletsTransactions::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::wbl_wltID },
-        }
-    ) { ; }
+        tblWalletsTransactions::Private::ORMFields,
+        tblWalletsTransactions::Private::Relations,
+        tblWalletsTransactions::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(WalletTransactions) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -63,21 +51,16 @@ QVariant IMPL_ORMGET(WalletTransactions) {
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
 
+/*****************************************************************\
+|* WalletsBalanceHistory *****************************************|
+\*****************************************************************/
 WalletsBalanceHistory::WalletsBalanceHistory() :
     intfSQLBasedModule(
         AAASchema,
         tblWalletsBalanceHistory::Name,
-        {///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
-            { tblWalletsBalanceHistory::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
-            { tblWalletsBalanceHistory::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletsBalanceHistory::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletsBalanceHistory::wblSumCredit,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletsBalanceHistory::wblSumIncome,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-            { tblWalletsBalanceHistory::wblSumExpense, S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
-        },
-        {///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
-            { tblWalletsBalanceHistory::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::wltID },
-        }
-    ) { ; }
+        tblWalletsBalanceHistory::Private::ORMFields,
+        tblWalletsBalanceHistory::Private::Relations,
+        tblWalletsBalanceHistory::Private::Indexes
+) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM

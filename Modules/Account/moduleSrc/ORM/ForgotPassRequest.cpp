@@ -35,19 +35,10 @@ ForgotPassRequest::ForgotPassRequest() :
     intfSQLBasedModule(
         AAASchema,
         tblForgotPassRequest::Name,
-        {///< ColName                                   Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblForgotPassRequest::fprID,              ORM_PRIMARYKEY_64 },
-            { tblForgotPassRequest::fpr_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblForgotPassRequest::fprRequestedVia,    S(Targoman::API::AccountModule::enuForgotPassLinkVia::Type), QFV, Targoman::API::AccountModule::enuForgotPassLinkVia::Email, UPNone },
-            { tblForgotPassRequest::fprCode,            S(QString),             QFV,                        QRequired,  UPNone },
-            { tblForgotPassRequest::fprRequestDate,     ORM_CREATED_ON },
-            { tblForgotPassRequest::fprApplyDate,       S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
-            { tblForgotPassRequest::fprStatus,          ORM_STATUS_FIELD(Targoman::API::AccountModule::enuFPRStatus, Targoman::API::AccountModule::enuFPRStatus::New) },
-        },
-        {///< Col                                Reference Table                 ForeignCol
-            { tblForgotPassRequest::Relation::User, { tblForgotPassRequest::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::usrID } },
-        }
-    ) { ; }
+        tblForgotPassRequest::Private::ORMFields,
+        tblForgotPassRequest::Private::Relations,
+        tblForgotPassRequest::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(ForgotPassRequest) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

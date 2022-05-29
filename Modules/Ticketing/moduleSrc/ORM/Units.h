@@ -25,6 +25,9 @@
 #define TARGOMAN_API_MODULES_TICKETING_ORM_UNITS_H
 
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Interfaces/AAA/AAA.hpp"
+#include "Defs.hpp"
+#include "Departments.h"
 
 namespace Targoman::API::TicketingModule {
 
@@ -36,11 +39,60 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblUnits {
     constexpr char Name[] = "tblUnits";
-    TARGOMAN_CREATE_CONSTEXPR(untID);
-    TARGOMAN_CREATE_CONSTEXPR(unt_depID);
-    TARGOMAN_CREATE_CONSTEXPR(untName);
-    TARGOMAN_CREATE_CONSTEXPR(untCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(untCreatedBy_usrID);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(untID);
+        TARGOMAN_CREATE_CONSTEXPR(unt_depID);
+        TARGOMAN_CREATE_CONSTEXPR(untName);
+        TARGOMAN_CREATE_CONSTEXPR(untCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(untCreatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::untID,
+            _tableAlias + Fields::unt_depID,
+            _tableAlias + Fields::untName,
+            _tableAlias + Fields::untCreationDateTime,
+            _tableAlias + Fields::untCreatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                           Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+                { Fields::untID,                  ORM_PRIMARYKEY_32 },
+                { Fields::unt_depID,              S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
+                { Fields::untName,                S(QString),             QFV,                        QRequired,  UPNone },
+                { Fields::untCreationDateTime,    ORM_CREATED_ON },
+                { Fields::untCreatedBy_usrID,     ORM_CREATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                   Reference Table                             ForeignCol              Rename      LeftJoin
+                { Fields::unt_depID,  R(TicketingSchema, tblDepartments::Name),   tblDepartments::Fields::depID },
+                ORM_RELATION_OF_CREATOR(Fields::untCreatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (untID),
+        SF_quint32                  (unt_depID),
+        SF_QString                  (untName),
+        SF_ORM_CREATED_ON           (untCreationDateTime),
+        SF_ORM_CREATED_BY           (untCreatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

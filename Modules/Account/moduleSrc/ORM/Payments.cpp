@@ -22,7 +22,6 @@
  */
 
 #include "Payments.h"
-#include "Voucher.h"
 #include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
@@ -48,28 +47,14 @@ OnlinePayments::OnlinePayments() :
     intfSQLBasedModule(
         AAASchema,
         tblOnlinePayments::Name,
-        {///< ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblOnlinePayments::onpID,                 ORM_PRIMARYKEY_64 },
-            { tblOnlinePayments::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired,  UPAdmin },
-            { tblOnlinePayments::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
-            { tblOnlinePayments::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
-            { tblOnlinePayments::onpTrackNumber,        S(QString),             QFV.allwaysValid().maxLenght(50),   QNull,      UPAdmin },
-            { tblOnlinePayments::onpAmount,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
-            { tblOnlinePayments::onpTarget_walID,       S(quint64),             QFV,                                QNull,      UPNone },
-            { tblOnlinePayments::onpResult,             S(QString),             QFV,                                QNull,      UPAdmin, false, false },
-            { tblOnlinePayments::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
-            { tblOnlinePayments::onpCreationDateTime,   ORM_CREATED_ON },
-            { tblOnlinePayments::onpLastUpdateDateTime, ORM_UPDATED_ON },
-        },
-        {///<                     Col                           Reference Table                            ForeignCol         Rename     LeftJoin
-            { "voucher",        { tblOnlinePayments::onp_vchID, R(AAASchema, tblVoucher::Name),            tblVoucher::vchID } },
-            { "paymentGateway", { tblOnlinePayments::onp_pgwID, R(AAASchema, tblPaymentGateways::Name),    tblPaymentGateways::pgwID } },
-        }
-    ) { ; }
+        tblOnlinePayments::Private::ORMFields,
+        tblOnlinePayments::Private::Relations,
+        tblOnlinePayments::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
@@ -85,30 +70,14 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
     intfSQLBasedModule(
         AAASchema,
         tblOfflinePaymentClaims::Name,
-        {///< ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblOfflinePaymentClaims::ofpcID,                  ORM_PRIMARYKEY_64},
-            { tblOfflinePaymentClaims::ofpc_vchID,              S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner},
-            { tblOfflinePaymentClaims::ofpcBank,                S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptCode,         S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcReceiptDate,         S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcAmount,              S(quint32),                 QFV,                                QRequired,  UPOwner},
-            { tblOfflinePaymentClaims::ofpcTarget_walID,        S(quint64),                 QFV,                                QNull,      UPNone },
-            { tblOfflinePaymentClaims::ofpcNotes,               S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-            { tblOfflinePaymentClaims::ofpcStatus,              ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
-            { tblOfflinePaymentClaims::ofpcCreationDateTime,    ORM_CREATED_ON},
-            { tblOfflinePaymentClaims::ofpcCreatedBy_usrID,     ORM_CREATED_BY},
-            { tblOfflinePaymentClaims::ofpcUpdatedBy_usrID,     ORM_UPDATED_BY},
-        },
-        {///< Col                                               Reference Table                 ForeignCol          Rename     LeftJoin
-            { tblOfflinePaymentClaims::ofpc_vchID,              R(AAASchema, tblVoucher::Name), tblVoucher::vchID },
-            ORM_RELATION_OF_CREATOR(tblOfflinePaymentClaims::ofpcCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblOfflinePaymentClaims::ofpcUpdatedBy_usrID),
-        }
-    ) { ; }
+        tblOfflinePaymentClaims::Private::ORMFields,
+        tblOfflinePaymentClaims::Private::Relations,
+        tblOfflinePaymentClaims::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(OfflinePaymentClaims) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
@@ -141,30 +110,14 @@ OfflinePayments::OfflinePayments() :
     intfSQLBasedModule(
         AAASchema,
         tblOfflinePayments::Name,
-        {///< ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblOfflinePayments::ofpID,                ORM_PRIMARYKEY_64},
-            { tblOfflinePayments::ofp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
-            { tblOfflinePayments::ofpBank,              S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePayments::ofpReceiptCode,       S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { tblOfflinePayments::ofpReceiptDate,       S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
-            { tblOfflinePayments::ofpAmount,            S(quint32),             QFV,                                QRequired,  UPOwner},
-            { tblOfflinePayments::ofpTarget_walID,      S(quint64),             QFV,                                QNull,      UPNone },
-            { tblOfflinePayments::ofpNotes,             S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-            { tblOfflinePayments::ofpStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
-            { tblOfflinePayments::ofpCreationDateTime,  ORM_CREATED_ON},
-            { tblOfflinePayments::ofpCreatedBy_usrID,   ORM_CREATED_BY},
-            { tblOfflinePayments::ofpUpdatedBy_usrID,   ORM_UPDATED_BY},
-        },
-        {///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-            { tblOfflinePayments::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::vchID},
-            ORM_RELATION_OF_CREATOR(tblOfflinePayments::ofpCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblOfflinePayments::ofpUpdatedBy_usrID),
-        }
-    ) { ; }
+        tblOfflinePayments::Private::ORMFields,
+        tblOfflinePayments::Private::Relations,
+        tblOfflinePayments::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(OfflinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);

@@ -34,22 +34,9 @@ intfAlerts::intfAlerts() :
     clsTable(
         "Common",
         "Alert",
-        {///< ColName                               Type                                        Validation                  Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
-            { tblAlerts::alrID,                     ORM_PRIMARYKEY_64 },
-            { tblAlerts::alrType,                   S(Targoman::API::ORM::enuAlertType::Type),  QFV,                        QRequired,  UPOwner },
-            { tblAlerts::alr_usrID,                 S(NULLABLE_TYPE(quint64)),                  QFV.integer().minValue(1),  QNull,      UPOwner },
-            { tblAlerts::alrLanguage,               S(TAPI::String_t),                          QFV.maxLenght(2),           QRequired,  UPAdmin },
-            { tblAlerts::alrReplacedContactInfo,    S(TAPI::String_t),                          QFV.maxLenght(50),          QRequired,  UPAdmin },
-            { tblAlerts::alr_altCode,               S(TAPI::String_t),                          QFV.maxLenght(50),          QRequired,  UPAdmin },
-            { tblAlerts::alrReplacements,           S(TAPI::DBText_t),                          QFV,                        QRequired,  UPAdmin },
-            { tblAlerts::alrCreateDate,             ORM_CREATED_ON },
-            { tblAlerts::alrLockedAt,               S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
-            { tblAlerts::alrLockedBy,               S(QString),                                 QFV,                        QNull,      UPAdmin },
-            { tblAlerts::alrLastTryAt,              S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
-            { tblAlerts::alrSentDate,               S(TAPI::DateTime_t),                        QFV,                        QNull,      UPAdmin },
-            { tblAlerts::alrStatus,                 ORM_STATUS_FIELD(Targoman::API::ORM::enuAlertStatus,                    Targoman::API::ORM::enuAlertStatus::New) },
-            { tblAlerts::alrResult,                 S(TAPI::JSON_t),                            QFV,                        QNull,      UPNone, false, false },
-        }
+        tblAlerts::Private::ORMFields,
+        tblAlerts::Private::Relations,
+        tblAlerts::Private::Indexes
     ) { ; }
 
 /*STATIC*/ bool intfAlerts::createNewAlert(

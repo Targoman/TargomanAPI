@@ -26,6 +26,8 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "UserWallets.h"
+#include "Voucher.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -47,32 +49,146 @@ TARGOMAN_DEFINE_ENUM(enuWalletTransactionStatus,
                      Removed  = 'R'
                      )
 
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
+
+namespace Targoman::API::AccountModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
-namespace tblWalletsTransactions {
-    constexpr char Name[] = "tblWalletsTransactions";
-    TARGOMAN_CREATE_CONSTEXPR(wltID);
-    TARGOMAN_CREATE_CONSTEXPR(wlt_walID);
-    TARGOMAN_CREATE_CONSTEXPR(wlt_vchID);
-    TARGOMAN_CREATE_CONSTEXPR(wlt_vchType);
-    TARGOMAN_CREATE_CONSTEXPR(wltAmount);
-    TARGOMAN_CREATE_CONSTEXPR(wltStatus);
-    TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
-}
 
 namespace tblWalletsBalanceHistory {
     constexpr char Name[] = "tblWalletsBalanceHistory";
-    TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
-    TARGOMAN_CREATE_CONSTEXPR(wblBalance);
-    TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
-    TARGOMAN_CREATE_CONSTEXPR(wblSumExpense);
-    TARGOMAN_CREATE_CONSTEXPR(wblSumCredit);
-    TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(wbl_wltID);
+        TARGOMAN_CREATE_CONSTEXPR(wblBalance);
+        TARGOMAN_CREATE_CONSTEXPR(wblSumIncome);
+        TARGOMAN_CREATE_CONSTEXPR(wblSumExpense);
+        TARGOMAN_CREATE_CONSTEXPR(wblSumCredit);
+        TARGOMAN_CREATE_CONSTEXPR(wblSumDebit);
+    }
+}
+
+namespace tblWalletsTransactions {
+    constexpr char Name[] = "tblWalletsTransactions";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(wltID);
+        TARGOMAN_CREATE_CONSTEXPR(wlt_walID);
+        TARGOMAN_CREATE_CONSTEXPR(wlt_vchID);
+        TARGOMAN_CREATE_CONSTEXPR(wlt_vchType);
+        TARGOMAN_CREATE_CONSTEXPR(wltAmount);
+        TARGOMAN_CREATE_CONSTEXPR(wltStatus);
+        TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::wltID,
+            _tableAlias + Fields::wlt_walID,
+            _tableAlias + Fields::wlt_vchID,
+            _tableAlias + Fields::wlt_vchType,
+            _tableAlias + Fields::wltAmount,
+            _tableAlias + Fields::wltStatus,
+            _tableAlias + Fields::wltDateTime,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
+                { Fields::wltID,        ORM_PRIMARYKEY_64 },
+                { Fields::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
+                { Fields::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
+                { Fields::wlt_vchType,  S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
+                { Fields::wltAmount,    S(qint64),                      QFV,                        QInvalid,   UPNone, false, false },
+                { Fields::wltStatus,    ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
+                { Fields::wltDateTime,  ORM_CREATED_ON },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
+                { Fields::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::Fields::walID },
+                { Fields::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::Fields::vchID },
+                { Fields::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::Fields::wbl_wltID },
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (wltID),
+        SF_quint64                  (wlt_walID),
+        SF_quint64                  (wlt_vchID),
+        SF_Enum                     (wlt_vchType, Targoman::API::AccountModule::enuVoucherType, Targoman::API::AccountModule::enuVoucherType::Expense),
+        SF_qint64                   (wltAmount),
+        SF_ORM_STATUS_FIELD         (wltStatus, Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New),
+        SF_ORM_CREATED_ON           (wltDateTime)
+    );
+}
+
+namespace tblWalletsBalanceHistory {
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::wbl_wltID,
+            _tableAlias + Fields::wblBalance,
+            _tableAlias + Fields::wblSumIncome,
+            _tableAlias + Fields::wblSumExpense,
+            _tableAlias + Fields::wblSumCredit,
+            _tableAlias + Fields::wblSumDebit,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
+                { Fields::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
+                { Fields::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+                { Fields::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+                { Fields::wblSumCredit,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+                { Fields::wblSumIncome,  S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+                { Fields::wblSumExpense, S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
+                { Fields::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::Fields::wltID },
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_qint64                   (wbl_wltID),
+        SF_qint64                   (wblBalance),
+        SF_qint64                   (wblSumDebit),
+        SF_qint64                   (wblSumCredit),
+        SF_qint64                   (wblSumIncome),
+        SF_qint64                   (wblSumExpense)
+    );
 }
 #pragma GCC diagnostic pop
-
 
 class WalletTransactions : public intfSQLBasedModule
 {
@@ -93,7 +209,5 @@ private:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_WALLETTRANSACTIONS_H

@@ -24,8 +24,11 @@
 #include "clsORMField.h"
 #include "Interfaces/Common/base.h"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
-#include "Server/ServerConfigs.h"
-#include "Server/RESTAPIRegistry.h"
+#include "Interfaces/Common/tmplAPIArg.h"
+#include "Interfaces/Server/ServerCommon.h"
+#include "Interfaces/API/intfPureModule.h"
+//#include "Server/ServerConfigs.h"
+//#include "Server/RESTAPIRegistry.h"
 
 using namespace Targoman::API::Common;
 using namespace Targoman::API::API;
@@ -56,18 +59,20 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
     this->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->ParamTypeName.toUtf8()));
 }
 
-clsORMFieldData::clsORMFieldData(const QString& _name,
-                const QString& _type,
-                QVariant _defaultValue,
-                const QFieldValidator& _extraValidator,
-                enuUpdatableBy::Type _updatableBy,
-                bool _isSortable,
-                bool _isFilterable,
-                bool _isSelfIdentifier,
-                bool _isVirtual,
-                bool _isPrimaryKey,
-                bool _isSelectable,
-                const QString& _renameAs) :
+clsORMFieldData::clsORMFieldData(
+    const QString& _name,
+    const QString& _type,
+    QVariant _defaultValue,
+    const QFieldValidator& _extraValidator,
+    enuUpdatableBy::Type _updatableBy,
+    bool _isSortable,
+    bool _isFilterable,
+    bool _isSelfIdentifier,
+    bool _isVirtual,
+    bool _isPrimaryKey,
+    bool _isSelectable,
+    const QString& _renameAs
+) :
     ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
     Name(_name),
     ParamTypeName(_type),
@@ -81,7 +86,7 @@ clsORMFieldData::clsORMFieldData(const QString& _name,
           (_isPrimaryKey ? 0x8 : 0) +
           (_isVirtual ? 0x10 : 0) +
           (_isSelectable ? 0x20 : 0)
-    ) {
+) {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
             .replace("(", "<")
@@ -108,19 +113,19 @@ clsORMField::clsORMField(const clsORMField& _other, const QString& _newName) :
 }
 
 clsORMField::clsORMField(
-        const QString& _name,
-        const QString& _type,
-        const QFieldValidator& _extraValidator,
-        QVariant _defaultValue,
-        enuUpdatableBy::Type _updatableBy,
-        bool _isSortable,
-        bool _isFilterable,
-        bool _isSelfIdentifier,
-        bool _isVirtual,
-        bool _isPrimaryKey,
-        bool _isSelectable,
-        const QString& _renameAs
-    ) :
+    const QString& _name,
+    const QString& _type,
+    const QFieldValidator& _extraValidator,
+    QVariant _defaultValue,
+    enuUpdatableBy::Type _updatableBy,
+    bool _isSortable,
+    bool _isFilterable,
+    bool _isSelfIdentifier,
+    bool _isVirtual,
+    bool _isPrimaryKey,
+    bool _isSelectable,
+    const QString& _renameAs
+) :
     Data(new clsORMFieldData(
              _name,
              _type,
@@ -135,13 +140,15 @@ clsORMField::clsORMField(
              _isSelectable,
              _renameAs
              )
-    ) { ; }
+) { ; }
 
 void clsORMField::registerTypeIfNotRegisterd(intfPureModule* _module) {
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType)) {
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toLatin1()));
+
         if (this->Data->ParameterType == QMetaType::UnknownType)
             throw exRESTRegistry("Unregistered type: <"+this->Data->ParamTypeName+">");
+
         _module->updateFilterParamType(this->Data->ParamTypeName, this->Data->ParameterType);
     }
 }
