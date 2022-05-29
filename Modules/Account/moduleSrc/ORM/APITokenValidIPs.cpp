@@ -23,15 +23,21 @@
 
 #include "APITokenValidIPs.h"
 #include "User.h"
-#include "APITokens.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
 
+APITokenValidIPs::APITokenValidIPs() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblAPITokenValidIPs::Name,
+        tblAPITokenValidIPs::Private::ORMFields,
+        tblAPITokenValidIPs::Private::Relations,
+        tblAPITokenValidIPs::Private::Indexes
+    ) { ; }
+
 QVariant IMPL_ORMGET(APITokenValidIPs) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblAPITokens::Name);
@@ -49,9 +55,9 @@ quint64 IMPL_ORMCREATE(APITokenValidIPs) {
 bool IMPL_ORMUPDATE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID());
 
-//    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
@@ -60,40 +66,11 @@ bool IMPL_ORMDELETE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::apt_usrID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblAPITokens::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID());
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);
 }
-
-APITokenValidIPs::APITokenValidIPs() :
-    intfSQLBasedModule(
-        AAASchema,
-        tblAPITokenValidIPs::Name,
-        {///< ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAPITokenValidIPs::tviID,               ORM_PRIMARYKEY_64 },
-            { tblAPITokenValidIPs::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone },
-            { tblAPITokenValidIPs::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner },
-            { tblAPITokenValidIPs::tviIPReadable,       S(QString),          QFV.allwaysInvalid(),           QInvalid,   UPNone, false, false },
-            { tblAPITokenValidIPs::tviStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAPITokenValidIPs::tviCreationDateTime, ORM_CREATED_ON },
-            { tblAPITokenValidIPs::tviCreatedBy_usrID,  ORM_CREATED_BY },
-            { tblAPITokenValidIPs::tviUpdatedBy_usrID,  ORM_UPDATED_BY },
-        },
-        { ///< Col                                     Reference Table                   ForeignCol              Rename     LeftJoin
-            { tblAPITokenValidIPs::tvi_aptID,          R(AAASchema,tblAPITokens::Name),  tblAPITokens::aptID },
-            ORM_RELATION_OF_CREATOR(tblAPITokenValidIPs::tviCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblAPITokenValidIPs::tviUpdatedBy_usrID),
-        },
-        {
-            { {
-                tblAPITokenValidIPs::tvi_aptID,
-                tblAPITokenValidIPs::tviIP,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
-    ) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM

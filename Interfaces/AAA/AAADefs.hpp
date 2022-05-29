@@ -25,13 +25,29 @@
 #define TARGOMAN_API_AAA_DEFS_HPP
 
 #include <QJsonObject>
+
 #include "libTargomanCommon/exTargomanBase.h"
 #include "libTargomanDBM/clsDAC.h"
+
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
+#include "Interfaces/Common/QtTypes.hpp"
+#include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
+#include "Interfaces/DBM/Defs.hpp"
+#include "Interfaces/DBM/clsORMField.h"
 
 using namespace qhttp;
 
+using namespace Targoman::API::DBM;
+
 namespace Targoman::API::AAA {
+
+constexpr char AccountDomain[] = "Account";
+constexpr char AAASchema[] = "AAA";
+
+constexpr quint64 SYSTEM_USER_ID = 1;
+#define makeAAADAC(_varName) DBManager::clsDAC _varName(AccountDomain, AAASchema)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
@@ -46,6 +62,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE(ESTATUS_PAYMENT_REQUIRED, exPaymentRequ
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
 namespace TOKENItems {
 TARGOMAN_CREATE_CONSTEXPR(tokID);
 TARGOMAN_CREATE_CONSTEXPR(usrID);
@@ -65,40 +82,135 @@ TARGOMAN_CREATE_CONSTEXPR(usrID);
 namespace tblUser {
     constexpr char Name[] = "tblUser";
 
-    namespace Relation {
-        constexpr char ExtraInfo[] = "extrainfo";
-    }
-
     constexpr quint64 MinNormalUserID = 100;
 
-    TARGOMAN_CREATE_CONSTEXPR(usrID);
-    TARGOMAN_CREATE_CONSTEXPR(usrGender);
-    TARGOMAN_CREATE_CONSTEXPR(usrName);
-    TARGOMAN_CREATE_CONSTEXPR(usrFamily);
-    TARGOMAN_CREATE_CONSTEXPR(usrEmail);
-    TARGOMAN_CREATE_CONSTEXPR(usrMobile);
-    TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
-    TARGOMAN_CREATE_CONSTEXPR(usrPass);
-    TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
-    TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
-    TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
-    TARGOMAN_CREATE_CONSTEXPR(usrEnableEmailAlerts);
-    TARGOMAN_CREATE_CONSTEXPR(usrEnableSMSAlerts);
-    TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
-    TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
-    TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
-    TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
-    TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(usrID);
+        TARGOMAN_CREATE_CONSTEXPR(usrGender);
+        TARGOMAN_CREATE_CONSTEXPR(usrName);
+        TARGOMAN_CREATE_CONSTEXPR(usrFamily);
+        TARGOMAN_CREATE_CONSTEXPR(usrEmail);
+        TARGOMAN_CREATE_CONSTEXPR(usrMobile);
+        TARGOMAN_CREATE_CONSTEXPR(usrApprovalState);
+        TARGOMAN_CREATE_CONSTEXPR(usrPass);
+        TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
+        TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
+        TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
+        TARGOMAN_CREATE_CONSTEXPR(usrEnableEmailAlerts);
+        TARGOMAN_CREATE_CONSTEXPR(usrEnableSMSAlerts);
+        TARGOMAN_CREATE_CONSTEXPR(usrMaxSessions);
+        TARGOMAN_CREATE_CONSTEXPR(usrActiveSessions);
+        TARGOMAN_CREATE_CONSTEXPR(usrLastLogin);
+        TARGOMAN_CREATE_CONSTEXPR(usrCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(usrCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(usrUpdatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(usrStatus);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::usrID,
+            _tableAlias + Fields::usrGender,
+            _tableAlias + Fields::usrName,
+            _tableAlias + Fields::usrFamily,
+            _tableAlias + Fields::usrEmail,
+            _tableAlias + Fields::usrMobile,
+            _tableAlias + Fields::usrApprovalState,
+            _tableAlias + Fields::usrPass,
+            _tableAlias + Fields::usr_rolID,
+            _tableAlias + Fields::usrSpecialPrivs,
+            _tableAlias + Fields::usrLanguage,
+            _tableAlias + Fields::usrEnableEmailAlerts,
+            _tableAlias + Fields::usrEnableSMSAlerts,
+            _tableAlias + Fields::usrMaxSessions,
+            _tableAlias + Fields::usrActiveSessions,
+            _tableAlias + Fields::usrLastLogin,
+            _tableAlias + Fields::usrCreatedBy_usrID,
+            _tableAlias + Fields::usrCreationDateTime,
+            _tableAlias + Fields::usrUpdatedBy_usrID,
+            _tableAlias + Fields::usrStatus
+        };
+    }
+
+    namespace Relation {
+        constexpr char ExtraInfo[] = "ExtraInfo";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
+            //ORM_PRIMARYKEY_64 with self:true
+            { Fields::usrID,                   S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
+            { Fields::usrEmail,                S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
+            { Fields::usrName,                 S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { Fields::usrFamily,               S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { Fields::usrGender,               S(TAPI::enuGender::Type),       QFV,                                    TAPI::enuGender::NotExpressed, UPOwner },
+            { Fields::usrMobile,               S(TAPI::Mobile_t),              QFV,                                    QNull,      UPOwner },
+            { Fields::usrApprovalState,        S(TAPI::enuUserApproval::Type), QFV,                                    TAPI::enuUserApproval::None },
+            { Fields::usr_rolID,               S(quint32),                     QFV.integer().minValue(1),              QRequired,  UPAdmin },
+            { Fields::usrSpecialPrivs,         S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPAdmin, false, false },
+            { Fields::usrLanguage,             S(QString),                     QFV.languageCode(),                     "fa",       UPOwner },
+            { Fields::usrEnableEmailAlerts,    S(bool),                        QFV,                                    true,       UPOwner },
+            { Fields::usrEnableSMSAlerts,      S(bool),                        QFV,                                    true,       UPOwner },
+            { Fields::usrMaxSessions,          S(qint32),                      QFV.integer().betweenValues(-1, 100),   -1,         UPAdmin },
+            { Fields::usrActiveSessions,       S(qint32),                      QFV.integer().betweenValues(-1, 1000),  QInvalid,   UPNone },
+            { Fields::usrLastLogin,            S(TAPI::DateTime_t),            QFV,                                    QInvalid,   UPNone },
+            { Fields::usrStatus,               ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::usrCreationDateTime,     ORM_CREATED_ON },
+            { Fields::usrCreatedBy_usrID,      ORM_CREATED_BY_NULLABLE },
+            { Fields::usrUpdatedBy_usrID,      ORM_UPDATED_BY },
+        };
+
+///< Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
+#define tblUser_Private_Relations \
+    { \
+        { tblUser::Fields::usr_rolID,               R(AAASchema, tblRoles::Name),                       tblRoles::Fields::rolID }, \
+        { tblUser::Relation::ExtraInfo, { tblUser::Fields::usrID, R(AAASchema, tblUserExtraInfo::Name), tblUserExtraInfo::Fields::uei_usrID,    "",     true } }, \
+        ORM_RELATION_OF_CREATOR(tblUser::Fields::usrCreatedBy_usrID), \
+        ORM_RELATION_OF_UPDATER(tblUser::Fields::usrUpdatedBy_usrID), \
+    }
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                  Fields::usrEmail,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+            { {
+                  Fields::usrMobile,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (usrID),
+        SF_QString                  (usrEmail),
+        SF_QString                  (usrName),
+        SF_QString                  (usrFamily),
+        SF_Enum                     (usrGender, TAPI::enuGender, TAPI::enuGender::NotExpressed),
+        SF_QString                  (usrMobile),
+        SF_Enum                     (usrApprovalState, TAPI::enuUserApproval, TAPI::enuUserApproval::None),
+        SF_quint32                  (usr_rolID),
+        SF_JSON_t                   (usrSpecialPrivs),
+        SF_QString                  (usrLanguage),
+        SF_bool                     (usrEnableEmailAlerts),
+        SF_bool                     (usrEnableSMSAlerts),
+        SF_qint32                   (usrMaxSessions),
+        SF_qint32                   (usrActiveSessions),
+        SF_DateTime_t               (usrLastLogin),
+        SF_ORM_STATUS_FIELD         (usrStatus, TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate),
+        SF_ORM_CREATED_ON           (usrCreationDateTime),
+        SF_ORM_CREATED_BY_NULLABLE  (usrCreatedBy_usrID),
+        SF_NULLABLE_quint64         (usrUpdatedBy_usrID)
+    );
+
 }
 #pragma GCC diagnostic pop
-
-constexpr char AccountDomain[] = "Account";
-constexpr char AAASchema[] = "AAA";
-
-constexpr quint64 SYSTEM_USER_ID = 1;
-#define makeAAADAC(_varName) DBManager::clsDAC _varName(AccountDomain, AAASchema)
 
 } //namespace Targoman::API::AAA
 

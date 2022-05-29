@@ -26,6 +26,7 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "IPBin.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -36,10 +37,52 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblIPStats {
-constexpr char Name[] = "tblIPStats";
-TARGOMAN_CREATE_CONSTEXPR(ips_ipbIP);
-TARGOMAN_CREATE_CONSTEXPR(ipsTimeStamp);
-TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
+    constexpr char Name[] = "tblIPStats";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(ips_ipbIP);
+        TARGOMAN_CREATE_CONSTEXPR(ipsTimeStamp);
+        TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::ips_ipbIP,
+            _tableAlias + Fields::ipsTimeStamp,
+            _tableAlias + Fields::ipsInsertionDate,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///<ColName                       Type                 Validation                     Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::ips_ipbIP,           ORM_PRIMARYKEY_32},
+            { Fields::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QRequired, UPNone},
+            { Fields::ipsInsertionDate,    ORM_CREATED_ON},
+          };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                  Reference Table                  ForeignCol
+            { Fields::ips_ipbIP,   R(AAASchema, tblIPBin::Name),     tblIPBin::Fields::ipbIP },
+          };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (ips_ipbIP),
+        SF_qreal                    (ipsTimeStamp),
+        SF_ORM_CREATED_ON           (ipsInsertionDate)
+    );
 }
 #pragma GCC diagnostic pop
 

@@ -22,15 +22,19 @@
  */
 
 #include "ActiveAds.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "Defs.hpp"
-#include "Bin.h"
-#include "Locations.h"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
+
+ActiveAds::ActiveAds() :
+    intfSQLBasedModule(
+        AdvertSchema,
+        tblActiveAds::Name,
+        tblActiveAds::Private::ORMFields,
+        tblActiveAds::Private::Relations,
+        tblActiveAds::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(ActiveAds) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -47,19 +51,5 @@ bool IMPL_ORMDELETE(ActiveAds) {
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
-
-ActiveAds::ActiveAds() :
-    intfSQLBasedModule(AdvertSchema,
-              tblActiveAds::Name,
-              { ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
-                {tblActiveAds::act_binID,    ORM_PRIMARYKEY_32},
-                {tblActiveAds::act_locID,    ORM_PRIMARYKEY_32},
-                {tblActiveAds::actOrder,     S(Targoman::API::AdvertModule::enuAdvertOrder::Type),QFV,               Targoman::API::AdvertModule::enuAdvertOrder::Normal, UPNone},
-                {tblActiveAds::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
-              },
-              { ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin
-                {tblActiveAds::act_binID,    R(AdvertSchema,tblBin::Name),   tblBin::binID},
-                {tblActiveAds::act_locID,    R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

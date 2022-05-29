@@ -46,7 +46,6 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblCurrency {
-
     constexpr char Name[] = "tblCurrency";
 
     namespace Fields {
@@ -64,6 +63,7 @@ namespace tblCurrency {
     inline QStringList ColumnNames(QString _tableAlias = "") {
         if (_tableAlias.isEmpty() == false)
             _tableAlias += ".";
+
         return {
             _tableAlias + Fields::curID,
             _tableAlias + Fields::curName,
@@ -75,6 +75,10 @@ namespace tblCurrency {
             _tableAlias + Fields::curCreationDateTime,
             _tableAlias + Fields::curUpdatedBy_usrID,
         };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
@@ -104,18 +108,18 @@ namespace tblCurrency {
     } //namespace Private
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
-        SF_ORM_PRIMARYKEY_32(curID),
-        SF_QString          (curName),
-        SF_QString          (curSymbol),
-        SF_qreal            (curRate),
-        SF_bool             (curIsDefault),
-        SF_ORM_STATUS_FIELD (curStatus, Targoman::API::AccountModule::enuCurrencyStatus, Targoman::API::AccountModule::enuCurrencyStatus::Active),
-        SF_ORM_CREATED_ON   (curCreationDateTime),
-        SF_ORM_CREATED_BY   (curCreatedBy_usrID),
-        SF_ORM_UPDATED_BY   (curUpdatedBy_usrID)
+        SF_ORM_PRIMARYKEY_32        (curID),
+        SF_QString                  (curName),
+        SF_QString                  (curSymbol),
+        SF_qreal                    (curRate),
+        SF_bool                     (curIsDefault),
+        SF_ORM_STATUS_FIELD         (curStatus, Targoman::API::AccountModule::enuCurrencyStatus, Targoman::API::AccountModule::enuCurrencyStatus::Active),
+        SF_ORM_CREATED_ON           (curCreationDateTime),
+        SF_ORM_CREATED_BY           (curCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (curUpdatedBy_usrID)
     );
 
-} //namespace tblCurrency
+}
 #pragma GCC diagnostic pop
 
 class Currency : public intfSQLBasedModule

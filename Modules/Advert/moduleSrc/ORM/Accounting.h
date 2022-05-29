@@ -24,7 +24,10 @@
 #ifndef TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
 #define TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H
 
+#include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/AAA/AAA.hpp"
+#include "Defs.hpp"
+#include "Locations.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -35,36 +38,145 @@ TARGOMAN_DEFINE_ENUM (enuProductType,
                       Reportage = 'R',
                       );
 
+} //namespace Targoman::API::AdvertModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuProductType);
+
+namespace Targoman::API::AdvertModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblAccountProducts {
-TARGOMAN_CREATE_CONSTEXPR(prdType);
-TARGOMAN_CREATE_CONSTEXPR(prd_locID);
-TARGOMAN_CREATE_CONSTEXPR(prdShowPerDay);
-TARGOMAN_CREATE_CONSTEXPR(prdShowTotal);
-TARGOMAN_CREATE_CONSTEXPR(prdClicksPerDay);
-TARGOMAN_CREATE_CONSTEXPR(prdClicksPerMonth);
-TARGOMAN_CREATE_CONSTEXPR(prdClicksTotal);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(prdType);
+        TARGOMAN_CREATE_CONSTEXPR(prd_locID);
+        TARGOMAN_CREATE_CONSTEXPR(prdShowPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(prdShowTotal);
+        TARGOMAN_CREATE_CONSTEXPR(prdClicksPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(prdClicksPerMonth);
+        TARGOMAN_CREATE_CONSTEXPR(prdClicksTotal);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return tblAccountProductsBase::ColumnNames(_tableAlias) + QStringList({
+            _tableAlias + Fields::prdType,
+            _tableAlias + Fields::prd_locID,
+            _tableAlias + Fields::prdShowPerDay,
+            _tableAlias + Fields::prdShowTotal,
+            _tableAlias + Fields::prdClicksPerDay,
+            _tableAlias + Fields::prdClicksPerMonth,
+            _tableAlias + Fields::prdClicksTotal,
+        });
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+                { Fields::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
+                { Fields::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
+                { Fields::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+                { Fields::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+                { Fields::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+                { Fields::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+                { Fields::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+                { Fields::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_tblAccountProductsBase_DTO,
+
+        SF_Enum                     (prdType, Targoman::API::AdvertModule::enuProductType, Targoman::API::AdvertModule::enuProductType::Advertise),
+        SF_quint32                  (prd_locID),
+        SF_quint32                  (prdShowPerDay),
+        SF_quint64                  (prdShowTotal),
+        SF_quint32                  (prdClicksPerDay),
+        SF_quint32                  (prdClicksPerMonth),
+        SF_quint64                  (prdClicksTotal)
+    );
 }
 
 namespace tblAccountSaleables {
-TARGOMAN_CREATE_CONSTEXPR(slbShowPerDay);
-TARGOMAN_CREATE_CONSTEXPR(slbShowTotal);
-TARGOMAN_CREATE_CONSTEXPR(slbClicksPerDay);
-TARGOMAN_CREATE_CONSTEXPR(slbClicksPerMonth);
-TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(slbShowPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(slbShowTotal);
+        TARGOMAN_CREATE_CONSTEXPR(slbClicksPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(slbClicksPerMonth);
+        TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return tblAccountSaleablesBase::ColumnNames(_tableAlias) + QStringList({
+            _tableAlias + Fields::slbShowPerDay,
+            _tableAlias + Fields::slbShowTotal,
+            _tableAlias + Fields::slbClicksPerDay,
+            _tableAlias + Fields::slbClicksPerMonth,
+            _tableAlias + Fields::slbClicksTotal,
+        });
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+                { Fields::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+                { Fields::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+                { Fields::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+                { Fields::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+                { Fields::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+            };
+
+        const QList<stuRelation> Relations = {
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_tblAccountSaleablesBase_DTO,
+
+        SF_quint32                  (slbShowPerDay),
+        SF_quint64                  (slbShowTotal),
+        SF_quint32                  (slbClicksPerDay),
+        SF_quint32                  (slbClicksPerMonth),
+        SF_quint64                  (slbClicksTotal)
+    );
 }
 
 namespace AccountAsset {
-TARGOMAN_CREATE_CONSTEXPR(Days);
-TARGOMAN_CREATE_CONSTEXPR(DayShow);
-TARGOMAN_CREATE_CONSTEXPR(TotalShow);
-TARGOMAN_CREATE_CONSTEXPR(DayClicks);
-TARGOMAN_CREATE_CONSTEXPR(MonthClicks);
-TARGOMAN_CREATE_CONSTEXPR(TotalClicks);
+    TARGOMAN_CREATE_CONSTEXPR(Days);
+    TARGOMAN_CREATE_CONSTEXPR(DayShow);
+    TARGOMAN_CREATE_CONSTEXPR(TotalShow);
+    TARGOMAN_CREATE_CONSTEXPR(DayClicks);
+    TARGOMAN_CREATE_CONSTEXPR(MonthClicks);
+    TARGOMAN_CREATE_CONSTEXPR(TotalClicks);
 }
 
 ///<  ColName                                                    Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
@@ -141,7 +253,5 @@ public:
 
 } //namespace ORM
 } //namespace Targoman::API::AdvertModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuProductType);
 
 #endif // TARGOMAN_API_MODULES_ADVERT_ORM_ACCOUNTING_H

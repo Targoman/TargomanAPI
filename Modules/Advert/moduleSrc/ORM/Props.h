@@ -26,6 +26,9 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Defs.hpp"
+#include "Locations.h"
+#include "Bin.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -36,16 +39,79 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblProps {
-constexpr char Name[] = "tblProps";
-TARGOMAN_CREATE_CONSTEXPR(prp_binID);
-TARGOMAN_CREATE_CONSTEXPR(prp_locID);
-TARGOMAN_CREATE_CONSTEXPR(prpOrder);
-TARGOMAN_CREATE_CONSTEXPR(prpKeyword);
-TARGOMAN_CREATE_CONSTEXPR(prpStartDate);
-TARGOMAN_CREATE_CONSTEXPR(prpEndDate);
-TARGOMAN_CREATE_CONSTEXPR(prpCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(prpCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(prpUpdatedBy_usrID);
+    constexpr char Name[] = "tblProps";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(prp_binID);
+        TARGOMAN_CREATE_CONSTEXPR(prp_locID);
+        TARGOMAN_CREATE_CONSTEXPR(prpOrder);
+        TARGOMAN_CREATE_CONSTEXPR(prpKeyword);
+        TARGOMAN_CREATE_CONSTEXPR(prpStartDate);
+        TARGOMAN_CREATE_CONSTEXPR(prpEndDate);
+        TARGOMAN_CREATE_CONSTEXPR(prpCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(prpCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(prpUpdatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::prp_binID,
+            _tableAlias + Fields::prp_locID,
+            _tableAlias + Fields::prpOrder,
+            _tableAlias + Fields::prpKeyword,
+            _tableAlias + Fields::prpStartDate,
+            _tableAlias + Fields::prpEndDate,
+            _tableAlias + Fields::prpCreatedBy_usrID,
+            _tableAlias + Fields::prpCreationDateTime,
+            _tableAlias + Fields::prpUpdatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///<ColName                     Type                    Validation                        UpBy   Sort  Filter Self  Virt   PK
+                { Fields::prp_binID,           ORM_PRIMARYKEY_32},
+                { Fields::prp_locID,           ORM_PRIMARYKEY_32},
+                { Fields::prpOrder,            S(Targoman::API::AdvertModule::enuAdvertOrder::Type), QFV,                       Targoman::API::AdvertModule::enuAdvertOrder::Normal,  UPOwner},
+                { Fields::prpKeyword,          S(QString),             QFV.unicodeAlNum().maxLenght(50), QRequired,  UPOwner},
+                { Fields::prpStartDate,        S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},
+                { Fields::prpEndDate,          S(TAPI::DateTime_t),    QFV,                              QRequired,  UPOwner},
+                { Fields::prpCreatedBy_usrID,  ORM_CREATED_BY},
+                { Fields::prpCreationDateTime, ORM_CREATED_ON},
+                { Fields::prpUpdatedBy_usrID,  ORM_UPDATED_BY},
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
+                { Fields::prp_binID,           R(AdvertSchema, tblBin::Name),       tblBin::Fields::binID },
+                { Fields::prp_locID,           R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
+                ORM_RELATION_OF_CREATOR(Fields::prpCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(Fields::prpUpdatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (prp_binID),
+        SF_ORM_PRIMARYKEY_32        (prp_locID),
+        SF_Enum                     (prpOrder, Targoman::API::AdvertModule::enuAdvertOrder, Targoman::API::AdvertModule::enuAdvertOrder::Normal),
+        SF_QString                  (prpKeyword),
+        SF_DateTime_t               (prpStartDate),
+        SF_DateTime_t               (prpEndDate),
+        SF_ORM_CREATED_BY           (prpCreatedBy_usrID),
+        SF_ORM_CREATED_ON           (prpCreationDateTime),
+        SF_ORM_UPDATED_BY           (prpUpdatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

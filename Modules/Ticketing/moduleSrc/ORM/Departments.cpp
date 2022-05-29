@@ -22,30 +22,19 @@
  */
 
 #include "Departments.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "Defs.hpp"
 
 using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
 
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
 Departments::Departments() :
     intfSQLBasedModule(
         TicketingSchema,
         tblDepartments::Name,
-        {///< ColName                               Type                    Validation      Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblDepartments::depID,                ORM_PRIMARYKEY_32 },
-            { tblDepartments::depName,              S(QString),             QFV,            QRequired,  UPNone },
-            { tblDepartments::depCreationDateTime,  ORM_CREATED_ON },
-            { tblDepartments::depCreatedBy_usrID,   ORM_CREATED_BY },
-        },
-        {///< Col                                   Reference Table         ForeignCol      Rename      LeftJoin
-            ORM_RELATION_OF_CREATOR(tblDepartments::depCreatedBy_usrID),
-        }
-    ) { ; }
+        tblDepartments::Private::ORMFields,
+        tblDepartments::Private::Relations,
+        tblDepartments::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Departments) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

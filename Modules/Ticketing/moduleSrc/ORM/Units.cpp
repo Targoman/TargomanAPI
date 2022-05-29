@@ -22,33 +22,19 @@
  */
 
 #include "Units.h"
-#include "Interfaces/AAA/AAA.hpp"
-#include "Defs.hpp"
-#include "Departments.h"
 
 using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
 
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
 Units::Units() :
     intfSQLBasedModule(
         TicketingSchema,
         tblUnits::Name,
-        {///< ColName                           Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblUnits::untID,                  ORM_PRIMARYKEY_32 },
-            { tblUnits::unt_depID,              S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblUnits::untName,                S(QString),             QFV,                        QRequired,  UPNone },
-            { tblUnits::untCreationDateTime,    ORM_CREATED_ON },
-            { tblUnits::untCreatedBy_usrID,     ORM_CREATED_BY },
-        },
-        {///< Col                   Reference Table                             ForeignCol              Rename      LeftJoin
-            { tblUnits::unt_depID,  R(TicketingSchema, tblDepartments::Name),   tblDepartments::depID },
-            ORM_RELATION_OF_CREATOR(tblUnits::untCreatedBy_usrID),
-        }
-    ) { ; }
+        tblUnits::Private::ORMFields,
+        tblUnits::Private::Relations,
+        tblUnits::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Units) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

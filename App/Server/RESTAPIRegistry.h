@@ -34,10 +34,10 @@ namespace Targoman::API::Server {
 
 class clsAPIObject;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wweak-vtables"
-TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase);
-#pragma clang diagnostic pop
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wweak-vtables"
+//TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase);
+//#pragma clang diagnostic pop
 
 /*****************************************************/
 class OpenAPIGenerator;

@@ -39,26 +39,10 @@ using namespace Targoman::API::ORM;
 namespace Targoman::API::AdvertModule {
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
-    SF_quint64(ID),
-    SF_QString(Title),
-    SF_QString(Description),
-    SF_QString(PrettyURL)
-
-//    stuAdvert(quint64 _id = 0, QString _title = {}, QString _description = {}, QString _prettyURL = {}) :
-//        ID(_id),
-//        Title(_title),
-//        Description(_description),
-//        PrettyURL(_prettyURL)
-//    {}
-
-//    QVariant toVariant() const{
-//        return QVariantMap({
-//            {"id", this->ID},
-//            {"title", this->Title},
-//            {"description", this->Description},
-//            {"prettyURL", this->PrettyURL}
-//        });
-//    }
+    SF_quint64                  (ID),
+    SF_QString                  (Title),
+    SF_QString                  (Description),
+    SF_QString                  (PrettyURL)
 );
 
 struct stuAdvertBill {

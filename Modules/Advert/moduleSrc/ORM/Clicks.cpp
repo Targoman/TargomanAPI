@@ -22,19 +22,21 @@
  */
 
 #include "Clicks.h"
-#include "Defs.hpp"
-#include "Bin.h"
-#include "Locations.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
-//using namespace ORM;
+Clicks::Clicks() :
+    intfSQLBasedModule(
+        AdvertSchema,
+        tblClicks::Name,
+        tblClicks::Private::ORMFields,
+        tblClicks::Private::Relations,
+        tblClicks::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Clicks) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::binID, _APICALLBOOM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, _filters);
 
     auto QueryLambda = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -42,24 +44,5 @@ QVariant IMPL_ORMGET(Clicks) {
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
 }
-
-Clicks::Clicks() :
-    intfSQLBasedModule(AdvertSchema,
-              tblClicks::Name,
-              { ///<ColName                 Type                    Validation                      UpBy   Sort  Filter Self  Virt   PK
-                {tblClicks::clkID,          ORM_PRIMARYKEY_64},
-                {tblClicks::clk_binID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
-                {tblClicks::clk_locID,      S(quint32),             QFV.integer().minValue(1),      QInvalid, UPNone},
-                {tblClicks::clkDateTime,    S(TAPI::DateTime_t),    QFV,                            QInvalid, UPNone},
-                {tblClicks::clkIP,          S(quint32),             QFV.ipv4(),                     QInvalid, UPNone},
-                {tblClicks::clkDevice,      S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
-                {tblClicks::clkScreenSize,  S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
-                {tblClicks::clkOS,          S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
-                {tblClicks::clkBrowser,     S(quint32),             QFV.asciiAlNum().maxLenght(50), QNull,    UPNone},
-              },
-              { ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
-                {tblClicks::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::binID},
-                {tblClicks::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::locID },
-              }) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

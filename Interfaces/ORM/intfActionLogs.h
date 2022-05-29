@@ -24,8 +24,8 @@
 #ifndef TARGOMAN_API_ACTIONLOGS_H
 #define TARGOMAN_API_ACTIONLOGS_H
 
-//#include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Interfaces/AAA/AAADefs.hpp"
 
 using namespace Targoman::API::DBM;
 using namespace Targoman::API::API;
@@ -36,12 +36,59 @@ namespace Targoman::API::ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblActionLogs {
-constexpr char Name[] = "tblActionLogs";
-TARGOMAN_CREATE_CONSTEXPR(atlID);
-TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
-TARGOMAN_CREATE_CONSTEXPR(atlType);
-TARGOMAN_CREATE_CONSTEXPR(atlDescription);
+    constexpr char Name[] = "tblActionLogs";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(atlID);
+        TARGOMAN_CREATE_CONSTEXPR(atlBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(atlInsertionDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(atlType);
+        TARGOMAN_CREATE_CONSTEXPR(atlDescription);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::atlID,
+            _tableAlias + Fields::atlBy_usrID,
+            _tableAlias + Fields::atlInsertionDateTime,
+            _tableAlias + Fields::atlType,
+            _tableAlias + Fields::atlDescription,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
+            { Fields::atlID,                 ORM_PRIMARYKEY_64},
+            { Fields::atlBy_usrID,           S(quint64),         QFV.integer().minValue(1),      {},      UPNone },
+            { Fields::atlInsertionDateTime,  S(TAPI::DateTime_t),QFV,                            {},      UPNone },
+            { Fields::atlType,               S(QString),         QFV.asciiAlNum().maxLenght(50), {},      UPNone },
+            { Fields::atlDescription,        S(QString),         QFV.allwaysInvalid(),           {},      UPNone, false, false },
+        };
+
+        const QList<stuRelation> Relations = {
+            { Fields::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (atlID),
+        SF_quint64                  (atlBy_usrID),
+        SF_DateTime_t               (atlInsertionDateTime),
+        SF_QString                  (atlType),
+        SF_QString                  (atlDescription)
+    );
 }
 
 #pragma GCC diagnostic pop

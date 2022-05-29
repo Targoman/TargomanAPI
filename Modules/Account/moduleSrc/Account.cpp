@@ -590,26 +590,26 @@ QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
 
     QVariantMap Data = SelectQuery(ForgotPassRequest::instance())
                        .addCols({
-                                    tblForgotPassRequest::fprCode,
-                                    tblForgotPassRequest::fprStatus,
+                                    tblForgotPassRequest::Fields::fprCode,
+                                    tblForgotPassRequest::Fields::fprStatus,
                                 })
                        .innerJoinWith(tblForgotPassRequest::Relation::User)
-                       .where({ Type == "E" ? tblUser::usrEmail : tblUser::usrMobile, enuConditionOperator::Equal, _emailOrMobile })
-                       .andWhere({ tblForgotPassRequest::fprRequestedVia, enuConditionOperator::Equal, Type.at(0) })
-                       .orderBy(tblForgotPassRequest::fprRequestDate, enuOrderDir::Descending)
+                       .where({ Type == "E" ? tblUser::Fields::usrEmail : tblUser::Fields::usrMobile, enuConditionOperator::Equal, _emailOrMobile })
+                       .andWhere({ tblForgotPassRequest::Fields::fprRequestedVia, enuConditionOperator::Equal, Type.at(0) })
+                       .orderBy(tblForgotPassRequest::Fields::fprRequestDate, enuOrderDir::Descending)
                        .one()
                        ;
 
-    QString Code = Data.value(tblForgotPassRequest::fprCode).toString();
+    QString Code = Data.value(tblForgotPassRequest::Fields::fprCode).toString();
 
     if (Code.isEmpty())
         throw exHTTPNotFound("No Code could be found");
 
-    QString fprStatus = Data.value(tblForgotPassRequest::fprStatus).toString();
+    QString fprStatus = Data.value(tblForgotPassRequest::Fields::fprStatus).toString();
     if (fprStatus != "Sent") {
         quint64 RowsCount = UpdateQuery(ForgotPassRequest::instance())
-                            .set(tblForgotPassRequest::fprStatus, enuFPRStatus::Sent)
-                            .where({ tblForgotPassRequest::fprCode, enuConditionOperator::Equal, Code })
+                            .set(tblForgotPassRequest::Fields::fprStatus, enuFPRStatus::Sent)
+                            .where({ tblForgotPassRequest::Fields::fprCode, enuConditionOperator::Equal, Code })
                             .execute(1)
                             ;
         if (RowsCount == 0)
@@ -682,7 +682,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
                                       .addCols(tblVoucher::ColumnNames())
-                                      .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                                      .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                       .one<tblVoucher::DTO>();
 
         if (VoucherInfo.vchStatus != enuVoucherStatus::New)
@@ -701,10 +701,10 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 //                     SYSTEM_USER_ID,
 //                     {},
 //                     TAPI::ORMFields_t({
-//                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::WaitForProcess }
+//                                           { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::WaitForProcess }
 //                                       }),
 //                     {
-//                         { tblVoucher::vchID, _voucherID }
+//                         { tblVoucher::Fields::vchID, _voucherID }
 //                     });
 
         if (PreVoucher.Items.isEmpty())
@@ -712,9 +712,9 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         QVariantList Services = SelectQuery(Service::instance())
                 .addCols({
-                             tblService::svcID,
-                             tblService::svcName,
-                             tblService::svcProcessVoucherItemEndPoint,
+                             tblService::Fields::svcID,
+                             tblService::Fields::svcName,
+                             tblService::Fields::svcProcessVoucherItemEndPoint,
                          })
                 .all();
 
@@ -739,9 +739,9 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                 foreach (QVariant Service, Services) {
                     QVariantMap ServiceInfo = Service.toMap();
 
-                    if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
+                    if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service) {
                         NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                        TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::svcProcessVoucherItemEndPoint));
+                        TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
 
                         //bypass process by end point?
                         if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
@@ -785,14 +785,14 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         Voucher::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                                    {},
                                    TAPI::ORMFields_t({
-                                      { tblVoucher::vchStatus, (ErrorCount == 0
+                                      { tblVoucher::Fields::vchStatus, (ErrorCount == 0
                                         ? Targoman::API::AAA::enuVoucherStatus::Finished
                                         : Targoman::API::AAA::enuVoucherStatus::Error
                                       )},
-                                      { tblVoucher::vchProcessResult, vchProcessResult }
+                                      { tblVoucher::Fields::vchProcessResult, vchProcessResult }
                                    }),
                                    {
-                                      { tblVoucher::vchID, _voucherID }
+                                      { tblVoucher::Fields::vchID, _voucherID }
                                    });
 
         //--------------------------
@@ -821,10 +821,10 @@ void Account::tryCancelVoucher(
     //1: cancel voucher items
     try {
         QVariant VoucherDesc = SelectQuery(Voucher::instance())
-                               .addCol(tblVoucher::vchDesc)
-                               .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                               .addCol(tblVoucher::Fields::vchDesc)
+                               .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                .tryOne()
-                               .value(tblVoucher::vchDesc);
+                               .value(tblVoucher::Fields::vchDesc);
 
         Targoman::API::AAA::stuPreVoucher PreVoucher;
 
@@ -836,9 +836,9 @@ void Account::tryCancelVoucher(
         if (PreVoucher.Items.length()) {
             QVariantList Services = SelectQuery(Service::instance())
                     .addCols({
-                                 tblService::svcID,
-                                 tblService::svcName,
-                                 tblService::svcCancelVoucherItemEndPoint,
+                                 tblService::Fields::svcID,
+                                 tblService::Fields::svcName,
+                                 tblService::Fields::svcCancelVoucherItemEndPoint,
                              })
                     .all();
 
@@ -848,9 +848,9 @@ void Account::tryCancelVoucher(
                     foreach (QVariant Service, Services) {
                         QVariantMap ServiceInfo = Service.toMap();
 
-                        if (ServiceInfo.value(tblService::svcName) == VoucherItem.Service) {
+                        if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service) {
                             NULLABLE_TYPE(QString) CancelVoucherItemEndPoint;
-                            TAPI::setFromVariant(CancelVoucherItemEndPoint, ServiceInfo.value(tblService::svcCancelVoucherItemEndPoint));
+                            TAPI::setFromVariant(CancelVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcCancelVoucherItemEndPoint));
 
                             //bypass process by end point?
                             if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint)) {
@@ -896,10 +896,10 @@ void Account::tryCancelVoucher(
 //                                 SYSTEM_USER_ID,
 //                                 {},
 //                                 TAPI::ORMFields_t({
-//                                    { tblVoucher::vchStatus, _setAsError ? Accounting::enuVoucherStatus::Error : Accounting::enuVoucherStatus::Canceled }
+//                                    { tblVoucher::Fields::vchStatus, _setAsError ? Accounting::enuVoucherStatus::Error : Accounting::enuVoucherStatus::Canceled }
 //                                 }),
 //                                 {
-//                                    { tblVoucher::vchID, _voucherID }
+//                                    { tblVoucher::Fields::vchID, _voucherID }
 //                                 });
 }
 
@@ -926,7 +926,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 
     tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
                                   .addCols(tblVoucher::ColumnNames())
-                                  .where({ tblVoucher::vchID, enuConditionOperator::Equal, _voucherID })
+                                  .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                   .one<tblVoucher::DTO>();
 
     if (VoucherInfo.vchStatus != enuVoucherStatus::New)
@@ -1062,11 +1062,11 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     quint64 VoucherID = this->Create(Voucher::instance(),
                               _APICALLBOOM,
                               TAPI::ORMFields_t({
-                                                    { tblVoucher::vch_usrID, CurrentUserID },
-                                                    { tblVoucher::vchDesc, _preVoucher.toJson().toVariantMap() },
-                                                    { tblVoucher::vchTotalAmount, _preVoucher.ToPay },
-                                                    { tblVoucher::vchType, enuVoucherType::Expense },
-                                                    { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                                    { tblVoucher::Fields::vch_usrID, CurrentUserID },
+                                                    { tblVoucher::Fields::vchDesc, _preVoucher.toJson().toVariantMap() },
+                                                    { tblVoucher::Fields::vchTotalAmount, _preVoucher.ToPay },
+                                                    { tblVoucher::Fields::vchType, enuVoucherType::Expense },
+                                                    { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                 }));
 
     Targoman::API::AAA::stuVoucher Voucher = payAndProcessBasket(
@@ -1126,10 +1126,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 //                     SYSTEM_USER_ID,
 //                     {},
 //                     TAPI::ORMFields_t({
-//                                           { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                                           { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
 //                                       }),
 //                     {
-//                         { tblVoucher::vchID, VoucherID }
+//                         { tblVoucher::Fields::vchID, VoucherID }
 //                     });
 //        throw;
 //    }
@@ -1154,8 +1154,8 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
 )) {
     if (NULLABLE_HAS_VALUE(voucherID)) {
         QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
-//            .addCol(tblVoucher::vchTotalAmount)
-            .where({ tblVoucher::vchID, enuConditionOperator::Equal, NULLABLE_VALUE(voucherID) })
+//            .addCol(tblVoucher::Fields::vchTotalAmount)
+            .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, NULLABLE_VALUE(voucherID) })
             .one()
         );
         tblVoucher::DTO Voucher;
@@ -1208,7 +1208,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
         .addCols(tblOfflinePaymentClaims::ColumnNames())
 //        .addCols(tblVoucher::ColumnNames())
 //        .leftJoin(tblVoucher::Name)
-        .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
+        .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
     );
 
@@ -1231,10 +1231,10 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
                  _APICALLBOOM,
                  {},
                  TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Rejected }
+                     { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Rejected }
                  }),
                  {
-                     { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                     { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
                  });
 
     return true;
@@ -1253,7 +1253,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         .addCols(tblOfflinePaymentClaims::ColumnNames())
 //        .addCols(tblVoucher::ColumnNames())
 //        .innerJoin(tblVoucher::Name)
-        .where({ tblOfflinePaymentClaims::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
+        .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one<tblOfflinePaymentClaims::DTO>();
 
     //check operator or owner
@@ -1266,7 +1266,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         throw exAuthorization("Only new offline payments are allowed.");
 
 //    if (ApprovalLimit > 0) {
-//        if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
+//        if (Voucher.value(tblVoucher::Fields::vchTotalAmount).toLongLong() > ApprovalLimit)
 //            throw exAuthorization("Voucher total amount is greater than your approval limit");
 //    }
 
@@ -1288,12 +1288,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         Voucher.ID = this->Create(Voucher::instance(),
                                   _APICALLBOOM,
                                   TAPI::ORMFields_t({
-                                                        { tblVoucher::vch_usrID, _APICALLBOOM.getUserID() },
-    //                                                    { tblVoucher::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                        { tblVoucher::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                        { tblVoucher::vchTotalAmount, Voucher.Info.ToPay },
-                                                        { tblVoucher::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
-                                                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                                        { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+    //                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                                        { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                                        { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
+                                                        { tblVoucher::Fields::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
+                                                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                     }));
 
         VoucherID = Voucher.ID;
@@ -1301,17 +1301,17 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         VoucherID = NULLABLE_VALUE(OfflinePaymentClaim.ofpc_vchID);
 
     QVariantMap CreateParams = {
-        { tblOfflinePayments::ofp_vchID, VoucherID },
-        { tblOfflinePayments::ofpBank, OfflinePaymentClaim.ofpcBank },
-        { tblOfflinePayments::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
-        { tblOfflinePayments::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
-        { tblOfflinePayments::ofpAmount, OfflinePaymentClaim.ofpcAmount },
-        { tblOfflinePayments::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
-        { tblOfflinePayments::ofpStatus, enuPaymentStatus::Payed },
+        { tblOfflinePayments::Fields::ofp_vchID, VoucherID },
+        { tblOfflinePayments::Fields::ofpBank, OfflinePaymentClaim.ofpcBank },
+        { tblOfflinePayments::Fields::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
+        { tblOfflinePayments::Fields::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
+        { tblOfflinePayments::Fields::ofpAmount, OfflinePaymentClaim.ofpcAmount },
+        { tblOfflinePayments::Fields::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
+        { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Payed },
     };
 
     if (NULLABLE_HAS_VALUE(OfflinePaymentClaim.ofpcTarget_walID))
-            CreateParams.insert(tblOfflinePayments::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaim.ofpcTarget_walID));
+            CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaim.ofpcTarget_walID));
 
     quint64 PaymentID = this->Create(OfflinePayments::instance(),
                  _APICALLBOOM,
@@ -1321,10 +1321,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                  _APICALLBOOM,
                  {},
                  TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Succeded }
+                     { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Succeded }
                  }),
                  {
-                     { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                     { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
                  });
 
     try {
@@ -1348,20 +1348,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                      _APICALLBOOM,
                      {},
                      TAPI::ORMFields_t({
-                         { tblOfflinePaymentClaims::ofpcStatus, enuPaymentStatus::Error }
+                         { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Error }
                      }),
                      {
-                         { tblOfflinePaymentClaims::ofpcID, _offlinePaymentClaimID }
+                         { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
                      });
 
         this->Update(OfflinePayments::instance(),
                      _APICALLBOOM,
                      {},
                      TAPI::ORMFields_t({
-                         { tblOfflinePayments::ofpStatus, enuPaymentStatus::Error }
+                         { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Error }
                      }),
                      {
-                         { tblOfflinePayments::ofpID, PaymentID }
+                         { tblOfflinePayments::Fields::ofpID, PaymentID }
                      });
 
 
@@ -1369,10 +1369,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 //                    SYSTEM_USER_ID,
 //                    {},
 //                    TAPI::ORMFields_t({
-//                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
 //                    }),
 //                    {
-//                        { tblVoucher::vchID, OfflinePaymentClaim.ofpc_vchID }
+//                        { tblVoucher::Fields::vchID, OfflinePaymentClaim.ofpc_vchID }
 //                    });
         throw;
     }
@@ -1394,13 +1394,13 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
         throw exAuthorization("Not enough access for offline approval");
 
     if (ApprovalLimit > 0) {
-//        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::vchTotalAmount).toMap();
+//        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::Fields::vchTotalAmount).toMap();
         QVariantMap Voucher = SelectQuery(Voucher::instance())
-            .addCol(tblVoucher::vchTotalAmount)
-            .where({ tblVoucher::vchID, enuConditionOperator::Equal, _vchID })
+            .addCol(tblVoucher::Fields::vchTotalAmount)
+            .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _vchID })
             .one();
 
-        if (Voucher.value(tblVoucher::vchTotalAmount).toLongLong() > ApprovalLimit)
+        if (Voucher.value(tblVoucher::Fields::vchTotalAmount).toLongLong() > ApprovalLimit)
             throw exAuthorization("Voucher total amount is greater than your approval limit");
     }
 
@@ -1443,20 +1443,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
                      _APICALLBOOM,
                      {},
                      TAPI::ORMFields_t({
-                         { tblOfflinePayments::ofpStatus, enuPaymentStatus::Error }
+                         { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Error }
                      }),
                      {
-                         { tblOfflinePayments::ofpID, PaymentID }
+                         { tblOfflinePayments::Fields::ofpID, PaymentID }
                      });
 
 //        this->Update(Voucher::instance(),
 //                    SYSTEM_USER_ID,
 //                    {},
 //                    TAPI::ORMFields_t({
-//                        { tblVoucher::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
+//                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
 //                    }),
 //                    {
-//                        { tblVoucher::vchID, _vchID }
+//                        { tblVoucher::Fields::vchID, _vchID }
 //                    });
         throw;
     }
@@ -1718,44 +1718,44 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
         for (int i=pgwTotalRows; i<3; ++i) {
             try {
                 QVariantMap PaymentGatewayValues = {
-                    { tblPaymentGateways::pgwName,     FixtureHelper::MakeRandomizeName(_random, " ", "fixture.devtest") },
-                    { tblPaymentGateways::pgwType,     enuPaymentGatewayType::toStr(enuPaymentGatewayType::_DeveloperTest) },
-                    { tblPaymentGateways::pgwDriver,   "DevTest" },
-                    { tblPaymentGateways::pgwMetaInfo, QVariantMap({
+                    { tblPaymentGateways::Fields::pgwName,     FixtureHelper::MakeRandomizeName(_random, " ", "fixture.devtest") },
+                    { tblPaymentGateways::Fields::pgwType,     enuPaymentGatewayType::toStr(enuPaymentGatewayType::_DeveloperTest) },
+                    { tblPaymentGateways::Fields::pgwDriver,   "DevTest" },
+                    { tblPaymentGateways::Fields::pgwMetaInfo, QVariantMap({
                           { "username", "hello" },
                           { "password", "123" },
                       })
                     },
-                    { tblPaymentGateways::pgw_curID,   1 },
-                    { tblPaymentGateways::pgwAllowedDomainName, "dev.test" },
+                    { tblPaymentGateways::Fields::pgw_curID,   1 },
+                    { tblPaymentGateways::Fields::pgwAllowedDomainName, "dev.test" },
                 };
                 quint32 PaymentGatewayID = CreateQuery(ORM::PaymentGateways::instance())
                                            .addCols({
-//                                                        tblPaymentGateways::pgwID,
-                                                        tblPaymentGateways::pgwName,
-                                                        tblPaymentGateways::pgwType,
-                                                        tblPaymentGateways::pgwDriver,
-                                                        tblPaymentGateways::pgwMetaInfo,
-                                                        tblPaymentGateways::pgw_curID,
-                                                        tblPaymentGateways::pgwAllowedDomainName,
-//                                                        tblPaymentGateways::pgwTransactionFeeValue,
-//                                                        tblPaymentGateways::pgwTransactionFeeType,
-//                                                        tblPaymentGateways::pgwMinRequestAmount,
-//                                                        tblPaymentGateways::pgwMaxRequestAmount,
-//                                                        tblPaymentGateways::pgwMaxPerDayAmount,
-//                                                        tblPaymentGateways::pgwLastPaymentDateTime,
-//                                                        tblPaymentGateways::pgwSumTodayPaidAmount,
-//                                                        tblPaymentGateways::pgwSumRequestCount,
-//                                                        tblPaymentGateways::pgwSumRequestAmount,
-//                                                        tblPaymentGateways::pgwSumFailedCount,
-//                                                        tblPaymentGateways::pgwSumOkCount,
-//                                                        tblPaymentGateways::pgwSumPaidAmount,
-//                                                        tblPaymentGateways::pgwStatus,
+//                                                        tblPaymentGateways::Fields::pgwID,
+                                                        tblPaymentGateways::Fields::pgwName,
+                                                        tblPaymentGateways::Fields::pgwType,
+                                                        tblPaymentGateways::Fields::pgwDriver,
+                                                        tblPaymentGateways::Fields::pgwMetaInfo,
+                                                        tblPaymentGateways::Fields::pgw_curID,
+                                                        tblPaymentGateways::Fields::pgwAllowedDomainName,
+//                                                        tblPaymentGateways::Fields::pgwTransactionFeeValue,
+//                                                        tblPaymentGateways::Fields::pgwTransactionFeeType,
+//                                                        tblPaymentGateways::Fields::pgwMinRequestAmount,
+//                                                        tblPaymentGateways::Fields::pgwMaxRequestAmount,
+//                                                        tblPaymentGateways::Fields::pgwMaxPerDayAmount,
+//                                                        tblPaymentGateways::Fields::pgwLastPaymentDateTime,
+//                                                        tblPaymentGateways::Fields::pgwSumTodayPaidAmount,
+//                                                        tblPaymentGateways::Fields::pgwSumRequestCount,
+//                                                        tblPaymentGateways::Fields::pgwSumRequestAmount,
+//                                                        tblPaymentGateways::Fields::pgwSumFailedCount,
+//                                                        tblPaymentGateways::Fields::pgwSumOkCount,
+//                                                        tblPaymentGateways::Fields::pgwSumPaidAmount,
+//                                                        tblPaymentGateways::Fields::pgwStatus,
                                                     })
                                            .values(PaymentGatewayValues)
                                            .execute(1);
 
-                PaymentGatewayValues.insert(tblPaymentGateways::pgwID, PaymentGatewayID);
+                PaymentGatewayValues.insert(tblPaymentGateways::Fields::pgwID, PaymentGatewayID);
 //                CreatedPaymentGateways.in(PaymentGatewayValues);
             } catch (std::exception &exp) {
                 qDebug() << exp.what();

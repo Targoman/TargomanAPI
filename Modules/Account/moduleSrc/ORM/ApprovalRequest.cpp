@@ -59,29 +59,9 @@ ApprovalRequest::ApprovalRequest() :
     intfSQLBasedModule(
         AAASchema,
         tblApprovalRequest::Name,
-        {///< ColName                               Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK isSelectable renameAs
-            { tblApprovalRequest::aprID,            ORM_PRIMARYKEY_64 },
-            { tblApprovalRequest::apr_usrID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QInvalid,   UPNone },
-            { tblApprovalRequest::aprRequestedFor,  S(Targoman::API::AccountModule::enuApprovalType::Type), QFV,    Targoman::API::AccountModule::enuApprovalType::Email, UPNone },
-//            { tblApprovalRequest::aprIsForLogin,   S(bool),                    QFV,                                false,      UPNone },
-            { tblApprovalRequest::aprApprovalKey,   S(QString),                 QFV.allwaysInvalid(),               QRequired,  UPNone, false, false },
-            { tblApprovalRequest::aprApprovalCode,  S(QString),                 QFV.asciiAlNum().maxLenght(32),     QRequired,  UPNone, false, false, false, false, false, false },
-            { tblApprovalRequest::aprRequestDate,   ORM_CREATED_ON },
-            { tblApprovalRequest::aprSentDate,      S(NULLABLE_TYPE(TAPI::DateTime_t)),  QFV,                       QNull,      UPAdmin },
-            { tblApprovalRequest::aprApplyDate,     S(NULLABLE_TYPE(TAPI::DateTime_t)),  QFV,                       QNull,      UPNone },
-            { tblApprovalRequest::aprStatus,        ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPRStatus, Targoman::API::AccountModule::enuAPRStatus::New) },
-            { ORM_INVALIDATED_AT_FIELD },
-        },
-        {///< Col                               Reference Table                 ForeignCol        Rename     LeftJoin
-            { tblApprovalRequest::apr_usrID,    R(AAASchema, tblUser::Name),    tblUser::usrID },
-        },
-        {
-            { {
-                tblApprovalRequest::aprApprovalKey,
-                tblApprovalRequest::aprApprovalCode,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
+        tblApprovalRequest::Private::ORMFields,
+        tblApprovalRequest::Private::Relations,
+        tblApprovalRequest::Private::Indexes
     ) { ; }
 
 QVariant IMPL_ORMGET(ApprovalRequest) {
@@ -121,47 +101,24 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
     QVariantMap Info = SelectQuery(*this)
-                         .addCols({
-//                                      tblApprovalRequest::aprID,
-//                                      tblApprovalRequest::apr_usrID,
-//                                      tblApprovalRequest::aprRequestedFor,
-                                      tblApprovalRequest::aprApprovalKey,
-                                      tblApprovalRequest::aprRequestDate,
-                                      tblApprovalRequest::aprSentDate,
-                                      tblApprovalRequest::aprApplyDate,
-                                      Targoman::API::CURRENT_TIMESTAMP,
-                                  })
-                         .where({ tblApprovalRequest::aprApprovalKey, enuConditionOperator::Equal, _emailOrMobile })
-                         .andWhere({ tblApprovalRequest::aprRequestedFor, enuConditionOperator::Equal, Type })
-                         .andWhere({ tblApprovalRequest::aprStatus, enuConditionOperator::In, "'N', 'S', 'A', '1', '2', 'E'" })
-                         .orderBy(tblApprovalRequest::aprRequestDate, enuOrderDir::Descending)
-                         .one();
+//                            .addCols(tblApprovalRequest::ColumnNames())
+//                            .addCol(Targoman::API::CURRENT_TIMESTAMP)
+                            .where({ tblApprovalRequest::Fields::aprApprovalKey, enuConditionOperator::Equal, _emailOrMobile })
+                            .andWhere({ tblApprovalRequest::Fields::aprRequestedFor, enuConditionOperator::Equal, Type })
+                            .andWhere({ tblApprovalRequest::Fields::aprStatus, enuConditionOperator::In, "'N', 'S', 'A', '1', '2', 'E'" })
+                            .orderBy(tblApprovalRequest::Fields::aprRequestDate, enuOrderDir::Descending)
+                            .one();
 
-    if (Info.isEmpty())
-        throw exTargomanBase("Approval Request Not found");
+    tblApprovalRequest::DTO ApprovalRequestInfo;
+    ApprovalRequestInfo.fromJson(QJsonObject::fromVariantMap(Info));
 
-//    quint64 aprID;
-//    quint64 apr_usrID;
-//    TAPI::DateTime_t aprRequestDate;
-    NULLABLE_TYPE(TAPI::DateTime_t) aprSentDate;
-    NULLABLE_TYPE(TAPI::DateTime_t) aprApplyDate;
-    Targoman::API::AccountModule::enuAPRStatus::Type aprStatus;
-
-//    SET_FIELD_FROM_VARIANT_MAP(aprID,           Info, tblApprovalRequest, aprID);
-//    SET_FIELD_FROM_VARIANT_MAP(apr_usrID,       Info, tblApprovalRequest, apr_usrID);
-//    SET_FIELD_FROM_VARIANT_MAP(aprRequestDate,  Info, tblApprovalRequest, aprRequestDate);
-//    SET_FIELD_FROM_VARIANT_MAP(aprSentDate,     Info, tblApprovalRequest, aprSentDate);
-    aprSentDate = Info.value(tblApprovalRequest::aprSentDate).toDateTime();
-    SET_FIELD_FROM_VARIANT_MAP(aprApplyDate,    Info, tblApprovalRequest, aprApplyDate);
-    SET_FIELD_FROM_VARIANT_MAP(aprStatus,       Info, tblApprovalRequest, aprStatus);
-
-    if ((aprStatus == enuAPRStatus::New) || NULLABLE_IS_NULL(aprSentDate))
+    if ((ApprovalRequestInfo.aprStatus == enuAPRStatus::New) || ApprovalRequestInfo.aprSentDate.isNull())
         throw exTargomanBase("Code not sent to the client");
 
-    if ((aprStatus == enuAPRStatus::Applied) || NULLABLE_HAS_VALUE(aprApplyDate))
+    if ((ApprovalRequestInfo.aprStatus == enuAPRStatus::Applied) || (ApprovalRequestInfo.aprApplyDate.isNull() == false))
         throw exTargomanBase("Already applied before");
 
-    if (aprStatus == enuAPRStatus::Expired)
+    if (ApprovalRequestInfo.aprStatus == enuAPRStatus::Expired)
         throw exTargomanBase("Code expired");
 
     quint32 ConfigTTL = (Type == enuApprovalType::Email
@@ -170,9 +127,9 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
                         );
 
     QDateTime Now = Info.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
-    quint64 Secs = Now.toSecsSinceEpoch() - aprSentDate->toSecsSinceEpoch();
+    quint64 Secs = Now.toSecsSinceEpoch() - ApprovalRequestInfo.aprSentDate.toSecsSinceEpoch();
 
-    qDebug() << Now.toString() << aprSentDate->toString() << Secs << ConfigTTL;
+    qDebug() << Now.toString() << ApprovalRequestInfo.aprSentDate.toString() << Secs << ConfigTTL;
 
     if (Secs >= ConfigTTL)
         throw exTargomanBase("The remaining time is up");

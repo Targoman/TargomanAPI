@@ -22,36 +22,34 @@
  */
 
 #include "Bin.h"
-#include "Defs.hpp"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
 
+/*****************************************************************\
+|* Banners *******************************************************|
+\*****************************************************************/
+Banners::Banners() :
+    intfSQLBasedModule(
+        AdvertSchema,
+        tblBanners::Name,
+        tblBanners::Private::ORMFields,
+        tblBanners::Private::Relations,
+        tblBanners::Private::Indexes
+) { ; }
+
+/*****************************************************************\
+|* Bin ***********************************************************|
+\*****************************************************************/
 Bin::Bin() :
-    intfSQLBasedModule(AdvertSchema,
-              tblBin::Name,
-              { ///<ColName                   Type                    Validation                                Default   UpBy   Sort  Filter Self  Virt   PK
-                {tblBin::binID,               ORM_PRIMARYKEY_32},
-                {tblBin::binType,             S(Targoman::API::AdvertModule::enuAdvertType::Type), QFV,                                Targoman::API::AdvertModule::enuAdvertType::Text, UPOwner},
-                {tblBin::binTitle,            S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QRequired, UPOwner},
-                {tblBin::binDesc,             S(QString),             QFV.unicodeAlNum(true, ".,:،-_*()[] "),   QNull,     UPOwner},
-                {tblBin::binPrettyURL,        S(QString),             QFV.url(),                                QRequired, UPOwner},
-                {tblBin::binURL,              S(QString),             QFV.url(),                                QRequired, UPOwner},
-                {tblBin::binShown,            S(quint64),             QFV.integer(),                            0,         UPNone},
-                {tblBin::binClicks,           S(quint64),             QFV.integer(),                            0,         UPNone},
-                {tblBin::binStatus,           ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
-                {tblBin::binCreationDateTime, ORM_CREATED_ON },
-                {tblBin::binCreatedBy_usrID,  ORM_CREATED_BY },
-                {tblBin::binUpdatedBy_usrID,  ORM_UPDATED_BY },
-              },
-              { ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
-                {tblBin::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::bnrID, "Banner_",  true},
-                ORM_RELATION_OF_CREATOR(tblBin::binCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(tblBin::binUpdatedBy_usrID),
-              }) { ; }
+    intfSQLBasedModule(
+        AdvertSchema,
+        tblBin::Name,
+        tblBin::Private::ORMFields,
+        tblBin::Private::Relations,
+        tblBin::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Bin) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -62,18 +60,5 @@ QVariant IMPL_ORMGET(Bin) {
 
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
-
-Banners::Banners() :
-    intfSQLBasedModule(AdvertSchema,
-              tblBanners::Name,
-              { ///<ColName                       Type                          Validation                  Default   UpBy   Sort  Filter Self  Virt   PK
-                {tblBanners::bnrImage,            S(TAPI::Base64Image_t),       QFV,                        QInvalid, UPOwner,false,false},
-                {tblBanners::bnrSize,             S(Targoman::API::AdvertModule::enuBannerSize::Type), QFV,QInvalid, UPOwner },
-                {tblBanners::bnrUpdatedBy_usrID,  ORM_UPDATED_BY},
-              },
-              {///< Col                           Reference Table             ForeignCol      Rename      LeftJoin
-                ORM_RELATION_OF_UPDATER(tblBanners::bnrUpdatedBy_usrID),
-              }
-              ) { ; }
 
 } //namespace Targoman::API::AdvertModule::ORM

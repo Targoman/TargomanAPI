@@ -47,7 +47,6 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblUserWallets {
-
     constexpr char Name[] = "tblUserWallets";
 
     namespace Fields {
@@ -68,6 +67,34 @@ namespace tblUserWallets {
         TARGOMAN_CREATE_CONSTEXPR(walUpdatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(walStatus);
     } //namespace Fields
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::walID,
+            _tableAlias + Fields::wal_usrID,
+            _tableAlias + Fields::walName,
+            _tableAlias + Fields::walDefault,
+            _tableAlias + Fields::walMinBalance,
+            _tableAlias + Fields::walNotTransferableAmount,
+            _tableAlias + Fields::walMaxTransferPerDay,
+            _tableAlias + Fields::walBalance,
+            _tableAlias + Fields::walSumIncome,
+            _tableAlias + Fields::walSumExpense,
+            _tableAlias + Fields::walSumCredit,
+            _tableAlias + Fields::walSumDebit,
+            _tableAlias + Fields::walCreatedBy_usrID,
+            _tableAlias + Fields::walCreationDateTime,
+            _tableAlias + Fields::walUpdatedBy_usrID,
+            _tableAlias + Fields::walStatus,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
@@ -93,7 +120,7 @@ namespace tblUserWallets {
 
         const QList<stuRelation> Relations = {
             //Col                   Reference Table                 ForeignCol     Rename   LeftJoin
-            { Fields::wal_usrID,    R(AAASchema, tblUser::Name),    tblUser::usrID },
+            { Fields::wal_usrID,    R(AAASchema, tblUser::Name),    tblUser::Fields::usrID },
             ORM_RELATION_OF_CREATOR(Fields::walCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::walUpdatedBy_usrID),
         };
@@ -109,25 +136,25 @@ namespace tblUserWallets {
     } //namespace Private
 
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
-        SF_ORM_PRIMARYKEY_64(walID),
-        SF_quint64          (wal_usrID),
-        SF_QString          (walName),
-        SF_bool             (walDefault),
-        SF_qint64           (walMinBalance),
-        SF_qint64           (walNotTransferableAmount),
-        SF_qint64           (walMaxTransferPerDay),
-        SF_qint64           (walBalance),
-        SF_qint64           (walSumIncome),
-        SF_qint64           (walSumExpense),
-        SF_qint64           (walSumCredit),
-        SF_qint64           (walSumDebit),
-        SF_ORM_STATUS_FIELD (walStatus, Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active),
-        SF_ORM_CREATED_ON   (walCreationDateTime),
-        SF_ORM_CREATED_BY   (walCreatedBy_usrID),
-        SF_ORM_UPDATED_BY   (walUpdatedBy_usrID)
+        SF_ORM_PRIMARYKEY_64        (walID),
+        SF_quint64                  (wal_usrID),
+        SF_QString                  (walName),
+        SF_bool                     (walDefault),
+        SF_qint64                   (walMinBalance),
+        SF_qint64                   (walNotTransferableAmount),
+        SF_qint64                   (walMaxTransferPerDay),
+        SF_qint64                   (walBalance),
+        SF_qint64                   (walSumIncome),
+        SF_qint64                   (walSumExpense),
+        SF_qint64                   (walSumCredit),
+        SF_qint64                   (walSumDebit),
+        SF_ORM_STATUS_FIELD         (walStatus, Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active),
+        SF_ORM_CREATED_ON           (walCreationDateTime),
+        SF_ORM_CREATED_BY           (walCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (walUpdatedBy_usrID)
     );
 
-} //namespace tblUserWallets
+}
 #pragma GCC diagnostic pop
 
 class UserWallets : public intfSQLBasedModule

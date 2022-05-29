@@ -331,10 +331,10 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         .addCols(tblAccountProductsBase::ColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .leftJoinWith("product")
-        .where({ tblAccountSaleablesBase::slbCode, enuConditionOperator::Equal, _saleableCode })
-        .andWhere({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-        .andWhere(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+        .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _saleableCode })
+        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
                 DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
         .one();
@@ -397,63 +397,63 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     if (_discountCode.size()) {
         QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
             .addCols(QStringList({
-                tblAccountCouponsBase::cpnID,
-                tblAccountCouponsBase::cpnCode,
-                tblAccountCouponsBase::cpnPrimaryCount,
-                tblAccountCouponsBase::cpnTotalMaxAmount,
-                tblAccountCouponsBase::cpnPerUserMaxCount,
-                tblAccountCouponsBase::cpnPerUserMaxAmount,
-                //tblAccountCouponsBase::cpnValidFrom,
-                tblAccountCouponsBase::cpnExpiryTime,
-                tblAccountCouponsBase::cpnAmount,
-                tblAccountCouponsBase::cpnAmountType,
-                tblAccountCouponsBase::cpnMaxAmount,
-                tblAccountCouponsBase::cpnSaleableBasedMultiplier,
-                tblAccountCouponsBase::cpnTotalUsedCount,
-                tblAccountCouponsBase::cpnTotalUsedAmount,
-                tblAccountCouponsBase::cpnStatus,
-                //tblAccountCouponsBase::cpnCreatedBy_usrID,
-                //tblAccountCouponsBase::cpnCreationDateTime,
-                //tblAccountCouponsBase::cpnUpdatedBy_usrID,
+                tblAccountCouponsBase::Fields::cpnID,
+                tblAccountCouponsBase::Fields::cpnCode,
+                tblAccountCouponsBase::Fields::cpnPrimaryCount,
+                tblAccountCouponsBase::Fields::cpnTotalMaxAmount,
+                tblAccountCouponsBase::Fields::cpnPerUserMaxCount,
+                tblAccountCouponsBase::Fields::cpnPerUserMaxAmount,
+                //tblAccountCouponsBase::Fields::cpnValidFrom,
+                tblAccountCouponsBase::Fields::cpnExpiryTime,
+                tblAccountCouponsBase::Fields::cpnAmount,
+                tblAccountCouponsBase::Fields::cpnAmountType,
+                tblAccountCouponsBase::Fields::cpnMaxAmount,
+                tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
+                tblAccountCouponsBase::Fields::cpnTotalUsedCount,
+                tblAccountCouponsBase::Fields::cpnTotalUsedAmount,
+                tblAccountCouponsBase::Fields::cpnStatus,
+                //tblAccountCouponsBase::Fields::cpnCreatedBy_usrID,
+                //tblAccountCouponsBase::Fields::cpnCreationDateTime,
+                //tblAccountCouponsBase::Fields::cpnUpdatedBy_usrID,
                 Targoman::API::CURRENT_TIMESTAMP,
             }))
 
             .leftJoin(SelectQuery(*this->AccountUserAssets)
                       .addCols({
-                                   tblAccountUserAssetsBase::uas_cpnID,
-                                   tblAccountUserAssetsBase::uas_vchID,
+                                   tblAccountUserAssetsBase::Fields::uas_cpnID,
+                                   tblAccountUserAssetsBase::Fields::uas_vchID,
                                })
-                      .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::uasID, "_discountUsedCount")
-                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-                      .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                      .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::Fields::uasID, "_discountUsedCount")
+                      .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                      .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                                   .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
-                      .groupBy(tblAccountUserAssetsBase::uas_cpnID)
-                      .groupBy(tblAccountUserAssetsBase::uas_vchID)
+                      .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
+                      .groupBy(tblAccountUserAssetsBase::Fields::uas_vchID)
                 , "tmp_cpn_count"
-                , { "tmp_cpn_count", tblAccountUserAssetsBase::uas_cpnID,
+                , { "tmp_cpn_count", tblAccountUserAssetsBase::Fields::uas_cpnID,
                     enuConditionOperator::Equal,
-                    tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
+                    tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
             )
             .addCol("tmp_cpn_count._discountUsedCount")
 
             .leftJoin(SelectQuery(*this->AccountUserAssets)
-                      .addCol(tblAccountUserAssetsBase::uas_cpnID)
-                      .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::uasDiscountAmount, "_discountUsedAmount")
-                      .where({ tblAccountUserAssetsBase::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-                      .andWhere({ tblAccountUserAssetsBase::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                      .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
+                      .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
+                      .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                      .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                                   .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
-                      .groupBy(tblAccountUserAssetsBase::uas_cpnID)
+                      .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
                 , "tmp_cpn_amount"
-                , { "tmp_cpn_amount", tblAccountUserAssetsBase::uas_cpnID,
+                , { "tmp_cpn_amount", tblAccountUserAssetsBase::Fields::uas_cpnID,
                     enuConditionOperator::Equal,
-                    tblAccountCouponsBase::Name, tblAccountCouponsBase::cpnID }
+                    tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
             )
             .addCol("tmp_cpn_amount._discountUsedAmount")
 
-            .where({ tblAccountCouponsBase::cpnCode, enuConditionOperator::Equal, _discountCode })
-            .andWhere({ tblAccountCouponsBase::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
-            .andWhere(clsCondition({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::Null })
-                .orCond({ tblAccountCouponsBase::cpnExpiryTime, enuConditionOperator::GreaterEqual,
+            .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _discountCode })
+            .andWhere({ tblAccountCouponsBase::Fields::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
+            .andWhere(clsCondition({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::Null })
+                .orCond({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::GreaterEqual,
                     DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
             )
             .one();
@@ -463,33 +463,13 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
         QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
 
-        stuFullDiscount FullDiscount;
-        FullDiscount.fromVariantMap(DiscountInfo);
+        QJsonObject DiscountInfoJson = QJsonObject::fromVariantMap(DiscountInfo);
+        tblAccountCouponsBase::DTO FullDiscount;
+        FullDiscount.fromJson(DiscountInfoJson);
 
-        SET_FIELD_FROM_VARIANT_MAP(Discount3.ID,                     DiscountInfo, tblAccountCouponsBase, cpnID);
-        SET_FIELD_FROM_VARIANT_MAP(Discount3.Code,                   DiscountInfo, tblAccountCouponsBase, cpnCode);
-        SET_FIELD_FROM_VARIANT_MAP(Discount3.Amount,                 DiscountInfo, tblAccountCouponsBase, cpnAmount);
-
-//        quint32 cpnPrimaryCount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnPrimaryCount,                 DiscountInfo, tblAccountCouponsBase, cpnPrimaryCount);
-//        quint32 cpnTotalMaxAmount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalMaxAmount,               DiscountInfo, tblAccountCouponsBase, cpnTotalMaxAmount);
-//        NULLABLE_TYPE(quint32) cpnPerUserMaxCount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxCount,              DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxCount);
-//        NULLABLE_TYPE(quint32) cpnPerUserMaxAmount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnPerUserMaxAmount,             DiscountInfo, tblAccountCouponsBase, cpnPerUserMaxAmount);
-//        NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnExpiryTime,                   DiscountInfo, tblAccountCouponsBase, cpnExpiryTime);
-//        enuDiscountType::Type cpnAmountType;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnAmountType,                   DiscountInfo, tblAccountCouponsBase, cpnAmountType);
-//        NULLABLE_TYPE(quint32) cpnMaxAmount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnMaxAmount,                    DiscountInfo, tblAccountCouponsBase, cpnMaxAmount);
-//        TAPI::JSON_t cpnSaleableBasedMultiplier;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnSaleableBasedMultiplier,      DiscountInfo, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
-//        quint32 cpnTotalUsedCount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedCount,               DiscountInfo, tblAccountCouponsBase, cpnTotalUsedCount);
-//        quint32 cpnTotalUsedAmount;
-//        SET_FIELD_FROM_VARIANT_MAP(cpnTotalUsedAmount,              DiscountInfo, tblAccountCouponsBase, cpnTotalUsedAmount);
+        Discount3.ID     = FullDiscount.cpnID;
+        Discount3.Code   = FullDiscount.cpnCode;
+        Discount3.Amount = FullDiscount.cpnAmount;
 
         NULLABLE_TYPE(quint32) _discountUsedCount;
         TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
@@ -514,7 +494,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
             throw exHTTPBadRequest("Discount usage amount per user has been reached");
 
 //        qDebug() << "-- DiscountInfo" << DiscountInfo;
-//        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::cpnSaleableBasedMultiplier);
+//        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier);
 //        qDebug() << "-- cpnSaleableBasedMultiplier" << cpnSaleableBasedMultiplier;
 //        qDebug() << "--" << cpnSaleableBasedMultiplier.object();
 //        qDebug() << "-- _saleableCode" << _saleableCode;
@@ -612,9 +592,9 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
             ///@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
             /// because the customer may be angry about not being able to use the coupon again in same voucher
 //            quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
-//                .increament(tblAccountCouponsBase::cpnTotalUsedCount, 1)
-//                .increament(tblAccountCouponsBase::cpnTotalUsedAmount, Discount.Amount)
-//                .where({ tblAccountCouponsBase::cpnID , enuConditionOperator::Equal, Discount.ID })
+//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedCount, 1)
+//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedAmount, Discount.Amount)
+//                .where({ tblAccountCouponsBase::Fields::cpnID , enuConditionOperator::Equal, Discount.ID })
 //                .execute(currentUserID);
 
 //            if (affectedRowsCount == 0)
@@ -652,38 +632,38 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
         .addCols({
-                     tblAccountUserAssetsBase::uas_usrID,
-                     tblAccountUserAssetsBase::uas_slbID,
-                     tblAccountUserAssetsBase::uasQty,
-//                     tblAccountUserAssetsBase::uas_vchID,
-                     tblAccountUserAssetsBase::uasVoucherItemUUID,
-//                     tblAccountUserAssetsBase::uasPrefered,
-//                     tblAccountUserAssetsBase::uasOrderDateTime,
-//                     tblAccountUserAssetsBase::uasStatus,
+                     tblAccountUserAssetsBase::Fields::uas_usrID,
+                     tblAccountUserAssetsBase::Fields::uas_slbID,
+                     tblAccountUserAssetsBase::Fields::uasQty,
+//                     tblAccountUserAssetsBase::Fields::uas_vchID,
+                     tblAccountUserAssetsBase::Fields::uasVoucherItemUUID,
+//                     tblAccountUserAssetsBase::Fields::uasPrefered,
+//                     tblAccountUserAssetsBase::Fields::uasOrderDateTime,
+//                     tblAccountUserAssetsBase::Fields::uasStatus,
                  })
     ;
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::uas_usrID, CurrentUserID },
-        { tblAccountUserAssetsBase::uas_slbID, AssetItem.slbID },
-        { tblAccountUserAssetsBase::uasQty, _qty },
-//        { tblAccountUserAssetsBase::uas_vchID, ??? },
-        { tblAccountUserAssetsBase::uasVoucherItemUUID, PreVoucherItem.UUID },
-//            { tblAccountUserAssetsBase::uasPrefered, ??? },
-//        { tblAccountUserAssetsBase::uasOrderDateTime, DBExpression::NOW() },
-//            { tblAccountUserAssetsBase::uasStatus, },
+        { tblAccountUserAssetsBase::Fields::uas_usrID, CurrentUserID },
+        { tblAccountUserAssetsBase::Fields::uas_slbID, AssetItem.slbID },
+        { tblAccountUserAssetsBase::Fields::uasQty, _qty },
+//        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
+        { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
+//            { tblAccountUserAssetsBase::Fields::uasPrefered, ??? },
+//        { tblAccountUserAssetsBase::Fields::uasOrderDateTime, DBExpression::NOW() },
+//            { tblAccountUserAssetsBase::Fields::uasStatus, },
     };
 
     if (Discount3.ID > 0) {
         qry.addCols({
-                        tblAccountUserAssetsBase::uas_cpnID,
-                        tblAccountUserAssetsBase::uasDiscountAmount,
+                        tblAccountUserAssetsBase::Fields::uas_cpnID,
+                        tblAccountUserAssetsBase::Fields::uasDiscountAmount,
                     })
         ;
 
-        values.insert(tblAccountUserAssetsBase::uas_cpnID, Discount3.ID);
-        values.insert(tblAccountUserAssetsBase::uasDiscountAmount, Discount3.Amount);
+        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, Discount3.ID);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, Discount3.Amount);
     }
 
     qry.values(values);
@@ -744,7 +724,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, remo
                                         _APICALLBOOM.getUserID(),
                                         PreVoucherItem,
                                         [](const QVariantMap &_userAssetInfo) -> bool {
-                                            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+                                            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
                                             return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
                                         }) == false) //not pending
                 throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
@@ -815,13 +795,13 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, upda
             //check uasStatus
             QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
                                         .addCols({
-                                                    tblAccountUserAssetsBase::uasID,
-                                                    tblAccountUserAssetsBase::uas_slbID,
-                                                    tblAccountUserAssetsBase::uasStatus,
+                                                    tblAccountUserAssetsBase::Fields::uasID,
+                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
+                                                    tblAccountUserAssetsBase::Fields::uasStatus,
                                                  })
-                                        .where({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
+                                        .where({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
                                         .one();
-            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
             if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
                 throw exHTTPInternalServerError("only Pending items of pre-voucher can be modify.");
 
@@ -847,17 +827,17 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, upda
             //update voucher item in Module/UsetAssets
             UpdateQuery(*this->AccountUserAssets)
                     .set(tblAccountUserAssetsBase::
-                        tblAccountUserAssetsBase::uasID)
+                        tblAccountUserAssetsBase::Fields::uasID)
                                         .addCols({
-                                                    tblAccountUserAssetsBase::uas_slbID,
-                                                    tblAccountUserAssetsBase::uasStatus,
+                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
+                                                    tblAccountUserAssetsBase::Fields::uasStatus,
                                                  })
-                                        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
+                                        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
                                         .one();
 
             if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
                 {
-                    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+                    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
 
                     if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
                         return false;
@@ -939,12 +919,12 @@ bool intfAccountingBasedModule::activateUserAsset(
                         APICALLBOOM_PARAM,
                         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
                         TAPI::ORMFields_t({
-                            { tblAccountUserAssetsBase::uas_vchID, _voucherID },
-                            { tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Active },
+                            { tblAccountUserAssetsBase::Fields::uas_vchID, _voucherID },
+                            { tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Active },
                         }),
                         {
-                            { tblAccountUserAssetsBase::uasID, _voucherItem.OrderID },
-                            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+                            { tblAccountUserAssetsBase::Fields::uasID, _voucherItem.OrderID },
+                            { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
                         });
 }
 
@@ -957,7 +937,7 @@ bool intfAccountingBasedModule::removeFromUserAssets(
         APICALLBOOM_PARAM,
         /*PK*/ QString("%1").arg(_voucherItem.OrderID),
         {
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+            { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
         },
         false
     );
@@ -993,22 +973,22 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
                                 .addCols({
-                                             tblAccountUserAssetsBase::uasID,
-                                             tblAccountUserAssetsBase::uas_slbID,
-                                             tblAccountUserAssetsBase::uasStatus,
+                                             tblAccountUserAssetsBase::Fields::uasID,
+                                             tblAccountUserAssetsBase::Fields::uas_slbID,
+                                             tblAccountUserAssetsBase::Fields::uasStatus,
                                          })
-                                .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+                                .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                                 .one();
 
     if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
         return false;
 
-    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
 
     if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
         this->decreaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
 
-    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::uas_slbID).toUInt();
+    quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uas_slbID).toUInt();
 
     //-- un-reserve saleable & product ------------------------------------
     this->AccountSaleables->callSP(APICALLBOOM_PARAM,
@@ -1020,19 +1000,19 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 
     //-- un-reserve saleable ------------------------------------
 //    UpdateQuery(*this->AccountSaleables)
-//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountSaleablesBase::slbReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Fields::slbID })
+//        .increament(tblAccountSaleablesBase::Fields::slbReturnedQty, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
 
     //-- un-reserve product -------------------------------------
 //    UpdateQuery(*this->AccountProducts)
-//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::prdID })
-//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::slbID })
-//        .increament(tblAccountProductsBase::prdReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
-//        .andWhere({ tblAccountUserAssetsBase::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
+//        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::Fields::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::Fields::prdID })
+//        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID })
+//        .increament(tblAccountProductsBase::Fields::prdReturnedQty, _voucherItem.Qty)
+//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+//        .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
 
     //-----------------------------------------------------------

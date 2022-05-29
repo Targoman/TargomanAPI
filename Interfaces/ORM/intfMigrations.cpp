@@ -34,17 +34,14 @@ intfMigrations::intfMigrations(
     const QString& _schema,
     const QString& _name
 ) :
-    intfSQLBasedModule(
-        _schema,
-        _name,
-        tblMigrations::Name,
-        {///< ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
-            { tblMigrations::migName,       S(QString),         QFV,        QNull,   UPNone },
-            { tblMigrations::migAppliedAt,  S(TAPI::DateTime_t),QFV,        QNull,   UPNone },
-            { tblMigrations::migRunType,    S(QString),         QFV,        QNull,   UPNone },
-            { tblMigrations::migStatus,     S(QString),         QFV,        QNull,   UPNone },
-        }
-    ) { ; }
+intfSQLBasedModule(
+    _schema,
+    _name,
+    tblMigrations::Name,
+    tblMigrations::Private::ORMFields,
+    tblMigrations::Private::Relations,
+    tblMigrations::Private::Indexes
+) { ; }
 
 QVariant IMPL_ANONYMOUSE_ORMGET(intfMigrations) {
 //    Authorization::checkPriv(_APICALLBOOM, { this->ModuleName + ":Migrations:CRUD~0100" });

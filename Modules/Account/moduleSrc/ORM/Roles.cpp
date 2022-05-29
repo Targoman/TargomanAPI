@@ -34,30 +34,10 @@ Roles::Roles() :
     intfSQLBasedModule(
         AAASchema,
         tblRoles::Name,
-        {///<ColName                          Type                   Validation                        Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblRoles::rolID,                ORM_PRIMARYKEY_32 },
-            { tblRoles::rolName,              S(QString),            QFV/*.unicodeAlNum()*/.maxLenght(50), QRequired, UPAdmin },
-            { tblRoles::rolParent_rolID,      S(quint32),            QFV.integer().minValue(1),        QNull,     UPAdmin },
-            { tblRoles::rolPrivileges,        S(TAPI::PrivObject_t), QFV,                              QRequired, UPAdmin, false, false },
-            { tblRoles::rolSignupAllowedIPs,  S(QString),            QFV,                              QNull,     UPAdmin, false, false }, //OJO This must be validated after splitting by comma
-            { tblRoles::rolStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuRoleStatus, Targoman::API::AccountModule::enuRoleStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblRoles::rolCreationDateTime,  ORM_CREATED_ON },
-            { tblRoles::rolCreatedBy_usrID,   ORM_CREATED_BY_NULLABLE },
-            { tblRoles::rolUpdatedBy_usrID,   ORM_UPDATED_BY },
-        },
-        {///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
-            { tblRoles::rolParent_rolID, R(AAASchema,tblRoles::Name), tblRoles::rolID, "Parent_", true },
-            ORM_RELATION_OF_CREATOR(tblRoles::rolCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblRoles::rolUpdatedBy_usrID),
-        },
-        {
-            { {
-                tblRoles::rolName,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-        }
-    ) { ; }
+        tblRoles::Private::ORMFields,
+        tblRoles::Private::Relations,
+        tblRoles::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(Roles) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));

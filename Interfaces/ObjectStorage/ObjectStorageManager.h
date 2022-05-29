@@ -42,10 +42,10 @@ class intfUploadQueue;
 namespace Targoman::API::ObjectStorage {
 
 //TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
-//    SF_QString(FullFileUrl),
-//    SF_QString(MimeType),
-//    SF_quint8(IsUploaded),
-//    SF_quint64(uplID)
+//    SF_QString                  (FullFileUrl),
+//    SF_QString                  (MimeType),
+//    SF_quint8                   (IsUploaded),
+//    SF_quint64                  (uplID)
 //);
 
 #pragma GCC diagnostic push

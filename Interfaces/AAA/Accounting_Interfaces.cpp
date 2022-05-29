@@ -199,51 +199,13 @@ intfAccountProducts::intfAccountProducts(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<DBM::stuDBIndex>& _exclusiveIndexes
 ) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountProductsBase::Name,
-        QList<DBM::clsORMField>({
-        ///<  ColName                                       Type                         Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountProductsBase::prdID,                ORM_PRIMARYKEY_32 },
-            { tblAccountProductsBase::prdCode,              S(TAPI::ProductCode_t),      QFV,                                     QRequired,  UPOwner },
-            { tblAccountProductsBase::prdName,              S(QString),                  QFV,                                     QRequired,  UPOwner },
-            { tblAccountProductsBase::prdDesc,              S(QString),                  QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidFromDate,     S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidToDate,       S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { tblAccountProductsBase::prdValidToHour,       S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { tblAccountProductsBase::prdPrivs,             S(TAPI::PrivObject_t),       QFV,                                     QNull,      UPOwner },
-            { tblAccountProductsBase::prdVAT,               S(NULLABLE_TYPE(double)),    QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
-            { tblAccountProductsBase::prdInStockQty,        S(double),                   QFV.integer().minValue(0),               QRequired,  UPAdmin },
-            { tblAccountProductsBase::prdOrderedQty,        S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
-            { tblAccountProductsBase::prdReturnedQty,       S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
-            { tblAccountProductsBase::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountProductsBase::prdCreationDateTime,  ORM_CREATED_ON },
-            { tblAccountProductsBase::prdCreatedBy_usrID,   ORM_CREATED_BY },
-            { tblAccountProductsBase::prdUpdatedBy_usrID,   ORM_UPDATED_BY },
-        }) + _exclusiveCols,
-        QList<DBM::stuRelation>({
-        ///<  Col                                           Reference Table    ForeignCol          Rename     LeftJoin
-            { "saleable",  { tblAccountProductsBase::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slb_prdID } },
-            ORM_RELATION_OF_CREATOR(tblAccountProductsBase::prdCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblAccountProductsBase::prdUpdatedBy_usrID),
-        }) + _exclusiveRelations,
-        QList<DBM::stuDBIndex>({
-            { {
-                tblAccountProductsBase::prdCode,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { tblAccountProductsBase::prdValidFromDate },
-            { tblAccountProductsBase::prdValidToDate },
-            { tblAccountProductsBase::prdValidFromHour },
-            { tblAccountProductsBase::prdValidToHour },
-            { tblAccountProductsBase::prdStatus },
-            { tblAccountProductsBase::prdCreatedBy_usrID },
-            { tblAccountProductsBase::prdCreationDateTime },
-            { tblAccountProductsBase::prdUpdatedBy_usrID },
-        }) + _exclusiveIndexes
-    ) { ; }
+intfSQLBasedModule(
+    _schema,
+    tblAccountProductsBase::Name,
+    tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
+    tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
+    tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -272,74 +234,32 @@ bool IMPL_ORMDELETE(intfAccountProducts) {
 
 /******************************************************************/
 intfAccountSaleables::intfAccountSaleables(
-        const QString& _schema,
-        const QList<DBM::clsORMField>& _exclusiveCols,
-        const QList<DBM::stuRelation>& _exclusiveRelations,
-        const QList<DBM::stuDBIndex>& _exclusiveIndexes
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountSaleablesBase::Name,
-        QList<DBM::clsORMField>({
-        ///<  ColName                                           Type                             Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
-            { tblAccountSaleablesBase::slbID,                   ORM_PRIMARYKEY_32 },
-            { tblAccountSaleablesBase::slb_prdID,               S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbCode,                 S(TAPI::SaleableCode_t),         QFV,                             QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbName,                 S(QString),                      QFV,                             QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbDesc,                 S(QString),                      QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbType,                 S(TAPI::enuSaleableType::Type),  QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-            { tblAccountSaleablesBase::slbAvailableFromDate,    S(TAPI::DateTime_t),             QFV,                             QNow,       UPOwner },
-            { tblAccountSaleablesBase::slbAvailableToDate,      S(TAPI::DateTime_t),             QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbPrivs,                S(TAPI::JSON_t),                 QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbBasePrice,            S(qreal),                        QFV.real().minValue(0),          QRequired,  UPOwner },
-            { tblAccountSaleablesBase::slbAdditives,            S(TAPI::SaleableAdditive_t),     QFV,                             QNull,      UPOwner },
-//            { tblAccountSaleablesBase::slbProductCount,         S(quint32),                      QFV.integer().minValue(1),       QRequired,  UPOwner},
-            { tblAccountSaleablesBase::slbMaxSaleCountPerUser,  S(NULLABLE_TYPE(quint32)),       QFV,                             QNull,      UPOwner},
-            { tblAccountSaleablesBase::slbInStockQty,           S(double),                       QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { tblAccountSaleablesBase::slbOrderedQty,           S(NULLABLE_TYPE(double)),        QFV,                             QNull,      UPAdmin },
-            { tblAccountSaleablesBase::slbReturnedQty,          S(NULLABLE_TYPE(double)),        QFV,                             QNull,      UPAdmin },
-            { tblAccountSaleablesBase::slbVoucherTemplate,      S(QString),                      QFV,                             QNull,      UPOwner },
-            { tblAccountSaleablesBase::slbStatus,               ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountSaleablesBase::slbCreationDateTime,     ORM_CREATED_ON },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID,      ORM_CREATED_BY },
-            { tblAccountSaleablesBase::slbUpdatedBy_usrID,      ORM_UPDATED_BY },
-        }) + _exclusiveCols,
-        QList<DBM::stuRelation>({
-        ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
-            { "product",  { tblAccountSaleablesBase::slb_prdID, R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::prdID } },
-            { "userAsset", { tblAccountSaleablesBase::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uas_slbID } },
-            ORM_RELATION_OF_CREATOR(tblAccountSaleablesBase::slbCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblAccountSaleablesBase::slbUpdatedBy_usrID),
-        }) + _exclusiveRelations,
-        QList<DBM::stuDBIndex>({
-            { {
-                tblAccountSaleablesBase::slbCode,
-                ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { tblAccountSaleablesBase::slbType },
-            { tblAccountSaleablesBase::slbAvailableFromDate },
-            { tblAccountSaleablesBase::slbAvailableToDate },
-            { tblAccountSaleablesBase::slbStatus },
-            { tblAccountSaleablesBase::slbCreatedBy_usrID },
-            { tblAccountSaleablesBase::slbCreationDateTime },
-            { tblAccountSaleablesBase::slbUpdatedBy_usrID },
-        }) + _exclusiveIndexes
-    ) { ; }
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+intfSQLBasedModule(
+    _schema,
+    tblAccountSaleablesBase::Name,
+    tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
+    tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
+    tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountSaleables) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("%1<=NOW() + ( %2=NULL | %2>=DATE_ADD(NOW(),INTERVAL$SPACE$15$SPACEMIN) )")
-//                       .arg(tblAccountSaleablesBase::slbAvailableFromDate)
-//                       .arg(tblAccountSaleablesBase::slbAvailableToDate);
+//                       .arg(tblAccountSaleablesBase::Fields::slbAvailableFromDate)
+//                       .arg(tblAccountSaleablesBase::Fields::slbAvailableToDate);
 
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblAccountSaleablesBase::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-            .andCond(clsCondition({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::Null })
-                .orCond({ tblAccountSaleablesBase::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+            .setCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
                           DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
             );
 
@@ -367,58 +287,22 @@ bool IMPL_ORMDELETE(intfAccountSaleables) {
 
 /******************************************************************/
 intfAccountUserAssets::intfAccountUserAssets(
-        const QString& _schema,
-        const QList<DBM::clsORMField>& _exclusiveCols,
-        const QList<DBM::stuRelation>& _exclusiveRelations,
-        const QList<stuDBIndex>& _exclusiveIndexes
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountUserAssetsBase::Name,
-        QList<DBM::clsORMField>({
-        ///<  ColName                                       Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountUserAssetsBase::uasID,              ORM_PRIMARYKEY_64 },
-            { tblAccountUserAssetsBase::uas_usrID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPAdmin },
-            { tblAccountUserAssetsBase::uas_slbID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uasQty,             S(double),                  QFV,                        QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uas_vchID,          S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPAdmin },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID, S(TAPI::MD5_t),             QFV,                        QRequired,  UPNone },
-            { tblAccountUserAssetsBase::uas_cpnID,          S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPNone },
-            { tblAccountUserAssetsBase::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPNone },
-            { tblAccountUserAssetsBase::uasPrefered,        S(bool),                    QFV,                        false,      UPOwner },
-            { tblAccountUserAssetsBase::uasOrderDateTime,   S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
-            { tblAccountUserAssetsBase::uasStatus,          ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountUserAssetsBase::uasUpdatedBy_usrID, ORM_UPDATED_BY },
-        }) + _exclusiveCols,
-        QList<DBM::stuRelation>({
-        ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
-            { tblAccountUserAssetsBase::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::usrID,                 "Owner_" },
-            { tblAccountUserAssetsBase::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::slbID, "",       true },
-            { tblAccountUserAssetsBase::uas_cpnID, R(_schema, tblAccountCouponsBase::Name),   tblAccountCouponsBase::cpnID,   "",       true },
-            //Voucher is not accessible as it is in another schema
-            //{tblAccountUserAssets::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::vchID,    "", true},
-        }) + _exclusiveRelations,
-        QList<DBM::stuDBIndex>({
-            { {
-                  tblAccountUserAssetsBase::uas_usrID,
-                  tblAccountUserAssetsBase::uasVoucherItemUUID,
-                  ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { tblAccountUserAssetsBase::uas_usrID },
-            { tblAccountUserAssetsBase::uas_slbID },
-            { tblAccountUserAssetsBase::uas_vchID },
-            { tblAccountUserAssetsBase::uasVoucherItemUUID },
-            { tblAccountUserAssetsBase::uas_cpnID },
-            { tblAccountUserAssetsBase::uasOrderDateTime },
-            { tblAccountUserAssetsBase::uasStatus },
-            { tblAccountUserAssetsBase::uasUpdatedBy_usrID },
-        }) + _exclusiveIndexes
-    ) { ; }
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
+) :
+intfSQLBasedModule(
+    _schema,
+    tblAccountUserAssetsBase::Name,
+    tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
+    tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
+    tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountUserAssets) {
   if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID() }}, _filters);
+    this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, _APICALLBOOM.getUserID() }}, _filters);
 
   return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -451,9 +335,9 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
 
   Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
   /*return this->update(_APICALLBOOM.getUserID(), {
-                            {tblAccountUserAssets::uasID, UserPackageID}
+                            {tblAccountUserAssets::Fields::uasID, UserPackageID}
                         }, {
-                            {tblAccountUserAssets::uasStatus, TAPI::enuAuditableStatus::Banned},
+                            {tblAccountUserAssets::Fields::uasStatus, TAPI::enuAuditableStatus::Banned},
                         });*/
   throw Targoman::Common::exTargomanMustBeImplemented(__FUNCTION__);
   return Ok;
@@ -469,73 +353,29 @@ intfAccountAssetUsage::intfAccountAssetUsage(
 intfSQLBasedModule(
     _schema,
     tblAccountAssetUsageBase::Name,
-    QList<DBM::clsORMField>({
-    ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-        { tblAccountAssetUsageBase::usg_uasID, ORM_PRIMARYKEY_64},
-    }) + _exclusiveCols,
-    QList<DBM::stuRelation>({
-    ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
-        { tblAccountAssetUsageBase::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uasID},
-    }) + _exclusiveRelations,
-    _exclusiveIndexes
-)
-{ ; }
+    tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
+    tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
+    tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountAssetUsage) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::uas_usrID, _APICALLBOOM.getUserID()}}, _filters);
+      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
-        const QString& _schema
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountCouponsBase::Name,
-        {///< ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
-            { tblAccountCouponsBase::cpnID,                      ORM_PRIMARYKEY_32 },
-            { tblAccountCouponsBase::cpnCode,                    S(TAPI::CouponCode_t),             QFV,                                     QRequired, UPAdmin },
-            { tblAccountCouponsBase::cpnPrimaryCount,            S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
-            { tblAccountCouponsBase::cpnTotalMaxAmount,          S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
-            { tblAccountCouponsBase::cpnPerUserMaxCount,         S(NULLABLE_TYPE(quint32)),         QFV.optional(QFV.integer().minValue(1)), QNull,     UPAdmin },
-            { tblAccountCouponsBase::cpnPerUserMaxAmount,        S(NULLABLE_TYPE(quint32)),         QFV.integer().minValue(1),               QNull,     UPAdmin },
-            { tblAccountCouponsBase::cpnValidFrom,               S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin },
-            { tblAccountCouponsBase::cpnExpiryTime,              S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin },
-            { tblAccountCouponsBase::cpnAmount,                  S(quint32),                        QFV,                                     QRequired, UPAdmin }, //, false, false },
-            { tblAccountCouponsBase::cpnAmountType,              S(Targoman::API::AAA::enuDiscountType::Type), QFV,              Targoman::API::AAA::enuDiscountType::Percent, UPAdmin },
-            { tblAccountCouponsBase::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
-            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
-//            { tblAccountCouponsBase::cpnSaleableBasedMultiplier, S(QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },
-            { tblAccountCouponsBase::cpnTotalUsedCount,          S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
-            { tblAccountCouponsBase::cpnTotalUsedAmount,         S(quint32),                        QFV.integer().minValue(0),               0,         UPNone },
-            { tblAccountCouponsBase::cpnStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { tblAccountCouponsBase::cpnCreationDateTime,        ORM_CREATED_ON },
-            { tblAccountCouponsBase::cpnCreatedBy_usrID,         ORM_CREATED_BY },
-            { tblAccountCouponsBase::cpnUpdatedBy_usrID,         ORM_UPDATED_BY },
-        },
-        {///< Col                           Reference Table                             ForeignCol                              Rename    LeftJoin
-            ORM_RELATION_OF_CREATOR(tblAccountCouponsBase::cpnCreatedBy_usrID),
-            ORM_RELATION_OF_UPDATER(tblAccountCouponsBase::cpnUpdatedBy_usrID),
-            { tblAccountCouponsBase::cpnID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::uas_cpnID,    "",       true },
-        },
-        {
-            { {
-               tblAccountCouponsBase::cpnCode,
-               ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { tblAccountCouponsBase::cpnAmountType },
-            { tblAccountCouponsBase::cpnValidFrom },
-            { tblAccountCouponsBase::cpnExpiryTime },
-            { tblAccountCouponsBase::cpnStatus },
-            { tblAccountCouponsBase::cpnCreatedBy_usrID },
-            { tblAccountCouponsBase::cpnCreationDateTime },
-            { tblAccountCouponsBase::cpnUpdatedBy_usrID },
-        }
-    ) { ; }
+    const QString& _schema
+) :
+intfSQLBasedModule(
+    _schema,
+    tblAccountCouponsBase::Name,
+    tblAccountCouponsBase::Private::ORMFields, // + _exclusiveCols,
+    tblAccountCouponsBase::Private::Relations(_schema), // + _exclusiveRelations,
+    tblAccountCouponsBase::Private::Indexes // + _exclusiveIndexes
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountCoupons) {
   Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -567,17 +407,17 @@ bool IMPL_ORMDELETE(intfAccountCoupons) {
 
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
-        const QString& _schema,
-        const QString& _name,
-        const QList<DBM::clsORMField>& _cols,
-        const QList<DBM::stuRelation>& _relations
-    ) :
-    intfSQLBasedModule(
-        _schema,
-        _name,
-        _cols,
-        _relations
-    ) { ; }
+    const QString& _schema,
+    const QString& _name,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations
+) :
+intfSQLBasedModule(
+    _schema,
+    _name,
+    _cols,
+    _relations
+) { ; }
 
 QVariant IMPL_ORMGET(intfAccountPrizes) {
   Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -704,56 +544,6 @@ for (auto LimitIter = Limits.begin();
  this->Remaining.insert(LimitIter.key(), stuUsage().fromJson(LimitIter->toObject()));
  */
  //}
-
-/*
-void stuAssetItem::fromVariantMap(const QVariantMap& _info) {
-    SET_FIELD_FROM_VARIANT_MAP(this->prdID,                  _info, tblAccountProductsBase,  prdID);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdCode,                _info, tblAccountProductsBase,  prdCode);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdName,                _info, tblAccountProductsBase,  prdName);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdValidFromDate,       _info, tblAccountProductsBase,  prdValidFromDate);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdValidToDate,         _info, tblAccountProductsBase,  prdValidToDate);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdValidFromHour,       _info, tblAccountProductsBase,  prdValidFromHour);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdValidToHour,         _info, tblAccountProductsBase,  prdValidToHour);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdPrivs,               _info, tblAccountProductsBase,  prdPrivs);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdVAT,                 _info, tblAccountProductsBase,  prdVAT);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdInStockQty,          _info, tblAccountProductsBase,  prdInStockQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdOrderedQty,          _info, tblAccountProductsBase,  prdOrderedQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdReturnedQty,         _info, tblAccountProductsBase,  prdReturnedQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->prdStatus,              _info, tblAccountProductsBase,  prdStatus);
-
-    SET_FIELD_FROM_VARIANT_MAP(this->slbID,                  _info, tblAccountSaleablesBase, slbID);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbCode,                _info, tblAccountSaleablesBase, slbCode);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbName,                _info, tblAccountSaleablesBase, slbName);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbPrivs,               _info, tblAccountSaleablesBase, slbPrivs);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbBasePrice,           _info, tblAccountSaleablesBase, slbBasePrice);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbAdditives,           _info, tblAccountSaleablesBase, slbAdditives);
-//    SET_FIELD_FROM_VARIANT_MAP(this->slbProductCount,        _info, tblAccountSaleablesBase, slbProductCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbMaxSaleCountPerUser, _info, tblAccountSaleablesBase, slbMaxSaleCountPerUser);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbInStockQty,          _info, tblAccountSaleablesBase, slbInStockQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbOrderedQty,          _info, tblAccountSaleablesBase, slbOrderedQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbReturnedQty,         _info, tblAccountSaleablesBase, slbReturnedQty);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbVoucherTemplate,     _info, tblAccountSaleablesBase, slbVoucherTemplate);
-    SET_FIELD_FROM_VARIANT_MAP(this->slbStatus,              _info, tblAccountSaleablesBase, slbStatus);
-}
-*/
-
-void stuFullDiscount::fromVariantMap(const QVariantMap& _info) {
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnID,                         _info, tblAccountCouponsBase, cpnID);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnCode,                       _info, tblAccountCouponsBase, cpnCode);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnPrimaryCount,               _info, tblAccountCouponsBase, cpnPrimaryCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalMaxAmount,             _info, tblAccountCouponsBase, cpnTotalMaxAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnPerUserMaxCount,            _info, tblAccountCouponsBase, cpnPerUserMaxCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnPerUserMaxAmount,           _info, tblAccountCouponsBase, cpnPerUserMaxAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnValidFrom,                  _info, tblAccountCouponsBase, cpnValidFrom);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnExpiryTime,                 _info, tblAccountCouponsBase, cpnExpiryTime);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnAmount,                     _info, tblAccountCouponsBase, cpnAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnAmountType,                 _info, tblAccountCouponsBase, cpnAmountType);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnMaxAmount,                  _info, tblAccountCouponsBase, cpnMaxAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnSaleableBasedMultiplier,    _info, tblAccountCouponsBase, cpnSaleableBasedMultiplier);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalUsedCount,             _info, tblAccountCouponsBase, cpnTotalUsedCount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnTotalUsedAmount,            _info, tblAccountCouponsBase, cpnTotalUsedAmount);
-    SET_FIELD_FROM_VARIANT_MAP(this->cpnStatus,                     _info, tblAccountCouponsBase, cpnStatus);
-};
 
 /******************************************************************/
 /*QVariant stuAssetItemReq_t::toVariant() const{

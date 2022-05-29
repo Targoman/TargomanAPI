@@ -37,14 +37,81 @@ namespace ORM {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace tblLocations {
-constexpr char Name[] = "tblLocations";
-TARGOMAN_CREATE_CONSTEXPR(locID);
-TARGOMAN_CREATE_CONSTEXPR(locURL);
-TARGOMAN_CREATE_CONSTEXPR(locPlaceCode);
-TARGOMAN_CREATE_CONSTEXPR(locCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(locCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(locUpdatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(locStatus);
+    constexpr char Name[] = "tblLocations";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(locID);
+        TARGOMAN_CREATE_CONSTEXPR(locURL);
+        TARGOMAN_CREATE_CONSTEXPR(locPlaceCode);
+        TARGOMAN_CREATE_CONSTEXPR(locCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(locCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(locUpdatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(locStatus);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::locID,
+            _tableAlias + Fields::locURL,
+            _tableAlias + Fields::locPlaceCode,
+            _tableAlias + Fields::locCreatedBy_usrID,
+            _tableAlias + Fields::locCreationDateTime,
+            _tableAlias + Fields::locUpdatedBy_usrID,
+            _tableAlias + Fields::locStatus,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+                { Fields::locID,               ORM_PRIMARYKEY_32 },
+                { Fields::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
+                { Fields::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
+                { Fields::locStatus,           ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+                { ORM_INVALIDATED_AT_FIELD },
+                { Fields::locCreationDateTime, ORM_CREATED_ON },
+                { Fields::locCreatedBy_usrID,  ORM_CREATED_BY },
+                { Fields::locUpdatedBy_usrID,  ORM_UPDATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
+                ORM_RELATION_OF_CREATOR(Fields::locCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(Fields::locUpdatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                Fields::locURL,
+                Fields::locPlaceCode,
+                ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+            { Fields::locURL },
+            { Fields::locPlaceCode },
+            { Fields::locStatus },
+            { Fields::locCreatedBy_usrID },
+            { Fields::locCreationDateTime },
+            { Fields::locUpdatedBy_usrID },
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (locID),
+        SF_QString                  (locURL),
+        SF_QString                  (locPlaceCode),
+        SF_ORM_STATUS_FIELD         (locStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
+        SF_ORM_CREATED_ON           (locCreationDateTime),
+        SF_ORM_CREATED_BY           (locCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (locUpdatedBy_usrID)
+    );
 }
 
 #pragma GCC diagnostic pop

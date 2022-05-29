@@ -58,39 +58,69 @@ namespace ORM {
 namespace tblVoucher {
     constexpr char Name[] = "tblVoucher";
 
-    TARGOMAN_CREATE_CONSTEXPR(vchID);
-    TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(vchDesc);
-    TARGOMAN_CREATE_CONSTEXPR(vchType);
-    TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
-    TARGOMAN_CREATE_CONSTEXPR(vchProcessResult);
-    TARGOMAN_CREATE_CONSTEXPR(vchStatus);
-    TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(vchID);
+        TARGOMAN_CREATE_CONSTEXPR(vch_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(vchDesc);
+        TARGOMAN_CREATE_CONSTEXPR(vchType);
+        TARGOMAN_CREATE_CONSTEXPR(vchTotalAmount);
+        TARGOMAN_CREATE_CONSTEXPR(vchProcessResult);
+        TARGOMAN_CREATE_CONSTEXPR(vchStatus);
+        TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
+    }
 
     inline QStringList ColumnNames(QString _tableAlias = "") {
         if (_tableAlias.isEmpty() == false)
             _tableAlias += ".";
+
         return {
-            _tableAlias + vchID,
-            _tableAlias + vch_usrID,
-            _tableAlias + vchDesc,
-            _tableAlias + vchType,
-            _tableAlias + vchTotalAmount,
-            _tableAlias + vchProcessResult,
-            _tableAlias + vchStatus,
-            _tableAlias + vchCreationDateTime,
+            _tableAlias + Fields::vchID,
+            _tableAlias + Fields::vch_usrID,
+            _tableAlias + Fields::vchDesc,
+            _tableAlias + Fields::vchType,
+            _tableAlias + Fields::vchTotalAmount,
+            _tableAlias + Fields::vchProcessResult,
+            _tableAlias + Fields::vchStatus,
+            _tableAlias + Fields::vchCreationDateTime,
         };
     }
 
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                           Type                    Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
+                { Fields::vchID,                ORM_PRIMARYKEY_64 },
+                { Fields::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+                { Fields::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPNone, false, false },
+                { Fields::vchType,              S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AccountModule::enuVoucherType::Expense*/, UPNone },
+                { Fields::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
+                { Fields::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin, false, false },
+                { Fields::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
+                { Fields::vchCreationDateTime,  ORM_CREATED_ON },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                     Reference Table              ForeignCol
+                { Fields::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::Fields::usrID },
+            };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
     TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
-        SF_quint64(vchID),
-        SF_quint64(vch_usrID),
-        SF_JSON_t(vchDesc),
-        SF_NULLABLE_Enum(Targoman::API::AccountModule::enuVoucherType, vchType),
-        SF_quint64(vchTotalAmount),
-        SF_JSON_t(vchProcessResult),
-        SF_Enum(Targoman::API::AAA::enuVoucherStatus, vchStatus, Targoman::API::AAA::enuVoucherStatus::New),
-        SF_DateTime_t(vchCreationDateTime)
+        SF_ORM_PRIMARYKEY_64        (vchID),
+        SF_quint64                  (vch_usrID),
+        SF_JSON_t                   (vchDesc),
+        SF_NULLABLE_Enum            (vchType, Targoman::API::AccountModule::enuVoucherType),
+        SF_quint64                  (vchTotalAmount),
+        SF_JSON_t                   (vchProcessResult),
+        SF_ORM_STATUS_FIELD         (vchStatus, Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New),
+        SF_DateTime_t               (vchCreationDateTime)
     );
 }
 #pragma GCC diagnostic pop

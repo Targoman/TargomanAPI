@@ -26,6 +26,7 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Roles.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -36,17 +37,84 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblService {
-constexpr char Name[] = "tblService";
-//constexpr char Invalid_ProcessVoucherItemEndPoint[] = "INVALID";
-TARGOMAN_CREATE_CONSTEXPR(svcID);
-TARGOMAN_CREATE_CONSTEXPR(svcName);
-TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
-TARGOMAN_CREATE_CONSTEXPR(svcProcessVoucherItemEndPoint);
-TARGOMAN_CREATE_CONSTEXPR(svcCancelVoucherItemEndPoint);
-TARGOMAN_CREATE_CONSTEXPR(svcStatus);
-TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
-TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
-TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
+    constexpr char Name[] = "tblService";
+    //constexpr char Invalid_ProcessVoucherItemEndPoint[] = "INVALID";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(svcID);
+        TARGOMAN_CREATE_CONSTEXPR(svcName);
+        TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
+        TARGOMAN_CREATE_CONSTEXPR(svcProcessVoucherItemEndPoint);
+        TARGOMAN_CREATE_CONSTEXPR(svcCancelVoucherItemEndPoint);
+        TARGOMAN_CREATE_CONSTEXPR(svcStatus);
+        TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::svcID,
+            _tableAlias + Fields::svcName,
+            _tableAlias + Fields::svc_rolID,
+            _tableAlias + Fields::svcProcessVoucherItemEndPoint,
+            _tableAlias + Fields::svcCancelVoucherItemEndPoint,
+            _tableAlias + Fields::svcStatus,
+            _tableAlias + Fields::svcCreationDateTime,
+            _tableAlias + Fields::svcCreatedBy_usrID,
+            _tableAlias + Fields::svcUpdatedBy_usrID,
+        };
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                       Type                        Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+                { Fields::svcID,                            ORM_PRIMARYKEY_32 },
+                { Fields::svcName,                          S(QString),                 QFV,                             QRequired, UPAdmin },
+                { Fields::svc_rolID,                        S(quint32),                 QFV,                             QRequired, UPAdmin },
+                { Fields::svcProcessVoucherItemEndPoint,    S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
+                { Fields::svcCancelVoucherItemEndPoint,     S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
+                { Fields::svcStatus,                        ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+                { ORM_INVALIDATED_AT_FIELD },
+                { Fields::svcCreationDateTime,              ORM_CREATED_ON },
+                { Fields::svcCreatedBy_usrID,               ORM_CREATED_BY },
+                { Fields::svcUpdatedBy_usrID,               ORM_UPDATED_BY },
+            };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                    Reference Table              ForeignCol      Rename     LeftJoin
+                { Fields::svc_rolID, R(AAASchema, tblRoles::Name), tblRoles::Fields::rolID },
+                ORM_RELATION_OF_CREATOR(Fields::svcCreatedBy_usrID),
+                ORM_RELATION_OF_UPDATER(Fields::svcUpdatedBy_usrID),
+            };
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                  Fields::svcName,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (svcID),
+        SF_QString                  (svcName),
+        SF_quint32                  (svc_rolID),
+        SF_QString                  (svcProcessVoucherItemEndPoint),
+        SF_QString                  (svcCancelVoucherItemEndPoint),
+        SF_ORM_STATUS_FIELD         (svcStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
+        SF_ORM_CREATED_ON           (svcCreationDateTime),
+        SF_ORM_CREATED_BY           (svcCreatedBy_usrID),
+        SF_ORM_UPDATED_BY           (svcUpdatedBy_usrID)
+    );
 }
 #pragma GCC diagnostic pop
 

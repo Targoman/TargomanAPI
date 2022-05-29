@@ -26,6 +26,9 @@
 
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
+#include "Defs.hpp"
+#include "Bin.h"
+#include "Locations.h"
 
 namespace Targoman::API::AdvertModule {
 
@@ -36,11 +39,57 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblActiveAds {
-constexpr char Name[] = "tblActiveAds";
-TARGOMAN_CREATE_CONSTEXPR(act_binID);
-TARGOMAN_CREATE_CONSTEXPR(act_locID);
-TARGOMAN_CREATE_CONSTEXPR(actOrder);
-TARGOMAN_CREATE_CONSTEXPR(actOnKeyword);
+    constexpr char Name[] = "tblActiveAds";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(act_binID);
+        TARGOMAN_CREATE_CONSTEXPR(act_locID);
+        TARGOMAN_CREATE_CONSTEXPR(actOrder);
+        TARGOMAN_CREATE_CONSTEXPR(actOnKeyword);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::act_binID,
+            _tableAlias + Fields::act_locID,
+            _tableAlias + Fields::actOrder,
+            _tableAlias + Fields::actOnKeyword,
+        };
+    }
+
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///<ColName                  Type           Validation                        Default     UpBy   Sort  Filter Self  Virt   PK
+               { Fields::act_binID,    ORM_PRIMARYKEY_32},
+               { Fields::act_locID,    ORM_PRIMARYKEY_32},
+               { Fields::actOrder,     S(Targoman::API::AdvertModule::enuAdvertOrder::Type),QFV,               Targoman::API::AdvertModule::enuAdvertOrder::Normal, UPNone},
+               { Fields::actOnKeyword, S(QString),    QFV.unicodeAlNum().maxLenght(50), QInvalid, UPNone},
+             };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin
+               { Fields::act_binID,    R(AdvertSchema, tblBin::Name),   tblBin::Fields::binID},
+               { Fields::act_locID,    R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
+             };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_32        (act_binID),
+        SF_ORM_PRIMARYKEY_32        (act_locID),
+        SF_Enum                     (actOrder, Targoman::API::AdvertModule::enuAdvertOrder, Targoman::API::AdvertModule::enuAdvertOrder::Normal),
+        SF_QString                  (actOnKeyword)
+    );
 }
 #pragma GCC diagnostic pop
 

@@ -22,32 +22,22 @@
  */
 
 #include "IPStats.h"
-#include "IPBin.h"
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+IPStats::IPStats() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblIPStats::Name,
+        tblIPStats::Private::ORMFields,
+        tblIPStats::Private::Relations,
+        tblIPStats::Private::Indexes
+) { ; }
 
 QVariant IMPL_ORMGET(IPStats) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
-
-//    return query.one();
-
-    //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
-
-IPStats::IPStats() :
-    intfSQLBasedModule(AAASchema,
-              tblIPStats::Name,
-              { ///<ColName                       Type                 Validation                     Default    UpBy   Sort  Filter Self  Virt   PK
-                {tblIPStats::ips_ipbIP,           ORM_PRIMARYKEY_32},
-                {tblIPStats::ipsTimeStamp,        S(double),           QFV.allwaysValid(),            QRequired, UPNone},
-                {tblIPStats::ipsInsertionDate,    ORM_CREATED_ON},
-              },
-              { ///< Col                  Reference Table                  ForeignCol
-                {tblIPStats::ips_ipbIP,   R(AAASchema,tblIPBin::Name),     tblIPBin::ipbIP },
-              }) { ; }
 
 } //namespace Targoman::API::AccountModule::ORM

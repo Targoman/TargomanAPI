@@ -36,28 +36,85 @@ TARGOMAN_DEFINE_ENUM(enuFPRStatus,
                      Sent     = 'S',
                      Applied  = 'A',
                      Removed  = 'R'
-                                )
+                     )
 TARGOMAN_DEFINE_ENUM(enuForgotPassLinkVia,
                      Email    = 'E',
                      Mobile   = 'M',
-                                )
+                     )
 
+} //namespace Targoman::API::AccountModule
+
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuFPRStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
+
+namespace Targoman::API::AccountModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblForgotPassRequest {
     constexpr char Name[] = "tblForgotPassRequest";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(fprID);
+        TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
+        TARGOMAN_CREATE_CONSTEXPR(fprCode);
+        TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
+        TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
+        TARGOMAN_CREATE_CONSTEXPR(fprStatus);
+    }
+
+    inline QStringList ColumnNames(QString _tableAlias = "") {
+        if (_tableAlias.isEmpty() == false)
+            _tableAlias += ".";
+
+        return {
+            _tableAlias + Fields::fprID,
+            _tableAlias + Fields::fpr_usrID,
+            _tableAlias + Fields::fprRequestedVia,
+            _tableAlias + Fields::fprCode,
+            _tableAlias + Fields::fprRequestDate,
+            _tableAlias + Fields::fprApplyDate,
+            _tableAlias + Fields::fprStatus,
+        };
+    }
+
     namespace Relation {
         constexpr char User[] = "user";
     }
-    TARGOMAN_CREATE_CONSTEXPR(fprID);
-    TARGOMAN_CREATE_CONSTEXPR(fpr_usrID);
-    TARGOMAN_CREATE_CONSTEXPR(fprRequestedVia);
-    TARGOMAN_CREATE_CONSTEXPR(fprCode);
-    TARGOMAN_CREATE_CONSTEXPR(fprRequestDate);
-    TARGOMAN_CREATE_CONSTEXPR(fprApplyDate);
-    TARGOMAN_CREATE_CONSTEXPR(fprStatus);
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///< ColName                                   Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::fprID,              ORM_PRIMARYKEY_64 },
+            { Fields::fpr_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::fprRequestedVia,    S(Targoman::API::AccountModule::enuForgotPassLinkVia::Type), QFV, Targoman::API::AccountModule::enuForgotPassLinkVia::Email, UPNone },
+            { Fields::fprCode,            S(QString),             QFV,                        QRequired,  UPNone },
+            { Fields::fprRequestDate,     ORM_CREATED_ON },
+            { Fields::fprApplyDate,       S(TAPI::DateTime_t),    QFV,                        QNull,      UPAdmin },
+            { Fields::fprStatus,          ORM_STATUS_FIELD(Targoman::API::AccountModule::enuFPRStatus, Targoman::API::AccountModule::enuFPRStatus::New) },
+        };
+
+        const QList<stuRelation> Relations = {
+            ///< Col                                Reference Table                 ForeignCol
+            { Relation::User, { Fields::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::Fields::usrID } },
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (fprID),
+        SF_quint64                  (fpr_usrID),
+        SF_Enum                     (fprRequestedVia, Targoman::API::AccountModule::enuForgotPassLinkVia, Targoman::API::AccountModule::enuForgotPassLinkVia::Email),
+        SF_QString                  (fprCode),
+        SF_DateTime_t               (fprApplyDate),
+        SF_ORM_STATUS_FIELD         (fprStatus, Targoman::API::AccountModule::enuFPRStatus, Targoman::API::AccountModule::enuFPRStatus::New),
+        SF_ORM_CREATED_ON           (fprRequestDate)
+    );
 }
 #pragma GCC diagnostic pop
 
@@ -73,8 +130,5 @@ private slots:
 
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuFPRStatus);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_ORM_FORGOTPASSREQUEST_H
