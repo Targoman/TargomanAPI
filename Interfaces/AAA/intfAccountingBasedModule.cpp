@@ -309,6 +309,200 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
+stuDiscount3 intfAccountingBasedModule::applyDiscount(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &AssetItem,
+    TAPI::CouponCode_t      _discountCode,
+    TAPI::SaleableCode_t    _saleableCode,
+    qreal                   _qty
+) {
+    stuDiscount3 Discount3;
+
+    _discountCode = _discountCode.trimmed();
+
+    if (_discountCode.isEmpty())
+        return Discount3;
+
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
+    QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
+        .addCols(this->AccountCoupons->SelectableColumnNames())
+
+        .leftJoin(SelectQuery(*this->AccountUserAssets)
+                  .addCols({
+                               tblAccountUserAssetsBase::Fields::uas_cpnID,
+                               tblAccountUserAssetsBase::Fields::uas_vchID,
+                           })
+                  .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::Fields::uasID, "_discountUsedCount")
+                  .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                  .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                              .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
+                  .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
+                  .groupBy(tblAccountUserAssetsBase::Fields::uas_vchID)
+            , "tmp_cpn_count"
+            , { "tmp_cpn_count", tblAccountUserAssetsBase::Fields::uas_cpnID,
+                enuConditionOperator::Equal,
+                tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
+        )
+        .addCol("tmp_cpn_count._discountUsedCount")
+
+        .leftJoin(SelectQuery(*this->AccountUserAssets)
+                  .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
+                  .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
+                  .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                  .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
+                              .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
+                  .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
+            , "tmp_cpn_amount"
+            , { "tmp_cpn_amount", tblAccountUserAssetsBase::Fields::uas_cpnID,
+                enuConditionOperator::Equal,
+                tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
+        )
+        .addCol("tmp_cpn_amount._discountUsedAmount")
+
+        .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _discountCode })
+        .andWhere({ tblAccountCouponsBase::Fields::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
+        .andWhere(clsCondition({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::Null })
+            .orCond({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::GreaterEqual,
+                DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+        )
+        .one();
+
+    if (DiscountInfo.size() == 0)
+        throw exHTTPBadRequest("Discount code not found.");
+
+    QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
+
+    QJsonObject DiscountInfoJson = QJsonObject::fromVariantMap(DiscountInfo);
+    tblAccountCouponsBase::DTO FullDiscount;
+    FullDiscount.fromJson(DiscountInfoJson);
+
+    Discount3.ID     = FullDiscount.cpnID;
+    Discount3.Code   = FullDiscount.cpnCode;
+    Discount3.Amount = FullDiscount.cpnAmount;
+
+    NULLABLE_TYPE(quint32) _discountUsedCount;
+    TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
+    NULLABLE_TYPE(quint32) _discountUsedAmount;
+    TAPI::setFromVariant(_discountUsedAmount, DiscountInfo.value("_discountUsedAmount"));
+
+//        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_GET(cpnExpiryTime).toDateTime() < Now)
+//            throw exHTTPBadRequest("Discount code has been expired");
+
+    if (FullDiscount.cpnTotalUsedCount >= FullDiscount.cpnPrimaryCount)
+        throw exHTTPBadRequest("Discount code has been finished");
+
+    if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0) > 0)
+            && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0)))
+        throw exHTTPBadRequest("Max discount usage per user has been reached");
+
+    if (FullDiscount.cpnTotalUsedAmount >= FullDiscount.cpnTotalMaxAmount)
+        throw exHTTPBadRequest("Max discount usage amount has been reached");
+
+    if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0)
+            && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
+        throw exHTTPBadRequest("Max discount usage amount per user has been reached");
+
+    QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
+    if (arr.size()) {
+        stuDiscountSaleableBasedMultiplier multiplier;
+
+        for (QJsonArray::const_iterator itr = arr.constBegin();
+            itr != arr.constEnd();
+            itr++
+        ) {
+            auto elm = *itr;
+
+            stuDiscountSaleableBasedMultiplier cur;
+            cur.fromJson(elm.toObject());
+
+            qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
+
+            if ((cur.SaleableCode == _saleableCode)
+                    && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _qty)
+            ) {
+                if ((multiplier.Multiplier == 0)
+                        || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
+                    multiplier = cur;
+            }
+        }
+
+//            if (multiplier.Multiplier == 0) //not found
+//                throw exHTTPBadRequest("Discount code is not valid on selected package");
+
+        if (multiplier.Multiplier > 0) { //found
+            auto m = Discount3.Amount;
+            Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
+
+            TargomanDebug(5) << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
+        }
+    } //if (arr.size())
+
+//        Discount.Code = _discountCode;
+
+    TargomanDebug(5) << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+
+    if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
+        Discount3.Amount = AssetItem.SubTotal * Discount3.Amount / 100.0;
+
+    TargomanDebug(5) << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+
+    //check cpnMaxAmount
+    if (NULLABLE_HAS_VALUE(FullDiscount.cpnMaxAmount)) {
+        //note: cpnMaxAmount type is opposite to cpnAmountType
+        if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
+            Discount3.Amount = fmin(Discount3.Amount, NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0));
+        else {
+            quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0) / 100.0);
+            Discount3.Amount = fmin(Discount3.Amount, _max);
+        }
+        TargomanDebug(5) << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    }
+
+    //check total - used amount
+    qint32 remainDiscountAmount = FullDiscount.cpnTotalMaxAmount - FullDiscount.cpnTotalUsedAmount;
+    if (remainDiscountAmount < Discount3.Amount) {
+        Discount3.Amount = remainDiscountAmount;
+        TargomanDebug(5) << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    }
+
+    //check per user - used amount
+    if (NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0) {
+        remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
+        if (remainDiscountAmount <= 0)
+            Discount3.Amount = 0;
+        else if (remainDiscountAmount < Discount3.Amount)
+            Discount3.Amount = remainDiscountAmount;
+        TargomanDebug(5) << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    }
+
+    //----------
+    Discount3.Amount = ceil(Discount3.Amount);
+    TargomanDebug(5) << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+
+    if (Discount3.Amount > 0) {
+        AssetItem.Discount = Discount3;
+        AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
+
+        TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
+
+        ///@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
+        /// because the customer may be angry about not being able to use the coupon again in same voucher
+//            quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
+//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedCount, 1)
+//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedAmount, Discount.Amount)
+//                .where({ tblAccountCouponsBase::Fields::cpnID , enuConditionOperator::Equal, Discount.ID })
+//                .execute(currentUserID);
+
+//            if (affectedRowsCount == 0)
+//               throw exHTTPInternalServerError("could not update discount usage");
+
+//            TargomanLogInfo(5, "Discount Usages updated (+1, +" << Discount.Amount << ")");
+    }
+
+    return Discount3;
+}
+
 Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t _saleableCode,
@@ -360,6 +554,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableQty).arg(_qty));
 
     //-- --------------------------------
+    AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
+    AssetItem.TotalPrice = AssetItem.SubTotal;
+    TargomanDebug(5) << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
+
+    //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
     for (auto Iter = this->AssetUsageLimitsCols.begin();
         Iter != this->AssetUsageLimitsCols.end();
@@ -373,10 +572,6 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         });
     }
     AssetItem.Digested.Limits = SaleableUsageLimits;
-
-    AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
-    AssetItem.TotalPrice = AssetItem.SubTotal;
-    TargomanDebug(5) << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
     this->digestPrivs(_APICALLBOOM, AssetItem);
@@ -395,203 +590,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
     //-- discount --------------------------------
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
-    stuDiscount3 Discount3;
-    if (_discountCode.size()) {
-        QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
-            .addCols(QStringList({
-                tblAccountCouponsBase::Fields::cpnID,
-                tblAccountCouponsBase::Fields::cpnCode,
-                tblAccountCouponsBase::Fields::cpnPrimaryCount,
-                tblAccountCouponsBase::Fields::cpnTotalMaxAmount,
-                tblAccountCouponsBase::Fields::cpnPerUserMaxCount,
-                tblAccountCouponsBase::Fields::cpnPerUserMaxAmount,
-                //tblAccountCouponsBase::Fields::cpnValidFrom,
-                tblAccountCouponsBase::Fields::cpnExpiryTime,
-                tblAccountCouponsBase::Fields::cpnAmount,
-                tblAccountCouponsBase::Fields::cpnAmountType,
-                tblAccountCouponsBase::Fields::cpnMaxAmount,
-                tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
-                tblAccountCouponsBase::Fields::cpnTotalUsedCount,
-                tblAccountCouponsBase::Fields::cpnTotalUsedAmount,
-                tblAccountCouponsBase::Fields::cpnStatus,
-                //tblAccountCouponsBase::Fields::cpnCreatedBy_usrID,
-                //tblAccountCouponsBase::Fields::cpnCreationDateTime,
-                //tblAccountCouponsBase::Fields::cpnUpdatedBy_usrID,
-                Targoman::API::CURRENT_TIMESTAMP,
-            }))
-
-            .leftJoin(SelectQuery(*this->AccountUserAssets)
-                      .addCols({
-                                   tblAccountUserAssetsBase::Fields::uas_cpnID,
-                                   tblAccountUserAssetsBase::Fields::uas_vchID,
-                               })
-                      .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::Fields::uasID, "_discountUsedCount")
-                      .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-                      .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
-                                  .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
-                      .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
-                      .groupBy(tblAccountUserAssetsBase::Fields::uas_vchID)
-                , "tmp_cpn_count"
-                , { "tmp_cpn_count", tblAccountUserAssetsBase::Fields::uas_cpnID,
-                    enuConditionOperator::Equal,
-                    tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
-            )
-            .addCol("tmp_cpn_count._discountUsedCount")
-
-            .leftJoin(SelectQuery(*this->AccountUserAssets)
-                      .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
-                      .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
-                      .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-                      .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
-                                  .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
-                      .groupBy(tblAccountUserAssetsBase::Fields::uas_cpnID)
-                , "tmp_cpn_amount"
-                , { "tmp_cpn_amount", tblAccountUserAssetsBase::Fields::uas_cpnID,
-                    enuConditionOperator::Equal,
-                    tblAccountCouponsBase::Name, tblAccountCouponsBase::Fields::cpnID }
-            )
-            .addCol("tmp_cpn_amount._discountUsedAmount")
-
-            .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _discountCode })
-            .andWhere({ tblAccountCouponsBase::Fields::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
-            .andWhere(clsCondition({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::Null })
-                .orCond({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::GreaterEqual,
-                    DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-            )
-            .one();
-
-        if (DiscountInfo.size() == 0)
-            throw exHTTPBadRequest("Discount code not found.");
-
-        QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
-
-        QJsonObject DiscountInfoJson = QJsonObject::fromVariantMap(DiscountInfo);
-        tblAccountCouponsBase::DTO FullDiscount;
-        FullDiscount.fromJson(DiscountInfoJson);
-
-        Discount3.ID     = FullDiscount.cpnID;
-        Discount3.Code   = FullDiscount.cpnCode;
-        Discount3.Amount = FullDiscount.cpnAmount;
-
-        NULLABLE_TYPE(quint32) _discountUsedCount;
-        TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
-        NULLABLE_TYPE(quint32) _discountUsedAmount;
-        TAPI::setFromVariant(_discountUsedAmount, DiscountInfo.value("_discountUsedAmount"));
-
-//        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_GET(cpnExpiryTime).toDateTime() < Now)
-//            throw exHTTPBadRequest("Discount code has been expired");
-
-        if (FullDiscount.cpnTotalUsedCount >= FullDiscount.cpnPrimaryCount)
-            throw exHTTPBadRequest("Discount code has been finished");
-
-        if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0) > 0)
-                && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0)))
-            throw exHTTPBadRequest("Discount usage per user has been reached");
-
-        if (FullDiscount.cpnTotalUsedAmount >= FullDiscount.cpnTotalMaxAmount)
-            throw exHTTPBadRequest("Discount usage amount has been reached");
-
-        if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0)
-                && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
-            throw exHTTPBadRequest("Discount usage amount per user has been reached");
-
-        QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
-        if (arr.size()) {
-            stuDiscountSaleableBasedMultiplier multiplier;
-
-            for (QJsonArray::const_iterator itr = arr.constBegin();
-                itr != arr.constEnd();
-                itr++
-            ) {
-                auto elm = *itr;
-
-                stuDiscountSaleableBasedMultiplier cur;
-                cur.fromJson(elm.toObject());
-
-                qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
-
-                if ((cur.SaleableCode == _saleableCode)
-                        && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _qty)
-                ) {
-                    if ((multiplier.Multiplier == 0)
-                            || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
-                        multiplier = cur;
-                }
-            }
-
-//            if (multiplier.Multiplier == 0) //not found
-//                throw exHTTPBadRequest("Discount code is not valid on selected package");
-
-            if (multiplier.Multiplier > 0) { //found
-                auto m = Discount3.Amount;
-                Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
-
-                TargomanDebug(5) << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
-            }
-        } //if (arr.size())
-
-//        Discount.Code = _discountCode;
-
-        TargomanDebug(5) << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-
-        if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
-            Discount3.Amount = AssetItem.SubTotal * Discount3.Amount / 100.0;
-
-        TargomanDebug(5) << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-
-        //check cpnMaxAmount
-        if (NULLABLE_HAS_VALUE(FullDiscount.cpnMaxAmount)) {
-            //note: cpnMaxAmount type is opposite to cpnAmountType
-            if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
-                Discount3.Amount = fmin(Discount3.Amount, NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0));
-            else {
-                quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0) / 100.0);
-                Discount3.Amount = fmin(Discount3.Amount, _max);
-            }
-            TargomanDebug(5) << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-        }
-
-        //check total - used amount
-        qint32 remainDiscountAmount = FullDiscount.cpnTotalMaxAmount - FullDiscount.cpnTotalUsedAmount;
-        if (remainDiscountAmount < Discount3.Amount) {
-            Discount3.Amount = remainDiscountAmount;
-            TargomanDebug(5) << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-        }
-
-        //check per user - used amount
-        if (NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0) {
-            remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
-            if (remainDiscountAmount <= 0)
-                Discount3.Amount = 0;
-            else if (remainDiscountAmount < Discount3.Amount)
-                Discount3.Amount = remainDiscountAmount;
-            TargomanDebug(5) << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-        }
-
-        //----------
-        Discount3.Amount = ceil(Discount3.Amount);
-        TargomanDebug(5) << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
-
-        if (Discount3.Amount > 0) {
-            AssetItem.Discount = Discount3;
-            AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
-
-            TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
-
-            ///@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
-            /// because the customer may be angry about not being able to use the coupon again in same voucher
-//            quint64 affectedRowsCount = UpdateQuery(*this->AccountCoupons)
-//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedCount, 1)
-//                .increament(tblAccountCouponsBase::Fields::cpnTotalUsedAmount, Discount.Amount)
-//                .where({ tblAccountCouponsBase::Fields::cpnID , enuConditionOperator::Equal, Discount.ID })
-//                .execute(currentUserID);
-
-//            if (affectedRowsCount == 0)
-//               throw exHTTPInternalServerError("could not update discount usage");
-
-//            TargomanLogInfo(5, "Discount Usages updated (+1, +" << Discount.Amount << ")");
-        }
-    } //if discount
+    stuDiscount3 Discount3 = this->applyDiscount(_APICALLBOOM, AssetItem, _discountCode, _saleableCode, _qty);
 
     //-- reserve saleable & product ------------------------------------
     this->AccountSaleables->callSP(APICALLBOOM_PARAM,
