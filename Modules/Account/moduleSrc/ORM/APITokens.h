@@ -68,28 +68,6 @@ namespace tblAPITokens {
         TARGOMAN_CREATE_CONSTEXPR(aptStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::aptID,
-            _tableAlias + Fields::aptToken,
-            _tableAlias + Fields::apt_usrID,
-            _tableAlias + Fields::apt_svcID,
-            _tableAlias + Fields::aptLang,
-            _tableAlias + Fields::aptValidateIP,
-            _tableAlias + Fields::aptExtraPriviledges,
-            _tableAlias + Fields::aptExpiryDate,
-            _tableAlias + Fields::aptLastActivity,
-            _tableAlias + Fields::aptAccessCount,
-            _tableAlias + Fields::aptCreatedBy_usrID,
-            _tableAlias + Fields::aptCreationDateTime,
-            _tableAlias + Fields::aptUpdatedBy_usrID,
-            _tableAlias + Fields::aptStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

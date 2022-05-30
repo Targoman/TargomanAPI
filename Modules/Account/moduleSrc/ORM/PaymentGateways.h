@@ -110,37 +110,6 @@ namespace tblPaymentGateways {
         TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::pgwID,
-            _tableAlias + Fields::pgwName,
-            _tableAlias + Fields::pgwType,
-            _tableAlias + Fields::pgwDriver,
-            _tableAlias + Fields::pgwMetaInfo,
-            _tableAlias + Fields::pgw_curID,
-            _tableAlias + Fields::pgwAllowedDomainName,
-            _tableAlias + Fields::pgwTransactionFeeValue,
-            _tableAlias + Fields::pgwTransactionFeeType,
-            _tableAlias + Fields::pgwMinRequestAmount,
-            _tableAlias + Fields::pgwMaxRequestAmount,
-            _tableAlias + Fields::pgwMaxPerDayAmount,
-            _tableAlias + Fields::pgwLastPaymentDateTime,
-            _tableAlias + Fields::pgwSumTodayPaidAmount,
-            _tableAlias + Fields::pgwSumRequestCount,
-            _tableAlias + Fields::pgwSumRequestAmount,
-            _tableAlias + Fields::pgwSumFailedCount,
-            _tableAlias + Fields::pgwSumOkCount,
-            _tableAlias + Fields::pgwSumPaidAmount,
-            _tableAlias + Fields::pgwStatus,
-            _tableAlias + Fields::pgwCreatedBy_usrID,
-            _tableAlias + Fields::pgwCreationDateTime,
-            _tableAlias + Fields::pgwUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

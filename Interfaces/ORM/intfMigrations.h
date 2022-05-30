@@ -41,18 +41,6 @@ namespace tblMigrations {
         TARGOMAN_CREATE_CONSTEXPR(migStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::migName,
-            _tableAlias + Fields::migAppliedAt,
-            _tableAlias + Fields::migRunType,
-            _tableAlias + Fields::migStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

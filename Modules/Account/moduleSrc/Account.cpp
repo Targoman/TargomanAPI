@@ -681,7 +681,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError("This voucher has not been paid in full");
 
         tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
-                                      .addCols(tblVoucher::ColumnNames())
+                                      .addCols(Voucher::instance().SelectableColumnNames())
                                       .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                       .one<tblVoucher::DTO>();
 
@@ -925,7 +925,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 //    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
-                                  .addCols(tblVoucher::ColumnNames())
+                                  .addCols(Voucher::instance().SelectableColumnNames())
                                   .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                   .one<tblVoucher::DTO>();
 
@@ -1205,8 +1205,8 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     quint64 _offlinePaymentClaimID
 )) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(SelectQuery(OfflinePaymentClaims::instance())
-        .addCols(tblOfflinePaymentClaims::ColumnNames())
-//        .addCols(tblVoucher::ColumnNames())
+        .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
+//        .addCols(Voucher::instance().SelectableColumnNames())
 //        .leftJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1250,8 +1250,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     quint64 _offlinePaymentClaimID
 )) {
     tblOfflinePaymentClaims::DTO OfflinePaymentClaim = SelectQuery(OfflinePaymentClaims::instance())
-        .addCols(tblOfflinePaymentClaims::ColumnNames())
-//        .addCols(tblVoucher::ColumnNames())
+        .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
+//        .addCols(Voucher::instance().SelectableColumnNames())
 //        .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one<tblOfflinePaymentClaims::DTO>();

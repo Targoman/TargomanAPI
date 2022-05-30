@@ -46,18 +46,6 @@ namespace tblDepartments {
         TARGOMAN_CREATE_CONSTEXPR(depCreatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::depID,
-            _tableAlias + Fields::depName,
-            _tableAlias + Fields::depCreationDateTime,
-            _tableAlias + Fields::depCreatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

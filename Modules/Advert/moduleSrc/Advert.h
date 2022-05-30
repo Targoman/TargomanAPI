@@ -65,13 +65,21 @@ class Advert : public intfAccountingBasedModule
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
+
     virtual void breakCredit(quint64 _slbID);
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
+
     virtual void applyAssetAdditives(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& _assetItem,
-        const OrderAdditives_t& _orderAdditives
+        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &AssetItem,
+        const OrderAdditives_t  &_orderAdditives
+    );
+    virtual void applyReferrer(
+        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &AssetItem,
+        const QString           &_referrer,
+        const TAPI::JSON_t      &_extraReferrerParams
     );
 
 protected slots:

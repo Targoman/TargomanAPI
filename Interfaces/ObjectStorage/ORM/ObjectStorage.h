@@ -98,27 +98,6 @@ namespace tblUploadFiles {
         //TARGOMAN_CREATE_CONSTEXPR(uflUniqueMD5);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uflID,
-            _tableAlias + Fields::uflPath,
-            _tableAlias + Fields::uflOriginalFileName,
-            _tableAlias + Fields::uflCounter,
-            _tableAlias + Fields::uflStoredFileName,
-            _tableAlias + Fields::uflSize,
-            _tableAlias + Fields::uflFileType,
-            _tableAlias + Fields::uflMimeType,
-            _tableAlias + Fields::uflLocalFullFileName,
-            _tableAlias + Fields::uflStatus,
-            _tableAlias + Fields::uflCreationDateTime,
-            _tableAlias + Fields::uflCreatedBy_usrID,
-            _tableAlias + Fields::uflUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
@@ -198,36 +177,6 @@ namespace tblUploadGateways {
         TARGOMAN_CREATE_CONSTEXPR(ugwCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(ugwCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(ugwUpdatedBy_usrID);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ugwID,
-            _tableAlias + Fields::ugwName,
-            _tableAlias + Fields::ugwType,
-            _tableAlias + Fields::ugwBucket,
-            _tableAlias + Fields::ugwEndpointUrl,
-            _tableAlias + Fields::ugwEndpointIsVirtualHosted,
-            _tableAlias + Fields::ugwMetaInfo,
-            _tableAlias + Fields::ugwAllowedFileTypes,
-            _tableAlias + Fields::ugwAllowedMimeTypes,
-            _tableAlias + Fields::ugwAllowedMinFileSize,
-            _tableAlias + Fields::ugwAllowedMaxFileSize,
-            _tableAlias + Fields::ugwMaxFilesCount,
-            _tableAlias + Fields::ugwMaxFilesSize,
-            _tableAlias + Fields::ugwCreatedFilesCount,
-            _tableAlias + Fields::ugwCreatedFilesSize,
-            _tableAlias + Fields::ugwDeletedFilesCount,
-            _tableAlias + Fields::ugwDeletedFilesSize,
-            _tableAlias + Fields::ugwLastActionTime, //used for loadbalance
-            _tableAlias + Fields::ugwStatus,
-            _tableAlias + Fields::ugwCreationDateTime,
-            _tableAlias + Fields::ugwCreatedBy_usrID,
-            _tableAlias + Fields::ugwUpdatedBy_usrID,
-        };
     }
 
     namespace Relation {
@@ -317,26 +266,6 @@ namespace tblUploadQueue {
         TARGOMAN_CREATE_CONSTEXPR(uquCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uquCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(uquUpdatedBy_usrID);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uquID,
-            _tableAlias + Fields::uqu_uflID,
-            _tableAlias + Fields::uqu_ugwID,
-            _tableAlias + Fields::uquLockedAt,
-            _tableAlias + Fields::uquLockedBy,
-            _tableAlias + Fields::uquLastTryAt,
-            _tableAlias + Fields::uquStoredAt,
-            _tableAlias + Fields::uquResult,
-            _tableAlias + Fields::uquStatus,
-            _tableAlias + Fields::uquCreationDateTime,
-            _tableAlias + Fields::uquCreatedBy_usrID,
-            _tableAlias + Fields::uquUpdatedBy_usrID,
-        };
     }
 
     namespace Relation {

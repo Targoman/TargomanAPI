@@ -150,29 +150,30 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
     if (BestMatchedCredit.IsFromParent) {
         for (auto UsageIter = _requestedUsage.begin();
             UsageIter != _requestedUsage.end();
-            UsageIter++) {
-            if (ActiveCredit.Digested_Limits.contains(UsageIter.key()) == false)
+            UsageIter++
+        ) {
+            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
                 continue;
 
             if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
                 checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
 
-            checkCredit(UsageIter, ActiveCredit.Digested_Limits.value(UsageIter.key()), "Parent");
+            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
         }
 
         return;
     }
 
-    if (this->isUnlimited(ActiveCredit.Digested_Limits))
+    if (this->isUnlimited(ActiveCredit.Digested.Limits))
         return;
 
     for (auto UsageIter = _requestedUsage.begin();
         UsageIter != _requestedUsage.end();
         UsageIter++) {
-        if (ActiveCredit.Digested_Limits.contains(UsageIter.key()) == false)
+        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
             continue;
 
-        checkCredit(UsageIter, ActiveCredit.Digested_Limits.value(UsageIter.key()), "Self");
+        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
     }
 }
 
@@ -208,7 +209,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                || (_assetItem.prdValidToDate.isValid() && _assetItem.prdValidToDate < Now.date())
                || (NULLABLE_HAS_VALUE(_assetItem.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
                || (NULLABLE_HAS_VALUE(_assetItem.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
-               || this->isEmpty(_assetItem.Digested_Limits)
+               || this->isEmpty(_assetItem.Digested.Limits)
             )
             return false;
 
@@ -216,11 +217,11 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
             for (auto UsageIter = _requestedUsage.begin();
                 UsageIter != _requestedUsage.end();
                 UsageIter++) {
-                if (_assetItem.Digested_Limits.contains(UsageIter.key()) == false)
+                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
 
-                if (this->isUnlimited(_assetItem.Digested_Limits) == false) {
-                    stuUsage Remaining = _assetItem.Digested_Limits.value(UsageIter.key());
+                if (this->isUnlimited(_assetItem.Digested.Limits) == false) {
+                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
                     if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
                            || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
                            || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
@@ -242,8 +243,8 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
     auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.prdValidToDate.isValid() && b.prdValidToDate.isValid() == false) return -1;
         if (a.prdValidToDate.isValid() == false && b.prdValidToDate.isValid()) return 1;
-        if (this->isUnlimited(a.Digested_Limits) && this->isUnlimited(b.Digested_Limits) == false) return -1;
-        if (this->isUnlimited(a.Digested_Limits) == false && this->isUnlimited(b.Digested_Limits)) return 1;
+        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
+        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
         if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_IS_NULL(b.prdValidToHour)) return -1;
         if (NULLABLE_IS_NULL(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) return 1;
         if (NULLABLE_HAS_VALUE(a.prdValidToHour) && NULLABLE_HAS_VALUE(b.prdValidToHour)) {
@@ -328,8 +329,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         throw exHTTPBadRequest("invalid pre-Voucher owner");
 
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
-        .addCols(tblAccountSaleablesBase::ColumnNames())
-        .addCols(tblAccountProductsBase::ColumnNames())
+        .addCols(this->AccountSaleables->SelectableColumnNames())
+        .addCols(this->AccountProducts->SelectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .leftJoinWith("product")
         .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _saleableCode })
@@ -340,7 +341,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         )
         .one();
 
-    qDebug() << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
+    TargomanDebug(5) << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
     AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
@@ -361,37 +362,36 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
     for (auto Iter = this->AssetUsageLimitsCols.begin();
-            Iter != this->AssetUsageLimitsCols.end();
-            Iter++
+        Iter != this->AssetUsageLimitsCols.end();
+        Iter++
     ) {
-        SaleableUsageLimits.insert(
-            Iter.key(),
-            {
-                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerDay)),
-                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerWeek)),
-                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerMonth)),
-                NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
-            }
-        );
+        SaleableUsageLimits.insert(Iter.key(), {
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerDay)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerWeek)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerMonth)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
+        });
     }
-    AssetItem.Digested_Limits = SaleableUsageLimits;
+    AssetItem.Digested.Limits = SaleableUsageLimits;
 
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;
-    qDebug() << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
+    TargomanDebug(5) << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     //-- --------------------------------
-    this->digestPrivs(_APICALLBOOM.getJWT(), AssetItem);
+    this->digestPrivs(_APICALLBOOM, AssetItem);
 
     this->applyAssetAdditives(_APICALLBOOM, AssetItem, _orderAdditives);
-    qDebug() << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
+    TargomanDebug(5) << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
 
     this->applyReferrer(_APICALLBOOM, AssetItem, _referrer, _extraReferrerParams);
 
+//    this->parsePrize(...); -> AssetItem.PendingVouchers
+
     //-- --------------------------------
     AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;
-    qDebug() << "SubTotal(" << AssetItem.SubTotal << ")";
+    TargomanDebug(5) << "SubTotal(" << AssetItem.SubTotal << ")";
 
     //-- discount --------------------------------
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
@@ -495,19 +495,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
                 && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
             throw exHTTPBadRequest("Discount usage amount per user has been reached");
 
-//        qDebug() << "-- DiscountInfo" << DiscountInfo;
-//        qDebug() << "--" << DiscountInfo.value(tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier);
-//        qDebug() << "-- cpnSaleableBasedMultiplier" << cpnSaleableBasedMultiplier;
-//        qDebug() << "--" << cpnSaleableBasedMultiplier.object();
-//        qDebug() << "-- _saleableCode" << _saleableCode;
-//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode);
-//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toString().toInt();
-//        qDebug() << "--" << cpnSaleableBasedMultiplier.object().value(_saleableCode).toInt(-1);
-
         QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
-//        qDebug() << "arr" << arr;
         if (arr.size()) {
-//            qDebug() << "AAAAAAAAAAAAAAA 2" << arr;
             stuDiscountSaleableBasedMultiplier multiplier;
 
             for (QJsonArray::const_iterator itr = arr.constBegin();
@@ -516,17 +505,14 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
             ) {
                 auto elm = *itr;
 
-//                qDebug() << "elm" << elm << "elm.toObject()=" << elm.toObject();
-
                 stuDiscountSaleableBasedMultiplier cur;
                 cur.fromJson(elm.toObject());
 
                 qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
-//                qDebug() << "********" << cur.SaleableCode << MinValue << cur.Multiplier;
 
                 if ((cur.SaleableCode == _saleableCode)
                         && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _qty)
-                    ) {
+                ) {
                     if ((multiplier.Multiplier == 0)
                             || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
                         multiplier = cur;
@@ -539,18 +525,19 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
             if (multiplier.Multiplier > 0) { //found
                 auto m = Discount3.Amount;
                 Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
-                qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
+
+                TargomanDebug(5) << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
             }
         } //if (arr.size())
 
 //        Discount.Code = _discountCode;
 
-        qDebug() << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+        TargomanDebug(5) << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
         if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
             Discount3.Amount = AssetItem.SubTotal * Discount3.Amount / 100.0;
 
-        qDebug() << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+        TargomanDebug(5) << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
         //check cpnMaxAmount
         if (NULLABLE_HAS_VALUE(FullDiscount.cpnMaxAmount)) {
@@ -561,14 +548,14 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
                 quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0) / 100.0);
                 Discount3.Amount = fmin(Discount3.Amount, _max);
             }
-            qDebug() << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+            TargomanDebug(5) << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //check total - used amount
         qint32 remainDiscountAmount = FullDiscount.cpnTotalMaxAmount - FullDiscount.cpnTotalUsedAmount;
         if (remainDiscountAmount < Discount3.Amount) {
             Discount3.Amount = remainDiscountAmount;
-            qDebug() << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+            TargomanDebug(5) << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //check per user - used amount
@@ -578,12 +565,12 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
                 Discount3.Amount = 0;
             else if (remainDiscountAmount < Discount3.Amount)
                 Discount3.Amount = remainDiscountAmount;
-            qDebug() << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+            TargomanDebug(5) << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
         }
 
         //----------
         Discount3.Amount = ceil(Discount3.Amount);
-        qDebug() << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+        TargomanDebug(5) << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
 
         if (Discount3.Amount > 0) {
             AssetItem.Discount = Discount3;
@@ -618,6 +605,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     ///TODO: add ttl for order item
 
     stuVoucherItem PreVoucherItem;
+
+    PreVoucherItem.PendingVouchers = AssetItem.PendingVouchers;
 
     PreVoucherItem.Service = this->ServiceName;
     //PreVoucherItem.OrderID

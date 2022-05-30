@@ -69,22 +69,6 @@ namespace tblVoucher {
         TARGOMAN_CREATE_CONSTEXPR(vchCreationDateTime);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::vchID,
-            _tableAlias + Fields::vch_usrID,
-            _tableAlias + Fields::vchDesc,
-            _tableAlias + Fields::vchType,
-            _tableAlias + Fields::vchTotalAmount,
-            _tableAlias + Fields::vchProcessResult,
-            _tableAlias + Fields::vchStatus,
-            _tableAlias + Fields::vchCreationDateTime,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

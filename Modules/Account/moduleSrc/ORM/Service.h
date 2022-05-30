@@ -52,23 +52,6 @@ namespace tblService {
         TARGOMAN_CREATE_CONSTEXPR(svcUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::svcID,
-            _tableAlias + Fields::svcName,
-            _tableAlias + Fields::svc_rolID,
-            _tableAlias + Fields::svcProcessVoucherItemEndPoint,
-            _tableAlias + Fields::svcCancelVoucherItemEndPoint,
-            _tableAlias + Fields::svcStatus,
-            _tableAlias + Fields::svcCreationDateTime,
-            _tableAlias + Fields::svcCreatedBy_usrID,
-            _tableAlias + Fields::svcUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

@@ -75,25 +75,6 @@ namespace tblOnlinePayments {
         TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::onpID,
-            _tableAlias + Fields::onpMD5,
-            _tableAlias + Fields::onp_vchID,
-            _tableAlias + Fields::onp_pgwID,
-            _tableAlias + Fields::onpTrackNumber,
-            _tableAlias + Fields::onpAmount,
-            _tableAlias + Fields::onpTarget_walID,
-            _tableAlias + Fields::onpResult,
-            _tableAlias + Fields::onpStatus,
-            _tableAlias + Fields::onpCreationDateTime,
-            _tableAlias + Fields::onpLastUpdateDateTime,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
@@ -171,26 +152,6 @@ namespace tblOfflinePaymentClaims {
         TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ofpcID,
-            _tableAlias + Fields::ofpc_vchID,
-            _tableAlias + Fields::ofpcBank,
-            _tableAlias + Fields::ofpcReceiptCode,
-            _tableAlias + Fields::ofpcReceiptDate,
-            _tableAlias + Fields::ofpcAmount,
-            _tableAlias + Fields::ofpcTarget_walID,
-            _tableAlias + Fields::ofpcNotes,
-            _tableAlias + Fields::ofpcStatus,
-            _tableAlias + Fields::ofpcCreationDateTime,
-            _tableAlias + Fields::ofpcCreatedBy_usrID,
-            _tableAlias + Fields::ofpcUpdatedBy_usrID,
-        };
     }
 
     namespace Relation {
@@ -278,26 +239,6 @@ namespace tblOfflinePayments {
         TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ofpID,
-            _tableAlias + Fields::ofp_vchID,
-            _tableAlias + Fields::ofpBank,
-            _tableAlias + Fields::ofpReceiptCode,
-            _tableAlias + Fields::ofpReceiptDate,
-            _tableAlias + Fields::ofpAmount,
-            _tableAlias + Fields::ofpTarget_walID,
-            _tableAlias + Fields::ofpNotes,
-            _tableAlias + Fields::ofpStatus,
-            _tableAlias + Fields::ofpCreationDateTime,
-            _tableAlias + Fields::ofpCreatedBy_usrID,
-            _tableAlias + Fields::ofpUpdatedBy_usrID,
-        };
     }
 
     namespace Relation {

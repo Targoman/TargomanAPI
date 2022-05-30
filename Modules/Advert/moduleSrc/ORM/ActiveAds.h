@@ -48,18 +48,6 @@ namespace tblActiveAds {
         TARGOMAN_CREATE_CONSTEXPR(actOnKeyword);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::act_binID,
-            _tableAlias + Fields::act_locID,
-            _tableAlias + Fields::actOrder,
-            _tableAlias + Fields::actOnKeyword,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

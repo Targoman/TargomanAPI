@@ -48,19 +48,6 @@ namespace tblUnits {
         TARGOMAN_CREATE_CONSTEXPR(untCreatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::untID,
-            _tableAlias + Fields::unt_depID,
-            _tableAlias + Fields::untName,
-            _tableAlias + Fields::untCreationDateTime,
-            _tableAlias + Fields::untCreatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

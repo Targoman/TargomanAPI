@@ -68,27 +68,6 @@ namespace tblActiveSessions {
         TARGOMAN_CREATE_CONSTEXPR(ssnUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ssnKey,
-            _tableAlias + Fields::ssn_usrID,
-            _tableAlias + Fields::ssnIP,
-            _tableAlias + Fields::ssnIPReadable,
-            _tableAlias + Fields::ssnCreationDateTime,
-            _tableAlias + Fields::ssnInfo,
-            _tableAlias + Fields::ssnFingerPrint,
-            _tableAlias + Fields::ssnLastActivity,
-            _tableAlias + Fields::ssnLastRenew,
-            _tableAlias + Fields::ssnRemember,
-            _tableAlias + Fields::ssnJWT,
-            _tableAlias + Fields::ssnStatus,
-            _tableAlias + Fields::ssnUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

@@ -50,22 +50,6 @@ namespace tblAPITokenValidIPs {
         TARGOMAN_CREATE_CONSTEXPR(tviStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tviID,
-            _tableAlias + Fields::tvi_aptID,
-            _tableAlias + Fields::tviIP,
-            _tableAlias + Fields::tviIPReadable,
-            _tableAlias + Fields::tviCreatedBy_usrID,
-            _tableAlias + Fields::tviCreationDateTime,
-            _tableAlias + Fields::tviUpdatedBy_usrID,
-            _tableAlias + Fields::tviStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

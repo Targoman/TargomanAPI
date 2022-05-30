@@ -60,22 +60,6 @@ namespace tblIPBin {
         TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ipbIP,
-            _tableAlias + Fields::ipbReadable,
-            _tableAlias + Fields::ipbFirstAccess,
-            _tableAlias + Fields::ipbAccessCount,
-            _tableAlias + Fields::ipbLastAccess,
-            _tableAlias + Fields::ipbBlockedBy_usrID,
-            _tableAlias + Fields::ipbBlockingTime,
-            _tableAlias + Fields::ipbStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

@@ -85,27 +85,6 @@ namespace tblTickets {
         TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tktID,
-            _tableAlias + Fields::tktTarget_usrID,
-            _tableAlias + Fields::tkt_svcID,
-            _tableAlias + Fields::tkt_untID,
-            _tableAlias + Fields::tktBase_tktID,
-            _tableAlias + Fields::tktInReply_tktID,
-            _tableAlias + Fields::tktType,
-            _tableAlias + Fields::tktTitle,
-            _tableAlias + Fields::tktBody,
-            _tableAlias + Fields::tktStatus,
-            _tableAlias + Fields::tktCreationDateTime,
-            _tableAlias + Fields::tktCreatedBy_usrID,
-            _tableAlias + Fields::tktUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -161,17 +140,6 @@ namespace tblTickets {
 }
 
 namespace tblTicketRead {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tkr_tktID,
-            _tableAlias + Fields::tkrBy_usrID,
-            _tableAlias + Fields::tkrDateTime,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

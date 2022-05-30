@@ -53,23 +53,6 @@ namespace tblProps {
         TARGOMAN_CREATE_CONSTEXPR(prpUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::prp_binID,
-            _tableAlias + Fields::prp_locID,
-            _tableAlias + Fields::prpOrder,
-            _tableAlias + Fields::prpKeyword,
-            _tableAlias + Fields::prpStartDate,
-            _tableAlias + Fields::prpEndDate,
-            _tableAlias + Fields::prpCreatedBy_usrID,
-            _tableAlias + Fields::prpCreationDateTime,
-            _tableAlias + Fields::prpUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

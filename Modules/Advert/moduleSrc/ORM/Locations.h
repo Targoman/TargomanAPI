@@ -49,21 +49,6 @@ namespace tblLocations {
         TARGOMAN_CREATE_CONSTEXPR(locStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::locID,
-            _tableAlias + Fields::locURL,
-            _tableAlias + Fields::locPlaceCode,
-            _tableAlias + Fields::locCreatedBy_usrID,
-            _tableAlias + Fields::locCreationDateTime,
-            _tableAlias + Fields::locUpdatedBy_usrID,
-            _tableAlias + Fields::locStatus,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

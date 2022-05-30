@@ -171,23 +171,6 @@ namespace tblUserExtraInfo {
         TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uei_usrID,
-//            _tableAlias + Fields::ueiGender,
-            _tableAlias + Fields::ueiBirthDate,
-            _tableAlias + Fields::ueiPhoto,
-            _tableAlias + Fields::ueiOAuthAccounts,
-            _tableAlias + Fields::ueiIBAN,
-            _tableAlias + Fields::ueiEther,
-            _tableAlias + Fields::ueiExtraInfo,
-            _tableAlias + Fields::ueiUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

@@ -164,13 +164,6 @@
     _qJsonValueToType
 
 #define SF_Struct(_name, _type, ...) INTERNAL_SF_STRUCT(_name, _type, __VA_ARGS__)
-#define SF_Var_Struct(_name, _type, _validator) \
-    /* name              */ _name, \
-    /* type              */ _type, \
-    /* def               */ _type(), \
-    /* validator         */ _validator, \
-    /* type 2 QJsonValue */ v.toJson(), \
-    /* QJsonValue 2 type */ _type().fromJson(v.toObject())
 
 #define SF_Enum(_name, _type, _def) \
     /* name              */ _name, \
@@ -242,6 +235,47 @@
                                 TAPI::Date_t t; \
                                 TAPI::setFromVariant(t, v.toVariant(), toCammel(#_name)); \
                                 return t; \
+                            }(v)
+
+#define SF_QMapOfVarStruct(_name, _itemType, _mapType) \
+    /* name              */ _name, \
+    /* type              */ _mapType, \
+    /* def               */ _mapType(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](_mapType v) -> QJsonValue { \
+                                QJsonObject A; \
+                                for (auto it = v.begin(); \
+                                    it != v.end(); \
+                                    it++ \
+                                ) { \
+                                    A.insert(it.key(), it->toJson()); \
+                                } \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> _mapType { \
+                                _mapType L; \
+                                QJsonObject O = v.toObject(); \
+                                foreach (const QString &Key, O.keys()) \
+                                    L.insert(Key, _itemType().fromJson(O.value(Key).toObject())); \
+                                return L; \
+                            }(v)
+
+#define SF_QListOfVarStruct(_name, _itemType) \
+    /* name              */ _name, \
+    /* type              */ QList<_itemType>, \
+    /* def               */ QList<_itemType>(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](QList<_itemType> v) -> QJsonValue { \
+                                QJsonArray A; \
+                                foreach (auto a, v) \
+                                    A.append(a.toJson()); \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> QList<_itemType> { \
+                                QList<_itemType> L; \
+                                foreach (auto I, v.toArray()) \
+                                    L.append(_itemType().fromJson(I.toObject())); \
+                                return L; \
                             }(v)
 
 //                                                  _name,  _type,                  _typeGroup,         _typeToQJsonValue,  _qJsonValueToType,      _def, _validator

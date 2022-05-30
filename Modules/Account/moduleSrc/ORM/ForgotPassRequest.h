@@ -65,21 +65,6 @@ namespace tblForgotPassRequest {
         TARGOMAN_CREATE_CONSTEXPR(fprStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::fprID,
-            _tableAlias + Fields::fpr_usrID,
-            _tableAlias + Fields::fprRequestedVia,
-            _tableAlias + Fields::fprCode,
-            _tableAlias + Fields::fprRequestDate,
-            _tableAlias + Fields::fprApplyDate,
-            _tableAlias + Fields::fprStatus,
-        };
-    }
-
     namespace Relation {
         constexpr char User[] = "user";
     }

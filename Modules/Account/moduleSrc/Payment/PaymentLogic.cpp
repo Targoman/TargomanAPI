@@ -183,7 +183,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
-        .addCols(tblPaymentGateways::ColumnNames())
+        .addCols(PaymentGateways::instance().SelectableColumnNames())
         .addCols({
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
@@ -351,8 +351,8 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
         throw exPayment("paymentMD5 is empty");
 
     QVariantMap OnlinePaymentInfo = SelectQuery(OnlinePayments::instance())
-            .addCols(tblOnlinePayments::ColumnNames())
-            .addCols(tblPaymentGateways::ColumnNames())
+            .addCols(OnlinePayments::instance().SelectableColumnNames())
+            .addCols(PaymentGateways::instance().SelectableColumnNames())
             .innerJoinWith("paymentGateway")
             .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
             .one();

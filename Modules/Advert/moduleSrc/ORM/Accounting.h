@@ -60,21 +60,6 @@ namespace tblAccountProducts {
         TARGOMAN_CREATE_CONSTEXPR(prdClicksTotal);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return tblAccountProductsBase::ColumnNames(_tableAlias) + QStringList({
-            _tableAlias + Fields::prdType,
-            _tableAlias + Fields::prd_locID,
-            _tableAlias + Fields::prdShowPerDay,
-            _tableAlias + Fields::prdShowTotal,
-            _tableAlias + Fields::prdClicksPerDay,
-            _tableAlias + Fields::prdClicksPerMonth,
-            _tableAlias + Fields::prdClicksTotal,
-        });
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -82,19 +67,19 @@ namespace tblAccountProducts {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             ///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
-                { Fields::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
-                { Fields::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
-                { Fields::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-            };
+            { Fields::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
+            { Fields::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
+            { Fields::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { Fields::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { Fields::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { Fields::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { Fields::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+        };
 
         const QList<stuRelation> Relations = {
             ///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
-                { Fields::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
-            };
+            { Fields::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
+        };
 
         const QList<stuDBIndex> Indexes = {
         };
@@ -124,19 +109,6 @@ namespace tblAccountSaleables {
         TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return tblAccountSaleablesBase::ColumnNames(_tableAlias) + QStringList({
-            _tableAlias + Fields::slbShowPerDay,
-            _tableAlias + Fields::slbShowTotal,
-            _tableAlias + Fields::slbClicksPerDay,
-            _tableAlias + Fields::slbClicksPerMonth,
-            _tableAlias + Fields::slbClicksTotal,
-        });
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -144,12 +116,12 @@ namespace tblAccountSaleables {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             ///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-                { Fields::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-            };
+            { Fields::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { Fields::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+            { Fields::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { Fields::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { Fields::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+        };
 
         const QList<stuRelation> Relations = {
         };

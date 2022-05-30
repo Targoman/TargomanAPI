@@ -45,17 +45,6 @@ namespace tblIPStats {
         TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ips_ipbIP,
-            _tableAlias + Fields::ipsTimeStamp,
-            _tableAlias + Fields::ipsInsertionDate,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

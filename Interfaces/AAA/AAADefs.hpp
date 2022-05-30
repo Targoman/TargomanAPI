@@ -107,34 +107,6 @@ namespace tblUser {
         TARGOMAN_CREATE_CONSTEXPR(usrStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::usrID,
-            _tableAlias + Fields::usrGender,
-            _tableAlias + Fields::usrName,
-            _tableAlias + Fields::usrFamily,
-            _tableAlias + Fields::usrEmail,
-            _tableAlias + Fields::usrMobile,
-            _tableAlias + Fields::usrApprovalState,
-            _tableAlias + Fields::usrPass,
-            _tableAlias + Fields::usr_rolID,
-            _tableAlias + Fields::usrSpecialPrivs,
-            _tableAlias + Fields::usrLanguage,
-            _tableAlias + Fields::usrEnableEmailAlerts,
-            _tableAlias + Fields::usrEnableSMSAlerts,
-            _tableAlias + Fields::usrMaxSessions,
-            _tableAlias + Fields::usrActiveSessions,
-            _tableAlias + Fields::usrLastLogin,
-            _tableAlias + Fields::usrCreatedBy_usrID,
-            _tableAlias + Fields::usrCreationDateTime,
-            _tableAlias + Fields::usrUpdatedBy_usrID,
-            _tableAlias + Fields::usrStatus
-        };
-    }
-
     namespace Relation {
         constexpr char ExtraInfo[] = "ExtraInfo";
     }

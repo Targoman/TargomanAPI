@@ -189,30 +189,20 @@ protected slots:
 
 protected:
     virtual void digestPrivs(
-        TAPI::JWT_t _JWT,
-        INOUT stuAssetItem& _assetItem
-    ) {
-        Q_UNUSED(_JWT);
-        Q_UNUSED(_assetItem)
-    };
+                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem
+    ) { ; };
     virtual void applyAssetAdditives(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& _assetItem,
-        const OrderAdditives_t& _orderAdditives
-    ) {
-        Q_UNUSED(_assetItem)
-        Q_UNUSED(_orderAdditives)
-    };
+                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
+        Q_DECL_UNUSED   const OrderAdditives_t  &_orderAdditives
+    ) { ; };
     virtual void applyReferrer(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& AssetItem,
-        QString _referrer,
-        TAPI::JSON_t _extraReferrerParams
-    ) {
-        Q_UNUSED(AssetItem);
-        Q_UNUSED(_referrer);
-        Q_UNUSED(_extraReferrerParams);
-    };
+                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
+        Q_DECL_UNUSED   const QString           &_referrer,
+        Q_DECL_UNUSED   const TAPI::JSON_t      &_extraReferrerParams
+    ) { ; };
 
 protected:
     QString ServiceName;

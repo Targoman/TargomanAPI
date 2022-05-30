@@ -116,22 +116,31 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
 void Advert::breakCredit(quint64 _slbID) {
 }
 
-bool Advert::isUnlimited(const UsageLimits_t& _limits) const
-{
+bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
 }
 
-bool Advert::isEmpty(const UsageLimits_t& _limits) const
-{
+bool Advert::isEmpty(const UsageLimits_t& _limits) const {
 }
 
 void Advert::applyAssetAdditives(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    INOUT stuAssetItem& _assetItem,
-    const OrderAdditives_t& _orderAdditives
+                    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
+    Q_DECL_UNUSED   const OrderAdditives_t  &_orderAdditives
 ) {
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
+//    AssetItem.slbBasePrice *= 1.1;
+};
 
-//    _assetItem.slbBasePrice *= 1.1;
+void Advert::applyReferrer(
+                    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+                    INOUT stuAssetItem      &AssetItem,
+    Q_DECL_UNUSED   const QString           &_referrer,
+    Q_DECL_UNUSED   const TAPI::JSON_t      &_extraReferrerParams
+) {
+    AssetItem.PendingVouchers.append({
+        /* Desc */ "REFERRER_PRIZE",
+        /* Info */ {},
+    });
 };
 
 /***************************************************************************************************/

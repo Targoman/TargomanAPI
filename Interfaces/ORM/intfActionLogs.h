@@ -46,19 +46,6 @@ namespace tblActionLogs {
         TARGOMAN_CREATE_CONSTEXPR(atlDescription);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::atlID,
-            _tableAlias + Fields::atlBy_usrID,
-            _tableAlias + Fields::atlInsertionDateTime,
-            _tableAlias + Fields::atlType,
-            _tableAlias + Fields::atlDescription,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

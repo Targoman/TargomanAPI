@@ -53,23 +53,6 @@ namespace tblClicks {
         TARGOMAN_CREATE_CONSTEXPR(clkBrowser);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::clkID,
-            _tableAlias + Fields::clk_binID,
-            _tableAlias + Fields::clk_locID,
-            _tableAlias + Fields::clkDateTime,
-            _tableAlias + Fields::clkIP,
-            _tableAlias + Fields::clkDevice,
-            _tableAlias + Fields::clkScreenSize,
-            _tableAlias + Fields::clkOS,
-            _tableAlias + Fields::clkBrowser,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

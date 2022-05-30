@@ -61,23 +61,6 @@ namespace tblRoles {
         TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::rolID,
-            _tableAlias + Fields::rolName,
-            _tableAlias + Fields::rolParent_rolID,
-            _tableAlias + Fields::rolPrivileges,
-            _tableAlias + Fields::rolSignupAllowedIPs,
-            _tableAlias + Fields::rolStatus,
-            _tableAlias + Fields::rolCreatedBy_usrID,
-            _tableAlias + Fields::rolCreationDateTime,
-            _tableAlias + Fields::rolUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

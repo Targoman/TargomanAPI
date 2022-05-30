@@ -46,18 +46,6 @@ namespace tblBanners {
         TARGOMAN_CREATE_CONSTEXPR(bnrUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::bnrID,
-            _tableAlias + Fields::bnrImage,
-            _tableAlias + Fields::bnrSize,
-            _tableAlias + Fields::bnrUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -103,26 +91,6 @@ namespace tblBin {
         TARGOMAN_CREATE_CONSTEXPR(binCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(binUpdatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(binStatus);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::binID,
-            _tableAlias + Fields::binType,
-            _tableAlias + Fields::binTitle,
-            _tableAlias + Fields::binDesc,
-            _tableAlias + Fields::binPrettyURL,
-            _tableAlias + Fields::binURL,
-            _tableAlias + Fields::binShown,
-            _tableAlias + Fields::binClicks,
-            _tableAlias + Fields::binCreatedBy_usrID,
-            _tableAlias + Fields::binCreationDateTime,
-            _tableAlias + Fields::binUpdatedBy_usrID,
-            _tableAlias + Fields::binStatus,
-        };
     }
 
     namespace Relation {

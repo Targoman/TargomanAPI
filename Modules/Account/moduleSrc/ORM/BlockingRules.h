@@ -51,24 +51,6 @@ namespace tblBlockingRules {
         TARGOMAN_CREATE_CONSTEXPR(blrStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::blrID,
-            _tableAlias + Fields::blr_ipbIP,
-            _tableAlias + Fields::blr_ipIPReadable,
-            _tableAlias + Fields::blrStartingTime,
-            _tableAlias + Fields::blrEndingTime,
-            _tableAlias + Fields::blrCause,
-            _tableAlias + Fields::blrCreatedBy_usrID,
-            _tableAlias + Fields::blrCreationDateTime,
-            _tableAlias + Fields::blrUpdatedBy_usrID,
-            _tableAlias + Fields::blrStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }

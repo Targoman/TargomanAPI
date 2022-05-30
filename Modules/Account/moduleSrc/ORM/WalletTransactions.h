@@ -85,21 +85,6 @@ namespace tblWalletsTransactions {
         TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::wltID,
-            _tableAlias + Fields::wlt_walID,
-            _tableAlias + Fields::wlt_vchID,
-            _tableAlias + Fields::wlt_vchType,
-            _tableAlias + Fields::wltAmount,
-            _tableAlias + Fields::wltStatus,
-            _tableAlias + Fields::wltDateTime,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -140,20 +125,6 @@ namespace tblWalletsTransactions {
 }
 
 namespace tblWalletsBalanceHistory {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::wbl_wltID,
-            _tableAlias + Fields::wblBalance,
-            _tableAlias + Fields::wblSumIncome,
-            _tableAlias + Fields::wblSumExpense,
-            _tableAlias + Fields::wblSumCredit,
-            _tableAlias + Fields::wblSumDebit,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }

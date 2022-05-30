@@ -49,19 +49,6 @@ namespace tblTicketAttachments {
         TARGOMAN_CREATE_CONSTEXPR(tatCreatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tatID,
-            _tableAlias + Fields::tat_tktID,
-            _tableAlias + Fields::tat_uplID,
-            _tableAlias + Fields::tatCreationDateTime,
-            _tableAlias + Fields::tatCreatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         constexpr char Tickets[] = "tickets";
     }

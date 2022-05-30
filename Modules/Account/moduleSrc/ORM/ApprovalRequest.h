@@ -72,23 +72,6 @@ namespace tblApprovalRequest {
         TARGOMAN_CREATE_CONSTEXPR(aprRequestDate);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::aprID,
-            _tableAlias + Fields::apr_usrID,
-            _tableAlias + Fields::aprRequestedFor,
-            _tableAlias + Fields::aprApprovalKey,
-            _tableAlias + Fields::aprApprovalCode,
-            _tableAlias + Fields::aprSentDate,
-            _tableAlias + Fields::aprApplyDate,
-            _tableAlias + Fields::aprStatus,
-            _tableAlias + Fields::aprRequestDate,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
