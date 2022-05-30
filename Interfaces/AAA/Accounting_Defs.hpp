@@ -82,27 +82,6 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
     SF_NULLABLE_qreal   (MinQty)
 );
 
-//struct stuFullDiscount
-//{
-//    quint32                         cpnID;
-//    TAPI::CouponCode_t              cpnCode;
-//    quint32                         cpnPrimaryCount;
-//    quint32                         cpnTotalMaxAmount;
-//    NULLABLE_TYPE(quint32)          cpnPerUserMaxCount;
-//    NULLABLE_TYPE(quint32)          cpnPerUserMaxAmount;
-//    TAPI::DateTime_t                cpnValidFrom;
-//    NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
-//    quint32                         cpnAmount;
-//    enuDiscountType::Type           cpnAmountType;
-//    NULLABLE_TYPE(quint32)          cpnMaxAmount;
-//    TAPI::JSON_t                    cpnSaleableBasedMultiplier;
-//    quint32                         cpnTotalUsedCount;
-//    quint32                         cpnTotalUsedAmount;
-//    TAPI::enuGenericStatus::Type    cpnStatus;
-
-//    void fromVariantMap(const QVariantMap& _info);
-//};
-
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
     SF_quint64          (ID),
     SF_QString          (Code),
@@ -134,10 +113,10 @@ typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
 
 typedef QMap<QString, QString> OrderAdditives_t;
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDigested,
 //    QJsonObject   Additives;
 //    UsageLimits_t Limits;
 //    QJsonObject   Privs;
+TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDigested,
     SF_QMapOfVarStruct  (Limits, stuUsage, UsageLimits_t)
 );
 
@@ -148,29 +127,26 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPendingVoucher,
 //typedef QList<stuPendingVoucher> PendingVouchers_t;
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
-    //product
     SF_quint32          (prdID),
-    SF_QString          (prdCode), //TAPI::ProductCode_t
+    SF_QString          (prdCode),
     SF_QString          (prdName),
     SF_Date_t           (prdValidFromDate),
     SF_Date_t           (prdValidToDate),
     SF_NULLABLE_quint8  (prdValidFromHour),
     SF_NULLABLE_quint8  (prdValidToHour),
-    SF_JSON_t           (prdPrivs), //TAPI::PrivObject_t
+    SF_JSON_t           (prdPrivs),
     SF_NULLABLE_qreal   (prdVAT),
     SF_quint32          (prdInStockQty),
     SF_NULLABLE_quint32 (prdOrderedQty),
     SF_NULLABLE_quint32 (prdReturnedQty),
     SF_Enum             (prdStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
 
-    //saleable
     SF_quint32          (slbID),
-    SF_QString          (slbCode), //TAPI::SaleableCode_t
+    SF_QString          (slbCode),
     SF_QString          (slbName),
     SF_JSON_t           (slbPrivs),
     SF_qreal            (slbBasePrice),
-    SF_JSON_t           (slbAdditives), //TAPI::SaleableAdditive_t
-//    SF_quint32          (slbProductCount),
+    SF_JSON_t           (slbAdditives),
     SF_NULLABLE_quint32 (slbMaxSaleCountPerUser),
     SF_quint32          (slbInStockQty),
     SF_NULLABLE_quint32 (slbOrderedQty),
@@ -178,15 +154,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
     SF_QString          (slbVoucherTemplate),
     SF_Enum             (slbStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
 
+    SF_qreal            (NewUnitPrice),
     SF_qreal            (SubTotal),
-    SF_Struct           (Discount, stuDiscount3, [](Q_DECL_UNUSED auto v) { return true; }(v)), //NULLABLE_TYPE
+    SF_Struct           (Discount, stuDiscount3, [](Q_DECL_UNUSED auto v) { return true; }(v)),
     SF_qreal            (TotalPrice),
 
-//    struct {
-//        QJsonObject   Additives;
-//        UsageLimits_t Limits;
-//        QJsonObject   Privs;
-//    } Digested;
     SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v)),
 
     SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)

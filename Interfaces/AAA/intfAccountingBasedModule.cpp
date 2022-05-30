@@ -540,6 +540,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     stuAssetItem AssetItem;
     AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
 
+    AssetItem.NewUnitPrice = AssetItem.slbBasePrice;
+
     //-- check available count --------------------------------
     qreal AvailableProductQty = AssetItem.prdInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedQty, 0));
     qreal AvailableSaleableQty = AssetItem.slbInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.slbOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.slbReturnedQty, 0));
@@ -554,9 +556,9 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableQty).arg(_qty));
 
     //-- --------------------------------
-    AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
+    AssetItem.SubTotal = AssetItem.NewUnitPrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;
-    TargomanDebug(5) << "slbBasePrice(" << AssetItem.slbBasePrice << ")";
+    TargomanDebug(5) << "NewUnitPrice(" << AssetItem.NewUnitPrice << ")";
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -577,14 +579,14 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     this->digestPrivs(_APICALLBOOM, AssetItem);
 
     this->applyAssetAdditives(_APICALLBOOM, AssetItem, _orderAdditives);
-    TargomanDebug(5) << "after applyAssetAdditives: slbBasePrice(" << AssetItem.slbBasePrice << ")";
+    TargomanDebug(5) << "after applyAssetAdditives: NewUnitPrice(" << AssetItem.NewUnitPrice << ")";
 
     this->applyReferrer(_APICALLBOOM, AssetItem, _referrer, _extraReferrerParams);
 
 //    this->parsePrize(...); -> AssetItem.PendingVouchers
 
     //-- --------------------------------
-    AssetItem.SubTotal = AssetItem.slbBasePrice * _qty;
+    AssetItem.SubTotal = AssetItem.NewUnitPrice * _qty;
     AssetItem.TotalPrice = AssetItem.SubTotal;
     TargomanDebug(5) << "SubTotal(" << AssetItem.SubTotal << ")";
 
@@ -606,12 +608,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     stuVoucherItem PreVoucherItem;
 
     PreVoucherItem.PendingVouchers = AssetItem.PendingVouchers;
-
     PreVoucherItem.Service = this->ServiceName;
     //PreVoucherItem.OrderID
     PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
     PreVoucherItem.Desc = AssetItem.slbName;
-    PreVoucherItem.UnitPrice = AssetItem.slbBasePrice;
+    PreVoucherItem.UnitPrice = AssetItem.NewUnitPrice;
     PreVoucherItem.Qty = _qty;
     PreVoucherItem.SubTotal = AssetItem.SubTotal;
     PreVoucherItem.Discount = Discount3;
