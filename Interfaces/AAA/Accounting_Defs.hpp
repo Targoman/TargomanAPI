@@ -72,14 +72,15 @@ extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
-    Desc,       QString,        QString()    , v.size(), v, v.toString(),
-    PriceInfo,  QJsonObject,    QJsonObject(), v.size(), v, v.toObject()
+    SF_QString          (Desc),
+    SF_QJsonObject      (PriceInfo)
 );
+//,  QJsonObject, QJsonObject(), v.size(), v, v.toObject()
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
-    SF_QString        (SaleableCode),
-    SF_qreal          (Multiplier),
-    SF_NULLABLE_qreal (MinQty)
+    SF_QString          (SaleableCode),
+    SF_qreal            (Multiplier),
+    SF_NULLABLE_qreal   (MinQty)
 );
 
 //struct stuFullDiscount
@@ -104,32 +105,32 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
 //};
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
-    SF_quint64 (ID),
-    SF_QString (Code),
-    SF_qreal   (Amount)
+    SF_quint64          (ID),
+    SF_QString          (Code),
+    SF_qreal            (Amount)
 );
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    SF_QString   (Service),
-    SF_quint64   (OrderID),
-    SF_MD5_t     (UUID),
-    SF_QString   (Desc),
-    SF_quint32   (UnitPrice),
-    SF_qreal     (Qty),
-    SF_quint32   (SubTotal),
-    SF_Var_Struct(Discount, stuDiscount3, v.ID > 0),
-    SF_quint32   (DisAmount),
-    SF_quint8    (VATPercent),
-    SF_quint32   (VATAmount),
-    SF_QString   (Sign)
+    SF_QString          (Service),
+    SF_quint64          (OrderID),
+    SF_MD5_t            (UUID),
+    SF_QString          (Desc),
+    SF_quint32          (UnitPrice),
+    SF_qreal            (Qty),
+    SF_quint32          (SubTotal),
+    SF_Var_Struct       (Discount, stuDiscount3, v.ID > 0),
+    SF_quint32          (DisAmount),
+    SF_quint8           (VATPercent),
+    SF_quint32          (VATAmount),
+    SF_QString          (Sign)
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemForTrustedAction,
-    SF_quint64  (UserID),
-    SF_quint64  (VoucherID),
-    SF_Struct   (VoucherItem, stuVoucherItem, v.Qty>0),
-    SF_QString  (Sign)
+    SF_quint64          (UserID),
+    SF_quint64          (VoucherID),
+    SF_Struct           (VoucherItem, stuVoucherItem, v.Qty > 0),
+    SF_QString          (Sign)
 );
 
 /*****************************************************************************/
@@ -142,8 +143,9 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
 
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
-#define SF_UsageLimits_t(_name) SF_Generic( \
-    /* name              */ Digested_Limits, \
+#define SF_UsageLimits_t(_name) \
+    SF_Generic( \
+    /* name              */ _name, \
     /* type              */ UsageLimits_t, \
     /* def               */ UsageLimits_t(), \
     /* validator         */ v.size(), \
@@ -223,30 +225,7 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
 //        QJsonObject   Privs;
     } Digested;*/
 
-//        SF_UsageLimits_t(Digested_Limits)
-    SF_Generic(
-        /* name              */ Digested_Limits,
-        /* type              */ UsageLimits_t,
-        /* def               */ UsageLimits_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
-                                    QJsonObject A;
-                                    for (auto it = v.begin();
-                                        it != v.end();
-                                        it++
-                                    ) {
-                                        A.insert(it.key(), it->toJson());
-                                    }
-                                    return A;
-                                }(v),
-        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
-                                    UsageLimits_t L;
-                                    QJsonObject O = v.toObject();
-                                    foreach (const QString &Key, O.keys())
-                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
-                                    return L;
-                                }(v)
-    )
+    SF_UsageLimits_t(Digested_Limits);
 
 //    QJsonObject toJson(bool _full);
 //    stuAssetItem& fromJson(const QJsonObject& _obj);
@@ -287,60 +266,39 @@ struct stuActiveCredit {
 */
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuActiveCredit,
-    SF_Var_Struct   (Credit, stuAssetItem, v.prdID),
-    SF_bool         (IsFromParent),
-//    SF_UsageLimits_t(MyLimitsOnParent),
-    SF_Generic(
-        /* name              */ MyLimitsOnParent,
-        /* type              */ UsageLimits_t,
-        /* def               */ UsageLimits_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
-                                    QJsonObject A;
-                                    for (auto it = v.begin();
-                                        it != v.end();
-                                        it++
-                                    ) {
-                                        A.insert(it.key(), it->toJson());
-                                    }
-                                    return A;
-                                }(v),
-        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
-                                    UsageLimits_t L;
-                                    QJsonObject O = v.toObject();
-                                    foreach (const QString &Key, O.keys())
-                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
-                                    return L;
-                                }(v)
-    ),
-    SF_qint64(TTL)
+    SF_Var_Struct       (Credit, stuAssetItem, v.prdID),
+    SF_bool             (IsFromParent),
+    SF_UsageLimits_t    (MyLimitsOnParent),
+    SF_qint64           (TTL)
 );
 
 typedef QList<stuVoucherItem> InvItems_t;
+#define SF_InvItems_t(_name) \
+    SF_Generic( \
+        /* name              */ _name, \
+        /* type              */ InvItems_t, \
+        /* def               */ InvItems_t(), \
+        /* validator         */ v.size(), \
+        /* type 2 QJsonValue */ [](auto v) { QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A; }(v), \
+        /* QJsonValue 2 type */ [](auto v) { InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L; }(v) \
+    )
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
-    SF_quint64                  (UserID),
-    SF_Generic(
-        /* name              */ Items,
-        /* type              */ InvItems_t,
-        /* def               */ InvItems_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](auto v) { QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A; }(v),
-        /* QJsonValue 2 type */ [](auto v) { InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L; }(v)
-    ),
-    SF_Struct(Prize, stuPrize, v.Desc.size()),
-    SF_QString                  (Summary),
-    SF_quint16(Round),
-    SF_quint32                  (ToPay, 0, v>0),
-    SF_QString                  (Sign)
+    SF_quint64          (UserID),
+    SF_InvItems_t       (Items),
+    SF_Struct           (Prize, stuPrize, v.Desc.size()),
+    SF_QString          (Summary),
+    SF_quint16          (Round),
+    SF_quint32          (ToPay, 0, v>0),
+    SF_QString          (Sign)
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
-    SF_quint64                  (ID, 0, v>0),
-    SF_Struct                   (Info, stuPreVoucher, v.ToPay),
-    SF_QString                  (PaymentLink),
-    SF_QString                  (PaymentMD5),
-    SF_Enum                     (Status, enuVoucherStatus, enuVoucherStatus::New)
+    SF_quint64          (ID, 0, v>0),
+    SF_Struct           (Info, stuPreVoucher, v.ToPay),
+    SF_QString          (PaymentLink),
+    SF_QString          (PaymentMD5),
+    SF_Enum             (Status, enuVoucherStatus, enuVoucherStatus::New)
 );
 
 //TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemProcess,

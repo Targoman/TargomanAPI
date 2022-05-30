@@ -74,16 +74,16 @@ intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
 |** intfAccountingBasedModule **********************************************************************|
 \***************************************************************************************************/
 intfAccountingBasedModule::intfAccountingBasedModule(
-        const QString& _module,
-        const QString& _schema,
-        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-        intfAccountProducts* _products,
-        intfAccountSaleables* _saleables,
-        intfAccountUserAssets* _userAssets,
-        intfAccountAssetUsage* _assetUsages,
-        intfAccountCoupons* _discounts,
-        intfAccountPrizes* _prizes
-    ) :
+    const QString& _module,
+    const QString& _schema,
+    AssetUsageLimitsCols_t _AssetUsageLimitsCols,
+    intfAccountProducts* _products,
+    intfAccountSaleables* _saleables,
+    intfAccountUserAssets* _userAssets,
+    intfAccountAssetUsage* _assetUsages,
+    intfAccountCoupons* _discounts,
+    intfAccountPrizes* _prizes
+) :
     API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
@@ -92,7 +92,8 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     AccountAssetUsages(_assetUsages),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
-    AssetUsageLimitsCols(_AssetUsageLimitsCols) {
+    AssetUsageLimitsCols(_AssetUsageLimitsCols)
+{
     foreach (auto Col, this->AssetUsageLimitsCols) {
         if (Col.PerDay.size())
             this->AssetUsageLimitsColsName.append(Col.PerDay);
@@ -361,7 +362,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     UsageLimits_t SaleableUsageLimits;
     for (auto Iter = this->AssetUsageLimitsCols.begin();
             Iter != this->AssetUsageLimitsCols.end();
-            Iter++) {
+            Iter++
+    ) {
         SaleableUsageLimits.insert(
             Iter.key(),
             {
@@ -510,7 +512,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
             for (QJsonArray::const_iterator itr = arr.constBegin();
                 itr != arr.constEnd();
-                itr++) {
+                itr++
+            ) {
                 auto elm = *itr;
 
 //                qDebug() << "elm" << elm << "elm.toObject()=" << elm.toObject();
@@ -533,8 +536,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 //            if (multiplier.Multiplier == 0) //not found
 //                throw exHTTPBadRequest("Discount code is not valid on selected package");
 
-            if (multiplier.Multiplier > 0) //found
-            {
+            if (multiplier.Multiplier > 0) { //found
                 auto m = Discount3.Amount;
                 Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
                 qDebug() << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
