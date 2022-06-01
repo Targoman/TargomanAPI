@@ -62,9 +62,9 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      );
 
 TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
+                     Processed  = 'P',
                      Canceled   = 'C',
                      Error      = 'E',
-                     Finished   = 'F',
                      Removed    = 'R',
                      );
 

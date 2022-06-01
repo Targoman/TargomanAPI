@@ -733,7 +733,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                 ItemResult = vchProcessResult[VoucherItem.UUID].toMap();
 
                 if (ItemResult.contains("status")
-                        && (ItemResult["status"] == enuVoucherItemProcessStatus::Finished)
+                        && (ItemResult["status"] == enuVoucherItemProcessStatus::Processed)
                 ) {
                     continue;
                 }
@@ -769,12 +769,15 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             if ((Result.isValid() == false) || (Result.toBool() == false))
                                 throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
 
-                            ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Finished);
+                            ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Processed);
                             if (ItemResult.contains("error"))
                                 ItemResult.remove("error");
 
                             vchProcessResult[VoucherItem.UUID] = ItemResult;
                         } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
+                        else {
+                            throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
+                        }
 
                         break;
                     } //if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service)

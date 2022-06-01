@@ -686,8 +686,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     _lastPreVoucher.Summary = _lastPreVoucher.Items.size() > 1 ?
                                   QString("%1 items").arg(_lastPreVoucher.Items.size()) :
                                   QString("%1 of %2").arg(PreVoucherItem.Qty).arg(PreVoucherItem.Desc);
-    qint64 FinalPrice = _lastPreVoucher.Round + _lastPreVoucher.ToPay
-                        + (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
+    qint64 FinalPrice = _lastPreVoucher.Round
+                        + _lastPreVoucher.ToPay
+                        + (PreVoucherItem.SubTotal
+//                           - PreVoucherItem.DisAmount
+                           + PreVoucherItem.VATAmount);
     if (FinalPrice < 0)
         throw exHTTPInternalServerError("Final amount computed negative!");
 
@@ -708,7 +711,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, remo
     checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
-        throw exHTTPInternalServerError("pre-voucher items is empty.");
+        throw exHTTPInternalServerError("prevoucher items is empty.");
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
     if (_lastPreVoucher.UserID != CurrentUserID)
