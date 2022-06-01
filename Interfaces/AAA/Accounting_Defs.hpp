@@ -37,6 +37,16 @@
 
 namespace Targoman::API::AAA {
 
+TARGOMAN_DEFINE_ENUM(enuVoucherType,
+                     Withdrawal     = 'W',
+                     Expense        = 'E',
+                     Income         = 'I',
+                     Credit         = 'C',
+                     Prize          = 'Z',
+                     TransferFrom   = 'F',
+                     TransferTo     = 'T',
+                     )
+
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      New            = 'N',
                      Canceled       = 'C',
@@ -60,6 +70,7 @@ TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
 
 } //namespace Targoman::API::AAA
 
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus) // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
@@ -69,6 +80,10 @@ namespace Targoman::API::AAA {
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
+
+constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
+constexpr char PENDING_VOUCHER_NAME_COUPON_DISCOUNT[]   = "COUPON_DISCOUNT";
+constexpr char PENDING_VOUCHER_NAME_REFERRER_PRIZE[]    = "REFERRER_PRIZE";
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
     SF_QString          (Desc),
@@ -121,8 +136,11 @@ TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDigested,
 );
 
 TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPendingVoucher,
-    SF_QString          (Desc),
-    SF_QJsonObject      (Info)
+    SF_QString          (Name),
+    SF_Enum             (Type, enuVoucherType, enuVoucherType::Credit),
+    SF_quint64          (Amount),
+    SF_QJsonObject      (Desc)
+
 );
 //typedef QList<stuPendingVoucher> PendingVouchers_t;
 

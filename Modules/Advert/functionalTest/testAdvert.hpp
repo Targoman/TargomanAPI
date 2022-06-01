@@ -419,7 +419,7 @@ private slots:
 //                    { "orderAdditives", {} },
 //                    { "qty", 12 },
 //                    { "discountCode", "abcd11" },
-//                    { "referrer", "" },
+                    { "referrer", "freepaper.com" },
 //                    { "extraReferrerParams", {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -445,7 +445,7 @@ private slots:
                     { "orderAdditives", {} },
                     { "qty", 999 },
 //                    { "discountCode", "zzzzzzzzzzzzzzzzzz" },
-                    { "referrer", "" },
+                    { "referrer", "freepaper.com" },
                     { "extraReferrerParams", {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -471,7 +471,7 @@ private slots:
                     { "orderAdditives", {} },
                     { "qty", 1 },
                     { "discountCode", "zzzzzzzzzzzzzzzzzz" },
-                    { "referrer", "" },
+                    { "referrer", "freepaper.com" },
                     { "extraReferrerParams", {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -540,7 +540,7 @@ private slots:
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                    10 },
                     { "discountCode",           this->CouponCode },
-                    { "referrer",               "" },
+                    { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -591,7 +591,7 @@ private slots:
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                    20 },
                     { "discountCode",           this->CouponCode },
-                    { "referrer",               "" },
+                    { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -621,7 +621,7 @@ private slots:
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                    30 },
                     { "discountCode",           this->CouponCode },
-                    { "referrer",               "" },
+                    { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -804,7 +804,7 @@ private slots:
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                    10 },
 //                    { "discountCode",           this->CouponCode },
-                    { "referrer",               "" },
+                    { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
@@ -831,7 +831,7 @@ private slots:
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
                     { "qty",                    5 },
 //                    { "discountCode",           this->CouponCode },
-                    { "referrer",               "" },
+                    { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }

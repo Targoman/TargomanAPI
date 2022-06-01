@@ -32,19 +32,7 @@ namespace Targoman::API::AccountModule {
 
 //enumes goes here
 
-TARGOMAN_DEFINE_ENUM(enuVoucherType,
-                     Withdrawal     = 'W',
-                     Expense        = 'E',
-                     Income         = 'I',
-                     Credit         = 'C',
-                     Prize          = 'Z',
-                     TransferFrom   = 'F',
-                     TransferTo     = 'T',
-                     )
-
 } //namespace Targoman::API::AccountModule
-
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuVoucherType);
 
 namespace Targoman::API::AccountModule {
 
@@ -79,7 +67,7 @@ namespace tblVoucher {
                 { Fields::vchID,                ORM_PRIMARYKEY_64 },
                 { Fields::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
                 { Fields::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPNone, false, false },
-                { Fields::vchType,              S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AccountModule::enuVoucherType::Expense*/, UPNone },
+                { Fields::vchType,              S(Targoman::API::AAA::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AAA::enuVoucherType::Expense*/, UPNone },
                 { Fields::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
                 { Fields::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin, false, false },
                 { Fields::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
@@ -100,7 +88,7 @@ namespace tblVoucher {
         SF_ORM_PRIMARYKEY_64        (vchID),
         SF_quint64                  (vch_usrID),
         SF_JSON_t                   (vchDesc),
-        SF_NULLABLE_Enum            (vchType, Targoman::API::AccountModule::enuVoucherType),
+        SF_NULLABLE_Enum            (vchType, Targoman::API::AAA::enuVoucherType),
         SF_quint64                  (vchTotalAmount),
         SF_JSON_t                   (vchProcessResult),
         SF_ORM_STATUS_FIELD         (vchStatus, Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New),

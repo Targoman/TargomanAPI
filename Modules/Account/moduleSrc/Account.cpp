@@ -725,11 +725,16 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         quint8 ErrorCount = 0;
 
         //1: process voucher items
-        foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items) {
+        foreach (stuVoucherItem VoucherItem, PreVoucher.Items) {
+
+            QVariantMap ItemResult;
 
             if (vchProcessResult.contains(VoucherItem.UUID)) {
-                QVariantMap ItemResult = vchProcessResult[VoucherItem.UUID].toMap();
-                if (ItemResult.contains("status") && (ItemResult["status"] == enuVoucherItemProcessStatus::Finished)) {
+                ItemResult = vchProcessResult[VoucherItem.UUID].toMap();
+
+                if (ItemResult.contains("status")
+                        && (ItemResult["status"] == enuVoucherItemProcessStatus::Finished)
+                ) {
                     continue;
                 }
             }
@@ -764,20 +769,23 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             if ((Result.isValid() == false) || (Result.toBool() == false))
                                 throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
 
-                            vchProcessResult[VoucherItem.UUID] = QVariantMap({
-                                                                                 { "status", QChar(enuVoucherItemProcessStatus::Finished) },
-                                                                             });
-                        }
+                            ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Finished);
+                            if (ItemResult.contains("error"))
+                                ItemResult.remove("error");
+
+                            vchProcessResult[VoucherItem.UUID] = ItemResult;
+                        } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
 
                         break;
-                    }
+                    } //if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service)
                 } //foreach (QVariant Service, Services)
             } catch (std::exception &_exp) {
                 ++ErrorCount;
-                vchProcessResult[VoucherItem.UUID] = QVariantMap({
-                                                                     { "status", QChar(enuVoucherItemProcessStatus::Error) },
-                                                                     { "error", _exp.what() },
-                                                                 });
+
+                ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Error);
+                ItemResult["error"] = _exp.what();
+
+                vchProcessResult[VoucherItem.UUID] = ItemResult;
             }
         } // foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items)
 
@@ -1027,7 +1035,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     QString _paymentVerifyCallback
 )) {
     ///scenario:
-    ///1: create voucher
+    ///1: create main expense voucher
+    ///?: create pending vouchers per item
     ///2: compute wallet remaining
     ///2.1: process voucher
     ///2.2: create online/offline payment
@@ -1049,7 +1058,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     if (_preVoucher.UserID != CurrentUserID)
         throw exHTTPBadRequest("invalid pre-Voucher owner");
 
-    //1: create voucher
+    ///1: create main expense voucher
 //    Targoman::API::AAA::stuVoucher Voucher;
 
 //    Voucher.Info = _preVoucher;
@@ -1069,6 +1078,66 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                     { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                 }));
 
+    ///?: create pending vouchers per item
+
+    //vchProcessResult not filled before and it is empty
+    QVariantMap vchProcessResult;
+
+    foreach (stuVoucherItem VoucherItem, _preVoucher.Items) {
+        if (VoucherItem.PendingVouchers.isEmpty())
+            continue;
+
+        QVariantMap AdditionalVouchers;
+
+        foreach (stuPendingVoucher PendingVoucher, VoucherItem.PendingVouchers) {
+            quint64 vchid;
+            if ((PendingVoucher.Type == enuVoucherType::Income)
+                    || (PendingVoucher.Type == enuVoucherType::Prize)
+            ) {
+                PendingVoucher.Desc.insert("mainVoucherID", static_cast<double>(VoucherID));
+
+                QJsonDocument Doc;
+                Doc.setObject(PendingVoucher.Desc);
+                vchid = this->callSP(APICALLBOOM_PARAM,
+                                     "spWallet_Increase", {
+                                         { "iWalletID", 0 },
+                                         { "iForUsrID", CurrentUserID },
+                                         { "iByUserID", CurrentUserID },
+                                         { "iType", QString(static_cast<char>(PendingVoucher.Type)) },
+                                         { "iAmount", PendingVoucher.Amount },
+                                         { "iDesc", Doc.toJson(QJsonDocument::Compact) },
+                                     }).spDirectOutputs().value("oVoucherID").toULongLong();
+            } else {
+                vchid = Voucher::instance().Create(_APICALLBOOM,
+                                                   TAPI::ORMFields_t({
+                                                                         { tblVoucher::Fields::vch_usrID, CurrentUserID },
+                                                                         { tblVoucher::Fields::vchDesc, PendingVoucher.Desc.toVariantMap() },
+                                                                         { tblVoucher::Fields::vchTotalAmount, PendingVoucher.Amount },
+                                                                         { tblVoucher::Fields::vchType, PendingVoucher.Type },
+                                                                         { tblVoucher::Fields::vchStatus, enuVoucherStatus::New },
+                                                                     }));
+            }
+
+            AdditionalVouchers.insert(PendingVoucher.Name, vchid);
+        }
+
+        vchProcessResult[VoucherItem.UUID] = QVariantMap({
+                                                             { "addVouchers", AdditionalVouchers },
+                                                         });
+    }
+
+    if (vchProcessResult.isEmpty() == false) {
+        Voucher::instance().Update(APICALLBOOM_PARAM,
+                                   {},
+                                   TAPI::ORMFields_t({
+                                      { tblVoucher::Fields::vchProcessResult, vchProcessResult }
+                                   }),
+                                   {
+                                      { tblVoucher::Fields::vchID, VoucherID }
+                                   });
+    }
+
+    /// --------------------
     Targoman::API::AAA::stuVoucher Voucher = payAndProcessBasket(
         APICALLBOOM_PARAM,
         _domain,
@@ -1280,7 +1349,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         Targoman::API::AAA::stuVoucher Voucher;
 
         Voucher.Info.UserID = _APICALLBOOM.getUserID();
-        Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walID));
+        Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
         Voucher.Info.ToPay = OfflinePaymentClaim.ofpcAmount;
         Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
@@ -1292,7 +1361,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     //                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                                         { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                                         { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                                        { tblVoucher::Fields::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
+                                                        { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
                                                         { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                     }));
 

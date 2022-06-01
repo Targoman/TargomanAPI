@@ -34,6 +34,11 @@ using namespace Targoman::API;
 
 using namespace Targoman::API::AAA;
 
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
+
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
@@ -169,10 +174,6 @@ TAPI_REGISTER_METATYPE(
         return Additives;
     }
 );
-
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 
 namespace Targoman::API::AAA {
 

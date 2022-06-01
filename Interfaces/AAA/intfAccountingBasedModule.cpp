@@ -316,12 +316,10 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
     TAPI::SaleableCode_t    _saleableCode,
     qreal                   _qty
 ) {
-    stuDiscount3 Discount3;
-
     _discountCode = _discountCode.trimmed();
 
     if (_discountCode.isEmpty())
-        return Discount3;
+        return {};
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
@@ -377,6 +375,8 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
     tblAccountCouponsBase::DTO FullDiscount;
     FullDiscount.fromJson(DiscountInfoJson);
 
+    stuDiscount3 Discount3;
+
     Discount3.ID     = FullDiscount.cpnID;
     Discount3.Code   = FullDiscount.cpnCode;
     Discount3.Amount = FullDiscount.cpnAmount;
@@ -403,6 +403,7 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
             && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
         throw exHTTPBadRequest("Max discount usage amount per user has been reached");
 
+    //-- SaleableBasedMultiplier ---------------------------
     QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
     if (arr.size()) {
         stuDiscountSaleableBasedMultiplier multiplier;
@@ -482,7 +483,8 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 
     if (Discount3.Amount > 0) {
         AssetItem.Discount = Discount3;
-        AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
+        //do not decrease TotalPrice, because PENDING_VOUCHER_NAME_COUPON_DISCOUNT will increase credit
+//        AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
 
         TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
 
@@ -498,9 +500,18 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 //               throw exHTTPInternalServerError("could not update discount usage");
 
 //            TargomanLogInfo(5, "Discount Usages updated (+1, +" << Discount.Amount << ")");
+
+        AssetItem.PendingVouchers.append({
+            /* Name     */ PENDING_VOUCHER_NAME_COUPON_DISCOUNT,
+            /* Type     */ enuVoucherType::Prize, //Credit,
+            /* Amount   */ Discount3.Amount,
+            /* Desc     */ Discount3.toJson(),
+        });
+
+        return Discount3;
     }
 
-    return Discount3;
+    return {};
 }
 
 Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
@@ -659,7 +670,10 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
     qry.values(values);
 
+    //-- --------------------------------
     PreVoucherItem.OrderID = qry.execute(CurrentUserID);
+
+    //-- --------------------------------
     PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
 
     //-- --------------------------------

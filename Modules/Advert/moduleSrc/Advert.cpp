@@ -137,9 +137,14 @@ void Advert::applyReferrer(
     Q_DECL_UNUSED   const QString           &_referrer,
     Q_DECL_UNUSED   const TAPI::JSON_t      &_extraReferrerParams
 ) {
+    ///@TODO: [very important] complete this
     AssetItem.PendingVouchers.append({
-        /* Desc */ "REFERRER_PRIZE",
-        /* Info */ {},
+        /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
+        /* Type     */ enuVoucherType::Prize, //Credit,
+        /* Amount   */ 123456,
+        /* Desc     */ {
+                           { "referrer", _referrer },
+                       },
     });
 };
 
