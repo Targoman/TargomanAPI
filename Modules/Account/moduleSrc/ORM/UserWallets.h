@@ -111,7 +111,7 @@ namespace tblUserWallets {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (walID),
         SF_quint64                  (wal_usrID),
         SF_QString                  (walName),
@@ -129,7 +129,6 @@ namespace tblUserWallets {
         SF_ORM_CREATED_BY           (walCreatedBy_usrID),
         SF_ORM_UPDATED_BY           (walUpdatedBy_usrID)
     );
-
 }
 #pragma GCC diagnostic pop
 

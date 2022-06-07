@@ -52,7 +52,7 @@ namespace tblActionLogs {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                               Type                Validation                      Default  UpBy   Sort  Filter Self  Virt   PK
             { Fields::atlID,                 ORM_PRIMARYKEY_64},
             { Fields::atlBy_usrID,           S(quint64),         QFV.integer().minValue(1),      {},      UPNone },
             { Fields::atlInsertionDateTime,  S(TAPI::DateTime_t),QFV,                            {},      UPNone },
@@ -69,7 +69,7 @@ namespace tblActionLogs {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (atlID),
         SF_quint64                  (atlBy_usrID),
         SF_DateTime_t               (atlInsertionDateTime),

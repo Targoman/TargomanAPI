@@ -90,7 +90,7 @@ namespace tblCurrency {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (curID),
         SF_QString                  (curName),
         SF_QString                  (curSymbol),

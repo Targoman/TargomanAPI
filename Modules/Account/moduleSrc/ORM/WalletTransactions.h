@@ -91,7 +91,7 @@ namespace tblWalletsTransactions {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
+            ///ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
                 { Fields::wltID,        ORM_PRIMARYKEY_64 },
                 { Fields::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
                 { Fields::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
@@ -102,7 +102,7 @@ namespace tblWalletsTransactions {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
+            ///Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
                 { Fields::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::Fields::walID },
                 { Fields::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::Fields::vchID },
                 { Fields::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::Fields::wbl_wltID },
@@ -113,7 +113,7 @@ namespace tblWalletsTransactions {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (wltID),
         SF_quint64                  (wlt_walID),
         SF_quint64                  (wlt_vchID),
@@ -131,7 +131,7 @@ namespace tblWalletsBalanceHistory {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
+            ///ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
                 { Fields::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
                 { Fields::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
                 { Fields::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
@@ -141,7 +141,7 @@ namespace tblWalletsBalanceHistory {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
+            ///Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
                 { Fields::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::Fields::wltID },
             };
 
@@ -150,7 +150,7 @@ namespace tblWalletsBalanceHistory {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_qint64                   (wbl_wltID),
         SF_qint64                   (wblBalance),
         SF_qint64                   (wblSumDebit),

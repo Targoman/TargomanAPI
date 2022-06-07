@@ -113,7 +113,7 @@ namespace tblUser {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
+            ///ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
             //ORM_PRIMARYKEY_64 with self:true
             { Fields::usrID,                   S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
             { Fields::usrEmail,                S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
@@ -137,7 +137,7 @@ namespace tblUser {
             { Fields::usrUpdatedBy_usrID,      ORM_UPDATED_BY },
         };
 
-///< Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
+///Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
 #define tblUser_Private_Relations \
     { \
         { tblUser::Fields::usr_rolID,               R(AAASchema, tblRoles::Name),                       tblRoles::Fields::rolID }, \
@@ -159,7 +159,7 @@ namespace tblUser {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (usrID),
         SF_QString                  (usrEmail),
         SF_QString                  (usrName),

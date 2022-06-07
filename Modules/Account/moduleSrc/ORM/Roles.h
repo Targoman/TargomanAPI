@@ -81,7 +81,7 @@ namespace tblRoles {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
                 { Fields::rolParent_rolID, R(AAASchema,tblRoles::Name), Fields::rolID, "Parent_", true },
                 ORM_RELATION_OF_CREATOR(Fields::rolCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::rolUpdatedBy_usrID),
@@ -96,7 +96,7 @@ namespace tblRoles {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (rolID),
         SF_QString                  (rolName),
         SF_quint32                  (rolParent_rolID),

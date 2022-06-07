@@ -54,7 +54,7 @@ AccountSaleables::AccountSaleables() :
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
         AdvertSchema,
-        {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
+        {///ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("uas")
         }
 ) { ; }
@@ -63,7 +63,7 @@ AccountUserAssets::AccountUserAssets() :
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
         AdvertSchema,
-        {///< ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
+        {///ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
             ADVERT_DEFINE_ASSET_FIELDS("usg")
         }
 ) { ; }

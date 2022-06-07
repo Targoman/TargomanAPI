@@ -59,7 +59,7 @@ namespace tblBanners {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                           Reference Table             ForeignCol      Rename      LeftJoin
+            ///Col                           Reference Table             ForeignCol      Rename      LeftJoin
                 ORM_RELATION_OF_UPDATER(Fields::bnrUpdatedBy_usrID),
             };
 
@@ -68,7 +68,7 @@ namespace tblBanners {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_QString                  (bnrImage),
         SF_NULLABLE_Enum            (bnrSize, Targoman::API::AdvertModule::enuBannerSize),
         SF_ORM_UPDATED_BY           (bnrUpdatedBy_usrID)
@@ -115,7 +115,7 @@ namespace tblBin {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table                 ForeignCol         Rename      LeftJoin
+            ///Col                        Reference Table                 ForeignCol         Rename      LeftJoin
                 { Fields::binID,                 R(AdvertSchema,tblBanners::Name),  tblBanners::Fields::bnrID, "Banner_",  true},
                 ORM_RELATION_OF_CREATOR(Fields::binCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::binUpdatedBy_usrID),
@@ -126,7 +126,7 @@ namespace tblBin {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (binID),
         SF_Enum                     (binType, Targoman::API::AdvertModule::enuAdvertType, Targoman::API::AdvertModule::enuAdvertType::Text),
         SF_QString                  (binTitle),

@@ -9,6 +9,7 @@ using namespace std;
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+
 using namespace Targoman;
 
 class testMacros: public QObject

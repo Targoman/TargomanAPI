@@ -56,7 +56,7 @@ namespace tblAPITokenValidIPs {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                   Type                 Validation                      Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::tviID,               ORM_PRIMARYKEY_64 },
             { Fields::tvi_aptID,           S(quint64),          QFV.integer().minValue(1),      QRequired,  UPNone },
             { Fields::tviIP,               S(quint64),          QFV.integer().minValue(1),      QRequired,  UPOwner },
@@ -69,7 +69,7 @@ namespace tblAPITokenValidIPs {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                     Reference Table                   ForeignCol              Rename     LeftJoin
+            ///Col                                     Reference Table                   ForeignCol              Rename     LeftJoin
             { Fields::tvi_aptID,          R(AAASchema, tblAPITokens::Name),  tblAPITokens::Fields::aptID },
             ORM_RELATION_OF_CREATOR(Fields::tviCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::tviUpdatedBy_usrID),
@@ -85,7 +85,7 @@ namespace tblAPITokenValidIPs {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tviID),
         SF_quint64                  (tvi_aptID),
         SF_quint64                  (tviIP),

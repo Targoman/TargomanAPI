@@ -62,7 +62,7 @@ namespace tblActiveAds {
              };
 
         const QList<stuRelation> Relations = {
-            ///< Col                     Reference Table                 ForeignCol   Rename     LeftJoin
+            ///Col                     Reference Table                 ForeignCol   Rename     LeftJoin
                { Fields::act_binID,    R(AdvertSchema, tblBin::Name),   tblBin::Fields::binID},
                { Fields::act_locID,    R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
              };
@@ -72,7 +72,7 @@ namespace tblActiveAds {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (act_binID),
         SF_ORM_PRIMARYKEY_32        (act_locID),
         SF_Enum                     (actOrder, Targoman::API::AdvertModule::enuAdvertOrder, Targoman::API::AdvertModule::enuAdvertOrder::Normal),

@@ -21,32 +21,31 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "FixtureHelper.h"
-#include <QStringList>
+#ifndef TARGOMAN_API_QTHELPER_H
+#define TARGOMAN_API_QTHELPER_H
 
-#ifdef QT_DEBUG
+#include <QVariantList>
 
 namespace Targoman::API::Helpers {
 
-QString FixtureHelper::MakeRandomizeName(
-        const QString &_random,
-        const QString &_sep,
-        const QString &_prefix,
-        const QString &_suffix
-) {
-    QStringList List;
+template <typename T>
+class QTHelperIterator
+{
+public:
+    QTHelperIterator& where(std::function<bool(T _item)> _fn);
+    //forEach
+    //reverseForEach
+    QTHelperIterator& firstThat(std::function<void(T _item)> _fn);
+    //lastThat
+};
 
-    List.append(_prefix);
-
-    if (_random.isEmpty() == false)
-        List.append(_random);
-
-    if (_suffix.isEmpty() == false)
-        List.append(_suffix);
-
-    return List.join(_sep);
+class QTHelper
+{
+public:
+    template <typename T>
+    static QTHelperIterator<T> ConstIterator(const QList<T> &_target);
 };
 
 } //namespace Targoman::API::Helpers
 
-#endif
+#endif // TARGOMAN_API_QTHELPER_H

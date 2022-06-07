@@ -72,7 +72,7 @@ namespace tblClicks {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
+            ///Col                 Reference Table                     ForeignCol   Rename     LeftJoin
                 { Fields::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::Fields::binID},
                 { Fields::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::Fields::locID },
             };
@@ -82,7 +82,7 @@ namespace tblClicks {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (clkID),
         SF_quint32                  (clk_binID),
         SF_quint32                  (clk_locID),

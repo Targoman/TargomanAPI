@@ -47,7 +47,7 @@ namespace tblMigrations {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
             { Fields::migName,       S(QString),         QFV,        QNull,   UPNone },
             { Fields::migAppliedAt,  S(TAPI::DateTime_t),QFV,        QNull,   UPNone },
             { Fields::migRunType,    S(QString),         QFV,        QNull,   UPNone },
@@ -63,7 +63,7 @@ namespace tblMigrations {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_QString                  (migName),
         SF_DateTime_t               (migAppliedAt),
         SF_QString                  (migRunType),

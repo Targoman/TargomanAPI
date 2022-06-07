@@ -92,7 +92,7 @@ namespace tblApprovalRequest {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                               Reference Table                 ForeignCol        Rename     LeftJoin
+            ///Col                               Reference Table                 ForeignCol        Rename     LeftJoin
             { Fields::apr_usrID,    R(AAASchema, tblUser::Name),    tblUser::Fields::usrID },
         };
 
@@ -106,7 +106,7 @@ namespace tblApprovalRequest {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (aprID),
         SF_NULLABLE_quint64         (apr_usrID),
         SF_Enum                     (aprRequestedFor, Targoman::API::AccountModule::enuApprovalType, Targoman::API::AccountModule::enuApprovalType::Email),

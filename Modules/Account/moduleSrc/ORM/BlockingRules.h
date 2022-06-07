@@ -57,7 +57,7 @@ namespace tblBlockingRules {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                Type                 Validation                       Default   UpBy     Sort   Filter Self  Virt   PK
+            ///ColName                                Type                 Validation                       Default   UpBy     Sort   Filter Self  Virt   PK
             { Fields::blrID,               ORM_PRIMARYKEY_64} ,
             { Fields::blr_ipbIP,           S(quint32),          QFV.integer().minValue(1),       QNull,    UPAdmin },
             { Fields::blr_ipIPReadable,    S(TAPI::IPv4_t),     QFV,                             QInvalid, UPNone,  false, false },
@@ -71,7 +71,7 @@ namespace tblBlockingRules {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                    Reference Table              ForeignCol          Rename     LeftJoin
+            ///Col                                    Reference Table              ForeignCol          Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::blrCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::blrUpdatedBy_usrID),
         };
@@ -81,7 +81,7 @@ namespace tblBlockingRules {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (blrID),
         SF_quint32                  (blr_ipbIP),
         SF_QString                  (blr_ipIPReadable),

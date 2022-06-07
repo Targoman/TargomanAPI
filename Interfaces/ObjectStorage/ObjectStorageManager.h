@@ -41,7 +41,7 @@ class intfUploadQueue;
 
 namespace Targoman::API::ObjectStorage {
 
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuSaveFileResult,
+//TAPI_DEFINE_STRUCT(stuSaveFileResult,
 //    SF_QString                  (FullFileUrl),
 //    SF_QString                  (MimeType),
 //    SF_quint8                   (IsUploaded),

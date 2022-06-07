@@ -40,7 +40,7 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      Removed   = 'R'
                      )
 
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuTicketScope,
+//TAPI_DEFINE_STRUCT(stuTicketScope,
 //    QString, baseTicketID,    QString(), v.size(), v, v.toString(),
 //    QString, inReplyTicketID, QString(), v.size(), v, v.toString()
 //);
@@ -91,7 +91,7 @@ namespace tblTickets {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
                 { Fields::tktID,                ORM_PRIMARYKEY_64 },
                 { Fields::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
                 { Fields::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
@@ -108,7 +108,7 @@ namespace tblTickets {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
+            ///Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
                 { Fields::tktInReply_tktID, R(TicketingSchema, tblTickets::Name),       Fields::tktID,          "InReply_" , true },
                 { Fields::tktTarget_usrID,  R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_"  , true },
                 { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_", true },
@@ -122,7 +122,7 @@ namespace tblTickets {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tktID),
         SF_NULLABLE_quint64         (tktTarget_usrID),
         SF_NULLABLE_quint32         (tkt_svcID),
@@ -160,7 +160,7 @@ namespace tblTicketRead {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tkr_tktID),
         SF_quint64                  (tkrBy_usrID),
         SF_DateTime_t               (tkrDateTime)

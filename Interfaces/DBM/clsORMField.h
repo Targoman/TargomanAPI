@@ -183,7 +183,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_TABLE_DBPROPERTY_STATUS_FIELD_NAME          "StatusFieldName"
 #define ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME   "InvalidatedAtFieldName"
 
-// used for TAPI_DEFINE_VARIANT_ENABLED_STRUCT
+// used for TAPI_DEFINE_STRUCT
 #define SF_ORM_PRIMARYKEY_32(_name)           SF_quint32                  (_name)
 #define SF_ORM_PRIMARYKEY_64(_name)           SF_quint64                  (_name)
 #define SF_ORM_CREATED_ON(_name)              SF_DateTime_t               (_name)

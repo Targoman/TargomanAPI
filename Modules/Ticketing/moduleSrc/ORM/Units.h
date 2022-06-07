@@ -54,7 +54,7 @@ namespace tblUnits {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                           Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
                 { Fields::untID,                  ORM_PRIMARYKEY_32 },
                 { Fields::unt_depID,              S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
                 { Fields::untName,                S(QString),             QFV,                        QRequired,  UPNone },
@@ -63,7 +63,7 @@ namespace tblUnits {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                   Reference Table                             ForeignCol              Rename      LeftJoin
+            ///Col                   Reference Table                             ForeignCol              Rename      LeftJoin
                 { Fields::unt_depID,  R(TicketingSchema, tblDepartments::Name),   tblDepartments::Fields::depID },
                 ORM_RELATION_OF_CREATOR(Fields::untCreatedBy_usrID),
             };
@@ -73,7 +73,7 @@ namespace tblUnits {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (untID),
         SF_quint32                  (unt_depID),
         SF_QString                  (untName),

@@ -51,6 +51,7 @@
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
+#include "Interfaces/Helpers/QTHelper.h"
 using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
@@ -741,6 +742,16 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
             //lookup services
             try {
+                QTHelper::ConstIterator(Services)
+                        .where([&VoucherItem](auto _item) {
+                            QVariantMap ServiceInfo = _item.toMap();
+                            return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
+                        })
+                        .firstThat([](auto _item) {
+
+                        });
+
+
                 foreach (QVariant Service, Services) {
                     QVariantMap ServiceInfo = Service.toMap();
 

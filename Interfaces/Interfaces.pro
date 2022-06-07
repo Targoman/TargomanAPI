@@ -42,13 +42,13 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Helpers/QTHelper.h \
     ORM/intfMigrations.h \
     Server/APICallBoom.h \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
     Common/base.h \
-    Common/tmplNullable.hpp \
     Common/APIArgHelperMacrosPrivate.h \
     Helpers/FixtureHelper.h \
     Helpers/RESTClientHelper.h \

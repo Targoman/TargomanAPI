@@ -319,15 +319,15 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 ) {
 //    QVariantMap ResponseHeaders;
 
-    auto FNTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+    auto fnTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
         this->addToTimings(_name, _desc, _nanoSecs);
     };
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
     if (_apiObject->requiresJWT())
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(FNTiming));
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(fnTiming));
     else
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(FNTiming));
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -357,6 +357,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 );
                 } catch (exJWTExpired &exp) {
                     auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
+
                     bool IsRenewed = false;
                     QString NewToken = Authentication::renewExpiredJWT(
                                 JWT,

@@ -38,7 +38,7 @@ using namespace Targoman::API::ORM;
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
+TAPI_DEFINE_STRUCT(stuAdvert,
     SF_quint64                  (ID),
     SF_QString                  (Title),
     SF_QString                  (Description),
@@ -70,16 +70,19 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
 
-    virtual void applyAssetAdditives(
-        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &AssetItem,
-        const OrderAdditives_t  &_orderAdditives
+    virtual void applyAdditivesAndComputeUnitPrice(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
     );
+
     virtual void applyReferrer(
-        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &AssetItem,
-        const QString           &_referrer,
-        const TAPI::JSON_t      &_extraReferrerParams
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
     );
 
 protected slots:

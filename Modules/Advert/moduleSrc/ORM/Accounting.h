@@ -66,7 +66,7 @@ namespace tblAccountProducts {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
             { Fields::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
             { Fields::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
             { Fields::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
@@ -77,7 +77,7 @@ namespace tblAccountProducts {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
             { Fields::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
         };
 
@@ -86,7 +86,7 @@ namespace tblAccountProducts {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsBase_DTO,
 
         SF_Enum                     (prdType, Targoman::API::AdvertModule::enuProductType, Targoman::API::AdvertModule::enuProductType::Advertise),
@@ -115,7 +115,7 @@ namespace tblAccountSaleables {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+            ///ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
             { Fields::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
             { Fields::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
             { Fields::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
@@ -131,7 +131,7 @@ namespace tblAccountSaleables {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesBase_DTO,
 
         SF_quint32                  (slbShowPerDay),

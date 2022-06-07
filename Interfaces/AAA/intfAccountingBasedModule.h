@@ -189,30 +189,34 @@ protected slots:
 
 protected:
     virtual void digestPrivs(
-                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem
-    ) { ; }
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
 
-    virtual void applyAssetAdditives(
-                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
-        Q_DECL_UNUSED   const OrderAdditives_t  &_orderAdditives
+    virtual void applyAdditivesAndComputeUnitPrice(
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
     ) { ; }
 
     virtual void applyReferrer(
-                        INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
-        Q_DECL_UNUSED   const QString           &_referrer,
-        Q_DECL_UNUSED   const TAPI::JSON_t      &_extraReferrerParams
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
     ) { ; }
 
-    virtual stuDiscount3 applyDiscount(
+    virtual void applySystemDiscount(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &AssetItem,
-        TAPI::CouponCode_t      _discountCode,
-        TAPI::SaleableCode_t    _saleableCode,
-        qreal                   _qty
+        INOUT stuAssetItem      &_assetItem
     );
+
+    virtual void applyCouponDiscount(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    ) { return {}; }
 
 protected:
     QString ServiceName;

@@ -58,7 +58,7 @@ namespace tblService {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                       Type                        Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                       Type                        Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
                 { Fields::svcID,                            ORM_PRIMARYKEY_32 },
                 { Fields::svcName,                          S(QString),                 QFV,                             QRequired, UPAdmin },
                 { Fields::svc_rolID,                        S(quint32),                 QFV,                             QRequired, UPAdmin },
@@ -72,7 +72,7 @@ namespace tblService {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                    Reference Table              ForeignCol      Rename     LeftJoin
+            ///Col                    Reference Table              ForeignCol      Rename     LeftJoin
                 { Fields::svc_rolID, R(AAASchema, tblRoles::Name), tblRoles::Fields::rolID },
                 ORM_RELATION_OF_CREATOR(Fields::svcCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::svcUpdatedBy_usrID),
@@ -87,7 +87,7 @@ namespace tblService {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (svcID),
         SF_QString                  (svcName),
         SF_quint32                  (svc_rolID),

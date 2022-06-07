@@ -104,7 +104,7 @@ namespace tblUploadFiles {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::uflID,                ORM_PRIMARYKEY_64 },
             { Fields::uflPath,              S(QString),             QFV,                        QRequired,  UPNone },
             { Fields::uflOriginalFileName,  S(QString),             QFV,                        QRequired,  UPNone },
@@ -121,7 +121,7 @@ namespace tblUploadFiles {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::uflCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::uflUpdatedBy_usrID),
         };
@@ -131,7 +131,7 @@ namespace tblUploadFiles {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (uflID),
         SF_QString                  (uflPath),
         SF_QString                  (uflOriginalFileName),
@@ -185,7 +185,7 @@ namespace tblUploadGateways {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                       Type                        Validation                          Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                                       Type                        Validation                          Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::ugwID,                     ORM_PRIMARYKEY_32 },
             { Fields::ugwName,                   S(QString),                 QFV.maxLenght(50),                  QRequired,  UPAdmin },
             { Fields::ugwType,                   S(Targoman::API::ObjectStorage::ORM::enuUploadGatewayType::Type), QFV, QRequired,  UPAdmin },
@@ -214,7 +214,7 @@ namespace tblUploadGateways {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::ugwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::ugwUpdatedBy_usrID),
         };
@@ -224,7 +224,7 @@ namespace tblUploadGateways {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (ugwID),
         SF_QString                  (ugwName),
         SF_NULLABLE_Enum            (ugwType, enuUploadGatewayType),
@@ -275,7 +275,7 @@ namespace tblUploadQueue {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::uquID,                ORM_PRIMARYKEY_64 },
             { Fields::uqu_uflID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::uqu_ugwID,            S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
@@ -305,7 +305,7 @@ namespace tblUploadQueue {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (uquID),
         SF_quint64                  (uqu_uflID),
         SF_quint32                  (uqu_ugwID),

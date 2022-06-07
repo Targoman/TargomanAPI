@@ -309,17 +309,28 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-stuDiscount3 intfAccountingBasedModule::applyDiscount(
+void intfAccountingBasedModule::digestPrivs(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &AssetItem,
-    TAPI::CouponCode_t      _discountCode,
-    TAPI::SaleableCode_t    _saleableCode,
-    qreal                   _qty
+    INOUT stuAssetItem      &_assetItem
 ) {
-    _discountCode = _discountCode.trimmed();
+    ///@TODO: What should I do here?
+}
 
-    if (_discountCode.isEmpty())
-        return {};
+void intfAccountingBasedModule::applySystemDiscount(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem
+) {
+    ///@TODO: tblAccountSystemDiscounts and all its behaviors must be implemented
+}
+
+void intfAccountingBasedModule::applyCouponDiscount(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem
+) {
+    _assetItem.DiscountCode = _assetItem.DiscountCode.trimmed();
+
+    if (_assetItem.DiscountCode.isEmpty())
+        return;
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
@@ -358,7 +369,7 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
         )
         .addCol("tmp_cpn_amount._discountUsedAmount")
 
-        .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _discountCode })
+        .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _assetItem.DiscountCode })
         .andWhere({ tblAccountCouponsBase::Fields::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
         .andWhere(clsCondition({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::Null })
             .orCond({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::GreaterEqual,
@@ -372,14 +383,15 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
     QDateTime Now = DiscountInfo.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
 
     QJsonObject DiscountInfoJson = QJsonObject::fromVariantMap(DiscountInfo);
-    tblAccountCouponsBase::DTO FullDiscount;
-    FullDiscount.fromJson(DiscountInfoJson);
 
-    stuDiscount3 Discount3;
+    tblAccountCouponsBase::DTO DiscountDTO;
+    DiscountDTO.fromJson(DiscountInfoJson);
 
-    Discount3.ID     = FullDiscount.cpnID;
-    Discount3.Code   = FullDiscount.cpnCode;
-    Discount3.Amount = FullDiscount.cpnAmount;
+    stuDiscount Discount;
+
+    Discount.ID     = DiscountDTO.cpnID;
+    Discount.Code   = DiscountDTO.cpnCode;
+    Discount.Amount = DiscountDTO.cpnAmount;
 
     NULLABLE_TYPE(quint32) _discountUsedCount;
     TAPI::setFromVariant(_discountUsedCount, DiscountInfo.value("_discountUsedCount"));
@@ -389,22 +401,22 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 //        if (NULLABLE_HAS_VALUE(cpnExpiryTime) && NULLABLE_GET(cpnExpiryTime).toDateTime() < Now)
 //            throw exHTTPBadRequest("Discount code has been expired");
 
-    if (FullDiscount.cpnTotalUsedCount >= FullDiscount.cpnPrimaryCount)
+    if (DiscountDTO.cpnTotalUsedCount >= DiscountDTO.cpnPrimaryCount)
         throw exHTTPBadRequest("Discount code has been finished");
 
-    if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0) > 0)
-            && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxCount, 0)))
+    if ((NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxCount, 0) > 0)
+            && (NULLABLE_GET_OR_DEFAULT(_discountUsedCount, 0) >= NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxCount, 0)))
         throw exHTTPBadRequest("Max discount usage per user has been reached");
 
-    if (FullDiscount.cpnTotalUsedAmount >= FullDiscount.cpnTotalMaxAmount)
+    if (DiscountDTO.cpnTotalUsedAmount >= DiscountDTO.cpnTotalMaxAmount)
         throw exHTTPBadRequest("Max discount usage amount has been reached");
 
-    if ((NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0)
-            && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0)))
+    if ((NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxAmount, 0) > 0)
+            && (NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0) >= NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxAmount, 0)))
         throw exHTTPBadRequest("Max discount usage amount per user has been reached");
 
     //-- SaleableBasedMultiplier ---------------------------
-    QJsonArray arr = FullDiscount.cpnSaleableBasedMultiplier.array();
+    QJsonArray arr = DiscountDTO.cpnSaleableBasedMultiplier.array();
     if (arr.size()) {
         stuDiscountSaleableBasedMultiplier multiplier;
 
@@ -419,8 +431,8 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 
             qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
 
-            if ((cur.SaleableCode == _saleableCode)
-                    && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _qty)
+            if ((cur.SaleableCode == _assetItem.slbCode)
+                    && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _assetItem.Qty)
             ) {
                 if ((multiplier.Multiplier == 0)
                         || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
@@ -432,61 +444,64 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 //                throw exHTTPBadRequest("Discount code is not valid on selected package");
 
         if (multiplier.Multiplier > 0) { //found
-            auto m = Discount3.Amount;
-            Discount3.Amount = Discount3.Amount * multiplier.Multiplier;
+            auto m = Discount.Amount;
+            Discount.Amount = Discount.Amount * multiplier.Multiplier;
 
-            TargomanDebug(5) << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount3.Amount << ")";
+            TargomanDebug(5) << "Discount Before Multiply(" << m << ")" << "multiplier (" << multiplier.Multiplier << ")" << "Discount After Multiply(" << Discount.Amount << ")";
         }
     } //if (arr.size())
 
 //        Discount.Code = _discountCode;
 
-    TargomanDebug(5) << "1 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    TargomanDebug(5) << "1 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
-    if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
-        Discount3.Amount = AssetItem.SubTotal * Discount3.Amount / 100.0;
+    if (DiscountDTO.cpnAmountType == enuDiscountType::Percent)
+        Discount.Amount = _assetItem.SubTotal * Discount.Amount / 100.0;
 
-    TargomanDebug(5) << "2 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    TargomanDebug(5) << "2 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
     //check cpnMaxAmount
-    if (NULLABLE_HAS_VALUE(FullDiscount.cpnMaxAmount)) {
+    if (NULLABLE_HAS_VALUE(DiscountDTO.cpnMaxAmount)) {
         //note: cpnMaxAmount type is opposite to cpnAmountType
-        if (FullDiscount.cpnAmountType == enuDiscountType::Percent)
-            Discount3.Amount = fmin(Discount3.Amount, NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0));
+        if (DiscountDTO.cpnAmountType == enuDiscountType::Percent)
+            Discount.Amount = fmin(Discount.Amount, NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnMaxAmount, 0));
         else {
-            quint32 _max = ceil(AssetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnMaxAmount, 0) / 100.0);
-            Discount3.Amount = fmin(Discount3.Amount, _max);
+            quint32 _max = ceil(_assetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnMaxAmount, 0) / 100.0);
+            Discount.Amount = fmin(Discount.Amount, _max);
         }
-        TargomanDebug(5) << "3 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+        TargomanDebug(5) << "3 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
     }
 
     //check total - used amount
-    qint32 remainDiscountAmount = FullDiscount.cpnTotalMaxAmount - FullDiscount.cpnTotalUsedAmount;
-    if (remainDiscountAmount < Discount3.Amount) {
-        Discount3.Amount = remainDiscountAmount;
-        TargomanDebug(5) << "4 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    qint32 remainDiscountAmount = DiscountDTO.cpnTotalMaxAmount - DiscountDTO.cpnTotalUsedAmount;
+    if (remainDiscountAmount < Discount.Amount) {
+        Discount.Amount = remainDiscountAmount;
+        TargomanDebug(5) << "4 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
     }
 
     //check per user - used amount
-    if (NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) > 0) {
-        remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(FullDiscount.cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
+    if (NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxAmount, 0) > 0) {
+        remainDiscountAmount = NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnPerUserMaxAmount, 0) - NULLABLE_GET_OR_DEFAULT(_discountUsedAmount, 0);
         if (remainDiscountAmount <= 0)
-            Discount3.Amount = 0;
-        else if (remainDiscountAmount < Discount3.Amount)
-            Discount3.Amount = remainDiscountAmount;
-        TargomanDebug(5) << "5 Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+            Discount.Amount = 0;
+        else if (remainDiscountAmount < Discount.Amount)
+            Discount.Amount = remainDiscountAmount;
+        TargomanDebug(5) << "5 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
     }
 
     //----------
-    Discount3.Amount = ceil(Discount3.Amount);
-    TargomanDebug(5) << "Discount:" << "ID(" << Discount3.ID << ")" << "Code(" << Discount3.Code << ")" << "Amount(" << Discount3.Amount << ")";
+    Discount.Amount = ceil(Discount.Amount);
+    TargomanDebug(5) << "Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
-    if (Discount3.Amount > 0) {
-        AssetItem.Discount = Discount3;
+    if (Discount.Amount > 0) {
+        _assetItem.CouponDiscount = Discount;
+
+        _assetItem.Discount += Discount.Amount;
+
         //do not decrease TotalPrice, because PENDING_VOUCHER_NAME_COUPON_DISCOUNT will increase credit
-//        AssetItem.TotalPrice = AssetItem.SubTotal - Discount3.Amount;
+//        AssetItem.TotalPrice = AssetItem.SubTotal - Discount.Amount;
 
-        TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
+//        TargomanDebug(5, "AssetItem.TotalPrice:" << AssetItem.TotalPrice);
 
         ///@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
         /// because the customer may be angry about not being able to use the coupon again in same voucher
@@ -501,17 +516,13 @@ stuDiscount3 intfAccountingBasedModule::applyDiscount(
 
 //            TargomanLogInfo(5, "Discount Usages updated (+1, +" << Discount.Amount << ")");
 
-        AssetItem.PendingVouchers.append({
-            /* Name     */ PENDING_VOUCHER_NAME_COUPON_DISCOUNT,
-            /* Type     */ enuVoucherType::Prize, //Credit,
-            /* Amount   */ Discount3.Amount,
-            /* Desc     */ Discount3.toJson(),
-        });
-
-        return Discount3;
+//        AssetItem.PendingVouchers.append({
+//            /* Name     */ PENDING_VOUCHER_NAME_COUPON_DISCOUNT,
+//            /* Type     */ enuVoucherType::Prize, //Credit,
+//            /* Amount   */ Discount.Amount,
+//            /* Desc     */ Discount.toJson(),
+//        });
     }
-
-    return {};
 }
 
 Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
@@ -551,11 +562,50 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     stuAssetItem AssetItem;
     AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
 
-    AssetItem.NewUnitPrice = AssetItem.slbBasePrice;
+    //-- --------------------------------
+    AssetItem.OrderAdditives       = _orderAdditives;
+    AssetItem.DiscountCode         = _discountCode;
+    AssetItem.Referrer             = _referrer;
+    AssetItem.ExtraReferrerParams  = _extraReferrerParams;
+    AssetItem.Qty                  = _qty;
+
+    //-- --------------------------------
+    AssetItem.UnitPrice = AssetItem.slbBasePrice;
+    AssetItem.SubTotal = AssetItem.UnitPrice * _qty;
+    AssetItem.Discount = 0;
+    AssetItem.AfterDiscount = AssetItem.SubTotal;
+    AssetItem.VATPercent = 0;
+    AssetItem.VAT = 0;
+
+    auto fnComputeTotalPrice = [&AssetItem](const QString &_label) {
+
+        AssetItem.SubTotal = AssetItem.UnitPrice * AssetItem.Qty;
+        AssetItem.AfterDiscount = AssetItem.SubTotal - AssetItem.Discount;
+
+        AssetItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
+        AssetItem.VAT = AssetItem.AfterDiscount * AssetItem.VATPercent / 100.0;
+
+        AssetItem.TotalPrice = AssetItem.AfterDiscount - AssetItem.VAT;
+
+        TargomanDebug(5) << "[" << _label << "]:"
+                         << "    Qty:           (" << AssetItem.Qty << ")" << endl
+                         << "    UnitPrice:     (" << AssetItem.UnitPrice << ")" << endl
+                         << "    SubTotal:      (" << AssetItem.SubTotal << ")" << endl
+                         << "    Discount:      (" << AssetItem.Discount << ")" << endl
+                         << "    AfterDiscount: (" << AssetItem.AfterDiscount << ")" << endl
+                         << "    VAT:           (" << AssetItem.VAT << ")" << endl
+                         << "    TotalPrice:    (" << AssetItem.TotalPrice << ")" << endl
+                        ;
+    };
+    fnComputeTotalPrice("start");
 
     //-- check available count --------------------------------
-    qreal AvailableProductQty = AssetItem.prdInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedQty, 0));
-    qreal AvailableSaleableQty = AssetItem.slbInStockQty - (NULLABLE_GET_OR_DEFAULT(AssetItem.slbOrderedQty, 0) - NULLABLE_GET_OR_DEFAULT(AssetItem.slbReturnedQty, 0));
+    qreal AvailableProductQty  = AssetItem.prdInStockQty
+                                 - NULLABLE_GET_OR_DEFAULT(AssetItem.prdOrderedQty, 0)
+                                 + NULLABLE_GET_OR_DEFAULT(AssetItem.prdReturnedQty, 0);
+    qreal AvailableSaleableQty = AssetItem.slbInStockQty
+                                 - NULLABLE_GET_OR_DEFAULT(AssetItem.slbOrderedQty, 0)
+                                 + NULLABLE_GET_OR_DEFAULT(AssetItem.slbReturnedQty, 0);
 
     if ((AvailableSaleableQty < 0) || (AvailableProductQty < 0))
         throw exHTTPInternalServerError(QString("AvailableSaleableQty(%1) or AvailableProductQty(%2) < 0").arg(AvailableSaleableQty).arg(AvailableProductQty));
@@ -565,11 +615,6 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
     if (AvailableSaleableQty < _qty)
         throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_saleableCode).arg(AvailableSaleableQty).arg(_qty));
-
-    //-- --------------------------------
-    AssetItem.SubTotal = AssetItem.NewUnitPrice * _qty;
-    AssetItem.TotalPrice = AssetItem.SubTotal;
-    TargomanDebug(5) << "NewUnitPrice(" << AssetItem.NewUnitPrice << ")";
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -587,23 +632,34 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->digestPrivs(_APICALLBOOM, AssetItem);
 
-    this->applyAssetAdditives(_APICALLBOOM, AssetItem, _orderAdditives);
-    TargomanDebug(5) << "after applyAssetAdditives: NewUnitPrice(" << AssetItem.NewUnitPrice << ")";
 
-    this->applyReferrer(_APICALLBOOM, AssetItem, _referrer, _extraReferrerParams);
+    ///@TODO: preprocess item for duplications
+    ///@TODO: call spSaleable_unReserve by cron
 
-//    this->parsePrize(...); -> AssetItem.PendingVouchers
 
     //-- --------------------------------
-    AssetItem.SubTotal = AssetItem.NewUnitPrice * _qty;
-    AssetItem.TotalPrice = AssetItem.SubTotal;
-    TargomanDebug(5) << "SubTotal(" << AssetItem.SubTotal << ")";
+    this->applyAdditivesAndComputeUnitPrice(_APICALLBOOM, AssetItem);
+    fnComputeTotalPrice("after applyAdditivesAndComputeUnitPrice");
+
+    //-- --------------------------------
+    this->applyReferrer(_APICALLBOOM, AssetItem);
+    fnComputeTotalPrice("after applyReferrer");
+
+    //-- --------------------------------
+//    this->parsePrize(...); -> AssetItem.PendingVouchers
 
     //-- discount --------------------------------
     ///TODO: what if some one uses discount code and at the same time will pay by prize credit
-    stuDiscount3 Discount3 = this->applyDiscount(_APICALLBOOM, AssetItem, _discountCode, _saleableCode, _qty);
+
+    this->applySystemDiscount(_APICALLBOOM, AssetItem);
+    fnComputeTotalPrice("after applySystemDiscount");
+
+    this->applyCouponDiscount(_APICALLBOOM, AssetItem);
+    fnComputeTotalPrice("after applyCouponBasedDiscount");
+
+    //-- --------------------------------
+    this->digestPrivs(_APICALLBOOM, AssetItem);
 
     //-- reserve saleable & product ------------------------------------
     this->AccountSaleables->callSP(APICALLBOOM_PARAM,
@@ -616,6 +672,8 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //-- new pre voucher item --------------------------------
     ///TODO: add ttl for order item
 
+    fnComputeTotalPrice("finish");
+
     stuVoucherItem PreVoucherItem;
 
     PreVoucherItem.PendingVouchers = AssetItem.PendingVouchers;
@@ -623,14 +681,22 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //PreVoucherItem.OrderID
     PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
     PreVoucherItem.Desc = AssetItem.slbName;
-    PreVoucherItem.UnitPrice = AssetItem.NewUnitPrice;
     PreVoucherItem.Qty = _qty;
+    PreVoucherItem.UnitPrice = AssetItem.UnitPrice;
     PreVoucherItem.SubTotal = AssetItem.SubTotal;
-    PreVoucherItem.Discount = Discount3;
-    PreVoucherItem.DisAmount = (Discount3.ID > 0 ? Discount3.Amount : 0);
-    PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.prdVAT, 0); // * 100;
-    PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
-    //PreVoucherItem.Sign
+
+    //store multiple discounts (system+coupon)
+    if (AssetItem.SystemDiscount.ID > 0)
+        PreVoucherItem.Discounts.insert(DISCOUNT_TYPE_SYSTEM, AssetItem.SystemDiscount);
+    if (AssetItem.CouponDiscount.ID > 0)
+        PreVoucherItem.Discounts.insert(DISCOUNT_TYPE_COUPON, AssetItem.CouponDiscount);
+    PreVoucherItem.DisAmount = AssetItem.Discount;
+    PreVoucherItem.AfterDiscount = AssetItem.AfterDiscount;
+
+    PreVoucherItem.VATPercent = AssetItem.VATPercent;
+    PreVoucherItem.VATAmount = AssetItem.VAT;
+
+    PreVoucherItem.TotalPrice = AssetItem.TotalPrice;
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
         .addCols({
@@ -657,17 +723,29 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 //            { tblAccountUserAssetsBase::Fields::uasStatus, },
     };
 
-    if (Discount3.ID > 0) {
+    //-- discount
+    if (AssetItem.CouponDiscount.ID > 0) {
         qry.addCols({
                         tblAccountUserAssetsBase::Fields::uas_cpnID,
                         tblAccountUserAssetsBase::Fields::uasDiscountAmount,
                     })
         ;
 
-        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, Discount3.ID);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, Discount3.Amount);
+        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, AssetItem.CouponDiscount.ID);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, AssetItem.CouponDiscount.Amount);
     }
 
+    //-- CustomUserAssetFields
+    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(_APICALLBOOM, AssetItem);
+    for (QVariantMap::const_iterator it = CustomFields.constBegin();
+         it != CustomFields.constEnd();
+         it ++
+    ) {
+        qry.addCol(it.key());
+        values.insert(it.key(), *it);
+    }
+
+    //--
     qry.values(values);
 
     //-- --------------------------------
@@ -686,11 +764,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     _lastPreVoucher.Summary = _lastPreVoucher.Items.size() > 1 ?
                                   QString("%1 items").arg(_lastPreVoucher.Items.size()) :
                                   QString("%1 of %2").arg(PreVoucherItem.Qty).arg(PreVoucherItem.Desc);
+
     qint64 FinalPrice = _lastPreVoucher.Round
                         + _lastPreVoucher.ToPay
-                        + (PreVoucherItem.SubTotal
-//                           - PreVoucherItem.DisAmount
-                           + PreVoucherItem.VATAmount);
+                        + PreVoucherItem.TotalPrice;
+
     if (FinalPrice < 0)
         throw exHTTPInternalServerError("Final amount computed negative!");
 
@@ -890,12 +968,25 @@ bool intfAccountingBasedModule::increaseDiscountUsage(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
-    if (_voucherItem.DisAmount > 0) {
+    if (_voucherItem.Discounts.contains(DISCOUNT_TYPE_SYSTEM)) {
+        stuDiscount Discount = _voucherItem.Discounts[DISCOUNT_TYPE_SYSTEM];
+
         clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
                                                            "spCoupon_IncreaseStats", {
-                                                               { "iDiscountID", _voucherItem.Discount.ID },
+                                                               { "iDiscountID", Discount.ID },
                                                                { "iTotalUsedCount", 1 },
-                                                               { "iTotalUsedAmount", _voucherItem.DisAmount },
+                                                               { "iTotalUsedAmount", Discount.Amount },
+                                                           });
+    }
+
+    if (_voucherItem.Discounts.contains(DISCOUNT_TYPE_COUPON)) {
+        stuDiscount Discount = _voucherItem.Discounts[DISCOUNT_TYPE_COUPON];
+
+        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+                                                           "spCoupon_IncreaseStats", {
+                                                               { "iDiscountID", Discount.ID },
+                                                               { "iTotalUsedCount", 1 },
+                                                               { "iTotalUsedAmount", Discount.Amount },
                                                            });
     }
 
@@ -906,12 +997,25 @@ bool intfAccountingBasedModule::decreaseDiscountUsage(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
-    if (_voucherItem.DisAmount > 0) {
+    if (_voucherItem.Discounts.contains(DISCOUNT_TYPE_SYSTEM)) {
+        stuDiscount Discount = _voucherItem.Discounts[DISCOUNT_TYPE_SYSTEM];
+
         clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
                                                            "spCoupon_DecreaseStats", {
-                                                               { "iDiscountID", _voucherItem.Discount.ID },
+                                                               { "iDiscountID", Discount.ID },
                                                                { "iTotalUsedCount", 1 },
-                                                               { "iTotalUsedAmount", _voucherItem.DisAmount },
+                                                               { "iTotalUsedAmount", Discount.Amount },
+                                                           });
+    }
+
+    if (_voucherItem.Discounts.contains(DISCOUNT_TYPE_COUPON)) {
+        stuDiscount Discount = _voucherItem.Discounts[DISCOUNT_TYPE_COUPON];
+
+        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+                                                           "spCoupon_DecreaseStats", {
+                                                               { "iDiscountID", Discount.ID },
+                                                               { "iTotalUsedCount", 1 },
+                                                               { "iTotalUsedAmount", Discount.Amount },
                                                            });
     }
 

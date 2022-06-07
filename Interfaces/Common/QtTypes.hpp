@@ -24,7 +24,6 @@
 #define TARGOMAN_API_SERVER_QTTYPES_HPP
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
-#include "Interfaces/Common/tmplNullable.hpp"
 #include "Interfaces/Common/tmplAPIArg.h"
 #include <QJsonValue>
 #include <math.h>

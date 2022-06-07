@@ -74,7 +74,7 @@ namespace tblAPITokens {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
             { Fields::aptID,               ORM_PRIMARYKEY_64 },
             { Fields::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false },
             { Fields::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone },
@@ -93,7 +93,7 @@ namespace tblAPITokens {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                Reference Table                 ForeignCol         Rename    LeftJoin
+            ///Col                                Reference Table                 ForeignCol         Rename    LeftJoin
             { Fields::apt_svcID,           R(AAASchema, tblService::Name), tblService::Fields::svcID, {},       true},
             { Fields::apt_usrID,           R(AAASchema, tblUser::Name),    tblUser::Fields::usrID,    "Owner_", true},
             ORM_RELATION_OF_CREATOR(Fields::aptCreatedBy_usrID),
@@ -109,7 +109,7 @@ namespace tblAPITokens {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (aptID),
         SF_QString                  (aptToken),
         SF_quint64                  (apt_usrID),

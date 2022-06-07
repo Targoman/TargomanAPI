@@ -52,7 +52,7 @@ namespace tblDepartments {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                    Validation      Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                               Type                    Validation      Default     UpBy   Sort  Filter Self  Virt   PK
                 { Fields::depID,                ORM_PRIMARYKEY_32 },
                 { Fields::depName,              S(QString),             QFV,            QRequired,  UPNone },
                 { Fields::depCreationDateTime,  ORM_CREATED_ON },
@@ -60,7 +60,7 @@ namespace tblDepartments {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                   Reference Table         ForeignCol      Rename      LeftJoin
+            ///Col                                   Reference Table         ForeignCol      Rename      LeftJoin
                 ORM_RELATION_OF_CREATOR(Fields::depCreatedBy_usrID),
             };
 
@@ -69,7 +69,7 @@ namespace tblDepartments {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (depID),
         SF_QString                  (depName),
         SF_ORM_CREATED_ON           (depCreationDateTime),

@@ -237,6 +237,31 @@
                                 return t; \
                             }(v)
 
+typedef QMap<QString, QString> QStringMap;
+
+#define SF_QStringMap(_name) \
+    /* name              */ _name, \
+    /* type              */ QStringMap, \
+    /* def               */ QStringMap(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](QStringMap v) -> QJsonValue { \
+                                QJsonObject A; \
+                                for (auto it = v.begin(); \
+                                    it != v.end(); \
+                                    it++ \
+                                ) { \
+                                    A.insert(it.key(), *it); \
+                                } \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> QStringMap { \
+                                QStringMap L; \
+                                QJsonObject O = v.toObject(); \
+                                foreach (const QString &Key, O.keys()) \
+                                    L.insert(Key, O.value(Key).toString()); \
+                                return L; \
+                            }(v)
+
 #define SF_QMapOfVarStruct(_name, _itemType, _mapType) \
     /* name              */ _name, \
     /* type              */ _mapType, \
@@ -308,22 +333,22 @@
 #define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qreal),   NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2DBL(v),      __VA_ARGS__)
 
 /************************************************************/
-#define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) \
+#define TAPI_DEFINE_STRUCT(_name, ...) \
     struct _name { \
-        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
-        _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
+        TAPI_HELPER_STRUCT_PARAMS(__VA_ARGS__) \
+        _name(TAPI_HELPER_STRUCT_CONST_INPUT(__VA_ARGS__)) : \
+            TAPI_HELPER_STRUCT_CONST_INIT(__VA_ARGS__) \
         { ; } \
         QJsonObject toJson() const { \
             QJsonObject Obj; \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
+            TAPI_HELPER_STRUCT_TOJSON(__VA_ARGS__); \
             return Obj; \
         } \
         _name& fromJson(const QJsonObject& _obj) { \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__); \
+            TAPI_HELPER_STRUCT_FROMJSON(__VA_ARGS__); \
             return *this; \
         } \
-    };
+    }
 
 /*
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
@@ -344,34 +369,22 @@
 #define C2U32(v) C2DBL(v)
 #define V2U32(v) INTERNAL_V2U32(v)
 
-/************************************************************/
-// METHOD 1: tmplNullable(QSharedPointer)
-//#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
-//#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
-//#define NULLABLE_UNDERLAYER_CLASS_NAME "TAPI::tmplNullable"
-//#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
-//#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name = NULLABLE_TYPE(_type)::create();
-//#define NULLABLE_GET(_value) _value.isNull() ? QVariant() : *_value
-//#define NULLABLE_NULL_VALUE nullptr
-//#define NULLABLE_IS_NULL(_nullable) _nullable.isNull()
-//#define NULLABLE_HAS_VALUE(_nullable) _nullable.isNull() == false
-//#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) NULLABLE_TYPE(_type)(_val)
-
-// METHOD 2: std::optional
-#define TAPI_HELEPER_QSP_M2STR_PREFIX "std::optional<"
-#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
-#define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
-#define NULLABLE_TYPE(_type) std::optional<_type>
-#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value) *_value
-#define NULLABLE_GET(_value) (_value.has_value() ? *_value : QVariant())
-#define NULLABLE_GET_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
-#define NULLABLE_SET(_var, _value) (_var = _value)
-#define NULLABLE_NULL_VALUE std::nullopt
-#define NULLABLE_NULL_VALUE_AS_STRING "std::nullopt"
-#define NULLABLE_RESET(_var) (_var = NULLABLE_NULL_VALUE)
-#define NULLABLE_IS_NULL(_nullable) (_nullable.has_value() == false)
-#define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
+/**********************************************************************************************************************/
+#define NULLABLE_UNDERLAYER_CLASS_NAME                  "std::optional"
+#define NULLABLE_M2STR_PREFIX                           "std::optional<"
+#define NULLABLE_M2STR_POSTFIX                          ">"
+#define NULLABLE_M2STR(_type)                           NULLABLE_M2STR_PREFIX #_type NULLABLE_M2STR_POSTFIX
+#define NULLABLE_TYPE(_type)                            std::optional<_type>
+#define NULLABLE_VAR(_type, _name)                      NULLABLE_TYPE(_type) _name
+#define NULLABLE_VALUE(_value)                          *_value
+#define NULLABLE_GET(_value)                            (_value.has_value() ? *_value : QVariant())
+#define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.has_value() ? *_value : _def)
+#define NULLABLE_SET(_var, _value)                      (_var = _value)
+#define NULLABLE_NULL_VALUE                             std::nullopt
+#define NULLABLE_NULL_VALUE_AS_STRING                   "std::nullopt"
+#define NULLABLE_RESET(_var)                            (_var = NULLABLE_NULL_VALUE)
+#define NULLABLE_IS_NULL(_nullable)                     (_nullable.has_value() == false)
+#define NULLABLE_HAS_VALUE(_nullable)                   _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
 
 //template <typename _type>
@@ -399,6 +412,5 @@
 #define N2U32(_value)  INTERNAL_N2uint32(_value)
 #define N2U64(_value)  INTERNAL_N2uint64(_value)
 #define N2DBL(_value)  INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(double,  _value)
-#define QSP_M2STR(_type) TAPI_HELEPER_QSP_M2STR_PREFIX #_type TAPI_HELEPER_QSP_M2STR_POSTFIX
 
 #endif // TAPI_APIARGHELPERMACROS_HPP

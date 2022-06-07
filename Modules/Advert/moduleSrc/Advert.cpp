@@ -122,31 +122,44 @@ bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
 bool Advert::isEmpty(const UsageLimits_t& _limits) const {
 }
 
-void Advert::applyAssetAdditives(
-                    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    Q_DECL_UNUSED   INOUT stuAssetItem      &AssetItem,
-    Q_DECL_UNUSED   const OrderAdditives_t  &_orderAdditives
+void Advert::applyAdditivesAndComputeUnitPrice(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem
 ) {
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
-//    AssetItem.slbBasePrice *= 1.1;
+//    AssetItem.UnitPrice *= 1.1;
 };
 
 void Advert::applyReferrer(
-                    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-                    INOUT stuAssetItem      &AssetItem,
-    Q_DECL_UNUSED   const QString           &_referrer,
-    Q_DECL_UNUSED   const TAPI::JSON_t      &_extraReferrerParams
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem
 ) {
     ///@TODO: [very important] complete this
-    AssetItem.PendingVouchers.append({
+    _assetItem.PendingVouchers.append({
         /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
         /* Type     */ enuVoucherType::Prize, //Credit,
         /* Amount   */ 123456,
         /* Desc     */ {
-                           { "referrer", _referrer },
+                           { "referrer", _assetItem.Referrer },
                        },
     });
 };
+
+QVariantMap Advert::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem
+) {
+/*
+    `uasDays` MEDIUMINT(7) NULL DEFAULT '0',
+    `uasDayShow` INT(10) UNSIGNED NULL DEFAULT '0',
+    `uasTotalShow` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+    `uasDayClicks` INT(10) UNSIGNED NULL DEFAULT '0',
+    `uasMonthClicks` INT(10) UNSIGNED NULL DEFAULT '0',
+    `uasTotalClicks` BIGINT(20) UNSIGNED NULL DEFAULT '0',
+*/
+
+    return {};
+}
 
 /***************************************************************************************************/
 //bool IMPL_REST_POST(Advert, processVoucher, (

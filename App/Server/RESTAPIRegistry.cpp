@@ -21,6 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
+#include <algorithm>
 #include <QMap>
 #include <QMutex>
 #include <QTextStream>
@@ -30,6 +31,8 @@
 
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
+
+using namespace std;
 
 namespace Targoman::API {
 
@@ -88,7 +91,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
     template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
     template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
-    static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(QSP_M2STR(_baseType)); \
+    static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(NULLABLE_M2STR(_baseType)); \
 //NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
 
 

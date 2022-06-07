@@ -55,7 +55,7 @@ namespace tblLocations {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                            Type                 Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
                 { Fields::locID,               ORM_PRIMARYKEY_32 },
                 { Fields::locURL,              S(TAPI::URL_t),      QFV/*.integer().minValue(1)*/,  QRequired, UPAdmin },
                 { Fields::locPlaceCode,        S(TAPI::String_t),   QFV.maxLenght(3),               QRequired, UPAdmin },
@@ -67,7 +67,7 @@ namespace tblLocations {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                            Reference Table                ForeignCol        Rename      LeftJoin
+            ///Col                            Reference Table                ForeignCol        Rename      LeftJoin
                 ORM_RELATION_OF_CREATOR(Fields::locCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::locUpdatedBy_usrID),
             };
@@ -88,7 +88,7 @@ namespace tblLocations {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (locID),
         SF_QString                  (locURL),
         SF_QString                  (locPlaceCode),
