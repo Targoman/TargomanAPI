@@ -42,7 +42,7 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
-    Helpers/QTHelper.h \
+    Helpers/IteratorHelper.hpp \
     ORM/intfMigrations.h \
     Server/APICallBoom.h \
     Server/ServerCommon.h \

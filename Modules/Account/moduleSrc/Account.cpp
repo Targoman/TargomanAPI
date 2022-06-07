@@ -51,7 +51,7 @@
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
-#include "Interfaces/Helpers/QTHelper.h"
+#include "Interfaces/Helpers/IteratorHelper.hpp"
 using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
@@ -742,17 +742,51 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
             //lookup services
             try {
-                QTHelper::ConstIterator(Services)
-                        .where([&VoucherItem](auto _item) {
-                            QVariantMap ServiceInfo = _item.toMap();
+                IteratorHelper::ConstIterator(Services)
+                        .where([&VoucherItem](auto _service) {
+                            QVariantMap ServiceInfo = _service.toMap();
                             return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
                         })
-                        .firstThat([](auto _item) {
+                        .runFirst([&APICALLBOOM_PARAM, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) {
+                            QVariantMap ServiceInfo = _service.toMap();
 
+                            NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
+                            TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
+
+                            //bypass process by end point?
+                            if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
+                                stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
+                                VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getUserID();
+                                VoucherItemForTrustedAction.VoucherID = _voucherID;
+                                VoucherItemForTrustedAction.VoucherItem = VoucherItem;
+                                VoucherItemForTrustedAction.Sign.clear();
+                                VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
+
+                                QVariant Result = RESTClientHelper::callAPI(
+                                    RESTClientHelper::POST,
+                                    NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
+                                    {},
+                                    {
+                                        { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
+                                    }
+                                );
+
+                                if ((Result.isValid() == false) || (Result.toBool() == false))
+                                    throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
+
+                                ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Processed);
+                                if (ItemResult.contains("error"))
+                                    ItemResult.remove("error");
+
+                                vchProcessResult[VoucherItem.UUID] = ItemResult;
+                            } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
+                            else {
+                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
+                            }
                         });
+                /**/
 
-
-                foreach (QVariant Service, Services) {
+                /*foreach (QVariant Service, Services) {
                     QVariantMap ServiceInfo = Service.toMap();
 
                     if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service) {
@@ -793,6 +827,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                         break;
                     } //if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service)
                 } //foreach (QVariant Service, Services)
+                /**/
             } catch (std::exception &_exp) {
                 ++ErrorCount;
 
