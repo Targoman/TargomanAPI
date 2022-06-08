@@ -66,41 +66,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _item) {
+                .runAll([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _item) {
+                .runAll([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _item) {
+                .runAll([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _item) {
+                .runAll([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
     }
@@ -111,41 +115,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _item) {
+                .runFirst([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _item) {
+                .runFirst([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _item) {
+                .runFirst([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(List)
-                .where([](auto _item) {
+                .where([](auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _item) {
+                .runFirst([](auto _item) -> bool {
                     qDebug() << _item;
+                    return true;
                 })
         ;
     }
@@ -155,11 +163,12 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }
@@ -169,11 +178,12 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::ReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }
@@ -187,41 +197,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }
@@ -235,41 +249,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }
@@ -283,41 +301,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runAll([](auto _key, auto _item) {
+                .runAll([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }
@@ -331,41 +353,45 @@ private slots:
 
         qDebug() << "Iterator:";
         IteratorHelper::Iterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Iterator:";
         IteratorHelper::ConstIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Reverse Iterator:";
         IteratorHelper::ReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
 
         qDebug() << "Const Reverse Iterator:";
         IteratorHelper::ConstReverseIterator(Map)
-                .where([](auto _key, auto _item) {
+                .where([](auto _key, auto _item) -> bool {
                     return true;
                 })
-                .runFirst([](auto _key, auto _item) {
+                .runFirst([](auto _key, auto _item) -> bool {
                     qDebug() << _key << ":" << _item;
+                    return true;
                 })
         ;
     }

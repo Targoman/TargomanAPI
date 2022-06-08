@@ -74,8 +74,8 @@ Advert::Advert() :
         AdvertSchema,
         {
             //           day                week   month                total
-            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
-            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+            { "show",  { "slbExShowPerDay",   {},    {},                  "slbExShowTotal" } },
+            { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
         &AccountProducts::instance(),
         &AccountSaleables::instance(),
@@ -126,6 +126,7 @@ void Advert::applyAdditivesAndComputeUnitPrice(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem
 ) {
+    ///@TODO: [very important] complete this
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 //    AssetItem.UnitPrice *= 1.1;
 };
@@ -149,16 +150,10 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem
 ) {
-/*
-    `uasDays` MEDIUMINT(7) NULL DEFAULT '0',
-    `uasDayShow` INT(10) UNSIGNED NULL DEFAULT '0',
-    `uasTotalShow` BIGINT(20) UNSIGNED NULL DEFAULT '0',
-    `uasDayClicks` INT(10) UNSIGNED NULL DEFAULT '0',
-    `uasMonthClicks` INT(10) UNSIGNED NULL DEFAULT '0',
-    `uasTotalClicks` BIGINT(20) UNSIGNED NULL DEFAULT '0',
-*/
-
-    return {};
+    ///@TODO: [very important] complete this
+    return {
+        { tblAccountUserAsset::ExtraFields::uasExDays, 100 },
+    };
 }
 
 /***************************************************************************************************/
@@ -224,7 +219,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     QVariantMap Result;
 
     if (_random == "1")
-        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+        _random = QString::number(QRandomGenerator::global()->generate());
 
     if (_random.isEmpty() == false)
         Result.insert("Random", _random);
@@ -256,8 +251,8 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountProductsBase::Fields::prdCode,          ProductCode },
         { tblAccountProductsBase::Fields::prdName,          FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
         { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-        { tblAccountProducts::Fields::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-        { tblAccountProducts::Fields::prd_locID,            LocationID },
+        { tblAccountProducts::ExtraFields::prdExType,         Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prdEx_locID,       LocationID },
     };
 
     quint32 ProductID = CreateQuery(*this->AccountProducts)
@@ -276,13 +271,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //                                     tblAccountProductsBase::Fields::prdOrderedQty,
 //                                     tblAccountProductsBase::Fields::prdReturnedQty,
 //                                     tblAccountProductsBase::Fields::prdStatus,
-                                     tblAccountProducts::Fields::prdType,
-                                     tblAccountProducts::Fields::prd_locID,
-//                                     tblAccountProducts::Fields::prdShowPerDay,
-//                                     tblAccountProducts::Fields::prdShowTotal,
-//                                     tblAccountProducts::Fields::prdClicksPerDay,
-//                                     tblAccountProducts::Fields::prdClicksPerMonth,
-//                                     tblAccountProducts::Fields::prdClicksTotal,
+                                     tblAccountProducts::ExtraFields::prdExType,
+                                     tblAccountProducts::ExtraFields::prdEx_locID,
+//                                     tblAccountProducts::ExtraFields::prdExShowPerDay,
+//                                     tblAccountProducts::ExtraFields::prdExShowTotal,
+//                                     tblAccountProducts::ExtraFields::prdExClicksPerDay,
+//                                     tblAccountProducts::ExtraFields::prdExClicksPerMonth,
+//                                     tblAccountProducts::ExtraFields::prdExClicksTotal,
                                  })
                         .values(ProductValues)
                         .execute(1);
@@ -329,11 +324,11 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //                                      tblAccountSaleablesBase::Fields::slbCreatedBy_usrID,
 //                                      tblAccountSaleablesBase::Fields::slbCreationDateTime,
 //                                      tblAccountSaleablesBase::Fields::slbUpdatedBy_usrID,
-//                                      tblAccountSaleables::Fields::slbShowPerDay,
-//                                      tblAccountSaleables::Fields::slbShowTotal,
-//                                      tblAccountSaleables::Fields::slbClicksPerDay,
-//                                      tblAccountSaleables::Fields::slbClicksPerMonth,
-//                                      tblAccountSaleables::Fields::slbClicksTotal,
+//                                      tblAccountSaleables::Fields::slbExShowPerDay,
+//                                      tblAccountSaleables::Fields::slbExShowTotal,
+//                                      tblAccountSaleables::Fields::slbExClicksPerDay,
+//                                      tblAccountSaleables::Fields::slbExClicksPerMonth,
+//                                      tblAccountSaleables::Fields::slbExClicksTotal,
                                   })
                          .values(SaleableValues)
                          .execute(1);

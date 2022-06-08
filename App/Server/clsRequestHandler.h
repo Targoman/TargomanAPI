@@ -165,6 +165,12 @@ private:
     QMap<QString, quint64> ServerTimings;
 
     friend class clsMultipartFormDataRequestHandler;
+
+    quint64 RequestIndex;
+
+public:
+    quint64 Index() { return this->RequestIndex; }
+
 };
 
 } //namespace Targoman::API::Server

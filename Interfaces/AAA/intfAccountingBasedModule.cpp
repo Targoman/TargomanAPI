@@ -526,24 +526,26 @@ void intfAccountingBasedModule::applyCouponDiscount(
 }
 
 Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    TAPI::SaleableCode_t _saleableCode,
-    Targoman::API::AAA::OrderAdditives_t _orderAdditives,
-    qreal _qty,
-    TAPI::CouponCode_t _discountCode,
-    QString _referrer,
-    TAPI::JSON_t _extraReferrerParams,
-    Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+    APICALLBOOM_TYPE_JWT_IMPL               &APICALLBOOM_PARAM,
+    TAPI::SaleableCode_t                    _saleableCode,
+    Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
+    qreal                                   _qty,
+    TAPI::CouponCode_t                      _discountCode,
+    QString                                 _referrer,
+    TAPI::JSON_t                            _extraReferrerParams,
+    Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
-    checkPreVoucherSanity(_lastPreVoucher);
-
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
+    //-- --------------------------------
+    checkPreVoucherSanity(_lastPreVoucher);
 
     if (_lastPreVoucher.Items.isEmpty())
         _lastPreVoucher.UserID = CurrentUserID;
     else if (_lastPreVoucher.UserID != CurrentUserID)
         throw exHTTPBadRequest("invalid pre-Voucher owner");
 
+    //-- --------------------------------
     QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
         .addCols(this->AccountSaleables->SelectableColumnNames())
         .addCols(this->AccountProducts->SelectableColumnNames())
@@ -560,23 +562,16 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     TargomanDebug(5) << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
 
     stuAssetItem AssetItem;
+
     AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
 
     //-- --------------------------------
-    AssetItem.OrderAdditives       = _orderAdditives;
-    AssetItem.DiscountCode         = _discountCode;
-    AssetItem.Referrer             = _referrer;
-    AssetItem.ExtraReferrerParams  = _extraReferrerParams;
-    AssetItem.Qty                  = _qty;
+    AssetItem.OrderAdditives        = _orderAdditives;
+    AssetItem.DiscountCode          = _discountCode;
+    AssetItem.Referrer              = _referrer;
+    AssetItem.ExtraReferrerParams   = _extraReferrerParams;
 
     //-- --------------------------------
-    AssetItem.UnitPrice = AssetItem.slbBasePrice;
-    AssetItem.SubTotal = AssetItem.UnitPrice * _qty;
-    AssetItem.Discount = 0;
-    AssetItem.AfterDiscount = AssetItem.SubTotal;
-    AssetItem.VATPercent = 0;
-    AssetItem.VAT = 0;
-
     auto fnComputeTotalPrice = [&AssetItem](const QString &_label) {
 
         AssetItem.SubTotal = AssetItem.UnitPrice * AssetItem.Qty;
@@ -597,6 +592,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
                          << "    TotalPrice:    (" << AssetItem.TotalPrice << ")" << endl
                         ;
     };
+
+    //-- --------------------------------
+    AssetItem.Qty       = _qty;
+    AssetItem.UnitPrice = AssetItem.slbBasePrice;
+    AssetItem.Discount  = 0;
     fnComputeTotalPrice("start");
 
     //-- check available count --------------------------------
@@ -688,8 +688,10 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //store multiple discounts (system+coupon)
     if (AssetItem.SystemDiscount.ID > 0)
         PreVoucherItem.Discounts.insert(DISCOUNT_TYPE_SYSTEM, AssetItem.SystemDiscount);
+
     if (AssetItem.CouponDiscount.ID > 0)
         PreVoucherItem.Discounts.insert(DISCOUNT_TYPE_COUPON, AssetItem.CouponDiscount);
+
     PreVoucherItem.DisAmount = AssetItem.Discount;
     PreVoucherItem.AfterDiscount = AssetItem.AfterDiscount;
 
@@ -1027,9 +1029,8 @@ bool intfAccountingBasedModule::activateUserAsset(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    return this->Update(*this->AccountUserAssets,
-                        APICALLBOOM_PARAM,
-                        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+    return this->AccountUserAssets->Update(APICALLBOOM_PARAM,
+                        /*PK*/ QString::number(_voucherItem.OrderID),
                         TAPI::ORMFields_t({
                             { tblAccountUserAssetsBase::Fields::uas_vchID, _voucherID },
                             { tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Active },
@@ -1044,12 +1045,12 @@ bool intfAccountingBasedModule::removeFromUserAssets(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
-    return this->DeleteByPks(
-        *this->AccountUserAssets,
+    return this->AccountUserAssets->DeleteByPks(
         APICALLBOOM_PARAM,
-        /*PK*/ QString("%1").arg(_voucherItem.OrderID),
+        /*PK*/ QString::number(_voucherItem.OrderID),
         {
-            { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
+            //this is just for make condition safe and strong:
+            { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID },
         },
         false
     );
@@ -1061,7 +1062,7 @@ bool intfAccountingBasedModule::processVoucherItem(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    if (!this->preProcessVoucherItem(APICALLBOOM_PARAM, _voucherItem, _voucherID))
+    if (!this->preProcessVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem, _voucherID))
         return false;
 
     if (this->activateUserAsset(APICALLBOOM_PARAM, _voucherItem, _voucherID) == false)
@@ -1069,7 +1070,11 @@ bool intfAccountingBasedModule::processVoucherItem(
 
     this->increaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
 
-    this->postProcessVoucherItem(APICALLBOOM_PARAM, _voucherItem, _voucherID);
+
+    ///@TODO: add prize on item if possible
+
+
+    this->postProcessVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem, _voucherID);
 
     return true;
 }
@@ -1080,7 +1085,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
 ) {
-    if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _voucherItem))
+    if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem))
         return false;
 
     QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
@@ -1095,10 +1100,14 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
         return false;
 
-    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+    enuAuditableStatus::Type UserAssetStatus =
+        enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, enuAuditableStatus::Pending).toString());
 
-    if (UserAssetStatus == TAPI::enuAuditableStatus::Active)
+    if (UserAssetStatus == TAPI::enuAuditableStatus::Active) {
         this->decreaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
+
+        ///@TODO: delete prize on item if previously added in processVoucherItem
+    }
 
     quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uas_slbID).toUInt();
 
@@ -1130,7 +1139,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     //-----------------------------------------------------------
     this->removeFromUserAssets(APICALLBOOM_PARAM, _voucherItem);
 
-    this->postCancelVoucherItem(APICALLBOOM_PARAM, _voucherItem);
+    this->postCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem);
 
     return true;
 }

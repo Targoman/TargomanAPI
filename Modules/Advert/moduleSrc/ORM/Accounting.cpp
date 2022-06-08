@@ -25,9 +25,6 @@
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
-//using namespace ORM;
-//using namespace AAA;
-//using namespace AAA::Accounting;
 using namespace Targoman::API::AAA;
 
 namespace Targoman::API::AdvertModule::ORM {
@@ -36,42 +33,45 @@ namespace Targoman::API::AdvertModule::ORM {
 AccountProducts::AccountProducts() :
     intfAccountProducts(
         AdvertSchema,
-        tblAccountProducts::Private::ORMFields,
-        tblAccountProducts::Private::Relations,
-        tblAccountProducts::Private::Indexes
+        tblAccountProducts::Private::ExtraORMFields,
+        tblAccountProducts::Private::ExtraRelations,
+        tblAccountProducts::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
         AdvertSchema,
-        tblAccountSaleables::Private::ORMFields,
-        tblAccountSaleables::Private::Relations,
-        tblAccountSaleables::Private::Indexes
+        tblAccountSaleables::Private::ExtraORMFields,
+        tblAccountSaleables::Private::ExtraRelations,
+        tblAccountSaleables::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
         AdvertSchema,
-        {///ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
-            ADVERT_DEFINE_ASSET_FIELDS("uas")
-        }
+        tblAccountUserAsset::Private::ExtraORMFields,
+        tblAccountUserAsset::Private::ExtraRelations,
+        tblAccountUserAsset::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
         AdvertSchema,
-        {///ColName                                 Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
-            ADVERT_DEFINE_ASSET_FIELDS("usg")
-        }
+        tblAccountAssetUsage::Private::ExtraORMFields,
+        tblAccountAssetUsage::Private::ExtraRelations,
+        tblAccountAssetUsage::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
 AccountCoupons::AccountCoupons() :
     intfAccountCoupons(
-        AdvertSchema
+        AdvertSchema,
+        tblAccountCoupons::Private::ExtraORMFields,
+        tblAccountCoupons::Private::ExtraRelations,
+        tblAccountCoupons::Private::ExtraIndexes
 ) { ; }
 
 } // namespace Targoman::API::AdvertModule::ORM

@@ -42,8 +42,8 @@ SOURCES += \
 
 OTHER_FILES += \
     ../conf/api.conf \
-    migrations/.gitkeep \
     migrations/db/* \
+    migrations/db/.dbdiff.dev_.cfg \
     migrations/local/* \
     migrations/local/.migrations
 

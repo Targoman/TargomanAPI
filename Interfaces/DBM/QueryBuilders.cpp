@@ -1879,14 +1879,14 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::xorWhere(const clsCondition& _c
 \***********************/
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(quint32 _pksByPath) {
-    this->WhereTraitData->PksByPath = QString("%1").arg(_pksByPath);
+    this->WhereTraitData->PksByPath = QString::number(_pksByPath);
 
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::setPksByPath(quint64 _pksByPath) {
-    this->WhereTraitData->PksByPath = QString("%1").arg(_pksByPath);
+    this->WhereTraitData->PksByPath = QString::number(_pksByPath);
 
     return (itmplDerived&)*this;
 }
@@ -2608,7 +2608,7 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
 //                    if (this->Data->PageSize > 0)
                         sLimit = QString("%1,%2").arg(this->Data->PageIndex * this->Data->PageSize).arg(this->Data->PageSize);
 //                    else
-//                        sLimit = QString("%1").arg(this->Data->PageIndex);
+//                        sLimit = QString::number(this->Data->PageIndex);
 //                } else //limit > 0
 //                    sLimit = QString("0,%1").arg(this->Data->PageSize);
 

@@ -76,7 +76,11 @@ public:
         return *this;
     }
 
-    bool runAll(std::function<void(T _value)> _fn, bool _runOnce=false) {
+    //[RunCount, OkCount]
+    std::tuple<int, int> runAll(std::function<bool(T _value)> _fn, bool _runOnce=false) {
+        int RunCount = 0;
+        int OkCount = 0;
+
         if (IsConst) {
             auto itFrom = (IsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
             auto itTo = (IsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
@@ -92,9 +96,13 @@ public:
                 }
 
                 if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                    _fn(*itFrom);
+                    if (_fn(*itFrom))
+                        ++OkCount;
+
+                    ++RunCount;
+
                     if (_runOnce)
-                        return true;
+                        return { RunCount, OkCount };
                 }
 
                 if (IsReverse)
@@ -117,9 +125,13 @@ public:
                 }
 
                 if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                    _fn(*itFrom);
+                    if (_fn(*itFrom))
+                        ++OkCount;
+
+                    ++RunCount;
+
                     if (_runOnce)
-                        return true;
+                        return { RunCount, OkCount };
                 }
 
                 if (IsReverse)
@@ -129,10 +141,11 @@ public:
             }
         }
 
-        return false;
+        return { RunCount, OkCount };
     }
 
-    bool runFirst(std::function<void(T _value)> _fn) {
+    //[RunCount, OkCount]
+    std::tuple<int, int> runFirst(std::function<bool(T _value)> _fn) {
         return this->runAll(_fn, true);
     }
 
@@ -183,7 +196,11 @@ public:
         return *this;
     }
 
-    bool runAll(std::function<void(TK _key, TV _value)> _fn, bool _runOnce=false) {
+    //[RunCount, OkCount]
+    std::tuple<int, int> runAll(std::function<bool(TK _key, TV _value)> _fn, bool _runOnce=false) {
+        int RunCount = 0;
+        int OkCount = 0;
+
         if (IsConst) {
             auto itFrom = (IsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
             auto itTo = (IsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
@@ -199,9 +216,13 @@ public:
                 }
 
                 if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                    _fn(itFrom.key(), *itFrom);
+                    if (_fn(itFrom.key(), *itFrom))
+                        ++OkCount;
+
+                    ++RunCount;
+
                     if (_runOnce)
-                        return true;
+                        return { RunCount, OkCount };
                 }
 
                 if (IsReverse)
@@ -224,9 +245,13 @@ public:
                 }
 
                 if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                    _fn(itFrom.key(), *itFrom);
+                    if (_fn(itFrom.key(), *itFrom))
+                        ++OkCount;
+
+                    ++RunCount;
+
                     if (_runOnce)
-                        return true;
+                        return { RunCount, OkCount };
                 }
 
                 if (IsReverse)
@@ -236,10 +261,11 @@ public:
             }
         }
 
-        return false;
+        return { RunCount, OkCount };
     }
 
-    bool runFirst(std::function<void(TK _key, TV _value)> _fn) {
+    //[RunCount, OkCount]
+    std::tuple<int, int> runFirst(std::function<bool(TK _key, TV _value)> _fn) {
         return this->runAll(_fn, true);
     }
 

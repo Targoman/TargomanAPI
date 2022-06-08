@@ -644,7 +644,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 */
 /*
 QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy) {
-    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
+    return this->selectFromTable(_extraJoins, {}, QString::number(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
 }
 */
 /*

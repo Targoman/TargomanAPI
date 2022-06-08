@@ -200,12 +200,12 @@ intfAccountProducts::intfAccountProducts(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<DBM::stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountProductsBase::Name,
-    tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
-    tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountProductsBase::Name,
+        tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountProducts) {
@@ -240,12 +240,12 @@ intfAccountSaleables::intfAccountSaleables(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<DBM::stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountSaleablesBase::Name,
-    tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
-    tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountSaleablesBase::Name,
+        tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountSaleables) {
@@ -293,12 +293,12 @@ intfAccountUserAssets::intfAccountUserAssets(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountUserAssetsBase::Name,
-    tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
-    tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountUserAssetsBase::Name,
+        tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountUserAssets) {
@@ -351,12 +351,12 @@ intfAccountAssetUsage::intfAccountAssetUsage(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountAssetUsageBase::Name,
-    tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
-    tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountAssetUsageBase::Name,
+        tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
+        tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountAssetUsage) {
@@ -368,14 +368,17 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
 
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
-    const QString& _schema
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountCouponsBase::Name,
-    tblAccountCouponsBase::Private::ORMFields, // + _exclusiveCols,
-    tblAccountCouponsBase::Private::Relations(_schema), // + _exclusiveRelations,
-    tblAccountCouponsBase::Private::Indexes // + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountCouponsBase::Name,
+        tblAccountCouponsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountCouponsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountCouponsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountCoupons) {
@@ -409,15 +412,16 @@ bool IMPL_ORMDELETE(intfAccountCoupons) {
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
     const QString& _schema,
-    const QString& _name,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    _name,
-    _cols,
-    _relations
+    intfSQLBasedModule(
+        _schema,
+        tblAccountPrizesBase::Name,
+        tblAccountPrizesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountPrizesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountPrizesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountPrizes) {

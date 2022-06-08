@@ -419,9 +419,21 @@ namespace tblAccountCouponsBase {
         TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedAmount);
 
         TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
-        TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
+    }
+}
+
+namespace tblAccountPrizesBase {
+    constexpr char Name[] = "tblAccountPrizes";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(przID);
+        TARGOMAN_CREATE_CONSTEXPR(przStatus);
+        TARGOMAN_CREATE_CONSTEXPR(przCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(przCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(przUpdatedBy_usrID);
     }
 }
 
@@ -771,10 +783,47 @@ namespace tblAccountCouponsBase {
     );
 }
 
+namespace tblAccountPrizesBase {
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::przID,                      ORM_PRIMARYKEY_32 },
+            { Fields::przStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::przCreationDateTime,        ORM_CREATED_ON },
+            { Fields::przCreatedBy_usrID,         ORM_CREATED_BY },
+            { Fields::przUpdatedBy_usrID,         ORM_UPDATED_BY },
+        };
+
+        inline const QList<stuRelation> Relations(const QString& _schema) {
+            return {};
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountPrizesBase_DTO \
+    SF_ORM_PRIMARYKEY_32        (przID), \
+    SF_ORM_STATUS_FIELD         (przStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active), \
+    SF_ORM_CREATED_ON           (przCreationDateTime), \
+    SF_ORM_CREATED_BY           (przCreatedBy_usrID), \
+    SF_ORM_UPDATED_BY           (przUpdatedBy_usrID)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountPrizesBase_DTO
+    );
+}
+
 /*
 not used??????
-namespace tblAccountReferalsBase {
-    constexpr char Name[] = "tblAccountReferals";
+namespace tblAccountReferralsBase {
+    constexpr char Name[] = "tblAccountReferrals";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
@@ -782,8 +831,8 @@ namespace tblAccountReferalsBase {
         TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
         TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
         TARGOMAN_CREATE_CONSTEXPR(refStatus);
-        TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
     }
 
@@ -795,7 +844,8 @@ namespace tblAccountReferalsBase {
         const QList<clsORMField> ORMFields = {
         };
 
-        const QList<stuRelation> Relations = {
+        inline const QList<stuRelation> Relations(const QString& _schema) {
+            return {};
         };
 
         const QList<stuDBIndex> Indexes = {

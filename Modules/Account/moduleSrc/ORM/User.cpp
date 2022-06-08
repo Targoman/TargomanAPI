@@ -307,7 +307,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
 
     if (ToUpdate.size())
         this->Update(_APICALLBOOM,
-                     QString("%1").arg(CurrentUserID),
+                     QString::number(CurrentUserID),
                      ToUpdate
                      );
 

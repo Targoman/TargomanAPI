@@ -734,7 +734,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                 ItemResult = vchProcessResult[VoucherItem.UUID].toMap();
 
                 if (ItemResult.contains("status")
-                        && (ItemResult["status"] == enuVoucherItemProcessStatus::Processed)
+                    && (ItemResult["status"] == enuVoucherItemProcessStatus::Processed)
                 ) {
                     continue;
                 }
@@ -742,12 +742,12 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
             //lookup services
             try {
-                IteratorHelper::ConstIterator(Services)
+                /*auto [RunCount, OkCount] = */IteratorHelper::ConstIterator(Services)
                         .where([&VoucherItem](auto _service) {
                             QVariantMap ServiceInfo = _service.toMap();
                             return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
                         })
-                        .runFirst([&APICALLBOOM_PARAM, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) {
+                        .runFirst([&APICALLBOOM_PARAM, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
                             QVariantMap ServiceInfo = _service.toMap();
 
                             NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
@@ -783,51 +783,9 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             else {
                                 throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
                             }
+
+                            return true;
                         });
-                /**/
-
-                /*foreach (QVariant Service, Services) {
-                    QVariantMap ServiceInfo = Service.toMap();
-
-                    if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service) {
-                        NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                        TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
-
-                        //bypass process by end point?
-                        if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
-                            stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                            VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getUserID();
-                            VoucherItemForTrustedAction.VoucherID = _voucherID;
-                            VoucherItemForTrustedAction.VoucherItem = VoucherItem;
-                            VoucherItemForTrustedAction.Sign.clear();
-                            VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
-
-                            QVariant Result = RESTClientHelper::callAPI(
-                                RESTClientHelper::POST,
-                                NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
-                                {},
-                                {
-                                    { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
-                                }
-                            );
-
-                            if ((Result.isValid() == false) || (Result.toBool() == false))
-                                throw exHTTPInternalServerError(QString("error in process voucher item %1:%2").arg(_voucherID).arg(VoucherItem.UUID));
-
-                            ItemResult["status"] = QChar(enuVoucherItemProcessStatus::Processed);
-                            if (ItemResult.contains("error"))
-                                ItemResult.remove("error");
-
-                            vchProcessResult[VoucherItem.UUID] = ItemResult;
-                        } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
-                        else {
-                            throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
-                        }
-
-                        break;
-                    } //if (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service)
-                } //foreach (QVariant Service, Services)
-                /**/
             } catch (std::exception &_exp) {
                 ++ErrorCount;
 
@@ -1512,7 +1470,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
         throw exAuthorization("Not enough access for offline approval");
 
     if (ApprovalLimit > 0) {
-//        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString("%1").arg(_vchID), 0, 1, tblVoucher::Fields::vchTotalAmount).toMap();
+//        QVariantMap Voucher = Voucher::instance().selectFromTable({}, {}, QString::number(_vchID), 0, 1, tblVoucher::Fields::vchTotalAmount).toMap();
         QVariantMap Voucher = SelectQuery(Voucher::instance())
             .addCol(tblVoucher::Fields::vchTotalAmount)
             .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _vchID })
@@ -1658,7 +1616,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
     QVariantMap Result;
 
     if (_random == "1")
-        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+        _random = QString::number(QRandomGenerator::global()->generate());
 
     if (_random.isEmpty() == false)
         Result.insert("Random", _random);

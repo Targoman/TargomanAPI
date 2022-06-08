@@ -306,8 +306,8 @@ private slots:
                     { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::Fields::prdName,          "test product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-                    { tblAccountProducts::Fields::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::Fields::prd_locID,            this->LocationID },
+                    { tblAccountProducts::ExtraFields::prdExType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prdEx_locID,            this->LocationID },
                 }
             );
 

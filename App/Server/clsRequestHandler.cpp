@@ -47,10 +47,14 @@ namespace Targoman::API::Server {
 using namespace qhttp::server;
 using namespace Targoman::Common;
 
+static quint64 RequestCounter = 1;
+
 clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QObject* _parent) :
     QObject(_parent),
     Request(_req),
-    Response(_res) {
+    Response(_res),
+    RequestIndex(RequestCounter++)
+{
     this->ElapsedTimer.start();
 }
 
@@ -133,7 +137,7 @@ void clsRequestHandler::process(const QString& _api) {
                             else if (JSONObjectIter.value().isObject())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
                             else if (JSONObjectIter.value().isDouble())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString("%1").arg(JSONObjectIter.value().toDouble()));
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString::number(JSONObjectIter.value().toDouble()));
                             else
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
                         }
@@ -295,11 +299,16 @@ void clsRequestHandler::sendTimingsToResponse() {
 
     QStringList Output;
 
+//    Output << "app";
+
     for (QMap<QString, quint64>::const_iterator it = this->ServerTimings.constBegin();
          it != this->ServerTimings.constEnd();
          it++
     ) {
-        Output.append(QString("%1;dur=%2").arg(it.key()).arg(ceil(it.value() / 1000.0) / 1000));
+        QString Label = it.key();
+//        if (Label.contains(";desc=") == false)
+//            Label += ";desc=\"total\"";
+        Output.append(QString("%1;dur=%2").arg(Label).arg(ceil(it.value() / 1000.0) / 1000));
     }
 
     this->Response->addHeaderValue("Server-Timing", Output.join(", "));
@@ -560,7 +569,7 @@ void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
     qint64 FileSize = QFileInfo(*this->FileHandler).size();
 
     this->Response->addHeaderValue("content-type", FileMIME.name());
-    this->Response->addHeaderValue("content-length", QString("%1").arg(FileSize));
+    this->Response->addHeaderValue("content-length", QString::number(FileSize));
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
 
     this->Response->setStatusCode(qhttp::ESTATUS_OK);

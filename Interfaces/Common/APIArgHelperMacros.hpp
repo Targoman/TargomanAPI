@@ -97,7 +97,7 @@
             return t; \
         }, \
         /* fromORMValueLambda */ [](const QVariant& _value) { \
-            QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData()); \
+            QString ret = QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData(); \
             /*qDebug() << "JSON_t(5) =================================" << _value << " -> " << ret;*/  \
             return ret; \
         } \
@@ -335,6 +335,7 @@ typedef QMap<QString, QString> QStringMap;
 /************************************************************/
 #define TAPI_DEFINE_STRUCT(_name, ...) \
     struct _name { \
+        QJsonObject _lastFromJsonSource; \
         TAPI_HELPER_STRUCT_PARAMS(__VA_ARGS__) \
         _name(TAPI_HELPER_STRUCT_CONST_INPUT(__VA_ARGS__)) : \
             TAPI_HELPER_STRUCT_CONST_INIT(__VA_ARGS__) \
@@ -345,6 +346,7 @@ typedef QMap<QString, QString> QStringMap;
             return Obj; \
         } \
         _name& fromJson(const QJsonObject& _obj) { \
+            this->_lastFromJsonSource = _obj; \
             TAPI_HELPER_STRUCT_FROMJSON(__VA_ARGS__); \
             return *this; \
         } \

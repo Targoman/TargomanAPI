@@ -63,6 +63,40 @@ protected:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const ServiceUsage_t& _requestedUsage);
 
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+
+    //-- used by addToBasket: ----------------------------------------
+    virtual void digestPrivs(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
+
+    virtual void applyAdditivesAndComputeUnitPrice(
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    ) { ; }
+
+    virtual void applyReferrer(
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    ) { ; }
+
+    virtual void applySystemDiscount(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
+
+    virtual void applyCouponDiscount(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    ) { return {}; }
+
+    //-- used by processVoucherItem and cancelVoucherItem: ----------------------------------------
     virtual bool increaseDiscountUsage(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
@@ -81,13 +115,13 @@ protected:
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
 
+    //-- processVoucherItem: ----------------------------------------
     virtual bool preProcessVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        Q_DECL_UNUSED quint64 _voucherID
     ) {
-        Q_UNUSED(_voucherItem);
-        Q_UNUSED(_voucherID);
         return true;
     };
     virtual bool processVoucherItem(
@@ -97,20 +131,20 @@ protected:
         quint64 _voucherID
     );
     virtual bool postProcessVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        Q_DECL_UNUSED quint64 _voucherID
     ) {
-        Q_UNUSED(_voucherItem);
-        Q_UNUSED(_voucherID);
         return true;
     };
 
+    //-- cancelVoucherItem: ----------------------------------------
     virtual bool preCancelVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
-        Q_UNUSED(_voucherItem);
         return true;
     };
     virtual bool cancelVoucherItem(
@@ -120,15 +154,12 @@ protected:
         std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr
     );
     virtual bool postCancelVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
-        Q_UNUSED(_voucherItem);
         return true;
     };
-
-private:
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 protected slots:
     Targoman::API::AAA::stuPreVoucher REST_POST(
@@ -188,40 +219,8 @@ protected slots:
     )
 
 protected:
-    virtual void digestPrivs(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
-    );
-
-    virtual void applyAdditivesAndComputeUnitPrice(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
-    ) { ; }
-
-    virtual void applyReferrer(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
-    ) { ; }
-
-    virtual void applySystemDiscount(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
-    );
-
-    virtual void applyCouponDiscount(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
-    );
-
-    virtual QVariantMap getCustomUserAssetFieldsForQuery(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
-    ) { return {}; }
-
-protected:
     QString ServiceName;
 
-protected:
     QScopedPointer<intfAccountProducts> AccountProducts;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
@@ -229,7 +228,6 @@ protected:
     QScopedPointer<intfAccountCoupons> AccountCoupons;
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
-protected:
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
     QStringList AssetUsageLimitsColsName;
 };
