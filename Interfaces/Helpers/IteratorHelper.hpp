@@ -31,6 +31,8 @@
 
 namespace Targoman::API::Helpers {
 
+namespace Private {
+
 template <typename T, bool IsConst, bool IsReverse>
 class IteratorHelper_List_Data : public QSharedData
 {
@@ -74,119 +76,56 @@ public:
         return *this;
     }
 
-//    std::tuple<typename QList<T>::const_reverse_iterator, typename QList<T>::const_reverse_iterator> getConstReverseIndexes() {
-//        return { this->Data->Target.crbegin(), this->Data->Target.crend() };
-//    }
-
     bool runAll(std::function<void(T _value)> _fn, bool _runOnce=false) {
-//        std::conditional<IsConst,
-//            std::conditional<IsReverse, typename QList<T>::const_reverse_iterator, typename QList<T>::const_iterator>,
-//            std::conditional<IsReverse, typename QList<T>::reverse_iterator, typename QList<T>::iterator>
-//        > itFrom, itTo;
-
         if (IsConst) {
-            if (IsReverse) {
-                auto itFrom = this->Data->Target.crbegin();
-                auto itTo = this->Data->Target.crend();
+            auto itFrom = (IsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
+            auto itTo = (IsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
 
-                while (itFrom != itTo) {
-                    bool hasFalse = false;
+            while (itFrom != itTo) {
+                bool hasFalse = false;
 
-                    foreach (auto fnWhere, this->Data->WhereList) {
-                        if (fnWhere(*itFrom) == false) {
-                            hasFalse = true;
-                            break;
-                        }
+                foreach (auto fnWhere, this->Data->WhereList) {
+                    if (fnWhere(*itFrom) == false) {
+                        hasFalse = true;
+                        break;
                     }
-
-                    if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                        _fn(*itFrom);
-                        if (_runOnce)
-                            return true;
-                    }
-
-        //            if (this->Reverse)
-        //                --itFrom;
-        //            else
-                        ++itFrom;
                 }
-            } else {
-                auto itFrom = this->Data->Target.constBegin();
-                auto itTo = this->Data->Target.constEnd();
 
-                while (itFrom != itTo) {
-                    bool hasFalse = false;
-
-                    foreach (auto fnWhere, this->Data->WhereList) {
-                        if (fnWhere(*itFrom) == false) {
-                            hasFalse = true;
-                            break;
-                        }
-                    }
-
-                    if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                        _fn(*itFrom);
-                        if (_runOnce)
-                            return true;
-                    }
-
-        //            if (this->Reverse)
-        //                --itFrom;
-        //            else
-                        ++itFrom;
+                if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
+                    _fn(*itFrom);
+                    if (_runOnce)
+                        return true;
                 }
+
+                if (IsReverse)
+                    --itFrom;
+                else
+                    ++itFrom;
             }
         } else {
-            if (IsReverse) {
-                auto itFrom = this->Data->Target.rbegin();
-                auto itTo = this->Data->Target.rend();
+            auto itFrom = (IsReverse ? this->Data->Target.end()-1 : this->Data->Target.begin());
+            auto itTo = (IsReverse ? this->Data->Target.begin()-1 : this->Data->Target.end());
 
-                while (itFrom != itTo) {
-                    bool hasFalse = false;
+            while (itFrom != itTo) {
+                bool hasFalse = false;
 
-                    foreach (auto fnWhere, this->Data->WhereList) {
-                        if (fnWhere(*itFrom) == false) {
-                            hasFalse = true;
-                            break;
-                        }
+                foreach (auto fnWhere, this->Data->WhereList) {
+                    if (fnWhere(*itFrom) == false) {
+                        hasFalse = true;
+                        break;
                     }
-
-                    if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                        _fn(*itFrom);
-                        if (_runOnce)
-                            return true;
-                    }
-
-        //            if (this->Reverse)
-        //                --itFrom;
-        //            else
-                        ++itFrom;
                 }
-            } else {
-                auto itFrom = this->Data->Target.begin();
-                auto itTo = this->Data->Target.end();
 
-                while (itFrom != itTo) {
-                    bool hasFalse = false;
-
-                    foreach (auto fnWhere, this->Data->WhereList) {
-                        if (fnWhere(*itFrom) == false) {
-                            hasFalse = true;
-                            break;
-                        }
-                    }
-
-                    if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
-                        _fn(*itFrom);
-                        if (_runOnce)
-                            return true;
-                    }
-
-        //            if (this->Reverse)
-        //                --itFrom;
-        //            else
-                        ++itFrom;
+                if ((hasFalse == false) || this->Data->WhereList.isEmpty()) {
+                    _fn(*itFrom);
+                    if (_runOnce)
+                        return true;
                 }
+
+                if (IsReverse)
+                    --itFrom;
+                else
+                    ++itFrom;
             }
         }
 
@@ -198,20 +137,10 @@ public:
     }
 
 protected:
-//    typedef std::conditional<IsConst,
-//        std::conditional<IsReverse, typename QList<T>::const_reverse_iterator, typename QList<T>::const_iterator>,
-//        std::conditional<IsReverse, typename QList<T>::reverse_iterator, typename QList<T>::iterator>
-//    > TIterator;
-
     QSharedDataPointer<IteratorHelper_List_Data<T, IsConst, IsReverse>> Data;
-
-//    typedef typename QList<T>::iterator iterator;
-//    typedef typename QList<T>::const_iterator const_iterator;
-//    typedef typename QList<T>::reverse_iterator reverse_iterator;
-//    typedef typename QList<T>::const_reverse_iterator const_reverse_iterator;
 };
 
-template <class TContainer, typename TK, typename TV, bool IsConst, bool IsReverse>
+template <typename TContainer, typename TK, typename TV, bool IsConst, bool IsReverse>
 class IteratorHelper_Pair_Data : public QSharedData
 {
 public:
@@ -318,59 +247,61 @@ protected:
     QSharedDataPointer<IteratorHelper_Pair_Data<TContainer, TK, TV, IsConst, IsReverse>> Data;
 };
 
+} //namespace Private
+
 namespace IteratorHelper {
     //-- QList<T> --------------------------------------------------
     template <typename T>
-    inline IteratorHelper_List<T, false, false> Iterator(const QList<T> &_target) {
-        return IteratorHelper_List<T, false, false>(_target);
+    inline Private::IteratorHelper_List<T, false, false> Iterator(QList<T> &_target) {
+        return Private::IteratorHelper_List<T, false, false>(_target);
     }
     template <typename T>
-    inline IteratorHelper_List<T, true, false> ConstIterator(const QList<T> &_target) {
-        return IteratorHelper_List<T, true, false>(_target);
+    inline Private::IteratorHelper_List<T, true, false> ConstIterator(const QList<T> &_target) {
+        return Private::IteratorHelper_List<T, true, false>(_target);
     }
     template <typename T>
-    inline IteratorHelper_List<T, false, true> ReverseIterator(const QList<T> &_target) {
-        return IteratorHelper_List<T, false, true>(_target);
+    inline Private::IteratorHelper_List<T, false, true> ReverseIterator(QList<T> &_target) {
+        return Private::IteratorHelper_List<T, false, true>(_target);
     }
     template <typename T>
-    inline IteratorHelper_List<T, true, true> ConstReverseIterator(const QList<T> &_target) {
-        return IteratorHelper_List<T, true, true>(_target);
+    inline Private::IteratorHelper_List<T, true, true> ConstReverseIterator(const QList<T> &_target) {
+        return Private::IteratorHelper_List<T, true, true>(_target);
     }
 
-//    //-- QMap<TK, TV> --------------------------------------------------
+    //-- QMap<TK, TV> --------------------------------------------------
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false> Iterator(QMap<TK, TV> &_target) {
-        return IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false>(_target);
+    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false> Iterator(QMap<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false> ConstIterator(QMap<TK, TV> &_target) {
-        return IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false>(_target);
+    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false> ConstIterator(const QMap<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true> ReverseIterator(QMap<TK, TV> &_target) {
-        return IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true>(_target);
+    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true> ReverseIterator(QMap<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true> ConstReverseIterator(QMap<TK, TV> &_target) {
-        return IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true>(_target);
+    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true> ConstReverseIterator(const QMap<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true>(_target);
     }
 
-//    //-- QHash<TK, TV> --------------------------------------------------
+    //-- QHash<TK, TV> --------------------------------------------------
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false> Iterator(QHash<TK, TV> &_target) {
-        return IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false>(_target);
+    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false> Iterator(QHash<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false> ConstIterator(QHash<TK, TV> &_target) {
-        return IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false>(_target);
+    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false> ConstIterator(const QHash<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true> ReverseIterator(QHash<TK, TV> &_target) {
-        return IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true>(_target);
+    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true> ReverseIterator(QHash<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true>(_target);
     }
     template <typename TK, typename TV>
-    inline IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true> ConstReverseIterator(QHash<TK, TV> &_target) {
-        return IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true>(_target);
+    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true> ConstReverseIterator(const QHash<TK, TV> &_target) {
+        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true>(_target);
     }
 
 } //namespace IteratorHelper
