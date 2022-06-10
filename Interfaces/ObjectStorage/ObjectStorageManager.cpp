@@ -44,7 +44,7 @@ using namespace qhttp;
 //    /* complexity      */ COMPLEXITY_Object,
 //    /* namespace       */ Targoman::API::ObjectStorage,
 //    /* type            */ stuSaveFileResult,
-//    /* toVariantLambda */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+//    /* fnToVariant */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 //);
 
 namespace Targoman::API::ObjectStorage {

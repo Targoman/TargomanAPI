@@ -33,7 +33,7 @@ namespace Targoman::API::Helpers {
 
 namespace Private {
 
-template <typename T, bool IsConst, bool IsReverse>
+template <typename _itmplTypeItem, bool _itmplIsConst, bool _itmplIsReverse>
 class IteratorHelper_List_Data : public QSharedData
 {
 public:
@@ -43,7 +43,7 @@ public:
         WhereList(_other.WhereList)
     { ; }
 
-    IteratorHelper_List_Data(const QList<T> &_target) :
+    IteratorHelper_List_Data(const QList<_itmplTypeItem> &_target) :
 //        QSharedData(),
         Target(_target)
     { ; }
@@ -51,39 +51,39 @@ public:
     virtual ~IteratorHelper_List_Data() { ; }
 
 public:
-    const QList<T> &Target;
-    QList<std::function<bool(T _value)>> WhereList;
+    const QList<_itmplTypeItem> &Target;
+    QList<std::function<bool(_itmplTypeItem _item)>> WhereList;
 };
 
-template <typename T, bool IsConst, bool IsReverse>
+template <typename _itmplTypeItem, bool _itmplIsConst, bool _itmplIsReverse>
 class IteratorHelper_List
 {
 public:
-    IteratorHelper_List(const IteratorHelper_List<T, IsConst, IsReverse> &_other) :
+    IteratorHelper_List(const IteratorHelper_List<_itmplTypeItem, _itmplIsConst, _itmplIsReverse> &_other) :
         Data(_other.Data)
     { ; }
 
-    IteratorHelper_List(const QList<T> &_target) :
-        Data(new IteratorHelper_List_Data<T, IsConst, IsReverse>(_target))
+    IteratorHelper_List(const QList<_itmplTypeItem> &_target) :
+        Data(new IteratorHelper_List_Data<_itmplTypeItem, _itmplIsConst, _itmplIsReverse>(_target))
     { ; }
 
     virtual ~IteratorHelper_List()
     { ; }
 
 public:
-    IteratorHelper_List& where(std::function<bool(T _value)> _fn) {
+    IteratorHelper_List& where(std::function<bool(_itmplTypeItem _item)> _fn) {
         this->Data->WhereList.append(_fn);
         return *this;
     }
 
     //[RunCount, OkCount]
-    std::tuple<int, int> runAll(std::function<bool(T _value)> _fn, bool _runOnce=false) {
+    std::tuple<int, int> runAll(std::function<bool(_itmplTypeItem _item)> _fn, bool _runOnce=false) {
         int RunCount = 0;
         int OkCount = 0;
 
-        if (IsConst) {
-            auto itFrom = (IsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
-            auto itTo = (IsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
+        if (_itmplIsConst) {
+            auto itFrom = (_itmplIsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
+            auto itTo = (_itmplIsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
 
             while (itFrom != itTo) {
                 bool hasFalse = false;
@@ -105,14 +105,14 @@ public:
                         return { RunCount, OkCount };
                 }
 
-                if (IsReverse)
+                if (_itmplIsReverse)
                     --itFrom;
                 else
                     ++itFrom;
             }
         } else {
-            auto itFrom = (IsReverse ? this->Data->Target.end()-1 : this->Data->Target.begin());
-            auto itTo = (IsReverse ? this->Data->Target.begin()-1 : this->Data->Target.end());
+            auto itFrom = (_itmplIsReverse ? this->Data->Target.end()-1 : this->Data->Target.begin());
+            auto itTo = (_itmplIsReverse ? this->Data->Target.begin()-1 : this->Data->Target.end());
 
             while (itFrom != itTo) {
                 bool hasFalse = false;
@@ -134,7 +134,7 @@ public:
                         return { RunCount, OkCount };
                 }
 
-                if (IsReverse)
+                if (_itmplIsReverse)
                     --itFrom;
                 else
                     ++itFrom;
@@ -145,15 +145,15 @@ public:
     }
 
     //[RunCount, OkCount]
-    std::tuple<int, int> runFirst(std::function<bool(T _value)> _fn) {
+    std::tuple<int, int> runFirst(std::function<bool(_itmplTypeItem _item)> _fn) {
         return this->runAll(_fn, true);
     }
 
 protected:
-    QSharedDataPointer<IteratorHelper_List_Data<T, IsConst, IsReverse>> Data;
+    QSharedDataPointer<IteratorHelper_List_Data<_itmplTypeItem, _itmplIsConst, _itmplIsReverse>> Data;
 };
 
-template <typename TContainer, typename TK, typename TV, bool IsConst, bool IsReverse>
+template <typename _itmplTypeContainer, typename _itmplTypeKey, typename _itmplTypeValue, bool _itmplIsConst, bool _itmplIsReverse>
 class IteratorHelper_Pair_Data : public QSharedData
 {
 public:
@@ -163,7 +163,7 @@ public:
         WhereList(_other.WhereList)
     { ; }
 
-    IteratorHelper_Pair_Data(const TContainer &_target) :
+    IteratorHelper_Pair_Data(const _itmplTypeContainer &_target) :
 //        QSharedData(),
         Target(_target)
     { ; }
@@ -171,39 +171,39 @@ public:
     virtual ~IteratorHelper_Pair_Data() { ; }
 
 public:
-    const TContainer &Target;
-    QList<std::function<bool(TK _key, TV _value)>> WhereList;
+    const _itmplTypeContainer &Target;
+    QList<std::function<bool(_itmplTypeKey _key, _itmplTypeValue _value)>> WhereList;
 };
 
-template <typename TContainer, typename TK, typename TV, bool IsConst, bool IsReverse>
+template <typename _itmplTypeContainer, typename _itmplTypeKey, typename _itmplTypeValue, bool _itmplIsConst, bool _itmplIsReverse>
 class IteratorHelper_Pair
 {
 public:
-    IteratorHelper_Pair(const IteratorHelper_Pair<TContainer, TK, TV, IsConst, IsReverse> &_other) :
+    IteratorHelper_Pair(const IteratorHelper_Pair<_itmplTypeContainer, _itmplTypeKey, _itmplTypeValue, _itmplIsConst, _itmplIsReverse> &_other) :
         Data(_other.Data)
     { ; }
 
-    IteratorHelper_Pair(const TContainer &_target) :
-        Data(new IteratorHelper_Pair_Data<TContainer, TK, TV, IsConst, IsReverse>(_target))
+    IteratorHelper_Pair(const _itmplTypeContainer &_target) :
+        Data(new IteratorHelper_Pair_Data<_itmplTypeContainer, _itmplTypeKey, _itmplTypeValue, _itmplIsConst, _itmplIsReverse>(_target))
     { ; }
 
     virtual ~IteratorHelper_Pair()
     { ; }
 
 public:
-    IteratorHelper_Pair& where(std::function<bool(TK _key, TV _value)> _fn) {
+    IteratorHelper_Pair& where(std::function<bool(_itmplTypeKey _key, _itmplTypeValue _value)> _fn) {
         this->Data->WhereList.append(_fn);
         return *this;
     }
 
     //[RunCount, OkCount]
-    std::tuple<int, int> runAll(std::function<bool(TK _key, TV _value)> _fn, bool _runOnce=false) {
+    std::tuple<int, int> runAll(std::function<bool(_itmplTypeKey _key, _itmplTypeValue _value)> _fn, bool _runOnce=false) {
         int RunCount = 0;
         int OkCount = 0;
 
-        if (IsConst) {
-            auto itFrom = (IsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
-            auto itTo = (IsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
+        if (_itmplIsConst) {
+            auto itFrom = (_itmplIsReverse ? this->Data->Target.constEnd()-1 : this->Data->Target.constBegin());
+            auto itTo = (_itmplIsReverse ? this->Data->Target.constBegin()-1 : this->Data->Target.constEnd());
 
             while (itFrom != itTo) {
                 bool hasFalse = false;
@@ -225,14 +225,14 @@ public:
                         return { RunCount, OkCount };
                 }
 
-                if (IsReverse)
+                if (_itmplIsReverse)
                     --itFrom;
                 else
                     ++itFrom;
             }
         } else {
-            auto itFrom = (IsReverse ? this->Data->Target.end()-1 : this->Data->Target.begin());
-            auto itTo = (IsReverse ? this->Data->Target.begin()-1 : this->Data->Target.end());
+            auto itFrom = (_itmplIsReverse ? this->Data->Target.end()-1 : this->Data->Target.begin());
+            auto itTo = (_itmplIsReverse ? this->Data->Target.begin()-1 : this->Data->Target.end());
 
             while (itFrom != itTo) {
                 bool hasFalse = false;
@@ -254,7 +254,7 @@ public:
                         return { RunCount, OkCount };
                 }
 
-                if (IsReverse)
+                if (_itmplIsReverse)
                     --itFrom;
                 else
                     ++itFrom;
@@ -265,69 +265,69 @@ public:
     }
 
     //[RunCount, OkCount]
-    std::tuple<int, int> runFirst(std::function<bool(TK _key, TV _value)> _fn) {
+    std::tuple<int, int> runFirst(std::function<bool(_itmplTypeKey _key, _itmplTypeValue _value)> _fn) {
         return this->runAll(_fn, true);
     }
 
 protected:
-    QSharedDataPointer<IteratorHelper_Pair_Data<TContainer, TK, TV, IsConst, IsReverse>> Data;
+    QSharedDataPointer<IteratorHelper_Pair_Data<_itmplTypeContainer, _itmplTypeKey, _itmplTypeValue, _itmplIsConst, _itmplIsReverse>> Data;
 };
 
 } //namespace Private
 
 namespace IteratorHelper {
     //-- QList<T> --------------------------------------------------
-    template <typename T>
-    inline Private::IteratorHelper_List<T, false, false> Iterator(QList<T> &_target) {
-        return Private::IteratorHelper_List<T, false, false>(_target);
+    template <typename _itmplTypeItem>
+    inline Private::IteratorHelper_List<_itmplTypeItem, false, false> Iterator(QList<_itmplTypeItem> &_target) {
+        return Private::IteratorHelper_List<_itmplTypeItem, false, false>(_target);
     }
-    template <typename T>
-    inline Private::IteratorHelper_List<T, true, false> ConstIterator(const QList<T> &_target) {
-        return Private::IteratorHelper_List<T, true, false>(_target);
+    template <typename _itmplTypeItem>
+    inline Private::IteratorHelper_List<_itmplTypeItem, true, false> ConstIterator(const QList<_itmplTypeItem> &_target) {
+        return Private::IteratorHelper_List<_itmplTypeItem, true, false>(_target);
     }
-    template <typename T>
-    inline Private::IteratorHelper_List<T, false, true> ReverseIterator(QList<T> &_target) {
-        return Private::IteratorHelper_List<T, false, true>(_target);
+    template <typename _itmplTypeItem>
+    inline Private::IteratorHelper_List<_itmplTypeItem, false, true> ReverseIterator(QList<_itmplTypeItem> &_target) {
+        return Private::IteratorHelper_List<_itmplTypeItem, false, true>(_target);
     }
-    template <typename T>
-    inline Private::IteratorHelper_List<T, true, true> ConstReverseIterator(const QList<T> &_target) {
-        return Private::IteratorHelper_List<T, true, true>(_target);
-    }
-
-    //-- QMap<TK, TV> --------------------------------------------------
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false> Iterator(QMap<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, false>(_target);
-    }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false> ConstIterator(const QMap<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, false>(_target);
-    }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true> ReverseIterator(QMap<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, false, true>(_target);
-    }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true> ConstReverseIterator(const QMap<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QMap<TK, TV>, TK, TV, true, true>(_target);
+    template <typename _itmplTypeItem>
+    inline Private::IteratorHelper_List<_itmplTypeItem, true, true> ConstReverseIterator(const QList<_itmplTypeItem> &_target) {
+        return Private::IteratorHelper_List<_itmplTypeItem, true, true>(_target);
     }
 
-    //-- QHash<TK, TV> --------------------------------------------------
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false> Iterator(QHash<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, false>(_target);
+    //-- QMap<_itmplTypeKey, _itmplTypeValue> --------------------------------------------------
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, false> Iterator(QMap<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, false>(_target);
     }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false> ConstIterator(const QHash<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, false>(_target);
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, false> ConstIterator(const QMap<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, false>(_target);
     }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true> ReverseIterator(QHash<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, false, true>(_target);
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, true> ReverseIterator(QMap<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, true>(_target);
     }
-    template <typename TK, typename TV>
-    inline Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true> ConstReverseIterator(const QHash<TK, TV> &_target) {
-        return Private::IteratorHelper_Pair<QHash<TK, TV>, TK, TV, true, true>(_target);
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, true> ConstReverseIterator(const QMap<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QMap<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, true>(_target);
+    }
+
+    //-- QHash<_itmplTypeKey, _itmplTypeValue> --------------------------------------------------
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, false> Iterator(QHash<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, false>(_target);
+    }
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, false> ConstIterator(const QHash<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, false>(_target);
+    }
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, true> ReverseIterator(QHash<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, false, true>(_target);
+    }
+    template <typename _itmplTypeKey, typename _itmplTypeValue>
+    inline Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, true> ConstReverseIterator(const QHash<_itmplTypeKey, _itmplTypeValue> &_target) {
+        return Private::IteratorHelper_Pair<QHash<_itmplTypeKey, _itmplTypeValue>, _itmplTypeKey, _itmplTypeValue, true, true>(_target);
     }
 
 } //namespace IteratorHelper

@@ -38,11 +38,11 @@ QVariant IMPL_ORMGET(Clicks) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 } //namespace Targoman::API::AdvertModule::ORM

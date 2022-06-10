@@ -151,7 +151,7 @@ protected:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr
+        std::function<bool(const QVariantMap &_userAssetInfo)> _fnCheckUserAsset = nullptr
     );
     virtual bool postCancelVoucherItem(
                       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,

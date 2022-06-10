@@ -44,11 +44,11 @@ QVariant IMPL_ORMGET(WalletTransactions) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblUserWallets::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 /*****************************************************************\

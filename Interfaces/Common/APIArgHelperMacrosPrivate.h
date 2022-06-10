@@ -412,17 +412,17 @@ inline QString toCammel(const QString& _name) {
     TAPI_HELPER_STRUCT_MACRO_SELECTOR( TAPI_HELPER_STRUCT_FROMJSON, __VA_ARGS__)(__VA_ARGS__)
 
 /**********************************************************/
-#define TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, _lambdaOptions) \
+#define TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue, _fnFromORMValue, _fnOptions) \
     namespace Targoman::API { \
-        template <> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::toVariantLambda = _toVariantLambda; \
-        template <> std::function<_namespace::_type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_type, _complexity, false>::fromVariantLambda = _fromVariantLambda; \
-        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::descriptionLambda = _descriptionLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::toORMValueLambda = _toORMValueLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fromORMValueLambda = _fromORMValueLambda; \
-        template <> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::optionsLambda = _lambdaOptions; \
-        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toVariantLambda = \
+        template <> std::function<QVariant(_namespace::_type _value)> tmplAPIArg<_namespace::_type, _complexity, false>::fnToVariant = _fnToVariant; \
+        template <> std::function<_namespace::_type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_type, _complexity, false>::fnFromVariant = _fnFromVariant; \
+        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_type, _complexity, false>::fnDescription = _fnDescription; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fnToORMValue = _fnToORMValue; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fnFromORMValue = _fnFromORMValue; \
+        template <> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::fnOptions = _fnOptions; \
+        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnToVariant = \
             [](NULLABLE_TYPE(_namespace::_type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
-        template <> std::function<NULLABLE_TYPE(_namespace::_type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromVariantLambda = \
+        template <> std::function<NULLABLE_TYPE(_namespace::_type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnFromVariant = \
             [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_type) { \
                 if (!_value.isValid() || _value.isNull()) \
                     return NULLABLE_TYPE(_namespace::_type)(); \
@@ -430,10 +430,10 @@ inline QString toCammel(const QString& _name) {
                 Value = tmplAPIArg<_namespace::_type, _complexity, false>::fromVariant(_value, _paramName); \
                 return Value; \
             }; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::toORMValueLambda = _toORMValueLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fromORMValueLambda = _fromORMValueLambda; \
-        template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::optionsLambda = _lambdaOptions; \
-        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::descriptionLambda = _descriptionLambda; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnToORMValue = _fnToORMValue; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnFromORMValue = _fnFromORMValue; \
+        template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnOptions = _fnOptions; \
+        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnDescription = _fnDescription; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -442,47 +442,47 @@ inline QString toCammel(const QString& _name) {
     }
 //            NULLABLE_TYPE(_namespace::_type) Value(new _namespace::_type);
 
-#define TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda) \
-    TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, nullptr)
+#define TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue, _fnFromORMValue) \
+    TAPI_REGISTER_METATYPE_FULL(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue, _fnFromORMValue, nullptr)
 
-#define TAPI_REGISTER_METATYPE_ToORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda) \
-    TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, nullptr)
+#define TAPI_REGISTER_METATYPE_ToORM(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue) \
+    TAPI_REGISTER_METATYPE_FromORM(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue, nullptr)
 
-#define TAPI_REGISTER_METATYPE_Desc(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda) \
-    TAPI_REGISTER_METATYPE_ToORM(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, _descriptionLambda, nullptr)
+#define TAPI_REGISTER_METATYPE_Desc(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription) \
+    TAPI_REGISTER_METATYPE_ToORM(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, _fnDescription, nullptr)
 
-#define TAPI_REGISTER_METATYPE_FromVariant(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda) \
-    TAPI_REGISTER_METATYPE_Desc(_complexity, _namespace, _type, _toVariantLambda, _fromVariantLambda, nullptr)
+#define TAPI_REGISTER_METATYPE_FromVariant(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant) \
+    TAPI_REGISTER_METATYPE_Desc(_complexity, _namespace, _type, _fnToVariant, _fnFromVariant, nullptr)
 
-#define TAPI_REGISTER_METATYPE_ToVariant(_complexity, _namespace, _type, _toVariantLambda) \
-    TAPI_REGISTER_METATYPE_FromVariant(_complexity, _namespace, _type, _toVariantLambda, nullptr)
+#define TAPI_REGISTER_METATYPE_ToVariant(_complexity, _namespace, _type, _fnToVariant) \
+    TAPI_REGISTER_METATYPE_FromVariant(_complexity, _namespace, _type, _fnToVariant, nullptr)
 
 #define TAPI_REGISTER_METATYPE_MACRO_ARG_COUNT(_01,_02,_03,_04,_05,_06, N ,...) N
 
-#define TAPI_REGISTER_METATYPE_MACRO_SELECTOR(_fn,...) TAPI_REGISTER_METATYPE_MACRO_ARG_COUNT(__VA_ARGS__,\
-    _fn##FULL,_fn##FromORM,_fn##ToORM,_fn##Desc,_fn##FromVariant,_fn##ToVariant, None)
+#define TAPI_REGISTER_METATYPE_MACRO_SELECTOR(_fn,...) \
+    TAPI_REGISTER_METATYPE_MACRO_ARG_COUNT(__VA_ARGS__, _fn##FULL,_fn##FromORM,_fn##ToORM,_fn##Desc,_fn##FromVariant,_fn##ToVariant, None)
 
-#define TAPI_REGISTER_TARGOMAN_ENUM_IMPL(_namespace, _enum, _toVariantLambda, _fromVariantLambda, _descriptionLambda, _toORMValueLambda, _fromORMValueLambda, _lambdaOptions) \
+#define TAPI_REGISTER_TARGOMAN_ENUM_IMPL(_namespace, _enum, _fnToVariant, _fnFromVariant, _fnDescription, _fnToORMValue, _fnFromORMValue, _fnOptions) \
     namespace Targoman::API { \
-        template <> std::function<QVariant(_namespace::_enum::Type _value)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariantLambda = _toVariantLambda; \
-        template <> std::function<_namespace::_enum::Type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariantLambda = _fromVariantLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toORMValueLambda = _toORMValueLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromORMValueLambda = _fromORMValueLambda; \
-        template <> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::optionsLambda = _lambdaOptions; \
-        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::descriptionLambda = _descriptionLambda; \
-        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toVariantLambda = \
+        template <> std::function<QVariant(_namespace::_enum::Type _value)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnToVariant = _fnToVariant; \
+        template <> std::function<_namespace::_enum::Type(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnFromVariant = _fnFromVariant; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnToORMValue = _fnToORMValue; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnFromORMValue = _fnFromORMValue; \
+        template <> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnOptions = _fnOptions; \
+        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnDescription = _fnDescription; \
+        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnToVariant = \
             [](NULLABLE_TYPE(_namespace::_enum::Type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
-        template <> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromVariantLambda = \
+        template <> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnFromVariant = \
             [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
                 if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
                 NULLABLE_VAR(_namespace::_enum::Type, Value); \
                 Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
                 return Value; \
             }; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::toORMValueLambda = _toORMValueLambda; \
-        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fromORMValueLambda = _fromORMValueLambda; \
-        template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::optionsLambda = _lambdaOptions; \
-        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::descriptionLambda = _descriptionLambda; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnToORMValue = _fnToORMValue; \
+        template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnFromORMValue = _fnFromORMValue; \
+        template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnOptions = _fnOptions; \
+        template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnDescription = _fnDescription; \
     } \
     namespace _namespace { \
         using namespace Targoman::API; \
@@ -492,12 +492,12 @@ inline QString toCammel(const QString& _name) {
 //NULLABLE_TYPE(_namespace::_enum::Type) Value(new _namespace::_enum::Type);
 
 /************************************************************/
-#define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
+#define INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant) \
     class _typeName : public _baseType { \
     public: \
         _typeName() { ; } \
         _typeName(const _baseType& _other) :_baseType(_other) { ; } \
-        void customFromVariant(const QVariant& _value, const QString &_paramName = {}) { _setFromVariantLambda(_value, _paramName); } \
+        void customFromVariant(const QVariant& _value, const QString &_paramName = {}) { _fnSetFromVariant(_value, _paramName); } \
         static _typeName fromVariant(const QVariant& _value, const QString &_paramName = {}) { \
             _typeName _var; \
             _var.customFromVariant(_value, _paramName); \
@@ -521,10 +521,10 @@ inline QString toCammel(const QString& _name) {
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
         /* namespace          */ _namespace, \
         /* enum               */ _enum, \
-        /* toVariantLambda    */ [](_namespace::_enum::Type _value) -> QVariant { \
+        /* fnToVariant    */ [](_namespace::_enum::Type _value) -> QVariant { \
             return _namespace::_enum::toStr(_value); \
         }, \
-        /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_enum::Type { \
+        /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_enum::Type { \
             QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
             if (_namespace::_enum::options().contains(_val.toString())) \
                 return _namespace::_enum::toEnum(_val.toString()); \
@@ -538,13 +538,13 @@ inline QString toCammel(const QString& _name) {
                     ); \
                 } \
         }, \
-        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) -> QString { \
+        /* fnDescription  */ [](const QList<Targoman::API::DBM::clsORMField>&) -> QString { \
             return QString("One of (%1)").arg(_namespace::_enum::options().join('|')); \
         }, \
-        /* toORMValueLambda   */ [](const QVariant& _value) -> QVariant { \
+        /* fnToORMValue   */ [](const QVariant& _value) -> QVariant { \
             return _namespace::_enum::toStr(static_cast<_namespace::_enum::Type>(_value.toString().toLatin1().at(0))); \
         }, \
-        /* fromORMValueLambda */ [](const QVariant& _value) -> QVariant { \
+        /* fnFromORMValue */ [](const QVariant& _value) -> QVariant { \
             QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
             if (_namespace::_enum::options().contains(_val.toString()) == false) \
                 throw exHTTPBadRequest(QString("%1 is not a valid %2.") \
@@ -553,7 +553,7 @@ inline QString toCammel(const QString& _name) {
                 ); \
             return QString(_namespace::_enum::toEnum(_val.toString())); \
         }, \
-        /* lambdaOptions      */ []() -> QStringList { return _namespace::_enum::options(); } \
+        /* fnOptions      */ []() -> QStringList { return _namespace::_enum::options(); } \
     )
 
 /************************************************************/

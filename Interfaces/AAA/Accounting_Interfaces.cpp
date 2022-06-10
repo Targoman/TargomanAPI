@@ -43,11 +43,11 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItem,
-    /* toVariantLambda    */ [](const stuVoucherItem& _value) -> QVariant {
+    /* fnToVariant    */ [](const stuVoucherItem& _value) -> QVariant {
 //        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
         return _value.toJson().toVariantMap();
     },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
 //        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
 //            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
@@ -85,8 +85,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuPreVoucher,
-    /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
+    /* fnToVariant    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
         if (_value.isValid() == false) {
             return stuPreVoucher();
         }
@@ -119,15 +119,15 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucher,
-    /* toVariantLambda    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+    /* fnToVariant    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItemForTrustedAction,
-    /* toVariantLambda    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
+    /* fnToVariant    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
     //        qDebug() << "stuVoucherItemForTrustedAction(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
     //            qDebug() << "stuVoucherItemForTrustedAction(2.1) =================================" << _paramName << ":" << _value;
@@ -165,8 +165,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ OrderAdditives_t,
-    /* toVariantLambda    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
+    /* fnToVariant    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
         OrderAdditives_t Additives;
         for (auto Iter = Map.begin(); Iter != Map.end(); ++Iter)

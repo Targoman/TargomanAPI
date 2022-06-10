@@ -56,11 +56,11 @@ QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 /*****************************************************************\
@@ -79,11 +79,11 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
@@ -119,11 +119,11 @@ QVariant IMPL_ORMGET(OfflinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {

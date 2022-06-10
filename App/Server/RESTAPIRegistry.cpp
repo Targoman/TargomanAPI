@@ -70,27 +70,27 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     QT_FOR_EACH_STATIC_WIDGETS_CLASS(MAKE_INVALID_METATYPE)
 };
 
-#define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fromVariantLambda, _toORMValueLambda, _descriptionLambda) \
-    template <> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::toVariantLambda = nullptr; \
-    template <> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fromVariantLambda = _fromVariantLambda; \
-    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::descriptionLambda = _descriptionLambda; \
-    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::toORMValueLambda = _toORMValueLambda; \
-    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fromORMValueLambda = nullptr; \
-    template <> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::optionsLambda = nullptr; \
+#define DO_ON_TYPE_NULLABLE_VALID(_complexity, _baseType, _fnFromVariant, _fnToORMValue, _fnDescription) \
+    template <> std::function<QVariant(_baseType _value)> tmplAPIArg<_baseType, _complexity, false, true>::fnToVariant = nullptr; \
+    template <> std::function<_baseType(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<_baseType, _complexity, false, true>::fnFromVariant = _fnFromVariant; \
+    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_baseType, _complexity, false, true>::fnDescription = _fnDescription; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fnToORMValue = _fnToORMValue; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<_baseType, _complexity, false, true>::fnFromORMValue = nullptr; \
+    template <> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::fnOptions = nullptr; \
     \
-    template <> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toVariantLambda = \
+    template <> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnToVariant = \
         [](NULLABLE_TYPE(_baseType) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
-    template <> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromVariantLambda = \
+    template <> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnFromVariant = \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
             if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
             NULLABLE_VAR(_baseType, Value); \
             Value = tmplAPIArg<_baseType, _complexity, false, true>::fromVariant(_value, _paramName); \
             return Value; \
         }; \
-    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::toORMValueLambda = nullptr; \
-    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fromORMValueLambda = nullptr; \
-    template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::optionsLambda = nullptr; \
-    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::descriptionLambda = nullptr; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnToORMValue = nullptr; \
+    template <> std::function<QVariant(const QVariant& _val)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnFromORMValue = nullptr; \
+    template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnOptions = nullptr; \
+    template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnDescription = nullptr; \
     static tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>* Dangling_QSP_##_baseType = tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::instance(NULLABLE_M2STR(_baseType)); \
 //NULLABLE_TYPE(_baseType) Value(new _baseType); -> NULLABLE_VAR(_baseType, Value);
 
@@ -691,10 +691,12 @@ void RESTAPIRegistry::dumpAPIs()
                     ;
 
             if (API.APIObject->ParamTypesName.isEmpty() == false) {
-                int maxLen = 0;
+                int maxTypeLen = 0;
+                int maxNameLen = 0;
 
                 for (int ParamsIndex = 0; ParamsIndex < API.APIObject->ParamTypesName.count(); ParamsIndex++) {
-                    maxLen = max(maxLen, API.APIObject->ParamTypesName[ParamsIndex].length());
+                    maxTypeLen = max(maxTypeLen, API.APIObject->ParamTypesName[ParamsIndex].length());
+                    maxNameLen = max(maxNameLen, API.APIObject->ParamNames[ParamsIndex].length());
                 }
 
                 for (int ParamsIndex = 0; ParamsIndex < API.APIObject->ParamTypesName.count(); ParamsIndex++) {
@@ -721,20 +723,34 @@ void RESTAPIRegistry::dumpAPIs()
 
                     bool IsLastParam = (ParamsIndex == API.APIObject->ParamTypesName.count()-1);
 
-                    TargomanDebug(5).noLabel().noquote().nospace()
-                            << (IsLastAPI ? " " : "│") << "   "
-                            << (IsLastMethod ? " " : "│") << "   "
-                            << (IsLastParam ?  "└" : "├") << "──"
-                            << " " << QString::number(ParamsIndex + 1) << ": "
-                            << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxLen)
-                            << " "
-                            << API.APIObject->ParamNames[ParamsIndex]
-                            << " = "
-                            << DefVal
-                            << " [" << (DefVal.isNull() ? "Null" : "Not Null") << "]"
-                            << " [" << (DefVal.isValid() ? "Valid" : "Invalid") << "]"
-                            << (ParamsIndex < API.APIObject->ParamTypesName.count()-1 ? "," : "")
-                    ;
+                    if (DefVal.isValid()) {
+                        TargomanDebug(5).noLabel().noquote().nospace()
+                                << (IsLastAPI ? " " : "│") << "   "
+                                << (IsLastMethod ? " " : "│") << "   "
+                                << (IsLastParam ?  "└" : "├") << "──"
+                                << " " << QString::number(ParamsIndex + 1) << ": "
+                                << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxTypeLen)
+                                << " "
+                                << API.APIObject->ParamNames[ParamsIndex].leftJustified(maxNameLen)
+                                << " = "
+                                << DefVal
+//                                << " [" << (DefVal.isNull() ? "Null" : "Not Null") << "]"
+//                                << " [" << (DefVal.isValid() ? "Valid" : "Invalid") << "]"
+                                << (ParamsIndex < API.APIObject->ParamTypesName.count()-1 ? "," : "")
+                        ;
+                    } else {
+                        TargomanDebug(5).noLabel().noquote().nospace()
+                                << (IsLastAPI ? " " : "│") << "   "
+                                << (IsLastMethod ? " " : "│") << "   "
+                                << (IsLastParam ?  "└" : "├") << "──"
+                                << " " << QString::number(ParamsIndex + 1) << ": "
+                                << API.APIObject->ParamTypesName[ParamsIndex].leftJustified(maxTypeLen)
+                                << " "
+                                << API.APIObject->ParamNames[ParamsIndex]
+                                << (ParamsIndex < API.APIObject->ParamTypesName.count()-1 ? "," : "")
+                        ;
+
+                    }
                 }
     //                    << "    ParamTypesName: [" << API.APIObject->ParamTypesName.count() << "] " << API.APIObject->ParamTypesName.join(", ") << endl
     //                    << "    ParamNames:     [" << API.APIObject->ParamNames.count() << "] " << API.APIObject->ParamNames.join(", ") << endl
@@ -747,6 +763,8 @@ void RESTAPIRegistry::dumpAPIs()
 
         }
     }
+
+    TargomanDebug(5).noLabel().noquote().nospace() << "";
 }
 
 /****************************************************/

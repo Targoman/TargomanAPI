@@ -28,8 +28,8 @@
 #include "APIArgHelperMacrosPrivate.h"
 
 /************************************************************/
-#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
-    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda)
+#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant) \
+    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant)
 
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
@@ -80,23 +80,23 @@
         /* complexity         */ _complexity, \
         /* namespace          */ _namespace, \
         /* type               */ _type, \
-        /* toVariantLambda    */ [](const _type& _value) -> QVariant { \
-            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "toVariantLambda", _value); \
+        /* fnToVariant    */ [](const _type& _value) -> QVariant { \
+            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "fnToVariant", _value); \
             return _value; \
         }, \
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
-            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fnFromVariant", _paramName, _value); \
             return _type::fromVariant(_value); \
         }, \
-        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
-        /* toORMValueLambda   */ [](const QVariant& _value) { \
+        /* fnDescription  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
+        /* fnToORMValue   */ [](const QVariant& _value) { \
             _namespace::_type t; \
-            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)>>> ===========================" << _value << " -> " << t;*/  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)>>> ===========================" << _value << " -> " << t;*/  \
             TAPI::setFromVariant(t, _value); \
-            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)<<< ===========================" << _value << " -> " << t;*/  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)<<< ===========================" << _value << " -> " << t;*/  \
             return t; \
         }, \
-        /* fromORMValueLambda */ [](const QVariant& _value) { \
+        /* fnFromORMValue */ [](const QVariant& _value) { \
             QString ret = QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData(); \
             /*qDebug() << "JSON_t(5) =================================" << _value << " -> " << ret;*/  \
             return ret; \

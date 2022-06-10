@@ -1029,7 +1029,8 @@ bool intfAccountingBasedModule::activateUserAsset(
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    return this->AccountUserAssets->Update(APICALLBOOM_PARAM,
+    return this->AccountUserAssets->Update(
+                        APICALLBOOM_PARAM,
                         /*PK*/ QString::number(_voucherItem.OrderID),
                         TAPI::ORMFields_t({
                             { tblAccountUserAssetsBase::Fields::uas_vchID, _voucherID },
@@ -1083,7 +1084,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-    std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda
+    std::function<bool(const QVariantMap &_userAssetInfo)> _fnCheckUserAsset
 ) {
     if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem))
         return false;
@@ -1097,7 +1098,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
                                 .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                                 .one();
 
-    if ((_checkUserAssetLambda != nullptr) && (_checkUserAssetLambda(UserAssetInfo) == false))
+    if ((_fnCheckUserAsset != nullptr) && (_fnCheckUserAsset(UserAssetInfo) == false))
         return false;
 
     enuAuditableStatus::Type UserAssetStatus =
