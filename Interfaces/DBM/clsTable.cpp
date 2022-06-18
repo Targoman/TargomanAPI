@@ -372,7 +372,7 @@ clsDACResult clsTable::execQueryCacheable(
 }
 
 //TAPI::Filter_t -> QString
-//TODO: IMPORTANT! deprecated?
+///@TODO: IMPORTANT! deprecated?
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters) {
     QStringList Filters;
 

@@ -66,6 +66,12 @@ protected:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
     //-- used by addToBasket: ----------------------------------------
+    virtual void processBasketItem(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        stuVoucherItem          *_oldVoucherItem = nullptr
+    );
+
     virtual void digestPrivs(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
         INOUT stuAssetItem      &_assetItem
@@ -82,8 +88,9 @@ protected:
     ) { ; }
 
     virtual void applySystemDiscount(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INTFAPICALLBOOM_DECL            &APICALLBOOM_PARAM,
+        INOUT stuAssetItem              &_assetItem,
+        const stuPendingSystemDiscount  &_pendingSystemDiscount = {}
     );
 
     virtual void applyCouponDiscount(
@@ -173,32 +180,43 @@ protected slots:
             QString _referrer = {},
             TAPI::JSON_t _extraReferrerParams = {},
             Targoman::API::AAA::stuPreVoucher _lastPreVoucher = {}
+//            TAPI::MD5_t _parentItemUUID = {}
         ),
-        "add a package to basket and return updated pre-Voucher"
+        "add an item to the basket and return updated pre-Voucher"
+    )
+
+protected:
+    Targoman::API::AAA::stuPreVoucher internalUpdateBasketItem(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
+        stuVoucherItem &_voucherItem,
+        qreal _newQty,
+        NULLABLE_TYPE(TAPI::CouponCode_t) _newDiscountCode = NULLABLE_NULL_VALUE
+    );
+
+protected slots:
+    Targoman::API::AAA::stuPreVoucher REST_POST(
+        updateBasketItem,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
+            TAPI::MD5_t _itemUUID,
+            qreal _newQty,
+            NULLABLE_TYPE(TAPI::CouponCode_t) _newDiscountCode = NULLABLE_NULL_VALUE
+        ),
+        "Update a basket item and return updated pre-Voucher."
     )
 
     Targoman::API::AAA::stuPreVoucher REST_POST(
         removeBasketItem,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            TAPI::MD5_t _itemUUID,
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
+            TAPI::MD5_t _itemUUID
         ),
-        "Remove a package from basket and return updated pre-Voucher."
+        "Remove an item from basket and return updated pre-Voucher."
         "Only Pending items can be removed."
     )
-
-//    Targoman::API::AAA::stuPreVoucher REST_POST(
-//        updateBasketItem,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            TAPI::MD5_t _itemUUID,
-//            quint16 _new_qty,
-//            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-//        ),
-//        "Update a package from basket and return updated pre-Voucher."
-//        "Only Pending items can be modify."
-//    )
 
     bool REST_POST(
         processVoucherItem,

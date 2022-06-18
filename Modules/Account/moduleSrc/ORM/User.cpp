@@ -36,7 +36,7 @@ namespace Targoman::API::AccountModule::ORM {
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-///TODO: BAD Gender causes assert
+///@TODO: BAD Gender causes assert
 User::User() :
     intfSQLBasedModule(
         AAASchema,

@@ -103,7 +103,7 @@ Advert::Advert() :
 }
 
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
-    //TODO: complete this
+    ///@TODO: complete this
     return stuServiceCreditsInfo(
                 {},
                 NULLABLE_NULL_VALUE,
@@ -136,14 +136,40 @@ void Advert::applyReferrer(
     INOUT stuAssetItem      &_assetItem
 ) {
     ///@TODO: [very important] complete this
+
+    ///::: SAMPLE CODE :::
+
+    //1: add credit voucher for fp.com
     _assetItem.PendingVouchers.append({
         /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
         /* Type     */ enuVoucherType::Prize, //Credit,
-        /* Amount   */ 123456,
+        /* Amount   */ 123'456,
         /* Desc     */ {
                            { "referrer", _assetItem.Referrer },
                        },
     });
+
+    //2: add system discount
+    this->applySystemDiscount(_APICALLBOOM, _assetItem, {
+                                  "5% off by fp.com",
+                                  5,
+                                  enuDiscountType::Percent,
+                                  10'000
+                              });
+
+    //3: inc translate words max limit (30'000 -> 35'000)
+//    int IncAmount = 5'000;
+//    if (_assetItem.AdditionalInfo.contains("plus-max-words"))
+//        _assetItem.AdditionalInfo["plus-max-words"] = IncAmount + _assetItem.AdditionalInfo["plus-max-words"].toInt();
+//    else
+//        _assetItem.AdditionalInfo.insert("plus-max-words", IncAmount);
+
+    //4: inc days (30 -> 40)
+    int IncDays = 10;
+    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
+    else
+        _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
 };
 
 QVariantMap Advert::getCustomUserAssetFieldsForQuery(
@@ -151,9 +177,13 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     INOUT stuAssetItem      &_assetItem
 ) {
     ///@TODO: [very important] complete this
-    return {
-        { tblAccountUserAsset::ExtraFields::uasExDays, 100 },
-    };
+
+    QVariantMap Result;
+
+    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        Result.insert(tblAccountUserAsset::ExtraFields::uasExDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+
+    return Result;
 }
 
 /***************************************************************************************************/

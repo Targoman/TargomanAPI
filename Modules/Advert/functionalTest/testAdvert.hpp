@@ -606,7 +606,7 @@ private slots:
         }
     }
 
-    ///TODO: updateBasketItem
+    ///@TODO: updateBasketItem
 
     void addToBasket_valid_coupon_code_3() {
         QT_TRY {

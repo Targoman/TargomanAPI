@@ -290,7 +290,7 @@ namespace Targoman::API::API {
 #define        IMPL_REST_GET_OR_POST(_module, _name, _params)          IMPL_REST(, _module, _name, _params)
 #define  IMPL_ASYNC_REST_GET_OR_POST(_module, _name, _params)    IMPL_ASYNC_REST(, _module, _name, _params)
 
-//TODO: create IMPL_REST_... for other cases
+///@TODO: create IMPL_REST_... for other cases
 #define           EXREST_GET(_name, _sig, _doc, ...)                      EXREST(GET, _name, _sig, _doc, __VA_ARGS__)
 #define     ASYNC_EXREST_GET(_name, _sig, _doc, ...)                ASYNC_EXREST(GET, _name, _sig, _doc, __VA_ARGS__)
 #define             REST_GET(_name, _sig, _doc)                             REST(GET, _name, _sig, _doc)

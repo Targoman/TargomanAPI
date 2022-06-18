@@ -712,9 +712,9 @@ private slots:
         QVERIFY(Result.toBool());
     }
 
-    ///TODO: test [DELETE]  Account/User/photo
-    ///TODO: test [PATCH]   Account/User/email
-    ///TODO: test [PATCH]   Account/User/mobile
+    ///@TODO: test [DELETE]  Account/User/photo
+    ///@TODO: test [PATCH]   Account/User/email
+    ///@TODO: test [PATCH]   Account/User/mobile
 
     void UpdateUserPersonalInfo() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH,

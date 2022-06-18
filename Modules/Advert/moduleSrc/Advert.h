@@ -38,6 +38,8 @@ using namespace Targoman::API::ORM;
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
 
+constexpr char ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS[] = "plus-max-days";
+
 TAPI_DEFINE_STRUCT(stuAdvert,
     SF_quint64                  (ID),
     SF_QString                  (Title),

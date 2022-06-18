@@ -96,7 +96,7 @@ QString makeColName(
 
 QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, clsORMField* baseCol = nullptr) {
     if (_value.isValid() == false)
-        return QString(""); ///TODO: ? throw ?
+        return QString(""); ///@TODO: ? throw ?
 
     //--
     if (_value.userType() == QMetaTypeId<DBExpression>::qt_metatype_id())
@@ -131,7 +131,7 @@ QString makeValueAsSQL(const QVariant& _value, bool _qouteIfIsString = true, cls
 };
 QVariant makeValueAsVariant(const QVariant& _value) {
     if (_value.isValid() == false)
-        return QVariant(); ///TODO: ? throw ?
+        return QVariant(); ///@TODO: ? throw ?
 
     //--
     if (_value.userType() == QMetaTypeId<DBExpression>::qt_metatype_id())
@@ -226,7 +226,7 @@ DBExpression DBExpression::NIL() {
     if (DBEX_NULL)
         return *DBEX_NULL;
 
-    ///TODO: check memory leak
+    ///@TODO: check memory leak
 
     return *(DBEX_NULL = new DBExpression("NULL", enuDBExpressionType::Value));
 }
@@ -236,7 +236,7 @@ DBExpression DBExpression::NOW() {
     if (DBEX_NOW)
         return *DBEX_NOW;
 
-    ///TODO: check memory leak
+    ///@TODO: check memory leak
 
     return *(DBEX_NOW = new DBExpression("NOW", enuDBExpressionType::Function));
 }
@@ -246,7 +246,7 @@ DBExpression DBExpression::CURDATE() {
     if (DBEX_CURDATE)
         return *DBEX_CURDATE;
 
-    ///TODO: check memory leak
+    ///@TODO: check memory leak
 
     return *(DBEX_CURDATE = new DBExpression("CURDATE", enuDBExpressionType::Function));
 }
@@ -485,7 +485,7 @@ QString clsColSpecs::buildColNameString(
     QString AggFunction;
 
     if (NULLABLE_IS_NULL(this->Data->SimpleAggregation)) {
-       ///TODO: why using ANY_VALUE?
+       ///@TODO: why using ANY_VALUE?
 //                   if (this->Data->GroupByCols.size())
 //                       AggFunction = "ANY_VALUE(";
     } else if (*this->Data->SimpleAggregation == enuAggregation::DISTINCT_COUNT)
@@ -1683,7 +1683,7 @@ public:
                     if (relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__)
                         StatusColHasCriteria = true;
 
-                    ///TODO: complete UsedJoins
+                    ///@TODO: complete UsedJoins
 //                    if (relatedORMField.Relation.Column.size() && UsedJoins.contains(relatedORMField.Relation) == false)
 //                        UsedJoins.insert(relatedORMField.Relation);
 
@@ -1714,7 +1714,7 @@ public:
                     else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
 
                     QString Value = PatternMatches.captured(3);
-                    ///TODO: @kambizzandi: very important: check if value is not simple (e.g. function) instead of isDateType
+                    ///@TODO: @kambizzandi: very important: check if value is not simple (e.g. function) instead of isDateType
                     bool isDateType = (Value == "NOW()"
                                        || Value.startsWith("DATE_ADD(")
                                        || Value.startsWith("DATE_SUB(")
@@ -2968,7 +2968,7 @@ public:
 
                 if (extraBaseColsValues.length()) {
                     foreach (auto val, extraBaseColsValues) {
-                        ///TODO: baseCol.toDB()
+                        ///@TODO: baseCol.toDB()
 
                         if (_useBinding) {
                             oneRecordToString.append("?");
@@ -3260,13 +3260,13 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, 
     return invalidateQueryString;
 }
 
-///TODO: BUG: the create query may results more than one rows, but only last inserted id returns by .execute
+///@TODO: BUG: the create query may results more than one rows, but only last inserted id returns by .execute
 quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
     clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
-    ///TODO: start transaction
+    ///@TODO: start transaction
 
     QT_TRY {
         //1: invalidate OLD removed row(s)
@@ -3334,12 +3334,12 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
 
         auto ret = Result.lastInsertId().toULongLong();
 
-        ///TODO: commit
+        ///@TODO: commit
 
         return ret;
     }
     QT_CATCH(...) {
-        ///TODO: rollback
+        ///@TODO: rollback
         QT_RETHROW;
     }
 }
@@ -3779,7 +3779,7 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 
     clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
 
-    ///TODO: start transaction
+    ///@TODO: start transaction
 
     QT_TRY {
         QString statusFieldName = this->Data->Table.getStatusColumnName();
@@ -3803,7 +3803,7 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
                     .addFilters(this->WhereTraitData->Filters)
                     .execute(_currentUserID);
             if (rowsAffected > 0) {
-                ///TODO: commit
+                ///@TODO: commit
                 return rowsAffected;
             }
         }
@@ -3815,7 +3815,7 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 
         //3: real delete this
         if (_realDelete == false) {
-            ///TODO: commit
+            ///@TODO: commit
             return 0;
         }
 
@@ -3828,12 +3828,12 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 
         auto ret = Result.numRowsAffected();
 
-        ///TODO: commit
+        ///@TODO: commit
 
         return ret;
     }
     QT_CATCH(...) {
-        ///TODO: rollback
+        ///@TODO: rollback
         QT_RETHROW;
     }
 }

@@ -506,7 +506,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     DBCurrentDateTime(_dbCurrentDateTime) { ; }
 
 //QJsonObject stuAssetItem::toJson(bool _full) {
-//    ///TODO: very important: Complete this
+//    ///@TODO: very important: Complete this
 //  QJsonObject Info;
 /*
   if (this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
@@ -530,7 +530,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
 //}
 
 //stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj) {
-//    ///TODO: very important: Complete this
+//    ///@TODO: very important: Complete this
 //  return *this;
 /*
 this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);

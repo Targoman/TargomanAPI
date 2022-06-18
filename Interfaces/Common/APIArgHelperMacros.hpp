@@ -239,7 +239,7 @@
 
 typedef QMap<QString, QString> QStringMap;
 
-#define SF_QStringMap(_name) \
+#define SF_QMapOfQString(_name) \
     /* name              */ _name, \
     /* type              */ QStringMap, \
     /* def               */ QStringMap(), \

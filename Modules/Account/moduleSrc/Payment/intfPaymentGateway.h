@@ -64,7 +64,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 //    QString PaymentLink;
 
 //    stuPaymentResponse() :
-//        ///TODO: why -1????
+//        ///@TODO: why -1????
 ////        ErrorCode(-1)
 //        ErrorCode(0)
 //    { ; }

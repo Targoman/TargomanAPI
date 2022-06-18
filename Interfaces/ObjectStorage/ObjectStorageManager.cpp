@@ -424,7 +424,7 @@ bool ObjectStorageManager::processQueue(
                 ;
     }
 
-    ///TODO: re compute upload file status by queue items status in the next version
+    ///@TODO: re compute upload file status by queue items status in the next version
 //    QString QueueIDs = QueueInfos.keys().join(',');
 //    update
 
