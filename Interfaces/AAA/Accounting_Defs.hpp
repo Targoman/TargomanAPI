@@ -227,7 +227,7 @@ namespace tblAccountPrizesBase {
 //-- tbl inside
 namespace tblAccountProductsBase {
     namespace Relation {
-//        constexpr char AAA[] = "aaa";
+        constexpr char Saleable[] = "saleable";
     }
 
     namespace Private {
@@ -257,7 +257,8 @@ namespace tblAccountProductsBase {
         inline const QList<stuRelation> Relations(const QString& _schema) {
             return {
                 ///<  Col                                           Reference Table    ForeignCol          Rename     LeftJoin
-                { "saleable",  { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
+                { Relation::Saleable,
+                    { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
             };
@@ -671,6 +672,7 @@ TAPI_DEFINE_STRUCT(stuDiscountSaleableBasedMultiplier,
 );
 
 TAPI_DEFINE_STRUCT(stuPendingSystemDiscount,
+    SF_QString          (Key),
     SF_QString          (Desc),
     SF_qreal            (Amount),
     SF_Enum             (AmountType, enuDiscountType, enuDiscountType::Percent),
@@ -678,9 +680,11 @@ TAPI_DEFINE_STRUCT(stuPendingSystemDiscount,
 );
 
 TAPI_DEFINE_STRUCT(stuSystemDiscount,
+//    SF_QString          (Key),
     SF_qreal            (Amount),
     SF_QJsonObject      (Info)
 );
+typedef QMap<QString, stuSystemDiscount> SystemDiscounts_t;
 
 TAPI_DEFINE_STRUCT(stuCouponDiscount,
     SF_quint64          (ID),
@@ -760,6 +764,8 @@ TAPI_DEFINE_STRUCT(stuPendingVoucher,
 TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
+    SF_qreal            (prdQtyInHand),
+    SF_qreal            (slbQtyInHand),
 
     //-- input
     SF_QMapOfQString    (OrderAdditives),
@@ -772,7 +778,7 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_qreal            (UnitPrice),
     SF_qreal            (SubTotal),
 
-    SF_QListOfVarStruct (SystemDiscounts, stuSystemDiscount),
+    SF_QMapOfVarStruct  (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
     SF_Struct           (CouponDiscount, stuCouponDiscount, v.ID),
     SF_qreal            (Discount),
     SF_qreal            (AfterDiscount),
@@ -827,8 +833,6 @@ TAPI_DEFINE_STRUCT(stuActiveCredit,
     SF_qint64           (TTL)
 );
 
-//typedef QMap<QString, stuSystemDiscount> SystemDiscounts_t;
-
 //constexpr char DISCOUNT_TYPE_SYSTEM[]   = "SYSTEM";
 //constexpr char DISCOUNT_TYPE_COUPON[]   = "COUPON";
 
@@ -846,7 +850,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_qreal            (Qty),
     SF_qreal            (UnitPrice),
     SF_qreal            (SubTotal),
-    SF_QListOfVarStruct (SystemDiscounts, stuSystemDiscount),
+    SF_QMapOfVarStruct  (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
     SF_Struct           (CouponDiscount, stuCouponDiscount, v.ID),
     SF_qreal            (DisAmount),
     SF_qreal            (AfterDiscount),

@@ -358,11 +358,11 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
           * discount code:
           *     OLD | new | result
           * --------------------
-          * 1 |  -  |  -  | OK (-)
-          * 2 |  -  |  x  | OK (x)
-          * 3 |  x  |  -  | OK (x)
-          * 4 |  x  |  x  | OK (x)
-          * 5 |  x  |  y  | NOK
+          * 1 |  -  |  -  |  OK (-)
+          * 2 |  -  |  x  |  OK (x)
+          * 3 |  x  |  -  |  OK (x)
+          * 4 |  x  |  x  |  OK (x)
+          * 5 |  x  |  y  | NOK (don't update. will be added as a new item in basket)
           */
 
         //3,4,5:
@@ -410,7 +410,9 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
         .addCols(this->AccountSaleables->SelectableColumnNames())
         .addCols(this->AccountProducts->SelectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
-        .leftJoinWith(tblAccountSaleablesBase::Relation::Product)
+        .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
+        .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
+        .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
         .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _saleableCode })
         .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
         .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
@@ -425,6 +427,13 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     AssetItem.Product.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
     AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
     AssetItem.fromJson(QJsonObject::fromVariantMap(SaleableInfo));
+
+//    _assetItem.prdQtyInHand  = _assetItem.Product.prdInStockQty
+//                               - NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdOrderedQty, 0)
+//                               + NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdReturnedQty, 0);
+//    _assetItem.slbQtyInHand = _assetItem.Saleable.slbInStockQty
+//                               - NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbOrderedQty, 0)
+//                               + NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbReturnedQty, 0);
 
     //-- --------------------------------
     AssetItem.OrderAdditives        = _orderAdditives;
@@ -572,10 +581,360 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     return _lastPreVoucher;
 }
 
+Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
+    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+    TAPI::MD5_t                         _itemUUID,
+    qreal                               _newQty,
+    NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode
+)) {
+    for (QList<stuVoucherItem>::iterator it = _lastPreVoucher.Items.begin();
+         it != _lastPreVoucher.Items.end();
+         it++
+    ) {
+        if (it->UUID == _itemUUID) {
+            return internalUpdateBasketItem(
+                APICALLBOOM_PARAM,
+                _lastPreVoucher,
+                *it,
+                it->Qty + _newQty,
+                _newDiscountCode
+            );
+        }
+    }
+
+    throw exHTTPNotFound("item not found");
+}
+
+Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBasketItem(
+    INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
+    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+    stuVoucherItem                      &_voucherItem,
+    qreal                               _newQty,
+    NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode
+) {
+    /**
+      1: check prev and new coupon code
+
+
+        check available instock (minus _voucherItem.qty)
+
+
+
+
+    **/
+
+    if ((_newQty == _voucherItem.Qty)
+            && (NULLABLE_IS_NULL(_newDiscountCode)
+                || (NULLABLE_VALUE(_newDiscountCode) == _voucherItem.CouponDiscount.Code)
+            )
+        )
+        return _lastPreVoucher; //no change
+
+    //-- validate preVoucher and owner --------------------------------
+    checkPreVoucherSanity(_lastPreVoucher);
+
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+
+    if (_lastPreVoucher.Items.isEmpty())
+        throw exHTTPBadRequest("Pre-Voucher is empty");
+
+    if (_lastPreVoucher.UserID != CurrentUserID)
+        throw exHTTPBadRequest("invalid pre-Voucher owner");
+
+    //--  --------------------------------
+    bool Found = false;
+    int VoucherItemIndex;
+    for (VoucherItemIndex = 0; VoucherItemIndex < _lastPreVoucher.Items.length(); ++VoucherItemIndex) {
+        if (_lastPreVoucher.Items.at(VoucherItemIndex).UUID == _voucherItem.UUID) {
+            Found = true;
+            break;
+        }
+    }
+    if (Found == false)
+        throw exHTTPBadRequest("Item not found in pre-Voucher");
+
+    //-- fetch SLB & PRD --------------------------------
+    QVariantMap UserAssetInfo = SelectQuery(*this->AccountSaleables)
+        .addCols(this->AccountSaleables->SelectableColumnNames())
+        .addCols(this->AccountProducts->SelectableColumnNames())
+        .addCols(this->AssetUsageLimitsColsName)
+        .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
+        .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
+        .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
+
+        .innerJoinWith(tblAccountSaleablesBase::Relation::UserAsset)
+        .addCols(this->AccountUserAssets->SelectableColumnNames())
+        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
+
+//        .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _voucherItem. })
+//        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+//        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+//            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+//                DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+//        )
+        .one();
+
+    TargomanDebug(5) << "intfAccountingBasedModule::internalUpdateBasketItem : UserAssetInfo" << UserAssetInfo;
+
+    tblAccountUserAssetsBase::DTO AccountUserAssetsBaseDTO;
+    AccountUserAssetsBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+
+    stuAssetItem AssetItem;
+    AssetItem.Product.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+    AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+    AssetItem.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+
+    stuVoucherItem PreVoucherItem;
+    PreVoucherItem.fromJson(AccountUserAssetsBaseDTO.uasVoucherItemInfo.object());
+
+    //--  --------------------------------
+    AssetItem.OrderAdditives        = PreVoucherItem.Additives;
+    AssetItem.DiscountCode          = NULLABLE_GET_OR_DEFAULT(_newDiscountCode, PreVoucherItem.CouponDiscount.Code);
+    AssetItem.Referrer              = PreVoucherItem.Referrer;
+    ///@TODO: PreVoucherItem.ReferrerParams
+//    AssetItem.ExtraReferrerParams   = PreVoucherItem.ReferrerParams;
+
+    AssetItem.Qty                   = _newQty;
+    AssetItem.UnitPrice             = AssetItem.Saleable.slbBasePrice;
+    AssetItem.Discount              = PreVoucherItem.DisAmount;
+
+    //-- --------------------------------
+    UsageLimits_t SaleableUsageLimits;
+    for (auto Iter = this->AssetUsageLimitsCols.begin();
+        Iter != this->AssetUsageLimitsCols.end();
+        Iter++
+    ) {
+        SaleableUsageLimits.insert(Iter.key(), {
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
+            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
+        });
+    }
+    AssetItem.Digested.Limits = SaleableUsageLimits;
+
+    //-- --------------------------------
+    this->processBasketItem(_APICALLBOOM, AssetItem, &_voucherItem);
+
+    //-- --------------------------------
+
+
+
+
+
+
+
+    /*
+    checkPreVoucherSanity(_lastPreVoucher);
+
+    if (_lastPreVoucher.Items.isEmpty())
+        throw exHTTPInternalServerError("pre-voucher items is empty.");
+
+    if (_new_qty <= 0)
+        throw exHTTPInternalServerError("Qty must be greater than zero.");
+
+    clsJWT JWT(_JWT);
+    quint64 currentUserID = JWT.usrID();
+
+    bool Found = false;
+    qint64 FinalPrice = 0;
+
+    auto iter = _lastPreVoucher.Items.begin();
+    while (iter != _lastPreVoucher.Items.end()) {
+        stuVoucherItem &PreVoucherItem = *iter;
+
+        if (PreVoucherItem.UUID == _itemUUID) {
+            Found = true;
+
+            if (_new_qty == PreVoucherItem.Qty)
+                throw exHTTPInternalServerError("Current Qty and new Qty can not be equal.");
+
+            //check uasStatus
+            QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+                                        .addCols({
+                                                    tblAccountUserAssetsBase::Fields::uasID,
+                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
+                                                    tblAccountUserAssetsBase::Fields::uasStatus,
+                                                 })
+                                        .where({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
+                                        .one();
+            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+            if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
+                throw exHTTPInternalServerError("only Pending items of pre-voucher can be modify.");
+
+            //
+            if (_new_qty < PreVoucherItem.Qty) {
+
+            } else { //_new_qty > PreVoucherItem.Qty
+
+            }
+
+            //update voucher item in _lastPreVoucher.Items
+            ///@TODO: re-apply additives
+            PreVoucherItem.Qty = _new_qty;
+
+            PreVoucherItem.SubTotal = AssetItem.SubTotal;
+            PreVoucherItem.Discount = Discount;
+            PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
+            PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.Product.prdVAT, 0); // * 100;
+            PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
+
+
+
+            //update voucher item in Module/UsetAssets
+            UpdateQuery(*this->AccountUserAssets)
+                    .set(tblAccountUserAssetsBase::
+                        tblAccountUserAssetsBase::Fields::uasID)
+                                        .addCols({
+                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
+                                                    tblAccountUserAssetsBase::Fields::uasStatus,
+                                                 })
+                                        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
+                                        .one();
+
+            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
+                {
+                    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+
+                    if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
+                        return false;
+
+                    return true;
+                }) == false) //not pending
+            {
+                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
+            }
+        }
+
+        //compute FinalPrice for all items
+        FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
+
+        ++iter;
+    }
+
+    if (Found) {
+        if (_lastPreVoucher.Items.size() > 1)
+            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
+        else {
+            auto item = _lastPreVoucher.Items.first();
+            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
+        }
+
+        _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
+        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+        _lastPreVoucher.Sign.clear();
+        _lastPreVoucher.Sign = QString(Accounting::voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+
+        return _lastPreVoucher;
+    }
+
+    throw exHTTPInternalServerError("item not found in pre-voucher items.");
+*/
+
+
+
+
+
+}
+
+Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
+    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+    TAPI::MD5_t                         _itemUUID
+)) {
+    return this->apiPOSTupdateBasketItem(
+        APICALLBOOM_PARAM,
+        _lastPreVoucher,
+        _itemUUID,
+        0
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    checkPreVoucherSanity(_lastPreVoucher);
+
+    if (_lastPreVoucher.Items.isEmpty())
+        throw exHTTPInternalServerError("prevoucher items is empty.");
+
+    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    if (_lastPreVoucher.UserID != CurrentUserID)
+        throw exHTTPBadRequest("invalid pre-Voucher owner");
+
+    bool Found = false;
+    qint64 FinalPrice = 0;
+
+    auto iter = _lastPreVoucher.Items.begin();
+    while (iter != _lastPreVoucher.Items.end()) {
+        stuVoucherItem PreVoucherItem = *iter;
+
+        if (PreVoucherItem.UUID == _itemUUID) {
+            Found = true;
+
+            //delete voucher item
+            if (this->cancelVoucherItem(_APICALLBOOM,
+                                        _APICALLBOOM.getUserID(),
+                                        PreVoucherItem,
+                                        [](const QVariantMap &_userAssetInfo) -> bool {
+                                            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
+                                            return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
+                                        }) == false) //not pending
+                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
+
+            //remove item
+            iter = _lastPreVoucher.Items.erase(iter);
+
+            //preventing ++iter
+            continue; //continue for computing final price
+        } else
+            FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
+
+        ++iter;
+    }
+
+    if (Found) {
+        if (_lastPreVoucher.Items.isEmpty())
+            _lastPreVoucher.Summary = "";
+        else if (_lastPreVoucher.Items.size() > 1)
+            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
+        else {
+            auto item = _lastPreVoucher.Items.first();
+            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
+        }
+
+        _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
+        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+        _lastPreVoucher.Sign.clear();
+        _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+
+        return _lastPreVoucher;
+    }
+
+    throw exHTTPInternalServerError("item not found in pre-voucher items.");
+}
+
+/**
+  * called by addToBasket
+  *           updateBasketItem
+  *           removeBasketItem
+  */
 void intfAccountingBasedModule::processBasketItem(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
-    stuVoucherItem          *_oldVoucherItem
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     /**
      1: check available SLB & PRD in stock qty
@@ -590,11 +949,34 @@ void intfAccountingBasedModule::processBasketItem(
      7: reserve SLB
     **/
 
+    //-- --------------------------------
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     //-- --------------------------------
-    auto fnComputeTotalPrice = [&_assetItem](const QString &_label) {
+    if ((_oldVoucherItem == nullptr) && (_assetItem.Qty == 0))
+        throw exHTTPBadRequest("qty is zero and old item not specified.");
 
+    qreal DeltaQty = _assetItem.Qty;
+    if (_oldVoucherItem != nullptr)
+        DeltaQty -= _oldVoucherItem->Qty;
+
+    //-- check available count --------------------------------
+    if (DeltaQty > 0) {
+        if ((_assetItem.slbQtyInHand < 0) || (_assetItem.prdQtyInHand < 0))
+            throw exHTTPInternalServerError(QString("Available Saleable Qty(%1) or Available Product Qty(%2) < 0")
+                                            .arg(_assetItem.slbQtyInHand).arg(_assetItem.prdQtyInHand));
+
+        if (_assetItem.slbQtyInHand > _assetItem.prdQtyInHand)
+            throw exHTTPInternalServerError(QString("Available Saleable Qty(%1) > Available Product Qty(%2)")
+                                            .arg(_assetItem.slbQtyInHand).arg(_assetItem.prdQtyInHand));
+
+        if (_assetItem.slbQtyInHand < DeltaQty)
+            throw exHTTPBadRequest(QString("Not enough %1 available in store. Available Qty(%2) Requested Qty(%3)")
+                                   .arg(_assetItem.Saleable.slbCode).arg(_assetItem.slbQtyInHand).arg(DeltaQty));
+    }
+
+    //-- --------------------------------
+    auto fnComputeTotalPrice = [&_assetItem](const QString &_label) {
         _assetItem.SubTotal = _assetItem.UnitPrice * _assetItem.Qty;
         _assetItem.AfterDiscount = _assetItem.SubTotal - _assetItem.Discount;
 
@@ -617,23 +999,6 @@ void intfAccountingBasedModule::processBasketItem(
     //-- --------------------------------
     fnComputeTotalPrice("start");
 
-    //-- check available count --------------------------------
-    qreal AvailableProductQty  = _assetItem.Product.prdInStockQty
-                                 - NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdOrderedQty, 0)
-                                 + NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdReturnedQty, 0);
-    qreal AvailableSaleableQty = _assetItem.Saleable.slbInStockQty
-                                 - NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbOrderedQty, 0)
-                                 + NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbReturnedQty, 0);
-
-    if ((AvailableSaleableQty < 0) || (AvailableProductQty < 0))
-        throw exHTTPInternalServerError(QString("AvailableSaleableQty(%1) or AvailableProductQty(%2) < 0").arg(AvailableSaleableQty).arg(AvailableProductQty));
-
-    if (AvailableSaleableQty > AvailableProductQty)
-        throw exHTTPInternalServerError(QString("AvailableSaleableQty(%1) > AvailableProductQty(%2)").arg(AvailableSaleableQty).arg(AvailableProductQty));
-
-    if (AvailableSaleableQty < _assetItem.Qty)
-        throw exHTTPBadRequest(QString("Not enough %1 available in store. Available(%2) qty(%3)").arg(_assetItem.Saleable.slbCode).arg(AvailableSaleableQty).arg(_assetItem.Qty));
-
     //-- check buy 2, take 3 --------------------------------
     /**
      * example:
@@ -642,12 +1007,12 @@ void intfAccountingBasedModule::processBasketItem(
     ///@TODO: 2 ta bekhar 3 ta bebar:
 
     //-- --------------------------------
-    this->applyAdditivesAndComputeUnitPrice(_APICALLBOOM, _assetItem);
-    fnComputeTotalPrice("after applyAdditivesAndComputeUnitPrice");
+    this->computeAdditives(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    fnComputeTotalPrice("after computeAdditives");
 
     //-- --------------------------------
-    this->applyReferrer(_APICALLBOOM, _assetItem);
-    fnComputeTotalPrice("after applyReferrer");
+    this->computeReferrer(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    fnComputeTotalPrice("after computeReferrer");
 
     //-- --------------------------------
 //    this->parsePrize(...); -> AssetItem.PendingVouchers
@@ -655,24 +1020,34 @@ void intfAccountingBasedModule::processBasketItem(
     //-- discount --------------------------------
     ///@TODO: what if some one uses discount code and at the same time will pay by prize credit
 
-    this->applySystemDiscount(_APICALLBOOM, _assetItem);
-    fnComputeTotalPrice("after applySystemDiscount");
+    this->computeSystemDiscount(_APICALLBOOM, _assetItem, {}, _oldVoucherItem);
+    fnComputeTotalPrice("after computeSystemDiscount");
 
-    this->applyCouponDiscount(_APICALLBOOM, _assetItem);
+    this->computeCouponDiscount(_APICALLBOOM, _assetItem, _oldVoucherItem);
     fnComputeTotalPrice("after applyCouponBasedDiscount");
 
     //-- --------------------------------
-    this->digestPrivs(_APICALLBOOM, _assetItem);
+    this->digestPrivs(_APICALLBOOM, _assetItem, _oldVoucherItem);
 
-    //-- reserve saleable & product ------------------------------------
+    //-- reserve and un-reserve saleable and product ------------------------------------
     ///@TODO: call spSaleable_unReserve by cron
 
-    this->AccountSaleables->callSP(APICALLBOOM_PARAM,
-                                   "spSaleable_Reserve", {
-                                       { "iSaleableID", _assetItem.Saleable.slbID },
-                                       { "iUserID", CurrentUserID },
-                                       { "iQty", _assetItem.Qty },
-                                   });
+    if (DeltaQty > 0) {
+        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+                                       "spSaleable_Reserve", {
+                                           { "iSaleableID", _assetItem.Saleable.slbID },
+                                           { "iUserID", CurrentUserID },
+                                           { "iQty", DeltaQty },
+                                       });
+    } else if (DeltaQty < 0) {
+        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+                                       "spSaleable_unReserve", {
+                                           { "iSaleableID", _assetItem.Saleable.slbID },
+                                           { "iUserID", CurrentUserID },
+                                           { "iQty", abs(DeltaQty) },
+                                       });
+    }
+
 
     //-- new pre voucher item --------------------------------
     ///@TODO: add ttl for order item
@@ -682,17 +1057,30 @@ void intfAccountingBasedModule::processBasketItem(
 
 void intfAccountingBasedModule::digestPrivs(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: What should I do here?
 }
 
-void intfAccountingBasedModule::applySystemDiscount(
+void intfAccountingBasedModule::computeSystemDiscount(
     INTFAPICALLBOOM_IMPL            &APICALLBOOM_PARAM,
     INOUT stuAssetItem              &_assetItem,
-    const stuPendingSystemDiscount  &_pendingSystemDiscount
+    const stuPendingSystemDiscount  &_pendingSystemDiscount /*= {}*/,
+    const stuVoucherItem            *_oldVoucherItem /*= nullptr*/
 ) {
     if (_pendingSystemDiscount.Amount > 0) {
+        if (_pendingSystemDiscount.Key.isEmpty())
+            throw exHTTPBadRequest("Pending System Discount Key is empty.");
+
+        //revert same key system discount
+        if ((_oldVoucherItem != nullptr)
+            && _oldVoucherItem->SystemDiscounts.contains(_pendingSystemDiscount.Key)
+        ) {
+            stuSystemDiscount OldSystemDiscount = _assetItem.SystemDiscounts[_pendingSystemDiscount.Key];
+            _assetItem.Discount -= OldSystemDiscount.Amount;
+        };
+
         stuSystemDiscount SystemDiscount;
 
         SystemDiscount.Info.insert("desc", _pendingSystemDiscount.Desc);
@@ -721,7 +1109,9 @@ void intfAccountingBasedModule::applySystemDiscount(
         if (SystemDiscount.Amount != _pendingSystemDiscount.Amount)
             SystemDiscount.Info.insert("applied-amount", SystemDiscount.Amount);
 
-        _assetItem.SystemDiscounts.append(SystemDiscount);
+        //
+        _assetItem.SystemDiscounts[_pendingSystemDiscount.Key] = SystemDiscount;
+//            _assetItem.SystemDiscounts.insert(_pendingSystemDiscount.Key, SystemDiscount);
         _assetItem.Discount += SystemDiscount.Amount;
 
         return;
@@ -730,9 +1120,10 @@ void intfAccountingBasedModule::applySystemDiscount(
     ///@TODO: tblAccountSystemDiscounts and all its behaviors must be implemented
 }
 
-void intfAccountingBasedModule::applyCouponDiscount(
+void intfAccountingBasedModule::computeCouponDiscount(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     _assetItem.DiscountCode = _assetItem.DiscountCode.trimmed();
 
@@ -927,244 +1318,6 @@ void intfAccountingBasedModule::applyCouponDiscount(
 //            /* Desc     */ Discount.toJson(),
 //        });
     }
-}
-
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
-    TAPI::MD5_t                         _itemUUID,
-    qreal                               _newQty,
-    NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode
-)) {
-    for (QList<stuVoucherItem>::iterator it = _lastPreVoucher.Items.begin();
-         it != _lastPreVoucher.Items.end();
-         it++
-    ) {
-        if (it->UUID == _itemUUID) {
-            return internalUpdateBasketItem(
-                APICALLBOOM_PARAM,
-                _lastPreVoucher,
-                *it,
-                it->Qty + _newQty,
-                _newDiscountCode
-            );
-        }
-    }
-
-    throw exHTTPNotFound("item not found");
-}
-
-Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBasketItem(
-    INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
-    stuVoucherItem                      &_voucherItem,
-    qreal                               _newQty,
-    NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode
-) {
-
-
-    ///@TODO: must be implemented
-
-
-    if ((_newQty == _voucherItem.Qty)
-            && (NULLABLE_IS_NULL(_newDiscountCode)
-                || (NULLABLE_VALUE(_newDiscountCode) == _voucherItem.CouponDiscount.Code)
-                )
-            )
-        return _lastPreVoucher; //no change
-
-
-    /**
-      1: check prev and new coupon code
-
-
-        check available instock (minus _voucherItem.qty)
-
-
-
-
-     **/
-
-
-
-
-    /*
-    checkPreVoucherSanity(_lastPreVoucher);
-
-    if (_lastPreVoucher.Items.isEmpty())
-        throw exHTTPInternalServerError("pre-voucher items is empty.");
-
-    if (_new_qty <= 0)
-        throw exHTTPInternalServerError("Qty must be greater than zero.");
-
-    clsJWT JWT(_JWT);
-    quint64 currentUserID = JWT.usrID();
-
-    bool Found = false;
-    qint64 FinalPrice = 0;
-
-    auto iter = _lastPreVoucher.Items.begin();
-    while (iter != _lastPreVoucher.Items.end()) {
-        stuVoucherItem &PreVoucherItem = *iter;
-
-        if (PreVoucherItem.UUID == _itemUUID) {
-            Found = true;
-
-            if (_new_qty == PreVoucherItem.Qty)
-                throw exHTTPInternalServerError("Current Qty and new Qty can not be equal.");
-
-            //check uasStatus
-            QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
-                                        .addCols({
-                                                    tblAccountUserAssetsBase::Fields::uasID,
-                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
-                                                    tblAccountUserAssetsBase::Fields::uasStatus,
-                                                 })
-                                        .where({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, PreVoucherItem.UUID })
-                                        .one();
-            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
-            if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
-                throw exHTTPInternalServerError("only Pending items of pre-voucher can be modify.");
-
-            //
-            if (_new_qty < PreVoucherItem.Qty) {
-
-            } else { //_new_qty > PreVoucherItem.Qty
-
-            }
-
-            //update voucher item in _lastPreVoucher.Items
-            ///@TODO: re-apply additives
-            PreVoucherItem.Qty = _new_qty;
-
-            PreVoucherItem.SubTotal = AssetItem.SubTotal;
-            PreVoucherItem.Discount = Discount;
-            PreVoucherItem.DisAmount = (Discount.ID > 0 ? Discount.Amount : 0);
-            PreVoucherItem.VATPercent = NULLABLE_GET_OR_DEFAULT(AssetItem.Product.prdVAT, 0); // * 100;
-            PreVoucherItem.VATAmount = (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount) * PreVoucherItem.VATPercent / 100;
-
-
-
-            //update voucher item in Module/UsetAssets
-            UpdateQuery(*this->AccountUserAssets)
-                    .set(tblAccountUserAssetsBase::
-                        tblAccountUserAssetsBase::Fields::uasID)
-                                        .addCols({
-                                                    tblAccountUserAssetsBase::Fields::uas_slbID,
-                                                    tblAccountUserAssetsBase::Fields::uasStatus,
-                                                 })
-                                        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, PreVoucherItem.OrderID })
-                                        .one();
-
-            if (this->cancelVoucherItem(currentUserID, PreVoucherItem, [](const QVariantMap &_userAssetInfo) -> bool
-                {
-                    TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
-
-                    if (UserAssetStatus != TAPI::enuAuditableStatus::Pending)
-                        return false;
-
-                    return true;
-                }) == false) //not pending
-            {
-                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
-            }
-        }
-
-        //compute FinalPrice for all items
-        FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
-
-        ++iter;
-    }
-
-    if (Found) {
-        if (_lastPreVoucher.Items.size() > 1)
-            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
-        else {
-            auto item = _lastPreVoucher.Items.first();
-            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
-        }
-
-        _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
-        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
-        _lastPreVoucher.Sign.clear();
-        _lastPreVoucher.Sign = QString(Accounting::voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
-
-        return _lastPreVoucher;
-    }
-
-    throw exHTTPInternalServerError("item not found in pre-voucher items.");
-*/
-
-
-
-
-
-}
-
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
-    TAPI::MD5_t                         _itemUUID
-)) {
-    checkPreVoucherSanity(_lastPreVoucher);
-
-    if (_lastPreVoucher.Items.isEmpty())
-        throw exHTTPInternalServerError("prevoucher items is empty.");
-
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
-    if (_lastPreVoucher.UserID != CurrentUserID)
-        throw exHTTPBadRequest("invalid pre-Voucher owner");
-
-    bool Found = false;
-    qint64 FinalPrice = 0;
-
-    auto iter = _lastPreVoucher.Items.begin();
-    while (iter != _lastPreVoucher.Items.end()) {
-        stuVoucherItem PreVoucherItem = *iter;
-
-        if (PreVoucherItem.UUID == _itemUUID) {
-            Found = true;
-
-            //delete voucher item
-            if (this->cancelVoucherItem(_APICALLBOOM,
-                                        _APICALLBOOM.getUserID(),
-                                        PreVoucherItem,
-                                        [](const QVariantMap &_userAssetInfo) -> bool {
-                                            TAPI::enuAuditableStatus::Type UserAssetStatus = TAPI::enuAuditableStatus::toEnum(_userAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Pending).toString());
-                                            return (UserAssetStatus == TAPI::enuAuditableStatus::Pending);
-                                        }) == false) //not pending
-                throw exHTTPInternalServerError("only Pending items can be removed from pre-voucher.");
-
-            //remove item
-            iter = _lastPreVoucher.Items.erase(iter);
-
-            //preventing ++iter
-            continue; //continue for computing final price
-        } else
-            FinalPrice += (PreVoucherItem.SubTotal - PreVoucherItem.DisAmount + PreVoucherItem.VATAmount);
-
-        ++iter;
-    }
-
-    if (Found) {
-        if (_lastPreVoucher.Items.isEmpty())
-            _lastPreVoucher.Summary = "";
-        else if (_lastPreVoucher.Items.size() > 1)
-            _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
-        else {
-            auto item = _lastPreVoucher.Items.first();
-            _lastPreVoucher.Summary = QString("%1 of %2").arg(item.Qty).arg(item.Desc);
-        }
-
-        _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
-        _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
-        _lastPreVoucher.Sign.clear();
-        _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
-
-        return _lastPreVoucher;
-    }
-
-    throw exHTTPInternalServerError("item not found in pre-voucher items.");
 }
 
 /******************************************************************\

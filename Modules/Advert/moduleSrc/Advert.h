@@ -72,19 +72,22 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
 
-    virtual void applyAdditivesAndComputeUnitPrice(
+    virtual void computeAdditives(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
-    virtual void applyReferrer(
+    virtual void computeReferrer(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
 protected slots:

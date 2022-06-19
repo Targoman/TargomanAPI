@@ -265,7 +265,27 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
             );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME);
+
+    auto fnTouchQuery = [this, &_cols](SelectQuery &_query) {
+        if (_cols.isEmpty())
+            _query
+                .addCols(this->SelectableColumnNames())
+                ///@TODO: intfAccountProducts::instance()->SelectableColumnNames()
+//                .addCols(intfAccountProducts::instance()->SelectableColumnNames())
+            ;
+        else {
+            _query.addCSVCols(_cols);
+            _cols = {};
+        }
+
+        _query
+            .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
+//            .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
+//            .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
+        ;
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME, fnTouchQuery);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountSaleables) {

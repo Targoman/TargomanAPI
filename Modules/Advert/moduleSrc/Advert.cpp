@@ -122,18 +122,20 @@ bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
 bool Advert::isEmpty(const UsageLimits_t& _limits) const {
 }
 
-void Advert::applyAdditivesAndComputeUnitPrice(
+void Advert::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
 //    AssetItem.UnitPrice *= 1.1;
 };
 
-void Advert::applyReferrer(
+void Advert::computeReferrer(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 
@@ -150,12 +152,13 @@ void Advert::applyReferrer(
     });
 
     //2: add system discount
-    this->applySystemDiscount(_APICALLBOOM, _assetItem, {
+    this->computeSystemDiscount(_APICALLBOOM, _assetItem, {
+                                  QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
                                   enuDiscountType::Percent,
                                   10'000
-                              });
+                              }, _oldVoucherItem);
 
     //3: inc translate words max limit (30'000 -> 35'000)
 //    int IncAmount = 5'000;
@@ -174,7 +177,8 @@ void Advert::applyReferrer(
 
 QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 

@@ -61,7 +61,8 @@ protected:
 
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const ServiceUsage_t& _requestedUsage);
+        const ServiceUsage_t& _requestedUsage
+    );
 
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
@@ -69,38 +70,44 @@ protected:
     virtual void processBasketItem(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
         INOUT stuAssetItem      &_assetItem,
-        stuVoucherItem          *_oldVoucherItem = nullptr
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void digestPrivs(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
-    virtual void applyAdditivesAndComputeUnitPrice(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    virtual void computeAdditives(
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
-    virtual void applyReferrer(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+    virtual void computeReferrer(
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
-    virtual void applySystemDiscount(
+    virtual void computeSystemDiscount(
         INTFAPICALLBOOM_DECL            &APICALLBOOM_PARAM,
         INOUT stuAssetItem              &_assetItem,
-        const stuPendingSystemDiscount  &_pendingSystemDiscount = {}
+        const stuPendingSystemDiscount  &_pendingSystemDiscount = {},
+        const stuVoucherItem            *_oldVoucherItem = nullptr
     );
 
-    virtual void applyCouponDiscount(
+    virtual void computeCouponDiscount(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
-                      INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem      &_assetItem
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { return {}; }
 
     //-- used by processVoucherItem and cancelVoucherItem: ----------------------------------------
