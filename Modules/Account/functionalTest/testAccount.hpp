@@ -73,7 +73,6 @@ DELETE FROM dev_AAA.tblWalletsBalanceHistory;
 DELETE FROM dev_AAA.tblWalletsTransactions;
 DELETE FROM dev_AAA.tblUserWallets;
 DELETE FROM dev_AAA.tblOnlinePayments;
-
 DELETE FROM dev_AAA.tblOfflinePayments;
 DELETE FROM dev_AAA.tblOfflinePaymentClaims;
 DELETE FROM dev_AAA.tblVoucher;
@@ -82,6 +81,15 @@ DELETE FROM dev_AAA.tblActiveSessions;
 DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
 DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
 DELETE FROM dev_Common.tblAlerts;
+DELETE FROM dev_Common.tblDBG;
+DELETE FROM dev_Advert.tblUploadQueue;
+DELETE FROM dev_Advert.tblUploadFiles;
+DELETE FROM dev_Advert.tblAccountAssetUsage;
+DELETE FROM dev_Advert.tblAccountUserAssets;
+DELETE FROM dev_Advert.tblAccountSaleables;
+DELETE FROM dev_Advert.tblAccountProducts;
+DELETE FROM dev_Advert.tblAccountCoupons;
+DELETE FROM dev_Advert.tblLocations;
 */
     void cleanupUnitTestData() {
         QVariantMap Result;

@@ -669,7 +669,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 \*****************************************************************/
 Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, mergeBasket, (
     APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher
+    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 )) {
     ///@TODO: must be implemented
 
@@ -696,9 +696,9 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, getBasket, (
 
 }
 
-void IMPL_REST_POST(Account, deleteBasket, (
+bool IMPL_REST_POST(Account, deleteBasket, (
     APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher
+    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 )) {
     ///@TODO: must be implemented
 

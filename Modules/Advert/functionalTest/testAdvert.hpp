@@ -538,7 +538,7 @@ private slots:
                 {
                     { "saleableCode",           this->BannerSaleableCode },
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                    10 },
+                    { "qty",                    5 },
                     { "discountCode",           this->CouponCode },
                     { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
@@ -564,7 +564,7 @@ private slots:
                 "Advert/removeBasketItem",
                 {},
                 {
-                    { "itemUUID",       this->LastPreVoucher.Items.at(0).UUID },
+                    { "itemUUID",       this->LastPreVoucher.Items.last().UUID },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
@@ -589,7 +589,7 @@ private slots:
                 {
                     { "saleableCode",           this->BannerSaleableCode },
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                    20 },
+                    { "qty",                    8 },
                     { "discountCode",           this->CouponCode },
                     { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
@@ -606,7 +606,30 @@ private slots:
         }
     }
 
-    ///@TODO: updateBasketItem
+    void updateBasketItem() {
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Advert/updateBasketItem",
+                {},
+                {
+                    { "itemUUID",               this->LastPreVoucher.Items.last().UUID },
+                    { "newQty",                 10 },
+//                    { "newDiscountCode",        ??? },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
 
     void addToBasket_valid_coupon_code_3() {
         QT_TRY {
@@ -619,7 +642,7 @@ private slots:
                 {
                     { "saleableCode",           this->BannerSaleableCode },
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                    30 },
+                    { "qty",                    14 },
                     { "discountCode",           this->CouponCode },
                     { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
@@ -630,6 +653,34 @@ private slots:
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void addToBasket_valid_coupon_code_3_same() {
+        QT_TRY {
+            int ItemsCount = this->LastPreVoucher.Items.length();
+
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Advert/addToBasket",
+                {},
+                {
+                    { "saleableCode",           this->BannerSaleableCode },
+                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
+                    { "qty",                    1 },
+                    { "discountCode",           this->CouponCode },
+                    { "referrer",               "freepaper.com" },
+                    { "extraReferrerParams",    {} },
+                    { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
+                }
+            );
+
+            this->LastPreVoucher.fromJson(Result.toJsonObject());
+
+            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -789,7 +840,7 @@ private slots:
         }
     }
 
-    void addToBasket2_valid_coupon_code_1() {
+    void addToBasket2_no_coupon_1() {
         this->LastPreVoucher = {};
 
         QT_TRY {
@@ -802,7 +853,7 @@ private slots:
                 {
                     { "saleableCode",           this->BannerSaleableCode },
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                    10 },
+                    { "qty",                    20 },
 //                    { "discountCode",           this->CouponCode },
                     { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },
@@ -818,7 +869,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-    void addToBasket2_valid_coupon_code_2() {
+    void addToBasket2_no_coupon_2() {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();
 
@@ -829,7 +880,7 @@ private slots:
                 {
                     { "saleableCode",           this->BannerSaleableCode },
                     { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 222 } }) },
-                    { "qty",                    5 },
+                    { "qty",                    25 },
 //                    { "discountCode",           this->CouponCode },
                     { "referrer",               "freepaper.com" },
                     { "extraReferrerParams",    {} },

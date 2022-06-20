@@ -179,17 +179,40 @@ protected slots:
     Targoman::API::AAA::stuPreVoucher REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            TAPI::SaleableCode_t _saleableCode,
-            Targoman::API::AAA::OrderAdditives_t _orderAdditives = {},
-            qreal _qty = 1,
-            TAPI::CouponCode_t _discountCode = {},
-            QString _referrer = {},
-            TAPI::JSON_t _extraReferrerParams = {},
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher = {}
-//            TAPI::MD5_t _parentItemUUID = {}
+            APICALLBOOM_TYPE_JWT_DECL               &APICALLBOOM_PARAM,
+            TAPI::SaleableCode_t                    _saleableCode,
+            Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
+            qreal                                   _qty = 1,
+            TAPI::CouponCode_t                      _discountCode = {},
+            QString _referrer                       = {},
+            TAPI::JSON_t _extraReferrerParams       = {},
+            Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
+//            TAPI::MD5_t _parentItemUUID             = {}
         ),
         "add an item to the basket and return updated pre-Voucher"
+    )
+
+    Targoman::API::AAA::stuPreVoucher REST_POST(
+        updateBasketItem,
+        (
+            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
+            TAPI::MD5_t                         _itemUUID,
+            qreal                               _newQty,
+            NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
+        ),
+        "Update a basket item and return updated pre-Voucher."
+    )
+
+    Targoman::API::AAA::stuPreVoucher REST_POST(
+        removeBasketItem,
+        (
+            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
+            TAPI::MD5_t                         _itemUUID
+        ),
+        "Remove an item from basket and return updated pre-Voucher."
+        "Only Pending items can be removed."
     )
 
 protected:
@@ -202,29 +225,6 @@ protected:
     );
 
 protected slots:
-    Targoman::API::AAA::stuPreVoucher REST_POST(
-        updateBasketItem,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
-            TAPI::MD5_t _itemUUID,
-            qreal _newQty,
-            NULLABLE_TYPE(TAPI::CouponCode_t) _newDiscountCode = NULLABLE_NULL_VALUE
-        ),
-        "Update a basket item and return updated pre-Voucher."
-    )
-
-    Targoman::API::AAA::stuPreVoucher REST_POST(
-        removeBasketItem,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
-            TAPI::MD5_t _itemUUID
-        ),
-        "Remove an item from basket and return updated pre-Voucher."
-        "Only Pending items can be removed."
-    )
-
     bool REST_POST(
         processVoucherItem,
         (

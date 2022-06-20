@@ -77,14 +77,14 @@
 
 #define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
     TAPI_REGISTER_METATYPE( \
-        /* complexity         */ _complexity, \
-        /* namespace          */ _namespace, \
-        /* type               */ _type, \
+        /* complexity     */ _complexity, \
+        /* namespace      */ _namespace, \
+        /* type           */ _type, \
         /* fnToVariant    */ [](const _type& _value) -> QVariant { \
             _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "fnToVariant", _value); \
             return _value; \
         }, \
-    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
+        /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
             _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fnFromVariant", _paramName, _value); \
             return _type::fromVariant(_value); \
         }, \

@@ -305,7 +305,7 @@ private slots:
         mergeBasket,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher
+            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
         ),
         "Merge given pre-Voucher and user's new asset items by service"
     )
@@ -318,11 +318,11 @@ private slots:
         "Fetch and make current user's pre-Voucher"
     )
 
-    void REST_POST(
+    bool REST_POST(
         deleteBasket,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher &_lastPreVoucher
+            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
         ),
         "Remove all items from pre-Voucher"
     )
