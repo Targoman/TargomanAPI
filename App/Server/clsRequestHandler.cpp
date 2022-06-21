@@ -39,6 +39,9 @@
 #include "APICache.hpp"
 #include "OpenAPIGenerator.h"
 
+#include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "Interfaces/AAA/Authentication.h"
 using namespace Targoman::API::AAA;
 
@@ -661,7 +664,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 
     } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
         TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
-        this->redirect(ResponseRedirect.url());
+        this->redirect(ResponseRedirect.url(), ResponseRedirect.appendBase(), ResponseRedirect.permananet());
 
     } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
         TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
@@ -705,7 +708,7 @@ void clsRequestHandler::sendCORSOptions() {
 
 void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet) {
     QString Path = _appendBase ? ServerConfigs::BasePathWithVersion + _path : _path;
-    Path = Path.replace(QRegularExpression("//+"), "/");
+    Path = URLHelper::normalize(Path);
 
     this->Response->addHeaderValue("Location", Path);
 

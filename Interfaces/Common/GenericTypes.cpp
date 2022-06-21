@@ -36,6 +36,9 @@
 #include "intfAPIArgManipulator.h"
 #include "HTTPExceptions.hpp"
 
+#include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "Interfaces/DBM/clsORMField.h"
 using namespace Targoman::API::DBM;
 
@@ -440,10 +443,14 @@ QVariant FileData_t::toVariant() const {
 }
 
 /**********************************************************************************/
-ResponseRedirect_t::ResponseRedirect_t(const QString &_url) :
-    Url(_url)
+ResponseRedirect_t::ResponseRedirect_t(const QString &_url,
+                                       bool _appendBase,
+                                       bool _permananet) :
+    Url(_url),
+    AppendBase(_appendBase),
+    Permananet(_permananet)
 {
-    Url = Url.replace(QRegularExpression("//+"), "/");
+    this->Url = URLHelper::normalize(_url);
 }
 
 QVariant ResponseRedirect_t::toVariant() const {

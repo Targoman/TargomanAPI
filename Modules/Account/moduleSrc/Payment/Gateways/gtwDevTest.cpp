@@ -22,6 +22,8 @@
  */
 
 #include "gtwDevTest.h"
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 namespace Targoman::API::AccountModule::Payment::Gateways {
 
@@ -52,10 +54,16 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 
     QString TrackID = "devtest_track_id";
 
+    QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?trackID=%2&callback=%3")
+                          .arg(ClientConfigs::RESTServerAddress.value())
+                          .arg(TrackID)
+                          .arg(_callback)
+                          ;
+
     return {
         "",
         TrackID,
-        QString(gtwDevTest::URL_GTW_PAY).replace("{{track_id}}", TrackID)
+        PaymentLink
     };
 
 #else

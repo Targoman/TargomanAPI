@@ -67,7 +67,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
     QString File = API.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
 
     if (File.isEmpty())
-        return TAPI::ResponseRedirect_t(API + "/").toVariant();
+        return TAPI::ResponseRedirect_t(API + "/", true).toVariant();
 
     if (File == "/")
         File = "index.html";

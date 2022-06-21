@@ -176,12 +176,18 @@ public:
     ~ResponseRedirect_t() = default;
     ResponseRedirect_t(const ResponseRedirect_t &) = default;
     ResponseRedirect_t &operator=(const ResponseRedirect_t &) = default;
-    ResponseRedirect_t(const QString &_url);
+    ResponseRedirect_t(const QString &_url,
+                       bool _appendBase,
+                       bool _permananet = false);
     QVariant toVariant() const;
     const QString &url() { return this->Url; }
+    bool appendBase() { return this->AppendBase; }
+    bool permananet() { return this->Permananet; }
 
 private:
     QString Url;
+    bool AppendBase;
+    bool Permananet;
 };
 
 /**********************************************************************/

@@ -63,6 +63,24 @@ QVariant IMPL_ORMGET(OnlinePayments) {
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
+#ifdef QT_DEBUG
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    Q_DECL_UNUSED QString _trackID,
+    QString _callback
+)) {
+/*
+
+http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?trackID=AAA&callback=http://bbb.dom
+
+curl -v -H 'accept: application/json' -X 'GET' 'http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?trackID=aaa&callback=http://bbb.dom/a/b//c'
+
+*/
+
+    return TAPI::ResponseRedirect_t(_callback, false).toVariant();
+}
+#endif
+
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|
 \*****************************************************************/
