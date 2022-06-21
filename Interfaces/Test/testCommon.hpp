@@ -177,8 +177,14 @@ protected:
 //        );
 //    }
 
+    enum struct JWTMode {
+        Guest,
+        User,
+        Admin
+    };
+
     QVariant callAPI(
-        bool _useAdminJWT,
+        JWTMode _JWTMode,
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs = {},
@@ -188,8 +194,12 @@ protected:
     ) {
         QVariantMap ResponseHeaders;
 
+        QString GuestJWT = "";
+
         QVariant Result = RESTClientHelper::callAPI(
-                              (_useAdminJWT ? gEncodedAdminJWT : gEncodedJWT),
+                              (_JWTMode == JWTMode::Guest
+                                ? GuestJWT
+                                : (_JWTMode == JWTMode::Admin ? gEncodedAdminJWT : gEncodedJWT)),
                               _method,
                               _api,
                               _urlArgs,
@@ -222,6 +232,25 @@ protected:
         return Result;
     }
 
+    QVariant callGuestAPI(
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postOrFormFields = {},
+        const QVariantMap& _formFiles = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    ) {
+        return callAPI(
+                    JWTMode::Guest,
+                    _method,
+                    _api,
+                    _urlArgs,
+                    _postOrFormFields,
+                    _formFiles,
+                    _outResponseHeaders
+                    );
+    }
+
     QVariant callUserAPI(
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
@@ -231,7 +260,7 @@ protected:
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         return callAPI(
-                    false,
+                    JWTMode::User,
                     _method,
                     _api,
                     _urlArgs,
@@ -250,7 +279,7 @@ protected:
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         return callAPI(
-                    true,
+                    JWTMode::Admin,
                     _method,
                     _api,
                     _urlArgs,

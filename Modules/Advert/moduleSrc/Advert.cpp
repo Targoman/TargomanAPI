@@ -141,17 +141,33 @@ void Advert::computeReferrer(
 
     ///::: SAMPLE CODE :::
 
-    //1: add credit voucher for fp.com
-    _assetItem.PendingVouchers.append({
-        /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
-        /* Type     */ enuVoucherType::Prize, //Credit,
-        /* Amount   */ 123'456,
-        /* Desc     */ {
-                           { "referrer", _assetItem.Referrer },
-                       },
-    });
+    //1: add, modify or remove credit voucher for fp.com
+    if (_oldVoucherItem != nullptr) {
+        if (_oldVoucherItem->Qty != _assetItem.Qty) {
+            //remove old
+            for (QList<stuPendingVoucher>::iterator it = _assetItem.PendingVouchers.begin();
+                 it != _assetItem.PendingVouchers.end();
+                 it++
+            ) {
+                if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
+                        && (it->Info.contains("referrer")))
+                    it = _assetItem.PendingVouchers.erase(it);
+            }
+        }
+    }
 
-    //2: add system discount
+    if (_assetItem.Qty > 0) {
+        _assetItem.PendingVouchers.append({
+            /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
+            /* Type     */ enuVoucherType::Prize, //Credit,
+            /* Amount   */ 2000 * _assetItem.Qty,
+            /* Info     */ {
+                               { "referrer", _assetItem.Referrer },
+                           },
+        });
+    }
+
+    //2: add, modify or remove system discount
     this->computeSystemDiscount(_APICALLBOOM, _assetItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
@@ -433,7 +449,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         /* qty                 */ 1,
         /* discountCode        */ CouponCode,
         /* referrer            */ "",
-        /* extraReferrerParams */ {},
+        /* referrerParams */ {},
         /* lastPreVoucher      */ LastPreVoucher
     );
     Result.insert("LastPreVoucher", LastPreVoucher.toJson());

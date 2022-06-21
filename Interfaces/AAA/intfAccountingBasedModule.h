@@ -67,7 +67,7 @@ protected:
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
     //-- used by addToBasket: ----------------------------------------
-    virtual void processBasketItem(
+    virtual void processItemForBasket(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
         INOUT stuAssetItem      &_assetItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
@@ -184,10 +184,10 @@ protected slots:
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
             qreal                                   _qty = 1,
             TAPI::CouponCode_t                      _discountCode = {},
-            QString _referrer                       = {},
-            TAPI::JSON_t _extraReferrerParams       = {},
+            QString                                 _referrer = {},
+            TAPI::JSON_t                            _referrerParams = {},
             Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
-//            TAPI::MD5_t _parentItemUUID             = {}
+//            TAPI::MD5_t                             _parentItemUUID = {}
         ),
         "add an item to the basket and return updated pre-Voucher"
     )
@@ -217,11 +217,11 @@ protected slots:
 
 protected:
     Targoman::API::AAA::stuPreVoucher internalUpdateBasketItem(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        Targoman::API::AAA::stuPreVoucher &_lastPreVoucher,
-        stuVoucherItem &_voucherItem,
-        qreal _newQty,
-        NULLABLE_TYPE(TAPI::CouponCode_t) _newDiscountCode = NULLABLE_NULL_VALUE
+        INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
+        Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+        stuVoucherItem                      &_voucherItem,
+        qreal                               _newQty,
+        NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
     );
 
 protected slots:

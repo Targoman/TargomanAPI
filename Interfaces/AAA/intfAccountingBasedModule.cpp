@@ -317,14 +317,14 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     qreal                                   _qty,
     TAPI::CouponCode_t                      _discountCode,
     QString                                 _referrer,
-    TAPI::JSON_t                            _extraReferrerParams,
+    TAPI::JSON_t                            _referrerParams,
     Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
     /**
      1: validate preVoucher and owner
      2: find duplicates
      3: fetch SLB & PRD
-     4: processBasketItem
+     4: processItemForBasket
      5: create new user asset (+ custom user asset fields)
      6: compute preVoucherItem prices and sign
      7: compute preVoucher prices and sign
@@ -433,22 +433,15 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     AssetItem.Product.fromJson(JsonSaleableInfo);
     AssetItem.Saleable.fromJson(JsonSaleableInfo);
 
-//    _assetItem.prdQtyInHand  = _assetItem.Product.prdInStockQty
-//                               - NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdOrderedQty, 0)
-//                               + NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdReturnedQty, 0);
-//    _assetItem.slbQtyInHand = _assetItem.Saleable.slbInStockQty
-//                               - NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbOrderedQty, 0)
-//                               + NULLABLE_GET_OR_DEFAULT(_assetItem.Saleable.slbReturnedQty, 0);
-
     //-- --------------------------------
-    AssetItem.OrderAdditives        = _orderAdditives;
-    AssetItem.DiscountCode          = _discountCode;
-    AssetItem.Referrer              = _referrer;
-    AssetItem.ExtraReferrerParams   = _extraReferrerParams;
+    AssetItem.DiscountCode      = _discountCode;
+    AssetItem.OrderAdditives    = _orderAdditives;
+    AssetItem.Referrer          = _referrer;
+    AssetItem.ReferrerParams    = _referrerParams;
 
-    AssetItem.Qty                   = _qty;
-    AssetItem.UnitPrice             = AssetItem.Saleable.slbBasePrice;
-    AssetItem.Discount              = 0;
+    AssetItem.Qty               = _qty;
+    AssetItem.UnitPrice         = AssetItem.Saleable.slbBasePrice;
+    AssetItem.Discount          = 0;
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -466,7 +459,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processBasketItem(_APICALLBOOM, AssetItem);
+    this->processItemForBasket(_APICALLBOOM, AssetItem);
 
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
@@ -491,6 +484,10 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     PreVoucherItem.VATAmount = AssetItem.VAT;
 
     PreVoucherItem.TotalPrice = AssetItem.TotalPrice;
+
+    PreVoucherItem.Additives = AssetItem.OrderAdditives;
+    PreVoucherItem.Referrer = AssetItem.Referrer;
+    PreVoucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
     CreateQuery qry = CreateQuery(*this->AccountUserAssets)
         .addCols({
@@ -635,6 +632,12 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, remo
     );
 }
 
+/**
+  * called by:
+  *     addToBasket
+  *     updateBasketItem
+  *     removeBasketItem
+  */
 Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBasketItem(
     INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
@@ -696,12 +699,11 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
         .addCols(this->AccountUserAssets->SelectableColumnNames())
         .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 
-//        .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _voucherItem. })
-//        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-//        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
-//            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
-//                DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-//        )
+        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+                DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+        )
         .one();
 
     TargomanDebug(5) << "intfAccountingBasedModule::internalUpdateBasketItem : UserAssetInfo" << UserAssetInfo;
@@ -714,19 +716,15 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     AssetItem.Product.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
     AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
-//    stuVoucherItem PreVoucherItem;
-//    PreVoucherItem.fromJson(AccountUserAssetsBaseDTO.uasVoucherItemInfo.object());
-
     //--  --------------------------------
-    AssetItem.OrderAdditives        = _voucherItem.Additives;
-    AssetItem.DiscountCode          = NULLABLE_GET_OR_DEFAULT(_newDiscountCode, _voucherItem.CouponDiscount.Code);
-    AssetItem.Referrer              = _voucherItem.Referrer;
-    ///@TODO: PreVoucherItem.ReferrerParams
-//    AssetItem.ExtraReferrerParams   = PreVoucherItem.ReferrerParams;
+    AssetItem.DiscountCode      = NULLABLE_GET_OR_DEFAULT(_newDiscountCode, _voucherItem.CouponDiscount.Code);
+    AssetItem.OrderAdditives    = _voucherItem.Additives;
+    AssetItem.Referrer          = _voucherItem.Referrer;
+    AssetItem.ReferrerParams    = _voucherItem.ReferrerParams;
 
-    AssetItem.Qty                   = _newQty;
-    AssetItem.UnitPrice             = AssetItem.Saleable.slbBasePrice;
-    AssetItem.Discount              = _voucherItem.DisAmount;
+    AssetItem.Qty               = _newQty;
+    AssetItem.UnitPrice         = AssetItem.Saleable.slbBasePrice;
+    AssetItem.Discount          = _voucherItem.DisAmount;
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -744,7 +742,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processBasketItem(_APICALLBOOM, AssetItem, &_voucherItem);
+    this->processItemForBasket(_APICALLBOOM, AssetItem, &_voucherItem);
 
     //-- --------------------------------
     qint64 FinalPrice = _lastPreVoucher.ToPay + _lastPreVoucher.Round;
@@ -760,12 +758,13 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
             false
         );
 
-        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
-                                       "spSaleable_unReserve", {
-                                           { "iSaleableID", AssetItem.Saleable.slbID },
-                                           { "iUserID", CurrentUserID },
-                                           { "iQty", _voucherItem.Qty },
-                                       });
+        //moved to processItemForBasket
+//        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+//                                       "spSaleable_unReserve", {
+//                                           { "iSaleableID", AssetItem.Saleable.slbID },
+//                                           { "iUserID", CurrentUserID },
+//                                           { "iQty", _voucherItem.Qty },
+//                                       });
 
         _lastPreVoucher.Items.removeAt(VoucherItemIndex);
     } else { //update
@@ -790,6 +789,10 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
         _voucherItem.VATAmount = AssetItem.VAT;
 
         _voucherItem.TotalPrice = AssetItem.TotalPrice;
+
+        _voucherItem.Additives = AssetItem.OrderAdditives;
+        _voucherItem.Referrer = AssetItem.Referrer;
+        _voucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
         UpdateQuery qry = UpdateQuery(*this->AccountUserAssets)
                           .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
@@ -823,7 +826,9 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
         _lastPreVoucher.Items.replace(VoucherItemIndex, _voucherItem);
     }
 
-    if (_lastPreVoucher.Items.size() > 1)
+    if (_lastPreVoucher.Items.isEmpty()) {
+        _lastPreVoucher.Summary = "";
+    } else if (_lastPreVoucher.Items.size() > 1)
         _lastPreVoucher.Summary = QString("%1 items").arg(_lastPreVoucher.Items.size());
     else {
         auto item = _lastPreVoucher.Items.first();
@@ -839,11 +844,13 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
 }
 
 /**
-  * called by addToBasket
-  *           updateBasketItem
-  *           removeBasketItem
+  * called by:
+  *     internalUpdateBasketItem:
+  *        addToBasket
+  *        updateBasketItem
+  *        removeBasketItem
   */
-void intfAccountingBasedModule::processBasketItem(
+void intfAccountingBasedModule::processItemForBasket(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -988,8 +995,12 @@ void intfAccountingBasedModule::computeSystemDiscount(
         if ((_oldVoucherItem != nullptr)
             && _oldVoucherItem->SystemDiscounts.contains(_pendingSystemDiscount.Key)
         ) {
-            stuSystemDiscount OldSystemDiscount = _assetItem.SystemDiscounts[_pendingSystemDiscount.Key];
+            stuSystemDiscount OldSystemDiscount = _oldVoucherItem->SystemDiscounts[_pendingSystemDiscount.Key];
             _assetItem.Discount -= OldSystemDiscount.Amount;
+
+            if (_assetItem.Qty == 0) {
+                return;
+            }
         };
 
         stuSystemDiscount SystemDiscount;
@@ -1079,7 +1090,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     }
 
     //C2, 4.2, 5:
-    if (_assetItem.Qty  == 0)
+    if (_assetItem.Qty == 0)
         return;
 
     clsCondition OmmitOldCondition;
@@ -1260,7 +1271,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
 }
 
 /******************************************************************\
-|** procerss and cancel voucher item ******************************|
+|** process and cancel voucher item *******************************|
 \******************************************************************/
 bool intfAccountingBasedModule::increaseDiscountUsage(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,

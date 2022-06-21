@@ -402,9 +402,7 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
         };
 
     } catch (std::exception &_exp) {
-        OnlinePayments::instance().Update(
-                    OnlinePayments::instance(),
-                    APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::Fields::onpResult, _exp.what() },

@@ -363,7 +363,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             const QString _paymentMD5,
             const QString _domain,
             TAPI::JSON_t _pgResponse

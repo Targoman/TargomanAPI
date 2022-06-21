@@ -160,13 +160,13 @@ namespace tblAccountUserAsset {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            ///ColName                  Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::uasExDays,          S(qint16),  QFV.integer().minValue(-1), 0,       UPNone, false, false },
-            { ExtraFields::uasExDayShow,       S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::uasExTotalShow,     S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::uasExDayClicks,     S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::uasExMonthClicks,   S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::uasExTotalClicks,   S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false }
+            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::uasExDays,           S(qint16),  QFV.integer().minValue(-1), 0,          UPAdmin, false,  false },
+            { ExtraFields::uasExDayShow,        S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExTotalShow,      S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExDayClicks,      S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExMonthClicks,    S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExTotalClicks,    S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false }
         };
 
         const QList<stuRelation> ExtraRelations = {
@@ -207,13 +207,13 @@ namespace tblAccountAssetUsage {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            ///ColName                  Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::usgExDays,          S(qint16),  QFV.integer().minValue(-1), 0,       UPNone, false, false },
-            { ExtraFields::usgExDayShow,       S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::usgExTotalShow,     S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::usgExDayClicks,     S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::usgExMonthClicks,   S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false },
-            { ExtraFields::usgExTotalClicks,   S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false }
+            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::usgExDays,           S(qint16),  QFV.integer().minValue(-1), 0,          UPAdmin, false,  false },
+            { ExtraFields::usgExDayShow,        S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExTotalShow,      S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExDayClicks,      S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExMonthClicks,    S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExTotalClicks,    S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false }
         };
 
         const QList<stuRelation> ExtraRelations = {

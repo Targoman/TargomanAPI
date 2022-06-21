@@ -22,9 +22,10 @@
  */
 
 #include "intfSQLBasedModule.h"
-
+#include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::AAA;
 using namespace Targoman::API::DBM;
 
 namespace Targoman::API::API {
@@ -291,7 +292,7 @@ quint64 intfSQLBasedModule::Create(
 
     query.values(_createInfo);
 
-    return query.execute(_APICALLBOOM.getUserID());
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID);
 }
 
 quint64 intfSQLBasedModule::Create(
@@ -385,7 +386,7 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(_APICALLBOOM.getUserID()) > 0;
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID) > 0;
 }
 
 bool intfSQLBasedModule::Update(
@@ -489,7 +490,7 @@ bool intfSQLBasedModule::DeleteByPks(
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_APICALLBOOM.getUserID(), {}, _realDelete) > 0;
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID, {}, _realDelete) > 0;
 }
 
 bool intfSQLBasedModule::DeleteByPks(

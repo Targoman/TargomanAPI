@@ -784,10 +784,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             if ((PendingVoucher.Type == enuVoucherType::Income)
                 || (PendingVoucher.Type == enuVoucherType::Prize)
             ) {
-                PendingVoucher.Desc.insert("mainVoucherID", static_cast<double>(VoucherID));
+                PendingVoucher.Info.insert("mainVoucherID", static_cast<double>(VoucherID));
 
                 QJsonDocument Doc;
-                Doc.setObject(PendingVoucher.Desc);
+                Doc.setObject(PendingVoucher.Info);
                 vchid = this->callSP(APICALLBOOM_PARAM,
                                      "spWallet_Increase", {
                                          { "iWalletID", 0 },
@@ -801,7 +801,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                 vchid = Voucher::instance().Create(_APICALLBOOM,
                                                    TAPI::ORMFields_t({
                                                                          { tblVoucher::Fields::vch_usrID, CurrentUserID },
-                                                                         { tblVoucher::Fields::vchDesc, PendingVoucher.Desc.toVariantMap() },
+                                                                         { tblVoucher::Fields::vchDesc, PendingVoucher.Info.toVariantMap() },
                                                                          { tblVoucher::Fields::vchTotalAmount, PendingVoucher.Amount },
                                                                          { tblVoucher::Fields::vchType, PendingVoucher.Type },
                                                                          { tblVoucher::Fields::vchStatus, enuVoucherStatus::New },
@@ -959,7 +959,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
  * @return
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     const QString _paymentMD5,
     const QString _domain,
     TAPI::JSON_t _pgResponse
@@ -1036,8 +1036,8 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
                 throw exAuthorization("Voucher is not yours");
         }
 
-        if (Voucher.vchTotalAmount > _amount)
-            throw exAuthorization("Voucher total amount is greater than provided amount");
+//        if (Voucher.vchTotalAmount > _amount)
+//            throw exAuthorization("Voucher total amount is greater than provided amount");
     }
 
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
@@ -1090,7 +1090,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     //check operator or owner
     if (Authorization::hasPriv(_APICALLBOOM, { "AAA:rejectOfflinePayment" }) == false) {
         if (OfflinePaymentClaim.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
-            throw exAuthorization("This `voucher` is not yours");
+            throw exAuthorization("This voucher is not yours");
     }
 
     if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
@@ -1112,7 +1112,6 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
 /**
  * @callby:
  *     operator
- *     owner
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
@@ -1125,11 +1124,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one<tblOfflinePaymentClaims::DTO>();
 
-    //check operator or owner
-    if (Authorization::hasPriv(_APICALLBOOM, { "AAA:approveOfflinePayment" }) == false) {
-        if (OfflinePaymentClaim.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
-            throw exAuthorization("This `offline payment claim` is not yours");
-    }
+    //check operator
+    if (Authorization::hasPriv(_APICALLBOOM, { "AAA:approveOfflinePayment" }) == false)
+        throw exAuthorization("Access denied");
 
     if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
