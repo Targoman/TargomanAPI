@@ -30,7 +30,7 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
-    TAPI::MD5_t _orderMD5,
+    TAPI::MD5_t _paymentKey,
     qint64 _amount,
     const QString& _callback,
     const QString& _desc
@@ -38,7 +38,7 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
-    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _orderMD5, _amount, _callback, _desc });
+    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _paymentKey, _amount, _callback, _desc });
 
     try {
         QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(
@@ -48,7 +48,7 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
                                                                { "amount"      , _amount },
                                                                { "callbackUrl" , _callback },
                                                                { "description" , _desc },
-                                                               { "orderId"     , _orderMD5 }
+                                                               { "orderId"     , _paymentKey }
                                                            }))
                                  );
 
@@ -109,12 +109,12 @@ std::tuple<QString, QString> gtwZibal::verifyAndSettle(
                             );
 
         QString TrackID = PGResponse.value("trackId").toString();
-        QString OrderMD5 = PGResponse.value("orderId").toString();
+        QString PaymentKey = PGResponse.value("orderId").toString();
 
-        if (OrderMD5.isEmpty() || TrackID.isEmpty())
+        if (PaymentKey.isEmpty() || TrackID.isEmpty())
             throw exHTTPBadRequest("Invalid response. not containing essential keys");
 
-        QFV.md5().validate(OrderMD5, "orderID");
+        QFV.md5().validate(PaymentKey, "orderID");
         QFV.asciiAlNum(false).maxLenght(32).validate(TrackID, "trackId");
 
         QJsonDocument Json = intfPaymentGateway::postJsonWithCurl(

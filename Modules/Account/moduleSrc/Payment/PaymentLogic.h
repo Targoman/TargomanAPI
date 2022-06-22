@@ -72,13 +72,13 @@ public:
         const QString& _invDesc,
         quint32 _toPay,
         const QString _paymentVerifyCallback,
-        /*OUT*/ TAPI::MD5_t& _outPaymentMD5,
+        /*OUT*/ TAPI::MD5_t& _outPaymentKey,
         quint64 _walID = 0
     );
 
     static std::tuple<quint64, quint64, quint64> approveOnlinePayment(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const QString& _paymentMD5,
+        const QString& _paymentKey,
         const TAPI::JSON_t& _pgResponse,
         const QString& _domain
     );

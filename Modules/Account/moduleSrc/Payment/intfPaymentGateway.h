@@ -60,7 +60,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 //    QString ErrorString;
 //    QString Result;
 //    QString TrackID;
-//    QString OrderMD5;
+//    QString PaymentKey;
 //    QString PaymentLink;
 
 //    stuPaymentResponse() :
@@ -75,11 +75,11 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 //        PaymentLink(_paymentLink)
 //    { ; }
 
-//    stuPaymentResponse(const QString _orderMD5, const QString& _result, int _errorCode, const QString& _errStr) :
+//    stuPaymentResponse(const QString _paymentKey, const QString& _result, int _errorCode, const QString& _errStr) :
 //        ErrorCode(_errorCode),
 //        ErrorString(_errStr),
 //        Result(_result),
-//        OrderMD5(_orderMD5)
+//        PaymentKey(_paymentKey)
 //    { ; }
 //};
 
@@ -105,7 +105,7 @@ protected: \
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
-            TAPI::MD5_t _orderMD5, \
+            TAPI::MD5_t _paymentKey, \
             qint64 _amount, \
             const QString &_callback, \
             const QString &_desc \
@@ -141,7 +141,7 @@ protected:
 //    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest(
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
-            TAPI::MD5_t _orderMD5,
+            TAPI::MD5_t _paymentKey,
             qint64 _amount,
             const QString &_callback,
             const QString &_desc

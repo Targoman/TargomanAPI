@@ -932,7 +932,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
             break;
 
         default:
-            TAPI::MD5_t PaymentMD5;
+            TAPI::MD5_t PaymentKey;
             Voucher.PaymentLink = PaymentLogic::createOnlinePaymentLink(
                                       APICALLBOOM_PARAM,
                                       NULLABLE_VALUE(_gatewayType),
@@ -941,10 +941,10 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
                                       VoucherInfo.vchDesc.toJson(), //_preVoucher.Summary,
                                       RemainingAfterWallet,
                                       _paymentVerifyCallback,
-                                      PaymentMD5,
+                                      PaymentKey,
                                       _walID < 0 ? 0 : abs(_walID)
                                       );
-            Voucher.PaymentMD5 = PaymentMD5;
+            Voucher.PaymentKey = PaymentKey;
             break;
     }
 
@@ -960,14 +960,14 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    const QString _paymentMD5,
+    const QString _paymentKey,
     const QString _domain,
     TAPI::JSON_t _pgResponse
 )) {
     //VoucherID comes from finalizeBasket(Expense, New) or requestIncrease(Credit, New)
 
     auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(APICALLBOOM_PARAM,
-                                                                                     _paymentMD5,
+                                                                                     _paymentKey,
                                                                                      _pgResponse,
                                                                                      _domain);
 

@@ -472,14 +472,14 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     Result.insert("Voucher", Voucher.toJson());
 
     //-- approve online payment --------------------------------------
-    if (Voucher.PaymentMD5.isEmpty() == false) {
+    if (Voucher.PaymentKey.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
             _APICALLBOOM,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},
             {
-                { "paymentMD5",     Voucher.PaymentMD5 },
+                { "paymentKey",     Voucher.PaymentKey },
                 { "domain",         "this.is.domain" },
                 { "pgResponse",     QVariantMap({
                       { "resp_1", 1 },

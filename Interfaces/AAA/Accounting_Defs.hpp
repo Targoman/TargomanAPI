@@ -858,7 +858,7 @@ TAPI_DEFINE_STRUCT(stuVoucher,
     SF_quint64          (ID, 0, v>0),
     SF_Struct           (Info, stuPreVoucher, v.ToPay),
     SF_QString          (PaymentLink),
-    SF_QString          (PaymentMD5),
+    SF_QString          (PaymentKey),
     SF_Enum             (Status, enuVoucherStatus, enuVoucherStatus::New)
 );
 

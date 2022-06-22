@@ -24,6 +24,9 @@
 #include "Payments.h"
 #include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Interfaces/Helpers/URLHelper.h"
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
@@ -66,18 +69,70 @@ QVariant IMPL_ORMGET(OnlinePayments) {
 #ifdef QT_DEBUG
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey,
     Q_DECL_UNUSED QString _trackID,
     QString _callback
 )) {
 /*
 
-http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?trackID=AAA&callback=http://bbb.dom
+curl -v -H 'accept: application/json' -X 'GET' 'http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://localhost:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage'
 
-curl -v -H 'accept: application/json' -X 'GET' 'http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?trackID=aaa&callback=http://bbb.dom/a/b//c'
+http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://localhost:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage
 
 */
 
-    return TAPI::ResponseRedirect_t(_callback, false).toVariant();
+    if (_callback.isEmpty())
+        _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
+                    .arg(ClientConfigs::RESTServerAddress.value())
+                    .arg(_paymentKey)
+                    ;
+    else
+        _callback = URLHelper::addParameter(_callback, "paymentKey", _paymentKey);
+
+    QByteArray Content = R"(
+<html>
+    <head>
+    </head>
+    <body>
+        <p>&nbsp;</p>
+        <p style='text-align:center'>Payment Page</p><br>
+        <p style='text-align:center'>
+            <a href='{URL_OK}'>[OK]</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href='{URL_ERROR}'>[ERROR]</a>
+        </p>
+    </body>
+</html>
+)";
+
+    Content = Content
+                .replace("{URL_OK}", URLHelper::addParameter(_callback, "result", "ok").toLatin1())
+                .replace("{URL_ERROR}", URLHelper::addParameter(_callback, "result", "error").toLatin1());
+
+    return TAPI::RawData_t(Content,
+                           "text/html; charset=utf-8"
+                           ).toVariant();
+
+//    return TAPI::ResponseRedirect_t(_callback, false).toVariant();
+}
+
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey,
+    QString _result
+)) {
+    return RESTClientHelper::callAPI(
+        RESTClientHelper::GET,
+        "Account/approveOnlinePayment",
+        {},
+        {
+            { "paymentKey",     _paymentKey },
+            { "domain",         "this.is.domain" },
+            { "pgResponse",     QVariantMap({
+                  { "result", _result },
+            }) },
+        }
+    );
 }
 #endif
 

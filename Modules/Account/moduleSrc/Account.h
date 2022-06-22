@@ -364,7 +364,7 @@ private slots:
         approveOnlinePayment,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
-            const QString _paymentMD5,
+            const QString _paymentKey,
             const QString _domain,
             TAPI::JSON_t _pgResponse
         ),

@@ -175,7 +175,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
             //Do nothing as it will be created after information upload.
         } else {
-            TAPI::MD5_t PaymentMD5;
+            TAPI::MD5_t PaymentKey;
             Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
                                       APICALLBOOM_PARAM,
                                       _gatewayType,
@@ -184,10 +184,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
                                       Voucher.Info.Summary,
                                       Voucher.Info.ToPay,
                                       _paymentVerifyCallback,
-                                      PaymentMD5,
+                                      PaymentKey,
                                       _walID
                                       );
-            Voucher.PaymentMD5 = PaymentMD5;
+            Voucher.PaymentKey = PaymentKey;
         }
     } catch (...) {
         this->Update(Voucher::instance(),

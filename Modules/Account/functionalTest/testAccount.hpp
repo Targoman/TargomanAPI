@@ -900,7 +900,7 @@ private slots:
     void requestIncrease_DEVTEST_with_domain() {
         try {
             this->Voucher.ID = 0;
-            this->Voucher.PaymentMD5 = "";
+            this->Voucher.PaymentKey = "";
 
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
@@ -917,7 +917,7 @@ private slots:
 
             this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.PaymentMD5.isEmpty() == false);
+            QVERIFY(this->Voucher.PaymentKey.isEmpty() == false);
 
         } catch (exTargomanBase &e) {
             QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
@@ -926,14 +926,14 @@ private slots:
         }
     }
     void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
-        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+        if (this->Voucher.PaymentKey.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callUserAPI(
                     RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
                     {
-                        { "paymentMD5",     this->Voucher.PaymentMD5 },
+                        { "paymentKey",     this->Voucher.PaymentKey },
                         { "domain",         "this.is.domain" },
                         { "pgResponse",     QVariantMap({
                               { "resp_1", 1 },
@@ -952,7 +952,7 @@ private slots:
             }
 
             this->Voucher.ID = 0;
-            this->Voucher.PaymentMD5 = "";
+            this->Voucher.PaymentKey = "";
         }
     }
 

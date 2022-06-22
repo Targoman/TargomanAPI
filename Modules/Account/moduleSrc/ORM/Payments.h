@@ -63,7 +63,7 @@ namespace tblOnlinePayments {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(onpID);
-        TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
+        TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentKey={onpMD5}
         TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
         TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
         TARGOMAN_CREATE_CONSTEXPR(onpTrackNumber);
@@ -135,8 +135,19 @@ private slots:
         devTestPayPage,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            QString _paymentKey,
             QString _trackID,
-            QString _callback
+            QString _callback = {}
+        ),
+        ""
+    )
+
+    QVariant REST_GET_OR_POST(
+        devTestCallbackPage,
+        (
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            QString _paymentKey,
+            QString _result
         ),
         ""
     )
