@@ -966,10 +966,11 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 )) {
     //VoucherID comes from finalizeBasket(Expense, New) or requestIncrease(Credit, New)
 
-    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(APICALLBOOM_PARAM,
-                                                                                     _paymentKey,
-                                                                                     _pgResponse,
-                                                                                     _domain);
+    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(
+            APICALLBOOM_PARAM,
+            _paymentKey,
+            _pgResponse,
+            _domain);
 
 //    try {
         clsDACResult Result = this->callSP(APICALLBOOM_PARAM,

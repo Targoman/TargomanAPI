@@ -75,9 +75,9 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
 )) {
 /*
 
-curl -v -H 'accept: application/json' -X 'GET' 'http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://localhost:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage'
+curl -v -H 'accept: application/json' -X 'GET' 'http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage'
 
-http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://localhost:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage
+http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage
 
 */
 
@@ -92,10 +92,12 @@ http://localhost:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
     QByteArray Content = R"(
 <html>
     <head>
+        <title>Payment Page</title>
     </head>
     <body>
         <p>&nbsp;</p>
-        <p style='text-align:center'>Payment Page</p><br>
+        <h1 style='text-align:center'>DevTest<br>Bank of MARS</h1><br>
+        <hr>
         <p style='text-align:center'>
             <a href='{URL_OK}'>[OK]</a>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -122,14 +124,14 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
     QString _result
 )) {
     return RESTClientHelper::callAPI(
-        RESTClientHelper::GET,
+        RESTClientHelper::POST,
         "Account/approveOnlinePayment",
         {},
         {
             { "paymentKey",     _paymentKey },
-            { "domain",         "this.is.domain" },
+            { "domain",         "dev.test" },
             { "pgResponse",     QVariantMap({
-                  { "result", _result },
+                  { "result",   _result },
             }) },
         }
     );

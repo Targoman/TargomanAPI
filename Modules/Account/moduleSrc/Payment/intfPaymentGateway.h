@@ -35,6 +35,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
 #include "Classes/Defs.hpp"
 #include "ORM/PaymentGateways.h"
+#include "ORM/Payments.h"
 
 using namespace qhttp;
 
@@ -112,6 +113,7 @@ protected: \
             ); \
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle( \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
+            const Targoman::API::AccountModule::ORM::tblOnlinePayments::DTO &_onlinePayment, \
             const TAPI::JSON_t &_pgResponse, \
             const QString &_domain \
             ); \
@@ -148,6 +150,7 @@ protected:
             ) = 0;
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle(
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
+            const ORM::tblOnlinePayments::DTO &_onlinePayment,
             const TAPI::JSON_t &_pgResponse,
             const QString &_domain
             ) = 0;

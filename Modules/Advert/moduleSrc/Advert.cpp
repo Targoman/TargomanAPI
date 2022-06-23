@@ -465,7 +465,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
             { "gatewayType",            "_DeveloperTest" },
             { "domain",                 "dev.test" },
 //            { "walID",               9988 },
-            { "paymentVerifyCallback",  "http://www.a.com" },
+            { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
         }
     );
     Voucher.fromJson(res.toJsonObject());
@@ -480,12 +480,10 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
             {},
             {
                 { "paymentKey",     Voucher.PaymentKey },
-                { "domain",         "this.is.domain" },
+                { "domain",         "dev.test" },
                 { "pgResponse",     QVariantMap({
-                      { "resp_1", 1 },
-                      { "resp_2", 2 },
-                      { "resp_3", 3 },
-                  }) },
+                    { "result",     "ok" },
+                }) },
             }
         );
         ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());

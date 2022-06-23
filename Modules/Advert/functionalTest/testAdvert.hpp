@@ -761,7 +761,7 @@ private slots:
                     { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "dev.test" },
 //                    { "walID",               9988 },
-                    { "paymentVerifyCallback",  "http://www.a.com" },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 
@@ -804,7 +804,7 @@ private slots:
                     { "gatewayType",            "_DeveloperTest" },
                     { "domain",                 "dev.test" },
 //                    { "walID",               9988 },
-                    { "paymentVerifyCallback",  "http://www.a.com" },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 
@@ -826,12 +826,10 @@ private slots:
                     {},
                     {
                         { "paymentKey",     this->BasketVoucher.PaymentKey },
-                        { "domain",         "this.is.domain" },
+                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
-                              { "resp_1", 1 },
-                              { "resp_2", 2 },
-                              { "resp_3", 3 },
-                          }) },
+                            { "result",     "ok" },
+                        }) },
                     }
                 );
 
@@ -859,7 +857,7 @@ private slots:
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
 //                    { "walID", 0 },
-                    { "paymentVerifyCallback", "http://www.a.com" }
+                    { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
                 }
             );
 
@@ -882,12 +880,10 @@ private slots:
                     {},
                     {
                         { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "this.is.domain" },
+                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
-                              { "resp_1", 1 },
-                              { "resp_2", 2 },
-                              { "resp_3", 3 },
-                          }) },
+                            { "result",     "ok" },
+                        }) },
                     }
                 );
 
@@ -985,7 +981,7 @@ private slots:
                     { "gatewayType",            "COD" },
                     { "domain",                 "dev.test" },
                     { "walID",                  0 },
-                    { "paymentVerifyCallback",  "http://www.a.com" },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 
@@ -1012,7 +1008,7 @@ private slots:
                     { "gatewayType",            "_DeveloperTest" },
                     { "amount",                 100'000 },
 //                    { "walID",                  0 },
-                    { "paymentVerifyCallback",  "http://www.a.com" },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 
@@ -1034,12 +1030,10 @@ private slots:
                     {},
                     {
                         { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "this.is.domain" },
+                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
-                              { "resp_1", 1 },
-                              { "resp_2", 2 },
-                              { "resp_3", 3 },
-                          }) },
+                            { "result",     "ok" },
+                        }) },
                     }
                 );
 

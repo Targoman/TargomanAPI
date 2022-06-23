@@ -366,10 +366,12 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
 
     try {
-        auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(OnlinePayment.PaymentGateway,
-                                                                           _pgResponse,
-                                                                           _domain
-                                                                           );
+        auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(
+                OnlinePayment.PaymentGateway,
+                OnlinePayment.OnlinePayment,
+                _pgResponse,
+                _domain
+                );
 
         //PaymentResponse.PaymentKey =?= _paymentKey
 

@@ -87,6 +87,7 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
 // [Response, refNumber]
 std::tuple<QString, QString> gtwZibal::verifyAndSettle(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const ORM::tblOnlinePayments::DTO &_onlinePayment,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
 ) {

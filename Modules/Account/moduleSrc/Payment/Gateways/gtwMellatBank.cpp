@@ -51,6 +51,7 @@ std::tuple<QString, QString, QString> gtwMellatBank::prepareAndRequest(
 // [Response, refNumber]
 std::tuple<QString, QString> gtwMellatBank::verifyAndSettle(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const ORM::tblOnlinePayments::DTO &_onlinePayment,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
 ) {

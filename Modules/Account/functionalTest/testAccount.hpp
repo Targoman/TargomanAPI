@@ -889,9 +889,9 @@ private slots:
             {
                 { "amount", 10'000 },
                 { "gatewayType", "_DeveloperTest" },
-                { "domain", "" },
+                { "domain", "dev.test" },
                 { "walID", 0 },
-                { "paymentVerifyCallback", "http://www.a.com" }
+                { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
             }
         ),
         exTargomanBase);
@@ -911,7 +911,7 @@ private slots:
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
 //                    { "walID", 0 },
-                    { "paymentVerifyCallback", "http://www.a.com" }
+                    { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
                 }
             );
 
@@ -934,12 +934,10 @@ private slots:
                     {},
                     {
                         { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "this.is.domain" },
+                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
-                              { "resp_1", 1 },
-                              { "resp_2", 2 },
-                              { "resp_3", 3 },
-                          }) },
+                            { "result",     "ok" },
+                        }) },
                     }
                 );
 
@@ -966,7 +964,7 @@ private slots:
                     { "amount", 12'000 },
                     { "gatewayType", "COD" },
                     { "domain", "dev.Test" },
-                    { "paymentVerifyCallback", "aa" },
+                    { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 

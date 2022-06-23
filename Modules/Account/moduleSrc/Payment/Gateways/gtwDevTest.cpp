@@ -45,14 +45,14 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
+//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 
-    if (raiseError)
-        throw exPayment("raiseError is TRUE");
+//    if (raiseError)
+//        throw exPayment("raiseError is TRUE");
 
-    QString TrackID = "devtest_track_id";
+    QString TrackID = "track_" + _paymentKey;
 
     QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
                           .arg(ClientConfigs::RESTServerAddress.value())
@@ -75,6 +75,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const ORM::tblOnlinePayments::DTO &_onlinePayment,
     const TAPI::JSON_t &_pgResponse,
     const QString &_domain
 ) {
@@ -84,7 +85,7 @@ std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
+//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 
@@ -101,7 +102,7 @@ std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
 
     return {
         "",
-        "devtest_ref_number"
+        "ref_" + _onlinePayment.onpMD5
     };
 
 #else
