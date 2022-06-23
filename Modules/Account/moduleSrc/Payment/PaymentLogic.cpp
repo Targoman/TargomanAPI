@@ -183,7 +183,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
-        .addCols(tblPaymentGateways::ColumnNames())
+        .addCols(PaymentGateways::instance().SelectableColumnNames())
         .addCols({
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
@@ -246,7 +246,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     const QString& _invDesc,
     quint32 _toPay,
     const QString _paymentVerifyCallback,
-    /*OUT*/ TAPI::MD5_t& _outPaymentMD5,
+    /*OUT*/ TAPI::MD5_t& _outPaymentKey,
     quint64 _walID
 ) {
     ///scenario:
@@ -285,9 +285,9 @@ QString PaymentLogic::createOnlinePaymentLink(
                          ;
 
     try {
-        _outPaymentMD5 = onpMD5;
+        _outPaymentKey = onpMD5;
 
-        QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentMD5", onpMD5);
+        QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentKey", onpMD5);
 
         //4: call driver::request
         auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(PaymentGateway,
@@ -343,18 +343,18 @@ QString PaymentLogic::createOnlinePaymentLink(
 // [PaymentID, VoucherID, TargetWalletID]
 std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const QString& _paymentMD5,
+    const QString& _paymentKey,
     const TAPI::JSON_t& _pgResponse,
     const QString& _domain
 ) {
-    if (_paymentMD5.isEmpty())
-        throw exPayment("paymentMD5 is empty");
+    if (_paymentKey.isEmpty())
+        throw exPayment("paymentKey is empty");
 
     QVariantMap OnlinePaymentInfo = SelectQuery(OnlinePayments::instance())
-            .addCols(tblOnlinePayments::ColumnNames())
-            .addCols(tblPaymentGateways::ColumnNames())
+            .addCols(OnlinePayments::instance().SelectableColumnNames())
+            .addCols(PaymentGateways::instance().SelectableColumnNames())
             .innerJoinWith("paymentGateway")
-            .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentMD5 })
+            .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
             .one();
 
     stuOnlinePayment OnlinePayment;
@@ -366,12 +366,14 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
 
     try {
-        auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(OnlinePayment.PaymentGateway,
-                                                                           _pgResponse,
-                                                                           _domain
-                                                                           );
+        auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(
+                OnlinePayment.PaymentGateway,
+                OnlinePayment.OnlinePayment,
+                _pgResponse,
+                _domain
+                );
 
-        //PaymentResponse.OrderMD5 =?= _paymentMD5
+        //PaymentResponse.PaymentKey =?= _paymentKey
 
         OnlinePayments::instance().Update(
                     OnlinePayments::instance(),
@@ -383,7 +385,7 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
                         { tblOnlinePayments::Fields::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Payed },
                     }),
                     {
-                        { tblOnlinePayments::Fields::onpMD5, _paymentMD5 }
+                        { tblOnlinePayments::Fields::onpMD5, _paymentKey }
                     });
 
         try {
@@ -402,16 +404,14 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
         };
 
     } catch (std::exception &_exp) {
-        OnlinePayments::instance().Update(
-                    OnlinePayments::instance(),
-                    APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::Fields::onpResult, _exp.what() },
                         { tblOnlinePayments::Fields::onpStatus, Targoman::API::AccountModule::enuPaymentStatus::Error },
                     }),
                     {
-                        { tblOnlinePayments::Fields::onpMD5, _paymentMD5 }
+                        { tblOnlinePayments::Fields::onpMD5, _paymentKey }
                     });
 
         //increase pgwSumFailedCount

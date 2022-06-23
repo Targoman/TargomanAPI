@@ -47,7 +47,7 @@ intfAlerts::intfAlerts() :
     QString _altCode,
     QString _replacements
 ) {
-    ///TODO: complete this
+    ///@TODO: complete this
 
 //    auto Query = CreateQuery(Alerts::instance())
 //                 .addCol("")

@@ -91,6 +91,9 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     }
 
     QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con) {
+
+        TargomanLogInfo(7, QString(100, '*'));
+
         if (!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
             _con->killConnection();
     });
@@ -103,7 +106,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             QString Path = _req->url().adjusted(QUrl::NormalizePathSegments | QUrl::RemoveAuthority).path(QUrl::PrettyDecoded);
 
             if (Path != _req->url().path())
-                return  RequestHandler->redirect(Path, false);
+                return RequestHandler->redirect(Path, false);
 
             if (ServerConfigs::PublicPath.value().size() && QFile::exists(ServerConfigs::PublicPath.value() + Path))
                 return RequestHandler->sendFile(ServerConfigs::PublicPath.value(), Path);
@@ -117,17 +120,18 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             if (Path == ServerConfigs::BasePathWithVersion )
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", {}, true);
 
-            TargomanLogInfo(7,
-                            "New API Call ["<<
-                            _req->connection()->tcpSocket()->peerAddress().toString()<<
-                            ":"<<
-                            _req->connection()->tcpSocket()->peerPort()<<
-                            "]: "<<
-                            _req->methodString () <<
-                            " "<<
-                            Path<<
-                            "?"<<
-                            _req->url().query());
+            TargomanLogInfo(7, QString(100, '*'));
+            TargomanLogInfo(7, "(" << RequestHandler->Index() << ") "
+                            << "New API Call ["
+                            << _req->connection()->tcpSocket()->peerAddress().toString()
+                            << ":"
+                            << _req->connection()->tcpSocket()->peerPort()
+                            << "]: "
+                            << _req->methodString ()
+                            << " "
+                            << Path
+                            << "?"
+                            << _req->url().query());
 
             //----------------------------------
             try {
@@ -196,10 +200,13 @@ void RESTServer::registerUserDefinedType(const char* _typeName, intfAPIArgManipu
 bool RESTServer::validateConnection(const QHostAddress& _peerAddress, quint16 _peerPort) {
     enuIPBlackListStatus::Type IPBlackListStatus = enuIPBlackListStatus::Unknown;
 
-    if (this->fnIPInBlackList &&
-            (IPBlackListStatus = this->fnIPInBlackList(_peerAddress)) != enuIPBlackListStatus::Ok) {
+    if (this->fnIPInBlackList
+        && (IPBlackListStatus = this->fnIPInBlackList(_peerAddress)) != enuIPBlackListStatus::Ok) {
+
         TargomanLogWarn(1,"Connection from " + _peerAddress.toString() + " was closed by security provider due to: "+enuIPBlackListStatus::toStr(IPBlackListStatus));
+
         gServerStats.Blocked.inc();
+
         return false;
     }
 

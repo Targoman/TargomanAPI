@@ -62,7 +62,7 @@ QVariant IMPL_ORMGET(TicketAttachments) {
                            Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
             );
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query
             .addCols({
                          tblTicketAttachments::Fields::tatID,
@@ -99,7 +99,7 @@ QVariant IMPL_ORMGET(TicketAttachments) {
 
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, fnTouchQuery);
 }
 
 } //namespace Targoman::API::TicketingModule::ORM

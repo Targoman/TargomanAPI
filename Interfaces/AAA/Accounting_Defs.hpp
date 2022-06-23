@@ -37,6 +37,16 @@
 
 namespace Targoman::API::AAA {
 
+TARGOMAN_DEFINE_ENUM(enuVoucherType,
+                     Withdrawal     = 'W',
+                     Expense        = 'E',
+                     Income         = 'I',
+                     Credit         = 'C',
+                     Prize          = 'Z',
+                     TransferFrom   = 'F',
+                     TransferTo     = 'T',
+                     )
+
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      New            = 'N',
                      Canceled       = 'C',
@@ -52,307 +62,28 @@ TARGOMAN_DEFINE_ENUM(enuDiscountType,
                      );
 
 TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
+                     Processed  = 'P',
                      Canceled   = 'C',
                      Error      = 'E',
-                     Finished   = 'F',
                      Removed    = 'R',
                      );
 
 } //namespace Targoman::API::AAA
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)  // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus)   // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus) // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 
 namespace Targoman::API::AAA {
 
-//inline QString makeConfig(const QString& _name) { return "/zModule_Account/" + _name; }
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPrize,
-    Desc,       QString,        QString()    , v.size(), v, v.toString(),
-    PriceInfo,  QJsonObject,    QJsonObject(), v.size(), v, v.toObject()
-);
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscountSaleableBasedMultiplier,
-    SF_QString        (SaleableCode),
-    SF_qreal          (Multiplier),
-    SF_NULLABLE_qreal (MinQty)
-);
-
-//struct stuFullDiscount
-//{
-//    quint32                         cpnID;
-//    TAPI::CouponCode_t              cpnCode;
-//    quint32                         cpnPrimaryCount;
-//    quint32                         cpnTotalMaxAmount;
-//    NULLABLE_TYPE(quint32)          cpnPerUserMaxCount;
-//    NULLABLE_TYPE(quint32)          cpnPerUserMaxAmount;
-//    TAPI::DateTime_t                cpnValidFrom;
-//    NULLABLE_TYPE(TAPI::DateTime_t) cpnExpiryTime;
-//    quint32                         cpnAmount;
-//    enuDiscountType::Type           cpnAmountType;
-//    NULLABLE_TYPE(quint32)          cpnMaxAmount;
-//    TAPI::JSON_t                    cpnSaleableBasedMultiplier;
-//    quint32                         cpnTotalUsedCount;
-//    quint32                         cpnTotalUsedAmount;
-//    TAPI::enuGenericStatus::Type    cpnStatus;
-
-//    void fromVariantMap(const QVariantMap& _info);
-//};
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuDiscount3,
-    SF_quint64 (ID),
-    SF_QString (Code),
-    SF_qreal   (Amount)
-);
-
-//Caution: Do not rename fields. Field names are used in vchDesc (as json)
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItem,
-    SF_QString   (Service),
-    SF_quint64   (OrderID),
-    SF_MD5_t     (UUID),
-    SF_QString   (Desc),
-    SF_quint32   (UnitPrice),
-    SF_qreal     (Qty),
-    SF_quint32   (SubTotal),
-    SF_Var_Struct(Discount, stuDiscount3, v.ID > 0),
-    SF_quint32   (DisAmount),
-    SF_quint8    (VATPercent),
-    SF_quint32   (VATAmount),
-    SF_QString   (Sign)
-);
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemForTrustedAction,
-    SF_quint64  (UserID),
-    SF_quint64  (VoucherID),
-    SF_Struct   (VoucherItem, stuVoucherItem, v.Qty>0),
-    SF_QString  (Sign)
-);
-
-/*****************************************************************************/
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuUsage,
-    SF_NULLABLE_quint32 (PerDay),
-    SF_NULLABLE_quint32 (PerWeek),
-    SF_NULLABLE_quint32 (PerMonth),
-    SF_NULLABLE_quint64 (Total)
-);
-
-typedef QMap<QString, stuUsage> UsageLimits_t;
-
-#define SF_UsageLimits_t(_name) SF_Generic( \
-    /* name              */ Digested_Limits, \
-    /* type              */ UsageLimits_t, \
-    /* def               */ UsageLimits_t(), \
-    /* validator         */ v.size(), \
-    /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue { \
-                                QJsonObject A; \
-                                for (auto it = v.begin(); \
-                                    it != v.end(); \
-                                    it++ \
-                                ) { \
-                                    A.insert(it.key(), it->toJson()); \
-                                } \
-                                return A; \
-                            }(v), \
-    /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t { \
-                                UsageLimits_t L; \
-                                QJsonObject O = v.toObject(); \
-                                foreach (const QString &Key, O.keys()) \
-                                    L.insert(Key, stuUsage().fromJson(O.value(Key).toObject())); \
-                                return L; \
-                            }(v) \
-    )
-
-struct stuUsageColDefinition {
-    QString PerDay;
-    QString PerWeek;
-    QString PerMonth;
-    QString Total;
-
-    stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
-        PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
-    { ; }
-};
-
-typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
-
-typedef QMap<QString, QString> OrderAdditives_t;
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAssetItem,
-    //product
-    SF_quint32          (prdID),
-    SF_QString          (prdCode), //TAPI::ProductCode_t
-    SF_QString          (prdName),
-    SF_Date_t           (prdValidFromDate),
-    SF_Date_t           (prdValidToDate),
-    SF_NULLABLE_quint8  (prdValidFromHour),
-    SF_NULLABLE_quint8  (prdValidToHour),
-    SF_JSON_t           (prdPrivs), //TAPI::PrivObject_t
-    SF_NULLABLE_qreal   (prdVAT),
-    SF_quint32          (prdInStockQty),
-    SF_NULLABLE_quint32 (prdOrderedQty),
-    SF_NULLABLE_quint32 (prdReturnedQty),
-    SF_Enum             (prdStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
-
-    //saleable
-    SF_quint32          (slbID),
-    SF_QString          (slbCode), //TAPI::SaleableCode_t
-    SF_QString          (slbName),
-    SF_JSON_t           (slbPrivs),
-    SF_qreal            (slbBasePrice),
-    SF_JSON_t           (slbAdditives), //TAPI::SaleableAdditive_t
-//    SF_quint32          (slbProductCount),
-    SF_NULLABLE_quint32 (slbMaxSaleCountPerUser),
-    SF_quint32          (slbInStockQty),
-    SF_NULLABLE_quint32 (slbOrderedQty),
-    SF_NULLABLE_quint32 (slbReturnedQty),
-    SF_QString          (slbVoucherTemplate),
-    SF_Enum             (slbStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
-
-    SF_qreal            (SubTotal),
-    SF_Var_Struct       (Discount, stuDiscount3, [](Q_DECL_UNUSED auto v) { return true; }(v)), //NULLABLE_TYPE
-    SF_qreal            (TotalPrice),
-
-    /*
-    struct {
-//        QJsonObject   Additives;
-        UsageLimits_t Limits;
-//        QJsonObject   Privs;
-    } Digested;*/
-
-//        SF_UsageLimits_t(Digested_Limits)
-    SF_Generic(
-        /* name              */ Digested_Limits,
-        /* type              */ UsageLimits_t,
-        /* def               */ UsageLimits_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
-                                    QJsonObject A;
-                                    for (auto it = v.begin();
-                                        it != v.end();
-                                        it++
-                                    ) {
-                                        A.insert(it.key(), it->toJson());
-                                    }
-                                    return A;
-                                }(v),
-        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
-                                    UsageLimits_t L;
-                                    QJsonObject O = v.toObject();
-                                    foreach (const QString &Key, O.keys())
-                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
-                                    return L;
-                                }(v)
-    )
-
-//    QJsonObject toJson(bool _full);
-//    stuAssetItem& fromJson(const QJsonObject& _obj);
-//    void fromVariantMap(const QVariantMap& _info);
-);
-
-typedef QMap<QString, stuAssetItem> ActiveCredits_t;
-
-struct stuServiceCreditsInfo {
-    ActiveCredits_t             ActiveCredits;
-    NULLABLE_TYPE(stuAssetItem) PreferedCredit;
-    NULLABLE_TYPE(quint32)      ParentID;
-    UsageLimits_t               MyLimitsOnParent;
-    QDateTime                   DBCurrentDateTime;
-
-    stuServiceCreditsInfo(ActiveCredits_t             _activeCredits,
-                          NULLABLE_TYPE(stuAssetItem) _preferedCredit,
-                          NULLABLE_TYPE(quint32)      _parentID,
-                          UsageLimits_t               _myLimitsOnParent,
-                          QDateTime                   _dbCurrentDateTime);
-};
-
-/*
-struct stuActiveCredit {
-    stuAssetItem  Credit;
-    bool          IsFromParent;
-    UsageLimits_t MyLimitsOnParent;
-    qint64        TTL;
-
-    stuActiveCredit(const stuAssetItem& _credit = {},
-                    bool _isFromParent = false,
-                    const UsageLimits_t& _myLimitsOnParent = {},
-                    qint64 _ttl = 0);
-
-//    QJsonObject toJson(bool _full);
-//    stuActiveCredit& fromJson(const QJsonObject _obj);
-};
-*/
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuActiveCredit,
-    SF_Var_Struct   (Credit, stuAssetItem, v.prdID),
-    SF_bool         (IsFromParent),
-//    SF_UsageLimits_t(MyLimitsOnParent),
-    SF_Generic(
-        /* name              */ MyLimitsOnParent,
-        /* type              */ UsageLimits_t,
-        /* def               */ UsageLimits_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](UsageLimits_t v) -> QJsonValue {
-                                    QJsonObject A;
-                                    for (auto it = v.begin();
-                                        it != v.end();
-                                        it++
-                                    ) {
-                                        A.insert(it.key(), it->toJson());
-                                    }
-                                    return A;
-                                }(v),
-        /* QJsonValue 2 type */ [](QJsonValue v) -> UsageLimits_t {
-                                    UsageLimits_t L;
-                                    QJsonObject O = v.toObject();
-                                    foreach (const QString &Key, O.keys())
-                                        L.insert(Key, stuUsage().fromJson(O.value(Key).toObject()));
-                                    return L;
-                                }(v)
-    ),
-    SF_qint64(TTL)
-);
-
-typedef QList<stuVoucherItem> InvItems_t;
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuPreVoucher,
-    SF_quint64                  (UserID),
-    SF_Generic(
-        /* name              */ Items,
-        /* type              */ InvItems_t,
-        /* def               */ InvItems_t(),
-        /* validator         */ v.size(),
-        /* type 2 QJsonValue */ [](auto v) { QJsonArray A; foreach (auto a, v) A.append(a.toJson()); return A; }(v),
-        /* QJsonValue 2 type */ [](auto v) { InvItems_t L; foreach (auto I, v.toArray()) L.append(Targoman::API::AAA::stuVoucherItem().fromJson(I.toObject())); return L; }(v)
-    ),
-    SF_Struct(Prize, stuPrize, v.Desc.size()),
-    SF_QString                  (Summary),
-    SF_quint16(Round),
-    SF_quint32                  (ToPay, 0, v>0),
-    SF_QString                  (Sign)
-);
-
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucher,
-    SF_quint64                  (ID, 0, v>0),
-    SF_Struct                   (Info, stuPreVoucher, v.ToPay),
-    SF_QString                  (PaymentLink),
-    SF_QString                  (PaymentMD5),
-    SF_Enum                     (Status, enuVoucherStatus, enuVoucherStatus::New)
-);
-
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuVoucherItemProcess,
-//    SF_MD5_t                    (UUID),
-//    SF_NULLABLE_Enum            (Status, enuVoucherItemProcessStatus)
-//);
-
-//bool KKKKKKKKKKKKKKKKKK() {return true;}
-
-typedef QMap<QString, qint32> ServiceUsage_t;
-
-extern void checkPreVoucherSanity(stuPreVoucher _preVoucher);
+constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
+//constexpr char PENDING_VOUCHER_NAME_COUPON_DISCOUNT[]   = "COUPON_DISCOUNT";
+constexpr char PENDING_VOUCHER_NAME_REFERRER_PRIZE[]    = "REFERRER_PRIZE";
 
 /***************************************************************************************************/
 #pragma GCC diagnostic push
@@ -372,8 +103,9 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
         TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
         TARGOMAN_CREATE_CONSTEXPR(prdVAT);
+        TARGOMAN_CREATE_CONSTEXPR(prdQtyIsDecimal);
 
-        ///TODO: create trigger for this 3 fields
+        ///@TODO: create trigger for this 3 fields
         TARGOMAN_CREATE_CONSTEXPR(prdInStockQty);
         TARGOMAN_CREATE_CONSTEXPR(prdOrderedQty);
         TARGOMAN_CREATE_CONSTEXPR(prdReturnedQty);
@@ -404,7 +136,7 @@ namespace tblAccountSaleablesBase {
     //    TARGOMAN_CREATE_CONSTEXPR(slbProductCount); //what is this?
         TARGOMAN_CREATE_CONSTEXPR(slbMaxSaleCountPerUser);
 
-        ///TODO: create trigger for this 3 fields and make changes to prd Count fields
+        ///@TODO: create trigger for this 3 fields and make changes to prd Count fields
         TARGOMAN_CREATE_CONSTEXPR(slbInStockQty);
         TARGOMAN_CREATE_CONSTEXPR(slbOrderedQty);
         TARGOMAN_CREATE_CONSTEXPR(slbReturnedQty);
@@ -428,6 +160,7 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uasQty);
         TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
         TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemUUID);
+        TARGOMAN_CREATE_CONSTEXPR(uasVoucherItemInfo);
         TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
         TARGOMAN_CREATE_CONSTEXPR(uasDiscountAmount);
         TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
@@ -445,8 +178,8 @@ namespace tblAccountAssetUsageBase {
     }
 }
 
-///TODO: max usage count (user, system)
-///TODO: CodeCommentMark
+///@TODO: max usage count (user, system)
+///@TODO: CodeCommentMark
 namespace tblAccountCouponsBase {
     constexpr char Name[] = "tblAccountCoupons";
 
@@ -473,60 +206,47 @@ namespace tblAccountCouponsBase {
         TARGOMAN_CREATE_CONSTEXPR(cpnTotalUsedAmount);
 
         TARGOMAN_CREATE_CONSTEXPR(cpnStatus);
-        TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(cpnCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(cpnCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(cpnUpdatedBy_usrID);
+    }
+}
+
+namespace tblAccountPrizesBase {
+    constexpr char Name[] = "tblAccountPrizes";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(przID);
+        TARGOMAN_CREATE_CONSTEXPR(przStatus);
+        TARGOMAN_CREATE_CONSTEXPR(przCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(przCreatedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(przUpdatedBy_usrID);
     }
 }
 
 //-- tbl inside
 namespace tblAccountProductsBase {
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::prdID,
-            _tableAlias + Fields::prdCode,
-            _tableAlias + Fields::prdName,
-            _tableAlias + Fields::prdDesc,
-            _tableAlias + Fields::prdValidFromDate,
-            _tableAlias + Fields::prdValidToDate,
-            _tableAlias + Fields::prdValidFromHour,
-            _tableAlias + Fields::prdValidToHour,
-            _tableAlias + Fields::prdPrivs,
-            _tableAlias + Fields::prdVAT,
-            _tableAlias + Fields::prdInStockQty,
-            _tableAlias + Fields::prdOrderedQty,
-            _tableAlias + Fields::prdReturnedQty,
-            _tableAlias + Fields::prdStatus,
-            _tableAlias + Fields::prdCreatedBy_usrID,
-            _tableAlias + Fields::prdCreationDateTime,
-            _tableAlias + Fields::prdUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
-//        constexpr char AAA[] = "aaa";
+        constexpr char Saleable[] = "saleable";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///<  ColName                                       Type                         Validation                                Default     UpBy   Sort  Filter Self  Virt   PK
+            ///<  ColName                   Type                        Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::prdID,                ORM_PRIMARYKEY_32 },
-            { Fields::prdCode,              S(TAPI::ProductCode_t),      QFV,                                     QRequired,  UPOwner },
-            { Fields::prdName,              S(QString),                  QFV,                                     QRequired,  UPOwner },
-            { Fields::prdDesc,              S(QString),                  QFV,                                     QNull,      UPOwner },
-            { Fields::prdValidFromDate,     S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
-            { Fields::prdValidToDate,       S(TAPI::Date_t),             QFV,                                     QNull,      UPOwner },
-            { Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),    QFV.integer().minValue(0).maxValue(23),  QNull,      UPOwner },
-            { Fields::prdPrivs,             S(TAPI::PrivObject_t),       QFV,                                     QNull,      UPOwner },
-            { Fields::prdVAT,               S(NULLABLE_TYPE(double)),    QFV.real().minValue(0).maxValue(100),    QNull,      UPOwner },
-            { Fields::prdInStockQty,        S(double),                   QFV.integer().minValue(0),               QRequired,  UPAdmin },
-            { Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
-            { Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),    QFV,                                     QNull,      UPAdmin },
+            { Fields::prdCode,              S(TAPI::ProductCode_t),     QFV,                                    QRequired,  UPOwner },
+            { Fields::prdName,              S(QString),                 QFV,                                    QRequired,  UPOwner },
+            { Fields::prdDesc,              S(QString),                 QFV,                                    QNull,      UPOwner },
+            { Fields::prdValidFromDate,     S(TAPI::Date_t),            QFV,                                    QNull,      UPOwner },
+            { Fields::prdValidToDate,       S(TAPI::Date_t),            QFV,                                    QNull,      UPOwner },
+            { Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),   QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+            { Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),   QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+            { Fields::prdPrivs,             S(TAPI::PrivObject_t),      QFV,                                    QNull,      UPOwner },
+            { Fields::prdVAT,               S(NULLABLE_TYPE(double)),   QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
+            { Fields::prdQtyIsDecimal,      S(bool),                    QFV,                                    false,      UPAdmin },
+            { Fields::prdInStockQty,        S(double),                  QFV.integer().minValue(0),              QRequired,  UPAdmin },
+            { Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),   QFV,                                    QNull,      UPAdmin },
+            { Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),   QFV,                                    QNull,      UPAdmin },
             { Fields::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::prdCreationDateTime,  ORM_CREATED_ON },
@@ -537,7 +257,8 @@ namespace tblAccountProductsBase {
         inline const QList<stuRelation> Relations(const QString& _schema) {
             return {
                 ///<  Col                                           Reference Table    ForeignCol          Rename     LeftJoin
-                { "saleable",  { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
+                { Relation::Saleable,
+                    { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
             };
@@ -571,6 +292,7 @@ namespace tblAccountProductsBase {
     SF_NULLABLE_quint8          (prdValidToHour), \
     SF_JSON_t                   (prdPrivs), \
     SF_NULLABLE_qreal           (prdVAT), \
+    SF_bool                     (prdQtyIsDecimal), \
     SF_qreal                    (prdInStockQty), \
     SF_NULLABLE_qreal           (prdOrderedQty), \
     SF_NULLABLE_qreal           (prdReturnedQty), \
@@ -579,44 +301,15 @@ namespace tblAccountProductsBase {
     SF_ORM_CREATED_BY           (prdCreatedBy_usrID), \
     SF_ORM_UPDATED_BY           (prdUpdatedBy_usrID)
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsBase_DTO
     );
 }
 
 namespace tblAccountSaleablesBase {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::slbID,
-            _tableAlias + Fields::slb_prdID,
-            _tableAlias + Fields::slbCode,
-            _tableAlias + Fields::slbName,
-            _tableAlias + Fields::slbDesc,
-            _tableAlias + Fields::slbType,
-            _tableAlias + Fields::slbAvailableFromDate,
-            _tableAlias + Fields::slbAvailableToDate,
-            _tableAlias + Fields::slbPrivs,
-            _tableAlias + Fields::slbBasePrice,
-            _tableAlias + Fields::slbAdditives,
-//            _tableAlias + Fields::slbProductCount, //what is this?
-            _tableAlias + Fields::slbMaxSaleCountPerUser,
-            _tableAlias + Fields::slbInStockQty,
-            _tableAlias + Fields::slbOrderedQty,
-            _tableAlias + Fields::slbReturnedQty,
-//            _tableAlias + Fields::slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
-            _tableAlias + Fields::slbVoucherTemplate,
-            _tableAlias + Fields::slbStatus,
-            _tableAlias + Fields::slbCreatedBy_usrID,
-            _tableAlias + Fields::slbCreationDateTime,
-            _tableAlias + Fields::slbUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
-//        constexpr char AAA[] = "aaa";
+        constexpr char Product[] = "product";
+        constexpr char UserAsset[] = "userAsset";
     }
 
     namespace Private {
@@ -649,8 +342,10 @@ namespace tblAccountSaleablesBase {
         inline const QList<stuRelation> Relations(const QString& _schema) {
             return {
                 ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
-                { "product",  { Fields::slb_prdID, R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::Fields::prdID } },
-                { "userAsset", { Fields::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_slbID } },
+                { Relation::Product,
+                    { Fields::slb_prdID, R(_schema, tblAccountProductsBase::Name), tblAccountProductsBase::Fields::prdID } },
+                { Relation::UserAsset,
+                    { Fields::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_slbID } },
                 ORM_RELATION_OF_CREATOR(Fields::slbCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::slbUpdatedBy_usrID),
             };
@@ -694,59 +389,41 @@ namespace tblAccountSaleablesBase {
     SF_ORM_CREATED_BY           (slbCreatedBy_usrID), \
     SF_ORM_UPDATED_BY           (slbUpdatedBy_usrID)
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesBase_DTO
     );
 }
 
 namespace tblAccountUserAssetsBase {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uasID,
-            _tableAlias + Fields::uas_usrID,
-            _tableAlias + Fields::uas_slbID,
-            _tableAlias + Fields::uasQty,
-            _tableAlias + Fields::uas_vchID,
-            _tableAlias + Fields::uasVoucherItemUUID,
-            _tableAlias + Fields::uas_cpnID,
-            _tableAlias + Fields::uasDiscountAmount,
-            _tableAlias + Fields::uasPrefered,
-            _tableAlias + Fields::uasOrderDateTime,
-            _tableAlias + Fields::uasStatus,
-            _tableAlias + Fields::uasUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
-//        constexpr char AAA[] = "aaa";
+        constexpr char Saleable[] = "Saleable";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///<  ColName                                       Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::uasID,              ORM_PRIMARYKEY_64 },
-            { Fields::uas_usrID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPAdmin },
-            { Fields::uas_slbID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
-            { Fields::uasQty,             S(double),                  QFV,                        QRequired,  UPNone },
-            { Fields::uas_vchID,          S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPAdmin },
-            { Fields::uasVoucherItemUUID, S(TAPI::MD5_t),             QFV,                        QRequired,  UPNone },
-            { Fields::uas_cpnID,          S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPNone },
-            { Fields::uasDiscountAmount,  S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPNone },
-            { Fields::uasPrefered,        S(bool),                    QFV,                        false,      UPOwner },
-            { Fields::uasOrderDateTime,   S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
-            { Fields::uasStatus,          ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
+            //Col                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::uasID,                ORM_PRIMARYKEY_64 },
+            { Fields::uas_usrID,            S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::uas_slbID,            S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::uasQty,               S(double),                  QFV,                        QRequired,  UPAdmin },
+            { Fields::uas_vchID,            S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPAdmin },
+            { Fields::uasVoucherItemUUID,   S(TAPI::MD5_t),             QFV,                        QRequired,  UPNone },
+            { Fields::uasVoucherItemInfo,   S(TAPI::JSON_t),            QFV,                        QRequired,  UPAdmin },
+            { Fields::uas_cpnID,            S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
+            { Fields::uasDiscountAmount,    S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
+            { Fields::uasPrefered,          S(bool),                    QFV,                        false,      UPOwner },
+            { Fields::uasOrderDateTime,     S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
+            { Fields::uasStatus,            ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
             { ORM_INVALIDATED_AT_FIELD },
-            { Fields::uasUpdatedBy_usrID, ORM_UPDATED_BY },
+            { Fields::uasUpdatedBy_usrID,   ORM_UPDATED_BY },
         };
 
         inline const QList<stuRelation> Relations(const QString& _schema) {
             return {
                 ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
                 { Fields::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::Fields::usrID,                 "Owner_" },
-                { Fields::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slbID, "",       true },
+                { Relation::Saleable,
+                    { Fields::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slbID, "",       true } },
                 { Fields::uas_cpnID, R(_schema, tblAccountCouponsBase::Name),   tblAccountCouponsBase::Fields::cpnID,   "",       true },
                 //Voucher is not accessible as it is in another schema
                 //{tblAccountUserAssets::Fields::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::Fields::vchID,    "", true},
@@ -778,6 +455,7 @@ namespace tblAccountUserAssetsBase {
     SF_qreal                    (uasQty), \
     SF_NULLABLE_quint64         (uas_vchID), \
     SF_MD5_t                    (uasVoucherItemUUID), \
+    SF_JSON_t                   (uasVoucherItemInfo), \
     SF_NULLABLE_quint32         (uas_cpnID), \
     SF_NULLABLE_quint32         (uasDiscountAmount), \
     SF_bool                     (uasPrefered), \
@@ -785,21 +463,12 @@ namespace tblAccountUserAssetsBase {
     SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
     SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUserAssetsBase_DTO
     );
 }
 
 namespace tblAccountAssetUsageBase {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::usg_uasID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -825,45 +494,19 @@ namespace tblAccountAssetUsageBase {
 #define SF_tblAccountAssetUsageBase_DTO \
     SF_ORM_PRIMARYKEY_64        (usg_uasID)
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageBase_DTO
     );
 }
 
 namespace tblAccountCouponsBase {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::cpnID,
-            _tableAlias + Fields::cpnCode,
-            _tableAlias + Fields::cpnPrimaryCount,
-            _tableAlias + Fields::cpnTotalMaxAmount,
-            _tableAlias + Fields::cpnPerUserMaxCount,
-            _tableAlias + Fields::cpnPerUserMaxAmount,
-            _tableAlias + Fields::cpnValidFrom,
-            _tableAlias + Fields::cpnExpiryTime,
-            _tableAlias + Fields::cpnAmount,
-            _tableAlias + Fields::cpnAmountType,
-            _tableAlias + Fields::cpnMaxAmount,
-            _tableAlias + Fields::cpnSaleableBasedMultiplier,
-            _tableAlias + Fields::cpnTotalUsedCount,
-            _tableAlias + Fields::cpnTotalUsedAmount,
-            _tableAlias + Fields::cpnStatus,
-            _tableAlias + Fields::cpnCreationDateTime,
-            _tableAlias + Fields::cpnCreatedBy_usrID,
-            _tableAlias + Fields::cpnUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
             { Fields::cpnID,                      ORM_PRIMARYKEY_32 },
             { Fields::cpnCode,                    S(TAPI::CouponCode_t),             QFV,                                     QRequired, UPAdmin },
             { Fields::cpnPrimaryCount,            S(quint32),                        QFV.integer().minValue(1),               1,         UPAdmin },
@@ -888,7 +531,7 @@ namespace tblAccountCouponsBase {
 
         inline const QList<stuRelation> Relations(const QString& _schema) {
             return {
-                ///< Col                           Reference Table                             ForeignCol                              Rename    LeftJoin
+                ///Col                           Reference Table                             ForeignCol                              Rename    LeftJoin
                 { Fields::cpnID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_cpnID,    "",       true },
                 ORM_RELATION_OF_CREATOR(Fields::cpnCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::cpnUpdatedBy_usrID),
@@ -931,15 +574,52 @@ namespace tblAccountCouponsBase {
     SF_ORM_CREATED_BY           (cpnCreatedBy_usrID), \
     SF_ORM_UPDATED_BY           (cpnUpdatedBy_usrID)
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountCouponsBase_DTO
+    );
+}
+
+namespace tblAccountPrizesBase {
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            ///ColName                                            Type                               Validation                               Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::przID,                      ORM_PRIMARYKEY_32 },
+            { Fields::przStatus,                  ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::przCreationDateTime,        ORM_CREATED_ON },
+            { Fields::przCreatedBy_usrID,         ORM_CREATED_BY },
+            { Fields::przUpdatedBy_usrID,         ORM_UPDATED_BY },
+        };
+
+        inline const QList<stuRelation> Relations(const QString& _schema) {
+            return {};
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountPrizesBase_DTO \
+    SF_ORM_PRIMARYKEY_32        (przID), \
+    SF_ORM_STATUS_FIELD         (przStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active), \
+    SF_ORM_CREATED_ON           (przCreationDateTime), \
+    SF_ORM_CREATED_BY           (przCreatedBy_usrID), \
+    SF_ORM_UPDATED_BY           (przUpdatedBy_usrID)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountPrizesBase_DTO
     );
 }
 
 /*
 not used??????
-namespace tblAccountReferalsBase {
-    constexpr char Name[] = "tblAccountReferals";
+namespace tblAccountReferralsBase {
+    constexpr char Name[] = "tblAccountReferrals";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
@@ -947,25 +627,9 @@ namespace tblAccountReferalsBase {
         TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
         TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
         TARGOMAN_CREATE_CONSTEXPR(refStatus);
-        TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(refCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(refUpdatedBy_usrID);
-    }
-
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ref_usrID,
-            _tableAlias + Fields::refValidFromDateTime,
-            _tableAlias + Fields::refValidToDateTime,
-            _tableAlias + Fields::refPrizeInfo,
-            _tableAlias + Fields::refStatus,
-            _tableAlias + Fields::refCreatedBy_usrID,
-            _tableAlias + Fields::refCreationDateTime,
-            _tableAlias + Fields::refUpdatedBy_usrID,
-        };
     }
 
     namespace Relation {
@@ -976,7 +640,8 @@ namespace tblAccountReferalsBase {
         const QList<clsORMField> ORMFields = {
         };
 
-        const QList<stuRelation> Relations = {
+        inline const QList<stuRelation> Relations(const QString& _schema) {
+            return {};
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -984,17 +649,242 @@ namespace tblAccountReferalsBase {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
     );
 }
 */
 
 #pragma GCC diagnostic pop
 
+
+
+
+TAPI_DEFINE_STRUCT(stuPrize,
+    SF_QString          (Desc),
+    SF_QJsonObject      (PrizeInfo) //Interpreted by the module
+);
+//,  QJsonObject, QJsonObject(), v.size(), v, v.toObject()
+
+TAPI_DEFINE_STRUCT(stuDiscountSaleableBasedMultiplier,
+    SF_QString          (SaleableCode),
+    SF_qreal            (Multiplier),
+    SF_NULLABLE_qreal   (MinQty)
+);
+
+TAPI_DEFINE_STRUCT(stuPendingSystemDiscount,
+    SF_QString          (Key),
+    SF_QString          (Desc),
+    SF_qreal            (Amount),
+    SF_Enum             (AmountType, enuDiscountType, enuDiscountType::Percent),
+    SF_qreal            (Max) //MaxType is opposite of AmountType
+);
+
+TAPI_DEFINE_STRUCT(stuSystemDiscount,
+//    SF_QString          (Key),
+    SF_qreal            (Amount),
+    SF_QJsonObject      (Info)
+);
+typedef QMap<QString, stuSystemDiscount> SystemDiscounts_t;
+
+TAPI_DEFINE_STRUCT(stuCouponDiscount,
+    SF_quint64          (ID),
+    SF_QString          (Code),
+    SF_qreal            (Amount)
+);
+
+/*****************************************************************************/
+TAPI_DEFINE_STRUCT(stuUsage,
+    SF_NULLABLE_quint32 (PerDay),
+    SF_NULLABLE_quint32 (PerWeek),
+    SF_NULLABLE_quint32 (PerMonth),
+    SF_NULLABLE_quint64 (Total)
+);
+
+typedef QMap<QString, stuUsage> UsageLimits_t;
+
+struct stuUsageColDefinition {
+    QString PerDay;
+    QString PerWeek;
+    QString PerMonth;
+    QString Total;
+
+    stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
+        PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
+    { ; }
+};
+
+typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
+
+typedef QMap<QString, QString> OrderAdditives_t;
+
+TAPI_DEFINE_STRUCT(stuDigested,
+//    QJsonObject   Additives;
+
+//    UsageLimits_t Limits;
+    SF_QMapOfVarStruct  (Limits, stuUsage, UsageLimits_t)
+
+//    QJsonObject   Privs;
+);
+
+TAPI_DEFINE_STRUCT(stuPendingVoucher,
+    SF_QString          (Name),
+    SF_Enum             (Type, enuVoucherType, enuVoucherType::Credit),
+    SF_quint64          (Amount),
+    SF_QJsonObject      (Info)
+);
+//typedef QList<stuPendingVoucher> PendingVouchers_t;
+
+TAPI_DEFINE_STRUCT(stuAssetItem,
+    SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
+    SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
+    SF_qreal            (prdQtyInHand),
+    SF_qreal            (slbQtyInHand),
+
+    //-- input
+    SF_QMapOfQString    (OrderAdditives),
+    SF_QString          (DiscountCode),
+    SF_QString          (Referrer),
+    SF_JSON_t           (ReferrerParams),
+    SF_qreal            (Qty),
+
+    //-- compute
+    SF_qreal            (UnitPrice),
+    SF_qreal            (SubTotal),
+
+    SF_QMapOfVarStruct  (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
+    SF_Struct           (CouponDiscount, stuCouponDiscount, v.ID),
+    SF_qreal            (Discount),
+    SF_qreal            (AfterDiscount),
+    SF_quint8           (VATPercent),
+    SF_qreal            (VAT),
+    SF_qreal            (TotalPrice),
+
+    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v)),
+
+    SF_QJsonObject      (AdditionalInfo), //per service
+
+    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
+);
+
+typedef QMap<QString, stuAssetItem> ActiveCredits_t;
+
+struct stuServiceCreditsInfo {
+    ActiveCredits_t             ActiveCredits;
+    NULLABLE_TYPE(stuAssetItem) PreferedCredit;
+    NULLABLE_TYPE(quint32)      ParentID;
+    UsageLimits_t               MyLimitsOnParent;
+    QDateTime                   DBCurrentDateTime;
+
+    stuServiceCreditsInfo(ActiveCredits_t             _activeCredits,
+                          NULLABLE_TYPE(stuAssetItem) _preferedCredit,
+                          NULLABLE_TYPE(quint32)      _parentID,
+                          UsageLimits_t               _myLimitsOnParent,
+                          QDateTime                   _dbCurrentDateTime);
+};
+
+/*
+struct stuActiveCredit {
+    stuAssetItem  Credit;
+    bool          IsFromParent;
+    UsageLimits_t MyLimitsOnParent;
+    qint64        TTL;
+
+    stuActiveCredit(const stuAssetItem& _credit = {},
+                    bool _isFromParent = false,
+                    const UsageLimits_t& _myLimitsOnParent = {},
+                    qint64 _ttl = 0);
+
+//    QJsonObject toJson(bool _full);
+//    stuActiveCredit& fromJson(const QJsonObject _obj);
+};
+*/
+
+TAPI_DEFINE_STRUCT(stuActiveCredit,
+    SF_Struct           (Credit, stuAssetItem, v.Product.prdID),
+    SF_bool             (IsFromParent),
+    SF_QMapOfVarStruct  (MyLimitsOnParent, stuUsage, UsageLimits_t),
+    SF_qint64           (TTL)
+);
+
+//constexpr char DISCOUNT_TYPE_SYSTEM[]   = "SYSTEM";
+//constexpr char DISCOUNT_TYPE_COUPON[]   = "COUPON";
+
+//TAPI_DEFINE_STRUCT(stuVoucherItemReferrer,
+//    SF_QString          (Referrer),
+//    SF_qreal            (Qty)
+//);
+
+//Caution: Do not rename fields. Field names are used in vchDesc (as json)
+TAPI_DEFINE_STRUCT(stuVoucherItem,
+    SF_QString          (Service),
+    SF_quint64          (OrderID), //AssetID per Service
+    SF_MD5_t            (UUID),
+    SF_QString          (Desc),
+    SF_qreal            (Qty),
+    SF_qreal            (UnitPrice),
+    SF_qreal            (SubTotal),
+    SF_QMapOfVarStruct  (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
+    SF_Struct           (CouponDiscount, stuCouponDiscount, v.ID),
+    SF_qreal            (DisAmount),
+    SF_qreal            (AfterDiscount),
+    SF_quint8           (VATPercent),
+    SF_qreal            (VATAmount),
+    SF_qreal            (TotalPrice),
+
+//    SF_QListOfVarStruct (Referrers, stuVoucherItemReferrer),
+    SF_QMapOfQString    (Additives),
+    SF_QString          (Referrer),
+    SF_JSON_t           (ReferrerParams),
+
+    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher),
+    SF_QListOfVarStruct (SubItems, stuVoucherItem),
+
+    SF_QString          (Sign)
+);
+
+//typedef QList<stuVoucherItem> InvItems_t;
+
+TAPI_DEFINE_STRUCT(stuPreVoucher,
+    SF_quint64          (UserID),
+    SF_QListOfVarStruct (Items, stuVoucherItem),
+//    SF _ Struct           (Prize, stuPrize, v.Desc.size()),
+    SF_QString          (Summary),
+    SF_quint16          (Round),
+    SF_quint32          (ToPay, 0, v>0),
+    SF_QString          (Sign)
+);
+
+TAPI_DEFINE_STRUCT(stuVoucher,
+    SF_quint64          (ID, 0, v>0),
+    SF_Struct           (Info, stuPreVoucher, v.ToPay),
+    SF_QString          (PaymentLink),
+    SF_QString          (PaymentKey),
+    SF_Enum             (Status, enuVoucherStatus, enuVoucherStatus::New)
+);
+
+TAPI_DEFINE_STRUCT(stuVoucherItemForTrustedAction,
+    SF_quint64          (UserID),
+    SF_quint64          (VoucherID),
+    SF_Struct           (VoucherItem, stuVoucherItem, v.Qty > 0),
+    SF_QString          (Sign)
+);
+
+//TAPI_DEFINE_STRUCT(stuVoucherItemProcess,
+//    SF_MD5_t                    (UUID),
+//    SF_NULLABLE_Enum            (Status, enuVoucherItemProcessStatus)
+//);
+
+//bool KKKKKKKKKKKKKKKKKK() {return true;}
+
+typedef QMap<QString, qint32> ServiceUsage_t;
+
+extern void checkPreVoucherSanity(stuPreVoucher _preVoucher);
+
 } //namespace Targoman::API::AAA
 
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuPrize)
-TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuDiscount3)
+TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuSystemDiscount)
+TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuCouponDiscount)
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuVoucherItem)         // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE(Targoman::API::AAA::stuUsage)
 

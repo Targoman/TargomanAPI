@@ -38,7 +38,9 @@ using namespace Targoman::API::ORM;
 //namespace TAPI {
 namespace Targoman::API::AdvertModule {
 
-TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuAdvert,
+constexpr char ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS[] = "plus-max-days";
+
+TAPI_DEFINE_STRUCT(stuAdvert,
     SF_quint64                  (ID),
     SF_QString                  (Title),
     SF_QString                  (Description),
@@ -65,13 +67,27 @@ class Advert : public intfAccountingBasedModule
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
+
     virtual void breakCredit(quint64 _slbID);
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
-    virtual void applyAssetAdditives(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& _assetItem,
-        const OrderAdditives_t& _orderAdditives
+
+    virtual void computeAdditives(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual void computeReferrer(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
 protected slots:

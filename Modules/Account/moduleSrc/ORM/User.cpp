@@ -36,7 +36,7 @@ namespace Targoman::API::AccountModule::ORM {
 /*****************************************************************\
 |* User **********************************************************|
 \*****************************************************************/
-///TODO: BAD Gender causes assert
+///@TODO: BAD Gender causes assert
 User::User() :
     intfSQLBasedModule(
         AAASchema,
@@ -307,7 +307,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
 
     if (ToUpdate.size())
         this->Update(_APICALLBOOM,
-                     QString("%1").arg(CurrentUserID),
+                     QString::number(CurrentUserID),
                      ToUpdate
                      );
 

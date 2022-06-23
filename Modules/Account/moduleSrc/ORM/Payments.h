@@ -63,7 +63,7 @@ namespace tblOnlinePayments {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(onpID);
-        TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentMD5={onpMD5}
+        TARGOMAN_CREATE_CONSTEXPR(onpMD5); //used for making payment callback url, e.g.: https://{tg.com}/callback/payment/verify?paymentKey={onpMD5}
         TARGOMAN_CREATE_CONSTEXPR(onp_vchID);
         TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
         TARGOMAN_CREATE_CONSTEXPR(onpTrackNumber);
@@ -75,32 +75,13 @@ namespace tblOnlinePayments {
         TARGOMAN_CREATE_CONSTEXPR(onpLastUpdateDateTime);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::onpID,
-            _tableAlias + Fields::onpMD5,
-            _tableAlias + Fields::onp_vchID,
-            _tableAlias + Fields::onp_pgwID,
-            _tableAlias + Fields::onpTrackNumber,
-            _tableAlias + Fields::onpAmount,
-            _tableAlias + Fields::onpTarget_walID,
-            _tableAlias + Fields::onpResult,
-            _tableAlias + Fields::onpStatus,
-            _tableAlias + Fields::onpCreationDateTime,
-            _tableAlias + Fields::onpLastUpdateDateTime,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::onpID,                 ORM_PRIMARYKEY_64 },
             { Fields::onpMD5,                S(TAPI::MD5_t),         QFV,                                QRequired,  UPAdmin },
             { Fields::onp_vchID,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
@@ -125,7 +106,7 @@ namespace tblOnlinePayments {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (onpID),
         SF_MD5_t                    (onpMD5),
         SF_quint64                  (onp_vchID),
@@ -148,6 +129,29 @@ class OnlinePayments : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
+
+#ifdef QT_DEBUG
+    QVariant REST_GET_OR_POST(
+        devTestPayPage,
+        (
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            QString _paymentKey,
+            QString _trackID,
+            QString _callback = {}
+        ),
+        ""
+    )
+
+    QVariant REST_GET_OR_POST(
+        devTestCallbackPage,
+        (
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            QString _paymentKey,
+            QString _result
+        ),
+        ""
+    )
+#endif
 };
 
 /*****************************************************************\
@@ -173,33 +177,13 @@ namespace tblOfflinePaymentClaims {
         TARGOMAN_CREATE_CONSTEXPR(ofpcUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ofpcID,
-            _tableAlias + Fields::ofpc_vchID,
-            _tableAlias + Fields::ofpcBank,
-            _tableAlias + Fields::ofpcReceiptCode,
-            _tableAlias + Fields::ofpcReceiptDate,
-            _tableAlias + Fields::ofpcAmount,
-            _tableAlias + Fields::ofpcTarget_walID,
-            _tableAlias + Fields::ofpcNotes,
-            _tableAlias + Fields::ofpcStatus,
-            _tableAlias + Fields::ofpcCreationDateTime,
-            _tableAlias + Fields::ofpcCreatedBy_usrID,
-            _tableAlias + Fields::ofpcUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::ofpcID,                  ORM_PRIMARYKEY_64},
             { Fields::ofpc_vchID,              S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner},
             { Fields::ofpcBank,                S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
@@ -215,7 +199,7 @@ namespace tblOfflinePaymentClaims {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                               Reference Table                 ForeignCol          Rename     LeftJoin
+            ///Col                                               Reference Table                 ForeignCol          Rename     LeftJoin
             { Fields::ofpc_vchID,              R(AAASchema, tblVoucher::Name), tblVoucher::Fields::vchID },
             ORM_RELATION_OF_CREATOR(Fields::ofpcCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::ofpcUpdatedBy_usrID),
@@ -226,7 +210,7 @@ namespace tblOfflinePaymentClaims {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (ofpcID),
         SF_NULLABLE_quint64         (ofpc_vchID),
         SF_QString                  (ofpcBank),
@@ -280,33 +264,13 @@ namespace tblOfflinePayments {
         TARGOMAN_CREATE_CONSTEXPR(ofpUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ofpID,
-            _tableAlias + Fields::ofp_vchID,
-            _tableAlias + Fields::ofpBank,
-            _tableAlias + Fields::ofpReceiptCode,
-            _tableAlias + Fields::ofpReceiptDate,
-            _tableAlias + Fields::ofpAmount,
-            _tableAlias + Fields::ofpTarget_walID,
-            _tableAlias + Fields::ofpNotes,
-            _tableAlias + Fields::ofpStatus,
-            _tableAlias + Fields::ofpCreationDateTime,
-            _tableAlias + Fields::ofpCreatedBy_usrID,
-            _tableAlias + Fields::ofpUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
                 { Fields::ofpID,                ORM_PRIMARYKEY_64},
                 { Fields::ofp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
                 { Fields::ofpBank,              S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
@@ -322,7 +286,7 @@ namespace tblOfflinePayments {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table                  ForeignCol         Rename     LeftJoin
+            ///Col                        Reference Table                  ForeignCol         Rename     LeftJoin
                 { Fields::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::Fields::vchID},
                 ORM_RELATION_OF_CREATOR(Fields::ofpCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::ofpUpdatedBy_usrID),
@@ -333,7 +297,7 @@ namespace tblOfflinePayments {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (ofpID),
         SF_quint64                  (ofp_vchID),
         SF_QString                  (ofpBank),

@@ -53,23 +53,6 @@ namespace tblProps {
         TARGOMAN_CREATE_CONSTEXPR(prpUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::prp_binID,
-            _tableAlias + Fields::prp_locID,
-            _tableAlias + Fields::prpOrder,
-            _tableAlias + Fields::prpKeyword,
-            _tableAlias + Fields::prpStartDate,
-            _tableAlias + Fields::prpEndDate,
-            _tableAlias + Fields::prpCreatedBy_usrID,
-            _tableAlias + Fields::prpCreationDateTime,
-            _tableAlias + Fields::prpUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -89,7 +72,7 @@ namespace tblProps {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table                     ForeignCol   Rename     LeftJoin
+            ///Col                        Reference Table                     ForeignCol   Rename     LeftJoin
                 { Fields::prp_binID,           R(AdvertSchema, tblBin::Name),       tblBin::Fields::binID },
                 { Fields::prp_locID,           R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
                 ORM_RELATION_OF_CREATOR(Fields::prpCreatedBy_usrID),
@@ -101,7 +84,7 @@ namespace tblProps {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (prp_binID),
         SF_ORM_PRIMARYKEY_32        (prp_locID),
         SF_Enum                     (prpOrder, Targoman::API::AdvertModule::enuAdvertOrder, Targoman::API::AdvertModule::enuAdvertOrder::Normal),

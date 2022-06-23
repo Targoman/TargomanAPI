@@ -103,9 +103,9 @@ private slots:
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
-            NULLABLE_TYPE(TAPI::enuGender::Type) _gender = {},
-            NULLABLE_TYPE(bool) _enableEmailAlerts = {},
-            NULLABLE_TYPE(bool) _enableSMSAlerts = {}
+            NULLABLE_TYPE(TAPI::enuGender::Type) _gender = NULLABLE_NULL_VALUE,
+            NULLABLE_TYPE(bool) _enableEmailAlerts = NULLABLE_NULL_VALUE,
+            NULLABLE_TYPE(bool) _enableSMSAlerts = NULLABLE_NULL_VALUE
         ),
         "Update User personal info"
     )
@@ -171,30 +171,13 @@ namespace tblUserExtraInfo {
         TARGOMAN_CREATE_CONSTEXPR(ueiUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uei_usrID,
-//            _tableAlias + Fields::ueiGender,
-            _tableAlias + Fields::ueiBirthDate,
-            _tableAlias + Fields::ueiPhoto,
-            _tableAlias + Fields::ueiOAuthAccounts,
-            _tableAlias + Fields::ueiIBAN,
-            _tableAlias + Fields::ueiEther,
-            _tableAlias + Fields::ueiExtraInfo,
-            _tableAlias + Fields::ueiUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                               Type                                            Validation      Default    UpBy   Sort  Filter Self  Virt   PK
             { Fields::uei_usrID,          ORM_PRIMARYKEY_64 },
 //            { Fields::ueiGender,          S(NULLABLE_TYPE(TAPI::enuGender::Type)),    QFV,            TAPI::enuGender::NotExpressed,  UPOwner,false,false },
             { Fields::ueiBirthDate,       S(NULLABLE_TYPE(TAPI::Date_t)),                 QFV,            QNull,  UPOwner },
@@ -207,7 +190,7 @@ namespace tblUserExtraInfo {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                   Reference Table                 ForeignCol      Rename  LeftJoin
+            ///Col                                   Reference Table                 ForeignCol      Rename  LeftJoin
             ORM_RELATION_OF_UPDATER(Fields::ueiUpdatedBy_usrID),
         };
 
@@ -216,7 +199,7 @@ namespace tblUserExtraInfo {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (uei_usrID),
 //        SF_NULLABLE_Enum            (ueiGender, TAPI::enuGender),
         SF_Date_t                   (ueiBirthDate),

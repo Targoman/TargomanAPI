@@ -24,7 +24,6 @@
 #define TARGOMAN_API_SERVER_QTTYPES_HPP
 
 #include "Interfaces/Common/HTTPExceptions.hpp"
-#include "Interfaces/Common/tmplNullable.hpp"
 #include "Interfaces/Common/tmplAPIArg.h"
 #include <QJsonValue>
 #include <math.h>
@@ -117,7 +116,7 @@ inline QVariant readNumber(const QString& _str, bool *ok) {
             // assume major is just a plain number
             double wholePart = floor(minorVal);
             minorVal -= wholePart;
-            major = QString("%1").arg(major.toInt() + (int)wholePart);
+            major = QString::number(major.toInt() + (int)wholePart);
         }
         minor = QString::number(minorVal, 'f').mid(2);     // chop off the "0." part
         // kDebug() <<"fraction:" << major <<"." << minor;

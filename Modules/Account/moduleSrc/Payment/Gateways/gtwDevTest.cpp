@@ -22,6 +22,8 @@
  */
 
 #include "gtwDevTest.h"
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 namespace Targoman::API::AccountModule::Payment::Gateways {
 
@@ -30,12 +32,12 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
-    TAPI::MD5_t _orderMD5,
+    TAPI::MD5_t _paymentKey,
     qint64 _amount,
     const QString &_callback,
     const QString &_desc
 ) {
-    Q_UNUSED(_orderMD5);
+    Q_UNUSED(_paymentKey);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
     Q_UNUSED(_desc);
@@ -43,19 +45,26 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
+//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 
-    if (raiseError)
-        throw exPayment("raiseError is TRUE");
+//    if (raiseError)
+//        throw exPayment("raiseError is TRUE");
 
-    QString TrackID = "devtest_track_id";
+    QString TrackID = "track_" + _paymentKey;
+
+    QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
+                          .arg(ClientConfigs::RESTServerAddress.value())
+                          .arg(_paymentKey)
+                          .arg(TrackID)
+                          .arg(_callback)
+                          ;
 
     return {
         "",
         TrackID,
-        QString(gtwDevTest::URL_GTW_PAY).replace("{{track_id}}", TrackID)
+        PaymentLink
     };
 
 #else
@@ -66,6 +75,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    const ORM::tblOnlinePayments::DTO &_onlinePayment,
     const TAPI::JSON_t &_pgResponse,
     const QString &_domain
 ) {
@@ -75,19 +85,24 @@ std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
+//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
 
 //    raiseError = true;
 
-//    QString OrderMD5 = _pgResponse.object().value("orderId").toString();
+//    QString PaymentKey = _pgResponse.object().value("orderId").toString();
 //    QString TrackID = _pgResponse.object().value("trackId").toString();
 
-    if (raiseError)
-        throw exPayment("raiseError is TRUE");
+    if (_pgResponse.isObject() == false)
+        throw exPayment("Invalid response from gateway.");
+    QJsonObject PGResponse = _pgResponse.object();
+    QString Result = PGResponse.value("result").toString();
+
+    if (Result == "error")
+        throw exPayment("Payment failed");
 
     return {
         "",
-        "devtest_ref_number"
+        "ref_" + _onlinePayment.onpMD5
     };
 
 #else

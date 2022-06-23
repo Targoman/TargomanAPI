@@ -60,29 +60,13 @@ namespace tblIPBin {
         TARGOMAN_CREATE_CONSTEXPR(ipbStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ipbIP,
-            _tableAlias + Fields::ipbReadable,
-            _tableAlias + Fields::ipbFirstAccess,
-            _tableAlias + Fields::ipbAccessCount,
-            _tableAlias + Fields::ipbLastAccess,
-            _tableAlias + Fields::ipbBlockedBy_usrID,
-            _tableAlias + Fields::ipbBlockingTime,
-            _tableAlias + Fields::ipbStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                        Type                 Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                        Type                 Validation                 Default    UpBy   Sort  Filter Self  Virt   PK
             { Fields::ipbIP,               ORM_PRIMARYKEY_32 },
             { Fields::ipbReadable,         S(TAPI::IPv4_t),     QFV,                       QInvalid,  UPNone },
             { Fields::ipbFirstAccess,      S(TAPI::DateTime_t), QFV,                       QAuto,     UPNone },
@@ -95,7 +79,7 @@ namespace tblIPBin {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                            Reference Table             ForeignCol      Rename      LeftJoin
+            ///Col                            Reference Table             ForeignCol      Rename      LeftJoin
             { Fields::ipbBlockedBy_usrID,  R(AAASchema, tblUser::Name), tblUser::Fields::usrID, "Blocker_", true },
         };
 
@@ -108,7 +92,7 @@ namespace tblIPBin {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (ipbIP),
         SF_QString                  (ipbReadable),
         SF_DateTime_t               (ipbFirstAccess),

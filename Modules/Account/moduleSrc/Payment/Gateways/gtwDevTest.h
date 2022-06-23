@@ -46,8 +46,8 @@ class gtwDevTest : public intfPaymentGateway
 public:
     constexpr static char Name[] = "DevTest";
 
-private:
-    constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
+//private:
+//    constexpr static char URL_GTW_PAY[] = "https://devtest.dom/pay/{{track_id}}";
 };
 
 } //namespace Targoman::API::AccountModule::Payment::Gateways

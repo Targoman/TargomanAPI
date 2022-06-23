@@ -110,44 +110,13 @@ namespace tblPaymentGateways {
         TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::pgwID,
-            _tableAlias + Fields::pgwName,
-            _tableAlias + Fields::pgwType,
-            _tableAlias + Fields::pgwDriver,
-            _tableAlias + Fields::pgwMetaInfo,
-            _tableAlias + Fields::pgw_curID,
-            _tableAlias + Fields::pgwAllowedDomainName,
-            _tableAlias + Fields::pgwTransactionFeeValue,
-            _tableAlias + Fields::pgwTransactionFeeType,
-            _tableAlias + Fields::pgwMinRequestAmount,
-            _tableAlias + Fields::pgwMaxRequestAmount,
-            _tableAlias + Fields::pgwMaxPerDayAmount,
-            _tableAlias + Fields::pgwLastPaymentDateTime,
-            _tableAlias + Fields::pgwSumTodayPaidAmount,
-            _tableAlias + Fields::pgwSumRequestCount,
-            _tableAlias + Fields::pgwSumRequestAmount,
-            _tableAlias + Fields::pgwSumFailedCount,
-            _tableAlias + Fields::pgwSumOkCount,
-            _tableAlias + Fields::pgwSumPaidAmount,
-            _tableAlias + Fields::pgwStatus,
-            _tableAlias + Fields::pgwCreatedBy_usrID,
-            _tableAlias + Fields::pgwCreationDateTime,
-            _tableAlias + Fields::pgwUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
+            ///ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
             { Fields::pgwID,                    ORM_PRIMARYKEY_32 },
             { Fields::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
             { Fields::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
@@ -179,7 +148,7 @@ namespace tblPaymentGateways {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::pgwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::pgwUpdatedBy_usrID),
         };
@@ -189,7 +158,7 @@ namespace tblPaymentGateways {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (pgwID),
         SF_QString                  (pgwName),
         SF_Enum                     (pgwType, Targoman::API::AccountModule::enuPaymentGatewayType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),

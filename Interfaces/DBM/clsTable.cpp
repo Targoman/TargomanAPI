@@ -81,12 +81,14 @@ clsTable::clsTable(const QString& _domain,
     clsTable::Registry.insert(Schema + "." + Name, this);
 }
 
-clsTable::clsTable(const QString& _schema,
-                   const QString& _name,
-                   const QList<clsORMField>& _cols,
-                   const QList<stuRelation>& _relations,
-                   const QList<stuDBIndex>& _indexes,
-                   const QVariantMap& _dbProperties) :
+clsTable::clsTable(
+    const QString& _schema,
+    const QString& _name,
+    const QList<clsORMField>& _cols,
+    const QList<stuRelation>& _relations,
+    const QList<stuDBIndex>& _indexes,
+    const QVariantMap& _dbProperties
+) :
     clsTable(
         "",
         _schema,
@@ -95,7 +97,7 @@ clsTable::clsTable(const QString& _schema,
         _relations,
         _indexes,
         _dbProperties
-    ) { ; }
+) { ; }
 
 clsTable* clsTable::addDBProperty(const QString& _key, const QVariant& _value) {
     this->DBProperties.insert(_key, _value);
@@ -244,12 +246,28 @@ const QString clsTable::name() const
 {
     return this->Name;
 }
-const QString clsTable::nameWithSchema() const
-{
+const QString clsTable::nameWithSchema() const {
     if (this->Schema.isEmpty())
         return this->Name;
 
     return QString("%1.%2").arg(this->Schema).arg(this->Name);
+}
+
+const QStringList clsTable::SelectableColumnNames(QString _tableAlias) const {
+    if (_tableAlias.isEmpty() == false)
+        _tableAlias += ".";
+
+    QStringList ColNames;
+
+    foreach (clsORMField Col, this->BaseCols) {
+        if (Col.isSelectable() == false)
+            continue;
+
+        QString FinalColName = this->finalColName(Col, _tableAlias);
+        ColNames.append(FinalColName);
+    }
+
+    return ColNames;
 }
 
 const QString clsTable::domain() {
@@ -354,7 +372,7 @@ clsDACResult clsTable::execQueryCacheable(
 }
 
 //TAPI::Filter_t -> QString
-//TODO: IMPORTANT! deprecated?
+///@TODO: IMPORTANT! deprecated?
 void clsTable::setSelfFilters(const QVariantMap& _requiredFilters, QString& _providedFilters) {
     QStringList Filters;
 
@@ -626,7 +644,7 @@ clsTable::stuSelectItems clsTable::makeListingQuery(const QString& _requiredCols
 */
 /*
 QVariant clsTable::selectFromTableByID(quint64 _id, QString _cols, const QStringList& _extraJoins, const QString& _groupBy) {
-    return this->selectFromTable(_extraJoins, {}, QString("%1").arg(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
+    return this->selectFromTable(_extraJoins, {}, QString::number(_id), 0, 2, _cols, {}, {}, _groupBy, false, 0);
 }
 */
 /*

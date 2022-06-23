@@ -68,30 +68,6 @@ namespace tblUserWallets {
         TARGOMAN_CREATE_CONSTEXPR(walStatus);
     } //namespace Fields
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::walID,
-            _tableAlias + Fields::wal_usrID,
-            _tableAlias + Fields::walName,
-            _tableAlias + Fields::walDefault,
-            _tableAlias + Fields::walMinBalance,
-            _tableAlias + Fields::walNotTransferableAmount,
-            _tableAlias + Fields::walMaxTransferPerDay,
-            _tableAlias + Fields::walBalance,
-            _tableAlias + Fields::walSumIncome,
-            _tableAlias + Fields::walSumExpense,
-            _tableAlias + Fields::walSumCredit,
-            _tableAlias + Fields::walSumDebit,
-            _tableAlias + Fields::walCreatedBy_usrID,
-            _tableAlias + Fields::walCreationDateTime,
-            _tableAlias + Fields::walUpdatedBy_usrID,
-            _tableAlias + Fields::walStatus,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -135,7 +111,7 @@ namespace tblUserWallets {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (walID),
         SF_quint64                  (wal_usrID),
         SF_QString                  (walName),
@@ -153,7 +129,6 @@ namespace tblUserWallets {
         SF_ORM_CREATED_BY           (walCreatedBy_usrID),
         SF_ORM_UPDATED_BY           (walUpdatedBy_usrID)
     );
-
 }
 #pragma GCC diagnostic pop
 

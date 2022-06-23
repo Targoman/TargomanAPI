@@ -24,6 +24,7 @@
 #include "URLHelper.h"
 #include <QUrl>
 #include <QUrlQuery>
+#include <QRegularExpression>
 
 namespace Targoman::API::Helpers {
 
@@ -50,6 +51,16 @@ QString URLHelper::addParameter(const QString &_url, const QString& _paramName, 
     Url.setQuery(UrlQuery);
 
     return Url.toString();
+}
+
+QString URLHelper::normalize(const QString &_url) {
+    QUrl Url = QUrl(_url);
+    QString Schema = Url.scheme();
+    QString Result = Url.toString(QUrl::FormattingOptions(QUrl::RemoveScheme)).replace(QRegularExpression("//+"), "/");
+    if (Result.startsWith("/") == false)
+        Result = "/" + Result;
+    Result = (Schema.isEmpty() ? "" : Schema + ":/") + Result;
+    return Result;
 }
 
 } //namespace Targoman::API::Helpers

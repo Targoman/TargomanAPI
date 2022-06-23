@@ -39,6 +39,9 @@
 #include "APICache.hpp"
 #include "OpenAPIGenerator.h"
 
+#include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "Interfaces/AAA/Authentication.h"
 using namespace Targoman::API::AAA;
 
@@ -47,10 +50,14 @@ namespace Targoman::API::Server {
 using namespace qhttp::server;
 using namespace Targoman::Common;
 
+static quint64 RequestCounter = 1;
+
 clsRequestHandler::clsRequestHandler(QHttpRequest *_req, QHttpResponse *_res, QObject* _parent) :
     QObject(_parent),
     Request(_req),
-    Response(_res) {
+    Response(_res),
+    RequestIndex(RequestCounter++)
+{
     this->ElapsedTimer.start();
 }
 
@@ -133,7 +140,7 @@ void clsRequestHandler::process(const QString& _api) {
                             else if (JSONObjectIter.value().isObject())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
                             else if (JSONObjectIter.value().isDouble())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString("%1").arg(JSONObjectIter.value().toDouble()));
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QString::number(JSONObjectIter.value().toDouble()));
                             else
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toString());
                         }
@@ -295,11 +302,16 @@ void clsRequestHandler::sendTimingsToResponse() {
 
     QStringList Output;
 
+//    Output << "app";
+
     for (QMap<QString, quint64>::const_iterator it = this->ServerTimings.constBegin();
          it != this->ServerTimings.constEnd();
          it++
     ) {
-        Output.append(QString("%1;dur=%2").arg(it.key()).arg(ceil(it.value() / 1000.0) / 1000));
+        QString Label = it.key();
+//        if (Label.contains(";desc=") == false)
+//            Label += ";desc=\"total\"";
+        Output.append(QString("%1;dur=%2").arg(Label).arg(ceil(it.value() / 1000.0) / 1000));
     }
 
     this->Response->addHeaderValue("Server-Timing", Output.join(", "));
@@ -319,15 +331,15 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 ) {
 //    QVariantMap ResponseHeaders;
 
-    auto FNTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+    auto fnTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
         this->addToTimings(_name, _desc, _nanoSecs);
     };
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
     if (_apiObject->requiresJWT())
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(FNTiming));
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(fnTiming));
     else
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(FNTiming));
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -357,6 +369,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 );
                 } catch (exJWTExpired &exp) {
                     auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
+
                     bool IsRenewed = false;
                     QString NewToken = Authentication::renewExpiredJWT(
                                 JWT,
@@ -559,7 +572,7 @@ void clsRequestHandler::sendFile(QString _basePath, const QString &_path) {
     qint64 FileSize = QFileInfo(*this->FileHandler).size();
 
     this->Response->addHeaderValue("content-type", FileMIME.name());
-    this->Response->addHeaderValue("content-length", QString("%1").arg(FileSize));
+    this->Response->addHeaderValue("content-length", QString::number(FileSize));
     this->Response->addHeaderValue("Connection", QString("keep-alive"));
 
     this->Response->setStatusCode(qhttp::ESTATUS_OK);
@@ -651,7 +664,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 
     } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
         TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
-        this->redirect(ResponseRedirect.url());
+        this->redirect(ResponseRedirect.url(), ResponseRedirect.appendBase(), ResponseRedirect.permananet());
 
     } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
         TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
@@ -695,7 +708,7 @@ void clsRequestHandler::sendCORSOptions() {
 
 void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet) {
     QString Path = _appendBase ? ServerConfigs::BasePathWithVersion + _path : _path;
-    Path = Path.replace(QRegularExpression("//+"), "/");
+    Path = URLHelper::normalize(Path);
 
     this->Response->addHeaderValue("Location", Path);
 

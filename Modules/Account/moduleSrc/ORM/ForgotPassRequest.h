@@ -65,28 +65,13 @@ namespace tblForgotPassRequest {
         TARGOMAN_CREATE_CONSTEXPR(fprStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::fprID,
-            _tableAlias + Fields::fpr_usrID,
-            _tableAlias + Fields::fprRequestedVia,
-            _tableAlias + Fields::fprCode,
-            _tableAlias + Fields::fprRequestDate,
-            _tableAlias + Fields::fprApplyDate,
-            _tableAlias + Fields::fprStatus,
-        };
-    }
-
     namespace Relation {
         constexpr char User[] = "user";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                   Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                                   Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::fprID,              ORM_PRIMARYKEY_64 },
             { Fields::fpr_usrID,          S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::fprRequestedVia,    S(Targoman::API::AccountModule::enuForgotPassLinkVia::Type), QFV, Targoman::API::AccountModule::enuForgotPassLinkVia::Email, UPNone },
@@ -97,7 +82,7 @@ namespace tblForgotPassRequest {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                Reference Table                 ForeignCol
+            ///Col                                Reference Table                 ForeignCol
             { Relation::User, { Fields::fpr_usrID,   R(AAASchema,tblUser::Name),     tblUser::Fields::usrID } },
         };
 
@@ -106,7 +91,7 @@ namespace tblForgotPassRequest {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (fprID),
         SF_quint64                  (fpr_usrID),
         SF_Enum                     (fprRequestedVia, Targoman::API::AccountModule::enuForgotPassLinkVia, Targoman::API::AccountModule::enuForgotPassLinkVia::Email),

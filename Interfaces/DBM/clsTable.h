@@ -203,6 +203,8 @@ public:
     const QString name() const;
     const QString nameWithSchema() const;
 
+    const QStringList SelectableColumnNames(QString _tableAlias = "") const;
+
 protected:
     /*inline */const QString domain();
 

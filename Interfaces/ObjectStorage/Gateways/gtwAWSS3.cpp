@@ -70,7 +70,7 @@ bool gtwAWSS3::storeFile(
                 );
 
     //----------------------------------------
-    ///TODO: use MultipartUploader for files larger than 400 MB
+    ///@TODO: use MultipartUploader for files larger than 400 MB
 
     S3::Model::PutObjectRequest Request;
 

@@ -22,9 +22,10 @@
  */
 
 #include "intfSQLBasedModule.h"
-
+#include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/DBM/QueryBuilders.h"
+using namespace Targoman::API::AAA;
 using namespace Targoman::API::DBM;
 
 namespace Targoman::API::API {
@@ -77,7 +78,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+    std::function<void(SelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
@@ -97,8 +98,8 @@ QVariantMap intfSQLBasedModule::SelectOne(
         .setCacheTime(_cacheTime)
     ;
 
-    if (_lambda_TouchQuery != nullptr)
-        _lambda_TouchQuery(Query);
+    if (_fnTouchQuery != nullptr)
+        _fnTouchQuery(Query);
 
     QVariantMap Result = Query.one();
 
@@ -120,7 +121,7 @@ QVariantList intfSQLBasedModule::SelectAll(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+    std::function<void(SelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
@@ -138,8 +139,8 @@ QVariantList intfSQLBasedModule::SelectAll(
         .setCacheTime(_cacheTime)
     ;
 
-    if (_lambda_TouchQuery != nullptr)
-        _lambda_TouchQuery(Query);
+    if (_fnTouchQuery != nullptr)
+        _fnTouchQuery(Query);
 
     QVariantList Result = Query.all();
 
@@ -161,7 +162,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+    std::function<void(SelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
@@ -179,8 +180,8 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
         .setCacheTime(_cacheTime)
     ;
 
-    if (_lambda_TouchQuery != nullptr)
-        _lambda_TouchQuery(Query);
+    if (_fnTouchQuery != nullptr)
+        _fnTouchQuery(Query);
 
     TAPI::stuTable Result = Query.allWithCount();
 
@@ -202,7 +203,7 @@ QVariant intfSQLBasedModule::Select(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+    std::function<void(SelectQuery &_query)> _fnTouchQuery
 ) {
     auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "read");
 
@@ -213,7 +214,7 @@ QVariant intfSQLBasedModule::Select(
                         GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                         _extraFilters,
                         _cacheTime,
-                        _lambda_TouchQuery
+                        _fnTouchQuery
                         )
                     .toVariant()
                 ;
@@ -223,7 +224,7 @@ QVariant intfSQLBasedModule::Select(
                     GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                     _extraFilters,
                     _cacheTime,
-                    _lambda_TouchQuery
+                    _fnTouchQuery
                     );
     }
 
@@ -232,7 +233,7 @@ QVariant intfSQLBasedModule::Select(
                 GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
-                _lambda_TouchQuery
+                _fnTouchQuery
                 );
 }
 
@@ -240,14 +241,14 @@ QVariant intfSQLBasedModule::Select(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _lambda_TouchQuery
+    std::function<void(SelectQuery &_query)> _fnTouchQuery
 ) {
     return this->Select(
                 *this,
                 GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
-                _lambda_TouchQuery
+                _fnTouchQuery
             );
 }
 
@@ -291,7 +292,7 @@ quint64 intfSQLBasedModule::Create(
 
     query.values(_createInfo);
 
-    return query.execute(_APICALLBOOM.getUserID());
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID);
 }
 
 quint64 intfSQLBasedModule::Create(
@@ -385,7 +386,7 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(_APICALLBOOM.getUserID()) > 0;
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID) > 0;
 }
 
 bool intfSQLBasedModule::Update(
@@ -489,7 +490,7 @@ bool intfSQLBasedModule::DeleteByPks(
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_APICALLBOOM.getUserID(), {}, _realDelete) > 0;
+    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID, {}, _realDelete) > 0;
 }
 
 bool intfSQLBasedModule::DeleteByPks(

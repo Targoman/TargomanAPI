@@ -31,7 +31,7 @@ public:
         clsTable(
             "test",
             "t1",
-            {///< ColName    Type                             Validation                 Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
+            {///ColName    Type                             Validation                 Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
                 { "colID1",  ORM_PRIMARYKEY_32 },
                 { "colA1",   S(qreal),                        QFV.real().minValue(0),    QNull,      UPOwner },
                 { "colB1",   S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
@@ -74,7 +74,7 @@ public:
         clsTable(
             "test",
             "t2",
-            {///< ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
+            {///ColName Type                             Validation                 Default     UpBy      Sort  Filter Self  Virt   PK
                 { "colA2", ORM_PRIMARYKEY_32 },
                 { "colB2", S(TAPI::SaleableCode_t),         QFV,                       QRequired,  UPOwner },
                 { "colC2", S(quint32),                      QFV.integer().minValue(1), QRequired,  UPOwner },

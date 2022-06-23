@@ -259,7 +259,7 @@ QVariant RESTClientHelper::callAPI(
         qDebug() << "**********************************" << "JWT replaced by" << endl
                  << _encodedJWT;
 
-        //TODO: complete this
+        ///@TODO: complete this
         //Account::instance()->addResponseHeader("x-auth-new-token", _encodedJWT);
     }
 #endif

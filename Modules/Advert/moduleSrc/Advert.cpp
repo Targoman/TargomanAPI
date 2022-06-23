@@ -74,8 +74,8 @@ Advert::Advert() :
         AdvertSchema,
         {
             //           day                week   month                total
-            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
-            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+            { "show",  { "slbExShowPerDay",   {},    {},                  "slbExShowTotal" } },
+            { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
         &AccountProducts::instance(),
         &AccountSaleables::instance(),
@@ -103,7 +103,7 @@ Advert::Advert() :
 }
 
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
-    //TODO: complete this
+    ///@TODO: complete this
     return stuServiceCreditsInfo(
                 {},
                 NULLABLE_NULL_VALUE,
@@ -116,23 +116,95 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
 void Advert::breakCredit(quint64 _slbID) {
 }
 
-bool Advert::isUnlimited(const UsageLimits_t& _limits) const
-{
+bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
 }
 
-bool Advert::isEmpty(const UsageLimits_t& _limits) const
-{
+bool Advert::isEmpty(const UsageLimits_t& _limits) const {
 }
 
-void Advert::applyAssetAdditives(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    INOUT stuAssetItem& _assetItem,
-    const OrderAdditives_t& _orderAdditives
+void Advert::computeAdditives(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
+    ///@TODO: [very important] complete this
 //    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
-
-//    _assetItem.slbBasePrice *= 1.1;
+//    AssetItem.UnitPrice *= 1.1;
 };
+
+void Advert::computeReferrer(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    ///@TODO: [very important] complete this
+
+    ///::: SAMPLE CODE :::
+
+    //1: add, modify or remove credit voucher for fp.com
+    if (_oldVoucherItem != nullptr) {
+        if (_oldVoucherItem->Qty != _assetItem.Qty) {
+            //remove old
+            for (QList<stuPendingVoucher>::iterator it = _assetItem.PendingVouchers.begin();
+                 it != _assetItem.PendingVouchers.end();
+                 it++
+            ) {
+                if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
+                        && (it->Info.contains("referrer")))
+                    it = _assetItem.PendingVouchers.erase(it);
+            }
+        }
+    }
+
+    if (_assetItem.Qty > 0) {
+        _assetItem.PendingVouchers.append({
+            /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
+            /* Type     */ enuVoucherType::Prize, //Credit,
+            /* Amount   */ 2000 * _assetItem.Qty,
+            /* Info     */ {
+                               { "referrer", _assetItem.Referrer },
+                           },
+        });
+    }
+
+    //2: add, modify or remove system discount
+    this->computeSystemDiscount(_APICALLBOOM, _assetItem, {
+                                  QString("referrer_%1").arg("fp.com"),
+                                  "5% off by fp.com",
+                                  5,
+                                  enuDiscountType::Percent,
+                                  10'000
+                              }, _oldVoucherItem);
+
+    //3: inc translate words max limit (30'000 -> 35'000)
+//    int IncAmount = 5'000;
+//    if (_assetItem.AdditionalInfo.contains("plus-max-words"))
+//        _assetItem.AdditionalInfo["plus-max-words"] = IncAmount + _assetItem.AdditionalInfo["plus-max-words"].toInt();
+//    else
+//        _assetItem.AdditionalInfo.insert("plus-max-words", IncAmount);
+
+    //4: inc days (30 -> 40)
+    int IncDays = 10;
+    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
+    else
+        _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
+};
+
+QVariantMap Advert::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    ///@TODO: [very important] complete this
+
+    QVariantMap Result;
+
+    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        Result.insert(tblAccountUserAsset::ExtraFields::uasExDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+
+    return Result;
+}
 
 /***************************************************************************************************/
 //bool IMPL_REST_POST(Advert, processVoucher, (
@@ -197,7 +269,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     QVariantMap Result;
 
     if (_random == "1")
-        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+        _random = QString::number(QRandomGenerator::global()->generate());
 
     if (_random.isEmpty() == false)
         Result.insert("Random", _random);
@@ -229,8 +301,8 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountProductsBase::Fields::prdCode,          ProductCode },
         { tblAccountProductsBase::Fields::prdName,          FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
         { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-        { tblAccountProducts::Fields::prdType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-        { tblAccountProducts::Fields::prd_locID,            LocationID },
+        { tblAccountProducts::ExtraFields::prdExType,         Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prdEx_locID,       LocationID },
     };
 
     quint32 ProductID = CreateQuery(*this->AccountProducts)
@@ -249,13 +321,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //                                     tblAccountProductsBase::Fields::prdOrderedQty,
 //                                     tblAccountProductsBase::Fields::prdReturnedQty,
 //                                     tblAccountProductsBase::Fields::prdStatus,
-                                     tblAccountProducts::Fields::prdType,
-                                     tblAccountProducts::Fields::prd_locID,
-//                                     tblAccountProducts::Fields::prdShowPerDay,
-//                                     tblAccountProducts::Fields::prdShowTotal,
-//                                     tblAccountProducts::Fields::prdClicksPerDay,
-//                                     tblAccountProducts::Fields::prdClicksPerMonth,
-//                                     tblAccountProducts::Fields::prdClicksTotal,
+                                     tblAccountProducts::ExtraFields::prdExType,
+                                     tblAccountProducts::ExtraFields::prdEx_locID,
+//                                     tblAccountProducts::ExtraFields::prdExShowPerDay,
+//                                     tblAccountProducts::ExtraFields::prdExShowTotal,
+//                                     tblAccountProducts::ExtraFields::prdExClicksPerDay,
+//                                     tblAccountProducts::ExtraFields::prdExClicksPerMonth,
+//                                     tblAccountProducts::ExtraFields::prdExClicksTotal,
                                  })
                         .values(ProductValues)
                         .execute(1);
@@ -302,11 +374,11 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //                                      tblAccountSaleablesBase::Fields::slbCreatedBy_usrID,
 //                                      tblAccountSaleablesBase::Fields::slbCreationDateTime,
 //                                      tblAccountSaleablesBase::Fields::slbUpdatedBy_usrID,
-//                                      tblAccountSaleables::Fields::slbShowPerDay,
-//                                      tblAccountSaleables::Fields::slbShowTotal,
-//                                      tblAccountSaleables::Fields::slbClicksPerDay,
-//                                      tblAccountSaleables::Fields::slbClicksPerMonth,
-//                                      tblAccountSaleables::Fields::slbClicksTotal,
+//                                      tblAccountSaleables::Fields::slbExShowPerDay,
+//                                      tblAccountSaleables::Fields::slbExShowTotal,
+//                                      tblAccountSaleables::Fields::slbExClicksPerDay,
+//                                      tblAccountSaleables::Fields::slbExClicksPerMonth,
+//                                      tblAccountSaleables::Fields::slbExClicksTotal,
                                   })
                          .values(SaleableValues)
                          .execute(1);
@@ -377,7 +449,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         /* qty                 */ 1,
         /* discountCode        */ CouponCode,
         /* referrer            */ "",
-        /* extraReferrerParams */ {},
+        /* referrerParams */ {},
         /* lastPreVoucher      */ LastPreVoucher
     );
     Result.insert("LastPreVoucher", LastPreVoucher.toJson());
@@ -393,27 +465,25 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
             { "gatewayType",            "_DeveloperTest" },
             { "domain",                 "dev.test" },
 //            { "walID",               9988 },
-            { "paymentVerifyCallback",  "http://www.a.com" },
+            { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
         }
     );
     Voucher.fromJson(res.toJsonObject());
     Result.insert("Voucher", Voucher.toJson());
 
     //-- approve online payment --------------------------------------
-    if (Voucher.PaymentMD5.isEmpty() == false) {
+    if (Voucher.PaymentKey.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
             _APICALLBOOM,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},
             {
-                { "paymentMD5",     Voucher.PaymentMD5 },
-                { "domain",         "this.is.domain" },
+                { "paymentKey",     Voucher.PaymentKey },
+                { "domain",         "dev.test" },
                 { "pgResponse",     QVariantMap({
-                      { "resp_1", 1 },
-                      { "resp_2", 2 },
-                      { "resp_3", 3 },
-                  }) },
+                    { "result",     "ok" },
+                }) },
             }
         );
         ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());

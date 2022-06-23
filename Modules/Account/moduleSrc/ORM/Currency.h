@@ -60,23 +60,6 @@ namespace tblCurrency {
         TARGOMAN_CREATE_CONSTEXPR(curUpdatedBy_usrID);
     } //namespace Fields
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::curID,
-            _tableAlias + Fields::curName,
-            _tableAlias + Fields::curSymbol,
-            _tableAlias + Fields::curRate,
-            _tableAlias + Fields::curIsDefault,
-            _tableAlias + Fields::curStatus,
-            _tableAlias + Fields::curCreatedBy_usrID,
-            _tableAlias + Fields::curCreationDateTime,
-            _tableAlias + Fields::curUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -107,7 +90,7 @@ namespace tblCurrency {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (curID),
         SF_QString                  (curName),
         SF_QString                  (curSymbol),

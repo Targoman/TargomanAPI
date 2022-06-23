@@ -36,6 +36,9 @@
 #include "intfAPIArgManipulator.h"
 #include "HTTPExceptions.hpp"
 
+#include "Interfaces/Helpers/URLHelper.h"
+using namespace Targoman::API::Helpers;
+
 #include "Interfaces/DBM/clsORMField.h"
 using namespace Targoman::API::DBM;
 
@@ -54,68 +57,68 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ stuTable,
-    /* toVariantLambda    */ [](const stuTable& _value) -> QVariant{return _value.toVariant();}
+    /* fnToVariant    */ [](const stuTable& _value) -> QVariant{return _value.toVariant();}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_File,
     /* namespace          */ TAPI,
     /* type               */ stuFileInfo,
-    /* toVariantLambda    */ [](const stuFileInfo& _value) -> QVariant{return _value.toVariant();},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _param) -> stuFileInfo {stuFileInfo TempValue; return TempValue.fromVariant(_value, _param);}
+    /* fnToVariant    */ [](const stuFileInfo& _value) -> QVariant{return _value.toVariant();},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray& _param) -> stuFileInfo {stuFileInfo TempValue; return TempValue.fromVariant(_value, _param);}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_File,
     /* namespace          */ TAPI,
     /* type               */ Files_t,
-    /* toVariantLambda    */ [](const Files_t& _value) -> QVariant{ return _value.toVariant();},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray& _param) -> Files_t {Files_t TempValue; return TempValue.fromVariant(_value, _param);}
+    /* fnToVariant    */ [](const Files_t& _value) -> QVariant{ return _value.toVariant();},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray& _param) -> Files_t {Files_t TempValue; return TempValue.fromVariant(_value, _param);}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ RawData_t,
-    /* toVariantLambda    */ [](const RawData_t& _value) -> QVariant{return _value.toVariant();}
+    /* fnToVariant    */ [](const RawData_t& _value) -> QVariant{return _value.toVariant();}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ FileData_t,
-    /* toVariantLambda    */ [](const FileData_t &_value) -> QVariant { return _value.toVariant(); }
+    /* fnToVariant    */ [](const FileData_t &_value) -> QVariant { return _value.toVariant(); }
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ ResponseRedirect_t,
-    /* toVariantLambda    */ [](const ResponseRedirect_t &_value) -> QVariant { return _value.toVariant(); }
+    /* fnToVariant    */ [](const ResponseRedirect_t &_value) -> QVariant { return _value.toVariant(); }
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ HEADERS_t,
-    /* toVariantLambda    */ [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
+    /* fnToVariant    */ [](const HEADERS_t& _value) -> QVariant {return _value.toVariant();},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> HEADERS_t {HEADERS_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ COOKIES_t,
-    /* toVariantLambda    */ [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
+    /* fnToVariant    */ [](const COOKIES_t& _value) -> QVariant {return _value.toVariant();},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> COOKIES_t {COOKIES_t  TempValue;return TempValue.fromVariant(_value);}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ TAPI,
     /* type               */ JWT_t,
-    /* toVariantLambda    */ nullptr,
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> JWT_t {
+    /* fnToVariant    */ nullptr,
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> JWT_t {
         QJsonObject Obj;
         if (_value.canConvert<QVariantMap>())
             Obj = Obj.fromVariantMap(_value.value<QVariantMap>());
@@ -130,8 +133,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ TAPI,
     /* type               */ ORMFields_t,
-    /* toVariantLambda    */ nullptr,
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
+    /* fnToVariant    */ nullptr,
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> ORMFields_t {return _value.toMap();}
 );
 
 TAPI_REGISTER_JSON_DERIVED_METATYPE(
@@ -239,7 +242,7 @@ TAPI_REGISTER_JSON_DERIVED_METATYPE(
 
 
 
-/// ///TODO:
+/// ///@TODO:
 
 
 
@@ -255,7 +258,7 @@ throw Targoman::Common::exTargomanMustBeImplemented("SaleableAdditive_t not impl
 
 
 
-/// ///TODO:
+/// ///@TODO:
 
 
 
@@ -287,8 +290,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ EncodedJWT_t,
-    /* toVariantLambda    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ nullptr,
+    /* fnToVariant    */ [](const EncodedJWT_t& _value) -> QVariant {return _value;},
+    /* fnFromVariant  */ nullptr,
     [](const QList<DBM::clsORMField>&) { return "A signed JsonWebToken string"; }
 );
 
@@ -296,16 +299,16 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ RemoteIP_t,
-    /* toVariantLambda    */ [](const RemoteIP_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
+    /* fnToVariant    */ [](const RemoteIP_t& _value) -> QVariant {return _value;},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> RemoteIP_t {RemoteIP_t Value;Value=_value.toString();return  Value;}
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ PKsByPath_t,
-    /* toVariantLambda    */ [](const PKsByPath_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> PKsByPath_t {
+    /* fnToVariant    */ [](const PKsByPath_t& _value) -> QVariant {return _value;},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> PKsByPath_t {
         PKsByPath_t Value;
         QUrl URL = QUrl::fromPercentEncoding(("http://127.0.0.1/" + _value.toString()).toUtf8());
         Value=URL.path().remove(0,1);
@@ -317,8 +320,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ CouponCode_t,
-    /* toVariantLambda    */ [](const CouponCode_t& _value) -> QVariant {return _value.mid(0, _value.indexOf('!'));},
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> CouponCode_t {
+    /* fnToVariant    */ [](const CouponCode_t& _value) -> QVariant {return _value.mid(0, _value.indexOf('!'));},
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> CouponCode_t {
         auto ValueStr = _value.toString();
         return ValueStr.mid(0, ValueStr.indexOf('!'));
     }
@@ -328,8 +331,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ Date_t,
-    /* toVariantLambda    */ [](const Date_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Date_t {
+    /* fnToVariant    */ [](const Date_t& _value) -> QVariant {return _value;},
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Date_t {
         if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Date: <"+_value.toString()+">");
         return _value.toDate();
@@ -340,8 +343,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ Time_t,
-    /* toVariantLambda    */ [](const Time_t& _value) -> QVariant {return _value;},
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Time_t {
+    /* fnToVariant    */ [](const Time_t& _value) -> QVariant {return _value;},
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> Time_t {
         if (_value.canConvert<QDate>() == false)
             throw exHTTPBadRequest(_paramName + " is not a valid Time: <"+_value.toString()+">");
         return _value.toTime();
@@ -352,8 +355,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_String,
     /* namespace          */ TAPI,
     /* type               */ DateTime_t,
-    /* toVariantLambda    */ [](const DateTime_t& _value) -> QVariant { return _value; },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> DateTime_t {
+    /* fnToVariant    */ [](const DateTime_t& _value) -> QVariant { return _value; },
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> DateTime_t {
         if (_value.canConvert<QDate>() == false) {
             print_stacktrace();
             throw exHTTPBadRequest(_paramName + " is not a valid DateTime: <" + _value.toString() + ">");
@@ -370,7 +373,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, IPv4_t,             
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ISO639_2_t,                 optional(QFV.maxLenght(2).languageCode()),                                 _value, [](const QList<clsORMField>&) { return "A valid ISO639 two-letter language code"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Base64Image_t,              optional(QFV.base64Image()),                                               _value, [](const QList<clsORMField>&) { return "A valid base64 encoded png/jpg image"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Sheba_t,                    optional(QFV.iban("IR")),                                                  _value, [](const QList<clsORMField>&) { return "A valid Iranian sheba code"; });
-///TODO: Ether/Bitcoin validator
+///@TODO: Ether/Bitcoin validator
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, Ether_t,                    optional(QFV.allwaysValid()),                                              _value, [](const QList<clsORMField>&) { return "A valid ethercoin address"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, URL_t,                      optional(QFV.url()),                                                       _value, [](const QList<clsORMField>&) { return "A valid URL"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, ProductCode_t,              optional(QFV.matches(QRegularExpression("[a-zA-Z\\-_0-9]{3,10}"))),        _value, [](const QList<clsORMField>&) { return "A valid ProductCode"; });
@@ -440,10 +443,14 @@ QVariant FileData_t::toVariant() const {
 }
 
 /**********************************************************************************/
-ResponseRedirect_t::ResponseRedirect_t(const QString &_url) :
-    Url(_url)
+ResponseRedirect_t::ResponseRedirect_t(const QString &_url,
+                                       bool _appendBase,
+                                       bool _permananet) :
+    Url(_url),
+    AppendBase(_appendBase),
+    Permananet(_permananet)
 {
-    Url = Url.replace(QRegularExpression("//+"), "/");
+    this->Url = URLHelper::normalize(_url);
 }
 
 QVariant ResponseRedirect_t::toVariant() const {

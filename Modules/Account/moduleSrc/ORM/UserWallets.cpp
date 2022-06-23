@@ -155,7 +155,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Targoman::API::AAA::stuVoucher Voucher;
 
     Voucher.Info.UserID = _APICALLBOOM.getUserID();
-    Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem("INC_WALLET", _walID));
+    Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
@@ -167,7 +167,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
 //                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                                     { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                                     { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                                    { tblVoucher::Fields::vchType, Targoman::API::AccountModule::enuVoucherType::Credit },
+                                                    { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
                                                     { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                                 }));
 
@@ -175,7 +175,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
             //Do nothing as it will be created after information upload.
         } else {
-            TAPI::MD5_t PaymentMD5;
+            TAPI::MD5_t PaymentKey;
             Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
                                       APICALLBOOM_PARAM,
                                       _gatewayType,
@@ -184,10 +184,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
                                       Voucher.Info.Summary,
                                       Voucher.Info.ToPay,
                                       _paymentVerifyCallback,
-                                      PaymentMD5,
+                                      PaymentKey,
                                       _walID
                                       );
-            Voucher.PaymentMD5 = PaymentMD5;
+            Voucher.PaymentKey = PaymentKey;
         }
     } catch (...) {
         this->Update(Voucher::instance(),

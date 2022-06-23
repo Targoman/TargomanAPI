@@ -34,6 +34,7 @@ class URLHelper
 public:
     static QString domain(QString _url);
     static QString addParameter(const QString& _url, const QString& _paramName, const QVariant& _value);
+    static QString normalize(const QString &_url);
 };
 
 } //namespace Targoman::API::Helpers

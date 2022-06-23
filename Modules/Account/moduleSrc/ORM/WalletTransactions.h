@@ -85,39 +85,24 @@ namespace tblWalletsTransactions {
         TARGOMAN_CREATE_CONSTEXPR(wltDateTime);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::wltID,
-            _tableAlias + Fields::wlt_walID,
-            _tableAlias + Fields::wlt_vchID,
-            _tableAlias + Fields::wlt_vchType,
-            _tableAlias + Fields::wltAmount,
-            _tableAlias + Fields::wltStatus,
-            _tableAlias + Fields::wltDateTime,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
+            ///ColName                               Type                            Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
                 { Fields::wltID,        ORM_PRIMARYKEY_64 },
                 { Fields::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
                 { Fields::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
-                { Fields::wlt_vchType,  S(Targoman::API::AccountModule::enuVoucherType::Type), QFV, Targoman::API::AccountModule::enuVoucherType::Expense, UPNone },
+                { Fields::wlt_vchType,  S(Targoman::API::AAA::enuVoucherType::Type), QFV, Targoman::API::AAA::enuVoucherType::Expense, UPNone },
                 { Fields::wltAmount,    S(qint64),                      QFV,                        QInvalid,   UPNone, false, false },
                 { Fields::wltStatus,    ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
                 { Fields::wltDateTime,  ORM_CREATED_ON },
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
+            ///Col                                   Reference Table                         ForeignCol                      Rename  LeftJoin
                 { Fields::wlt_walID,    R(AAASchema, tblUserWallets::Name),     tblUserWallets::Fields::walID },
                 { Fields::wlt_vchID,    R(AAASchema, tblVoucher::Name),         tblVoucher::Fields::vchID },
                 { Fields::wltID,        R(AAASchema, tblWalletsBalanceHistory::Name),  tblWalletsBalanceHistory::Fields::wbl_wltID },
@@ -128,11 +113,11 @@ namespace tblWalletsTransactions {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (wltID),
         SF_quint64                  (wlt_walID),
         SF_quint64                  (wlt_vchID),
-        SF_Enum                     (wlt_vchType, Targoman::API::AccountModule::enuVoucherType, Targoman::API::AccountModule::enuVoucherType::Expense),
+        SF_Enum                     (wlt_vchType, Targoman::API::AAA::enuVoucherType, Targoman::API::AAA::enuVoucherType::Expense),
         SF_qint64                   (wltAmount),
         SF_ORM_STATUS_FIELD         (wltStatus, Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New),
         SF_ORM_CREATED_ON           (wltDateTime)
@@ -140,27 +125,13 @@ namespace tblWalletsTransactions {
 }
 
 namespace tblWalletsBalanceHistory {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::wbl_wltID,
-            _tableAlias + Fields::wblBalance,
-            _tableAlias + Fields::wblSumIncome,
-            _tableAlias + Fields::wblSumExpense,
-            _tableAlias + Fields::wblSumCredit,
-            _tableAlias + Fields::wblSumDebit,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
+            ///ColName                           Type        Validation              Default     UpBy    Sort    Filter Self  Virt   PK
                 { Fields::wbl_wltID,     S(qint64),  QFV,                    QRequired,  UPNone },
                 { Fields::wblBalance,    S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
                 { Fields::wblSumDebit,   S(qint64),  QFV.allwaysInvalid(),   QInvalid,   UPNone, false,  false },
@@ -170,7 +141,7 @@ namespace tblWalletsBalanceHistory {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
+            ///Col                               Reference Table                             ForeignCol                      Rename   LeftJoin
                 { Fields::wbl_wltID,     R(AAASchema, tblWalletsTransactions::Name), tblWalletsTransactions::Fields::wltID },
             };
 
@@ -179,7 +150,7 @@ namespace tblWalletsBalanceHistory {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_qint64                   (wbl_wltID),
         SF_qint64                   (wblBalance),
         SF_qint64                   (wblSumDebit),

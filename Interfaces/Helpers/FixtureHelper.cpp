@@ -22,6 +22,7 @@
  */
 
 #include "FixtureHelper.h"
+#include <QStringList>
 
 #ifdef QT_DEBUG
 
@@ -32,7 +33,7 @@ QString FixtureHelper::MakeRandomizeName(
         const QString &_sep,
         const QString &_prefix,
         const QString &_suffix
-    ) {
+) {
     QStringList List;
 
     List.append(_prefix);

@@ -19,6 +19,7 @@ HEADERS += \
     $$BASE_PROJECT_PATH/Interfaces/Server/APICallBoom.h \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.h \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.h \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/URLHelper.h \
 
 SOURCES += \
     $$BASE_PROJECT_PATH/Interfaces/Server/clsSimpleCrypt.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
     $$BASE_PROJECT_PATH/Interfaces/Server/APICallBoom.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/RESTClientHelper.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Helpers/SecurityHelper.cpp \
+    $$BASE_PROJECT_PATH/Interfaces/Helpers/URLHelper.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Common/base.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Common/GenericTypes.cpp \
     $$BASE_PROJECT_PATH/Interfaces/Common/intfAPIArgManipulator.cpp \

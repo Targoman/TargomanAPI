@@ -61,23 +61,6 @@ namespace tblRoles {
         TARGOMAN_CREATE_CONSTEXPR(rolUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::rolID,
-            _tableAlias + Fields::rolName,
-            _tableAlias + Fields::rolParent_rolID,
-            _tableAlias + Fields::rolPrivileges,
-            _tableAlias + Fields::rolSignupAllowedIPs,
-            _tableAlias + Fields::rolStatus,
-            _tableAlias + Fields::rolCreatedBy_usrID,
-            _tableAlias + Fields::rolCreationDateTime,
-            _tableAlias + Fields::rolUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
@@ -98,7 +81,7 @@ namespace tblRoles {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
                 { Fields::rolParent_rolID, R(AAASchema,tblRoles::Name), Fields::rolID, "Parent_", true },
                 ORM_RELATION_OF_CREATOR(Fields::rolCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::rolUpdatedBy_usrID),
@@ -113,7 +96,7 @@ namespace tblRoles {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (rolID),
         SF_QString                  (rolName),
         SF_quint32                  (rolParent_rolID),

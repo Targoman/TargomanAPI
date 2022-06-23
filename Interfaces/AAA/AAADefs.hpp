@@ -107,41 +107,13 @@ namespace tblUser {
         TARGOMAN_CREATE_CONSTEXPR(usrStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::usrID,
-            _tableAlias + Fields::usrGender,
-            _tableAlias + Fields::usrName,
-            _tableAlias + Fields::usrFamily,
-            _tableAlias + Fields::usrEmail,
-            _tableAlias + Fields::usrMobile,
-            _tableAlias + Fields::usrApprovalState,
-            _tableAlias + Fields::usrPass,
-            _tableAlias + Fields::usr_rolID,
-            _tableAlias + Fields::usrSpecialPrivs,
-            _tableAlias + Fields::usrLanguage,
-            _tableAlias + Fields::usrEnableEmailAlerts,
-            _tableAlias + Fields::usrEnableSMSAlerts,
-            _tableAlias + Fields::usrMaxSessions,
-            _tableAlias + Fields::usrActiveSessions,
-            _tableAlias + Fields::usrLastLogin,
-            _tableAlias + Fields::usrCreatedBy_usrID,
-            _tableAlias + Fields::usrCreationDateTime,
-            _tableAlias + Fields::usrUpdatedBy_usrID,
-            _tableAlias + Fields::usrStatus
-        };
-    }
-
     namespace Relation {
         constexpr char ExtraInfo[] = "ExtraInfo";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
+            ///ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
             //ORM_PRIMARYKEY_64 with self:true
             { Fields::usrID,                   S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
             { Fields::usrEmail,                S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
@@ -165,7 +137,7 @@ namespace tblUser {
             { Fields::usrUpdatedBy_usrID,      ORM_UPDATED_BY },
         };
 
-///< Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
+///Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
 #define tblUser_Private_Relations \
     { \
         { tblUser::Fields::usr_rolID,               R(AAASchema, tblRoles::Name),                       tblRoles::Fields::rolID }, \
@@ -187,7 +159,7 @@ namespace tblUser {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (usrID),
         SF_QString                  (usrEmail),
         SF_QString                  (usrName),

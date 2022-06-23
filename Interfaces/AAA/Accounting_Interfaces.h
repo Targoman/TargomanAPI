@@ -119,7 +119,10 @@ class intfAccountCoupons : public intfSQLBasedModule
     Q_OBJECT
 
 public:
-    intfAccountCoupons(const QString& _schema);
+    intfAccountCoupons(const QString& _schema,
+                       const QList<DBM::clsORMField>& _exclusiveCols = {},
+                       const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
     QVariant ORMGET("Get Active Discounts")
@@ -135,9 +138,9 @@ class intfAccountPrizes : public intfSQLBasedModule
 
 public:
     intfAccountPrizes(const QString& _schema,
-                         const QString& _name,
-                         const QList<DBM::clsORMField>& _cols,
-                         const QList<DBM::stuRelation>& _relations);
+                      const QList<DBM::clsORMField>& _exclusiveCols = {},
+                      const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
     QVariant ORMGET("Get Active Prizes")
     bool ORMDELETE("Delete a Prizes")

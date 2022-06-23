@@ -41,25 +41,13 @@ namespace tblMigrations {
         TARGOMAN_CREATE_CONSTEXPR(migStatus);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::migName,
-            _tableAlias + Fields::migAppliedAt,
-            _tableAlias + Fields::migRunType,
-            _tableAlias + Fields::migStatus,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                       Type                Validation  Default  UpBy   Sort  Filter Self  Virt   PK
             { Fields::migName,       S(QString),         QFV,        QNull,   UPNone },
             { Fields::migAppliedAt,  S(TAPI::DateTime_t),QFV,        QNull,   UPNone },
             { Fields::migRunType,    S(QString),         QFV,        QNull,   UPNone },
@@ -75,7 +63,7 @@ namespace tblMigrations {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_QString                  (migName),
         SF_DateTime_t               (migAppliedAt),
         SF_QString                  (migRunType),

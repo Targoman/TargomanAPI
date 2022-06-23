@@ -23,8 +23,6 @@
 
 #include "Voucher.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuVoucherType);
-
 namespace Targoman::API::AccountModule::ORM {
 
 Voucher::Voucher() :
@@ -47,7 +45,7 @@ bool IMPL_ORMDELETE(Voucher) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
-        ExtraFilters.insert(tblVoucher::Fields::vchType, Targoman::API::AccountModule::enuVoucherType::toStr(Targoman::API::AccountModule::enuVoucherType::Withdrawal));
+        ExtraFilters.insert(tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::toStr(Targoman::API::AAA::enuVoucherType::Withdrawal));
 
         ExtraFilters.insert(tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID());
 //        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);

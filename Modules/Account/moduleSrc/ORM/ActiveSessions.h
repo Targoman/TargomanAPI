@@ -68,34 +68,13 @@ namespace tblActiveSessions {
         TARGOMAN_CREATE_CONSTEXPR(ssnUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ssnKey,
-            _tableAlias + Fields::ssn_usrID,
-            _tableAlias + Fields::ssnIP,
-            _tableAlias + Fields::ssnIPReadable,
-            _tableAlias + Fields::ssnCreationDateTime,
-            _tableAlias + Fields::ssnInfo,
-            _tableAlias + Fields::ssnFingerPrint,
-            _tableAlias + Fields::ssnLastActivity,
-            _tableAlias + Fields::ssnLastRenew,
-            _tableAlias + Fields::ssnRemember,
-            _tableAlias + Fields::ssnJWT,
-            _tableAlias + Fields::ssnStatus,
-            _tableAlias + Fields::ssnUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                   Type                    Validation                  Default     UpBy    Sort    Filter  Self    Virt    PK      Select
+            ///ColName                                   Type                    Validation                  Default     UpBy    Sort    Filter  Self    Virt    PK      Select
             { Fields::ssnKey,                S(TAPI::MD5_t),         QFV,                        ORM_PRIMARY_KEY },
             { Fields::ssn_usrID,             S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::ssnIP,                 S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone, false,  false,  false,  false,  false,  false },
@@ -112,7 +91,7 @@ namespace tblActiveSessions {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                                       Reference Table              ForeignCol      Rename      LeftJoin
+            ///Col                                       Reference Table              ForeignCol      Rename      LeftJoin
             { Fields::ssn_usrID,             R(AAASchema, tblUser::Name), tblUser::Fields::usrID, "Owner_" },
             { Fields::ssnUpdatedBy_usrID,    R(AAASchema, tblUser::Name), tblUser::Fields::usrID, "Updater_", true }
         };
@@ -122,7 +101,7 @@ namespace tblActiveSessions {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_MD5_t                    (ssnKey),
         SF_quint64                  (ssn_usrID),
         SF_quint32                  (ssnIP),

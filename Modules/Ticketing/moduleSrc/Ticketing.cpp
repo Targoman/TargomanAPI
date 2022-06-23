@@ -216,7 +216,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
     QVariantMap Result;
 
     if (_random == "1")
-        _random = QString("%1").arg(QRandomGenerator::global()->generate());
+        _random = QString::number(QRandomGenerator::global()->generate());
 
     if (_random.isEmpty() == false)
         Result.insert("Random", _random);

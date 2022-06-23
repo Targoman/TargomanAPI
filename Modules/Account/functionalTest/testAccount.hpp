@@ -73,7 +73,6 @@ DELETE FROM dev_AAA.tblWalletsBalanceHistory;
 DELETE FROM dev_AAA.tblWalletsTransactions;
 DELETE FROM dev_AAA.tblUserWallets;
 DELETE FROM dev_AAA.tblOnlinePayments;
-
 DELETE FROM dev_AAA.tblOfflinePayments;
 DELETE FROM dev_AAA.tblOfflinePaymentClaims;
 DELETE FROM dev_AAA.tblVoucher;
@@ -82,6 +81,15 @@ DELETE FROM dev_AAA.tblActiveSessions;
 DELETE FROM dev_AAA.tblUser WHERE usrID > 100;
 DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
 DELETE FROM dev_Common.tblAlerts;
+DELETE FROM dev_Common.tblDBG;
+DELETE FROM dev_Advert.tblUploadQueue;
+DELETE FROM dev_Advert.tblUploadFiles;
+DELETE FROM dev_Advert.tblAccountAssetUsage;
+DELETE FROM dev_Advert.tblAccountUserAssets;
+DELETE FROM dev_Advert.tblAccountSaleables;
+DELETE FROM dev_Advert.tblAccountProducts;
+DELETE FROM dev_Advert.tblAccountCoupons;
+DELETE FROM dev_Advert.tblLocations;
 */
     void cleanupUnitTestData() {
         QVariantMap Result;
@@ -712,9 +720,9 @@ private slots:
         QVERIFY(Result.toBool());
     }
 
-    ///TODO: test [DELETE]  Account/User/photo
-    ///TODO: test [PATCH]   Account/User/email
-    ///TODO: test [PATCH]   Account/User/mobile
+    ///@TODO: test [DELETE]  Account/User/photo
+    ///@TODO: test [PATCH]   Account/User/email
+    ///@TODO: test [PATCH]   Account/User/mobile
 
     void UpdateUserPersonalInfo() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH,
@@ -881,9 +889,9 @@ private slots:
             {
                 { "amount", 10'000 },
                 { "gatewayType", "_DeveloperTest" },
-                { "domain", "" },
+                { "domain", "dev.test" },
                 { "walID", 0 },
-                { "paymentVerifyCallback", "http://www.a.com" }
+                { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
             }
         ),
         exTargomanBase);
@@ -892,7 +900,7 @@ private slots:
     void requestIncrease_DEVTEST_with_domain() {
         try {
             this->Voucher.ID = 0;
-            this->Voucher.PaymentMD5 = "";
+            this->Voucher.PaymentKey = "";
 
             QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
@@ -903,13 +911,13 @@ private slots:
                     { "gatewayType", "_DeveloperTest" },
                     { "domain", "dev.Test" },
 //                    { "walID", 0 },
-                    { "paymentVerifyCallback", "http://www.a.com" }
+                    { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
                 }
             );
 
             this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.PaymentMD5.isEmpty() == false);
+            QVERIFY(this->Voucher.PaymentKey.isEmpty() == false);
 
         } catch (exTargomanBase &e) {
             QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
@@ -918,20 +926,18 @@ private slots:
         }
     }
     void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
-        if (this->Voucher.PaymentMD5.isEmpty() == false) {
+        if (this->Voucher.PaymentKey.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callUserAPI(
                     RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
                     {
-                        { "paymentMD5",     this->Voucher.PaymentMD5 },
-                        { "domain",         "this.is.domain" },
+                        { "paymentKey",     this->Voucher.PaymentKey },
+                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
-                              { "resp_1", 1 },
-                              { "resp_2", 2 },
-                              { "resp_3", 3 },
-                          }) },
+                            { "result",     "ok" },
+                        }) },
                     }
                 );
 
@@ -944,7 +950,7 @@ private slots:
             }
 
             this->Voucher.ID = 0;
-            this->Voucher.PaymentMD5 = "";
+            this->Voucher.PaymentKey = "";
         }
     }
 
@@ -958,7 +964,7 @@ private slots:
                     { "amount", 12'000 },
                     { "gatewayType", "COD" },
                     { "domain", "dev.Test" },
-                    { "paymentVerifyCallback", "aa" },
+                    { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
                 }
             );
 

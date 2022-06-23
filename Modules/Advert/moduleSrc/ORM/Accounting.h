@@ -50,146 +50,217 @@ namespace ORM {
 
 namespace tblAccountProducts {
 
-    namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(prdType);
-        TARGOMAN_CREATE_CONSTEXPR(prd_locID);
-        TARGOMAN_CREATE_CONSTEXPR(prdShowPerDay);
-        TARGOMAN_CREATE_CONSTEXPR(prdShowTotal);
-        TARGOMAN_CREATE_CONSTEXPR(prdClicksPerDay);
-        TARGOMAN_CREATE_CONSTEXPR(prdClicksPerMonth);
-        TARGOMAN_CREATE_CONSTEXPR(prdClicksTotal);
+    namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(prdExType);
+        TARGOMAN_CREATE_CONSTEXPR(prdEx_locID);
+        //prdExDuration
+        TARGOMAN_CREATE_CONSTEXPR(prdExShowPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(prdExShowTotal);
+        TARGOMAN_CREATE_CONSTEXPR(prdExClicksPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(prdExClicksPerMonth);
+        TARGOMAN_CREATE_CONSTEXPR(prdExClicksTotal);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return tblAccountProductsBase::ColumnNames(_tableAlias) + QStringList({
-            _tableAlias + Fields::prdType,
-            _tableAlias + Fields::prd_locID,
-            _tableAlias + Fields::prdShowPerDay,
-            _tableAlias + Fields::prdShowTotal,
-            _tableAlias + Fields::prdClicksPerDay,
-            _tableAlias + Fields::prdClicksPerMonth,
-            _tableAlias + Fields::prdClicksTotal,
-        });
-    }
-
-    namespace Relation {
+    namespace ExtraRelation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
-        const QList<clsORMField> ORMFields = {
-            ///< ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
-                { Fields::prdType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
-                { Fields::prd_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
-                { Fields::prdShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
-                { Fields::prdClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
-            };
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::prdExType,               S(Targoman::API::AdvertModule::enuProductType::Type), QFV, QRequired, UPOwner },
+            { ExtraFields::prdEx_locID,             S(quint32), QFV.integer().minValue(1),         QRequired, UPOwner },
+            { ExtraFields::prdExShowPerDay,         S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { ExtraFields::prdExShowTotal,          S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { ExtraFields::prdExClicksPerDay,       S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { ExtraFields::prdExClicksPerMonth,     S(quint32), QFV.integer().minValue(-1),        -1,        UPOwner },
+            { ExtraFields::prdExClicksTotal,        S(quint64), QFV.integer().minValue(-1),        -1,        UPOwner },
+        };
 
-        const QList<stuRelation> Relations = {
-            ///< Col                              Reference Table                      ForeignCol             Rename     LeftJoin
-                { Fields::prd_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
-            };
+        const QList<stuRelation> ExtraRelations = {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            { ExtraFields::prdEx_locID,   R(AdvertSchema, tblLocations::Name), tblLocations::Fields::locID },
+        };
 
-        const QList<stuDBIndex> Indexes = {
+        const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsBase_DTO,
 
-        SF_Enum                     (prdType, Targoman::API::AdvertModule::enuProductType, Targoman::API::AdvertModule::enuProductType::Advertise),
-        SF_quint32                  (prd_locID),
-        SF_quint32                  (prdShowPerDay),
-        SF_quint64                  (prdShowTotal),
-        SF_quint32                  (prdClicksPerDay),
-        SF_quint32                  (prdClicksPerMonth),
-        SF_quint64                  (prdClicksTotal)
+        SF_Enum                     (prdExType, Targoman::API::AdvertModule::enuProductType, Targoman::API::AdvertModule::enuProductType::Advertise),
+        SF_quint32                  (prdEx_locID),
+        SF_quint32                  (prdExShowPerDay),
+        SF_quint64                  (prdExShowTotal),
+        SF_quint32                  (prdExClicksPerDay),
+        SF_quint32                  (prdExClicksPerMonth),
+        SF_quint64                  (prdExClicksTotal)
     );
 }
 
 namespace tblAccountSaleables {
 
-    namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(slbShowPerDay);
-        TARGOMAN_CREATE_CONSTEXPR(slbShowTotal);
-        TARGOMAN_CREATE_CONSTEXPR(slbClicksPerDay);
-        TARGOMAN_CREATE_CONSTEXPR(slbClicksPerMonth);
-        TARGOMAN_CREATE_CONSTEXPR(slbClicksTotal);
+    namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(slbExShowPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(slbExShowTotal);
+        TARGOMAN_CREATE_CONSTEXPR(slbExClicksPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(slbExClicksPerMonth);
+        TARGOMAN_CREATE_CONSTEXPR(slbExClicksTotal);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return tblAccountSaleablesBase::ColumnNames(_tableAlias) + QStringList({
-            _tableAlias + Fields::slbShowPerDay,
-            _tableAlias + Fields::slbShowTotal,
-            _tableAlias + Fields::slbClicksPerDay,
-            _tableAlias + Fields::slbClicksPerMonth,
-            _tableAlias + Fields::slbClicksTotal,
-        });
-    }
-
-    namespace Relation {
+    namespace ExtraRelation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
-        const QList<clsORMField> ORMFields = {
-            ///< ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
-                { Fields::slbShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
-                { Fields::slbClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
-            };
-
-        const QList<stuRelation> Relations = {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::slbExShowPerDay,         S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { ExtraFields::slbExShowTotal,          S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
+            { ExtraFields::slbExClicksPerDay,       S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { ExtraFields::slbExClicksPerMonth,     S(quint32), QFV.integer().minValue(-1), -1,        UPOwner },
+            { ExtraFields::slbExClicksTotal,        S(quint64), QFV.integer().minValue(-1), -1,        UPOwner },
         };
 
-        const QList<stuDBIndex> Indexes = {
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesBase_DTO,
 
-        SF_quint32                  (slbShowPerDay),
-        SF_quint64                  (slbShowTotal),
-        SF_quint32                  (slbClicksPerDay),
-        SF_quint32                  (slbClicksPerMonth),
-        SF_quint64                  (slbClicksTotal)
+        SF_quint32                  (slbExShowPerDay),
+        SF_quint64                  (slbExShowTotal),
+        SF_quint32                  (slbExClicksPerDay),
+        SF_quint32                  (slbExClicksPerMonth),
+        SF_quint64                  (slbExClicksTotal)
     );
 }
 
-namespace AccountAsset {
-    TARGOMAN_CREATE_CONSTEXPR(Days);
-    TARGOMAN_CREATE_CONSTEXPR(DayShow);
-    TARGOMAN_CREATE_CONSTEXPR(TotalShow);
-    TARGOMAN_CREATE_CONSTEXPR(DayClicks);
-    TARGOMAN_CREATE_CONSTEXPR(MonthClicks);
-    TARGOMAN_CREATE_CONSTEXPR(TotalClicks);
+namespace tblAccountUserAsset {
+
+    namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(uasExDays);
+        TARGOMAN_CREATE_CONSTEXPR(uasExDayShow);
+        TARGOMAN_CREATE_CONSTEXPR(uasExTotalShow);
+        TARGOMAN_CREATE_CONSTEXPR(uasExDayClicks);
+        TARGOMAN_CREATE_CONSTEXPR(uasExMonthClicks);
+        TARGOMAN_CREATE_CONSTEXPR(uasExTotalClicks);
+    }
+
+    namespace ExtraRelation {
+    //        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::uasExDays,           S(qint16),  QFV.integer().minValue(-1), 0,          UPAdmin, false,  false },
+            { ExtraFields::uasExDayShow,        S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExTotalShow,      S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExDayClicks,      S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExMonthClicks,    S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::uasExTotalClicks,    S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false }
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUserAssetsBase_DTO,
+
+        SF_qint16                   (uasExDays),
+        SF_quint32                  (uasExDayShow),
+        SF_quint64                  (uasExTotalShow),
+        SF_quint32                  (uasExDayClicks),
+        SF_quint32                  (uasExMonthClicks),
+        SF_quint64                  (uasExTotalClicks)
+    );
 }
 
-///<  ColName                                                    Type        Validation                  Default  UpBy    Sort   Filter Self  Virt   PK
-#define ADVERT_DEFINE_ASSET_FIELDS(_prefix) \
-    { QString("%1%2").arg(_prefix, AccountAsset::Days),          S(qint16),  QFV.integer().minValue(-1), 0,       UPNone, false, false }, \
-    { QString("%1%2").arg(_prefix, AccountAsset::DayShow),       S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
-    { QString("%1%2").arg(_prefix, AccountAsset::TotalShow),     S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
-    { QString("%1%2").arg(_prefix, AccountAsset::DayClicks),     S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
-    { QString("%1%2").arg(_prefix, AccountAsset::MonthClicks),   S(quint32), QFV.integer().minValue(0),  0,       UPNone, false, false }, \
-    { QString("%1%2").arg(_prefix, AccountAsset::TotalClicks),   S(quint64), QFV.integer().minValue(0),  0,       UPNone, false, false } \
+namespace tblAccountAssetUsage {
 
-namespace tblAccountUserAsset {
-//Extra fields goes here
+    namespace ExtraFields {
+        //usgExRemainingDays
+        TARGOMAN_CREATE_CONSTEXPR(usgExDays);
+        TARGOMAN_CREATE_CONSTEXPR(usgExDayShow);
+        TARGOMAN_CREATE_CONSTEXPR(usgExTotalShow);
+        TARGOMAN_CREATE_CONSTEXPR(usgExDayClicks);
+        TARGOMAN_CREATE_CONSTEXPR(usgExMonthClicks);
+        TARGOMAN_CREATE_CONSTEXPR(usgExTotalClicks);
+    }
+
+    namespace ExtraRelation {
+    //        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::usgExDays,           S(qint16),  QFV.integer().minValue(-1), 0,          UPAdmin, false,  false },
+            { ExtraFields::usgExDayShow,        S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExTotalShow,      S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExDayClicks,      S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExMonthClicks,    S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::usgExTotalClicks,    S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false }
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountAssetUsageBase_DTO,
+
+        SF_qint16                   (usgExDays),
+        SF_quint32                  (usgExDayShow),
+        SF_quint64                  (usgExTotalShow),
+        SF_quint32                  (usgExDayClicks),
+        SF_quint32                  (usgExMonthClicks),
+        SF_quint64                  (usgExTotalClicks)
+    );
+}
+
+namespace tblAccountCoupons {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+    //        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                  Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountCouponsBase_DTO
+    );
 }
 
 #pragma GCC diagnostic pop

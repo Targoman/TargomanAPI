@@ -24,6 +24,9 @@
 #include "Payments.h"
 #include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
+#include "Interfaces/Helpers/URLHelper.h"
+#include "Interfaces/Helpers/RESTClientHelper.h"
+using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
@@ -56,12 +59,84 @@ QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
+
+#ifdef QT_DEBUG
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey,
+    Q_DECL_UNUSED QString _trackID,
+    QString _callback
+)) {
+/*
+
+curl -v -H 'accept: application/json' -X 'GET' 'http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage'
+
+http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=ppp&trackID=aaa&callback=http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage
+
+*/
+
+    if (_callback.isEmpty())
+        _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
+                    .arg(ClientConfigs::RESTServerAddress.value())
+                    .arg(_paymentKey)
+                    ;
+    else
+        _callback = URLHelper::addParameter(_callback, "paymentKey", _paymentKey);
+
+    QByteArray Content = R"(
+<html>
+    <head>
+        <title>Payment Page</title>
+    </head>
+    <body>
+        <p>&nbsp;</p>
+        <h1 style='text-align:center'>DevTest<br>Bank of MARS</h1><br>
+        <hr>
+        <p style='text-align:center'>
+            <a href='{URL_OK}'>[OK]</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href='{URL_ERROR}'>[ERROR]</a>
+        </p>
+    </body>
+</html>
+)";
+
+    Content = Content
+                .replace("{URL_OK}", URLHelper::addParameter(_callback, "result", "ok").toLatin1())
+                .replace("{URL_ERROR}", URLHelper::addParameter(_callback, "result", "error").toLatin1());
+
+    return TAPI::RawData_t(Content,
+                           "text/html; charset=utf-8"
+                           ).toVariant();
+
+//    return TAPI::ResponseRedirect_t(_callback, false).toVariant();
+}
+
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey,
+    QString _result
+)) {
+    return RESTClientHelper::callAPI(
+        RESTClientHelper::POST,
+        "Account/approveOnlinePayment",
+        {},
+        {
+            { "paymentKey",     _paymentKey },
+            { "domain",         "dev.test" },
+            { "pgResponse",     QVariantMap({
+                  { "result",   _result },
+            }) },
+        }
+    );
+}
+#endif
 
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|
@@ -79,11 +154,11 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
@@ -119,11 +194,11 @@ QVariant IMPL_ORMGET(OfflinePayments) {
     if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
 
-    auto QueryLambda = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](SelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {

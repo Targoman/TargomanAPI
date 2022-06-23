@@ -72,23 +72,6 @@ namespace tblApprovalRequest {
         TARGOMAN_CREATE_CONSTEXPR(aprRequestDate);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::aprID,
-            _tableAlias + Fields::apr_usrID,
-            _tableAlias + Fields::aprRequestedFor,
-            _tableAlias + Fields::aprApprovalKey,
-            _tableAlias + Fields::aprApprovalCode,
-            _tableAlias + Fields::aprSentDate,
-            _tableAlias + Fields::aprApplyDate,
-            _tableAlias + Fields::aprStatus,
-            _tableAlias + Fields::aprRequestDate,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
@@ -109,7 +92,7 @@ namespace tblApprovalRequest {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                               Reference Table                 ForeignCol        Rename     LeftJoin
+            ///Col                               Reference Table                 ForeignCol        Rename     LeftJoin
             { Fields::apr_usrID,    R(AAASchema, tblUser::Name),    tblUser::Fields::usrID },
         };
 
@@ -123,7 +106,7 @@ namespace tblApprovalRequest {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (aprID),
         SF_NULLABLE_quint64         (apr_usrID),
         SF_Enum                     (aprRequestedFor, Targoman::API::AccountModule::enuApprovalType, Targoman::API::AccountModule::enuApprovalType::Email),

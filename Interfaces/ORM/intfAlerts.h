@@ -72,35 +72,13 @@ namespace tblAlerts {
         TARGOMAN_CREATE_CONSTEXPR(alrResult);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::alrID,
-            _tableAlias + Fields::alrType,
-            _tableAlias + Fields::alr_usrID,
-            _tableAlias + Fields::alrLanguage,
-            _tableAlias + Fields::alrReplacedContactInfo,
-            _tableAlias + Fields::alr_altCode,
-            _tableAlias + Fields::alrReplacements,
-            _tableAlias + Fields::alrCreateDate,
-            _tableAlias + Fields::alrLockedAt,
-            _tableAlias + Fields::alrLockedBy,
-            _tableAlias + Fields::alrLastTryAt,
-            _tableAlias + Fields::alrSentDate,
-            _tableAlias + Fields::alrStatus,
-            _tableAlias + Fields::alrResult,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                                        Validation                  Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
+            ///ColName                               Type                                        Validation                  Default     UpBy       Sort    Filter  Self    Virt    PK      Select  RenameAs
             { Fields::alrID,                     ORM_PRIMARYKEY_64 },
             { Fields::alrType,                   S(Targoman::API::ORM::enuAlertType::Type),  QFV,                        QRequired,  UPOwner },
             { Fields::alr_usrID,                 S(NULLABLE_TYPE(quint64)),                  QFV.integer().minValue(1),  QNull,      UPOwner },
@@ -125,7 +103,7 @@ namespace tblAlerts {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (alrID),
         SF_Enum                     (alrType, Targoman::API::ORM::enuAlertType, Targoman::API::ORM::enuAlertType::Informational),
         SF_NULLABLE_quint64         (alr_usrID),

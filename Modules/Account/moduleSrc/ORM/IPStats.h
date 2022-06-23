@@ -45,17 +45,6 @@ namespace tblIPStats {
         TARGOMAN_CREATE_CONSTEXPR(ipsInsertionDate);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ips_ipbIP,
-            _tableAlias + Fields::ipsTimeStamp,
-            _tableAlias + Fields::ipsInsertionDate,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
@@ -69,7 +58,7 @@ namespace tblIPStats {
           };
 
         const QList<stuRelation> Relations = {
-            ///< Col                  Reference Table                  ForeignCol
+            ///Col                  Reference Table                  ForeignCol
             { Fields::ips_ipbIP,   R(AAASchema, tblIPBin::Name),     tblIPBin::Fields::ipbIP },
           };
 
@@ -78,7 +67,7 @@ namespace tblIPStats {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (ips_ipbIP),
         SF_qreal                    (ipsTimeStamp),
         SF_ORM_CREATED_ON           (ipsInsertionDate)

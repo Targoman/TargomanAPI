@@ -98,34 +98,13 @@ namespace tblUploadFiles {
         //TARGOMAN_CREATE_CONSTEXPR(uflUniqueMD5);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uflID,
-            _tableAlias + Fields::uflPath,
-            _tableAlias + Fields::uflOriginalFileName,
-            _tableAlias + Fields::uflCounter,
-            _tableAlias + Fields::uflStoredFileName,
-            _tableAlias + Fields::uflSize,
-            _tableAlias + Fields::uflFileType,
-            _tableAlias + Fields::uflMimeType,
-            _tableAlias + Fields::uflLocalFullFileName,
-            _tableAlias + Fields::uflStatus,
-            _tableAlias + Fields::uflCreationDateTime,
-            _tableAlias + Fields::uflCreatedBy_usrID,
-            _tableAlias + Fields::uflUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::uflID,                ORM_PRIMARYKEY_64 },
             { Fields::uflPath,              S(QString),             QFV,                        QRequired,  UPNone },
             { Fields::uflOriginalFileName,  S(QString),             QFV,                        QRequired,  UPNone },
@@ -142,7 +121,7 @@ namespace tblUploadFiles {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::uflCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::uflUpdatedBy_usrID),
         };
@@ -152,7 +131,7 @@ namespace tblUploadFiles {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (uflID),
         SF_QString                  (uflPath),
         SF_QString                  (uflOriginalFileName),
@@ -200,43 +179,13 @@ namespace tblUploadGateways {
         TARGOMAN_CREATE_CONSTEXPR(ugwUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::ugwID,
-            _tableAlias + Fields::ugwName,
-            _tableAlias + Fields::ugwType,
-            _tableAlias + Fields::ugwBucket,
-            _tableAlias + Fields::ugwEndpointUrl,
-            _tableAlias + Fields::ugwEndpointIsVirtualHosted,
-            _tableAlias + Fields::ugwMetaInfo,
-            _tableAlias + Fields::ugwAllowedFileTypes,
-            _tableAlias + Fields::ugwAllowedMimeTypes,
-            _tableAlias + Fields::ugwAllowedMinFileSize,
-            _tableAlias + Fields::ugwAllowedMaxFileSize,
-            _tableAlias + Fields::ugwMaxFilesCount,
-            _tableAlias + Fields::ugwMaxFilesSize,
-            _tableAlias + Fields::ugwCreatedFilesCount,
-            _tableAlias + Fields::ugwCreatedFilesSize,
-            _tableAlias + Fields::ugwDeletedFilesCount,
-            _tableAlias + Fields::ugwDeletedFilesSize,
-            _tableAlias + Fields::ugwLastActionTime, //used for loadbalance
-            _tableAlias + Fields::ugwStatus,
-            _tableAlias + Fields::ugwCreationDateTime,
-            _tableAlias + Fields::ugwCreatedBy_usrID,
-            _tableAlias + Fields::ugwUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         // constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                                       Type                        Validation                          Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                                       Type                        Validation                          Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::ugwID,                     ORM_PRIMARYKEY_32 },
             { Fields::ugwName,                   S(QString),                 QFV.maxLenght(50),                  QRequired,  UPAdmin },
             { Fields::ugwType,                   S(Targoman::API::ObjectStorage::ORM::enuUploadGatewayType::Type), QFV, QRequired,  UPAdmin },
@@ -265,7 +214,7 @@ namespace tblUploadGateways {
         };
 
         const QList<stuRelation> Relations = {
-            ///< Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
             ORM_RELATION_OF_CREATOR(Fields::ugwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::ugwUpdatedBy_usrID),
         };
@@ -275,7 +224,7 @@ namespace tblUploadGateways {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (ugwID),
         SF_QString                  (ugwName),
         SF_NULLABLE_Enum            (ugwType, enuUploadGatewayType),
@@ -319,26 +268,6 @@ namespace tblUploadQueue {
         TARGOMAN_CREATE_CONSTEXPR(uquUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::uquID,
-            _tableAlias + Fields::uqu_uflID,
-            _tableAlias + Fields::uqu_ugwID,
-            _tableAlias + Fields::uquLockedAt,
-            _tableAlias + Fields::uquLockedBy,
-            _tableAlias + Fields::uquLastTryAt,
-            _tableAlias + Fields::uquStoredAt,
-            _tableAlias + Fields::uquResult,
-            _tableAlias + Fields::uquStatus,
-            _tableAlias + Fields::uquCreationDateTime,
-            _tableAlias + Fields::uquCreatedBy_usrID,
-            _tableAlias + Fields::uquUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
         constexpr char File[] = "file";
         constexpr char Gateway[] = "gateway";
@@ -346,7 +275,7 @@ namespace tblUploadQueue {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
+            ///ColName                               Type                    Validation                  Default     UpBy    Sort  Filter Self  Virt   PK
             { Fields::uquID,                ORM_PRIMARYKEY_64 },
             { Fields::uqu_uflID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::uqu_ugwID,            S(quint32),             QFV.integer().minValue(1),  QRequired,  UPNone },
@@ -376,7 +305,7 @@ namespace tblUploadQueue {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (uquID),
         SF_quint64                  (uqu_uflID),
         SF_quint32                  (uqu_ugwID),

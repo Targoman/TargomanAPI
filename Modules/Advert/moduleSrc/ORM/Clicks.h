@@ -53,23 +53,6 @@ namespace tblClicks {
         TARGOMAN_CREATE_CONSTEXPR(clkBrowser);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::clkID,
-            _tableAlias + Fields::clk_binID,
-            _tableAlias + Fields::clk_locID,
-            _tableAlias + Fields::clkDateTime,
-            _tableAlias + Fields::clkIP,
-            _tableAlias + Fields::clkDevice,
-            _tableAlias + Fields::clkScreenSize,
-            _tableAlias + Fields::clkOS,
-            _tableAlias + Fields::clkBrowser,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -89,7 +72,7 @@ namespace tblClicks {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                 Reference Table                     ForeignCol   Rename     LeftJoin
+            ///Col                 Reference Table                     ForeignCol   Rename     LeftJoin
                 { Fields::clk_binID,   R(AdvertSchema,tblBin::Name),       tblBin::Fields::binID},
                 { Fields::clk_locID,   R(AdvertSchema,tblLocations::Name), tblLocations::Fields::locID },
             };
@@ -99,7 +82,7 @@ namespace tblClicks {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (clkID),
         SF_quint32                  (clk_binID),
         SF_quint32                  (clk_locID),

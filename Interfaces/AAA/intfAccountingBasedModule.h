@@ -61,8 +61,56 @@ protected:
 
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const ServiceUsage_t& _requestedUsage);
+        const ServiceUsage_t& _requestedUsage
+    );
 
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+
+    //-- used by addToBasket: ----------------------------------------
+    virtual void processItemForBasket(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual void digestPrivs(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual void computeAdditives(
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
+    ) { ; }
+
+    virtual void computeReferrer(
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
+    ) { ; }
+
+    virtual void computeSystemDiscount(
+        INTFAPICALLBOOM_DECL            &APICALLBOOM_PARAM,
+        INOUT stuAssetItem              &_assetItem,
+        const stuPendingSystemDiscount  &_pendingSystemDiscount = {},
+        const stuVoucherItem            *_oldVoucherItem = nullptr
+    );
+
+    virtual void computeCouponDiscount(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
+    ) { return {}; }
+
+    //-- used by processVoucherItem and cancelVoucherItem: ----------------------------------------
     virtual bool increaseDiscountUsage(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
@@ -81,13 +129,13 @@ protected:
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
 
+    //-- processVoucherItem: ----------------------------------------
     virtual bool preProcessVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        Q_DECL_UNUSED quint64 _voucherID
     ) {
-        Q_UNUSED(_voucherItem);
-        Q_UNUSED(_voucherID);
         return true;
     };
     virtual bool processVoucherItem(
@@ -97,78 +145,86 @@ protected:
         quint64 _voucherID
     );
     virtual bool postProcessVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        quint64 _voucherID
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
+        Q_DECL_UNUSED quint64 _voucherID
     ) {
-        Q_UNUSED(_voucherItem);
-        Q_UNUSED(_voucherID);
         return true;
     };
 
+    //-- cancelVoucherItem: ----------------------------------------
     virtual bool preCancelVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
-        Q_UNUSED(_voucherItem);
         return true;
     };
     virtual bool cancelVoucherItem(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
-        std::function<bool(const QVariantMap &_userAssetInfo)> _checkUserAssetLambda = nullptr
+        std::function<bool(const QVariantMap &_userAssetInfo)> _fnCheckUserAsset = nullptr
     );
     virtual bool postCancelVoucherItem(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        const Targoman::API::AAA::stuVoucherItem &_voucherItem
+                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        Q_DECL_UNUSED quint64 _userID,
+        Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
-        Q_UNUSED(_voucherItem);
         return true;
     };
-
-private:
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 protected slots:
     Targoman::API::AAA::stuPreVoucher REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            TAPI::SaleableCode_t _saleableCode,
-            Targoman::API::AAA::OrderAdditives_t _orderAdditives = {},
-            qreal _qty = 1,
-            TAPI::CouponCode_t _discountCode = {},
-            QString _referrer = {},
-            TAPI::JSON_t _extraReferrerParams = {},
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher = {}
+            APICALLBOOM_TYPE_JWT_DECL               &APICALLBOOM_PARAM,
+            TAPI::SaleableCode_t                    _saleableCode,
+            Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
+            qreal                                   _qty = 1,
+            TAPI::CouponCode_t                      _discountCode = {},
+            QString                                 _referrer = {},
+            TAPI::JSON_t                            _referrerParams = {},
+            Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
+//            TAPI::MD5_t                             _parentItemUUID = {}
         ),
-        "add a package to basket and return updated pre-Voucher"
+        "add an item to the basket and return updated pre-Voucher"
+    )
+
+    Targoman::API::AAA::stuPreVoucher REST_POST(
+        updateBasketItem,
+        (
+            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
+            TAPI::MD5_t                         _itemUUID,
+            qreal                               _newQty,
+            NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
+        ),
+        "Update a basket item and return updated pre-Voucher."
     )
 
     Targoman::API::AAA::stuPreVoucher REST_POST(
         removeBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            TAPI::MD5_t _itemUUID,
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
+            TAPI::MD5_t                         _itemUUID
         ),
-        "Remove a package from basket and return updated pre-Voucher."
+        "Remove an item from basket and return updated pre-Voucher."
         "Only Pending items can be removed."
     )
 
-//    Targoman::API::AAA::stuPreVoucher REST_POST(
-//        updateBasketItem,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            TAPI::MD5_t _itemUUID,
-//            quint16 _new_qty,
-//            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-//        ),
-//        "Update a package from basket and return updated pre-Voucher."
-//        "Only Pending items can be modify."
-//    )
+protected:
+    Targoman::API::AAA::stuPreVoucher internalUpdateBasketItem(
+        INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
+        Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+        stuVoucherItem                      &_voucherItem,
+        qreal                               _newQty,
+        NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
+    );
 
+protected slots:
     bool REST_POST(
         processVoucherItem,
         (
@@ -188,36 +244,8 @@ protected slots:
     )
 
 protected:
-    virtual void digestPrivs(
-        TAPI::JWT_t _JWT,
-        INOUT stuAssetItem& _assetItem
-    ) {
-        Q_UNUSED(_JWT);
-        Q_UNUSED(_assetItem)
-    };
-    virtual void applyAssetAdditives(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& _assetItem,
-        const OrderAdditives_t& _orderAdditives
-    ) {
-        Q_UNUSED(_assetItem)
-        Q_UNUSED(_orderAdditives)
-    };
-    virtual void applyReferrer(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-        INOUT stuAssetItem& AssetItem,
-        QString _referrer,
-        TAPI::JSON_t _extraReferrerParams
-    ) {
-        Q_UNUSED(AssetItem);
-        Q_UNUSED(_referrer);
-        Q_UNUSED(_extraReferrerParams);
-    };
-
-protected:
     QString ServiceName;
 
-protected:
     QScopedPointer<intfAccountProducts> AccountProducts;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
@@ -225,7 +253,6 @@ protected:
     QScopedPointer<intfAccountCoupons> AccountCoupons;
     QScopedPointer<intfAccountPrizes> AccountPrizes;
 
-protected:
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
     QStringList AssetUsageLimitsColsName;
 };

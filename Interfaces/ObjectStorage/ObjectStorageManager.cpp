@@ -44,7 +44,7 @@ using namespace qhttp;
 //    /* complexity      */ COMPLEXITY_Object,
 //    /* namespace       */ Targoman::API::ObjectStorage,
 //    /* type            */ stuSaveFileResult,
-//    /* toVariantLambda */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+//    /* fnToVariant */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 //);
 
 namespace Targoman::API::ObjectStorage {
@@ -424,7 +424,7 @@ bool ObjectStorageManager::processQueue(
                 ;
     }
 
-    ///TODO: re compute upload file status by queue items status in the next version
+    ///@TODO: re compute upload file status by queue items status in the next version
 //    QString QueueIDs = QueueInfos.keys().join(',');
 //    update
 

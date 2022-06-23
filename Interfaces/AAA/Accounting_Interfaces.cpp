@@ -34,15 +34,20 @@ using namespace Targoman::API;
 
 using namespace Targoman::API::AAA;
 
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
+
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItem,
-    /* toVariantLambda    */ [](const stuVoucherItem& _value) -> QVariant {
+    /* fnToVariant    */ [](const stuVoucherItem& _value) -> QVariant {
 //        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
         return _value.toJson().toVariantMap();
     },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
 //        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
 //            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
@@ -80,8 +85,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Object,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuPreVoucher,
-    /* toVariantLambda    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
+    /* fnToVariant    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
         if (_value.isValid() == false) {
             return stuPreVoucher();
         }
@@ -114,15 +119,15 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucher,
-    /* toVariantLambda    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+    /* fnToVariant    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ stuVoucherItemForTrustedAction,
-    /* toVariantLambda    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
+    /* fnToVariant    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
     //        qDebug() << "stuVoucherItemForTrustedAction(2) =================================" << _paramName << ":" << _value;
         if (_value.isValid() == false) {
     //            qDebug() << "stuVoucherItemForTrustedAction(2.1) =================================" << _paramName << ":" << _value;
@@ -160,8 +165,8 @@ TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ OrderAdditives_t,
-    /* toVariantLambda    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
-    /* fromVariantLambda  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
+    /* fnToVariant    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
+    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
         OrderAdditives_t Additives;
         for (auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
@@ -169,10 +174,6 @@ TAPI_REGISTER_METATYPE(
         return Additives;
     }
 );
-
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 
 namespace Targoman::API::AAA {
 
@@ -199,12 +200,12 @@ intfAccountProducts::intfAccountProducts(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<DBM::stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountProductsBase::Name,
-    tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
-    tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountProductsBase::Name,
+        tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountProducts) {
@@ -239,12 +240,12 @@ intfAccountSaleables::intfAccountSaleables(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<DBM::stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountSaleablesBase::Name,
-    tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
-    tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountSaleablesBase::Name,
+        tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountSaleables) {
@@ -264,7 +265,27 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
             );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME);
+
+    auto fnTouchQuery = [this, &_cols](SelectQuery &_query) {
+        if (_cols.isEmpty())
+            _query
+                .addCols(this->SelectableColumnNames())
+                ///@TODO: intfAccountProducts::instance()->SelectableColumnNames()
+//                .addCols(intfAccountProducts::instance()->SelectableColumnNames())
+            ;
+        else {
+            _query.addCSVCols(_cols);
+            _cols = {};
+        }
+
+        _query
+            .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
+//            .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
+//            .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
+        ;
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, CACHE_TIME, fnTouchQuery);
 }
 
 quint32 IMPL_ORMCREATE(intfAccountSaleables) {
@@ -292,12 +313,12 @@ intfAccountUserAssets::intfAccountUserAssets(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountUserAssetsBase::Name,
-    tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
-    tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountUserAssetsBase::Name,
+        tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountUserAssets) {
@@ -350,12 +371,12 @@ intfAccountAssetUsage::intfAccountAssetUsage(
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountAssetUsageBase::Name,
-    tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
-    tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
-    tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountAssetUsageBase::Name,
+        tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
+        tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountAssetUsage) {
@@ -367,14 +388,17 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
 
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
-    const QString& _schema
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    tblAccountCouponsBase::Name,
-    tblAccountCouponsBase::Private::ORMFields, // + _exclusiveCols,
-    tblAccountCouponsBase::Private::Relations(_schema), // + _exclusiveRelations,
-    tblAccountCouponsBase::Private::Indexes // + _exclusiveIndexes
+    intfSQLBasedModule(
+        _schema,
+        tblAccountCouponsBase::Name,
+        tblAccountCouponsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountCouponsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountCouponsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountCoupons) {
@@ -408,15 +432,16 @@ bool IMPL_ORMDELETE(intfAccountCoupons) {
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
     const QString& _schema,
-    const QString& _name,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-intfSQLBasedModule(
-    _schema,
-    _name,
-    _cols,
-    _relations
+    intfSQLBasedModule(
+        _schema,
+        tblAccountPrizesBase::Name,
+        tblAccountPrizesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountPrizesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountPrizesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountPrizes) {
@@ -501,7 +526,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
     DBCurrentDateTime(_dbCurrentDateTime) { ; }
 
 //QJsonObject stuAssetItem::toJson(bool _full) {
-//    ///TODO: very important: Complete this
+//    ///@TODO: very important: Complete this
 //  QJsonObject Info;
 /*
   if (this->PackageID > 0)       Info[PKG_ID] = static_cast<double>(this->PackageID);
@@ -525,7 +550,7 @@ stuServiceCreditsInfo::stuServiceCreditsInfo(
 //}
 
 //stuAssetItem &stuAssetItem::fromJson(const QJsonObject& _obj) {
-//    ///TODO: very important: Complete this
+//    ///@TODO: very important: Complete this
 //  return *this;
 /*
 this->PackageID = static_cast<quint64>(_obj.contains(PKG_ID) ? _obj.value(PKG_ID).toDouble() : 0);

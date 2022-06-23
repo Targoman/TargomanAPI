@@ -40,7 +40,7 @@ TARGOMAN_DEFINE_ENUM(enuTicketStatus,
                      Removed   = 'R'
                      )
 
-//TAPI_DEFINE_VARIANT_ENABLED_STRUCT(stuTicketScope,
+//TAPI_DEFINE_STRUCT(stuTicketScope,
 //    QString, baseTicketID,    QString(), v.size(), v, v.toString(),
 //    QString, inReplyTicketID, QString(), v.size(), v, v.toString()
 //);
@@ -85,34 +85,13 @@ namespace tblTickets {
         TARGOMAN_CREATE_CONSTEXPR(tktUpdatedBy_usrID);
     }
 
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tktID,
-            _tableAlias + Fields::tktTarget_usrID,
-            _tableAlias + Fields::tkt_svcID,
-            _tableAlias + Fields::tkt_untID,
-            _tableAlias + Fields::tktBase_tktID,
-            _tableAlias + Fields::tktInReply_tktID,
-            _tableAlias + Fields::tktType,
-            _tableAlias + Fields::tktTitle,
-            _tableAlias + Fields::tktBody,
-            _tableAlias + Fields::tktStatus,
-            _tableAlias + Fields::tktCreationDateTime,
-            _tableAlias + Fields::tktCreatedBy_usrID,
-            _tableAlias + Fields::tktUpdatedBy_usrID,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///< ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            ///ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
                 { Fields::tktID,                ORM_PRIMARYKEY_64 },
                 { Fields::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
                 { Fields::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
@@ -129,7 +108,7 @@ namespace tblTickets {
             };
 
         const QList<stuRelation> Relations = {
-            ///< Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
+            ///Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
                 { Fields::tktInReply_tktID, R(TicketingSchema, tblTickets::Name),       Fields::tktID,          "InReply_" , true },
                 { Fields::tktTarget_usrID,  R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_"  , true },
                 { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_", true },
@@ -143,7 +122,7 @@ namespace tblTickets {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tktID),
         SF_NULLABLE_quint64         (tktTarget_usrID),
         SF_NULLABLE_quint32         (tkt_svcID),
@@ -161,17 +140,6 @@ namespace tblTickets {
 }
 
 namespace tblTicketRead {
-    inline QStringList ColumnNames(QString _tableAlias = "") {
-        if (_tableAlias.isEmpty() == false)
-            _tableAlias += ".";
-
-        return {
-            _tableAlias + Fields::tkr_tktID,
-            _tableAlias + Fields::tkrBy_usrID,
-            _tableAlias + Fields::tkrDateTime,
-        };
-    }
-
     namespace Relation {
 //        constexpr char AAA[] = "aaa";
     }
@@ -192,7 +160,7 @@ namespace tblTicketRead {
 
     } //namespace Private
 
-    TAPI_DEFINE_VARIANT_ENABLED_STRUCT(DTO,
+    TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tkr_tktID),
         SF_quint64                  (tkrBy_usrID),
         SF_DateTime_t               (tkrDateTime)

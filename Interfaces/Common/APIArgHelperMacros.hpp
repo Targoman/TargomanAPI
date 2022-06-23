@@ -28,8 +28,8 @@
 #include "APIArgHelperMacrosPrivate.h"
 
 /************************************************************/
-#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda) \
-    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _setFromVariantLambda)
+#define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant) \
+    INTERNAL_TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant)
 
 #define TAPI_ADD_TYPE(_baseType, _typeName) \
     TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, [=](const QVariant &_value, const QString &_paramName = {}) { \
@@ -77,27 +77,27 @@
 
 #define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
     TAPI_REGISTER_METATYPE( \
-        /* complexity         */ _complexity, \
-        /* namespace          */ _namespace, \
-        /* type               */ _type, \
-        /* toVariantLambda    */ [](const _type& _value) -> QVariant { \
-            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "toVariantLambda", _value); \
+        /* complexity     */ _complexity, \
+        /* namespace      */ _namespace, \
+        /* type           */ _type, \
+        /* fnToVariant    */ [](const _type& _value) -> QVariant { \
+            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "fnToVariant", _value); \
             return _value; \
         }, \
-    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
-            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fromVariantLambda", _paramName, _value); \
+        /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fnFromVariant", _paramName, _value); \
             return _type::fromVariant(_value); \
         }, \
-        /* descriptionLambda  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
-        /* toORMValueLambda   */ [](const QVariant& _value) { \
+        /* fnDescription  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
+        /* fnToORMValue   */ [](const QVariant& _value) { \
             _namespace::_type t; \
-            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)>>> ===========================" << _value << " -> " << t;*/  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)>>> ===========================" << _value << " -> " << t;*/  \
             TAPI::setFromVariant(t, _value); \
-            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(toORMValueLambda)<<< ===========================" << _value << " -> " << t;*/  \
+            /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)<<< ===========================" << _value << " -> " << t;*/  \
             return t; \
         }, \
-        /* fromORMValueLambda */ [](const QVariant& _value) { \
-            QString ret = QString("%1").arg(QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData()); \
+        /* fnFromORMValue */ [](const QVariant& _value) { \
+            QString ret = QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData(); \
             /*qDebug() << "JSON_t(5) =================================" << _value << " -> " << ret;*/  \
             return ret; \
         } \
@@ -164,13 +164,6 @@
     _qJsonValueToType
 
 #define SF_Struct(_name, _type, ...) INTERNAL_SF_STRUCT(_name, _type, __VA_ARGS__)
-#define SF_Var_Struct(_name, _type, _validator) \
-    /* name              */ _name, \
-    /* type              */ _type, \
-    /* def               */ _type(), \
-    /* validator         */ _validator, \
-    /* type 2 QJsonValue */ v.toJson(), \
-    /* QJsonValue 2 type */ _type().fromJson(v.toObject())
 
 #define SF_Enum(_name, _type, _def) \
     /* name              */ _name, \
@@ -212,6 +205,14 @@
                                 return t; \
                             }(v)
 
+#define SF_QJsonObject(_name) \
+    /* name              */ _name, \
+    /* type              */ QJsonObject, \
+    /* def               */ QJsonObject(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ v, \
+    /* QJsonValue 2 type */ v.toObject()
+
 #define SF_DateTime_t(_name) \
     /* name              */ _name, \
     /* type              */ TAPI::DateTime_t, \
@@ -236,52 +237,120 @@
                                 return t; \
                             }(v)
 
-//                                                  _name,  _type,                  _typeGroup,        _typeToQJsonValue,      _qJsonValueToType,           _def, _validator
-#define SF_String(_name, _type, ...)    INTERNAL_SF(_name,  _type,                  STRING,            v,                 v.toString(),         __VA_ARGS__)
+typedef QMap<QString, QString> QStringMap;
+
+#define SF_QMapOfQString(_name) \
+    /* name              */ _name, \
+    /* type              */ QStringMap, \
+    /* def               */ QStringMap(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](QStringMap v) -> QJsonValue { \
+                                QJsonObject A; \
+                                for (auto it = v.begin(); \
+                                    it != v.end(); \
+                                    it++ \
+                                ) { \
+                                    A.insert(it.key(), *it); \
+                                } \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> QStringMap { \
+                                QStringMap L; \
+                                QJsonObject O = v.toObject(); \
+                                foreach (const QString &Key, O.keys()) \
+                                    L.insert(Key, O.value(Key).toString()); \
+                                return L; \
+                            }(v)
+
+#define SF_QMapOfVarStruct(_name, _itemType, _mapType) \
+    /* name              */ _name, \
+    /* type              */ _mapType, \
+    /* def               */ _mapType(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](_mapType v) -> QJsonValue { \
+                                QJsonObject A; \
+                                for (auto it = v.begin(); \
+                                    it != v.end(); \
+                                    it++ \
+                                ) { \
+                                    A.insert(it.key(), it->toJson()); \
+                                } \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> _mapType { \
+                                _mapType L; \
+                                QJsonObject O = v.toObject(); \
+                                foreach (const QString &Key, O.keys()) \
+                                    L.insert(Key, _itemType().fromJson(O.value(Key).toObject())); \
+                                return L; \
+                            }(v)
+
+#define SF_QListOfVarStruct(_name, _itemType) \
+    /* name              */ _name, \
+    /* type              */ QList<_itemType>, \
+    /* def               */ QList<_itemType>(), \
+    /* validator         */ v.size(), \
+    /* type 2 QJsonValue */ [](QList<_itemType> v) -> QJsonValue { \
+                                QJsonArray A; \
+                                foreach (auto a, v) \
+                                    A.append(a.toJson()); \
+                                return A; \
+                            }(v), \
+    /* QJsonValue 2 type */ [](QJsonValue v) -> QList<_itemType> { \
+                                QList<_itemType> L; \
+                                foreach (auto I, v.toArray()) \
+                                    L.append(_itemType().fromJson(I.toObject())); \
+                                return L; \
+                            }(v)
+
+//                                                  _name,  _type,                  _typeGroup,         _typeToQJsonValue,  _qJsonValueToType,      _def, _validator
+#define SF_String(_name, _type, ...)    INTERNAL_SF(_name,  _type,                  STRING,             v,                  v.toString(),           __VA_ARGS__)
 #define SF_QString(_name, ...)          SF_String  (_name,  QString,                __VA_ARGS__)
 #define SF_MD5_t(_name, ...)            SF_String  (_name,  TAPI::MD5_t,            __VA_ARGS__)
 
-#define SF_bool(_name, ...)             INTERNAL_SF(_name,  bool,                   INTEGRAL,          INTERNAL_C2bool(v),   INTERNAL_V2bool(v),  __VA_ARGS__)
-#define SF_NULLABLE_bool(_name, ...)    INTERNAL_SF(_name,  NULLABLE_TYPE(bool),    NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2bool(v),  __VA_ARGS__)
+#define SF_bool(_name, ...)             INTERNAL_SF(_name,  bool,                   INTEGRAL,           INTERNAL_C2bool(v), INTERNAL_V2bool(v),     __VA_ARGS__)
+#define SF_NULLABLE_bool(_name, ...)    INTERNAL_SF(_name,  NULLABLE_TYPE(bool),    NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2bool(v),     __VA_ARGS__)
 
-#define SF_quint8(_name, ...)           INTERNAL_SF(_name,  quint8,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint8(v),  __VA_ARGS__)
-#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(quint8),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint8(v),  __VA_ARGS__)
-#define SF_quint16(_name, ...)          INTERNAL_SF(_name,  quint16,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint16(v), __VA_ARGS__)
-#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint16), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint16(v), __VA_ARGS__)
-#define SF_quint32(_name, ...)          INTERNAL_SF(_name,  quint32,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint32(v), __VA_ARGS__)
-#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint32), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint32(v), __VA_ARGS__)
-#define SF_quint64(_name, ...)          INTERNAL_SF(_name,  quint64,                INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2uint64(v), __VA_ARGS__)
-#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint64), NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2uint64(v), __VA_ARGS__)
+#define SF_quint8(_name, ...)           INTERNAL_SF(_name,  quint8,                 INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2uint8(v),    __VA_ARGS__)
+#define SF_NULLABLE_quint8(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(quint8),  NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2uint8(v),    __VA_ARGS__)
+#define SF_quint16(_name, ...)          INTERNAL_SF(_name,  quint16,                INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2uint16(v),   __VA_ARGS__)
+#define SF_NULLABLE_quint16(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint16), NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2uint16(v),   __VA_ARGS__)
+#define SF_quint32(_name, ...)          INTERNAL_SF(_name,  quint32,                INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2uint32(v),   __VA_ARGS__)
+#define SF_NULLABLE_quint32(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint32), NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2uint32(v),   __VA_ARGS__)
+#define SF_quint64(_name, ...)          INTERNAL_SF(_name,  quint64,                INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2uint64(v),   __VA_ARGS__)
+#define SF_NULLABLE_quint64(_name, ...) INTERNAL_SF(_name,  NULLABLE_TYPE(quint64), NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2uint64(v),   __VA_ARGS__)
 
-#define SF_qint8(_name, ...)            INTERNAL_SF(_name,  qint8,                  INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int8(v),   __VA_ARGS__)
-#define SF_NULLABLE_qint8(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qint8),   NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int8(v),   __VA_ARGS__)
-#define SF_qint16(_name, ...)           INTERNAL_SF(_name,  qint16,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int16(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint16(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint16),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int16(v),  __VA_ARGS__)
-#define SF_qint32(_name, ...)           INTERNAL_SF(_name,  qint32,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int32(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint32(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint32),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int32(v),  __VA_ARGS__)
-#define SF_qint64(_name, ...)           INTERNAL_SF(_name,  qint64,                 INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2int64(v),  __VA_ARGS__)
-#define SF_NULLABLE_qint64(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint64),  NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2int64(v),  __VA_ARGS__)
+#define SF_qint8(_name, ...)            INTERNAL_SF(_name,  qint8,                  INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2int8(v),     __VA_ARGS__)
+#define SF_NULLABLE_qint8(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qint8),   NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2int8(v),     __VA_ARGS__)
+#define SF_qint16(_name, ...)           INTERNAL_SF(_name,  qint16,                 INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2int16(v),    __VA_ARGS__)
+#define SF_NULLABLE_qint16(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint16),  NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2int16(v),    __VA_ARGS__)
+#define SF_qint32(_name, ...)           INTERNAL_SF(_name,  qint32,                 INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2int32(v),    __VA_ARGS__)
+#define SF_NULLABLE_qint32(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint32),  NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2int32(v),    __VA_ARGS__)
+#define SF_qint64(_name, ...)           INTERNAL_SF(_name,  qint64,                 INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2int64(v),    __VA_ARGS__)
+#define SF_NULLABLE_qint64(_name, ...)  INTERNAL_SF(_name,  NULLABLE_TYPE(qint64),  NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2int64(v),    __VA_ARGS__)
 
-#define SF_qreal(_name, ...)            INTERNAL_SF(_name,  qreal,                  INTEGRAL,          INTERNAL_C2DBL(v),    INTERNAL_V2DBL(v),    __VA_ARGS__)
-#define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qreal),   NULLABLE_INTEGRAL, INTERNAL_N2J(v),      INTERNAL_N2DBL(v),    __VA_ARGS__)
+#define SF_qreal(_name, ...)            INTERNAL_SF(_name,  qreal,                  INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2DBL(v),      __VA_ARGS__)
+#define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qreal),   NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2DBL(v),      __VA_ARGS__)
 
 /************************************************************/
-#define TAPI_DEFINE_VARIANT_ENABLED_STRUCT(_name, ...) \
+#define TAPI_DEFINE_STRUCT(_name, ...) \
     struct _name { \
-        TAPI_HELEPER_DEFINE_VARIANT_STRUCT_PARAMS(__VA_ARGS__) \
-        _name(TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INPUT(__VA_ARGS__)) : \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_CONS_INIT(__VA_ARGS__) \
+        QJsonObject _lastFromJsonSource; \
+        TAPI_HELPER_STRUCT_PARAMS(__VA_ARGS__) \
+        _name(TAPI_HELPER_STRUCT_CONST_INPUT(__VA_ARGS__)) : \
+            TAPI_HELPER_STRUCT_CONST_INIT(__VA_ARGS__) \
         { ; } \
         QJsonObject toJson() const { \
             QJsonObject Obj; \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_TOJSON(__VA_ARGS__); \
+            TAPI_HELPER_STRUCT_TOJSON(__VA_ARGS__); \
             return Obj; \
         } \
         _name& fromJson(const QJsonObject& _obj) { \
-            TAPI_HELEPER_DEFINE_VARIANT_STRUCT_FROMJSON(__VA_ARGS__); \
+            this->_lastFromJsonSource = _obj; \
+            TAPI_HELPER_STRUCT_FROMJSON(__VA_ARGS__); \
             return *this; \
         } \
-    };
+    }
 
 /*
 #define SET_FIELD_FROM_VARIANT_MAP(_varName, _infoRec, _table, _tableFieldName) \
@@ -302,34 +371,22 @@
 #define C2U32(v) C2DBL(v)
 #define V2U32(v) INTERNAL_V2U32(v)
 
-/************************************************************/
-// METHOD 1: tmplNullable(QSharedPointer)
-//#define TAPI_HELEPER_QSP_M2STR_PREFIX "TAPI::tmplNullable<"
-//#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
-//#define NULLABLE_UNDERLAYER_CLASS_NAME "TAPI::tmplNullable"
-//#define NULLABLE_TYPE(_type) TAPI::tmplNullable<_type>
-//#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name = NULLABLE_TYPE(_type)::create();
-//#define NULLABLE_GET(_value) _value.isNull() ? QVariant() : *_value
-//#define NULLABLE_NULL_VALUE nullptr
-//#define NULLABLE_IS_NULL(_nullable) _nullable.isNull()
-//#define NULLABLE_HAS_VALUE(_nullable) _nullable.isNull() == false
-//#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) NULLABLE_TYPE(_type)(_val)
-
-// METHOD 2: std::optional
-#define TAPI_HELEPER_QSP_M2STR_PREFIX "std::optional<"
-#define TAPI_HELEPER_QSP_M2STR_POSTFIX ">"
-#define NULLABLE_UNDERLAYER_CLASS_NAME "std::optional"
-#define NULLABLE_TYPE(_type) std::optional<_type>
-#define NULLABLE_VAR(_type, _name) NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value) *_value
-#define NULLABLE_GET(_value) (_value.has_value() ? *_value : QVariant())
-#define NULLABLE_GET_OR_DEFAULT(_value, _def) (_value.has_value() ? *_value : _def)
-#define NULLABLE_SET(_var, _value) (_var = _value)
-#define NULLABLE_NULL_VALUE std::nullopt
-#define NULLABLE_NULL_VALUE_AS_STRING "std::nullopt"
-#define NULLABLE_RESET(_var) (_var = NULLABLE_NULL_VALUE)
-#define NULLABLE_IS_NULL(_nullable) (_nullable.has_value() == false)
-#define NULLABLE_HAS_VALUE(_nullable) _nullable.has_value()
+/**********************************************************************************************************************/
+#define NULLABLE_UNDERLAYER_CLASS_NAME                  "std::optional"
+#define NULLABLE_M2STR_PREFIX                           "std::optional<"
+#define NULLABLE_M2STR_POSTFIX                          ">"
+#define NULLABLE_M2STR(_type)                           NULLABLE_M2STR_PREFIX #_type NULLABLE_M2STR_POSTFIX
+#define NULLABLE_TYPE(_type)                            std::optional<_type>
+#define NULLABLE_VAR(_type, _name)                      NULLABLE_TYPE(_type) _name
+#define NULLABLE_VALUE(_value)                          *_value
+#define NULLABLE_GET(_value)                            (_value.has_value() ? *_value : QVariant())
+#define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.has_value() ? *_value : _def)
+#define NULLABLE_SET(_var, _value)                      (_var = _value)
+#define NULLABLE_NULL_VALUE                             std::nullopt
+#define NULLABLE_NULL_VALUE_AS_STRING                   "std::nullopt"
+#define NULLABLE_RESET(_var)                            (_var = NULLABLE_NULL_VALUE)
+#define NULLABLE_IS_NULL(_nullable)                     (_nullable.has_value() == false)
+#define NULLABLE_HAS_VALUE(_nullable)                   _nullable.has_value()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
 
 //template <typename _type>
@@ -357,6 +414,5 @@
 #define N2U32(_value)  INTERNAL_N2uint32(_value)
 #define N2U64(_value)  INTERNAL_N2uint64(_value)
 #define N2DBL(_value)  INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(double,  _value)
-#define QSP_M2STR(_type) TAPI_HELEPER_QSP_M2STR_PREFIX #_type TAPI_HELEPER_QSP_M2STR_POSTFIX
 
 #endif // TAPI_APIARGHELPERMACROS_HPP

@@ -31,8 +31,8 @@ using namespace Targoman::API::TicketingModule;
 //    /* complexity         */ COMPLEXITY_Object,
 //    /* namespace          */ Targoman::API::TicketingModule,
 //    /* type               */ stuTicketScope,
-//    /* toVariantLambda    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-//    /* fromVariantLambda  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuTicketScope {
+//    /* fnToVariant    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
+//    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuTicketScope {
 //        if (_value.isValid() == false)
 //            return stuTicketScope();
 
@@ -102,7 +102,7 @@ QVariant Tickets::apiGET(
                 .andCond({ tblTickets::Fields::tktType, enuConditionOperator::Equal, enuTicketType::Broadcast })
             );
 
-    auto QueryLambda = [&_baseTicketID, _inReplyTicketID](SelectQuery &_query) {
+    auto fnTouchQuery = [&_baseTicketID, _inReplyTicketID](SelectQuery &_query) {
         _query
             .addCols({
                          tblTickets::Fields::tktID,
@@ -153,7 +153,7 @@ QVariant Tickets::apiGET(
         ;
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, QueryLambda);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, fnTouchQuery);
 }
 
 /******************************************************************************\
